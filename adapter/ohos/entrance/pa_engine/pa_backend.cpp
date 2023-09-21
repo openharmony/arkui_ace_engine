@@ -47,8 +47,6 @@ bool PaBackend::Initialize(BackendType type, SrcLanguage language)
 
     CHECK_NULL_RETURN(jsBackendEngine_, false);
     jsBackendEngine_->Initialize(type, language);
-
-    LOGI("PaBackend initialize end.");
     return true;
 }
 

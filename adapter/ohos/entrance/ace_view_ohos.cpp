@@ -311,7 +311,7 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
 
 void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
 {
-    LOGD("ProcessDragEvent");
+    TAG_LOGD(AceLogTag::ACE_DRAG, "ProcessDragEvent");
     CHECK_NULL_VOID(dragEventCallback_);
     dragEventCallback_(x, y, action);
 }

@@ -185,7 +185,6 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
 
 void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)
 {
-    LOGI("GetSnapshotJson start");
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID(container);
 

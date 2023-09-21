@@ -47,7 +47,7 @@ public:
         LOGI("OnWindowReady and ready to connect extension");
         auto nodeStrong = node_.Upgrade();
         if (!nodeStrong || !rsSurfaceNode) {
-            LOGI("cannot replace sureface node because the render node or surfacenode is empty");
+            LOGW("cannot replace sureface node because the render node or surfacenode is empty");
             return;
         }
         rsSurfaceNode->CreateNodeInRenderThread();
@@ -134,7 +134,7 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(
 {
     LOGI("ConnectExtension rect: %{public}s", rect.ToString().c_str());
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OS_ACCOUNT_EXISTS)
-    LOGI("connect to windows extension begin");
+    LOGD("connect to windows extension begin");
     if (!windowExtension_) {
         windowExtension_ = std::make_unique<Rosen::WindowExtensionConnection>();
     }
@@ -156,8 +156,6 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(
     }
     sptr<Rosen::IWindowExtensionCallback> callback = new ConnectionCallback(node, instanceId);
     windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), windowId, callback);
-#else
-    LOGI("unrosen engine doesn't support ability component");
 #endif
 }
 
@@ -166,8 +164,6 @@ void WindowExtensionConnectionAdapterOhos::RemoveExtension()
     if (windowExtension_) {
         LOGI("remove extension");
         windowExtension_->DisconnectExtension();
-    } else {
-        LOGI("ability doesn't connect to window extension. remove extension fail");
     }
 }
 
@@ -176,8 +172,6 @@ void WindowExtensionConnectionAdapterOhos::Show()
     LOGI("show WindowExtensionConnectionAdapterOhos");
     if (windowExtension_) {
         windowExtension_->Show();
-    } else {
-        LOGI("ability doesn't connect to window extension. show extension fail");
     }
 }
 
@@ -186,8 +180,6 @@ void WindowExtensionConnectionAdapterOhos::Hide()
     LOGI("hide WindowExtensionConnectionAdapterOhos");
     if (windowExtension_) {
         windowExtension_->Hide();
-    } else {
-        LOGI("ability doesn't connect to window extension. show extension fail");
     }
 }
 
@@ -198,8 +190,6 @@ void WindowExtensionConnectionAdapterOhos::UpdateRect(const Rect& rect)
         RectConverter(rect, rosenRect);
         LOGI("UpdateRect rect: %{public}s", rect.ToString().c_str());
         windowExtension_->SetBounds(rosenRect);
-    } else {
-        LOGI("ability doesn't connect to window extension.cannot update rect region ");
     }
 }
 } // namespace OHOS::Ace

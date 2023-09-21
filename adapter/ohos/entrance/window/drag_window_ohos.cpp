@@ -243,7 +243,7 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(
 
     OHOS::Rosen::WMError ret = dragWindow->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::CreateDragWindow, drag window Show() failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow CreateDragWindow, drag window Show() failed, ret: %d", ret);
     }
 
     auto window = AceType::MakeRefPtr<DragWindowOhos>(dragWindow);
@@ -269,7 +269,7 @@ RefPtr<DragWindow> DragWindow::CreateTextDragWindow(
 
     OHOS::Rosen::WMError ret = dragWindow->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::CreateTextDragWindow, drag window Show() failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow CreateTextDragWindow, drag window Show() failed, ret: %d", ret);
     }
 
     auto window = AceType::MakeRefPtr<DragWindowOhos>(dragWindow);
@@ -283,13 +283,13 @@ void DragWindowOhos::MoveTo(int32_t x, int32_t y) const
 
     OHOS::Rosen::WMError ret = dragWindow_->MoveTo(x + offsetX_ - width_ / 2, y + offsetY_ - height_ / 2);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::MoveTo, drag window move failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow MoveTo, drag window move failed, ret: %d", ret);
         return;
     }
 
     ret = dragWindow_->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::CreateDragWindow, drag window Show() failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow CreateDragWindow, drag window Show() failed, ret: %d", ret);
     }
 }
 
@@ -299,13 +299,13 @@ void DragWindowOhos::TextDragWindowMove(double x, double y) const
     OHOS::Rosen::WMError ret =
         dragWindow_->MoveTo(x - Window_EXTERN.ConvertToPx() + offsetX_, y + offsetY_ - Window_EXTERN.ConvertToPx());
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::TextDragWindowMove, drag window move failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow TextDragWindowMove, drag window move failed, ret: %d", ret);
         return;
     }
 
     ret = dragWindow_->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::TextDragWindowMove, drag window Show() failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow TextDragWindowMove, drag window Show() failed, ret: %d", ret);
     }
 }
 
@@ -315,7 +315,7 @@ void DragWindowOhos::Destroy() const
 
     OHOS::Rosen::WMError ret = dragWindow_->Destroy();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::Destroy, drag window destroy failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow Destroy, drag window destroy failed, ret: %d", ret);
     }
 }
 
@@ -527,13 +527,11 @@ void DragWindowOhos::DrawText(
     }
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
-    LOGE("Drawing is not supported");
+    TAG_LOGE(AceLogTag::ACE_DRAG, "Drawing is not supported");
 #endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 #endif
-#else
-    LOGE("not supported in new pipeline");
 #endif
 }
 

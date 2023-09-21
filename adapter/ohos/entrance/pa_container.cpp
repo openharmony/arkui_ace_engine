@@ -97,7 +97,7 @@ void PaContainer::CreateContainer(int32_t instanceId, void* paAbility, const PaC
 
 bool PaContainer::RunPa(int32_t instanceId, const std::string& content, const OHOS::AAFwk::Want& want)
 {
-    LOGI("PA: PaContainer::RunPa start");
+    LOGI("PA: PaContainer RunPa start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     ContainerScope scope(instanceId);
@@ -106,13 +106,12 @@ bool PaContainer::RunPa(int32_t instanceId, const std::string& content, const OH
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     CHECK_NULL_RETURN(paBackend, false);
     paBackend->RunPa(content, want);
-    LOGI("PA: PaContainer::RunPa end");
     return true;
 }
 
 bool PaContainer::OnCreate(int32_t instanceId, const OHOS::AAFwk::Want& want)
 {
-    LOGI("PA: PaContainer::OnCreate start");
+    LOGI("PA: PaContainer OnCreate start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
@@ -120,13 +119,12 @@ bool PaContainer::OnCreate(int32_t instanceId, const OHOS::AAFwk::Want& want)
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     CHECK_NULL_RETURN(paBackend, false);
     paBackend->OnCreate(want);
-    LOGI("PA: PaContainer::OnCreate end");
     return true;
 }
 
 bool PaContainer::OnDelete(int32_t instanceId, int64_t formId)
 {
-    LOGI("PA: PaContainer::OnDelete start");
+    LOGI("PA: PaContainer OnDelete start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
@@ -134,13 +132,12 @@ bool PaContainer::OnDelete(int32_t instanceId, int64_t formId)
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     CHECK_NULL_RETURN(paBackend, false);
     paBackend->OnDelete(formId);
-    LOGI("PA: PaContainer::OnDelete end");
     return true;
 }
 
 bool PaContainer::OnTriggerEvent(int32_t instanceId, int64_t formId, const std::string& message)
 {
-    LOGI("PA: PaContainer::OnTriggerEvent start");
+    LOGI("PA: PaContainer OnTriggerEvent start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
@@ -148,13 +145,12 @@ bool PaContainer::OnTriggerEvent(int32_t instanceId, int64_t formId, const std::
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     CHECK_NULL_RETURN(paBackend, false);
     paBackend->OnTriggerEvent(formId, message);
-    LOGI("PA: PaContainer::OnTriggerEvent end");
     return true;
 }
 
 int32_t PaContainer::OnAcquireFormState(int32_t instanceId, const OHOS::AAFwk::Want& want)
 {
-    LOGI("PA: PaContainer::OnAcquireFormState start");
+    LOGI("PA: PaContainer OnAcquireFormState start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, -1);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
@@ -162,13 +158,12 @@ int32_t PaContainer::OnAcquireFormState(int32_t instanceId, const OHOS::AAFwk::W
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     CHECK_NULL_RETURN(paBackend, -1);
     int32_t formState = paBackend->OnAcquireFormState(want);
-    LOGI("PA: PaContainer::OnAcquireFormState end");
     return formState;
 }
 
 bool PaContainer::OnUpdate(int32_t instanceId, int64_t formId)
 {
-    LOGI("PA: PaContainer::OnUpdate start");
+    LOGI("PA: PaContainer OnUpdate start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
@@ -176,13 +171,12 @@ bool PaContainer::OnUpdate(int32_t instanceId, int64_t formId)
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     CHECK_NULL_RETURN(paBackend, false);
     paBackend->OnUpdate(formId);
-    LOGI("PA: PaContainer::OnUpdate end");
     return true;
 }
 
 bool PaContainer::OnCastTemptoNormal(int32_t instanceId, int64_t formId)
 {
-    LOGI("PA: PaContainer::OnCastTemptoNormal start");
+    LOGI("PA: PaContainer OnCastTemptoNormal start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
@@ -190,13 +184,12 @@ bool PaContainer::OnCastTemptoNormal(int32_t instanceId, int64_t formId)
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     CHECK_NULL_RETURN(paBackend, false);
     paBackend->OnCastTemptoNormal(formId);
-    LOGI("PA: PaContainer::OnCastTemptoNormal end");
     return true;
 }
 
 bool PaContainer::OnVisibilityChanged(int32_t instanceId, const std::map<int64_t, int32_t>& formEventsMap)
 {
-    LOGI("PA: PaContainer::OnVisibilityChanged start");
+    LOGI("PA: PaContainer OnVisibilityChanged start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
@@ -204,13 +197,12 @@ bool PaContainer::OnVisibilityChanged(int32_t instanceId, const std::map<int64_t
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     CHECK_NULL_RETURN(paBackend, false);
     paBackend->OnVisibilityChanged(formEventsMap);
-    LOGI("PA: PaContainer::OnVisibilityChanged end");
     return true;
 }
 
 AppExecFwk::FormProviderData PaContainer::GetFormData(int32_t instanceId)
 {
-    LOGI("PA: PaContainer::GetFormData start");
+    LOGI("PA: PaContainer GetFormData start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, AppExecFwk::FormProviderData());
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);

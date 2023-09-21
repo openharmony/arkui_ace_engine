@@ -32,8 +32,6 @@ void ClipboardImpl::SetData(const std::string& data)
             [pasteData]() { OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData); },
             TaskExecutor::TaskType::IO);
     }
-#else
-    LOGI("Current device doesn't support system clipboard");
 #endif
 }
 
@@ -61,8 +59,6 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
             [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)), textData]() { callback(*textData); },
             TaskExecutor::TaskType::IO);
     }
-#else
-    LOGI("Current device doesn't support system clipboard");
 #endif
 }
 void ClipboardImpl::Clear() {}

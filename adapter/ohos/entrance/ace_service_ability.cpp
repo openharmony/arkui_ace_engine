@@ -65,7 +65,7 @@ REGISTER_AA(AceServiceAbility)
 void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     Ability::OnStart(want, sessionInfo);
-    LOGI("AceServiceAbility::OnStart called");
+    LOGI("AceServiceAbility OnStart called");
     // get url
     std::string parsedUrl;
     if (want.HasParameter(URI)) {
@@ -96,11 +96,11 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::Sessi
     std::vector<std::string> assetBasePathStr;
     AceEngine::InitJsDumpHeadSignal();
     if (abilityInfo != nullptr && !abilityInfo->srcPath.empty()) {
-        LOGI("AceServiceAbility::OnStar assetBasePathStr: %{public}s, parsedUrl: %{public}s",
+        LOGD("AceServiceAbility OnStar assetBasePathStr: %{public}s, parsedUrl: %{public}s",
             abilityInfo->srcPath.c_str(), parsedUrl.c_str());
         assetBasePathStr = { "assets/js/" + abilityInfo->srcPath + "/", std::string("assets/js/") };
     } else {
-        LOGI("AceServiceAbility::OnStar parsedUrl: %{public}s", parsedUrl.c_str());
+        LOGD("AceServiceAbility OnStar parsedUrl: %{public}s", parsedUrl.c_str());
         assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
     }
 
@@ -118,44 +118,40 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::Sessi
 
     // run service
     Platform::PaContainer::RunPa(abilityId_, parsedUrl, want);
-    LOGI("AceServiceAbility::OnStart called End");
+    LOGD("AceServiceAbility OnStart called End");
 }
 
 void AceServiceAbility::OnStop()
 {
-    LOGI("AceServiceAbility::OnStop called ");
+    LOGI("AceServiceAbility OnStop called ");
     Ability::OnStop();
     Platform::PaContainer::DestroyContainer(abilityId_);
-    LOGI("AceServiceAbility::OnStop called End");
 }
 
 sptr<IRemoteObject> AceServiceAbility::OnConnect(const Want& want)
 {
-    LOGI("AceServiceAbility::OnConnect start");
+    LOGI("AceServiceAbility OnConnect start");
     Ability::OnConnect(want);
     auto ret = Platform::PaContainer::OnConnect(abilityId_, want);
     if (ret == nullptr) {
-        LOGE("AceServiceAbility::OnConnect, the iremoteObject is null");
+        LOGE("AceServiceAbility OnConnect, the iremoteObject is null");
         return nullptr;
     }
-    LOGI("AceServiceAbility::OnConnect end");
     return ret;
 }
 
 void AceServiceAbility::OnDisconnect(const Want& want)
 {
-    LOGI("AceServiceAbility::OnDisconnect start");
+    LOGI("AceServiceAbility OnDisconnect start");
     Ability::OnDisconnect(want);
     Platform::PaContainer::OnDisConnect(abilityId_, want);
-    LOGI("AceServiceAbility::OnDisconnect end");
 }
 
 void AceServiceAbility::OnCommand(const AAFwk::Want &want, bool restart, int startId)
 {
-    LOGI("AceServiceAbility::OnCommand start");
+    LOGI("AceServiceAbility OnCommand start");
     Ability::OnCommand(want, restart, startId);
     Platform::PaContainer::OnCommand(want, startId, abilityId_);
-    LOGI("AceServiceAbility::OnCommand end");
 }
 } // namespace Ace
 } // namespace OHOS

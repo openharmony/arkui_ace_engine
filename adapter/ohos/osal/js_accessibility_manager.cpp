@@ -332,8 +332,6 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     if (!node->GetAccessibilityHint().empty()) {
         if (node->GetAccessibilityLabel().empty()) {
             LOGI("UpdateAccessibilityNodeInfo Label is null");
-        } else {
-            LOGI("UpdateAccessibilityNodeInfo Label is not null");
         }
     }
 
@@ -1324,7 +1322,7 @@ bool JsAccessibilityManager::SubscribeToastObserver()
 
 bool JsAccessibilityManager::UnsubscribeToastObserver()
 {
-    LOGI("UnsubscribeToastObserver");
+    LOGD("UnsubscribeToastObserver");
     CHECK_NULL_RETURN(toastObserver_, false);
     auto& config = OHOS::AccessibilityConfig::AccessibilityConfig::GetInstance();
     bool isSuccess = config.InitializeContext();
@@ -1338,7 +1336,6 @@ bool JsAccessibilityManager::UnsubscribeToastObserver()
 
 bool JsAccessibilityManager::SubscribeStateObserver(int eventType)
 {
-    LOGD("SubscribeStateObserver");
     if (!stateObserver_) {
         stateObserver_ = std::make_shared<JsAccessibilityStateObserver>();
     }
@@ -1354,12 +1351,11 @@ bool JsAccessibilityManager::SubscribeStateObserver(int eventType)
 
 bool JsAccessibilityManager::UnsubscribeStateObserver(int eventType)
 {
-    LOGI("UnsubscribeStateObserver");
     CHECK_NULL_RETURN(stateObserver_, false);
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
     Accessibility::RetError ret = instance->UnsubscribeStateObserver(stateObserver_, eventType);
-    LOGI("UnsubscribeStateObserver:%{public}d", ret);
+    LOGD("UnsubscribeStateObserver:%{public}d", ret);
     return ret == RET_OK;
 }
 
@@ -2458,7 +2454,7 @@ void JsAccessibilityManager::ExecuteAction(const int32_t elementId, const Action
         actionResult =
             AccessibilityActionEvent(action, actionArguments, node, AceType::DynamicCast<PipelineContext>(context));
     }
-    LOGI("SetExecuteActionResult actionResult= %{public}d", actionResult);
+    LOGD("SetExecuteActionResult actionResult= %{public}d", actionResult);
     SetExecuteActionResult(callback, actionResult, requestId);
     if (actionResult && AceType::InstanceOf<PipelineContext>(context)) {
         SendActionEvent(action, elementId);
@@ -2514,7 +2510,7 @@ int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
         interactionOperation->SetHandler(WeakClaim(this));
         retReg = instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
     }
-    LOGI("RegisterInteractionOperation end windowId:%{public}d, ret:%{public}d", windowId, retReg);
+    LOGD("RegisterInteractionOperation end windowId:%{public}d, ret:%{public}d", windowId, retReg);
     Register(retReg == RET_OK);
 
     return retReg;
@@ -2777,7 +2773,6 @@ RefPtr<AccessibilityNode> JsAccessibilityManager::GetPreviousFocusableNode(
 
 bool JsAccessibilityManager::RequestAccessibilityFocus(const RefPtr<AccessibilityNode>& node)
 {
-    LOGI("RequestAccessibilityFocus");
     auto requestNodeId = node->GetNodeId();
     if (currentFocusNodeId_ == requestNodeId) {
         LOGW("This node is focused.");
@@ -2807,7 +2802,6 @@ bool JsAccessibilityManager::ClearAccessibilityFocus(const RefPtr<AccessibilityN
 
 bool JsAccessibilityManager::ClearCurrentFocus()
 {
-    LOGI("ClearCurrentFocus");
     auto currentFocusNode = GetAccessibilityNodeFromPage(currentFocusNodeId_);
     CHECK_NULL_RETURN(currentFocusNode, false);
     currentFocusNodeId_ = -1;

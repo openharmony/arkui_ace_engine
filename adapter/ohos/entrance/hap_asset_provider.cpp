@@ -104,7 +104,6 @@ std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& 
         LOGD("GetFileBuffer Success: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
         return std::make_unique<HapAssetMapping>(osstream);
     }
-    LOGI("Cannot find base path of %{public}s", assetName.c_str());
     return nullptr;
 }
 

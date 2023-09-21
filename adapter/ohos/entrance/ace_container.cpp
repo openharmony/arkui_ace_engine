@@ -167,7 +167,7 @@ void AceContainer::Initialize()
 
 void AceContainer::Destroy()
 {
-    LOGI("AceContainer::Destroy begin");
+    LOGI("AceContainer Destroy begin");
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
@@ -207,7 +207,6 @@ void AceContainer::Destroy()
     }
     resRegister_.Reset();
     assetManager_.Reset();
-    LOGI("AceContainer::Destroy end");
 }
 
 void AceContainer::DestroyView()
@@ -235,15 +234,11 @@ void AceContainer::InitializeFrontend()
         jsFrontend->SetJsEngine(jsEngine);
         jsFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         jsFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
-#else
-        LOGE("JS_FRONTEND not supported in new pipeline mode");
 #endif
     } else if (type_ == FrontendType::JS_CARD) {
 #ifndef NG_BUILD
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
-#else
-        LOGE("JS_CARD not supported in new pipeline mode");
 #endif
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
         if (isFormRender_) {
@@ -902,7 +897,7 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 void AceContainer::SetHapPath(const std::string& hapPath)
 {
     if (hapPath.empty()) {
-        LOGI("SetHapPath, Use .index to load resource");
+        LOGW("SetHapPath, Use .index to load resource");
         return;
     }
     LOGI("SetHapPath, Use hap path to load resource");
@@ -932,7 +927,7 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
 bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     if (isDumping_.test_and_set()) {
-        LOGI("another dump is still running");
+        LOGW("another dump is still running");
         return false;
     }
     ContainerScope scope(instanceId_);
@@ -1546,7 +1541,7 @@ void AceContainer::NotifyConfigurationChange(
             CHECK_NULL_VOID(container);
             auto frontend = container->GetFrontend();
             if (frontend) {
-                LOGI("AceContainer::UpdateConfiguration frontend MarkNeedUpdate");
+                LOGI("AceContainer UpdateConfiguration frontend MarkNeedUpdate");
                 frontend->FlushReload();
             }
             auto taskExecutor = container->GetTaskExecutor();
@@ -1588,7 +1583,7 @@ void AceContainer::HotReload()
             CHECK_NULL_VOID(container);
             auto frontend = container->GetFrontend();
             CHECK_NULL_VOID(frontend);
-            LOGI("AceContainer::Flush Frontend for HotReload");
+            LOGI("AceContainer Flush Frontend for HotReload");
             frontend->HotReload();
 
             auto pipeline = container->GetPipelineContext();
