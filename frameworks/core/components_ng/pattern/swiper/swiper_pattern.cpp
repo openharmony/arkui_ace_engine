@@ -2811,7 +2811,7 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
 
     auto delayTime = GetInterval() - GetDuration();
     delayTime = std::clamp(delayTime, 0, delayTime);
-    if (NeedAutoPlay() && isUserFinish_) {
+    if (NeedAutoPlay() && isUserFinish_ && !forceStop) {
         PostTranslateTask(delayTime);
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
