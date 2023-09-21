@@ -25,8 +25,8 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/event/ace_events.h"
 #include "core/common/layout_inspector.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -341,12 +341,15 @@ void Scrollable::StopScrollable()
 
 void Scrollable::HandleScrollEnd()
 {
+    // priority:
+    //  1. onScrollEndRec_ (would internally call onScrollEnd)
+    //  2. scrollEndCallback_
+    if (onScrollEndRec_) {
+        onScrollEndRec_();
+        return;
+    }
     if (scrollEndCallback_) {
         scrollEndCallback_();
-    }
-    auto parent = parent_.Upgrade();
-    if (parent && nestedOpt_.NeedParent()) {
-        parent->HandleScrollEnd();
     }
 }
 
@@ -376,10 +379,8 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     }
 #endif
     JankFrameReport::SetFrameJankFlag(JANK_RUNNING_SCROLL);
-    UpdateScrollPosition(dragPositionInMainAxis, SCROLL_FROM_START);
-    auto parent = parent_.Upgrade();
-    if (parent && nestedOpt_.NeedParent()) {
-        parent->UpdateScrollPosition(dragPositionInMainAxis, SCROLL_FROM_START);
+    if (onScrollStartRec_) {
+        onScrollStartRec_(static_cast<float>(dragPositionInMainAxis));
     }
     RelatedEventStart();
     auto node = scrollableNode_.Upgrade();
@@ -388,6 +389,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     }
 }
 
+[[deprecated("using NestableScrollContainer")]]
 ScrollResult Scrollable::HandleScrollParentFirst(double& offset, int32_t source, NestedState state)
 {
     auto parent = parent_.Upgrade();
@@ -427,6 +429,7 @@ ScrollResult Scrollable::HandleScrollParentFirst(double& offset, int32_t source,
     return { 0, canOverScroll_ };
 }
 
+[[deprecated("using NestableScrollContainer")]]
 ScrollResult Scrollable::HandleScrollSelfFirst(double& offset, int32_t source, NestedState state)
 {
     auto parent = parent_.Upgrade();
@@ -468,6 +471,7 @@ ScrollResult Scrollable::HandleScrollSelfFirst(double& offset, int32_t source, N
     return { 0, canOverScroll_ };
 }
 
+[[deprecated("using NestableScrollContainer")]]
 ScrollResult Scrollable::HandleScrollSelfOnly(double& offset, int32_t source, NestedState state)
 {
     double allOffset = offset;
@@ -493,6 +497,7 @@ ScrollResult Scrollable::HandleScrollSelfOnly(double& offset, int32_t source, Ne
     return { remainOffset, !NearZero(overOffset) };
 }
 
+[[deprecated("using NestableScrollContainer")]]
 ScrollResult Scrollable::HandleScrollParallel(double& offset, int32_t source, NestedState state)
 {
     auto remainOffset = 0.0;
@@ -536,34 +541,14 @@ ScrollResult Scrollable::HandleScrollParallel(double& offset, int32_t source, Ne
 
 ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState state)
 {
-    if (!overScrollOffsetCallback_) {
+    if (!handleScrollCallback_) {
         ExecuteScrollBegin(offset);
-        ExecuteScrollFrameBegin(offset, ScrollState::SCROLL);
         moved_ = UpdateScrollPosition(offset, source);
         canOverScroll_ = false;
         return { 0, false };
     }
-    ScrollResult result = { 0, false };
-    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
-    auto parent = parent_.Upgrade();
-    auto overOffsets = overScrollOffsetCallback_(offset);
-    double backOverOffset = offset > 0 ? overOffsets.end : overOffsets.start;
-    if (NearZero(offset) || !NearZero(backOverOffset)) {
-        ExecuteScrollFrameBegin(offset, scrollState);
-    } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::PARENT_FIRST) ||
-                             (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARENT_FIRST))) {
-        result = HandleScrollParentFirst(offset, source, state);
-    } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::SELF_FIRST) ||
-                             (offset > 0 && nestedOpt_.backward == NestedScrollMode::SELF_FIRST))) {
-        result = HandleScrollSelfFirst(offset, source, state);
-    } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::PARALLEL) ||
-                             (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARALLEL))) {
-        result = HandleScrollParallel(offset, source, state);
-    } else {
-        result = HandleScrollSelfOnly(offset, source, state);
-    }
-    moved_ = UpdateScrollPosition(offset, source);
-    return result;
+    // call NestableScrollContainer::HandleScroll
+    return handleScrollCallback_(static_cast<float>(offset), source, state);
 }
 
 void Scrollable::HandleDragUpdate(const GestureEvent& info)
@@ -649,7 +634,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             FrameReport::GetInstance().EndListFling();
         }
 #endif
-    } else if (!overScrollOffsetCallback_ && outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
+    } else if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
         ResetContinueDragCount();
         ProcessScrollOverCallback(correctVelocity);
     } else if (canOverScroll_) {
@@ -789,7 +774,7 @@ void Scrollable::ExecuteScrollBegin(double& mainDelta)
     }
 }
 
-void Scrollable::ExecuteScrollFrameBegin(double& mainDelta, ScrollState state)
+[[deprecated]] void Scrollable::ExecuteScrollFrameBegin(double& mainDelta, ScrollState state)
 {
     auto context = context_.Upgrade();
     if (!scrollFrameBeginCallback_ || !context) {
@@ -1078,7 +1063,7 @@ void Scrollable::ProcessScrollMotion(double position)
 
     // spring effect special process
     if ((IsSnapStopped() && canOverScroll_) || needScrollSnapChange_ ||
-        (!overScrollOffsetCallback_ && (outBoundaryCallback_ && outBoundaryCallback_()))) {
+        ((outBoundaryCallback_ && outBoundaryCallback_()))) {
         scrollPause_ = true;
         controller_->Stop();
     }
@@ -1111,8 +1096,7 @@ void Scrollable::ProcessScrollOverCallback(double velocity)
 
 bool Scrollable::HandleOverScroll(double velocity)
 {
-    auto parent = parent_.Upgrade();
-    if (!parent || !nestedOpt_.NeedParent()) {
+    if (!handleVelocityCallback_) {
         if (edgeEffect_ == EdgeEffect::SPRING) {
             ProcessScrollOverCallback(velocity);
             return true;
@@ -1122,30 +1106,8 @@ bool Scrollable::HandleOverScroll(double velocity)
         }
         return false;
     }
-    // parent handle over scroll first
-    if ((velocity < 0 && (nestedOpt_.forward == NestedScrollMode::SELF_FIRST)) ||
-        (velocity > 0 && (nestedOpt_.backward == NestedScrollMode::SELF_FIRST))) {
-        if (parent->HandleOverScroll(velocity)) {
-            if (scrollEndCallback_) {
-                scrollEndCallback_();
-            }
-            return true;
-        }
-        if (edgeEffect_ == EdgeEffect::SPRING) {
-            ProcessScrollOverCallback(velocity);
-            return true;
-        }
-    }
-
-    // self handle over scroll first
-    if (edgeEffect_ == EdgeEffect::SPRING) {
-        ProcessScrollOverCallback(velocity);
-        return true;
-    }
-    if (scrollEndCallback_) {
-        scrollEndCallback_();
-    }
-    return parent->HandleOverScroll(velocity);
+    // call NestableScrollContainer::HandleScrollVelocity
+    return handleVelocityCallback_(velocity);
 }
 
 void Scrollable::SetSlipFactor(double SlipFactor)
