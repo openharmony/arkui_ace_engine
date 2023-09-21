@@ -127,6 +127,7 @@ OffsetF GridProperty::GetContainerPosition()
     if (container_) {
         auto container = DynamicCast<GridContainerLayoutProperty>(container_);
         auto framenode = container->GetHost();
+        CHECK_NULL_RETURN(framenode, OffsetF());
         return framenode->GetOffsetRelativeToWindow();
     }
     return OffsetF();

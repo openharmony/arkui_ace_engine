@@ -497,6 +497,7 @@ inline FontWeight ConvertWrapStringToFontWeight(const std::string& str)
 
     inline std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
     {
+        CHECK_NULL_RETURN(!fontFamily.empty(), "");
         std::string result;
         for (const auto& item : fontFamily) {
             result += item;
