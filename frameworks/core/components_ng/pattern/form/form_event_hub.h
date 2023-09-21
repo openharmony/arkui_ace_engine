@@ -66,42 +66,48 @@ public:
     void FireOnAcquired(const std::string& param) const
     {
         if (onAcquired_) {
-            onAcquired_(param);
+            auto onAcquired = onAcquired_;
+            onAcquired(param);
         }
     }
 
     void FireOnError(const std::string& param) const
     {
         if (onError_) {
-            onError_(param);
+            auto onError = onError_;
+            onError(param);
         }
     }
 
     void FireOnUninstall(const std::string& param) const
     {
         if (onUninstall_) {
-            onUninstall_(param);
+            auto onUninstall = onUninstall_;
+            onUninstall(param);
         }
     }
 
     void FireOnRouter(const std::string& param) const
     {
         if (onRouter_) {
-            onRouter_(param);
+            auto onRouter = onRouter_;
+            onRouter(param);
         }
     }
 
     void FireOnLoad(const std::string& param) const
     {
         if (onLoad_) {
-            onLoad_(param);
+            auto onLoad = onLoad_;
+            onLoad(param);
         }
     }
 
     void FireOnCache() const
     {
         if (onCache_) {
-            onCache_();
+            auto onCache = onCache_;
+            onCache();
         }
     }
 
