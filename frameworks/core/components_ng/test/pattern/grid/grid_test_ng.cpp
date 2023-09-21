@@ -52,7 +52,7 @@ namespace {
 constexpr float ITEM_WIDTH = 100.f;
 constexpr float ITEM_HEIGHT = 100.f;
 constexpr float GRID_HEIGHT = 300.f;
-constexpr Dimension GRIDITEM_FOCUS_INTERVAL = 4.0_vp;
+constexpr Dimension GRIDITEM_FOCUS_INTERVAL = 3.0_vp;
 constexpr Dimension BORDER_RADIUS = 8.0_vp;
 constexpr int32_t NULL_VALUE = -1;
 constexpr float COL_GAP = 10.f;
@@ -4399,7 +4399,7 @@ HWTEST_F(GridTestNg, GridItemGetInnerFocusPaintRectTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Set paintRect when grid item has border radius.
-     * @tc.expected: Focus border radius is equal to 12.0_vp.
+     * @tc.expected: Focus border radius is equal to 11.0_vp.
      */
     auto renderContext = gridItemNode->GetRenderContext();
     renderContext->UpdateBorderRadius({ BORDER_RADIUS, BORDER_RADIUS, BORDER_RADIUS, BORDER_RADIUS });
