@@ -275,66 +275,83 @@ void NavigationGroupNode::SetBackButtonEvent(
     CHECK_NULL_VOID(backButtonEventHub);
     auto onBackButtonEvent =
         [navDestinationWeak = WeakPtr<NavDestinationGroupNode>(navDestination), navigationWeak = WeakClaim(this),
-            navRouterPatternWeak = WeakPtr<NavRouterPattern>(navRouterPattern)](GestureEvent& /*info*/) {
-            // the one before navDestination in the stack
-            auto navDestination = navDestinationWeak.Upgrade();
-            CHECK_NULL_VOID(navDestination);
-            auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            auto onBackPressed = eventHub->GetOnBackPressedEvent();
-            bool isOverride = false;
-            if (onBackPressed != nullptr) {
-                isOverride = eventHub->FireOnBackPressedEvent();
-            }
-            if (isOverride) {
-                LOGI("this onBackButtonPressed event returns false");
-                return;
-            }
-            auto navigation = navigationWeak.Upgrade();
-            CHECK_NULL_VOID(navigation);
-            if (navigation->isOnAnimation_) {
-                LOGI("animation is ongoing");
-                return;
-            }
-            auto navigationPattern = navigation->GetPattern<NavigationPattern>();
-            CHECK_NULL_VOID(navigationPattern);
-            auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
-            auto preNavDestinationNode =
-                navigationPattern->GetPreNavDestination(navDestinationPattern->GetName(), navDestination);
-            auto preNavDestination =
-                AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(preNavDestinationNode));
+            navRouterPatternWeak = WeakPtr<NavRouterPattern>(navRouterPattern)](GestureEvent& /*info*/) -> bool {
+        auto navDestination = navDestinationWeak.Upgrade();
+        CHECK_NULL_RETURN(navDestination, false);
+        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_RETURN(eventHub, false);
+        auto isOverride = eventHub->GetOnBackPressedEvent();
+        auto result = false;
+        if (isOverride) {
+            result = eventHub->FireOnBackPressedEvent();
+        }
+        if (result) {
+            LOGI("this onBackButtonPressed event returns true");
+            return true;
+        }
+        auto navigation = navigationWeak.Upgrade();
+        CHECK_NULL_RETURN(navigation, false);
+        const auto& children = navigation->GetContentNode()->GetChildren();
+        auto isLastChild = children.size() == 1 ? true : false;
+        if (isOverride) {
+            result = navigation->HandleBack(navDestination, isLastChild, true);
+        } else {
+            result = navigation->HandleBack(navDestination, isLastChild, false);
+        }
+        // when js navigationStack is provided, modifyDone will be called by state manager.
+        auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+        CHECK_NULL_RETURN(navigationPattern, false);
+        if (!navigationPattern->GetNavigationStackProvided()) {
+            navigation->MarkModifyDone();
+            navigation->MarkDirtyNode();
+        }
 
-            navigationPattern->RemoveNavDestination();
-            // when js navigationStack is provided, modifyDone will be called by state manager.
-            if (!navigationPattern->GetNavigationStackProvided()) {
-                navigation->MarkModifyDone();
-                navigation->MarkDirtyNode();
-            }
-        }; // backButton event
+        return result;
+    }; // backButton event
 
     navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
     backButtonEventHub->GetOrCreateGestureEventHub()->SetUserOnClick(onBackButtonEvent);
 }
 
-RefPtr<FrameNode> NavigationGroupNode::GetNavDestinationNodeToHandleBack()
+bool NavigationGroupNode::CheckCanHandleBack()
 {
-    auto pattern = GetPattern<NavigationPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
+    auto navigation = AceType::WeakClaim(this).Upgrade();
+    CHECK_NULL_RETURN(navigation, false);
+    if (navigation->isOnAnimation_) {
+        LOGI("animation is ongoing");
+        return false;
+    }
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, false);
     const auto& children = contentNode_->GetChildren();
     if (children.empty()) {
-        return nullptr;
+        return false;
     }
-    if (children.size() == 1) {
-        auto mode = pattern->GetNavigationMode();
-        auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, nullptr);
-        if (mode == NavigationMode::SPLIT ||
-            (mode == NavigationMode::STACK && layoutProperty->GetHideNavBar().value_or(false))) {
-            return nullptr;
-        }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(children.back());
+    CHECK_NULL_RETURN(navDestination, false);
+    GestureEvent gestureEvent;
+    return navDestination->GetNavDestinationBackButtonEvent()(gestureEvent);
+}
+
+bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride)
+{
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    if (!isOverride && !isLastChild) {
+        navigationPattern->RemoveNavDestination();
+        return true;
+    }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(node);
+    CHECK_NULL_RETURN(navDestination, false);
+
+    auto mode = navigationPattern->GetNavigationMode();
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    if (isLastChild && (mode == NavigationMode::SPLIT ||
+                           (mode == NavigationMode::STACK && layoutProperty->GetHideNavBar().value_or(false)))) {
+        return false;
     }
 
-    return AceType::DynamicCast<NavDestinationGroupNode>(children.back());
+    navigationPattern->RemoveNavDestination();
+    return true;
 }
 
 void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
@@ -487,7 +504,7 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                     needSetInVisible = AceType::DynamicCast<NavDestinationGroupNode>(node)->GetTransitionType() ==
                                        PageTransitionType::EXIT_PUSH;
                 }
-                // for the case, the navBar form EXIT_PUSH to push  during animation
+                // for the case, the navBar form EXIT_PUSH to push during animation
                 if (needSetInVisible) {
                     node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 }

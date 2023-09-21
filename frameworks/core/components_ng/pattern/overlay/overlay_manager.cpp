@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/overlay/keyboard_view.h"
@@ -1096,18 +1097,15 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         if (InstanceOf<MenuWrapperPattern>(pattern)) {
             return RemoveMenu(overlay);
         }
+        // remove navDestination in navigation first
         do {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_BREAK(pipeline);
-            auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-                pipeline->FindNavDestinationNodeToHandleBack(overlay));
-            CHECK_NULL_BREAK(navDestination);
-            auto backCallback = navDestination->GetNavDestinationBackButtonEvent();
-            CHECK_NULL_BREAK(backCallback);
-            GestureEvent gestureEvent;
-            backCallback(gestureEvent);
+            auto navigationGroupNode =
+                AceType::DynamicCast<NavigationGroupNode>(pipeline->FindNavigationNodeToHandleBack(overlay));
+            CHECK_NULL_BREAK(navigationGroupNode);
             return true;
-        } while(0);
+        } while (0);
         if (!modalStack_.empty()) {
             if (isPageRouter) {
                 return RemoveAllModalInOverlay();
@@ -1824,8 +1822,7 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
                         root->RemoveChild(mask);
                     },
                     TaskExecutor::TaskType::UI);
-            }
-        );
+            });
         context->OpacityAnimation(option, 1.0, 0.0);
     }
 }

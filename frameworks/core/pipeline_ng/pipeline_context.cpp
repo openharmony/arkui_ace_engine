@@ -949,7 +949,7 @@ bool PipelineContext::OnBackPressed()
 
     auto result = false;
     taskExecutor_->PostSyncTask(
-        [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), &result]() {
+        [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), stageManager = stageManager_, &result]() {
             auto frontend = weakFrontend.Upgrade();
             if (!frontend) {
                 LOGW("frontend is nullptr");
@@ -962,11 +962,12 @@ bool PipelineContext::OnBackPressed()
                 result = false;
                 return;
             }
-            auto navDestinationNode =
-                AceType::DynamicCast<NavDestinationGroupNode>(context->GetNavDestinationBackButtonNode());
-            if (navDestinationNode && navDestinationNode->GetNavDestinationBackButtonEvent()) {
-                GestureEvent gestureEvent;
-                navDestinationNode->GetNavDestinationBackButtonEvent()(gestureEvent);
+            CHECK_NULL_VOID(stageManager);
+            auto lastPage = stageManager->GetLastPage();
+            CHECK_NULL_VOID(lastPage);
+            auto navigationGroupNode =
+                AceType::DynamicCast<NavigationGroupNode>(context->FindNavigationNodeToHandleBack(lastPage));
+            if (navigationGroupNode) {
                 result = true;
             }
         },
@@ -999,28 +1000,20 @@ bool PipelineContext::OnBackPressed()
     return false;
 }
 
-RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
-{
-    CHECK_NULL_RETURN(stageManager_, nullptr);
-    auto lastPage = stageManager_->GetLastPage();
-    CHECK_NULL_RETURN(lastPage, nullptr);
-    return FindNavDestinationNodeToHandleBack(lastPage);
-}
-
-RefPtr<FrameNode> PipelineContext::FindNavDestinationNodeToHandleBack(const RefPtr<UINode>& node)
+RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
 {
     const auto& children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
 
-        auto target = FindNavDestinationNodeToHandleBack(child);
+        auto target = FindNavigationNodeToHandleBack(child);
         if (target) {
             return target;
         }
     }
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(node);
-    if (navigationGroupNode) {
-        return navigationGroupNode->GetNavDestinationNodeToHandleBack();
+    if (navigationGroupNode && navigationGroupNode->CheckCanHandleBack()) {
+        return navigationGroupNode;
     }
     return nullptr;
 }
