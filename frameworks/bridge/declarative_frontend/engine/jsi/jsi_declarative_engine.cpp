@@ -1556,8 +1556,18 @@ void JsiDeclarativeEngine::SetHspBufferTrackerCallback(
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
     CHECK_NULL_VOID(runtime);
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    LOGI("SetHspBufferTrackerCallback is executed successfully.");
     panda::JSNApi::SetHostResolveBufferTracker(vm, std::move(callback));
+    LOGI("Set hsp buffer tracker callback to ark virtual machine successfully.");
+}
+
+void JsiDeclarativeEngine::SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo)
+{
+    CHECK_NULL_VOID(engineInstance_);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    CHECK_NULL_VOID(runtime);
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    panda::JSNApi::SetMockModuleList(vm, mockJsonInfo);
+    LOGI("Set mock module list to ark virtual machine successfully.");
 }
 #endif
 

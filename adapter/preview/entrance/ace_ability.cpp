@@ -158,6 +158,16 @@ AceAbility::~AceAbility()
     AceContainer::DestroyContainer(ACE_INSTANCE_ID);
 }
 
+void AceAbility::SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo)
+{
+    // only support the stage model
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+        CHECK_NULL_VOID(container);
+        container->SetMockModuleList(mockJsonInfo);
+    }
+}
+
 std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 {
     DumpAceRunArgs(runArgs);
@@ -243,8 +253,7 @@ void AceAbility::InitEnv()
         LOGI("Set MinPlatformVersion to %{public}d", compatibleVersion_);
         pipelineContext->SetMinPlatformVersion(compatibleVersion_);
     }
-    container->InitializeStageAppConfig(
-        runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
+    container->InitializeStageAppConfig(runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
