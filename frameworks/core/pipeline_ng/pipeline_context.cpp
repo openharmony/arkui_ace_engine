@@ -691,20 +691,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
     switch (type) {
         case WindowSizeChangeReason::RECOVER:
         case WindowSizeChangeReason::MAXIMIZE: {
-            LOGI("PipelineContext::Root node RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d",
-                width, height);
-            AnimationOption option;
-            constexpr int32_t duration = 400;
-            option.SetDuration(duration);
-            auto curve = MakeRefPtr<DecelerationCurve>();
-            option.SetCurve(curve);
-            auto weak = WeakClaim(this);
-            Animate(option, curve, [width, height, weak]() {
-                auto pipeline = weak.Upgrade();
-                CHECK_NULL_VOID(pipeline);
-                pipeline->SetRootRect(width, height, 0.0);
-                pipeline->FlushUITasks();
-            });
+            StartWindowMaximizeAnimation(width, height, rsTransaction);
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
@@ -727,6 +714,36 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             SetRootRect(width, height, 0.0f);
         }
     }
+}
+
+void PipelineContext::StartWindowMaximizeAnimation(int32_t width, int32_t height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    LOGI("PipelineContext::Root node RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d",
+        width, height);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+    AnimationOption option;
+    constexpr int32_t duration = 400;
+    option.SetDuration(duration);
+    auto curve = MakeRefPtr<DecelerationCurve>();
+    option.SetCurve(curve);
+    auto weak = WeakClaim(this);
+    Animate(option, curve, [width, height, weak]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetRootRect(width, height, 0.0);
+        pipeline->FlushUITasks();
+    });
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
 }
 
 void PipelineContext::SetRootRect(double width, double height, double offset)
