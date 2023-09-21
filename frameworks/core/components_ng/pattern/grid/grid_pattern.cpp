@@ -335,16 +335,20 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
     auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
+    float overScroll = 0.0f;
     if (gridLayoutInfo_.offsetEnd_) {
+        overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
         if (source == SCROLL_FROM_UPDATE) {
-            auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
             auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
+            overScroll += offset * friction;
         } else {
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ += offset;
+            overScroll += offset;
         }
+        HandleScrollBarOutBoundary(overScroll);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (GreatOrEqual(gridLayoutInfo_.currentOffset_, GetMainContentSize() - itemsHeight)) {
@@ -362,6 +366,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ += offset;
         }
+        overScroll = gridLayoutInfo_.currentOffset_;
+        HandleScrollBarOutBoundary(overScroll);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessOrEqual(gridLayoutInfo_.currentOffset_, 0.0)) {

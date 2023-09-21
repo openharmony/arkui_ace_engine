@@ -274,7 +274,6 @@ private:
     void RegisterScrollEventTask();
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
-    void HandleScrollBarOutBoundary();
     void ValidateOffset(int32_t source);
     void HandleScrollPosition(float scroll, int32_t scrollState);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
