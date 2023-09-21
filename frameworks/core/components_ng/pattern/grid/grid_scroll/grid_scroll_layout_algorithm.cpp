@@ -180,6 +180,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         int32_t itemIdex = -1;
         float lineHeight = gridLayoutInfo_.lineHeightMap_[line->first];
+        Alignment align = axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
+        if (gridLayoutProperty->GetPositionProperty()) {
+            align = gridLayoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
+        }
         for (auto iter = line->second.begin(); iter != line->second.end(); iter++) {
             // If item index is the same, must be the same GridItem, need't layout again.
             if (itemIdex == iter->second) {
@@ -207,13 +211,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto frSize = itemsCrossSize_.at(iter->first);
             SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
             auto translate = OffsetF(0.0f, 0.0f);
-            if (axis_ == Axis::VERTICAL) {
-                translate = Alignment::GetAlignPosition(
-                    blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::TOP_CENTER);
-            } else {
-                translate = Alignment::GetAlignPosition(
-                    blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::CENTER_LEFT);
-            }
+            translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
 
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
             wrapper->Layout();
