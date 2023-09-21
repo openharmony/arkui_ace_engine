@@ -68,6 +68,10 @@ ohos_unittest("canvas_renderer_test_ng") {
     "window_manager:scene_session",
     "window_manager:scene_session_manager",
   ]
+
+  if (enable_graphic_text_gine) {
+    external_deps += [ "graphic_2d:rosen_text" ]
+  }
 }
 
 config("config_canvas_renderer_test") {

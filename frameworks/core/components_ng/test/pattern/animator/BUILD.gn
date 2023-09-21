@@ -15,8 +15,6 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("animator_test_ng") {
-  ace_animation = true
-
   sources = [
     "$ace_root/frameworks/bridge/declarative_frontend/declarative_frontend.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",

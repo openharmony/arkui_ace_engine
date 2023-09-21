@@ -14,7 +14,6 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("rich_editor_test_ng") {
-  ace_animation = true
   render = true
   sources = [
     "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",

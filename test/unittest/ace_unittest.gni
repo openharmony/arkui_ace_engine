@@ -34,7 +34,6 @@ template("ace_unittest") {
   forward_variables_from(invoker, "*")
 
   type = "components"
-  ace_animation = false
   flutter_skia = false
   render = false
   ace_unittest_out_path = "ace_engine/$type"
@@ -47,7 +46,6 @@ template("ace_unittest") {
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//third_party/googletest:gmock",
   ]
 
@@ -65,20 +63,18 @@ template("ace_unittest") {
     ace_unittest_out_path = "ace_engine/$type"
   }
 
-  if (defined(invoker.ace_animation)) {
-    ace_animation = invoker.ace_animation
-  }
-
   if (defined(invoker.flutter_skia)) {
     flutter_skia = invoker.flutter_skia
   }
 
-  if (ace_animation) {
-    ace_unittest_deps += [ "$ace_root/test/unittest:ace_core_animation" ]
-  }
-
   if (render) {
-    ace_unittest_deps += [ "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client" ]
+    ace_unittest_deps += [
+      "$graphic_2d_path/rosen/modules/render_service_base:librender_service_base",
+      "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
+    ]
+    if (enable_graphic_text_gine) {
+      ace_external_deps += [ "graphic_2d:rosen_text" ]
+    }
   }
 
   if (flutter_skia) {
@@ -129,6 +125,7 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_components_property",
         "$ace_root/test/unittest:ace_components_render",
         "$ace_root/test/unittest:ace_components_syntax",
+        "$ace_root/test/unittest:ace_core_animation",
       ]
 
       configs = []

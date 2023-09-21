@@ -55,9 +55,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
-#ifdef USE_GRAPHIC_TEXT_GINE
-#include "rosen_text/typography.h"
-#endif
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)

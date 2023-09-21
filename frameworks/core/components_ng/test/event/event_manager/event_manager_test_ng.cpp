@@ -39,7 +39,6 @@
 #include "core/components/ability_component/render_ability_component.h"
 #include "core/components/box/render_box.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
