@@ -171,11 +171,16 @@ void AceContainer::Destroy()
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
-        RefPtr<PipelineBase>& context = pipelineContext_;
+        RefPtr<PipelineBase> context;
+        {
+            std::lock_guard<std::mutex> lock(pipelineMutex_);
+            context.Swap(pipelineContext_);
+        }
+        auto uiTask = [context]() { context->Destroy(); };
         if (GetSettings().usePlatformAsUIThread) {
-            context->Destroy();
+            uiTask();
         } else {
-            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
+            taskExecutor_->PostTask(uiTask, TaskExecutor::TaskType::UI);
         }
 
         if (isSubContainer_) {
@@ -184,13 +189,20 @@ void AceContainer::Destroy()
         }
 
         // 2. Destroy Frontend on JS thread.
-        RefPtr<Frontend>& frontend = frontend_;
-        if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
-            frontend->UpdateState(Frontend::State::ON_DESTROY);
+        RefPtr<Frontend> frontend;
+        {
+            std::lock_guard<std::mutex> lock(frontendMutex_);
+            frontend.Swap(frontend_);
+        }
+        auto jsTask = [frontend]() {
+            auto lock = frontend->GetLock();
             frontend->Destroy();
+        };
+        frontend->UpdateState(Frontend::State::ON_DESTROY);
+        if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
+            jsTask();
         } else {
-            frontend->UpdateState(Frontend::State::ON_DESTROY);
-            taskExecutor_->PostTask([frontend]() { frontend->Destroy(); }, TaskExecutor::TaskType::JS);
+            taskExecutor_->PostTask(jsTask, TaskExecutor::TaskType::JS);
         }
     }
     resRegister_.Reset();
