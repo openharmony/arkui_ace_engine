@@ -139,6 +139,11 @@ WindowConfig& CardFrontend::GetWindowConfig()
 {
     ParseManifest();
     if (GetFormSrc().empty()) {
+        if (!manifestParser_) {
+            static WindowConfig windowConfig;
+            LOGW("manifestParser is null, return default config");
+            return windowConfig;
+        }
         return manifestParser_->GetWindowConfig();
     } else {
         return GetCardWindowConfig();

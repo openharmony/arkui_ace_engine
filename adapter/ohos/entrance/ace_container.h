@@ -68,6 +68,7 @@ public:
 
     RefPtr<Frontend> GetFrontend() const override
     {
+        std::lock_guard<std::mutex> lock(frontendMutex_);
         return frontend_;
     }
 
@@ -128,6 +129,7 @@ public:
 
     RefPtr<PipelineBase> GetPipelineContext() const override
     {
+        std::lock_guard<std::mutex> lock(pipelineMutex_);
         return pipelineContext_;
     }
 
@@ -473,6 +475,9 @@ private:
     bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
+
+    mutable std::mutex frontendMutex_;
+    mutable std::mutex pipelineMutex_;
 
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
