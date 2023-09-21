@@ -922,4 +922,30 @@ HWTEST_F(SelectPropertyTestNg, SelectModel004, TestSize.Level1)
     EXPECT_EQ(width.Value(), 0.0);
     EXPECT_EQ(height.Value(), 0.0);
 }
+
+/**
+ * @tc.name: SelectPattern001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectPattern001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto options = pattern->GetOptions();
+    auto optionPattern = options.front()->GetPattern<OptionPattern>();
+    ASSERT_NE(optionPattern, nullptr);
+    pattern->SetSelectedOptionBgColor(Color::BLACK);
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnColorConfigurationUpdate();
+    auto selectColor = optionPattern->GetBgColor();
+    EXPECT_EQ(selectColor, Color::BLACK);
+}
 } // namespace OHOS::Ace::NG
