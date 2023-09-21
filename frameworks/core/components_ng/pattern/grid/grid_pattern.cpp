@@ -1268,7 +1268,7 @@ void GridPattern::UpdateScrollBarOffset()
             offset += info.lineHeightMap_.find(lineIndex)->second;
         }
     }
-    UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0, 0.0));
+    UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
 
 RefPtr<PaintProperty> GridPattern::CreatePaintProperty()

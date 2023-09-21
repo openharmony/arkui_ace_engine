@@ -578,7 +578,7 @@ void ScrollPattern::UpdateScrollBarOffset()
     auto viewPortExtent = viewPortExtent_;
     AddPaddingToSize(padding, viewPortExtent);
     auto estimatedHeight = (GetAxis() == Axis::HORIZONTAL) ? viewPortExtent.Width() : viewPortExtent.Height();
-    UpdateScrollBarRegion(-currentOffset_, estimatedHeight, size, Offset(0.0, 0.0));
+    UpdateScrollBarRegion(-currentOffset_, estimatedHeight, size, Offset(0.0f, 0.0f));
 }
 
 void ScrollPattern::SetAccessibilityAction()
