@@ -450,16 +450,7 @@ public:
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallback GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 
-    void SetThumbnailPixelMapCallback(std::function<void()>&& callback)
-    {
-        callback_ = std::move(callback);
-    }
-
-    bool HasThumbnailCallback() const
-    {
-        return static_cast<bool>(callback_);
-    }
-
+    std::function<void()> GetMousePixelMapCallback(const GestureEvent& info);
     OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f) const;
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -529,7 +520,6 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
-    std::function<void()> callback_;
 #endif
 };
 
