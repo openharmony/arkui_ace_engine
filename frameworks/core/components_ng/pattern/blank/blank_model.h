@@ -29,6 +29,7 @@ public:
     virtual void Create() = 0;
     virtual void SetBlankMin(const Dimension& blankMin) = 0;
     virtual void SetHeight(const Dimension& height) = 0;
+    virtual void SetColor(const Color& color) = 0;
 
 private:
     static std::unique_ptr<BlankModel> instance_;

@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_blank.h"
 
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/blank_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -75,13 +76,23 @@ void JSBlank::Height(const JSCallbackInfo& info)
     BlankModel::GetInstance()->SetHeight(value);
 }
 
+void JSBlank::Color(const JSCallbackInfo& info)
+{
+    class Color value;
+    if (!ParseJsColor(info[0], value)) {
+        BlankModel::GetInstance()->SetColor(Color::TRANSPARENT);
+        return;
+    }
+    BlankModel::GetInstance()->SetColor(value);
+}
+
 void JSBlank::JSBind(BindingTarget globalObj)
 {
     JSClass<JSBlank>::Declare("Blank");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBlank>::StaticMethod("create", &JSBlank::Create, opt);
     JSClass<JSBlank>::StaticMethod("height", &JSBlank::Height, opt);
-    JSClass<JSBlank>::StaticMethod("color", &JSViewAbstract::JsBackgroundColor, opt);
+    JSClass<JSBlank>::StaticMethod("color", &JSBlank::Color, opt);
     JSClass<JSBlank>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSBlank>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSBlank>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
