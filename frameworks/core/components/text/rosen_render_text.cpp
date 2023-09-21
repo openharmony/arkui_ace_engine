@@ -141,11 +141,7 @@ void RosenRenderText::Paint(RenderContext& context, const Offset& offset)
     }
 
     PaintSelection(canvas, GetGlobalOffset());
-#ifndef USE_ROSEN_DRAWING
     paragraph_->Paint(canvas, newX, newY);
-#else
-    // Drawing is not supported
-#endif
 }
 
 bool RosenRenderText::NeedPaint()
