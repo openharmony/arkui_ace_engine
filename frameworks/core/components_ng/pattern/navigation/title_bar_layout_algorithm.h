@@ -118,10 +118,10 @@ private:
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
     Dimension defaultPaddingStart_;
-    Dimension menuHeight_;
     Dimension iconSize_;
     Dimension titleFontSize_;
 
+    float menuHeight_ = 0.0f;
     float initialTitleOffsetY_ = 0.0f;
     bool isInitialTitle_ = true;
     float initialSubtitleOffsetY_ = 0.0f;

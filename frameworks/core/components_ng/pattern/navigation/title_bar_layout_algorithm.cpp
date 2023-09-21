@@ -246,7 +246,7 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
             auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
             // if has menu and menu is not custom, max height is single line height
             auto maxHeight = NearZero(menuWidth_) ? titleBarSize.Height()
-                             : isCustomMenu       ? titleBarSize.Height() - menuHeight_.ConvertToPx()
+                             : isCustomMenu       ? titleBarSize.Height() - menuHeight_
                                                   : SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx();
             constraint.parentIdealSize.SetHeight(maxHeight);
             constraint.maxSize.SetHeight(maxHeight);
@@ -283,7 +283,7 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
         }
         menuWrapper->Measure(constraint);
         menuWidth_ = menuWrapper->GetGeometryNode()->GetFrameSize().Width();
-        menuHeight_ = Dimension(menuWrapper->GetGeometryNode()->GetFrameSize().Height(), DimensionUnit::PX);
+        menuHeight_ = menuWrapper->GetGeometryNode()->GetFrameSize().Height();
         return;
     }
     auto menuItemNum = static_cast<int32_t>(menuNode->GetChildren().size());
@@ -292,7 +292,7 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
     } else {
         menuWidth_ = static_cast<float>(MENU_ITEM_SIZE.ConvertToPx()) * menuItemNum;
     }
-    constraint.selfIdealSize = OptionalSizeF(menuWidth_, static_cast<float>(menuHeight_.ConvertToPx()));
+    constraint.selfIdealSize = OptionalSizeF(menuWidth_, menuHeight_);
     menuWrapper->Measure(constraint);
 }
 
@@ -313,7 +313,7 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
             return;
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            auto offsetY = ((menuHeight_ - BACK_BUTTON_ICON_SIZE) / 2).ConvertToPx();
+            auto offsetY = (menuHeight_ - BACK_BUTTON_ICON_SIZE.ConvertToPx()) / 2;
             geometryNode->SetMarginFrameOffset(OffsetF { maxPaddingStart_.ConvertToPx(), offsetY });
             backButtonWrapper->Layout();
             return;
@@ -449,20 +449,20 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             geometryNode->SetMarginFrameOffset(
-                OffsetF { maxPaddingStart_.ConvertToPx(), menuHeight_.ConvertToPx() + offsetY });
+                OffsetF { maxPaddingStart_.ConvertToPx(), menuHeight_ + offsetY });
             titleWrapper->Layout();
             return;
         }
         // full mode
         if (isCustom) {
             // custom title margin is (0.0f, menuHeight_)
-            auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_.ConvertToPx();
+            auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
             geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, customOffsetY});
             titleWrapper->Layout();
         } else {
             // fixed white space menuHeight
             OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
-                static_cast<float>(menuHeight_.ConvertToPx()) + offsetY);
+                menuHeight_ + offsetY);
             geometryNode->SetMarginFrameOffset(titleOffset);
             titleWrapper->Layout();
         }
@@ -472,7 +472,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         // free mode
         if (isCustom) {
             // customBuilder and NavigationCustomTitle offset is (0.0f, menuHeight_)
-            auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_.ConvertToPx();
+            auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
             geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, customOffsetY});
             titleWrapper->Layout();
             return;
@@ -484,7 +484,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         if (!textLayoutProperty) {
             // current title mode is Navigation common title
             OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
-                static_cast<float>(menuHeight_.ConvertToPx())+ offsetY);
+                menuHeight_+ offsetY);
             geometryNode->SetMarginFrameOffset(titleOffset);
             titleWrapper->Layout();
             return;
@@ -497,7 +497,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
 #else
         minTitleHeight_ = 0.0;
 #endif
-        initialTitleOffsetY_ = static_cast<float>(menuHeight_.ConvertToPx()) + offsetY;
+        initialTitleOffsetY_ = menuHeight_ + offsetY;
         isInitialTitle_ = false;
         auto titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
         geometryNode->SetMarginFrameOffset(titleOffset);
@@ -508,7 +508,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     if (NearZero(titlePattern->GetTempTitleOffsetY())) {
-        initialTitleOffsetY_ = static_cast<float>(menuHeight_.ConvertToPx()) + offsetY;
+        initialTitleOffsetY_ = menuHeight_ + offsetY;
         auto titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
@@ -565,7 +565,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
         if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
             if (isInitialSubtitle_) {
-                initialSubtitleOffsetY_ = static_cast<float>(menuHeight_.ConvertToPx()) + offsetY;
+                initialSubtitleOffsetY_ = menuHeight_ + offsetY;
                 isInitialSubtitle_ = false;
                 OffsetF titleOffset =
                     OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialSubtitleOffsetY_);
@@ -592,7 +592,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
         }
         // full mode
         OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
-            static_cast<float>(menuHeight_.ConvertToPx()) + offsetY);
+            menuHeight_ + offsetY);
         geometryNode->SetMarginFrameOffset(titleOffset);
         subtitleWrapper->Layout();
         return;
@@ -632,18 +632,18 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
         auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
         auto overDragOffset = titlePattern->GetOverDragOffset();
-        auto menuOffsetY = (SINGLE_LINE_TITLEBAR_HEIGHT - menuHeight_) / 2;
+        auto menuOffsetY = (SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx() - menuHeight_) / 2;
         // custom menu width has no right padding
         auto offsetX = isCustomMenu ? maxWidth - menuWidth
                                     : (maxWidth - menuWidth - static_cast<float>(maxPaddingEnd_.ConvertToPx()) +
                                           BUTTON_PADDING.ConvertToPx());
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             geometryNode->SetMarginFrameOffset(OffsetF { maxWidth - menuWidth - defaultPaddingStart_.ConvertToPx(),
-                static_cast<float>(menuOffsetY.ConvertToPx()) + overDragOffset / MENU_OFFSET_RATIO });
+                menuOffsetY + overDragOffset / MENU_OFFSET_RATIO });
             menuWrapper->Layout();
             return;
         }
-        OffsetF menuOffset(offsetX, static_cast<float>(menuOffsetY.ConvertToPx()) + overDragOffset / MENU_OFFSET_RATIO);
+        OffsetF menuOffset(offsetX, menuOffsetY + overDragOffset / MENU_OFFSET_RATIO);
         geometryNode->SetMarginFrameOffset(menuOffset);
         menuWrapper->Layout();
         return;
@@ -651,17 +651,17 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         auto totalHeight = NearZero(subtitleHeight) ? SINGLE_LINE_TITLEBAR_HEIGHT : DOUBLE_LINE_TITLEBAR_HEIGHT;
         geometryNode->SetMarginFrameOffset(OffsetF { maxWidth - menuWidth - defaultPaddingStart_.ConvertToPx(),
-            ((totalHeight - menuHeight_).ConvertToPx()) / 2 });
+            (totalHeight.ConvertToPx() - menuHeight_) / 2 });
         menuWrapper->Layout();
         return;
     }
     // custom menu doesn't have top padding. if menu isn't custom, menu items has top padding
-    auto menuOffsetY =  isCustomMenu ? Dimension() : (SINGLE_LINE_TITLEBAR_HEIGHT - menuHeight_) / 2;
+    auto menuOffsetY =  isCustomMenu ? 0.0f : (SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx() - menuHeight_) / 2;
     auto menuOffsetX = maxWidth - menuWidth;
     // custom menu doesn't have right padding. if menu isn't custom, menu items has right padding
     menuOffsetX =
         isCustomMenu ? menuOffsetX : (menuOffsetX - maxPaddingEnd_.ConvertToPx() + BUTTON_PADDING.ConvertToPx());
-    OffsetF menuOffset(menuOffsetX, static_cast<float>(menuOffsetY.ConvertToPx()));
+    OffsetF menuOffset(menuOffsetX, menuOffsetY);
     geometryNode->SetMarginFrameOffset(menuOffset);
     menuWrapper->Layout();
 }
@@ -673,7 +673,7 @@ void TitleBarLayoutAlgorithm::InitializeTheme()
     CHECK_NULL_VOID(theme);
     maxPaddingStart_ = theme->GetMaxPaddingStart();
     maxPaddingEnd_ = theme->GetMaxPaddingEnd();
-    menuHeight_ = theme->GetHeight();
+    menuHeight_ = theme->GetHeight().ConvertToPx();
     defaultPaddingStart_ = theme->GetDefaultPaddingStart();
     iconSize_ = theme->GetMenuIconSize();
     titleFontSize_ = theme->GetTitleFontSize();
