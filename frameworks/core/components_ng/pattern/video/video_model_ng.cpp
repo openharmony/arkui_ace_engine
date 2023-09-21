@@ -40,8 +40,8 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
     bool hasPreviewImageNode = videoNode->HasPreviewImageNode();
     bool hasControllerRowNode = videoNode->HasControllerRowNode();
     bool hasMediaColumnNode = videoNode->HasMediaColumnNode();
-    LOGD("Preview mediaColumn is %{public}d,image is %{public}d, controller is %{public}d.", hasMediaColumnNode,
-        hasPreviewImageNode, hasControllerRowNode);
+    TAG_LOGD(AceLogTag::ACE_VIDEO, "Preview mediaColumn is %{public}d,image is %{public}d, controller is %{public}d.",
+        hasMediaColumnNode, hasPreviewImageNode, hasControllerRowNode);
     if (!hasMediaColumnNode) {
         auto mediaColumnId = videoNode->GetMediaColumnId();
         auto mediaColumNode = FrameNode::GetOrCreateFrameNode(

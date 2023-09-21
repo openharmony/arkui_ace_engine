@@ -45,6 +45,7 @@ const std::unordered_map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_SUB_WINDOW, "AceSubWindow" },
     { AceLogTag::ACE_FORM, "AceForm" },
     { AceLogTag::ACE_DRAG, "AceDrag" },
+    { AceLogTag::ACE_VIDEO, "AceVideo" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";
