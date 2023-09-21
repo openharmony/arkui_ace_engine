@@ -110,7 +110,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     CHECK_NULL_VOID(backButtonLayoutProperty);
     backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+        CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
     backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
     backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
     backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -119,7 +119,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 
     PaddingProperty padding;
-    padding.SetEdges(CalcLength(BUTTON_PADDING.ConvertToPx()));
+    padding.SetEdges(CalcLength(BUTTON_PADDING));
     backButtonLayoutProperty->UpdatePadding(padding);
 
     auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
