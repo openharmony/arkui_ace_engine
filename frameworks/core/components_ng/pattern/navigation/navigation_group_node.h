@@ -91,7 +91,9 @@ public:
         isModeChange_ = isModeChange;
     }
 
-    RefPtr<FrameNode> GetNavDestinationNodeToHandleBack();
+    bool CheckCanHandleBack();
+
+    bool HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);

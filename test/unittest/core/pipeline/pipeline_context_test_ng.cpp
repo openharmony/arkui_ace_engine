@@ -1741,56 +1741,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg032, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg033
- * @tc.desc: Test GetNavDestinationBackButtonNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters and set stageNode_
-                set frameNode_'s children
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->stageManager_->stageNode_ = frameNode_;
-    frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode_1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    frameNode_->children_.push_back(frameNode_1);
-    auto navigationGroupNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-    auto navigationGroupNode_1 = NavigationGroupNode::GetOrCreateGroupNode(TEST_TAG, navigationGroupNodeId_, nullptr);
-    frameNode_->children_.push_back(navigationGroupNode_1);
-
-    /**
-     * @tc.steps1: set frameNode_2 as navigationGroupNode_1's contentNode_,titleBarNode_
-                and set frameNode_2's children
-     */
-    frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode_2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    navigationGroupNode_1->contentNode_ = frameNode_2;
-    auto navDestinationGroupNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-    auto navDestinationGroupNode_1 =
-        NavDestinationGroupNode::GetOrCreateGroupNode(TEST_TAG, navDestinationGroupNodeId_, nullptr);
-    frameNode_2->children_.push_back(navDestinationGroupNode_1);
-    auto titleBarNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-    auto titleBarNode_ = TitleBarNode::GetOrCreateTitleBarNode(TEST_TAG, titleBarNodeId_, nullptr);
-    navDestinationGroupNode_1->titleBarNode_ = titleBarNode_;
-
-    /**
-     * @tc.steps1: set frameNode_3 as titleBarNode_'s backButton_
-     */
-    frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode_3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    titleBarNode_->backButton_ = frameNode_3;
-    /**
-     * @tc.steps2: set layoutProperty_ and call GetNavDestinationBackButtonNode.
-     * @tc.expected: rt is nullptr.
-     */
-    frameNode_3->layoutProperty_ = AceType::MakeRefPtr<ImageLayoutProperty>();
-    auto rt = context_->GetNavDestinationBackButtonNode();
-    EXPECT_EQ(rt, nullptr);
-}
-
-/**
  * @tc.name: PipelineContextTestNg035
  * @tc.desc: Test ChangeMouseStyle.
  * @tc.type: FUNC
@@ -2545,7 +2495,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg052, TestSize.Level1)
 
 /**
  * @tc.name: PipelineContextTestNg053
- * @tc.desc: Test the function FindNavDestinationNodeToHandleBack.
+ * @tc.desc: Test the function FindNavigationNodeToHandleBack.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
@@ -2556,7 +2506,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     /**
-     * @tc.steps2: call FindNavDestinationNodeToHandleBack.
+     * @tc.steps2: call FindNavigationNodeToHandleBack.
      * @tc.expected: The ret is nullptr.
      */
     context_->SetupRootElement();
@@ -2566,7 +2516,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
     auto childId = ElementRegister::GetInstance()->MakeUniqueId();
     auto childNode = NavigationGroupNode::GetOrCreateFrameNode(TEST_TAG, childId, nullptr);
     node->AddChild(childNode);
-    EXPECT_EQ(context_->FindNavDestinationNodeToHandleBack(node), nullptr);
+    EXPECT_EQ(context_->FindNavigationNodeToHandleBack(node), nullptr);
 }
 
 /**

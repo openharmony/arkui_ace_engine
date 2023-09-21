@@ -412,7 +412,9 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     if (pattern->navigationStack_->Size() == 1 &&
                         (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
                             navigationLayoutProperty->GetHideNavBar().value_or(false))) {
-                        // set backButton gone for the first level page in SPLIT mode
+                        // cases that backButton of navDestination is gone when there's only one child and
+                        // 1. In SPLIT mode, it's the first level page
+                        // 2. In STACK mode, the navBar is hidden
                         hostNode->SetBackButtonVisible(curTopNavDestination, false);
                     } else {
                         hostNode->SetBackButtonVisible(curTopNavDestination, true);

@@ -435,7 +435,7 @@ void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
     textFieldManager_ = manager;
 }
 
-RefPtr<NG::FrameNode> NG::PipelineContext::FindNavDestinationNodeToHandleBack(const RefPtr<NG::UINode>& node)
+RefPtr<NG::FrameNode> NG::PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<NG::UINode>& node)
 {
     return nullptr;
 }
