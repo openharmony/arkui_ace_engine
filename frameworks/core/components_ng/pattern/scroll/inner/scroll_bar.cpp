@@ -580,6 +580,16 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
             scrollBar->ProcessFrictionMotion(value);
         });
     }
+    if (calePredictSnapOffsetCallback_ && startScrollSnapMotionCallback_) {
+        auto predictSnapOffset = calePredictSnapOffsetCallback_(CalcPatternOffset(frictionMotion_->GetFinalPosition()));
+        // If snap scrolling, predictSnapOffset will has a value.
+        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
+            LOGD("ScrollBar::HandleDragEnd predictSnapOffset:%{public}f", predictSnapOffset.value());
+            startScrollSnapMotionCallback_(predictSnapOffset.value(), velocity);
+            return;
+        }
+    }
+
     if (!frictionController_) {
         frictionController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
         frictionController_->AddStopListener([weakBar = AceType::WeakClaim(this)]() {

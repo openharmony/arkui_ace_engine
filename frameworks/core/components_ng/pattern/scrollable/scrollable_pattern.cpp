@@ -342,6 +342,19 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         pattern->OnScrollEndCallback();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
+    auto calePredictSnapOffsetCallback = [weak = WeakClaim(this)](float delta) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, std::optional<float>());
+        return pattern->CalePredictSnapOffset(delta);
+    };
+    scrollBar_->SetCalePredictSnapOffsetCallback(std::move(calePredictSnapOffsetCallback));
+    auto startScrollSnapMotionCallback = [weak = WeakClaim(this)](float scrollSnapDelta, float scrollSnapVelocity) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StartScrollSnapMotion(scrollSnapDelta, scrollSnapVelocity);
+    };
+    scrollBar_->SetStartScrollSnapMotionCallback(std::move(startScrollSnapMotionCallback));
+
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
     inputHub->AddOnHoverEvent(scrollBar_->GetHoverEvent());
@@ -492,8 +505,19 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         pattern->OnScrollEnd();
         pattern->OnScrollEndCallback();
     };
-    ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction),
-        std::move(scrollStartCallback), std::move(scrollEndCallback) };
+    auto calePredictSnapOffsetCallback = [weak = WeakClaim(this)](float delta) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, std::optional<float>());
+        return pattern->CalePredictSnapOffset(delta);
+    };
+    auto startScrollSnapMotionCallback = [weak = WeakClaim(this)](float scrollSnapDelta, float scrollSnapVelocity) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StartScrollSnapMotion(scrollSnapDelta, scrollSnapVelocity);
+    };
+    ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction), std::move(scrollStartCallback),
+        std::move(scrollEndCallback), std::move(calePredictSnapOffsetCallback),
+        std::move(startScrollSnapMotionCallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
 }
