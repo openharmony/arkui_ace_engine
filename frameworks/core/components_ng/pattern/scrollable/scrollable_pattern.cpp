@@ -530,6 +530,13 @@ void ScrollablePattern::CreateScrollBarOverlayModifier()
     scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect(), scrollBar_->GetBarRect());
 }
 
+void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)
+{
+    scrollBarOutBoundaryExtent_ = scrollBarOutBoundaryExtent;
+    CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedScrollBar());
+    scrollBar_->SetOutBoundary(std::abs(scrollBarOutBoundaryExtent_));
+}
+
 void ScrollablePattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 {
     nestedScroll_ = nestedOpt;

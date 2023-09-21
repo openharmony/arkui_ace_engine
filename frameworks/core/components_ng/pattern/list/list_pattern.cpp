@@ -686,6 +686,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
             overScroll = endPos - itemHeight / 2.0f - contentMainSize_ / 2.0f;
         }
     }
+    HandleScrollBarOutBoundary(overScroll);
 
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
         // adjust offset.
