@@ -256,6 +256,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     itemsPosition_.clear();
     gridLayoutInfo_.gridMatrix_.clear();
     gridLayoutInfo_.startIndex_ = 0;
+    gridLayoutInfo_.hasBigItem_  = false;
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childLayoutWrapper) {
@@ -276,6 +277,10 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
             itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
             itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
+        }
+
+        if (itemRowSpan > 1 || itemColSpan > 1) {
+            gridLayoutInfo_.hasBigItem_ = true;
         }
 
         if (itemRowStart >= 0 && itemRowStart < mainCount_ && itemColStart >= 0 && itemColStart < crossCount_ &&

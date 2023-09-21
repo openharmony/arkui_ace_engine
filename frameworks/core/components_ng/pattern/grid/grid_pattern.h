@@ -32,6 +32,17 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
+struct GridItemIndexInfo {
+    int32_t mainIndex = -1;
+    int32_t crossIndex = -1;
+    int32_t mainSpan = -1;
+    int32_t crossSpan = -1;
+    int32_t mainStart = -1;
+    int32_t mainEnd = -1;
+    int32_t crossStart = -1;
+    int32_t crossEnd = -1;
+};
+
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
@@ -199,6 +210,7 @@ private:
         int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step);
     WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t maxCrossCount,
         int32_t curMainIndex = -1, int32_t curCrossIndex = -1);
+    WeakPtr<FocusHub> SearchIrregularFocusableChild(int32_t tarMainIndex, int32_t tarCrossIndex);
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t tarIndex = -1);
     std::unordered_set<int32_t> GetFocusableChildCrossIndexesAt(int32_t tarMainIndex);
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
@@ -224,6 +236,11 @@ private:
     void FireOnScrollStart();
     void InitScrollableEvent();
 
+    int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
+    double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
+    double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
+    void ResetAllDirectionsStep();
+
     RefPtr<GridPositionController> positionController_;
     float animatorOffset_ = 0.0f;
     bool scrollStop_ = false;
@@ -240,6 +257,14 @@ private:
     float endHeight_ = 0.0f;
 
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
+
+    bool isLeftStep_ = false;
+    bool isRightStep_ = false;
+    bool isUpStep_ = false;
+    bool isDownStep_ = false;
+    bool isLeftEndStep_ = false;
+    bool isRightEndStep_ = false;
+    GridItemIndexInfo curFocusIndexInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };

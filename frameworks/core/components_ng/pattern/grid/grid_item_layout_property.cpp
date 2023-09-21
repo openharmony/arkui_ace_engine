@@ -89,4 +89,20 @@ int32_t GridItemLayoutProperty::GetCrossStart(Axis axis) const
     }
     return propRowStart_.value_or(-1);
 }
+
+int32_t GridItemLayoutProperty::GetMainEnd(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propRowEnd_.value_or(-1);
+    }
+    return propColumnEnd_.value_or(-1);
+}
+
+int32_t GridItemLayoutProperty::GetCrossEnd(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propColumnEnd_.value_or(-1);
+    }
+    return propRowEnd_.value_or(-1);
+}
 } // namespace OHOS::Ace::NG

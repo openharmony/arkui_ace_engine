@@ -36,6 +36,11 @@ namespace OHOS::Ace::NG {
 
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+
+double CalcCoordinatesDistance(double curFocusMain, double curFocusCross, double childMain, double childCross)
+{
+    return std::sqrt(std::pow((curFocusMain - childMain), 2) + std::pow((curFocusCross - childCross), 2));
+}
 } // namespace
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
@@ -617,11 +622,33 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     CHECK_NULL_RETURN(curItemPattern, nullptr);
     auto curItemProperty = curItemPattern->GetLayoutProperty<GridItemLayoutProperty>();
     CHECK_NULL_RETURN(curItemProperty, nullptr);
+    auto scrollIrregularInfo = curItemPattern->GetScrollIrregularItemInfo();
+    bool hasIrregularItemInScroll = scrollIrregularInfo.has_value();
 
     auto curMainIndex = curItemProperty->GetMainIndex().value_or(-1);
     auto curCrossIndex = curItemProperty->GetCrossIndex().value_or(-1);
-    auto curMainSpan = curItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
-    auto curCrossSpan = curItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
+    auto curMainSpan = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainSpan
+                                                : curItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
+    auto curCrossSpan = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossSpan
+                                                 : curItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
+    auto curMainStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainStart
+                                                 : curItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+    auto curCrossStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossStart
+                                                  : curItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
+    auto curMainEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainEnd
+                                               : curItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
+    auto curCrossEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossEnd
+                                                : curItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
+
+    curFocusIndexInfo_.mainIndex = curMainIndex;
+    curFocusIndexInfo_.crossIndex = curCrossIndex;
+    curFocusIndexInfo_.mainSpan = curMainSpan;
+    curFocusIndexInfo_.crossSpan = curCrossSpan;
+    curFocusIndexInfo_.mainStart = curMainStart;
+    curFocusIndexInfo_.mainEnd = curMainEnd;
+    curFocusIndexInfo_.crossStart = curCrossStart;
+    curFocusIndexInfo_.crossEnd = curCrossEnd;
+
     if (curMainIndex < 0 || curCrossIndex < 0) {
         LOGE("can't find focused child.");
         return nullptr;
@@ -655,8 +682,9 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         }
         auto nextMaxCrossCount = GetCrossCount();
         auto flag = (step == FocusStep::LEFT_END) || (step == FocusStep::RIGHT_END);
-        auto weakChild = SearchFocusableChildInCross(
-            nextMainIndex, nextCrossIndex, nextMaxCrossCount, flag ? -1 : curMainIndex, curCrossIndex);
+        auto weakChild = gridLayoutInfo_.hasBigItem_ ? SearchIrregularFocusableChild(nextMainIndex, nextCrossIndex)
+                                                     : SearchFocusableChildInCross(nextMainIndex, nextCrossIndex,
+                                                         nextMaxCrossCount, flag ? -1 : curMainIndex, curCrossIndex);
         auto child = weakChild.Upgrade();
         if (child && child->IsFocusable()) {
             ScrollToFocusNode(weakChild);
@@ -679,6 +707,7 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     auto curChildStartIndex = gridLayoutInfo_.startIndex_;
     auto curChildEndIndex = gridLayoutInfo_.endIndex_;
     auto childrenCount = gridLayoutInfo_.childrenCount_;
+    auto hasIrregularItems = gridLayoutInfo_.hasBigItem_;
     if (gridLayoutInfo_.gridMatrix_.find(curMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
         LOGE("Can not find current main index: %{public}d", curMainIndex);
         return { -1, -1 };
@@ -694,26 +723,32 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
         (step == FocusStep::LEFT_END && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = 0;
+        isLeftEndStep_ = hasIrregularItems ? true : false;
     } else if ((step == FocusStep::DOWN_END && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
                (step == FocusStep::RIGHT_END && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = curMaxCrossCount - 1;
+        isRightEndStep_ = hasIrregularItems ? true : false;
     } else if (((step == FocusStep::UP || step == FocusStep::SHIFT_TAB) && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
                ((step == FocusStep::LEFT || step == FocusStep::SHIFT_TAB) && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = curCrossIndex - 1;
+        isLeftStep_ = hasIrregularItems ? true : false;
     } else if ((step == FocusStep::UP && gridLayoutInfo_.axis_ == Axis::VERTICAL) ||
                (step == FocusStep::LEFT && gridLayoutInfo_.axis_ == Axis::HORIZONTAL)) {
-        nextMainIndex = curMainIndex - 1;
+        nextMainIndex = hasIrregularItems ? curMainIndex - curMainSpan : curMainIndex - 1;
         nextCrossIndex = curCrossIndex + static_cast<int32_t>((curCrossSpan - 1) / 2);
+        isUpStep_ = hasIrregularItems ? true : false;
     } else if (((step == FocusStep::DOWN || step == FocusStep::TAB) && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
                ((step == FocusStep::RIGHT || step == FocusStep::TAB) && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = curCrossIndex + curCrossSpan;
+        isRightStep_ = hasIrregularItems ? true : false;
     } else if ((step == FocusStep::DOWN && gridLayoutInfo_.axis_ == Axis::VERTICAL) ||
                (step == FocusStep::RIGHT && gridLayoutInfo_.axis_ == Axis::HORIZONTAL)) {
-        nextMainIndex = curMainIndex + curMainSpan;
+        nextMainIndex = hasIrregularItems ? curMainIndex + 1 : curMainIndex + curMainSpan;
         nextCrossIndex = curCrossIndex + static_cast<int32_t>((curCrossSpan - 1) / 2);
+        isDownStep_ = hasIrregularItems ? true : false;
     } else {
         LOGE("Next index return: Invalid step: %{public}d and axis: %{public}d", step, gridLayoutInfo_.axis_);
         return { -1, -1 };
@@ -729,6 +764,7 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     if (nextMainIndex == curMainIndex && nextCrossIndex == curCrossIndex) {
         LOGI("Next index return: Move stoped. Next index: (%{public}d,%{public}d) is same as current.", nextMainIndex,
             nextCrossIndex);
+        ResetAllDirectionsStep();
         return { -1, -1 };
     }
     if (curChildStartIndex != 0 && curMainIndex == curMainStart && nextMainIndex < curMainIndex) {
@@ -755,25 +791,29 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     if (nextMainIndex < curMainStart || nextMainIndex > curMainEnd) {
         LOGW("Next index return: Error. Next main index is out of range(%{public}d,%{public}d)", curMainStart,
             curMainEnd);
+        ResetAllDirectionsStep();
         return { -1, -1 };
     }
     if (nextCrossIndex < 0) {
         LOGW("Next index return: Error. Next cross index is less than 0.");
+        ResetAllDirectionsStep();
         return { -1, -1 };
     }
     if (gridLayoutInfo_.gridMatrix_.find(nextMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
         LOGE("Can not find next main index: %{public}d", nextMainIndex);
+        ResetAllDirectionsStep();
         return { -1, -1 };
     }
     auto nextMaxCrossCount = GetCrossCount();
     if (nextCrossIndex >= nextMaxCrossCount) {
         LOGI("Next index: { %{public}d,%{public}d }. Next cross index is greater than max cross count: %{public}d.",
             nextMainIndex, nextCrossIndex, nextMaxCrossCount - 1);
-        if (nextMaxCrossCount - 1 != curCrossIndex) {
+        if (nextMaxCrossCount - 1 != (curCrossIndex + curCrossSpan - 1)) {
             LOGI("Current cross index: %{public}d is not the tail item. Return to the tail: { %{public}d,%{public}d }",
                 curCrossIndex, nextMainIndex, nextMaxCrossCount - 1);
             return { nextMainIndex, nextMaxCrossCount - 1 };
         }
+        ResetAllDirectionsStep();
         LOGW("Current cross index: %{public}d is the tail item. No next item can be found!", curCrossIndex);
         return { -1, -1 };
     }
@@ -821,6 +861,189 @@ WeakPtr<FocusHub> GridPattern::SearchFocusableChildInCross(
     }
     LOGD("Child can not be found.");
     return nullptr;
+}
+
+WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainIndex, int32_t tarCrossIndex)
+{
+    double minDistance = std::numeric_limits<double>::max();
+    int32_t minMainIndex = std::numeric_limits<int32_t>::max();
+    int32_t minCrossIndex = std::numeric_limits<int32_t>::max();
+    int32_t maxAreaInMainShadow = -1;
+    int32_t maxAreaInCrossShadow = -1;
+    WeakPtr<FocusHub> targetFocusHubWeak;
+
+    auto gridFrame = GetHost();
+    CHECK_NULL_RETURN(gridFrame, nullptr);
+    auto gridFocus = gridFrame->GetFocusHub();
+    CHECK_NULL_RETURN(gridFocus, nullptr);
+    auto childFocusList = gridFocus->GetChildren();
+    for (const auto& childFocus : childFocusList) {
+        if (!childFocus->IsFocusable()) {
+            continue;
+        }
+        auto childFrame = childFocus->GetFrameNode();
+        if (!childFrame) {
+            continue;
+        }
+        auto childPattern = childFrame->GetPattern<GridItemPattern>();
+        if (!childPattern) {
+            continue;
+        }
+        auto childItemProperty = childFrame->GetLayoutProperty<GridItemLayoutProperty>();
+        if (!childItemProperty) {
+            continue;
+        }
+        auto scrollIrregularInfo = childPattern->GetScrollIrregularItemInfo();
+        bool hasIrregularItemInScroll = scrollIrregularInfo.has_value();
+
+        auto childMainIndex = childItemProperty->GetMainIndex().value_or(-1);
+        auto childCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
+        auto chidlMainStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainStart
+                                                       : childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+        auto chidlMainEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainEnd
+                                                     : childItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
+        auto chidCrossStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossStart
+                                                       : childItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
+        auto chidCrossEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossEnd
+                                                     : childItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
+
+        GridItemIndexInfo childInfo;
+        childInfo.mainIndex = childMainIndex;
+        childInfo.crossIndex = childCrossIndex;
+        childInfo.mainStart = chidlMainStart;
+        childInfo.mainEnd = chidlMainEnd;
+        childInfo.crossStart = chidCrossStart;
+        childInfo.crossEnd = chidCrossEnd;
+
+        if ((isLeftStep_ && (childCrossIndex == tarCrossIndex || chidCrossEnd == tarCrossIndex)) ||
+            (isRightStep_ && childCrossIndex == tarCrossIndex)) {
+            double nearestDistance = GetNearestDistanceFromChildToCurFocusItemInMainAxis(tarCrossIndex, childInfo);
+            int32_t intersectAreaSize = CalcIntersectAreaInTargetDirectionShadow(childInfo, true);
+            if (LessNotEqual(nearestDistance, minDistance) ||
+                (NearEqual(nearestDistance, minDistance) && intersectAreaSize > maxAreaInCrossShadow) ||
+                (NearEqual(nearestDistance, minDistance) && intersectAreaSize == maxAreaInCrossShadow &&
+                    childMainIndex < minMainIndex)) {
+                minDistance = nearestDistance;
+                maxAreaInCrossShadow = intersectAreaSize;
+                minMainIndex = childMainIndex;
+                targetFocusHubWeak = AceType::WeakClaim(AceType::RawPtr(childFocus));
+            }
+        } else if ((isUpStep_ && childMainIndex == tarMainIndex) ||
+                   (isDownStep_ && (childMainIndex == tarMainIndex || chidlMainStart == tarMainIndex))) {
+            double nearestDistance = GetNearestDistanceFromChildToCurFocusItemInCrossAxis(tarMainIndex, childInfo);
+            int32_t intersectAreaSize = CalcIntersectAreaInTargetDirectionShadow(childInfo, false);
+            if (LessNotEqual(nearestDistance, minDistance) ||
+                (NearEqual(nearestDistance, minDistance) && intersectAreaSize > maxAreaInMainShadow) ||
+                (NearEqual(nearestDistance, minDistance) && intersectAreaSize == maxAreaInMainShadow &&
+                    childCrossIndex < minCrossIndex)) {
+                minDistance = nearestDistance;
+                minCrossIndex = childCrossIndex;
+                maxAreaInMainShadow = intersectAreaSize;
+                targetFocusHubWeak = AceType::WeakClaim(AceType::RawPtr(childFocus));
+            }
+        } else if ((isLeftEndStep_ || isRightEndStep_) &&
+                   ((tarMainIndex == childMainIndex && tarCrossIndex == childCrossIndex) ||
+                       (chidlMainStart != -1 && chidlMainStart <= tarMainIndex && tarMainIndex <= childMainIndex &&
+                           tarCrossIndex == childCrossIndex))) {
+            targetFocusHubWeak = AceType::WeakClaim(AceType::RawPtr(childFocus));
+        }
+    }
+    ResetAllDirectionsStep();
+    return targetFocusHubWeak;
+}
+
+int32_t GridPattern::CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis)
+{
+    int32_t curFocusLeftTopX = -1;
+    int32_t curFocusLeftTopY = -1;
+    int32_t curFocusRightBottonX = -1;
+    int32_t curFocusRightBottonY = -1;
+
+    if (isFindInMainAxis) {
+        curFocusLeftTopX =
+            curFocusIndexInfo_.mainStart == -1 ? curFocusIndexInfo_.mainIndex : curFocusIndexInfo_.mainStart;
+        curFocusLeftTopY = 0;
+        curFocusRightBottonX =
+            curFocusIndexInfo_.mainEnd == -1 ? curFocusIndexInfo_.mainIndex : curFocusIndexInfo_.mainEnd;
+        curFocusRightBottonY = GetCrossCount();
+    } else {
+        curFocusLeftTopX = gridLayoutInfo_.startMainLineIndex_;
+        curFocusLeftTopY =
+            curFocusIndexInfo_.crossStart == -1 ? curFocusIndexInfo_.crossIndex : curFocusIndexInfo_.crossStart;
+        curFocusRightBottonX = gridLayoutInfo_.endMainLineIndex_;
+        curFocusRightBottonY =
+            curFocusIndexInfo_.crossEnd == -1 ? curFocusIndexInfo_.crossIndex : curFocusIndexInfo_.crossEnd;
+    }
+    int32_t childLeftTopX = itemIndexInfo.mainStart == -1 ? itemIndexInfo.mainIndex : itemIndexInfo.mainStart;
+    int32_t childLeftTopY = itemIndexInfo.crossStart == -1 ? itemIndexInfo.crossIndex : itemIndexInfo.crossStart;
+    int32_t childRightBottonX = itemIndexInfo.mainEnd == -1 ? itemIndexInfo.mainIndex : itemIndexInfo.mainEnd;
+    int32_t childRightBottonY = itemIndexInfo.crossEnd == -1 ? itemIndexInfo.crossIndex : itemIndexInfo.crossEnd;
+
+    int32_t intersectAreaLeftTopX = std::max(curFocusLeftTopX, childLeftTopX);
+    int32_t intersectAreaLeftTopY = std::max(curFocusLeftTopY, childLeftTopY);
+    int32_t intersectAreaRightBottonX = std::min(curFocusRightBottonX, childRightBottonX);
+    int32_t intersectAreaRightBottonY = std::min(curFocusRightBottonY, childRightBottonY);
+
+    int32_t intersectWidth = intersectAreaRightBottonX - intersectAreaLeftTopX + 1;
+    int32_t intersectHeight = intersectAreaRightBottonY - intersectAreaLeftTopY + 1;
+
+    return (intersectWidth < 0 || intersectHeight < 0) ? -1 : intersectWidth * intersectHeight;
+}
+
+double GridPattern::GetNearestDistanceFromChildToCurFocusItemInMainAxis(
+    int32_t targetIndex, GridItemIndexInfo itemIndexInfo)
+{
+    double minDistance = std::numeric_limits<double>::max();
+    auto mainAxisIndex =
+        curFocusIndexInfo_.mainStart == -1 ? curFocusIndexInfo_.mainIndex : curFocusIndexInfo_.mainStart;
+    auto mainAxisEndIndex =
+        curFocusIndexInfo_.mainEnd == -1 ? curFocusIndexInfo_.mainIndex : curFocusIndexInfo_.mainEnd;
+    for (int32_t i = mainAxisIndex; i <= mainAxisEndIndex; i++) {
+        double childMainIndexDistance =
+            CalcCoordinatesDistance(i, curFocusIndexInfo_.crossIndex, itemIndexInfo.mainIndex, targetIndex);
+        double childMainStartDistance =
+            itemIndexInfo.mainStart == -1
+                ? std::numeric_limits<double>::max()
+                : CalcCoordinatesDistance(i, curFocusIndexInfo_.crossIndex, itemIndexInfo.mainStart, targetIndex);
+        double distance = std::min(childMainIndexDistance, childMainStartDistance);
+        if (LessNotEqual(distance, minDistance)) {
+            minDistance = distance;
+        }
+    }
+    return minDistance;
+}
+
+double GridPattern::GetNearestDistanceFromChildToCurFocusItemInCrossAxis(
+    int32_t targetIndex, GridItemIndexInfo itemIndexInfo)
+{
+    double minDistance = std::numeric_limits<double>::max();
+    auto crossAxisIndex =
+        curFocusIndexInfo_.crossStart == -1 ? curFocusIndexInfo_.crossIndex : curFocusIndexInfo_.crossStart;
+    auto crossAxisEndIndex =
+        curFocusIndexInfo_.crossEnd == -1 ? curFocusIndexInfo_.crossIndex : curFocusIndexInfo_.crossEnd;
+    for (int32_t i = crossAxisIndex; i <= crossAxisEndIndex; i++) {
+        double childCrossIndexDistance =
+            CalcCoordinatesDistance(curFocusIndexInfo_.mainIndex, i, targetIndex, itemIndexInfo.crossIndex);
+        double childCrossEndDistance =
+            itemIndexInfo.crossEnd == -1
+                ? std::numeric_limits<double>::max()
+                : CalcCoordinatesDistance(curFocusIndexInfo_.mainIndex, i, targetIndex, itemIndexInfo.crossEnd);
+        double distance = std::min(childCrossIndexDistance, childCrossEndDistance);
+        if (LessNotEqual(distance, minDistance)) {
+            minDistance = distance;
+        }
+    }
+    return minDistance;
+}
+
+void GridPattern::ResetAllDirectionsStep()
+{
+    isLeftStep_ = false;
+    isRightStep_ = false;
+    isUpStep_ = false;
+    isDownStep_ = false;
+    isLeftEndStep_ = false;
+    isRightEndStep_ = false;
 }
 
 WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t tarIndex)
@@ -906,7 +1129,9 @@ std::unordered_set<int32_t> GridPattern::GetFocusableChildCrossIndexesAt(int32_t
         }
         auto curMainIndex = childItemProperty->GetMainIndex().value_or(-1);
         auto curCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
-        if (curMainIndex == tarMainIndex) {
+        auto curMainStart = childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+        if ((curMainIndex == tarMainIndex) ||
+            (curMainStart != -1 && curMainStart <= tarMainIndex && tarMainIndex <= curMainIndex)) {
             result.emplace(curCrossIndex);
         }
     }
