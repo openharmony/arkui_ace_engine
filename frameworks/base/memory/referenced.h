@@ -21,7 +21,6 @@
 #include "base/memory/memory_monitor.h"
 #include "base/memory/ref_counter.h"
 #include "base/utils/macros.h"
-#include "base/utils/lifecycle_checkable.h"
 
 #define ACE_REMOVE(...)
 
@@ -33,7 +32,7 @@ template<class T>
 class WeakPtr;
 
 // Inherit this class to use 'RefPtr' and 'WeakPtr' to manage pointer of instance.
-class Referenced : public LifeCycleCheckable {
+class Referenced {
 public:
     // Use raw pointer to construct 'RefPtr' and 'WeakPtr'.
     template<class T>
@@ -167,7 +166,7 @@ public:
         Swap(RefPtr());
     }
 
-    typename LifeCycleCheckable::PtrHolder<T> operator->() const
+    T* operator->() const
     {
         return rawPtr_;
     }
