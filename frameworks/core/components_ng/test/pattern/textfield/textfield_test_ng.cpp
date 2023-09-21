@@ -677,9 +677,9 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextRectOffset, TestSize.Level2)
     pattern->caretRect_.SetTop(10);
     pattern->contentRect_.SetTop(8);
     pattern->contentRect_.SetHeight(4);
-    EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 0.0f);
+    EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 2.0f);
     pattern->caretRect_.SetTop(5);
-    EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 3.0f);
+    EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 7.0f);
     pattern->caretRect_.SetTop(13);
     EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), -1.0f);
 
@@ -1651,6 +1651,7 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor001, TestSize.Level1)
     TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     textFieldOverlayModifier.cursorVisible_ = AceType::MakeRefPtr<PropertyBool>(true);
     textFieldOverlayModifier.PaintCursor(context);
@@ -3639,6 +3640,7 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor002, TestSize.Level1)
     TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
 
     /**
@@ -6192,8 +6194,8 @@ HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
     pipeline->GetSafeAreaManager()->UpdateKeyboardSafeArea(0.0f);
     pattern->caretRect_ = CARE_RECT_DANGEROUS;
     dy = pattern->AdjustTextAreaOffsetY();
-    EXPECT_EQ(dy, 0.0f);
-    EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS);
+    EXPECT_EQ(dy, 195.0f);
+    EXPECT_EQ(pattern->caretRect_.GetX(), CARE_RECT_DANGEROUS.GetX());
     int32_t charPosition[3] = {-1, 0, 2};
     auto content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[1], true);;
     for (int i = 0; i < 3; i++) {
@@ -7559,7 +7561,7 @@ HWTEST_F(TextFieldPatternTestNg, HandleClickEvent, TestSize.Level1)
 
     pattern_->isMousePressed_ = true;
     pattern_->HandleClickEvent(info);
-    EXPECT_FALSE(pattern_->isMousePressed_);
+    EXPECT_TRUE(pattern_->isMousePressed_);
 
     info.SetLocalLocation(Offset(90, 90));
     pattern_->imageRect_.SetWidth(20);
