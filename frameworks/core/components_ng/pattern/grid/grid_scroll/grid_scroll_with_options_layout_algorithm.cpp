@@ -13,11 +13,23 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void UpdateGridItemRowAndColumnInfo(const RefPtr<LayoutWrapper>& itemLayoutWrapper, GridItemIndexInfo irregualItemInfo)
+{
+    auto gridItemHost = itemLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(gridItemHost);
+    auto gridItemPattern = gridItemHost->GetPattern<GridItemPattern>();
+    CHECK_NULL_VOID(gridItemPattern);
+    gridItemPattern->SetScrollIrregularItemInfo(irregualItemInfo);
+}
+} // namespace
+
 void GridScrollWithOptionsLayoutAlgorithm::AdjustRowColSpan(
-    const RefPtr<LayoutWrapper>& /* itemLayoutWrapper */, LayoutWrapper* layoutWrapper, int32_t itemIndex)
+    const RefPtr<LayoutWrapper>& itemLayoutWrapper, LayoutWrapper* layoutWrapper, int32_t itemIndex)
 {
     auto result = GetCrossStartAndSpan(layoutWrapper, itemIndex);
     if (gridLayoutInfo_.axis_ == Axis::VERTICAL) {
@@ -34,6 +46,19 @@ void GridScrollWithOptionsLayoutAlgorithm::AdjustRowColSpan(
         currentItemColStart_ = -1;
         currentItemColEnd_ = -1;
         currentItemColSpan_ = 1;
+    }
+
+    if (currentItemRowSpan_ > 1 || currentItemColSpan_ > 1) {
+        gridLayoutInfo_.hasBigItem_ = true;
+
+        GridItemIndexInfo irregualItemInfo;
+        irregualItemInfo.mainStart = currentItemRowStart_;
+        irregualItemInfo.mainEnd = currentItemRowEnd_;
+        irregualItemInfo.mainSpan = currentItemRowSpan_;
+        irregualItemInfo.crossStart = currentItemColStart_;
+        irregualItemInfo.crossEnd = currentItemColEnd_;
+        irregualItemInfo.crossSpan = currentItemColSpan_;
+        UpdateGridItemRowAndColumnInfo(itemLayoutWrapper, irregualItemInfo);
     }
 }
 

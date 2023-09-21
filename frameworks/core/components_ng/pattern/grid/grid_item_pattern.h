@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_model.h"
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
@@ -111,6 +112,15 @@ public:
         isSelected_ = selected;
     }
 
+    void SetScrollIrregularItemInfo(GridItemIndexInfo info)
+    {
+        irregularItemInfo_ = info;
+    }
+    std::optional<GridItemIndexInfo> GetScrollIrregularItemInfo() const
+    {
+        return irregularItemInfo_;
+    }
+
 protected:
     void OnModifyDone() override;
 private:
@@ -136,6 +146,7 @@ private:
     bool isPressed_ = false;
     GridItemStyle gridItemStyle_ = GridItemStyle::NONE;
     std::optional<double> enableOpacity_;
+    std::optional<GridItemIndexInfo> irregularItemInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridItemPattern);
 };
