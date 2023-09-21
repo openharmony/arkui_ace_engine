@@ -220,7 +220,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        if (static_cast<int32_t>(touchPoints_.size()) == 1) {
+        if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
             ResSchedReport::GetInstance().ResSchedDataReport("click");
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
