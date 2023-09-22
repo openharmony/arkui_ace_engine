@@ -60,6 +60,12 @@ RichEditorModel* RichEditorModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+
+const float DEFAULT_TEXT_SIZE = 16.0f;
+} // namespace
+
 void JSRichEditor::Create(const JSCallbackInfo& info)
 {
     JSRichEditorController* jsController = nullptr;
@@ -610,6 +616,10 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFp(fontSize, size)) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
+    } else {
+        size = Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP);
+        updateSpanStyle.updateFontSize = size;
+        style.SetFontSize(size);
     }
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
     if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
@@ -631,6 +641,13 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
         updateSpanStyle.updateFontFamily = family;
         style.SetFontFamilies(family);
     }
+    ParseTextDecoration(styleObject, style, updateSpanStyle);
+    return style;
+}
+
+void JSRichEditorController::ParseTextDecoration(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
     auto decorationObj = styleObject->GetProperty("decoration");
     JSRef<JSObject> decorationObject = JSRef<JSObject>::Cast(decorationObj);
     if (!decorationObject->IsUndefined()) {
@@ -646,7 +663,6 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
             style.SetTextDecorationColor(decorationColor);
         }
     }
-    return style;
 }
 
 void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
