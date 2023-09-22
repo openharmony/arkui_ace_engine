@@ -391,6 +391,8 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> formBindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
     { "Text", JSText::JSBind },
+    { "TextClock", JSTextClock::JSBind },
+    { "TextClockController", JSTextClockController::JSBind },
     { "Animator", JSAnimator::JSBind },
     { "SpringProp", JSAnimator::JSBind },
     { "SpringMotion", JSAnimator::JSBind },
