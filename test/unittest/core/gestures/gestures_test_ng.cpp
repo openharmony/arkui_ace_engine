@@ -11357,6 +11357,153 @@ HWTEST_F(GesturesTestNg, PinchRecognizerHandleTouchCancelEventTest001, TestSize.
 }
 
 /**
+ * @tc.name: LongPressRecognizerThumbnailTimerTest001
+ * @tc.desc: Test ThumbnailTimer in LongPressRecognizer
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerThumbnailTimerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    auto callback = [](Offset offset) {};
+    longPressRecognizer->callback_ = callback;
+    longPressRecognizer->ThumbnailTimer(0);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: LongPressRecognizerTestGetLongPressActionFunc005
+ * @tc.desc: Test LongPressRecognizer function: GetLongPressActionFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    bool isCatchMode = false;
+    longPressRecognizer->refereeState_ = RefereeState::SUCCEED;
+    longPressRecognizer->HandleOverdueDeadline(isCatchMode);
+    longPressRecognizer->DoRepeat();
+    GestureEventFunc click;
+    GestureEvent info;
+
+    /**
+     * @tc.steps: step2. call GetLongPressActionFunc function and compare result.
+     * @tc.steps: case1: normal case
+     * @tc.expected: step2. result equals.
+     */
+    click = longPressRecognizer->GetLongPressActionFunc();
+    click(info);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
+
+    auto onActionStart = [](GestureEvent& info) { return true; };
+    auto onActionUpdate = [](GestureEvent& info) { return true; };
+    auto onActionEnd = [](GestureEvent& info) { return true; };
+    longPressRecognizer->SetOnActionUpdate(onActionUpdate);
+    longPressRecognizer->SetOnAction(onActionStart);
+    longPressRecognizer->SetOnActionEnd(onActionEnd);
+    click = longPressRecognizer->GetLongPressActionFunc();
+    click(info);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: LongPressRecognizerTestGetLongPressActionFunc006
+ * @tc.desc: Test LongPressRecognizer function: GetLongPressActionFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    GestureEventFunc click;
+    GestureEvent info;
+
+    /**
+     * @tc.steps: step2. call GetLongPressActionFunc function and compare result.
+     * @tc.steps: case1: normal case
+     * @tc.expected: step2. result equals.
+     */
+    click = longPressRecognizer->GetLongPressActionFunc();
+    click(info);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::READY);
+
+    auto onActionStart = [](GestureEvent& info) { return true; };
+    auto onActionUpdate = [](GestureEvent& info) { return true; };
+    auto onActionEnd = [](GestureEvent& info) { return true; };
+    longPressRecognizer->SetOnActionUpdate(onActionUpdate);
+    longPressRecognizer->SetOnAction(onActionStart);
+    longPressRecognizer->SetOnActionEnd(onActionEnd);
+    click = longPressRecognizer->GetLongPressActionFunc();
+    click(info);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: LongPressRecognizerHandleTouchUpEventTest001
+ * @tc.desc: Test HandleTouchUpEvent in LongPressRecognizer
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerHandleTouchUpEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    longPressRecognizer->refereeState_ = RefereeState::SUCCEED;
+    longPressRecognizer->currentFingers_ = longPressRecognizer->fingers_ + 1;
+    auto callback = [](Offset offset) {};
+    longPressRecognizer->callback_ = callback;
+    longPressRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleOverdueDeadlineTest001
+ * @tc.desc: Test HandleOverdueDeadline in ClickRecognizer
+ */
+HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create clickRecognizerPtr.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. set HandleOverdueDeadline function.
+     */
+    clickRecognizerPtr->currentTouchPointsNum_ = clickRecognizerPtr->fingers_ - 1;
+    clickRecognizerPtr->HandleOverdueDeadline();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::FAIL);
+
+    /**
+     * @tc.steps: step2. set HandleOverdueDeadline function.
+     */
+    clickRecognizerPtr->currentTouchPointsNum_ = clickRecognizerPtr->fingers_;
+    clickRecognizerPtr->tappedCount_ = clickRecognizerPtr->count_ - 1;
+    clickRecognizerPtr->HandleOverdueDeadline();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::FAIL);
+}
+
+/**
  * @tc.name: PinchRecognizerHandleTouchCancelEventTest002
  * @tc.desc: Test PinchRecognizer function: HandleTouchUpEvent
  * @tc.type: FUNC
