@@ -245,7 +245,6 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
                 auto outNode = geometryTransition->outNode_.Upgrade();
                 if (outNode && geometryTransition->layoutPropertyOut_) {
                     outNode->SetLayoutProperty(geometryTransition->layoutPropertyOut_);
-                    geometryTransition->layoutPropertyOut_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
                     geometryTransition->layoutPropertyOut_.Reset();
                 }
             }
@@ -282,14 +281,10 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     layoutProperty->UpdateUserDefinedIdealSize(targetSize);
     LOGD("GeometryTransition: node: %{public}d modify size to: %{public}s",
         self->GetId(), targetSize.ToString().c_str());
-    // if node has aspect ratio we'll ignore it in active state, instead target's aspect ratio is respected
+    // if node has aspect ratio we'll ignore it in active state
     const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
-    auto hasAspectRatio = magicItemProperty ? magicItemProperty->HasAspectRatio() : false;
-    if (hasAspectRatio && size.IsPositive()) {
-        auto targetAspectRatio = size.Width() / size.Height();
-        magicItemProperty->UpdateAspectRatio(targetAspectRatio);
-        LOGD("GeometryTransition: node: %{public}d modify aspect ratio to: %{public}f",
-            self->GetId(), targetAspectRatio);
+    if (magicItemProperty && magicItemProperty->HasAspectRatio()) {
+        magicItemProperty->ResetAspectRatio();
     }
 }
 
@@ -477,7 +472,7 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
     auto animOption = animationOption_.IsValid() ? animationOption_ : AnimationOption(Curves::LINEAR, defaultDuration);
     AnimationUtils::Animate(animOption,
         [&]() {
-            inRenderContext->SetSandBox(inNodeParentPos);
+            inRenderContext->SetSandBox(inNodeParentPos, true);
             if (inNodeAbsRect.GetSize() == inNodeAbsRectOld.GetSize()) {
                 auto activeFrameRect = RectF(inNodeAbsRect.GetOffset() - outNodeParentPos_, inNodeAbsRect.GetSize());
                 outRenderContext->SyncGeometryProperties(activeFrameRect);
@@ -488,16 +483,7 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
                 MarkLayoutDirty(outNode);
             }
         },
-        [id = Container::CurrentId(), inNodeWeak = WeakClaim(RawPtr(inNode)), outNodeWeak = WeakClaim(RawPtr(outNode)),
-            geometryTransitionWeak = WeakClaim(this)]() {
-            ContainerScope scope(id);
-            auto geometryTransition = geometryTransitionWeak.Upgrade();
-            auto inNode = inNodeWeak.Upgrade();
-            CHECK_NULL_VOID(geometryTransition && inNode);
-            auto inContext = inNode->GetRenderContext();
-            CHECK_NULL_VOID(inContext);
-            inContext->SetSandBox(std::nullopt, geometryTransition->inNode_ == inNode && !outNodeWeak.Upgrade());
-        });
+        nullptr);
     LOGD("GeometryTransition: outNode: %{public}d %{public}s resyncs to inNode: %{public}d %{public}s, "
         "outAnim: %{public}d, option: %{public}d", outNode->GetId(), inNodeAbsRectOld.ToString().c_str(),
         inNode->GetId(), inNodeAbsRect.ToString().c_str(), hasOutAnim_, animationOption_.IsValid());
