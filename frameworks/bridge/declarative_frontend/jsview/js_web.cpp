@@ -1969,7 +1969,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
 void JSWeb::WebRotate(const JSCallbackInfo& args)
 {
-    // LOGD("Web rotate is not supported.");
+    LOGD("Web rotate is not supported.");
 }
 
 void JSWeb::OnAlert(const JSCallbackInfo& args)
