@@ -642,7 +642,6 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
-    offset = Round(offset);
     if (itemPosition_.empty()) {
         return false;
     }

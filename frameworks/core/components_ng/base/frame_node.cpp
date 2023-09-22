@@ -794,7 +794,6 @@ void FrameNode::TriggerOnAreaChangeCallback()
     if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         auto currParentOffsetToWindow = GetOffsetRelativeToWindow() - currFrameRect.GetOffset();
-        currFrameRect.SetOffset(geometryNode_->GetPixelGridRoundOffsetForArea());
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             eventHub_->FireOnAreaChanged(
                 *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
@@ -2412,7 +2411,7 @@ void FrameNode::SyncGeometryNode()
         geometryTransition->DidLayout(Claim(this));
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
-        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true);
+        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
     }
 
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
