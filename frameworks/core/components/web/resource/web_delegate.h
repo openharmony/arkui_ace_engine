@@ -708,8 +708,9 @@ private:
     void NotifyPopupWindowResult(bool result);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
-    void SurfaceOcclusionCallback(bool occlusion);
+    void SurfaceOcclusionCallback(float visibleRatio);
     void RegisterSurfaceOcclusionChangeFun();
+    void ratioStrToFloat(const std::string& str);
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -790,8 +791,9 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     Rosen::NodeId surfaceNodeId_ = 0;
-    bool surfaceOcclusion_ = true;
+    float visibleRatio_ = 1.0;
     uint32_t delayTime_ = 500;
+    float lowerFrameRateVisibleRatio_ = 0.1;
 #endif
 };
 
