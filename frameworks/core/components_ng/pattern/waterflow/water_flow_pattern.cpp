@@ -249,4 +249,24 @@ void WaterFlowPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("friction", GetFriction());
 }
+
+std::string WaterFlowPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("beginIndex", GetBeginIndex());
+    Dimension dimension(GetStoredOffset());
+    jsonObj->Put("offset", dimension.ConvertToVp());
+    return jsonObj->ToString();
+}
+
+void WaterFlowPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    UpdateStartIndex(info->GetInt("beginIndex"));
+    Dimension dimension(info->GetDouble("offset"), DimensionUnit::VP);
+    SetRestoreOffset(dimension.ConvertToPx());
+}
 } // namespace OHOS::Ace::NG

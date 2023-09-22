@@ -819,4 +819,16 @@ bool ScrollPattern::NeedScrollSnapToSide(float delta)
     }
     return false;
 }
+
+std::string ScrollPattern::ProvideRestoreInfo()
+{
+    Dimension dimension(currentOffset_);
+    return StringUtils::DoubleToString(dimension.ConvertToVp());
+}
+
+void ScrollPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    Dimension dimension = StringUtils::StringToDimension(restoreInfo, true);
+    currentOffset_ = dimension.ConvertToPx();
+}
 } // namespace OHOS::Ace::NG

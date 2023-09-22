@@ -579,8 +579,12 @@ bool GridScrollLayoutAlgorithm::IsIndexInMatrix(int32_t index, int32_t& startLin
 void GridScrollLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
     LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex)
 {
-    int32_t benchmarkIndex = isTargetBackward ? gridLayoutInfo_.gridMatrix_.rbegin()->second.rbegin()->second + 1 : 0;
-    int32_t mainStartIndex = isTargetBackward ? gridLayoutInfo_.gridMatrix_.rbegin()->first + 1 : 0;
+    int32_t benchmarkIndex = (isTargetBackward && !gridLayoutInfo_.gridMatrix_.empty())
+                                 ? gridLayoutInfo_.gridMatrix_.rbegin()->second.rbegin()->second + 1
+                                 : 0;
+    int32_t mainStartIndex = (isTargetBackward && !gridLayoutInfo_.gridMatrix_.empty())
+                                 ? gridLayoutInfo_.gridMatrix_.rbegin()->first + 1
+                                 : 0;
     int32_t currentIndex = benchmarkIndex;
     int32_t headOfMainStartLine = currentIndex;
 
@@ -672,17 +676,15 @@ void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, 
     }
 
     /* 2.3 targetIndex is out of the matrix */
-    if (gridLayoutInfo_.gridMatrix_.empty()) {
-        LOGW("no grid for jump to index:%{public}d", targetIndex);
-        return;
-    }
     bool isTargetBackward = true;
-    if (targetIndex < gridLayoutInfo_.gridMatrix_.begin()->second.begin()->second) {
-        isTargetBackward = false;
-    } else if (targetIndex > gridLayoutInfo_.gridMatrix_.rbegin()->second.rbegin()->second) {
-        isTargetBackward = true;
-    } else {
-        return;
+    if (!gridLayoutInfo_.gridMatrix_.empty()) {
+        if (targetIndex < gridLayoutInfo_.gridMatrix_.begin()->second.begin()->second) {
+            isTargetBackward = false;
+        } else if (targetIndex > gridLayoutInfo_.gridMatrix_.rbegin()->second.rbegin()->second) {
+            isTargetBackward = true;
+        } else {
+            return;
+        }
     }
     auto grid = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(grid);
@@ -711,17 +713,15 @@ void GridScrollLayoutAlgorithm::ScrollToIndexStart(LayoutWrapper* layoutWrapper,
         return;
     }
     /* targetIndex is out of the matrix */
-    if (gridLayoutInfo_.gridMatrix_.empty()) {
-        LOGW("no grid for jump to index:%{public}d", targetIndex);
-        return;
-    }
     bool isTargetBackward = true;
-    if (targetIndex < gridLayoutInfo_.gridMatrix_.begin()->second.begin()->second) {
-        isTargetBackward = false;
-    } else if (targetIndex > gridLayoutInfo_.gridMatrix_.rbegin()->second.rbegin()->second) {
-        isTargetBackward = true;
-    } else {
-        return;
+    if (!gridLayoutInfo_.gridMatrix_.empty()) {
+        if (targetIndex < gridLayoutInfo_.gridMatrix_.begin()->second.begin()->second) {
+            isTargetBackward = false;
+        } else if (targetIndex > gridLayoutInfo_.gridMatrix_.rbegin()->second.rbegin()->second) {
+            isTargetBackward = true;
+        } else {
+            return;
+        }
     }
     auto grid = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(grid);

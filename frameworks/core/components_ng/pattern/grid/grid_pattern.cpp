@@ -1685,4 +1685,15 @@ void GridPattern::DumpInfo()
         gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.startMainLineIndex_,
         gridLayoutInfo_.endMainLineIndex_, property->GetCachedCountValue(1));
 }
+
+std::string GridPattern::ProvideRestoreInfo()
+{
+    return std::to_string(gridLayoutInfo_.startIndex_);
+}
+
+void GridPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    gridLayoutInfo_.jumpIndex_ = StringUtils::StringToInt(restoreInfo);
+    gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
+}
 } // namespace OHOS::Ace::NG

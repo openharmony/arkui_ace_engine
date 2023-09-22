@@ -112,4 +112,11 @@ bool ListPattern::IsItemSelected(const MouseInfo& info)
 {
     return false;
 }
+
+std::string ListPattern::ProvideRestoreInfo()
+{
+    return "";
+}
+
+void ListPattern::OnRestoreInfo(const std::string& restoreInfo) {}
 } // namespace OHOS::Ace::NG

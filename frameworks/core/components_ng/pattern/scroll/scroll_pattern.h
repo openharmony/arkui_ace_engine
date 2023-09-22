@@ -258,6 +258,9 @@ public:
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
 
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
