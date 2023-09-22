@@ -44,7 +44,6 @@ protected:
     void OnActivation() override;
     void OnConnect() override;
     void OnForeground() override;
-    void OnBackground() override;
     void OnDisconnect() override;
 
 private:
