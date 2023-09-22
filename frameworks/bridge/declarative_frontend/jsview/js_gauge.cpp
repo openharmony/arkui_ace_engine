@@ -240,7 +240,7 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
         return;
     }
     CalcDimension strokeWidth;
-    if (!ParseJsDimensionVp(info[0], strokeWidth)) {
+    if (!ParseJsDimensionVpNG(info[0], strokeWidth) || strokeWidth.Unit() == DimensionUnit::PERCENT) {
         strokeWidth = CalcDimension(0);
     }
     GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
