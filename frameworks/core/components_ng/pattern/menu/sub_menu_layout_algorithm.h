@@ -28,6 +28,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem);
     float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
     float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
 
