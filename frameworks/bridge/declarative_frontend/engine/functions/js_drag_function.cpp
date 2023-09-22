@@ -196,8 +196,8 @@ void JsDragEvent::SetData(const JSCallbackInfo& args)
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
-    ScopeRAII scope(nativeEngine->GetScopeManager());
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
     CHECK_NULL_VOID(udData);
     dragEvent_->SetData(udData);
@@ -230,9 +230,9 @@ void JsDragEvent::GetData(const JSCallbackInfo& args)
         }
     }
     CHECK_NULL_VOID(dragData);
-    NativeValue* nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
+    napi_value nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
     CHECK_NULL_VOID(nativeValue);
-    auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    auto jsValue = JsConverter::ConvertNapiValueToJsVal(nativeValue);
     args.SetReturnValue(jsValue);
 }
 
@@ -241,9 +241,9 @@ void JsDragEvent::GetSummary(const JSCallbackInfo& args)
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     auto summary = dragEvent_->GetSummary();
-    NativeValue* nativeValue = UdmfClient::GetInstance()->TransformSummary(summary);
+    napi_value nativeValue = UdmfClient::GetInstance()->TransformSummary(summary);
     CHECK_NULL_VOID(nativeValue);
-    auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    auto jsValue = JsConverter::ConvertNapiValueToJsVal(nativeValue);
     args.SetReturnValue(jsValue);
 }
 
@@ -294,8 +294,8 @@ void JsDragEvent::SetDragInfo(const JSCallbackInfo& args)
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
-    ScopeRAII scope(nativeEngine->GetScopeManager());
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
     CHECK_NULL_VOID(udData);
     dragEvent_->SetData(udData);
@@ -305,9 +305,9 @@ void JsDragEvent::GetDragInfo(const JSCallbackInfo& args)
 {
     auto dragData = dragEvent_->GetDragInfo();
     CHECK_NULL_VOID(dragData);
-    NativeValue* nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
+    napi_value nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
     CHECK_NULL_VOID(nativeValue);
-    auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    auto jsValue = JsConverter::ConvertNapiValueToJsVal(nativeValue);
     args.SetReturnValue(jsValue);
 }
 

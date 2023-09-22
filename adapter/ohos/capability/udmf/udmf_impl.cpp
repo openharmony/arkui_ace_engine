@@ -51,14 +51,14 @@ RefPtr<UnifiedData> UdmfClientImpl::CreateUnifiedData()
     return AceType::DynamicCast<UnifiedData>(AceType::MakeRefPtr<UnifiedDataImpl>());
 }
 
-RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(NativeValue* nativeValue)
+RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(napi_value napiValue)
 {
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, nullptr);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     void* native = nullptr;
-    napi_unwrap(env, reinterpret_cast<napi_value>(nativeValue), &native);
+    napi_unwrap(env, napiValue, &native);
     auto* unifiedData = reinterpret_cast<UDMF::UnifiedDataNapi*>(native);
     CHECK_NULL_RETURN(unifiedData, nullptr);
     CHECK_NULL_RETURN(unifiedData->value_, nullptr);
@@ -67,7 +67,7 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(NativeValue* nativeValu
     return udData;
 }
 
-NativeValue* UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData)
+napi_value UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData)
 {
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, nullptr);
@@ -78,10 +78,10 @@ NativeValue* UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& Unifi
     napi_value dataVal = nullptr;
     UDMF::UnifiedDataNapi::NewInstance(env, unifiedData, dataVal);
     CHECK_NULL_RETURN(dataVal, nullptr);
-    return reinterpret_cast<NativeValue*>(dataVal);
+    return dataVal;
 }
 
-NativeValue* UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summary)
+napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summary)
 {
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, nullptr);
@@ -97,7 +97,7 @@ NativeValue* UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& su
     napi_value dataVal = nullptr;
     UDMF::SummaryNapi::NewInstance(env, udmfSummary, dataVal);
     CHECK_NULL_RETURN(dataVal, nullptr);
-    return reinterpret_cast<NativeValue*>(dataVal);
+    return dataVal;
 }
 
 int32_t UdmfClientImpl::SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key)

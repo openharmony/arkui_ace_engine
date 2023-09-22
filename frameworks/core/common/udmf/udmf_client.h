@@ -30,9 +30,9 @@ class ACE_FORCE_EXPORT UdmfClient : public AceType {
 
 public:
     static UdmfClient* GetInstance();
-    virtual RefPtr<UnifiedData> TransformUnifiedData(NativeValue* nativeValue) = 0;
-    virtual NativeValue* TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
-    virtual NativeValue* TransformSummary(std::map<std::string, int64_t>& summary) = 0;
+    virtual RefPtr<UnifiedData> TransformUnifiedData(napi_value napiValue) = 0;
+    virtual napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
+    virtual napi_value TransformSummary(std::map<std::string, int64_t>& summary) = 0;
     virtual RefPtr<UnifiedData> CreateUnifiedData() = 0;
     virtual int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) = 0;
     virtual int32_t GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key) = 0;

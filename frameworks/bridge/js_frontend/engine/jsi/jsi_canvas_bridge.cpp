@@ -62,7 +62,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
     }
 
     JSValueWrapper valueWrapper = arkJsValue->GetValue(arkRuntime);
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
     PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
     if (!pixelMapNapiEntry) {
@@ -70,7 +70,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
         return nullptr;
     }
     void* pixmapPtrAddr = pixelMapNapiEntry(
-        reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
+        reinterpret_cast<napi_env>(nativeEngine), napiValue);
     if (pixmapPtrAddr == nullptr) {
         LOGE(" Failed to get pixmap pointer");
         return nullptr;
@@ -1864,20 +1864,12 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
         return runtime->NewUndefined();
     }
 
-    // 4 NapiValue to JsValue
-    NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
-    if (!nativeValue) {
-        LOGE("nativeValue is null");
-        return runtime->NewUndefined();
-    }
-
-    Global<JSValueRef> globalRef = *nativeValue;
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     if (!arkRuntime) {
         LOGE("arkRuntime is null");
         return runtime->NewUndefined();
     }
-    auto jsValue = std::make_shared<ArkJSValue>(arkRuntime, globalRef.ToLocal(arkRuntime->GetEcmaVm()));
+    auto jsValue = std::make_shared<ArkJSValue>(arkRuntime, NapiValueToLocalValue(napiValue));
     if (!jsValue) {
         LOGE("jsValue is null");
         return runtime->NewUndefined();

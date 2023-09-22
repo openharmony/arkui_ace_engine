@@ -3443,8 +3443,7 @@ JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventI
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMapToJs);
-    NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
-    auto jsPixelMap = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    auto jsPixelMap = JsConverter::ConvertNapiValueToJsVal(napiValue);
     obj->SetPropertyObject("favicon", jsPixelMap);
     return JSRef<JSObject>::Cast(obj);
 }

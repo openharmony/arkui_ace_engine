@@ -19,7 +19,7 @@
 #include "native_engine/native_engine.h"
 
 namespace OHOS::Ace {
-void InitTimerModule(NativeEngine& engine);
+void InitTimerModule(napi_env env);
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_COMMON_JS_BACKEND_TIMER_MODULE_H

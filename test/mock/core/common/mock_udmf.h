@@ -27,9 +27,9 @@ class MockUdmfClient : public UdmfClient {
     DECLARE_ACE_TYPE(MockUdmfClient, UdmfClient);
 
 public:
-    MOCK_METHOD(RefPtr<UnifiedData>, TransformUnifiedData, (NativeValue* nativeValue), (override));
-    MOCK_METHOD(NativeValue*, TransformUdmfUnifiedData, (RefPtr<UnifiedData>& UnifiedData), (override));
-    MOCK_METHOD(NativeValue*, TransformSummary, ((std::map<std::string, int64_t>& summary)), (override));
+    MOCK_METHOD(RefPtr<UnifiedData>, TransformUnifiedData, (napi_value napiValue), (override));
+    MOCK_METHOD(napi_value, TransformUdmfUnifiedData, (RefPtr<UnifiedData>& UnifiedData), (override));
+    MOCK_METHOD(napi_value, TransformSummary, ((std::map<std::string, int64_t>& summary)), (override));
     MOCK_METHOD(RefPtr<UnifiedData>, CreateUnifiedData, (), (override));
     MOCK_METHOD(int32_t, SetData, (const RefPtr<UnifiedData>& unifiedData, std::string& key), (override));
     MOCK_METHOD(int32_t, GetData, (const RefPtr<UnifiedData>& unifiedData, const std::string& key), (override));

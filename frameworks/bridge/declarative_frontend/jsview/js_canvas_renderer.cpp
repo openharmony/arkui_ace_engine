@@ -1194,8 +1194,7 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 
     // 4 NapiValue to JsValue
 #ifdef USE_ARK_ENGINE
-    NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
-    auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    auto jsValue = JsConverter::ConvertNapiValueToJsVal(napiValue);
     info.SetReturnValue(jsValue);
 #else
     napi_value temp = nullptr;
