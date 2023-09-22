@@ -133,7 +133,7 @@ constexpr Dimension FONT_SIZE = 12.0_vp;
 const std::string FONT_CONTEXT = "start";
 const FontWeight FONT_WEIGHT = FontWeight::BOLDER;
 const std::vector<std::string> FONT_FAMILY = { "serif" };
-constexpr Dimension DEFALUT_SPACE = 4.0_vp;
+constexpr Dimension DEFALUT_SPACE = 3.0_vp;
 
 CreateProperty creatProperty;
 DirtySwapConfig config;

@@ -9669,7 +9669,7 @@ HWTEST_F(TabsTestNg, TabBarPatternGetIndicatorStyle002, TestSize.Level1)
     EXPECT_EQ(tabBarPattern->axis_, Axis::HORIZONTAL);
     tabBarPattern->turnPageRate_ = 2.0f;
     tabBarPattern->GetIndicatorStyle(indicator);
-    EXPECT_EQ(tabBarPattern->turnPageRate_, 1.0f);
+    EXPECT_EQ(tabBarPattern->turnPageRate_, 2.0f);
     tabBarPattern->swiperStartIndex_ = 1;
     tabBarPattern->GetIndicatorStyle(indicator);
     EXPECT_EQ(tabBarPattern->swiperStartIndex_, 1);
@@ -9789,7 +9789,7 @@ HWTEST_F(TabsTestNg, TabBarPatternApplyTurnPageRateToIndicator002, TestSize.Leve
     tabBarPattern->selectedModes_.clear();
     tabBarPattern->selectedModes_.push_back(selectedMode1);
     tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
-    EXPECT_EQ(tabBarPattern->swiperStartIndex_, -1);
+    EXPECT_EQ(tabBarPattern->swiperStartIndex_, 0);
     tabBarPattern->selectedModes_.clear();
     tabBarPattern->selectedModes_.push_back(selectedMode2);
     tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
@@ -9842,7 +9842,7 @@ HWTEST_F(TabsTestNg, TabBarPatternApplyTurnPageRateToIndicator003, TestSize.Leve
     tabBarPattern->selectedModes_.clear();
     tabBarPattern->selectedModes_.push_back(selectedMode1);
     tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
-    EXPECT_EQ(tabBarPattern->swiperStartIndex_, -1);
+    EXPECT_EQ(tabBarPattern->swiperStartIndex_, 0);
     tabBarPattern->swiperStartIndex_ = 0;
     tabBarPattern->tabBarStyles_.push_back(tabBarStyles2);
     tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);

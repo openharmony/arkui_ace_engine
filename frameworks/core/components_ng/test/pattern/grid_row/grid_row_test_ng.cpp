@@ -15,6 +15,9 @@
 
 #include <optional>
 
+#define private public
+#define protected public
+
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
@@ -102,6 +105,11 @@ void GridRowTestNg::SetUp()
     colLayoutBack->UpdateSpan(V2::GridContainerSize(1));
     colLayoutBack->UpdateOffset(V2::GridContainerSize(0));
     colLayoutBack->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    MockPipelineBase::GetCurrent()->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    MockPipelineBase::GetCurrent()->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+    MockPipelineBase::GetCurrent()->windowManager_->SetWindowGetModeCallBack(
+        []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
 }
 
 void GridRowTestNg::TearDown() {}

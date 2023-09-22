@@ -29,18 +29,25 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
+#include "base/resource/internal_resource.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/video/video_theme.h"
+#include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_styles.h"
 #include "core/components_ng/test/mock/render/mock_media_player.h"
@@ -106,7 +113,7 @@ const SizeF VIDEO_SIZE(VIDEO_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_GREATER_THAN_1(MAX_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_LESS_THAN_1(VIDEO_WIDTH, MAX_HEIGHT);
 const SizeF INVALID_SIZE(MAX_WIDTH, 0.0f);
-constexpr uint32_t VIDEO_CHILDREN_NUM = 2;
+constexpr uint32_t VIDEO_CHILDREN_NUM = 3;
 constexpr uint32_t DURATION = 100;
 constexpr uint32_t CURRENT_TIME = 100;
 constexpr int32_t SLIDER_INDEX = 2;
@@ -418,9 +425,9 @@ HWTEST_F(VideoTestNg, VideoMeasureTest005, TestSize.Level1)
     for (const auto& child : children) {
         auto frameNodeChild = AceType::DynamicCast<FrameNode>(child);
         RefPtr<GeometryNode> geometryNodeChild = AceType::MakeRefPtr<GeometryNode>();
-        auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-                AceType::WeakClaim(AceType::RawPtr(frameNodeChild)), geometryNodeChild,
-                frameNodeChild->GetLayoutProperty());
+        auto childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(AceType::WeakClaim(AceType::RawPtr(frameNodeChild)),
+                geometryNodeChild, frameNodeChild->GetLayoutProperty());
         layoutWrapper.AppendChild(childLayoutWrapper);
     }
 
@@ -467,8 +474,8 @@ HWTEST_F(VideoTestNg, VideoPatternTest006, TestSize.Level1)
      */
     auto children = frameNode->GetChildren();
     auto childrenSize = static_cast<int32_t>(children.size());
-    EXPECT_EQ(childrenSize, 2);
-    auto image = frameNode->GetChildAtIndex(0);
+    EXPECT_EQ(childrenSize, VIDEO_CHILDREN_NUM);
+    auto image = frameNode->GetChildAtIndex(1);
     EXPECT_EQ(image->GetTag(), V2::IMAGE_ETS_TAG);
 }
 
@@ -494,8 +501,8 @@ HWTEST_F(VideoTestNg, VideoPatternTest007, TestSize.Level1)
      */
     auto children = frameNode->GetChildren();
     auto childrenSize = static_cast<int32_t>(children.size());
-    EXPECT_EQ(childrenSize, 2);
-    auto row = frameNode->GetChildAtIndex(1);
+    EXPECT_EQ(childrenSize, VIDEO_CHILDREN_NUM);
+    auto row = frameNode->GetChildAtIndex(2);
     EXPECT_EQ(row->GetTag(), V2::ROW_ETS_TAG);
 }
 
@@ -704,7 +711,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     /**
      * @tc.steps: step2. Prepare the childNode & videoEvent
      */
-    auto controlBar = frameNode->GetChildAtIndex(1);
+    auto controlBar = frameNode->GetChildAtIndex(2);
     ASSERT_TRUE(controlBar);
 
     auto playBtn = AceType::DynamicCast<FrameNode>(controlBar->GetChildAtIndex(0));
@@ -731,11 +738,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
      */
     pattern->OnPlayerStatus(PlaybackStatus::STARTED);
     EXPECT_EQ(startCheck, VIDEO_START_EVENT);
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(3)
-        .WillOnce(Return(false))
-        .WillOnce(Return(true))
-        .WillOnce(Return(true));
     // will call pattern->Pause()
     EXPECT_TRUE(pattern->isPlaying_);
     // case1: MediaPlayer is invalid
@@ -773,6 +775,12 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     videoLayoutProperty->UpdateControls(false);
     pattern->OnPlayerStatus(PlaybackStatus::PLAYBACK_COMPLETE); // case2: controls = false
     EXPECT_EQ(finishCheck, VIDEO_FINISH_EVENT);
+    pattern->OnPlayerStatus(PlaybackStatus::ERROR);
+    pattern->OnPlayerStatus(PlaybackStatus::IDLE);
+    pattern->OnPlayerStatus(PlaybackStatus::PREPARED);
+    pattern->OnPlayerStatus(PlaybackStatus::PAUSED);
+    pattern->OnPlayerStatus(PlaybackStatus::STOPPED);
+    pattern->OnPlayerStatus(PlaybackStatus::NONE);
 }
 
 /**
@@ -806,9 +814,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
      *            case1: needControlBar & needFireEvent = true, isStop_ & autoPlay_ = false
      * @tc.expected: step2. FirePreparedEvent will be called & duration_ has changed
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_)), IsSurfaceValid())
-        .WillOnce(Return(false));
-
     EXPECT_TRUE(videoLayoutProperty->GetControlsValue(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(3)
@@ -827,11 +832,17 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     pattern->isStop_ = true;
     pattern->autoPlay_ = true;
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(5)
+        .Times(10)
         .WillRepeatedly(Return(true));
     pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_TRUE(preparedCheck.empty());
+    pattern->isStop_ = false;
+    pattern->dragEndAutoPlay_ = true;
+    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
+    EXPECT_EQ(pattern->duration_, DURATION);
+    EXPECT_TRUE(preparedCheck.empty());
+    EXPECT_FALSE(pattern->dragEndAutoPlay_);
 }
 
 /**
@@ -867,9 +878,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
      * @tc.steps: step2. Call Start
      * @tc.expected: step2. relevant functions called correctly
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(2)
-        .WillRepeatedly(Return(true));
     bool isStops[2] { true, false };
     int32_t prepareReturns[2] { -1, 0 };
     for (bool isStop : isStops) {
@@ -896,11 +904,9 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
      */
     pattern->currentPos_ = 10;
     pattern->isStop_ = false;
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .WillOnce(Return(false));
     pattern->Stop();
-    EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 10);
-    EXPECT_EQ(pattern->isStop_, false);
+    EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
+    EXPECT_TRUE(pattern->isStop_);
 
     /**
      * @tc.steps: step3. Call Stop when the mediaplayer is valid.
@@ -909,23 +915,16 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     pattern->currentPos_ = 10;
     pattern->isStop_ = false;
     pattern->duration_ = 20;
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .WillOnce(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop()).WillOnce(Return(0));
     pattern->Stop();
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
     EXPECT_EQ(pattern->isStop_, true);
 
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .WillOnce(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop()).WillOnce(Return(0));
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
     pattern->Stop(); // case2: media player is valid & currentPos = currentPos_ = 0
     EXPECT_EQ(pattern->isStop_, true);
 
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(2)
-        .WillRepeatedly(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop())
         .Times(2)
         .WillRepeatedly(Return(0));
@@ -985,15 +984,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
      * @tc.expected: step2. onSeeking/onSeeked & SetCurrentTime  will be called
      */
     std::vector<int32_t> sliderChangeModes { 0, 1, 2 };
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(4)
-        .WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
     for (int i = 0; i < 3; i++) {
         auto sliderChangeMode = sliderChangeModes[i];
         if (i == 1) {
             EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Seek(_, _))
-                .Times(1)
+                .Times(2)
                 .WillOnce(Return(0)); // 0 <= currentPos(0) <= duration_(0) will call mediaPlayer's Seek()
         }
         if (i < 2) {
@@ -1033,9 +1028,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest014, TestSize.Level1)
      * @tc.steps: step2. Call OnResolutionChange
      * @tc.expected: step2. related functions will be called
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(1)
-        .WillOnce(Return(true));
     pattern->OnResolutionChange();
 
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();

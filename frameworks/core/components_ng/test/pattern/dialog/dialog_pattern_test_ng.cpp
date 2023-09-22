@@ -264,9 +264,14 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0020, TestSize.Level1)
     for (size_t i = 0; i < sizeof(aligns) / sizeof(aligns[0]); i++) {
         dialogLayoutAlgorithm->alignment_ = aligns[i];
         auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
-        EXPECT_EQ(result, true);
+        if (i == 3) {
+            EXPECT_FALSE(result);
+        } else {
+            EXPECT_TRUE(result);
+        }
     }
 }
+
 
 /**
  * @tc.name: DialogAccessibilityProperty001

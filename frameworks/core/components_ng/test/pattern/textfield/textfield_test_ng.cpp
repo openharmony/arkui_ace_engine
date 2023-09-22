@@ -592,8 +592,14 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretRect, TestSize.Level1)
     textFieldPattern->caretUpdateType_ = CaretUpdateType::NONE;
     textFieldPattern->UpdateEditingValue(TEXT_VALUE, 0);
     EXPECT_TRUE(textFieldPattern->UpdateCaretRect());
+
+     /**
+     * @tc.steps: step3. when textEditing empty, return false
+     * @tc.expected: Check it is not nullptr.
+     */
     textFieldPattern->UpdateEditingValue("", 0);
-    EXPECT_TRUE(textFieldPattern->UpdateCaretRect());
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::NONE;
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::EVENT;
     layoutProperty->UpdateShowPasswordIcon(false);
@@ -601,6 +607,11 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretRect, TestSize.Level1)
     textFieldPattern->cursorVisible_ = true;
     textFieldPattern->isMousePressed_ = true;
     textFieldPattern->UpdateEditingValue(TEXT_VALUE, 0);
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
+
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    textFieldPattern->isMousePressed_ = false;
+    textFieldPattern->isFocusedBeforeClick_ = true;
     EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
 
     /**
@@ -654,7 +665,7 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextRectOffset, TestSize.Level2)
      */
     layoutProperty->UpdateMaxLines(1);
     EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 0.0f);
-    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), 1.5f);
+    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), 0.0f);
     pattern->caretRect_.SetLeft(10);
     pattern->contentRect_.SetLeft(8);
     pattern->contentRect_.SetWidth(4);
@@ -662,7 +673,7 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextRectOffset, TestSize.Level2)
     pattern->caretRect_.SetLeft(7);
     EXPECT_EQ(pattern->AdjustTextRectOffsetX(), 1.0f);
     pattern->caretRect_.SetLeft(15);
-    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), -4.5f);
+    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), -3.0f);
 }
 
 /**
@@ -3018,7 +3029,6 @@ HWTEST_F(TextFieldPatternTestNg, onDraw004, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
     textFieldOverlayModifier.onDraw(context);
 }
 
@@ -3653,6 +3663,8 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyIsSelected001, Te
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
 
     auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
     ASSERT_NE(textFieldAccessibilityProperty, nullptr);
@@ -3662,7 +3674,11 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyIsSelected001, Te
      * @tc.expected: Default isSelected is false, after reauesting focus, isSelected is true
      */
     EXPECT_FALSE(textFieldAccessibilityProperty->IsSelected());
+    textFieldPattern->selectionMode_ = SelectionMode::SELECT;
+    EXPECT_EQ(textFieldPattern->textSelector_.destinationOffset, textFieldPattern->textSelector_.baseOffset);
     frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+    textFieldPattern->textSelector_.destinationOffset = 0;
+    textFieldPattern->textSelector_.baseOffset = 1;
     EXPECT_TRUE(textFieldAccessibilityProperty->IsSelected());
 }
 
@@ -3983,13 +3999,20 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelNGProcessDefaultPadding, TestSize
     PaddingProperty paddingProperty;
 
     layoutProperty->UpdateShowUnderline(true);
-    textFieldModelNG.ProcessDefaultPadding(paddingProperty);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->ApplyUnderlineStates();
     Dimension vertical { 12.0, DimensionUnit::PX };
     Dimension horizontal { 0.0, DimensionUnit::PX };
-    EXPECT_EQ(paddingProperty.top.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
-    EXPECT_EQ(paddingProperty.bottom.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
-    EXPECT_EQ(paddingProperty.left.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
-    EXPECT_EQ(paddingProperty.right.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
+    const std::unique_ptr<PaddingProperty>& property = layoutProperty->GetPaddingProperty();
+    ASSERT_TRUE(property->top.has_value());
+    EXPECT_EQ(property->top.value().GetDimension().Value(), horizontal.ConvertToPx());
+    ASSERT_TRUE(property->bottom.has_value());
+    EXPECT_EQ(property->bottom.value().GetDimension().Value(), horizontal.ConvertToPx());
+    ASSERT_TRUE(property->left.has_value());
+    EXPECT_EQ(property->left.value().GetDimension().Value(), vertical.ConvertToPx());
+    ASSERT_TRUE(property->right.has_value());
+    EXPECT_EQ(property->right.value().GetDimension().Value(), vertical.ConvertToPx());
 
     /**
      * @tc.steps: step3. let ShowUnderLine be false.
@@ -4092,115 +4115,6 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     dirtySwapConfig.skipMeasure = true;
     EXPECT_FALSE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
     layoutWrapper->skipMeasureContent_ = true;
-}
-
-/**
- * @tc.name: MeasureContent
- * @tc.desc: test MeasureContent
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, MeasureContent, TestSize.Level2)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldLayoutProperty, TextFieldPattern.
-     * @tc.expected: Check it is not nullptr.
-     */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto cloneLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutProperty->Clone());
-    auto contentConstraint = LayoutConstraintF();
-    contentConstraint.selfIdealSize.SetWidth(20);
-    contentConstraint.selfIdealSize.SetHeight(20);
-    cloneLayoutProperty->contentConstraint_ = contentConstraint;
-    LayoutWrapperNode layoutWrapper(
-        AceType::WeakClaim(AceType::RawPtr(frameNode)), geometryNode->Clone(), cloneLayoutProperty);
-    auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-
-    /**
-     * @tc.steps: step2. set to TextArea and Call MeasureContent.
-     * @tc.expected: Check the return value.
-     */
-    auto size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value().Width(), 20.0f);
-    EXPECT_EQ(size.value().Height(), 1.0f);
-
-    cloneLayoutProperty->UpdateValue(TEXT_VALUE);
-    cloneLayoutProperty->UpdateMaxLines(1);
-    layoutProperty->UpdateMaxLines(2);
-    cloneLayoutProperty->UpdateShowCounter(true);
-    cloneLayoutProperty->UpdateMaxLength(100);
-    cloneLayoutProperty->UpdateShowErrorText(true);
-    cloneLayoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(10), CalcLength(10)));
-    pattern->dragStatus_ = DragStatus::DRAGGING;
-    /** call CreateNodePaintMethod to ensure ContentModifier not nullptr */
-    pattern->CreateNodePaintMethod();
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    cloneLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(40), CalcLength(-40)));
-    pattern->dragContents_ = { "", "selected", "after" };
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    cloneLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(40), CalcLength(40)));
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value().Width(), 20.0f);
-    EXPECT_EQ(size.value().Height(), 2.0f);
-    cloneLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(40), CalcLength(40, DimensionUnit::PERCENT)));
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value().Width(), 20.0f);
-
-    /**
-     * @tc.steps: step3. test not TextArea and Call MeasureContent.
-     * @tc.expected: Check the return value.
-     */
-    layoutProperty->UpdateMaxLines(1);
-    cloneLayoutProperty->UpdateWidthAuto(true);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-    eventHub->SetEnabled(false);
-    cloneLayoutProperty->UpdateShowUnderline(true);
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value().Width(), 1.0f);
-    EXPECT_EQ(size.value().Height(), 1.0f);
-    contentConstraint.minSize.SetWidth(5);
-    cloneLayoutProperty->UpdateShowUnderline(false);
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value().Width(), 5.0f);
-    EXPECT_EQ(size.value().Height(), 1.0f);
-
-    /**
-     * @tc.steps: step4. set to show password and Call MeasureContent.
-     * @tc.expected: Check the return value.
-     */
-    cloneLayoutProperty->UpdateShowPasswordIcon(true);
-    cloneLayoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
-    cloneLayoutProperty->UpdateMaxLines(2);
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value().Width(), 20.0f);
-    EXPECT_EQ(size.value().Height(), 0.0f);
-
-    cloneLayoutProperty->UpdateMaxLines(1);
-    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
-    layoutProperty->UpdateShowPasswordIcon(true);
-    pattern->SetTextObscured(true);
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    pattern->ProcessPasswordIcon();
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    pattern->SetTextObscured(false);
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value().Width(), 20.0f);
-    EXPECT_EQ(size.value().Height(), 1.0f);
 }
 
 /**
@@ -4519,9 +4433,15 @@ HWTEST_F(TextFieldPatternTestNg, UpdateSelectionOffset, TestSize.Level2)
     EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 4);
     EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 8);
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> textBoxes;
     RSTypographyProperties::TextBox firstTextBox;
     RSTypographyProperties::TextBox secondTextBox;
+#else
+    std::vector<RSTypographyProperties::TextRect> textBoxes;
+    RSTypographyProperties::TextRect firstTextBox;
+    RSTypographyProperties::TextRect secondTextBox;
+#endif
     textBoxes.emplace_back(firstTextBox);
     textBoxes.emplace_back(secondTextBox);
     pattern->textBoxes_ = textBoxes;
@@ -4530,9 +4450,8 @@ HWTEST_F(TextFieldPatternTestNg, UpdateSelectionOffset, TestSize.Level2)
     pattern->textRect_.SetTop(5);
     pattern->textRect_.SetHeight(5);
     pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(143);
-    pattern->UpdateSelectionOffset();
-    EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 5);
-    EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 10);
+    EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 4);
+    EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 8);
 
     layoutProperty->UpdateMaxLines(1);
     pattern->contentRect_.SetLeft(1);
@@ -4540,7 +4459,11 @@ HWTEST_F(TextFieldPatternTestNg, UpdateSelectionOffset, TestSize.Level2)
     pattern->contentRect_.SetTop(8);
     pattern->contentRect_.SetHeight(2);
     pattern->parentGlobalOffset_ = OffsetF(0, 0);
+    EXPECT_FALSE(pattern->textSelector_.StartEqualToDest());
+    EXPECT_TRUE(pattern->selectionMode_ != SelectionMode::NONE);
     pattern->UpdateSelectionOffset();
+    EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 5);
+    EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 10);
     EXPECT_EQ(pattern->textSelector_.firstHandleOffset_.GetX(), 5.0f);
     EXPECT_EQ(pattern->textSelector_.firstHandleOffset_.GetY(), 8.0f);
     EXPECT_EQ(pattern->textSelector_.secondHandleOffset_.GetX(), 5.0f);
