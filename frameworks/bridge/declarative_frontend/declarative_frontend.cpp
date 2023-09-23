@@ -531,6 +531,21 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             return jsEngine->LoadNamedRouterSource(namedRouter, isTriggeredByJs);
         };
         delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadNamedRouterCallback));
+        auto moduleNamecallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& pageName)->
+        std::string {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return "";
+            }
+            return jsEngine->SearchRouterRegisterMap(pageName);
+        };
+        auto container = Container::Current();
+        if (container) {
+            auto pageUrlChecker = container->GetPageUrlChecker();
+            if (pageUrlChecker != nullptr) {
+                pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
+            }
+        }
     }
 }
 

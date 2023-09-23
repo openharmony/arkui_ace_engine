@@ -125,6 +125,11 @@ public:
         return false;
     }
 
+    virtual std::string SearchRouterRegisterMap(const std::string& pageName)
+    {
+        return "";
+    }
+
     // Update running page
     virtual void UpdateRunningPage(const RefPtr<JsAcePage>& page) = 0;
 
