@@ -1864,19 +1864,37 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
             return true;
         }
         if (event.code == KeyCode::KEY_DEL) {
-            int32_t startPos = GetEditingValue().selection.GetStart();
-            int32_t endPos = GetEditingValue().selection.GetEnd();
-            Delete(startPos, startPos == endPos ? startPos - 1 : endPos);
+#if defined(PREVIEW)
+            DeleteRight();
+            return true;
+#endif
+            DeleteLeft();
             return true;
         }
         if (event.code == KeyCode::KEY_FORWARD_DEL) {
-            int32_t startPos = GetEditingValue().selection.GetStart();
-            int32_t endPos = GetEditingValue().selection.GetEnd();
-            Delete(startPos, startPos == endPos ? startPos + 1 : endPos);
+#if defined(PREVIEW)
+            DeleteLeft();
+            return true;
+#endif
+            DeleteRight();
             return true;
         }
     }
     return HandleKeyEvent(event);
+}
+
+void RenderTextField::DeleteLeft()
+{
+    int32_t startPos = GetEditingValue().selection.GetStart();
+    int32_t endPos = GetEditingValue().selection.GetEnd();
+    Delete(startPos, startPos == endPos ? startPos - 1 : endPos);
+}
+
+void RenderTextField::DeleteRight()
+{
+    int32_t startPos = GetEditingValue().selection.GetStart();
+    int32_t endPos = GetEditingValue().selection.GetEnd();
+    Delete(startPos, startPos == endPos ? startPos + 1 : endPos);
 }
 
 void RenderTextField::UpdateFocusStyles()
@@ -2516,6 +2534,8 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
                 // normal enter should trigger onSubmit
                 PerformAction(action_, true);
             }
+        } else if (HandleShiftPressedEvent(event)) {
+            return true;
         } else if (event.IsNumberKey()) {
             appendElement = event.ConvertCodeToString();
         } else if (event.IsLetterKey()) {
@@ -2550,13 +2570,50 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     if (appendElement.empty()) {
         return false;
     }
+    InsertValueDone(appendElement);
+    return true;
+}
+
+bool RenderTextField::HandleShiftPressedEvent(const KeyEvent& event)
+{
+    const static size_t maxKeySizes = 2;
+    wchar_t keyChar;
+    auto iterCode = KEYBOARD_SYMBOLS.find(event.code);
+    if (event.pressedCodes.size() == 1 && iterCode != KEYBOARD_SYMBOLS.end()) {
+        if (iterCode != KEYBOARD_SYMBOLS.end()) {
+            keyChar = iterCode->second;
+        } else {
+            return false;
+        }
+    } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
+                                                               event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
+        iterCode = SHIFT_KEYBOARD_SYMBOLS.find(event.code);
+        if (iterCode != SHIFT_KEYBOARD_SYMBOLS.end()) {
+            keyChar = iterCode->second;
+        } else if (KeyCode::KEY_A <= event.code && event.code <= KeyCode::KEY_Z) {
+            keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_A) + UPPER_CASE_A;
+        } else if (KeyCode::KEY_0 <= event.code && event.code <= KeyCode::KEY_9) {
+            keyChar = NUM_SYMBOLS[static_cast<int32_t>(event.code) - static_cast<int32_t>(KeyCode::KEY_0)];
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+    std::wstring wideAppendElement(1, keyChar);
+    auto appendElement = StringUtils::ToString(wideAppendElement);
+    InsertValueDone(appendElement);
+    return true;
+}
+
+void RenderTextField::InsertValueDone(const std::string& appendElement)
+{
     auto editingValue = std::make_shared<TextEditingValue>();
     editingValue->text = GetEditingValue().GetBeforeSelection() + appendElement + GetEditingValue().GetAfterSelection();
     editingValue->UpdateSelection(
         std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
     UpdateEditingValue(editingValue);
     MarkNeedLayout();
-    return true;
 }
 
 void RenderTextField::UpdateAccessibilityAttr()
