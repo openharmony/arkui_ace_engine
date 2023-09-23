@@ -46,7 +46,8 @@ public:
         const std::string& plainContent) override;
     void GetHtmlRecord(
         const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent) override;
-    void AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) override;
+    void AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data,
+        PixelMapRecordDetails& details) override;
     void AddImageRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& uri) override;
     void AddPlainTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) override;
     std::string GetSinglePlainTextRecord(const RefPtr<UnifiedData>& unifiedData) override;
