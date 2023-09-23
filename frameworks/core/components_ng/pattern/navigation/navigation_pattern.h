@@ -305,6 +305,8 @@ private:
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     bool navigationModeChange_ = false;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
+    void NotifyPageHide(const std::string& pageName);
+    void NotifyPageShow(const std::string& pageName);
 };
 
 } // namespace OHOS::Ace::NG

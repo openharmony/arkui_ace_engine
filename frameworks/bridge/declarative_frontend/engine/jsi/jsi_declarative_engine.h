@@ -202,7 +202,6 @@ private:
     static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
     shared_ptr<JsValue> CallGetUIContextFunc(const shared_ptr<JsRuntime>& runtime,
         const std::vector<shared_ptr<JsValue>>& argv);
-
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
@@ -400,7 +399,7 @@ public:
     static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
-
+    std::string SearchRouterRegisterMap(const std::string& pageName) override;
 private:
     bool CallAppFunc(const std::string& appFuncName);
 

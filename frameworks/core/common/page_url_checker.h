@@ -29,6 +29,10 @@ public:
     virtual void LoadPageUrl(const std::string& url, const std::function<void()>& callback,
         const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack) = 0;
     virtual void CheckPreload(const std::string& url) {}
+
+    virtual void NotifyPageShow(const std::string& pageName) {}
+    virtual void NotifyPageHide(const std::string& pageName) {}
+    virtual void SetModuleNameCallback(std::function<std::string(const std::string&)>&& callback) {}
 };
 } // namespace OHOS::Ace
 
