@@ -94,6 +94,7 @@ public:
         Pattern::ToJsonValue(json);
         json->Put("currentIndex", currentIndex_);
         json->Put("currentOffset", currentOffset_);
+        json->Put("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1));
 
         if (indicatorIsBoolean_) {
             return;
@@ -111,10 +112,14 @@ public:
     {
         currentIndex_ = json->GetInt("currentIndex");
         auto currentOffset = json->GetDouble("currentOffset");
+        auto jumpIndex = json->GetInt("uiCastJumpIndex");
         if (currentOffset != currentOffset_) {
             auto delta = currentOffset - currentOffset_;
             LOGD("UITree delta=%{public}f", delta);
             UpdateCurrentOffset(delta);
+        } else if (jumpIndex >= 0) {
+            jumpIndex_ = jumpIndex;
+            MarkDirtyNodeSelf();
         }
         Pattern::FromJson(json);
     }
@@ -631,6 +636,7 @@ private:
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
 
+    std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> preTargetIndex_;

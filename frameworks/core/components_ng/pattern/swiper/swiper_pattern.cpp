@@ -700,6 +700,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopFadeAnimation();
     StopSpringAnimation();
     jumpIndex_ = index;
+    uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
 }
 
