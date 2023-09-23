@@ -280,6 +280,9 @@ public:
     void SetOutBoundary(double outBoundary)
     {
         inSpring_ = !NearEqual(outBoundary_, outBoundary, 0.000001f);
+        if (inSpring_ && adaptAnimator_ && adaptAnimator_->IsRunning()) {
+            adaptAnimator_->Stop();
+        }
         outBoundary_ = outBoundary;
     }
 
