@@ -2505,12 +2505,16 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
 
 void SwiperPattern::RegisterVisibleAreaChange()
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+
     if (hasVisibleChangeRegistered_ || !IsAutoPlay()) {
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
@@ -2524,12 +2528,8 @@ void SwiperPattern::RegisterVisibleAreaChange()
             swiperPattern->StartAutoPlay();
         }
     };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
-
-    pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
 }
 
@@ -2830,6 +2830,12 @@ void SwiperPattern::OnWindowHide()
 {
     isWindowShow_ = false;
     StopAutoPlay();
+
+    if (isDragging_) {
+        HandleDragEnd(0.0);
+    }
+
+    StopSpringAnimationAndFlushImmediately();
 }
 
 void SwiperPattern::ArrowHover(bool hoverFlag)
