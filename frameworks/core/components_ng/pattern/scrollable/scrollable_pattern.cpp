@@ -93,11 +93,18 @@ void ScrollablePattern::ProcessNavBarReactOnStart()
     navBarPattern_->OnCoordScrollStart();
 }
 
-bool ScrollablePattern::ProcessNavBarReactOnUpdate(bool isDraggedDown, float offset)
+bool ScrollablePattern::ProcessNavBarReactOnUpdate(float offset)
 {
     CHECK_NULL_RETURN(navBarPattern_, true);
     auto minTitle = navBarPattern_ ? navBarPattern_->GetIsMinTitle() : false;
-    navBarPattern_->OnCoordScrollUpdate(offset);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto firstNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_RETURN(firstNode, true);
+    auto firstGeometryNode = firstNode->GetGeometryNode();
+    CHECK_NULL_RETURN(firstGeometryNode, true);
+    auto dragOffsetY = firstGeometryNode->GetFrameOffset().GetY();
+    navBarPattern_->OnCoordScrollUpdate(offset, dragOffsetY);
     DraggedDownScrollEndProcess();
     if (minTitle) {
         return scrollEffect_ && scrollEffect_->IsNoneEffect();
@@ -140,7 +147,7 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
         ProcessNavBarReactOnEnd();
     }
     if (isReactInParentMovement_) {
-        auto needMove = ProcessNavBarReactOnUpdate(isDraggedDown, offset);
+        auto needMove = ProcessNavBarReactOnUpdate(offset);
         if (coordinationEvent_) {
             auto onScroll = coordinationEvent_->GetOnScroll();
             CHECK_NULL_RETURN(onScroll, false);

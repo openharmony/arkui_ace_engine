@@ -25,7 +25,7 @@ void NavBarPattern::OnCoordScrollStart()
 {
 }
 
-void NavBarPattern::OnCoordScrollUpdate(float offset)
+void NavBarPattern::OnCoordScrollUpdate(float offset, float dragOffsetY)
 {
 }
 

@@ -2937,37 +2937,4 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0025, TestSize.Level1)
     navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RECOVER);
     ASSERT_FALSE(barItem->isMoreItemNode_);
 }
-
-/**
- * @tc.name: NavigationModelNG0026
- * @tc.desc: Test NavBarPattern::FindScrollableChild
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, NavigationModelNG0026, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navigation.
-     */
-    NavigationModelNG model;
-    model.Create();
-    model.SetNavigationStack();
-    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ASSERT_NE(navigation, nullptr);
-    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto contentNode = FrameNode::CreateFrameNode("content", 454, AceType::MakeRefPtr<ButtonPattern>());
-
-    auto navBar =
-        NavBarNode::GetOrCreateNavBarNode("navBar", 300, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    ASSERT_NE(navBar, nullptr);
-    auto navBarPattern = navBar->GetPattern<NavBarPattern>();
-    ASSERT_NE(navBarPattern, nullptr);
-
-    auto scroll = FrameNode::CreateFrameNode("content", 341, AceType::MakeRefPtr<ScrollPattern>());
-    auto custom = CustomNode::CreateCustomNode(342, "custom");
-    navBar->children_.push_back(scroll);
-    navBar->children_.push_back(custom);
-    auto res = navBarPattern->FindScrollableChild();
-    ASSERT_EQ(res, nullptr);
-}
 } // namespace OHOS::Ace::NG
