@@ -126,9 +126,9 @@ public:
     // Get window config of front end, which is used to calculate the pixel ratio of the real device.
     virtual WindowConfig& GetWindowConfig() = 0;
 
-    std::unique_lock<std::mutex> GetLock() const
+    std::unique_lock<std::recursive_mutex> GetLock() const
     {
-        return std::unique_lock<std::mutex>(mutex_);
+        return std::unique_lock<std::recursive_mutex>(mutex_);
     }
 
     FrontendType GetType() const
@@ -299,7 +299,7 @@ protected:
     bool disallowPopLastPage_ = false;
     FrontendDialogCallback dialogCallback_ = nullptr;
     State state_ = State::UNDEFINE;
-    mutable std::mutex mutex_;
+    mutable std::recursive_mutex mutex_;
 };
 
 } // namespace OHOS::Ace
