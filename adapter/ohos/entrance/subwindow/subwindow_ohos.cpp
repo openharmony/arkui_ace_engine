@@ -255,6 +255,7 @@ bool SubwindowOhos::CancelPopup(const std::string& id)
 
 void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
 {
+    LOGI("Subwindow ShowPopup.");
     popupTargetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
