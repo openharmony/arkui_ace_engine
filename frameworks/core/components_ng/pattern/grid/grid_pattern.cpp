@@ -1310,6 +1310,7 @@ int32_t GridPattern::GetChildrenCount() const
 void GridPattern::ClearDragState()
 {
     gridLayoutInfo_.ClearDragState();
+    MarkDirtyNodeSelf();
 }
 
 void GridPattern::UpdateRectOfDraggedInItem(int32_t insertIndex)
