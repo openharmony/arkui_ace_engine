@@ -229,22 +229,24 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow)
 void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
 {
     auto containerId = Container::CurrentId();
-    auto taskExecutor = Container::CurrentTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [containerId, targetId, popupInfo] {
-            auto manager = SubwindowManager::GetInstance();
-            CHECK_NULL_VOID(manager);
-            auto subwindow = manager->GetSubwindow(containerId);
-            if (!subwindow) {
+    auto manager = SubwindowManager::GetInstance();
+    CHECK_NULL_VOID(manager);
+    auto subwindow = manager->GetSubwindow(containerId);
+    if (!subwindow) {
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [containerId, targetId, popupInfo, manager] {
                 LOGI("Subwindow is null, add a new one.");
-                subwindow = Subwindow::CreateSubwindow(containerId);
+                auto subwindow = Subwindow::CreateSubwindow(containerId);
                 subwindow->InitContainer();
                 manager->AddSubwindow(containerId, subwindow);
-            }
-            subwindow->ShowPopupNG(targetId, popupInfo);
-        },
-        TaskExecutor::TaskType::PLATFORM);
+                subwindow->ShowPopupNG(targetId, popupInfo);
+            },
+            TaskExecutor::TaskType::PLATFORM);
+    } else {
+        subwindow->ShowPopupNG(targetId, popupInfo);
+    }
 }
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
