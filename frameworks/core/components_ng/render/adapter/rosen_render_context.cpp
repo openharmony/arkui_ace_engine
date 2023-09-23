@@ -455,6 +455,7 @@ void RosenRenderContext::PaintDebugBoundary()
         rsNode_->AddModifier(debugBoundaryModifier_);
     }
     if (debugBoundaryModifier_) {
+        debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
         auto rect = GetPaintRectWithoutTransform();
         auto marginOffset = geometryNode->GetMarginFrameOffset();
         std::shared_ptr<Rosen::RectF> drawRect =
