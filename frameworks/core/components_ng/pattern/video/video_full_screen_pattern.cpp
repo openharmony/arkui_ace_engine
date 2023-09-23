@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 
@@ -40,7 +41,6 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     // add node to root
     auto rootNode = PipelineContext::GetCurrentContext()->GetRootElement();
     if (!rootNode) {
-        LOGI("rootNode is nullptr");
         auto videoPattern = AceType::DynamicCast<VideoPattern>(videoNode->GetPattern());
         videoPattern->UpdateMediaParam(mediaPlayer_, renderSurface_, renderContextForMediaPlayer_);
         ResetMediaParam();
