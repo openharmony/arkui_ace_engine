@@ -27,7 +27,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/core/components_ng/pattern/canvas_renderer/canvas_renderer_model.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -138,27 +137,9 @@ public:
     void JsGetDirection(const JSCallbackInfo& info);
     void JsSetDirection(const JSCallbackInfo& info);
 
-    void SetCanvasPattern(const RefPtr<AceType>& canvas)
-    {
-        canvasPattern_ = canvas;
-        isOffscreen_ = false;
-        BaseInfo baseInfo;
-        baseInfo.canvasPattern = canvasPattern_;
-        baseInfo.offscreenPattern = offscreenPattern_;
-        baseInfo.isOffscreen = isOffscreen_;
-        CanvasRendererModel::GetInstance()->SetShadowColor(baseInfo, Color::TRANSPARENT);
-    }
+    void SetCanvasPattern(const RefPtr<AceType>& canvas);
 
-    void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas)
-    {
-        offscreenPattern_ = offscreenCanvas;
-        isOffscreen_ = true;
-        BaseInfo baseInfo;
-        baseInfo.canvasPattern = canvasPattern_;
-        baseInfo.offscreenPattern = offscreenPattern_;
-        baseInfo.isOffscreen = isOffscreen_;
-        CanvasRendererModel::GetInstance()->SetShadowColor(baseInfo, Color::TRANSPARENT);
-    }
+    void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas);
 
     std::vector<uint32_t> GetLineDash() const
     {
@@ -198,8 +179,6 @@ protected:
 
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
-    std::unique_ptr<ImageData> GetImageDataFromCanvas(
-        const double& left, const double& top, const double& width, const double& height);
     PaintState paintState_;
     TextStyle style_;
     static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;

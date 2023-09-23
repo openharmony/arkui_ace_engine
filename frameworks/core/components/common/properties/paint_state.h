@@ -96,6 +96,7 @@ struct CanvasImage {
 };
 
 struct ImageData {
+    RefPtr<Ace::PixelMap> pixelMap;
     int32_t x = 0;
     int32_t y = 0;
     int32_t dirtyX = 0;
