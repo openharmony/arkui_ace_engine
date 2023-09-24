@@ -57,9 +57,7 @@ void QRCodeModelNG::SetQRCodeColor(const Color& color)
 void QRCodeModelNG::SetQRBackgroundColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
-    }
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 
 void QRCodeModelNG::SetContentOpacity(const double opacity)
