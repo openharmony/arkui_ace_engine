@@ -219,14 +219,20 @@ void MenuWrapperPattern::StartShowAnimation()
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateOpacity(0.0);
-    context->UpdateOffset(GetAnimationOffset());
+    if (GetPreviewMode() == MenuPreviewMode::NONE) {
+        context->UpdateOffset(GetAnimationOffset());
+    }
 
     AnimationUtils::Animate(
         animationOption_,
-        [context]() {
+        [context, weak = WeakClaim(this)]() {
             if (context) {
                 context->UpdateOpacity(1.0);
-                context->UpdateOffset(OffsetT<Dimension>());
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (pattern->GetPreviewMode() == MenuPreviewMode::NONE) {
+                    context->UpdateOffset(OffsetT<Dimension>());
+                }
             }
         },
         animationOption_.GetOnFinishEvent());

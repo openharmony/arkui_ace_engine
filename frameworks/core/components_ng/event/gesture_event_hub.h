@@ -40,12 +40,12 @@ struct DragNotifyMsg;
 namespace OHOS::Ace {
 class UnifiedData;
 }
+#endif
 enum class MenuPreviewMode {
     NONE,
     IMAGE,
     CUSTOM,
 };
-#endif
 namespace OHOS::Ace::NG {
 
 enum class HitTestMode {

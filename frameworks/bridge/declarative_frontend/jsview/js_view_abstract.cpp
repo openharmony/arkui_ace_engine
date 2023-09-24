@@ -2492,11 +2492,10 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
     }
 
     if (preview->IsNumber()) {
-        if (preview->ToNumber<int32_t>() == 1) {
-            menuParam.hasPreview = true;
+        if (preview->ToNumber<int32_t>() == 0) {
+            menuParam.previewMode = MenuPreviewMode::NONE;
         }
     } else {
-        menuParam.hasPreview = true;
         auto previewObj = JSRef<JSObject>::Cast(preview);
         auto previewBuilder = previewObj->GetProperty("builder");
         if (!previewBuilder->IsFunction()) {
@@ -2509,6 +2508,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
             ACE_SCORING_EVENT("BuildContextMenuPreviwer");
             func->Execute();
         };
+        menuParam.previewMode = MenuPreviewMode::CUSTOM;
     }
 }
 
@@ -5268,12 +5268,13 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     };
 
     NG::MenuParam menuParam;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
     std::function<void()> previewBuildFunc = nullptr;
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
     if (responseType != ResponseType::LONG_PRESS) {
-        menuParam.hasPreview = false;
+        menuParam.previewMode = MenuPreviewMode::NONE;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);

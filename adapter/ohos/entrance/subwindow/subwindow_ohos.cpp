@@ -532,7 +532,7 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
-void SubwindowOhos::ClearMenuNG(bool inWindow)
+void SubwindowOhos::ClearMenuNG(bool inWindow, bool showAnimation)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos ClearMenuNG");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -541,7 +541,11 @@ void SubwindowOhos::ClearMenuNG(bool inWindow)
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->CleanMenuInSubWindow();
+    if (showAnimation) {
+        overlay->CleanMenuInSubWindowWithAnimation();
+    } else {
+        overlay->CleanMenuInSubWindow();
+    }
     HideWindow();
     context->FlushPipelineImmediately();
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -1113,7 +1117,7 @@ void SubwindowOhos::HideFilter()
     auto manager = parentPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     ContainerScope scope(parentContainerId_);
-    manager->RemoveFilter();
+    manager->RemoveFilterAnimation();
 }
 
 void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)

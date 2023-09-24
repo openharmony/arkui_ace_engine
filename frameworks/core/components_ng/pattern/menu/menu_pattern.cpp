@@ -28,7 +28,9 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
@@ -624,8 +626,98 @@ void MenuPattern::SetAccessibilityAction()
     });
 }
 
+Offset MenuPattern::GetTransformCenter() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Offset());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, Offset());
+    auto size = geometryNode->GetFrameSize();
+    auto layoutAlgorithmWrapper = host->GetLayoutAlgorithm();
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, Offset());
+    auto layoutAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithm, Offset());
+    auto placement = layoutAlgorithm->GetPlacement();
+    switch (placement) {
+        case Placement::BOTTOM_LEFT:
+        case Placement::RIGHT_TOP:
+        case Placement::BOTTOM:
+        case Placement::RIGHT:
+            return Offset();
+        case Placement::BOTTOM_RIGHT:
+        case Placement::LEFT_TOP:
+        case Placement::LEFT:
+            return Offset(size.Width(), 0.0f);
+        case Placement::TOP_LEFT:
+        case Placement::RIGHT_BOTTOM:
+        case Placement::TOP:
+            return Offset(0.0f, size.Height());
+        case Placement::TOP_RIGHT:
+        case Placement::LEFT_BOTTOM:
+            return Offset(size.Width(), size.Height());
+        default:
+            return Offset();
+    }
+}
+
+void MenuPattern::ShowPreviewMenuAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isFirstShow_ && previewMode_ != MenuPreviewMode::NONE) {
+        auto menuWrapper = GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto preview = menuWrapperPattern->GetPreview();
+        CHECK_NULL_VOID(preview);
+        auto previewRenderContext = preview->GetRenderContext();
+        CHECK_NULL_VOID(previewRenderContext);
+        auto previewGeometryNode = preview->GetGeometryNode();
+        CHECK_NULL_VOID(previewGeometryNode);
+        auto previewPosition = previewGeometryNode->GetFrameOffset();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
+        auto menuPosition = host->GetPaintRectOffset();
+        OffsetF previewOriginPosition = GetPreviewOriginOffset();
+
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        auto menuAnimationScale = menuTheme->GetMenuAnimationScale();
+        auto springMotionResponse = menuTheme->GetSpringMotionResponse();
+        auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
+
+        renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
+
+        previewRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
+        renderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(originPosition_.GetX()), Dimension(originPosition_.GetY())));
+
+        AnimationOption scaleOption = AnimationOption();
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
+        scaleOption.SetCurve(motion);
+        AnimationUtils::Animate(scaleOption, [renderContext, menuPosition, previewRenderContext, previewPosition]() {
+            if (renderContext) {
+                renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+                renderContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+                previewRenderContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
+            }
+        });
+    }
+    isFirstShow_ = false;
+}
+
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    ShowPreviewMenuAnimation();
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }

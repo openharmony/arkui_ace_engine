@@ -212,7 +212,7 @@ void SubwindowManager::HideMenuNG()
     }
 }
 
-void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow)
+void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow, bool showAnimation)
 {
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
@@ -222,7 +222,7 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow)
         subwindow = GetCurrentWindow();
     }
     if (subwindow) {
-        subwindow->ClearMenuNG(inWindow);
+        subwindow->ClearMenuNG(inWindow, showAnimation);
     }
 }
 
