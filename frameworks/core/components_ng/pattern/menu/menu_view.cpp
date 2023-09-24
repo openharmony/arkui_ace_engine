@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
@@ -50,13 +51,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 #ifdef ENABLE_DRAG_FRAMEWORK
-constexpr Dimension FILTER_VALUE(0.0f);
-constexpr Dimension FILTER_RADIUS(100.0f);
-constexpr int32_t FILTER_TIMES = 250;
 constexpr float SCALE_NUMBER = 0.95f;
-constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
-constexpr float PIXELMAP_ANIMATION_SCALE = 1.0f;
-const Dimension CONTAINER_OUTER_RADIUS = 16.0_vp;
+constexpr float PAN_MAX_VELOCITY = 2000.0f;
 #endif
 // create menuWrapper and menu node, update menu props
 std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, const std::string& targetTag = "",
@@ -72,13 +68,12 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
 
     menuNode->MountToParent(wrapperNode);
     if (previewCustomNode) {
-        // create columnNode
-        auto columnNode =
-            FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                AceType::MakeRefPtr<MenuPreviewPattern>());
-        columnNode->AddChild(previewCustomNode);
-        columnNode->MountToParent(wrapperNode);
-        columnNode->MarkModifyDone();
+        // create previewNode
+        auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+        previewNode->AddChild(previewCustomNode);
+        previewNode->MountToParent(wrapperNode);
+        previewNode->MarkModifyDone();
     }
 
     return { wrapperNode, menuNode };
@@ -181,20 +176,83 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode)
 {
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
-    AnimationOption option;
-    option.SetDuration(PIXELMAP_ANIMATION_DURATION);
-    option.SetCurve(Curves::SHARP);
-    imageContext->UpdateBackgroundColor(Color::WHITE);
     imageContext->SetClipToBounds(true);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(CONTAINER_OUTER_RADIUS);
-    imageContext->UpdateBorderRadius(borderRadius);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto previewBeforeAnimationScale = menuTheme->GetPreviewBeforeAnimationScale();
+    auto previewAfterAnimationScale = menuTheme->GetPreviewAfterAnimationScale();
+    auto springMotionResponse = menuTheme->GetSpringMotionResponse();
+    auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
+    auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
+
+    imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
+    auto shadow = imageContext->GetBackShadow();
+    if (!shadow.has_value()) {
+        shadow = Shadow::CreateShadow(ShadowStyle::None);
+    }
+
+    AnimationOption scaleOption = AnimationOption();
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
+    scaleOption.SetCurve(motion);
+    AnimationUtils::Animate(
+        scaleOption,
+        [imageContext, previewAfterAnimationScale]() {
+            if (imageContext) {
+                imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
+            }
+        },
+        scaleOption.GetOnFinishEvent());
+
+    AnimationOption option;
+    option.SetDuration(menuTheme->GetPreviewAnimationDuration());
+    option.SetCurve(Curves::SHARP);
+    imageContext->UpdateOpacity(0.0);
     AnimationUtils::Animate(
         option,
-        [imageContext]() {
-            imageContext->UpdateTransformScale(VectorF(PIXELMAP_ANIMATION_SCALE, PIXELMAP_ANIMATION_SCALE));
+        [imageContext, previewBorderRadius, shadow]() mutable {
+            if (imageContext) {
+                auto color = shadow->GetColor();
+                auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
+                shadow->SetColor(newColor);
+                imageContext->UpdateBackShadow(shadow.value());
+                BorderRadiusProperty borderRadius;
+                borderRadius.SetRadius(previewBorderRadius);
+                imageContext->UpdateBorderRadius(borderRadius);
+                imageContext->UpdateOpacity(1.0);
+            }
         },
         option.GetOnFinishEvent());
+}
+
+void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<FrameNode>& menuWrapper)
+{
+    if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || LessOrEqual(offsetY, 0.0f)) &&
+        LessOrEqual(velocity, PAN_MAX_VELOCITY)) {
+        return;
+    }
+    CHECK_NULL_VOID(menuWrapper);
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->HideMenu();
+}
+
+void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuWrapper)
+{
+    auto actionEndTask = [menuWrapper](const GestureEvent& info) {
+        auto offsetX = static_cast<float>(info.GetOffsetX());
+        auto offsetY = static_cast<float>(info.GetOffsetY());
+        auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
+        auto offsetPerSecondY = info.GetVelocity().GetOffsetPerSecond().GetY();
+        auto velocity =
+            static_cast<float>(std::sqrt(offsetPerSecondX * offsetPerSecondX + offsetPerSecondY * offsetPerSecondY));
+        HandleDragEnd(offsetX, offsetY, velocity, menuWrapper);
+    };
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
 void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuNode)
@@ -217,6 +275,11 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     auto targetSize = CalcSize(NG::CalcLength(width), NG::CalcLength(height));
     props->UpdateUserDefinedIdealSize(targetSize);
     props->UpdateImageFit(ImageFit::FILL);
+    auto hub = imageNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    InitPanEvent(gestureHub, menuNode);
 
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
@@ -261,12 +324,16 @@ void SetFilter(const RefPtr<FrameNode>& targetNode)
             manager->SetFilterColumnNode(columnNode);
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
+        auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
         AnimationOption option;
-        option.SetDuration(FILTER_TIMES);
+        option.SetDuration(menuTheme->GetFilterAnimationDuration());
         option.SetCurve(Curves::SHARP);
-        columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_VALUE);
+        columnNode->GetRenderContext()->UpdateBackBlurRadius(Dimension(0.0f));
+        auto filterRadius = menuTheme->GetFilterRadius();
         AnimationUtils::Animate(
-            option, [columnNode]() { columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_RADIUS); },
+            option,
+            [columnNode, filterRadius]() { columnNode->GetRenderContext()->UpdateBackBlurRadius(filterRadius); },
             option.GetOnFinishEvent());
     }
 }
@@ -337,7 +404,10 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 {
     auto type = menuParam.type;
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type, previewCustomNode);
-
+    auto pattern = menuNode->GetPattern<MenuPattern>();
+    if (pattern) {
+        pattern->SetPreviewMode(menuParam.previewMode);
+    }
     // put custom node in a scroll to limit its height
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
@@ -361,10 +431,10 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         return menuNode;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (type == MenuType::CONTEXT_MENU && menuParam.hasPreview) {
+    if (type == MenuType::CONTEXT_MENU && menuParam.previewMode != MenuPreviewMode::NONE) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         SetFilter(targetNode);
-        if (!previewCustomNode) {
+        if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
             SetPixelMap(targetNode, wrapperNode);
         }
     }

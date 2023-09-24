@@ -25,20 +25,12 @@ class MenuPreviewLayoutAlgorithm : public LinearLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuPreviewLayoutAlgorithm, LayoutAlgorithm)
 public:
     MenuPreviewLayoutAlgorithm() = default;
-    explicit MenuPreviewLayoutAlgorithm(int32_t targetNodeId) : targetNodeId_(targetNodeId) {}
     ~MenuPreviewLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    int32_t GetTargetNodeId() const
-    {
-        return targetNodeId_;
-    }
-
 private:
-    int32_t targetNodeId_ = -1;
-
     ACE_DISALLOW_COPY_AND_MOVE(MenuPreviewLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

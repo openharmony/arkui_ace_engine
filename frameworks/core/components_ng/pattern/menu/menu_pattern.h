@@ -102,6 +102,16 @@ public:
         return type_ == MenuType::CONTEXT_MENU;
     }
 
+    void SetPreviewMode(MenuPreviewMode mode)
+    {
+        previewMode_ = mode;
+    }
+
+    MenuPreviewMode GetPreviewMode() const
+    {
+        return previewMode_;
+    }
+
     bool IsNavigationMenu() const
     {
         return type_ == MenuType::NAVIGATION_MENU;
@@ -223,6 +233,31 @@ public:
     RefPtr<FrameNode> GetFirstInnerMenu() const;
     void DumpInfo() override;
 
+    void SetFirstShow()
+    {
+        isFirstShow_ = true;
+    }
+
+    void SetOriginOffset(OffsetF offset)
+    {
+        originPosition_ = offset;
+    }
+
+    OffsetF GetOriginOffset() const
+    {
+        return originPosition_;
+    }
+
+    void SetPreviewOriginOffset(OffsetF offset)
+    {
+        previewOriginPosition_ = offset;
+    }
+
+    OffsetF GetPreviewOriginOffset() const
+    {
+        return previewOriginPosition_;
+    }
+
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -249,6 +284,9 @@ private:
 
     void DisableTabInMenu();
 
+    Offset GetTransformCenter() const;
+    void ShowPreviewMenuAnimation();
+
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
@@ -261,6 +299,10 @@ private:
     std::vector<RefPtr<FrameNode>> options_;
 
     bool isSelectMenu_ = false;
+    MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
+    bool isFirstShow_ = false;
+    OffsetF originPosition_;
+    OffsetF previewOriginPosition_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

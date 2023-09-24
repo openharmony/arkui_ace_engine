@@ -59,6 +59,7 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/border_image.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
+    "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
     "$ace_root/frameworks/core/components_ng/animation/geometry_transition.cpp",

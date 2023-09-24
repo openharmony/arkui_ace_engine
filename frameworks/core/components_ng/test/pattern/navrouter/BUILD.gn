@@ -22,6 +22,7 @@ ace_unittest("navrouter_test_ng") {
     "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
+    "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.cpp",

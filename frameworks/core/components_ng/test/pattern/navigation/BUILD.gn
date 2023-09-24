@@ -57,6 +57,7 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
     "$ace_root/frameworks/core/components/font/constants_converter.cpp",

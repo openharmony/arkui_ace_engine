@@ -102,6 +102,7 @@ public:
     RefPtr<FrameNode> GetMenuNode(int32_t targetId);
     void HideMenuInSubWindow();
     void CleanMenuInSubWindow();
+    void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
@@ -245,6 +246,7 @@ public:
     void RemovePixelMapAnimation(bool startDrag, double x, double y);
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
+    void RemoveFilterAnimation();
     void RemoveEventColumn();
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,

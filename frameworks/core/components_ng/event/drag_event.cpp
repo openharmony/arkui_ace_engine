@@ -61,6 +61,7 @@ constexpr float PIXELMAP_ANIMATION_SCALE = 1.1f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float SPRING_RESPONSE = 0.416f;
 constexpr float SPRING_DAMPING_FRACTION = 0.73f;
+constexpr Dimension PIXELMAP_BORDER_RADIUS = 16.0_vp;
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace
 
@@ -715,6 +716,9 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
             shadow->SetColor(newColor);
             imageContext->UpdateBackShadow(shadow.value());
             imageContext->UpdateTransformScale({ PIXELMAP_ANIMATION_SCALE, PIXELMAP_ANIMATION_SCALE });
+            BorderRadiusProperty borderRadius;
+            borderRadius.SetRadius(PIXELMAP_BORDER_RADIUS);
+            imageContext->UpdateBorderRadius(borderRadius);
         },
         option.GetOnFinishEvent());
 }

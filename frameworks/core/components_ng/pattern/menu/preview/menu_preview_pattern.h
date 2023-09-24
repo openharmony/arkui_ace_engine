@@ -32,8 +32,7 @@ class MenuPreviewPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(MenuPreviewPattern, Pattern);
 
 public:
-    MenuPreviewPattern(): LinearLayoutPattern(true)
-    {}
+    MenuPreviewPattern() : LinearLayoutPattern(true) {}
     ~MenuPreviewPattern() override = default;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -41,9 +40,18 @@ public:
         return MakeRefPtr<MenuPreviewLayoutAlgorithm>();
     }
 
+    void SetFirstShow()
+    {
+        isFirstShow_ = true;
+    }
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    RefPtr<FrameNode> GetMenuWrapper() const;
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragEnd(float offsetX, float offsetY, float velocity);
+    bool isFirstShow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPreviewPattern);
 };
