@@ -53,6 +53,9 @@ public:
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float maxHeight_ = 0.0f;
+    // store offset for distributed migration
+    float storedOffset_ = 0.0f;
+    float restoreOffset_ = 0.0f;
 
     bool itemEnd_ = false;
     bool itemStart_ = false;

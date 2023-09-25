@@ -1724,4 +1724,14 @@ void ListPattern::RefreshLanesItemRange()
         }
     }
 }
+
+std::string ListPattern::ProvideRestoreInfo()
+{
+    return std::to_string(startIndex_);
+}
+
+void ListPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    jumpIndex_ = StringUtils::StringToInt(restoreInfo);
+}
 } // namespace OHOS::Ace::NG

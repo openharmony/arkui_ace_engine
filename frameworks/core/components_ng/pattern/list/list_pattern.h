@@ -206,6 +206,10 @@ public:
     {
         return predictLayoutParam_;
     }
+
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+
 private:
     void OnScrollEndCallback() override;
     void OnScrollStartCallback() override;

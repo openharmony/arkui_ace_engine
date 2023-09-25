@@ -194,6 +194,9 @@ public:
 
     void DumpInfo() override;
 
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+
 private:
     float GetMainGap();
     float GetAllDelta();
