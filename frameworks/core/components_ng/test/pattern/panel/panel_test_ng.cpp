@@ -3284,4 +3284,156 @@ HWTEST_F(PanelTestNg, PanelTestNg0064, TestSize.Level1)
     slidingPanelPattern->IsShowChanged(false);
     EXPECT_EQ(slidingPanelPattern->previousMode_, slidingPanelPattern->mode_);
 }
+
+/**
+ * @tc.name: PanelTestNg0065
+ * @tc.desc: Test SlidingPanelPattern::FirstLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0065, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto closeIconNode = FrameNode::GetOrCreateFrameNode(V2::PANEL_CLOSE_ICON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CloseIconPattern>(); });
+    closeIconNode->MountToParent(frameNode, 1);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    auto layoutProperty = slidingPanelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetIsShowValue(false));
+    EXPECT_TRUE(slidingPanelPattern->previousMode_ != slidingPanelPattern->mode_.value_or(PanelMode::HALF));
+    EXPECT_TRUE(layoutProperty->GetHasDragBarValue(true));
+    auto dragBar = slidingPanelPattern->GetDragBarNode();
+    ASSERT_NE(dragBar, nullptr);
+    auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+    auto closeIcon = slidingPanelPattern->GetCloseIconNode();
+    ASSERT_NE(closeIcon, nullptr);
+    auto closeIconPattern = closeIcon->GetPattern<CloseIconPattern>();
+    ASSERT_NE(closeIconPattern, nullptr);
+    layoutProperty->UpdateHasDragBar(false);
+    slidingPanelPattern->FirstLayout();
+}
+
+/**
+ * @tc.name: PanelTestNg0066
+ * @tc.desc: Test panel pattern OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0066, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create mock theme manager
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto closeIconTheme = AceType::MakeRefPtr<CloseIconTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(closeIconTheme));
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetShowCloseIcon(SLIDING_PANEL_SHOW_CLOSE_ICON_TRUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    EXPECT_FALSE(slidingPanelPattern == nullptr);
+    auto host = slidingPanelPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCustomHeight(CalcDimension("wrapContent"));
+    layoutProperty->UpdatePanelType(PanelType::CUSTOM);
+    auto dragBar = slidingPanelPattern->GetDragBarNode();
+    ASSERT_NE(dragBar, nullptr);
+    auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+    dragBarPattern->clickArrowCallback_ = []() {};
+    auto closeIconNode = slidingPanelPattern->GetCloseIconNode();
+    ASSERT_NE(closeIconNode, nullptr);
+    auto closeIconPattern = closeIconNode->GetPattern<CloseIconPattern>();
+    ASSERT_NE(closeIconPattern, nullptr);
+    closeIconPattern->clickButtonCallback_ = []() {};
+    layoutProperty->UpdateIsShow(false);
+    slidingPanelPattern->isShow_ = true;
+    std::queue<bool> test;
+    std::swap(test, slidingPanelPattern->isShowQueue_);
+    slidingPanelPattern->OnModifyDone();
+    EXPECT_FALSE(slidingPanelPattern->isShowQueue_.empty());
+}
+
+/**
+ * @tc.name: PanelTestNg0067
+ * @tc.desc: Test panel pattern Measure and Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0067, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto frameNode1 = AceType::MakeRefPtr<FrameNode>(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_FALSE(frameNode1 == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto panelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    EXPECT_FALSE(panelPattern == nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<SlidingPanelLayoutAlgorithm>(panelPattern->CreateLayoutAlgorithm());
+    EXPECT_FALSE(layoutAlgorithm == nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutWrapper->layoutProperty_ = AceType::MakeRefPtr<SlidingPanelLayoutProperty>();
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(PANEL_HEIGHT)));
+    panelPattern->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto layoutProperty = AceType::DynamicCast<SlidingPanelLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    EXPECT_FALSE(layoutProperty == nullptr);
+    auto layoutWrapper_test =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode1, geometryNode, frameNode1->GetLayoutProperty());
+    layoutWrapper->currentChildCount_ = 2;
+    layoutWrapper->childrenMap_.emplace(std::make_pair(1, layoutWrapper_test));
+    layoutProperty->UpdateCustomHeight(CalcDimension("wrapContent"));
+    layoutProperty->UpdatePanelType(PanelType::CUSTOM);
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->isFirstLayout_ = true;
+    layoutAlgorithm->invisibleFlag_ = true;
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_NE(layoutWrapper->GetGeometryNode()->GetFrameSize(), PANEL_SIZE);
+    EXPECT_NE(layoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
+    layoutProperty->layoutConstraint_.reset();
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_NE(layoutWrapper->GetGeometryNode()->GetFrameSize(), PANEL_SIZE);
+    EXPECT_NE(layoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
+}
 } // namespace OHOS::Ace::NG
