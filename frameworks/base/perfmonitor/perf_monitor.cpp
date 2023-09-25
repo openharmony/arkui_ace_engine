@@ -28,6 +28,7 @@ using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
+constexpr double JANK_SKIPPED_THRESHOLD = 15;
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -302,6 +303,17 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank)
             }
         }
         it++;
+    }
+}
+
+void PerfMonitor::ReportJankFrameApp(double jank)
+{
+    if (jank >= JANK_SKIPPED_THRESHOLD) {
+        JankInfo jankInfo;
+        jankInfo.skippedFrameTime = static_cast<int64_t>(jank * SINGLE_FRAME_TIME);
+        RecordBaseInfo(nullptr);
+        jankInfo.baseInfo = baseInfo;
+        EventReport::ReportJankFrameApp(jankInfo);
     }
 }
 

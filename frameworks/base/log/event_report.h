@@ -176,6 +176,7 @@ public:
         const std::string& pageUrl, uint32_t jankStatusVersion = 1);
     static void ReportEventComplete(DataBase& data);
     static void ReportEventJankFrame(DataBase& data);
+    static void ReportJankFrameApp(JankInfo& info);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
