@@ -1,6 +1,6 @@
 {
   "files": [
-    // common:
+    // common
     // declarations of C++ exposed classes
     "src/lib/common/ace_console.native.d.ts",
     "src/lib/common/ace_trace.native.d.ts",
@@ -12,7 +12,7 @@
     "src/lib/common/lazy_foreach.d.ts",
     "src/lib/common/ifelse_native.d.ts",
 
-    // interfaces
+    // internal interfaces
     "src/lib/common/i_environment_backend.ts",
     "src/lib/common/i_storage.ts",
 
@@ -66,10 +66,10 @@
   "compilerOptions": {
     "module": "none",
     "target": "ES2016",
-    "outDir": "./dist/",
-    "outFile": "./dist/stateMgmt.js",
+    "outDir": "./distProfile/",
+    "outFile": "./distProfile/stateMgmt.js",
     "rootDir": "./src/",
-    "declaration": true,
+    "declaration": false,
     "noEmitOnError": true,
     "experimentalDecorators": true,
     "lib": [

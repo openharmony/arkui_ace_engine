@@ -9,8 +9,6 @@ Developed at UI Frameworks Team at the Huawei R&D Center Helsinki, Finland.
 ## Building just state mgmt
 
 The implementation is in Typescript.
-TS sources are built into a single JS file using `tsc`.
-`tsc` must be in shell's PATH.
 
 Before first build:
 `npm install`
@@ -27,25 +25,17 @@ For every release build
 The output is one JS file:
 `./distRelease/stateMgmt.js`
 
-The difference between debug build and release build is the removal 
-of all `stateMgmtConsole.log`/`.debug`/`.info` statements from the 
-release version JS output code.
-
-## Unit tests for state mgmt using node.js / npm
-
-Unit tests run with Node.js on Ubuntu shell independent of the native ArkUI framework.
-
-Before first run:
-`npm install`
-
-To compile the entire project and unit tests, and to run all tests
-`npm test`
+For profiler build. See StateMgmt Profiler.
+`npm run build_profile`
 
 The output is one JS file:
-`./distTest/stateMgmt_test.js`
+`./distProfile/stateMgmt.js`
 
-The results are written to console.
-Successful run ends with the message `Passed all XX cases, YYY test asertions.`.
+The difference between debug build and release build is the removal
+of all `stateMgmtConsole.log`/`.debug`/`.info` statements from the
+release version JS output code.
+
+NOTE: After compiling with npm run X command. You need to copy stateMgmt.js from output folder to ../engine/. Then build the device SW again. Output folder is on of following (dist, distRelease or distProfile).
 
 ## File Organising into Directories
 
@@ -53,6 +43,153 @@ Successful run ends with the message `Passed all XX cases, YYY test asertions.`.
     * `./src/lib/sdk/*.ts` - all files that include SDK definitons
     * `./src/lib/common/*.ts` - common files that do not include any SDK functionality
     * `./src/lib/full_update/*.ts` - files specific to the older version of state mgmt for full Component to Element update
-    * `./src/lin/partial_update/*.ts` - files specfic to the newer version of state mgmt for NG UINode minimal scope updates
+    * `./src/lib/partial_update/*.ts` - files specfic to the newer version of state mgmt for NG UINode minimal scope updates
 -`./src/index.ts` - implementation 'main' creates singletons.
--`./test/utest/*` - unit tests
+
+## StateMgmt Profiler
+
+### Building
+
+Execute follwing commands in framework/bridge/declarative_frontend/state_mgmt.
+
+```bash
+npm install
+npm run build_profile
+cp ./distProfile/stateMgmt.js ../engine/
+```
+
+Then compile SW and flash / update .so
+
+#### Initialization for App (DevEco)
+
+By default you can see timing infor from framework. If you want to add something to your App then...
+First, initialize an instance of the profiler in your ETS, at the top.
+NOTE: The class declarations provided below are needed for DevEco apps
+
+```typescript
+// Native class
+declare class StateMgmtProfiler {
+  constructor(suite: string);
+  begin(block: string): void;
+  end(): void;
+  report(): void;
+  clear(): void;
+}
+
+// JS global object
+declare class stateMgmtProfiler {
+  static begin(blockName: string) : void;
+  static end() : void;
+  static report() : void;
+  static clear(): void;
+  static init(instance: StateMgmtProfiler) : void;
+}
+
+stateMgmtProfiler.init(new StateMgmtProfiler("MyProfiler"));
+```
+
+#### Placing blocks in code
+
+In your JS code, wrap the code to be measured between `stateMgmtProfiler.begin("blockNameHere")` and `stateMgmtProfiler.end()`:
+
+```typescript
+stateMgmtProfiler.begin("HeavyMethodCall");
+myObject.myVeryHeavyMethodCall();
+// Nested blocks also work:
+{
+    stateMgmtProfiler.begin("EvenHeavierMethodCall");
+    myObject.evenHeavierMethodCall();
+    stateMgmtProfiler.end();
+}
+stateMgmtProfiler.end();
+```
+
+#### Print results
+
+To print the results, you can use this script. You need to replace the package ID with your own and also see the WindowID of your package.
+The last command invokes DFX log. The argument `-jsdump` is to invoke JS DFX logging and `-profiler` is the arg to dump profiler results.
+
+```bash
+#! /bin/bash
+hdc shell param set persist.ace.debug.enabled 0 (needs to be done once)
+Start the Test application NOW
+hdc shell "hidumper -s WindowManagerService -a '-a'"
+Check WinId of your app. Lets say its 11. Put it to -w arg.
+hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -profiler'"
+```
+
+The output will be like this:
+Total include childrens.
+
+```bash
+============================================================================================================
+Block name                                                                #Calls          Self         Total
+============================================================================================================
+MyProfiler
+ HeavyMethodCall                                                              1        1.465ms       1.465ms
+  EvenHeavierMethodCall                                                       1        1.417ms       1.417ms
+============================================================================================================
+```
+
+- Calling `stateMgmtProfiler.clear()` will clear the results.
+- Calling `stateMgmtProfiler.report()` will print the results and then clear them.
+
+## DFX Debug Log
+
+DFX Debug Log is built to work on top of `hidumper`, which is OHOS info dump tool. The DFX Debug Log is used to request information from the process in a shell.
+
+### Commands
+
+- `-jsdump`
+    * Requests JS debug logging from the `hidumper` service. It is followed by additional commands and arguments to format the output. See below.
+
+Two output modifiers are defined in order to facilitate the usage of the commands:
+
+- `-viewId`
+    * Specifies the view for which information is obtaineed. It acts as an aditional argument to the command providing the view ID in the following format `viewId=##`. where `##` is the numerical ID of the target view.
+- `-r`
+    * Specifies whether the output of the command should be recursive or not. Non-recursive prints the information for the target view ommiting the same information about it's decendants.
+
+For the purpose of logging the following commands are accepted as input:
+
+- `-dumpAll`
+    * Prints all information about the view. This combines the output of all other commands for the specified view. Default print is for root view if no view is specified.
+- `-viewHierarchy`
+    * Prints the view hierarchy of a particular view, namely the custom component children. Accepts `-viewId` argument and `-r` flag. Depending on the flags provided it can be either recursive, from a specific view downwards, or just the immediate children of the view. Default print is for root view non-recursive if no flags are provided.
+- `-stateVariables`
+    * Prints the variables dependencies of the view, and their respective owners and sync peers. Accepts `-viewId` argument. Default print is for root view if no view is specified.
+- `-registeredElementIds`
+    * Prints a list of components, namely JS classes such as `Column`, `TapGesture` etc. and their ID-s owned by the view. Accepts `-viewId` argument. Default print is for root view if not specified otherwise.
+- `-dirtyElementIds`
+    * Prints a list of dependent elmtIds that need partial update in next re-render. Accepts `-viewId` argument. Default print is for root view if not specified otherwise.
+- `-uiNodeRegister`
+    * Prints a global list of elements whose `UINode` has been deleted and ned to be unregistered from state management. Accepts no flags.
+
+The application must be running and visible in order to receive commands. The `hidumper` service delivers the commands through the `WindowManagerService`. and the window ID is used to target a specific application.
+
+NG pipeline MUST be configured for your application. This can be made for example by changing following.
+For API10...\OpenHarmony\Sdk\10\ets\build-tools\ets-loader\main.js and change const partialUpdateConfig = {
+  partialUpdateMode: true, // from false
+
+```bash
+#! /bin/bash
+hdc shell "param set persist.ace.debug.enabled 0" (needs to be done once)
+Start the Test application NOW
+hdc shell "hidumper -s WindowManagerService -a '-a'"
+Check WinId of your app. Lets say its 11. Put it to -w arg.
+hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -dumpAll'"
+hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -viewHierarchy'"
+```
+
+### Usefull examples
+
+All the following commands concern a hypothetical window with ID 11 and view with ID 42. Note that -viewId is optional.
+
+| Info | Shell command |
+|-------|----------|
+|Dump all info | `hidumper -s WindowManagerService -a '-w 11 -jsdump -dumpAll -viewId=42'`|
+|Dump view hierarchy recursively | `hidumper -s WindowManagerService -a '-w 11 -jsdump -viewHierarchy -viewId=42 -r'`|
+|Dump view hierarchy only for the target view | `hidumper -s WindowManagerService -a '-w 11 -jsdump -viewHierarchy -viewId=42'`|
+|Dump the list of all registered element ids | `hidumper -s WindowManagerService -a '-w 11 -jsdump -registeredElementIds -viewId=42'`|
+|Dump the list of all dirty element ids | `hidumper -s WindowManagerService -a '-w 11 -jsdump -dirtyElementIds -viewId=42'`|
+|Dump the list of all dirty element ids | `hidumper -s uiNodeRegister -a '-w 11 -jsdump -uiNodeRegister'`|
