@@ -517,10 +517,10 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
                 } else {
                     frameSize = previewSize;
                 }
+                geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
             } else {
-                maxWidth = std::min(frameSize.Width(), maxWidth);
+                geometryNode->SetFrameSize(frameSize);
             }
-            geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
         }
         if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
             previewLayoutWrapper = child;
@@ -1096,6 +1096,7 @@ void MenuLayoutAlgorithm::LayoutOtherDevicePreviewMenu(LayoutWrapper* layoutWrap
     LayoutOtherDeviceLeftPreviewRightMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
     UpdateScrollAndColumnLayoutConstraint(previewLayoutWrapper, menuLayoutWrapper);
     auto previewSize = previewGeometryNode->GetMarginFrameSize();
+    previewOffset_ = previewGeometryNode->GetFrameOffset();
     auto previewOffsetX = previewGeometryNode->GetFrameOffset().GetX();
     auto previewOffsetY = previewGeometryNode->GetFrameOffset().GetY();
     targetSize_ = previewSize * previewScale_;
