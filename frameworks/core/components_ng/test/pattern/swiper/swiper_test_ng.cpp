@@ -12941,4 +12941,250 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternTestNg0021, TestSize.Level1)
     info.localLocation_.SetY(15.0);
     indicatorPattern->HandleMouseEvent(info);
 }
+
+
+/**
+ * @tc.name: SwiperPatternOnModifyDone002
+ * @tc.desc: Test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnModifyDone002, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    RefPtr<SwiperPattern> indicatorPattern = indicatorNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    indicatorPattern->panEvent_ =
+        AceType::MakeRefPtr<PanEvent>([](GestureEvent&) {}, [](GestureEvent&) {}, [](GestureEvent&) {}, [] {});
+    indicatorPattern->OnModifyDone();
+    indicatorPattern->swiperController_->removeSwiperEventCallback_();
+    indicatorPattern->swiperController_->addSwiperEventCallback_();
+    EXPECT_NE(indicatorPattern, nullptr);
+}
+
+/**
+ * @tc.name: SwiperPaintMethodClipPadding001
+ * @tc.desc: ClipPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintMethodClipPadding001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    RSCanvas canvas;
+
+    /**
+     * @tc.steps: step2. call ClipPadding.
+     * @tc.expected: Related function is called.
+     */
+    swiperPaintMethod1.needClipPadding_ = true;
+    swiperPaintMethod1.ClipPadding(&paintWrapper, canvas);
+    EXPECT_EQ(swiperPaintMethod1.needClipPadding_, true);
+    swiperPaintMethod1.needClipPadding_ = false;
+    swiperPaintMethod1.ClipPadding(&paintWrapper, canvas);
+    EXPECT_EQ(swiperPaintMethod1.needClipPadding_, false);
+}
+
+/**
+ * @tc.name: SwiperPaintMethodPaintFade001
+ * @tc.desc: InitSurfaceChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintMethodPaintFade001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    RSCanvas canvas;
+
+    /**
+     * @tc.steps: step2. call PaintFade whith setting needPaintFade_ and renderContext.
+     * @tc.expected: Related function is called.
+     */
+    swiperPaintMethod1.needPaintFade_ = true;
+    swiperPaintMethod1.PaintFade(canvas, &paintWrapper);
+    EXPECT_EQ(swiperPaintMethod1.needPaintFade_, true);
+    swiperPaintMethod1.needPaintFade_ = false;
+    swiperPaintMethod1.PaintFade(canvas, &paintWrapper);
+    EXPECT_EQ(swiperPaintMethod1.needPaintFade_, false);
+    paintWrapper.renderContext_ = renderContext;
+    swiperPaintMethod1.needPaintFade_ = true;
+    renderContext->UpdateClipEdge(false);
+    swiperPaintMethod1.PaintFade(canvas, &paintWrapper);
+    paintWrapper.renderContext_ = nullptr;
+    swiperPaintMethod1.PaintFade(canvas, &paintWrapper);
+    EXPECT_EQ(swiperPaintMethod1.needPaintFade_, true);
+}
+
+/**
+ * @tc.name: SwiperPaintMethodPaintFade002
+ * @tc.desc: InitSurfaceChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintMethodPaintFade002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = AceType::MakeRefPtr<PaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    RSCanvas canvas;
+    paintWrapper.paintProperty_ = AceType::MakeRefPtr<PaintProperty>();
+    /**
+     * @tc.steps: step2. call PaintFade whith setting (GreatNotEqual(mainDelta_, 0.0)) .
+     * @tc.expected: Related function is called.
+     */
+    swiperPaintMethod1.needPaintFade_ = true;
+    swiperPaintMethod1.mainDelta_ = 1.0f;
+    swiperPaintMethod1.PaintFade(canvas, &paintWrapper);
+    EXPECT_EQ(swiperPaintMethod1.mainDelta_, 1.0f);
+    swiperPaintMethod1.mainDelta_ = 0.002f;
+    swiperPaintMethod1.PaintFade(canvas, &paintWrapper);
+    EXPECT_EQ(swiperPaintMethod1.mainDelta_, 0.002f);
+}
+
+/**
+ * @tc.name: SwiperPaintMethodGetForegroundDrawFunction001
+ * @tc.desc: GetForegroundDrawFunction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintMethodGetForegroundDrawFunction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper node.
+     */
+    indicatorDirection_ = Axis::HORIZONTAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create layoutWrapper and set swiperLayoutAlgorithm.
+     */
+    auto swiperNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    RefPtr<FrameNode> indicatorNode;
+    RefPtr<LayoutWrapperNode> layoutWrapper;
+    RefPtr<LayoutAlgorithm> algorithm;
+    InitLayoutWrapper(swiperNode, algorithm, indicatorNode, layoutWrapper);
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper;
+    CreateSwiperLayoutWrapper(swiperNode, swiperLayoutWrapper);
+    ASSERT_NE(swiperLayoutWrapper, nullptr);
+
+    auto swiperPatternAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(swiperPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(swiperPatternAlgorithm, nullptr);
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(swiperNode->GetLayoutProperty());
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateBackgroundSize(ARROW_BACKGROUND_SIZE);
+    /**
+     * @tc.steps: step3. Create arrow node and layoutWrapper.
+     */
+    RefPtr<FrameNode> leftArrowNode;
+    RefPtr<FrameNode> rightArrowNode;
+    RefPtr<LayoutWrapperNode> leftArrowNodeWrapper;
+    RefPtr<LayoutWrapperNode> rightArrowNodeWrapper;
+    InitArrowLayoutWrapper(swiperNode, V2::SWIPER_LEFT_ARROW_ETS_TAG, leftArrowNode, leftArrowNodeWrapper);
+    InitArrowLayoutWrapper(swiperNode, V2::SWIPER_RIGHT_ARROW_ETS_TAG, rightArrowNode, rightArrowNodeWrapper);
+    swiperLayoutWrapper->AppendChild(leftArrowNodeWrapper);
+    swiperLayoutWrapper->AppendChild(rightArrowNodeWrapper);
+
+    /**
+     * @tc.steps: step4. call Measure.
+     * @tc.expected: Return button measure, SizeF(3.0f, 3.0f).
+     */
+    swiperPatternAlgorithm->mainSizeIsMeasured_ = true;
+    swiperPatternAlgorithm->Measure(AceType::RawPtr(swiperLayoutWrapper));
+    EXPECT_EQ(swiperPatternAlgorithm->mainSizeIsMeasured_, false);
+    swiperPatternAlgorithm->mainSizeIsMeasured_ = true;
+    swiperLayoutWrapper->isConstraintNotChanged_ = true;
+    swiperPatternAlgorithm->Measure(AceType::RawPtr(swiperLayoutWrapper));
+    EXPECT_EQ(swiperLayoutWrapper->isConstraintNotChanged_, true);
+}
 } // namespace OHOS::Ace::NG
