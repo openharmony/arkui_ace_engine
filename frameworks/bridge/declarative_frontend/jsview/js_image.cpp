@@ -402,7 +402,24 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         return;
     }
     auto tmpInfo = info[0];
-    if (!tmpInfo->IsArray()) {
+    if (!tmpInfo->IsArray() && !tmpInfo->IsObject()) {
+        LOGW("ColorFilter is not array or obj");
+        return;
+    }
+    if (tmpInfo->IsObject()) {
+        JSColorFilter* colorFilter;
+        if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
+            colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
+        } else {
+            LOGW("ColorFilter obj is null");
+            return;
+        }
+        if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+            ImageModel::GetInstance()->SetColorFilterMatrix(colorFilter->GetColorFilterMatrix());
+        } else {
+            LOGW("ColorFilter cannot be parsed or length illegal");
+            return;
+        }
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
