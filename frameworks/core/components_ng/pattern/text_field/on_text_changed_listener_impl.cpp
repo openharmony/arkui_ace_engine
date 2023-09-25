@@ -270,9 +270,7 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
     CHECK_NULL_VOID(textFieldPattern);
     auto instanceId = textFieldPattern->GetInstanceId();
     ContainerScope scope(instanceId);
-    auto host = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
     auto taskExecutor = context->GetTaskExecutor();
