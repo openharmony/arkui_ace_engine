@@ -232,7 +232,7 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetHandleVelocityCallback(std::move(handleVelocityCallback));
 
-    auto scrollStart = [weak= WeakClaim(this)](float position) {
+    auto scrollStart = [weak = WeakClaim(this)](float position) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnScrollStartRecursive(position);

@@ -389,8 +389,8 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     }
 }
 
-[[deprecated("using NestableScrollContainer")]]
-ScrollResult Scrollable::HandleScrollParentFirst(double& offset, int32_t source, NestedState state)
+[[deprecated("using NestableScrollContainer")]] ScrollResult Scrollable::HandleScrollParentFirst(
+    double& offset, int32_t source, NestedState state)
 {
     auto parent = parent_.Upgrade();
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
@@ -429,8 +429,8 @@ ScrollResult Scrollable::HandleScrollParentFirst(double& offset, int32_t source,
     return { 0, canOverScroll_ };
 }
 
-[[deprecated("using NestableScrollContainer")]]
-ScrollResult Scrollable::HandleScrollSelfFirst(double& offset, int32_t source, NestedState state)
+[[deprecated("using NestableScrollContainer")]] ScrollResult Scrollable::HandleScrollSelfFirst(
+    double& offset, int32_t source, NestedState state)
 {
     auto parent = parent_.Upgrade();
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
@@ -471,8 +471,8 @@ ScrollResult Scrollable::HandleScrollSelfFirst(double& offset, int32_t source, N
     return { 0, canOverScroll_ };
 }
 
-[[deprecated("using NestableScrollContainer")]]
-ScrollResult Scrollable::HandleScrollSelfOnly(double& offset, int32_t source, NestedState state)
+[[deprecated("using NestableScrollContainer")]] ScrollResult Scrollable::HandleScrollSelfOnly(
+    double& offset, int32_t source, NestedState state)
 {
     double allOffset = offset;
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
@@ -497,8 +497,8 @@ ScrollResult Scrollable::HandleScrollSelfOnly(double& offset, int32_t source, Ne
     return { remainOffset, !NearZero(overOffset) };
 }
 
-[[deprecated("using NestableScrollContainer")]]
-ScrollResult Scrollable::HandleScrollParallel(double& offset, int32_t source, NestedState state)
+[[deprecated("using NestableScrollContainer")]] ScrollResult Scrollable::HandleScrollParallel(
+    double& offset, int32_t source, NestedState state)
 {
     auto remainOffset = 0.0;
     auto parent = parent_.Upgrade();
