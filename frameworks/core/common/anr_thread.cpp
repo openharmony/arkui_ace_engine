@@ -43,9 +43,9 @@ bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime)
 
     auto anrTaskRunner = g_anrThread->GetTaskRunner();
     if (delayTime > 0) {
-        anrTaskRunner->PostDelayedTask(std::move(task), fml::TimeDelta::FromSeconds(delayTime));
+        anrTaskRunner->PostDelayedTask(std::move(task), fml::TimeDelta::FromSeconds(delayTime), {});
     } else {
-        anrTaskRunner->PostTask(std::move(task));
+        anrTaskRunner->PostTask(std::move(task), {});
     }
     return true;
 }

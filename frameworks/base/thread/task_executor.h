@@ -22,8 +22,36 @@
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/noncopyable.h"
+#include "base/log/log.h"
+
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
 
 namespace OHOS::Ace {
+struct Caller final {
+#if __has_builtin(__builtin_FILE)
+    Caller(std::string file = __builtin_FILE(), int line = __builtin_LINE(), std::string func = __builtin_FUNCTION())
+        : file_(file), line_(line), func_(func)
+    {
+        if (!file_.empty()) {
+            size_t split = file_.find_last_of("/\\");
+            if (split == std::string::npos) {
+                split = 0;
+            }
+            caller_ = std::string("[" + file_.substr(split + 1) + "(" + func_ + ":" + std::to_string(line_) + ")]");
+        }
+    }
+#else
+    Caller() {
+    }
+#endif
+
+    std::string file_;
+    int32_t line_ = 0;
+    std::string func_;
+    std::string caller_ = "[]";
+};
 
 class TaskExecutor : public AceType {
     DECLARE_ACE_TYPE(TaskExecutor, AceType);
@@ -53,9 +81,9 @@ public:
      * @param type FrontendType of task, used to specify the thread.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTask(Task&& task, TaskType type) const
+    bool PostTask(Task&& task, TaskType type, const Caller& caller = {}) const
     {
-        return PostDelayedTask(std::move(task), type, 0);
+        return PostDelayedTask(std::move(task), type, 0, caller);
     }
 
     /**
@@ -65,9 +93,9 @@ public:
      * @param type FrontendType of task, used to specify the thread.
      * @return Returns 'true' if task has been posted successfully.
      */
-    bool PostTask(const Task& task, TaskType type) const
+    bool PostTask(const Task& task, TaskType type, const Caller& caller = {}) const
     {
-        return PostDelayedTask(task, type, 0);
+        return PostDelayedTask(task, type, 0, caller);
     }
 
     /**
@@ -78,10 +106,10 @@ public:
      * @param id The id to trace the task.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTaskWithTraceId(Task&& task, TaskType type, int32_t id) const
+    bool PostTaskWithTraceId(Task&& task, TaskType type, int32_t id, const Caller& caller = {}) const
     {
         Task wrappedTask = WrapTaskWithTraceId(std::move(task), id);
-        return PostDelayedTask(std::move(wrappedTask), type, 0);
+        return PostDelayedTask(std::move(wrappedTask), type, 0, caller);
     }
 
     /**
@@ -92,10 +120,10 @@ public:
      * @param id The id to trace the task.
      * @return Returns 'true' if task has been posted successfully.
      */
-    bool PostTaskWithTraceId(const Task& task, TaskType type, int32_t id) const
+    bool PostTaskWithTraceId(const Task& task, TaskType type, int32_t id, const Caller& caller = {}) const
     {
         Task wrappedTask = WrapTaskWithTraceId(Task(task), id);
-        return PostDelayedTask(std::move(wrappedTask), type, 0);
+        return PostDelayedTask(std::move(wrappedTask), type, 0, caller);
     }
 
     /**
@@ -107,12 +135,12 @@ public:
      * @param delayTime Wait a period of time in milliseconds before execution.
      * @return Returns 'true' if task has been posted successfully.
      */
-    bool PostDelayedTask(Task&& task, TaskType type, uint32_t delayTime) const
+    bool PostDelayedTask(Task&& task, TaskType type, uint32_t delayTime, const Caller& caller = {}) const
     {
         if (delayTime > 0 && type == TaskType::BACKGROUND) {
             return false;
         }
-        return OnPostTask(std::move(task), type, delayTime);
+        return OnPostTask(std::move(task), type, delayTime, caller.caller_);
     }
 
     /**
@@ -124,9 +152,9 @@ public:
      * @param delayTime Wait a period of time in milliseconds before execution.
      * @return Returns 'true' if task has been posted successfully.
      */
-    bool PostDelayedTask(const Task& task, TaskType type, uint32_t delayTime) const
+    bool PostDelayedTask(const Task& task, TaskType type, uint32_t delayTime, const Caller& caller = {}) const
     {
-        return PostDelayedTask(Task(task), type, delayTime);
+        return PostDelayedTask(Task(task), type, delayTime, caller);
     }
 
     /**
@@ -137,7 +165,7 @@ public:
      * @param type FrontendType of task, used to specify the thread.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(Task&& task, TaskType type) const
+    bool PostSyncTask(Task&& task, TaskType type, const Caller& caller = {}) const
     {
         if (!task || type == TaskType::BACKGROUND) {
             return false;
@@ -145,7 +173,7 @@ public:
             task();
             return true;
         }
-        return PostTaskAndWait(CancelableTask(std::move(task)), type);
+        return PostTaskAndWait(CancelableTask(std::move(task)), type, 0ms, caller.caller_);
     }
 
     /**
@@ -157,7 +185,7 @@ public:
      * @param timeoutMs Timeout in milliseconds before task execution.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTaskTimeout(const Task& task, TaskType type, uint32_t timeoutMs) const
+    bool PostSyncTaskTimeout(const Task& task, TaskType type, uint32_t timeoutMs, const Caller& caller = {}) const
     {
         if (!task || type == TaskType::BACKGROUND) {
             return false;
@@ -165,7 +193,8 @@ public:
             task();
             return true;
         }
-        return PostTaskAndWait(CancelableTask(std::move(task)), type, std::chrono::milliseconds(timeoutMs));
+        return PostTaskAndWait(
+            CancelableTask(std::move(task)), type, std::chrono::milliseconds(timeoutMs), caller.caller_);
     }
 
     /**
@@ -176,9 +205,9 @@ public:
      * @param type FrontendType of task, used to specify the thread.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(const Task& task, TaskType type) const
+    bool PostSyncTask(const Task& task, TaskType type, const Caller& caller = {}) const
     {
-        return PostSyncTask(Task(task), type);
+        return PostSyncTask(Task(task), type, caller);
     }
 
     /**
@@ -189,7 +218,7 @@ public:
      * @param type FrontendType of task, used to specify the thread.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(CancelableTask&& task, TaskType type) const
+    bool PostSyncTask(CancelableTask&& task, TaskType type, const Caller& caller = {}) const
     {
         if (!task || type == TaskType::BACKGROUND) {
             return false;
@@ -198,7 +227,7 @@ public:
             task();
             return avatar.WaitUntilComplete();
         }
-        return PostTaskAndWait(std::move(task), type);
+        return PostTaskAndWait(std::move(task), type, 0ms, caller.caller_);
     }
 
     /**
@@ -209,9 +238,9 @@ public:
      * @param type FrontendType of task, used to specify the thread.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(const CancelableTask& task, TaskType type) const
+    bool PostSyncTask(const CancelableTask& task, TaskType type, const Caller& caller = {}) const
     {
-        return PostSyncTask(CancelableTask(task), type);
+        return PostSyncTask(CancelableTask(task), type, caller);
     }
 
     virtual void AddTaskObserver(Task&& callback) = 0;
@@ -232,7 +261,7 @@ public:
 protected:
     TaskExecutor() = default;
 
-    virtual bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const = 0;
+    virtual bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& callerInfo) const = 0;
     virtual Task WrapTaskWithTraceId(Task&& task, int32_t id) const = 0;
 
 #ifdef ACE_DEBUG
@@ -244,17 +273,18 @@ protected:
 #endif
 
 private:
-    bool PostTaskAndWait(CancelableTask&& task, TaskType type, std::chrono::milliseconds timeoutMs = 0ms) const
+    bool PostTaskAndWait(CancelableTask&& task, TaskType type, std::chrono::milliseconds timeoutMs = 0ms,
+        const std::string& callerInfo = {}) const
     {
 #ifdef ACE_DEBUG
         bool result = false;
         if (OnPreSyncTask(type)) {
-            result = OnPostTask(Task(task), type, 0) && task.WaitUntilComplete(timeoutMs);
+            result = OnPostTask(Task(task), type, 0, callerInfo) && task.WaitUntilComplete(timeoutMs);
             OnPostSyncTask();
         }
         return result;
 #else
-        return OnPostTask(Task(task), type, 0) && task.WaitUntilComplete(timeoutMs);
+        return OnPostTask(Task(task), type, 0, callerInfo) && task.WaitUntilComplete(timeoutMs);
 #endif
     }
 };
@@ -289,9 +319,9 @@ public:
      * @param task Task which need execution.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTask(Task&& task) const
+    bool PostTask(Task&& task, const Caller& caller = {}) const
     {
-        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_) : false;
+        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, caller) : false;
     }
 
     /**
@@ -300,9 +330,9 @@ public:
      * @param task Task which need execution.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTask(const Task& task) const
+    bool PostTask(const Task& task, const Caller& caller = {}) const
     {
-        return taskExecutor_ ? taskExecutor_->PostTask(task, type_) : false;
+        return taskExecutor_ ? taskExecutor_->PostTask(task, type_, caller) : false;
     }
 
     /**
@@ -313,9 +343,9 @@ public:
      * @param delayTime Wait a period of time in milliseconds before execution.
      * @return Returns 'true' if task has been posted successfully.
      */
-    bool PostDelayedTask(Task&& task, uint32_t delayTime) const
+    bool PostDelayedTask(Task&& task, uint32_t delayTime, const Caller& caller = {}) const
     {
-        return taskExecutor_ ? taskExecutor_->PostDelayedTask(std::move(task), type_, delayTime) : false;
+        return taskExecutor_ ? taskExecutor_->PostDelayedTask(std::move(task), type_, delayTime, caller) : false;
     }
 
     /**
@@ -326,9 +356,9 @@ public:
      * @param delayTime Wait a period of time in milliseconds before execution.
      * @return Returns 'true' if task has been posted successfully.
      */
-    bool PostDelayedTask(const Task& task, uint32_t delayTime) const
+    bool PostDelayedTask(const Task& task, uint32_t delayTime, const Caller& caller = {}) const
     {
-        return taskExecutor_ ? taskExecutor_->PostDelayedTask(task, type_, delayTime) : false;
+        return taskExecutor_ ? taskExecutor_->PostDelayedTask(task, type_, delayTime, caller) : false;
     }
 
     /**
@@ -338,9 +368,9 @@ public:
      * @param task Task which need execution.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(Task&& task) const
+    bool PostSyncTask(Task&& task, const Caller& caller = {}) const
     {
-        return taskExecutor_ ? taskExecutor_->PostSyncTask(std::move(task), type_) : false;
+        return taskExecutor_ ? taskExecutor_->PostSyncTask(std::move(task), type_, caller) : false;
     }
 
     /**
@@ -350,9 +380,9 @@ public:
      * @param task Task which need execution.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(const Task& task) const
+    bool PostSyncTask(const Task& task, const Caller& caller = {}) const
     {
-        return taskExecutor_ ? taskExecutor_->PostSyncTask(task, type_) : false;
+        return taskExecutor_ ? taskExecutor_->PostSyncTask(task, type_, caller) : false;
     }
 
     /**
@@ -362,9 +392,9 @@ public:
      * @param task Task which need execution.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(CancelableTask&& task) const
+    bool PostSyncTask(CancelableTask&& task, const Caller& caller = {}) const
     {
-        return taskExecutor_ ? taskExecutor_->PostSyncTask(std::move(task), type_) : false;
+        return taskExecutor_ ? taskExecutor_->PostSyncTask(std::move(task), type_, caller) : false;
     }
 
     /**
@@ -374,9 +404,9 @@ public:
      * @param task Task which need execution.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(const CancelableTask& task) const
+    bool PostSyncTask(const CancelableTask& task, const Caller& caller = {}) const
     {
-        return taskExecutor_ ? taskExecutor_->PostSyncTask(task, type_) : false;
+        return taskExecutor_ ? taskExecutor_->PostSyncTask(task, type_, caller) : false;
     }
 
     RefPtr<TaskExecutor> GetTaskExecutor() const

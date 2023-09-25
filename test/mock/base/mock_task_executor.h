@@ -28,7 +28,7 @@ public:
     MOCK_METHOD(void, RemoveTaskObserver, (), (override));
     MOCK_METHOD(Task, WrapTaskWithTraceId, (Task && task, int32_t id), (const override));
 
-    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const override
+    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& callerInfo) const override
     {
         CHECK_NULL_RETURN(task, false);
         task();
