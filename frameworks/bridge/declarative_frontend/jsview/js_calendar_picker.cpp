@@ -296,7 +296,7 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
     CalcDimension dayRadius;
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
-        if (!ParseJsDimensionVp(obj->GetProperty("hintRadius"), dayRadius)) {
+        if (!ParseJsDimensionVpNG(obj->GetProperty("hintRadius"), dayRadius)) {
             dayRadius = calendarTheme->GetCalendarDayRadius();
         }
         auto selected = obj->GetProperty("selected");
@@ -511,7 +511,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     }
 
     CalcDimension radius;
-    if (ParseJsDimensionVp(paramObj->GetProperty("hintRadius"), radius)) {
+    if (ParseJsDimensionVpNG(paramObj->GetProperty("hintRadius"), radius)) {
         settingData.dayRadius = radius;
     }
 
