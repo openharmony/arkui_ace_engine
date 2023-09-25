@@ -316,7 +316,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             ++index;
             continue;
         }
-        if (index >= placeHolderIndex.size()) {
+        if (index >= placeHolderIndex.size() || index >= rectsForPlaceholders.size()) {
             return;
         }
         auto rect = rectsForPlaceholders.at(index);
