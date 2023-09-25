@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <thread>
+#include <chrono>
 #include "gtest/gtest.h"
 #include "test/mock/interfaces/mock_uicontent.h"
 #include "ui_content.h"
@@ -67,7 +69,8 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
      * @tc.steps: step1. create formRenderGroup and prepare want
      * @tc.expected: step1. formRenderGroup is created successfully
      */
-    auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr);
+    std::weak_ptr<OHOS::AppExecFwk::EventHandler> emptyHandler;
+    auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, emptyHandler);
     EXPECT_TRUE(formRendererGroup);
     bool isEmpty = formRendererGroup->IsFormRequestsEmpty();
     EXPECT_TRUE(isEmpty);
@@ -178,7 +181,10 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
      * @tc.expected: step1. formRenderGroup is created successfully and the formRenderer is added to the
      * formRendererGroup
      */
-    auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr);
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest002");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
     EXPECT_TRUE(formRendererGroup);
     OHOS::AAFwk::Want want;
     want.SetParam(FORM_RENDERER_COMP_ID, FORM_COMPONENT_ID_1);
@@ -250,7 +256,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Test surface change
-     * @tc.expected: step5. onSurfaceChange has been called
+     * @tc.expected: step5. onSurfaceChange & uiContent.OnFormSurfaceChange has been called
      */
     auto formRendererDispatcher = formRenderer->formRendererDispatcherImpl_;
     EXPECT_TRUE(formRendererDispatcher);
@@ -259,6 +265,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2))
         .WillOnce(Return());
     formRendererDispatcher->DispatchSurfaceChangeEvent(FORM_WIDTH_2, FORM_HEIGHT_2);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_EQ(onSurfaceChangeEventKey, CHECK_KEY);
     // formRenderer is null
     formRendererDispatcher->formRenderer_.reset();
@@ -268,6 +275,17 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
         .WillOnce(Return());
     onSurfaceChangeEventKey = "";
     formRendererDispatcher->DispatchSurfaceChangeEvent(FORM_WIDTH_2, FORM_HEIGHT_2);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_NE(onSurfaceChangeEventKey, CHECK_KEY);
+
+    /**
+     * @tc.steps: step6. Test pointer event
+     * @tc.expected: step4. uiContent.ProcessPointerEvent has been called
+     */
+    std::shared_ptr<OHOS::MMI::PointerEvent> event;
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), ProcessPointerEvent(event))
+        .WillOnce(Return(true));
+    formRendererDispatcher->DispatchPointerEvent(event);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 } // namespace OHOS::Ace

@@ -39,7 +39,8 @@ bool DelegateImplAPI(const std::string data, size_t size)
 bool DispatcherImplAPI(const std::string data, size_t size)
 {
     std::shared_ptr<UIContent> uiContent;
-    FormRendererDispatcherImpl dispatcherImpl(uiContent, nullptr);
+    std::weak_ptr<OHOS::AppExecFwk::EventHandler> handler;
+    FormRendererDispatcherImpl dispatcherImpl(uiContent, nullptr, handler);
     std::shared_ptr<OHOS::MMI::PointerEvent> pointEvent;
     dispatcherImpl.DispatchPointerEvent(pointEvent);
     dispatcherImpl.SetAllowUpdate(true);
