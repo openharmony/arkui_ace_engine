@@ -368,8 +368,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> Init()
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     pattern->AttachToFrameNode(frameNode);
-    auto host = pattern->GetHost();
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->rootNode_ =
         FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());
     ;
@@ -3714,7 +3713,7 @@ HWTEST_F(TextTestNg, HandlePanUpdateAndEnd001, TestSize.Level1)
      */
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipelineContext, nullptr);
     auto rect = pipelineContext->GetCurrentWindowRect();
     auto contentRect_ = CONTENT_RECT;
@@ -4302,7 +4301,7 @@ HWTEST_F(TextTestNg, OnHandleMove002, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern and some environment for running process.
      */
     auto [host, pattern] = Init();
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     SelectOverlayInfo selectOverlayInfo;
     selectOverlayInfo.singleLineHeight = NODE_ID;
@@ -4338,7 +4337,7 @@ HWTEST_F(TextTestNg, GetGlobalOffset001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern and some environment for running process.
      */
     auto [host, pattern] = Init();
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
 
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.

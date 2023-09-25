@@ -75,7 +75,7 @@ void RichEditorPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     copyOption_ = layoutProperty->GetCopyOption().value_or(CopyOptions::Distributed);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
@@ -697,7 +697,7 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& s
     selectLineHeight = 0.0f;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF(0, 0));
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, OffsetF(0, 0));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
@@ -1007,9 +1007,7 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const s
 
 void RichEditorPattern::ScheduleCaretTwinkling()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
     if (!context->GetTaskExecutor()) {
@@ -1144,7 +1142,7 @@ void RichEditorPattern::UseHostToUpdateTextFieldManager()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
@@ -1505,8 +1503,7 @@ void RichEditorPattern::OnHover(bool isHover)
 
 bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
-    auto host = GetHost();
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     CHECK_NULL_RETURN(needShowSoftKeyboard, false);
     if (needShowSoftKeyboard && customKeyboardBuilder_) {
@@ -1527,8 +1524,7 @@ bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartT
 #if defined(ENABLE_STANDARD_INPUT)
 bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
 {
-    auto host = GetHost();
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     MiscServices::Configuration configuration;
     configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>(static_cast<int32_t>(TextInputAction::DONE)));
@@ -1578,8 +1574,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
 #else
 bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
 {
-    auto host = GetHost();
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     if (HasConnection()) {
         connection_->Show(isFocusViewChanged, GetInstanceId());
@@ -3108,7 +3103,7 @@ void RichEditorPattern::OnAreaChangedInner()
     float selectLineHeight = 0.0f;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     if (parentGlobalOffset != parentGlobalOffset_) {
@@ -3137,7 +3132,7 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto offset = host->GetPaintRectOffset();

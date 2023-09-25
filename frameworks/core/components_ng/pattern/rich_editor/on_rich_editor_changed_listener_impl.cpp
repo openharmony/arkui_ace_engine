@@ -199,9 +199,7 @@ void OnRichEditorChangedListenerImpl::PostSyncTaskToUI(const std::function<void(
     CHECK_NULL_VOID(textFieldPattern);
     auto instanceId = textFieldPattern->GetInstanceId();
     ContainerScope scope(instanceId);
-    auto host = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
     auto taskExecutor = context->GetTaskExecutor();
@@ -217,9 +215,7 @@ void OnRichEditorChangedListenerImpl::PostTaskToUI(const std::function<void()>& 
     CHECK_NULL_VOID(richEditorPattern);
     auto instanceId = richEditorPattern->GetInstanceId();
     ContainerScope scope(instanceId);
-    auto host = richEditorPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
