@@ -27,7 +27,7 @@
 
 class NativeEngine;
 class NativeReference;
-class NativeValue;
+typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace::Framework {
 class JsAcePage;
@@ -114,8 +114,8 @@ public:
     }
 
     // Load the js file of the page in NG structure..
-    virtual bool LoadPageSource(const std::string& /* url */,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
+    virtual bool LoadPageSource(
+        const std::string& /* url */, const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
     {
         return false;
     }
@@ -220,8 +220,7 @@ public:
 
     virtual void JsCallback(const std::string& callbackId, const std::string& args) = 0;
 
-    virtual void SetErrorEventHandler(
-        std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
+    virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 
     virtual void RunGarbageCollection() = 0;
 
@@ -371,16 +370,17 @@ public:
         return;
     }
 
-    virtual void InitializeModuleSearcher(const std::string& bundleName, const std::string& moduleName,
-                                          const std::string assetPath, bool isBundle)
+    virtual void InitializeModuleSearcher(
+        const std::string& bundleName, const std::string& moduleName, const std::string assetPath, bool isBundle)
     {
         LOGE("Ark does not support InitializeModuleSearcher");
     }
 #endif
     virtual void FlushReload() {}
-    virtual NativeValue* GetContextValue()
+    virtual napi_value GetContextValue()
     {
-        return nullptr;
+        napi_value value = nullptr;
+        return value;
     }
 
 protected:

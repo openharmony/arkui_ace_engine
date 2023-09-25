@@ -64,7 +64,8 @@ public:
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const override {}
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
-    NativeValue* GetContextValue() override;
+    napi_value GetContextValue() override;
+    
 #if defined(PREVIEW)
     void RunNativeEngineLoop() override
     {

@@ -57,6 +57,12 @@ public:
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
 
+    void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
+    void Initialize(
+        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
+    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override;
+
     // UI content event process
     bool ProcessBackPressed() override;
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
@@ -151,6 +157,8 @@ public:
     void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) override;
     NativeValue* GetUIContext() override;
+
+    napi_value GetUINapiContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
 
     void UpdateResource() override;
@@ -161,9 +169,9 @@ public:
 
 private:
     void InitializeInner(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage, bool isNamedRouter);
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
-    void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
+    void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);

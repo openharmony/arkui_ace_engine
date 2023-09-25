@@ -31,7 +31,7 @@
 
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
 
-class NativeValue;
+typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
 
@@ -109,8 +109,7 @@ public:
     }
 
     // Get the stage mode sourceMap.
-    virtual void GetStageSourceMap(
-        std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {}
+    virtual void GetStageSourceMap(std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {}
 
     virtual void RunPage(const std::string& content, const std::string& params) = 0;
 
@@ -261,11 +260,13 @@ public:
     }
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
-    
-    virtual NativeValue* GetContextValue()
+
+    virtual napi_value GetContextValue()
     {
-        return nullptr;
+        napi_value value = nullptr;
+        return value;
     }
+
 #ifdef PREVIEW
     virtual void RunNativeEngineLoop() {}
 #endif

@@ -20,28 +20,28 @@
 
 #include "base/memory/ace_type.h"
 
-class NativeEngine;
-class NativeValue;
-
+typedef struct napi_value__* napi_value;
+typedef struct napi_env__* napi_env;
 namespace OHOS::AAFwk {
 class Want;
 class WantParams;
-} // namespace AAFwk
+} // namespace OHOS::AAFwk
 
 namespace OHOS::Ace {
 class WantParamsWrap : public AceType {
     DECLARE_ACE_TYPE(WantParamsWrap, AceType);
+
 public:
-    static RefPtr<WantParamsWrap> CreateWantWrap(NativeEngine* engine, NativeValue* value);
+    static RefPtr<WantParamsWrap> CreateWantWrap(napi_env env, napi_value value);
 };
 
 class ACE_EXPORT WantWrap : public AceType {
     DECLARE_ACE_TYPE(WantWrap, AceType);
 
 public:
-    static NativeValue* ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine);
-    static NativeValue* ConvertParamsToNativeValue(const OHOS::AAFwk::WantParams& wantParams, NativeEngine* engine);
-    static RefPtr<WantWrap> CreateWantWrap(void* nativeEngine, void* nativeValue);
+    static napi_value ConvertToNativeValue(const OHOS::AAFwk::Want& want, napi_env env);
+    static napi_value ConvertParamsToNativeValue(const OHOS::AAFwk::WantParams& wantParams, napi_env env);
+    static RefPtr<WantWrap> CreateWantWrap(napi_env env, napi_value value);
     static RefPtr<WantWrap> CreateWantWrap(const std::string& bundleName, const std::string& abilityName);
 
     virtual void SetWantParamsFromWantWrap(void* want) = 0;

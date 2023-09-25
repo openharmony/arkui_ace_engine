@@ -805,33 +805,45 @@ shared_ptr<JsValue> JsiBaseUtils::JsTraceEnd(const shared_ptr<JsRuntime>& runtim
     return runtime->NewUndefined();
 }
 
-std::string GetLogContent(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+std::string GetLogContent(napi_env env, napi_callback_info info)
 {
+    size_t argc = 0;
+    napi_value* argv = nullptr;
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
+    if (argc > 0) {
+        argv = new napi_value[argc];
+    }
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
+
     std::string content;
-    for (size_t i = 0; i < info->argc; ++i) {
-        if (info->argv[i]->TypeOf() != NATIVE_STRING) {
+    napi_valuetype valueType = napi_undefined;
+    for (size_t i = 0; i < argc; ++i) {
+        napi_typeof(env, argv[i], &valueType);
+        if (valueType != napi_string) {
             LOGE("argv is not NativeString");
             continue;
         }
-        auto nativeString = reinterpret_cast<NativeString*>(info->argv[i]->GetInterface(NativeString::INTERFACE_ID));
-        size_t bufferSize = nativeString->GetLength();
-        size_t strLength = 0;
-        char* buffer = new char[bufferSize + 1] { 0 };
-        nativeString->GetCString(buffer, bufferSize + 1, &strLength);
-        content.append(buffer);
-        delete[] buffer;
+        size_t buffSize = 0;
+        napi_status status = napi_get_value_string_utf8(env, argv[i], nullptr, 0, &buffSize);
+        if (status != napi_ok || buffSize == 0) {
+            continue;
+        }
+        std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(buffSize + 1);
+        size_t ret = 0;
+        napi_get_value_string_utf8(env, argv[i], paramsChar.get(), buffSize + 1, &ret);
+        content.append(paramsChar.get());
     }
+    delete[] argv;
     return content;
 }
 
-NativeValue* AppLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info, JsLogLevel level)
+napi_value AppLogPrint(napi_env env, napi_callback_info info, JsLogLevel level)
 {
     // Should have at least 1 parameters.
-    if (info->argc == 0) {
-        LOGE("the arg is error");
-        return nativeEngine->CreateUndefined();
-    }
-    std::string content = GetLogContent(nativeEngine, info);
+    napi_value result = nullptr;
+    std::string content = GetLogContent(env, info);
     switch (level) {
         case JsLogLevel::DEBUG:
             APP_LOGD("app Log: %{public}s", content.c_str());
@@ -847,27 +859,27 @@ NativeValue* AppLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info, J
             break;
     }
 
-    return nativeEngine->CreateUndefined();
+    return result;
 }
 
-NativeValue* AppDebugLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+napi_value AppDebugLogPrint(napi_env env, napi_callback_info info)
 {
-    return AppLogPrint(nativeEngine, info, JsLogLevel::DEBUG);
+    return AppLogPrint(env, info, JsLogLevel::DEBUG);
 }
 
-NativeValue* AppInfoLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+napi_value AppInfoLogPrint(napi_env env, napi_callback_info info)
 {
-    return AppLogPrint(nativeEngine, info, JsLogLevel::INFO);
+    return AppLogPrint(env, info, JsLogLevel::INFO);
 }
 
-NativeValue* AppWarnLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+napi_value AppWarnLogPrint(napi_env env, napi_callback_info info)
 {
-    return AppLogPrint(nativeEngine, info, JsLogLevel::WARNING);
+    return AppLogPrint(env, info, JsLogLevel::WARNING);
 }
 
-NativeValue* AppErrorLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+napi_value AppErrorLogPrint(napi_env env, napi_callback_info info)
 {
-    return AppLogPrint(nativeEngine, info, JsLogLevel::ERROR);
+    return AppLogPrint(env, info, JsLogLevel::ERROR);
 }
 
 void JsiBaseUtils::GetStageSourceMap(

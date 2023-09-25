@@ -384,7 +384,7 @@ void DeclarativeFrontendNG::PushPage(const std::string& url, const std::string& 
 }
 
 
-NativeValue* DeclarativeFrontendNG::GetContextValue()
+napi_value DeclarativeFrontendNG::GetContextValue()
 {
     return jsEngine_->GetContextValue();
 }

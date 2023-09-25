@@ -16,12 +16,13 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 
 namespace OHOS::Ace {
-NativeValue* WantWrap::ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine)
+napi_value WantWrap::ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine)
 {
-    return nullptr;
+    napi_value result = nullptr;
+    return result;
 }
 
-RefPtr<WantWrap> WantWrap::CreateWantWrap(void* nativeEngine, void* nativeValue)
+RefPtr<WantWrap> WantWrap::CreateWantWrap(napi_env env, napi_value value)
 {
     return nullptr;
 }
@@ -31,7 +32,7 @@ RefPtr<WantWrap> WantWrap::CreateWantWrap(const std::string& bundleName, const s
     return nullptr;
 }
 
-WantWrapOhos::WantWrapOhos(NativeEngine* engine, NativeValue* value)
+WantWrapOhos::WantWrapOhos(napi_env env, napi_value value)
 {
 }
 

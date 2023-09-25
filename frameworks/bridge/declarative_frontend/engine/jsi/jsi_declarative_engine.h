@@ -66,7 +66,7 @@ public:
     void DestroyRootViewHandle(int32_t pageId);
     void DestroyAllRootViewHandle();
     void FlushReload();
-    NativeValue* GetContextValue();
+    napi_value GetContextValue();
 
     static std::unique_ptr<JsonValue> GetI18nStringResource(
         const std::string& targetStringKey, const std::string& targetStringValue);
@@ -378,10 +378,11 @@ public:
         pluginModuleName_ = pluginModuleName;
     }
 
-    NativeValue* GetContextValue() override
+    napi_value GetContextValue() override
     {
         return engineInstance_->GetContextValue();
     }
+
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;

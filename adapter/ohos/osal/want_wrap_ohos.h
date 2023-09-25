@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 class WantParamsWrapOhos : public WantParamsWrap {
     DECLARE_ACE_TYPE(WantParamsWrapOhos, WantParamsWrap);
 public:
-    WantParamsWrapOhos(NativeEngine* engine, NativeValue* value);
+    WantParamsWrapOhos(napi_env env, napi_value value);
     ~WantParamsWrapOhos() = default;
     const AAFwk::WantParams& GetWantParams() const
     {
@@ -42,7 +42,7 @@ class WantWrapOhos : public WantWrap {
     DECLARE_ACE_TYPE(WantWrapOhos, WantWrap)
 
 public:
-    WantWrapOhos(NativeEngine* engine, NativeValue* value);
+    WantWrapOhos(napi_env env, napi_value value);
     WantWrapOhos(const std::string& bundleName, const std::string& abilityName);
     ~WantWrapOhos() = default;
     void SetWantParamsFromWantWrap(void* want) override;
