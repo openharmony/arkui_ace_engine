@@ -495,16 +495,15 @@ std::shared_ptr<Media::PixelMap> CreatePixelMapFromString(const std::string& fil
 OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale) const
 {
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
-    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
-        return result;
-    }
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, result);
     auto frameTag = frameNode->GetTag();
     if (frameTag == V2::WEB_ETS_TAG) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
-    } else if (!NearEqual(scale, DEFALUT_DRAG_PPIXELMAP_SCALE)) {
+    } else if ((info.GetInputEventType() != InputEventType::MOUSE_BUTTON &&
+                   !NearEqual(scale, DEFALUT_DRAG_PPIXELMAP_SCALE)) ||
+               (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !NearEqual(scale, 1.0f))) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
     } else if (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
@@ -567,6 +566,59 @@ float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t widt
         }
     }
     return scale;
+}
+
+std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEvent& info)
+{
+    auto&& callback = [weak = WeakClaim(this), info]() {
+        auto gestureHub = weak.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        std::shared_ptr<Media::PixelMap> pixelMap;
+        auto frameNode = gestureHub->GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        if (gestureHub->GetTextDraggable()) {
+            auto pattern = frameNode->GetPattern<TextDragBase>();
+            CHECK_NULL_VOID(pattern);
+            auto dragNode = pattern->MoveDragNode();
+            CHECK_NULL_VOID(dragNode);
+            auto context = dragNode->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            auto thumbnailPixelMap = context->GetThumbnailPixelMap();
+            CHECK_NULL_VOID(thumbnailPixelMap);
+            pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
+        } else {
+            auto context = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            auto thumbnailPixelMap = context->GetThumbnailPixelMap();
+            CHECK_NULL_VOID(thumbnailPixelMap);
+            pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
+        }
+        CHECK_NULL_VOID(pixelMap);
+        float scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+        pixelMap->scale(scale, scale);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        if (!dragDropManager->IsDragged()) {
+            return;
+        }
+        int32_t width = pixelMap->GetWidth();
+        int32_t height = pixelMap->GetHeight();
+        auto pixelMapOffset = gestureHub->GetPixelMapOffset(info, SizeF(width, height), scale);
+        Msdp::DeviceStatus::ShadowInfo shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
+        int ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateShadowPic(shadowInfo);
+        if (ret != 0) {
+            LOGE("InteractionManager: UpdateShadowPic error");
+            return;
+        }
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("In setThumbnailPixelMap callback, set DragWindowVisible true.");
+        }
+        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        dragDropManager->SetIsDragWindowShow(true);
+    };
+    return callback;
 }
 #endif
 
@@ -711,12 +763,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->SetIsMouseDrag(true);
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
         CHECK_NULL_VOID(pixelMap);
-        if (HasThumbnailCallback()) {
-            auto taskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            CancelableCallback<void()> task;
-            task.Reset(callback_);
-            taskExecutor.PostTask(task);
-        }
+        auto taskScheduler = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        auto callback = GetMousePixelMapCallback(info);
+        taskScheduler->PostTask(callback, TaskExecutor::TaskType::UI);
     } else {
         CHECK_NULL_VOID(pixelMap_);
         if (pixelMap == nullptr) {
