@@ -22,6 +22,7 @@
 #include "base/i18n/localization.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/render_context.h"
@@ -257,6 +258,10 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     dateTime.hour = timeZoneTime->tm_hour;
     dateTime.minute = timeZoneTime->tm_min;
     dateTime.second = timeZoneTime->tm_sec;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        std::string time = Localization::GetInstance()->FormatDateTime(dateTime, GetFormat());
+        return time;
+    }
     dateTime.week = timeZoneTime->tm_wday;       // 0-6
     std::string dateTimeFormat = DEFAULT_FORMAT; // the format to get datetime value from the thirdlib
     int32_t weekType = 0;                        // 0:no week, 1:full type week, 2:short type week
@@ -286,8 +291,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     std::string outputDateTime = SpliceDateTime(curDateTime, inputFormatSplitter);
     outputDateTime =
         ((curDateTime[(int32_t)(TextClockElementIndex::CUR_YEAR_INDEX)] == "1900") || (outputDateTime == ""))
-            ? dateTimeValue
-            : outputDateTime;
+            ? dateTimeValue : outputDateTime;
     return outputDateTime;
 }
 
