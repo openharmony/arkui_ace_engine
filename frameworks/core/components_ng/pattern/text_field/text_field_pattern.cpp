@@ -5717,10 +5717,16 @@ void TextFieldPattern::UpdateErrorTextMargin()
     auto errorTextCapsuleMargin = theme->GetErrorTextCapsuleMargin();
     if (layoutProperty->GetShowErrorTextValue(false) && (preErrorMargin_ < errorTextCapsuleMargin.ConvertToPx())) {
         errorMargin.bottom = CalcLength(errorTextCapsuleMargin);
+        errorMargin.right = CalcLength(passwordModeStyle_.margin.right->GetDimension());
+        errorMargin.left = CalcLength(passwordModeStyle_.margin.left->GetDimension());
+        errorMargin.top = CalcLength(passwordModeStyle_.margin.top->GetDimension());
         layoutProperty->UpdateMargin(errorMargin);
         restoreMarginState_ = true;
     } else if (restoreMarginState_ == true) {
         errorMargin.bottom = CalcLength(preErrorMargin_);
+        errorMargin.right = CalcLength(passwordModeStyle_.margin.right->GetDimension());
+        errorMargin.left = CalcLength(passwordModeStyle_.margin.left->GetDimension());
+        errorMargin.top = CalcLength(passwordModeStyle_.margin.top->GetDimension());
         layoutProperty->UpdateMargin(errorMargin);
         restoreMarginState_ = false;
     }
@@ -5766,6 +5772,18 @@ void TextFieldPattern::SavePasswordModeStates()
         passwordModeStyle_.padding.top = CalcLength(0.0);
         passwordModeStyle_.padding.bottom = CalcLength(0.0);
         passwordModeStyle_.padding.right = CalcLength(0.0);
+    }
+    const auto& marginProperty = layoutProperty->GetMarginProperty();
+    if (marginProperty) {
+        passwordModeStyle_.margin.left = CalcLength(marginProperty->left->GetDimension().ConvertToPx());
+        passwordModeStyle_.margin.top = CalcLength(marginProperty->top->GetDimension().ConvertToPx());
+        passwordModeStyle_.margin.bottom = CalcLength(marginProperty->bottom->GetDimension().ConvertToPx());
+        passwordModeStyle_.margin.right = CalcLength(marginProperty->right->GetDimension().ConvertToPx());
+    } else {
+        passwordModeStyle_.margin.left = CalcLength(0.0_vp);
+        passwordModeStyle_.margin.top = CalcLength(0.0_vp);
+        passwordModeStyle_.margin.bottom = CalcLength(0.0_vp);
+        passwordModeStyle_.margin.right = CalcLength(0.0_vp);
     }
 }
 

@@ -123,6 +123,7 @@ struct PasswordModeStyle {
     BorderColorProperty borderColor;
     BorderRadiusProperty radius;
     PaddingProperty padding;
+    MarginProperty margin;
 };
 
 struct PreInlineState {
@@ -181,7 +182,14 @@ public:
             auto geometryNode = host->GetGeometryNode();
             auto frameOffset = geometryNode->GetFrameOffset();
             auto frameSize = geometryNode->GetFrameSize();
-            RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(),
+            auto contentOffset = geometryNode->GetContentOffset();
+            float errorTextWidth = 0.0f;
+#ifndef USE_GRAPHIC_TEXT_GINE
+            errorTextWidth = errorParagraph_->GetLongestLine();
+#else
+            errorTextWidth = errorParagraph_->GetActualWidth();
+#endif
+            RectF boundsRect(contentOffset.GetX(), frameOffset.GetY(), errorTextWidth,
                 frameSize.Height() + ERROR_TEXT_BOUNDSRECT_MARGIN);
             textFieldOverlayModifier->SetBoundsRect(boundsRect);
         }
