@@ -1158,4 +1158,21 @@ const RefPtr<SpringProperty>& Scrollable::GetDefaultOverSpringProperty()
     return DEFAULT_OVER_SPRING_PROPERTY;
 }
 
+void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
+{
+    if (scrollSnapMotion_ && scrollSnapController_ && scrollSnapController_->IsRunning()) {
+        scrollSnapController_->ClearStopListeners();
+        scrollSnapController_->Stop();
+        auto currPos = scrollSnapMotion_->GetCurrentPosition();
+        auto endPos = scrollSnapMotion_->GetEndValue();
+        auto velocity = scrollSnapMotion_->GetCurrentVelocity();
+        scrollSnapMotion_->Reset(currPos, endPos - offset, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+        scrollSnapController_->PlayMotion(scrollSnapMotion_);
+        scrollSnapController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+            auto scroll = weak.Upgrade();
+            CHECK_NULL_VOID(scroll);
+            scroll->ProcessScrollSnapStop();
+        });
+    }
+}
 } // namespace OHOS::Ace
