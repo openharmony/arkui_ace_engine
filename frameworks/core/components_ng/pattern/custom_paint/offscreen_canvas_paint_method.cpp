@@ -95,19 +95,19 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
 #ifndef USE_ROSEN_DRAWING
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
-    if (!canvasCache_.tryAllocPixels(imageInfo)) {
+    if (!bitmap_.tryAllocPixels(imageInfo)) {
         LOGE("The OffScreenCanvas fail to constructor due to the width and height being too large");
         isSucceed_ = false;
         return;
     }
-    canvasCache_.eraseColor(SK_ColorTRANSPARENT);
-    skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
+    bitmap_.eraseColor(SK_ColorTRANSPARENT);
+    skCanvas_ = std::make_unique<SkCanvas>(bitmap_);
 #else
     RSBitmapFormat bitmapFormat = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_UNPREMUL };
-    canvasCache_.Build(width, height, bitmapFormat);
-    canvasCache_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    bitmap_.Build(width, height, bitmapFormat);
+    bitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     rsCanvas_ = std::make_unique<RSCanvas>();
-    rsCanvas_->Bind(canvasCache_);
+    rsCanvas_->Bind(bitmap_);
 #endif
 
     imageShadow_ = std::make_unique<Shadow>();
@@ -416,9 +416,9 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     SkCanvas tempCanvas(tempCache);
 #if defined(USE_SYSTEM_SKIA_S) || defined (NEW_SKIA)
     tempCanvas.drawImageRect(
-        canvasCache_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
+        bitmap_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
 #else
-    tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
+    tempCanvas.drawBitmapRect(bitmap_, srcRect, dstRect, nullptr);
 #endif
     // write color
     std::unique_ptr<uint8_t[]> pixels = std::make_unique<uint8_t[]>(size * 4);
@@ -434,7 +434,7 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);
     RSImage rsImage;
-    rsImage.BuildFromBitmap(canvasCache_);
+    rsImage.BuildFromBitmap(bitmap_);
     tempCanvas.DrawImageRect(
         rsImage, srcRect, dstRect, RSSamplingOptions(), RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
     // write color
@@ -452,6 +452,64 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
         imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue));
     }
     return imageData;
+}
+
+void OffscreenCanvasPaintMethod::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
+{
+    double viewScale = 1.0;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    viewScale = context->GetViewScale();
+    int32_t dirtyWidth = std::abs(imageData->dirtyWidth);
+    int32_t dirtyHeight = std::abs(imageData->dirtyHeight);
+    double scaledLeft = imageData->dirtyX * viewScale;
+    double scaledTop = imageData->dirtyY * viewScale;
+    double dx = 0;
+    double dy = 0;
+    if (Negative(imageData->dirtyWidth)) {
+        scaledLeft += imageData->dirtyWidth * viewScale;
+    }
+    if (Negative(imageData->dirtyHeight)) {
+        scaledTop += imageData->dirtyHeight * viewScale;
+    }
+    if (Negative(scaledLeft)) {
+        dx = scaledLeft;
+    }
+    if (Negative(scaledTop)) {
+        dy = scaledTop;
+    }
+    // copy the bitmap to tempCanvas
+#ifndef USE_ROSEN_DRAWING
+    auto imageInfo = SkImageInfo::Make(dirtyWidth * viewScale, dirtyHeight * viewScale,
+        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+    SkBitmap subBitmap;
+    SkIRect subRect = SkIRect::MakeXYWH(scaledLeft, scaledTop, dirtyWidth * viewScale, dirtyHeight * viewScale);
+    bool ret = bitmap_.extractSubset(&subBitmap, subRect);
+    if (!ret) {
+        return;
+    }
+    auto pixelMap = imageData->pixelMap;
+    CHECK_NULL_VOID(pixelMap);
+    auto *rawData = pixelMap->GetWritablePixels();
+    CHECK_NULL_VOID(rawData);
+    subBitmap.readPixels(imageInfo, rawData, dirtyWidth * imageInfo.bytesPerPixel(), dx, dy);
+#else
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    int32_t size = dirtyWidth * dirtyHeight;
+    auto srcRect =
+        RSRect(scaledLeft, scaledTop, dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
+    auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
+    RSBitmap tempCache;
+    tempCache.Build(width, height, format);
+    RSCanvas tempCanvas;
+    tempCanvas.Bind(tempCache);
+    RSImage rsImage;
+    rsImage.BuildFromBitmap(bitmap_);
+    tempCanvas.DrawImageRect(
+        rsImage, srcRect, dstRect, RSSamplingOptions(), RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+    // write color
+    uint8_t* pixels = static_cast<uint8_t*>(tempCache.GetPixels());
+#endif
 }
 
 void OffscreenCanvasPaintMethod::FillText(
@@ -813,9 +871,9 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
 #if defined(USE_SYSTEM_SKIA_S) || defined (NEW_SKIA)
     //The return value of the dual framework interface has no alpha
-    tempCanvas.drawImage(canvasCache_.asImage(), 0.0f, 0.0f);
+    tempCanvas.drawImage(bitmap_.asImage(), 0.0f, 0.0f);
 #else
-    tempCanvas.drawBitmap(canvasCache_, 0.0f, 0.0f);
+    tempCanvas.drawBitmap(bitmap_, 0.0f, 0.0f);
 #endif
     SkPixmap src;
     bool success = tempCache.peekPixels(&src);
@@ -828,7 +886,7 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     double viewScale = context->GetViewScale();
     tempCanvas.Clear(RSColor::COLOR_TRANSPARENT);
     tempCanvas.Scale(1.0 / viewScale, 1.0 / viewScale);
-    tempCanvas.DrawBitmap(canvasCache_, 0.0f, 0.0f);
+    tempCanvas.DrawBitmap(bitmap_, 0.0f, 0.0f);
 
     auto& skBitmap = tempCache.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
     SkPixmap src;

@@ -385,6 +385,19 @@ std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, do
     return paintMethod_->GetImageData(rosenRenderContext, left, top, width, height);
 }
 
+void CustomPaintPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    if (paintMethod_->HasTask()) {
+        paintMethod_->FlushPipelineImmediately();
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    paintMethod_->GetImageData(renderContext, imageData);
+}
+
 void CustomPaintPattern::PutImageData(const Ace::ImageData& imageData)
 {
     auto task = [imageData](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {

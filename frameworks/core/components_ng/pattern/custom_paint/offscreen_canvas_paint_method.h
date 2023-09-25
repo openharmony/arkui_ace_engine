@@ -31,6 +31,7 @@ public:
     void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
+    void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
     std::string ToDataURL(const std::string& type, const double quality);
 
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
@@ -75,6 +76,12 @@ private:
     {
         return rsCanvas_.get();
     }
+#endif
+
+#ifndef USE_ROSEN_DRAWING
+    SkBitmap bitmap_;
+#else
+    RSBitmap bitmap_;
 #endif
 
     int32_t width_;

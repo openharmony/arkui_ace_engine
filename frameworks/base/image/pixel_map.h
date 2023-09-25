@@ -72,6 +72,7 @@ public:
     virtual std::string GetId() = 0;
     virtual std::string GetModifyId() = 0;
     virtual std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() = 0;
+    virtual void* GetWritablePixels() const = 0;
 
     static void* GetReleaseContext(const RefPtr<PixelMap>& pixelMap);
     // passed to SkImage to release PixelMap shared_ptr
