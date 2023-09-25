@@ -259,9 +259,7 @@ public:
     static void JsFocusOnTouch(const JSCallbackInfo& info);
     static void JsDefaultFocus(const JSCallbackInfo& info);
     static void JsGroupDefaultFocus(const JSCallbackInfo& info);
-#if defined(PREVIEW)
     static void JsDebugLine(const JSCallbackInfo& info);
-#endif
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);

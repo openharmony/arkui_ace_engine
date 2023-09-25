@@ -36,6 +36,10 @@ const char INSPECTOR_WIDTH[] = "width";
 const char INSPECTOR_HEIGHT[] = "height";
 const char INSPECTOR_RESOLUTION[] = "$resolution";
 const char INSPECTOR_CHILDREN[] = "$children";
+const char INSPECTOR_DEBUGLINE[] = "$debugLine";
+#ifdef PREVIEW
+const char INSPECTOR_VIEW_ID[] = "$viewID";
+#endif
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
@@ -133,8 +137,8 @@ void GetSpanInspector(
                       .append(",")
                       .append(std::to_string(rect.Height()));
     jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
-    jsonNode->Put("$debugLine", parent->GetDebugLine().c_str());
-    jsonNode->Put("$viewID", parent->GetViewId().c_str());
+    jsonNode->Put(INSPECTOR_DEBUGLINE, parent->GetDebugLine().c_str());
+    jsonNode->Put(INSPECTOR_VIEW_ID, parent->GetViewId().c_str());
     jsonNodeArray->Put(jsonNode);
 }
 
@@ -168,8 +172,8 @@ void GetInspectorChildren(
                           .append(",")
                           .append(std::to_string(rect.Height()));
         jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
-        jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
-        jsonNode->Put("$viewID", node->GetViewId().c_str());
+        jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
+        jsonNode->Put(INSPECTOR_VIEW_ID, node->GetViewId().c_str());
         auto jsonObject = JsonUtil::Create(true);
         parent->ToJsonValue(jsonObject);
         jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
@@ -227,6 +231,7 @@ void GetSpanInspector(
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
+    jsonNode->Put(INSPECTOR_DEBUGLINE, parent->GetDebugLine().c_str());
     RectF rect = node->GetTransformRectRelativeToWindow();
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     jsonNodeArray->Put(jsonNode);
@@ -253,6 +258,7 @@ void GetInspectorChildren(
     }
 
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
+    jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
@@ -326,6 +332,8 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
         jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     }
     auto jsonAttrs = JsonUtil::Create(true);
+    std::string debugLine = inspectorElement->GetDebugLine();
+    jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
     inspectorElement->ToJsonValue(jsonAttrs);
     jsonNode->Put(INSPECTOR_ATTRS, jsonAttrs);
     return jsonNode->ToString();
