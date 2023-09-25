@@ -506,6 +506,7 @@ void DragDropManager::RequireSummary()
     if (ret != 0) {
         LOGW("OnDragStart: UDMF GetSummary failed: %{public}d", ret);
     }
+    previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_ = summary;
 }
 

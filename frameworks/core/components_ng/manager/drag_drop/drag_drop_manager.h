@@ -159,6 +159,11 @@ public:
         return dragDropState_ == DragDropMgrState::DRAGGING;
     }
 
+    void ResetDragging(DragDropMgrState dragDropMgrState = DragDropMgrState::IDLE)
+    {
+        dragDropState_ = dragDropMgrState;
+    }
+
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(
