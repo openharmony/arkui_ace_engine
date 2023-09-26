@@ -2352,6 +2352,11 @@ void TextFieldPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE && !IsNormalInlineState()) {
+        layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    }
     CheckIfNeedToResetKeyboard();
     if (layoutProperty->GetShowUnderlineValue(false) &&
         layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
@@ -2395,8 +2400,6 @@ void TextFieldPattern::OnModifyDone()
     textRect_.SetLeft(textRect_.GetX() + offsetDifference_.GetX());
     textRect_.SetTop(textRect_.GetY() + offsetDifference_.GetY());
     CalculateDefaultCursor();
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
     if (renderContext->HasBackgroundColor()) {
         paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
     }
