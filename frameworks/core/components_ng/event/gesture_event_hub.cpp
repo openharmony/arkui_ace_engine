@@ -754,6 +754,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         LOGW("HandleOnDragStart: UDMF GetSummary failed, ret %{public}d", ret);
     }
     dragDropManager->SetSummaryMap(summary);
+    dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
     std::shared_ptr<Media::PixelMap> pixelMap;
     if (g_getPixelMapSucc) {
         pixelMap = g_pixelMap->GetPixelMapSharedPtr();
