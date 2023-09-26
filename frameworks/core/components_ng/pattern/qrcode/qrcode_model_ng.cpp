@@ -56,11 +56,7 @@ void QRCodeModelNG::SetQRCodeColor(const Color& color)
 void QRCodeModelNG::SetQRBackgroundColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
-        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
-    }
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 
 void QRCodeModelNG::SetContentOpacity(const double opacity)
