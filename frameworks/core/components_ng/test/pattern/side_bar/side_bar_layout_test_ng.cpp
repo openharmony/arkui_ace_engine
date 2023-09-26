@@ -1019,7 +1019,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg0023, TestSize.Level1)
     layoutConstraint.percentReference = CONTAINER_SIZE;
     layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper.GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
+    ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->contentConstraint_ = layoutProperty->CreateContentConstraint();
     layoutAlgorithm->Measure(&layoutWrapper);
@@ -1033,7 +1033,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg0023, TestSize.Level1)
     layoutAlgorithm->preSideBarWidth_ = DEFAULT_MIN;
     layoutAlgorithm->GetAllPropertyValue(layoutProperty, parentWidth);
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    ASSERT_NE(pipeline, nullptr);
     pipeline->minPlatformVersion_ = 12;
     layoutAlgorithm->Measure(&layoutWrapper);
     layoutAlgorithm->type_ = SideBarContainerType::OVERLAY;
