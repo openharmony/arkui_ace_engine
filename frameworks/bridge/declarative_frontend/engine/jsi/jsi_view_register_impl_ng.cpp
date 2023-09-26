@@ -167,6 +167,7 @@
 #endif
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
 #endif
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
