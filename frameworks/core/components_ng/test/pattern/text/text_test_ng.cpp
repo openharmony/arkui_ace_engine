@@ -525,9 +525,6 @@ HWTEST_F(TextTestNg, OnAttachToFrameNode001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, OnDetachFromFrameNode001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     pattern->selectOverlayProxy_ = nullptr;
     pattern->OnDetachFromFrameNode(nullptr);

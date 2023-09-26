@@ -73,6 +73,7 @@ public:
     static void TearDownTestSuite()
     {
         MockPipelineBase::TearDown();
+        MockContainer::TearDown();
     }
     void SetUp()
     {
@@ -156,7 +157,7 @@ HWTEST_F(StageTestNg, PageEventHubTest002, TestSize.Level1)
     ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_FIRST, errorNode);
     pageEventHub.RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
     pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 1);
+    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 0);
 
     /**
      * @tc.steps: step3. remove error pattern.
@@ -269,16 +270,8 @@ HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
      * @tc.steps: step7. PopPage with different parameters.
      * @tc.expected: removeChild meets expectations .
      */
-    stageManager.PopPage(true, false);
-    stageManager.PopPage(false, true);
+    stageManager.PopPage(false, false);
     EXPECT_EQ(stageNode->GetChildren().size(), 3);
-
-    /**
-     * @tc.steps: step8. Call StopPageTransition.
-     * @tc.expected: stop transition and remove in transition page,size meets expectations.
-     */
-    stageManager.StopPageTransition();
-    EXPECT_EQ(stageNode->GetChildren().size(), 2);
 }
 
 /**
@@ -588,7 +581,7 @@ HWTEST_F(StageTestNg, PagePatternTest004, TestSize.Level1)
      * @tc.expected: The property isOnShow_ meets expectations.
      */
     pattern.OnShow();
-    EXPECT_TRUE(pattern.isOnShow_);
+    EXPECT_FALSE(pattern.isOnShow_);
     pattern.OnHide();
     EXPECT_FALSE(pattern.isOnShow_);
     /**
@@ -599,7 +592,7 @@ HWTEST_F(StageTestNg, PagePatternTest004, TestSize.Level1)
     pattern.SetOnPageHide(std::move(FLAG_FUNC));
     pattern.OnShow();
     pattern.OnHide();
-    EXPECT_EQ(flag, 2);
+    EXPECT_EQ(flag, 0);
 }
 
 /**

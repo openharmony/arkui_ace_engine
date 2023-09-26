@@ -1475,7 +1475,7 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::TOUCH);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    EXPECT_TRUE(scrollBar->IsPressed());
+    EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
      * @tc.steps: step7. Mouse in bar and move out of bar (out->in->in->out)

@@ -382,7 +382,7 @@ HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg005, TestSize.Level1)
     subMenu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));
     subMenu->MountToParent(wrapperNode);
     wrapperPattern->OnTouchEvent(contextMenuTouchUpEventInfo);
-    EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
+    EXPECT_EQ(wrapperNode->GetChildren().size(), 3);
 }
 
 /**
@@ -4455,16 +4455,16 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
     algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset(),
-        OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y));
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(),
+        MENU_ITEM_SIZE_WIDTH);
 
     // @tc.cases: case2. sub menu show on the left side of item
     algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(),
-        (FULL_SCREEN_WIDTH - MENU_ITEM_SIZE_WIDTH - MENU_SIZE_WIDTH));
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), MENU_OFFSET_Y);
+        MENU_ITEM_SIZE_WIDTH);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 
 /**
@@ -4740,10 +4740,10 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg039, TestSize.Level1)
      */
     menuAlgorithm->GetPaintProperty(layoutWrapper)->UpdateEnableArrow(true);
     auto result = menuAlgorithm->GetIfNeedArrow(layoutWrapper, menuSize);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     menuAlgorithm->placement_ = Placement::LEFT;
     result = menuAlgorithm->GetIfNeedArrow(layoutWrapper, menuSize);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**

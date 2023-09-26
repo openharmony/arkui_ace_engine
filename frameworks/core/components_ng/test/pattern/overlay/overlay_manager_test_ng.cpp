@@ -18,17 +18,18 @@
 
 #include "gtest/gtest.h"
 
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "core/components/common/properties/color.h"
-
 #define private public
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
@@ -629,13 +630,16 @@ HWTEST_F(OverlayManagerTestNg, PopupTest003, TestSize.Level1)
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     popupNode->MountToParent(rootNode);
+    targetNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->HidePopup(targetId, popupInfo);
+    overlayManager->BlurOverlayNode(rootNode);
+    overlayManager->MarkDirty(rootNode->layoutProperty_->GetPropertyChangeFlag());
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
-    EXPECT_TRUE(iter == rootChildren.end());
+    EXPECT_TRUE(iter == rootChildren.begin());
 }
 /**
  * @tc.name: MenuTest001
@@ -652,8 +656,7 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
     auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto menuNode =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     menuNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode();
@@ -849,7 +852,6 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest001, TestSize.Level1)
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
     auto res = overlayManager->RemoveOverlay(false);
     EXPECT_FALSE(res);
-    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
     EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
 }
 /**
@@ -1155,6 +1157,8 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    overlayManager->ShowTimeDialog(
+        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
 

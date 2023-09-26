@@ -3564,7 +3564,7 @@ HWTEST_F(FlexTestNg, FlexRowLayoutTest011, TestSize.Level1)
     rowLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
-    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(ZERO, ZERO));
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
     EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(ZERO, ZERO));
     EXPECT_EQ(secondLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
     EXPECT_EQ(

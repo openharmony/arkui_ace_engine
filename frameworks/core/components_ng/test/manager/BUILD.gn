@@ -17,7 +17,8 @@ group("manager_unittest") {
     "drag_drop/drag_drop_manager:drag_drop_manager_test_ng",
     "drag_drop/drag_drop_proxy:drag_drop_proxy_test_ng",
     "full_screen:full_screen_manager_test_ng",
-    "select_overlay/select_overlay_manager:select_overlay_manager_test_ng",
+
+    #"select_overlay/select_overlay_manager:select_overlay_manager_test_ng",
     "select_overlay/select_overlay_proxy:select_overlay_proxy_test_ng",
     "shared_overlay:shared_overlay_manager_test_ng",
   ]

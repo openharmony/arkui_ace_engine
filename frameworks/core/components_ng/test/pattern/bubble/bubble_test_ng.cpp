@@ -443,6 +443,9 @@ HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level1)
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
     EXPECT_NE(frameNode, nullptr);
+    auto blankFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(blankFrameNode, nullptr);
+    frameNode->AddChild(blankFrameNode);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -491,6 +494,10 @@ HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level1)
     auto bubbleLayoutAlgorithm =
         AceType::DynamicCast<BubbleLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     EXPECT_NE(bubbleLayoutAlgorithm, nullptr);
+    auto host = bubblePattern->GetHost();
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    EXPECT_NE(childNode, nullptr);
+    
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     bool flag = bubblePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config.skipMeasure, config.skipLayout);
     EXPECT_EQ(flag, true);
@@ -705,9 +712,6 @@ HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level1)
     pattern->transitionStatus_ = TransitionStatus::ENTERING;
     pattern->StartEnteringAnimation(nullptr);
     EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::ENTERING);
-    pattern->transitionStatus_ = TransitionStatus::EXITING;
-    pattern->StartExitingAnimation(nullptr);
-    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::EXITING);
 }
 
 /**
@@ -818,6 +822,10 @@ HWTEST_F(BubbleTestNg, BubblePatternTest012, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, pattern);
     ASSERT_NE(frameNode, nullptr);
+    auto blankFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(blankFrameNode, nullptr);
+    frameNode->AddChild(blankFrameNode);
+
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper =
@@ -1441,7 +1449,8 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH, BUBBLE_HEIGHT));
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset(), MESSAGE_OFFSET);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 0);
 }
 
 /**

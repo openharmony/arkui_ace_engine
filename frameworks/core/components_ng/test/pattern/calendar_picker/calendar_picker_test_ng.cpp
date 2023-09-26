@@ -302,7 +302,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest001, TestSize.Level1)
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     KeyEvent keyEventOne(KeyCode::KEY_TAB, KeyAction::DOWN);
     auto result = pickerPattern->HandleFocusEvent(keyEventOne);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     KeyEvent keyEventTwo(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);

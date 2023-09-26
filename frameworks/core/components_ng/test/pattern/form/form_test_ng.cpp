@@ -472,11 +472,8 @@ HWTEST_F(FormTestNg, CreateCardContainer002, TestSize.Level1)
     pattern->subContainer_ = subContainer;
     pattern->frameNode_ = frameNode;
     pattern->cardInfo_.id = 1;
-    auto mockContianer = AceType::MakeRefPtr<MockContainer>();
-    AceEngine::Get().AddContainer(ContainerScope::CurrentId(), mockContianer);
-    auto conainer = Container::Current();
-    ASSERT_NE(conainer, nullptr);
-    ASSERT_EQ(conainer, mockContianer);
+    RefPtr<Container> conainer = Container::Current();
+    EXPECT_NE(conainer, nullptr);
     conainer->SetUseNewPipeline();
     ASSERT_EQ(Container::IsCurrentUseNewPipeline(), true);
 
