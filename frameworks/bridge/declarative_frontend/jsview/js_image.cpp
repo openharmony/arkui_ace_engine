@@ -406,7 +406,7 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         LOGW("ColorFilter is not array or obj");
         return;
     }
-    if (tmpInfo->IsObject()) {
+    if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
         JSColorFilter* colorFilter;
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
             colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
