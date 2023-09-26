@@ -211,6 +211,17 @@ public:
 
     void SetTransInfo(int id);
     void Transform(PointF& windowPointF, PointF& originPointF);
+
+    void AddCurrentFingers()
+    {
+        currentFingers_++;
+    }
+
+    void MinusCurrentFingers()
+    {
+        currentFingers_--;
+    }
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
