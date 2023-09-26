@@ -3203,9 +3203,9 @@ HWTEST_F(PanelTestNg, PanelTestNg0062, TestSize.Level1)
     auto layoutAlgorithm = AceType::DynamicCast<SlidingPanelLayoutAlgorithm>(panelPattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(layoutAlgorithm == nullptr);
     auto hub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
+    ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
+    ASSERT_NE(gestureHub, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     layoutProperty->UpdatePanelType(PanelType::CUSTOM);
     panelPattern->InitPanEvent(gestureHub);
