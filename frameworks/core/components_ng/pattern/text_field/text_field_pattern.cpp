@@ -552,6 +552,7 @@ bool TextFieldPattern::CaretPositionCloseToTouchPosition()
 
 bool TextFieldPattern::IsTextArea() const
 {
+    CHECK_NULL_RETURN(GetHost(), false);
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, true);
     return layoutProperty->HasMaxLines() ? layoutProperty->GetMaxLinesValue(1) > 1 : true;
