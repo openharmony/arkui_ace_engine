@@ -273,6 +273,11 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
 panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+#if defined(PREViEW)
+    LOGW("[Engine Log] The postCardAction interface in the Previewer is a mocked implementation and"
+"may behave differently than an real device.");
+    return panda::JSValueRef::Undefined(vm);
+#endif
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {
         LOGE("The arg is wrong, must have no more than two argument");
