@@ -1124,6 +1124,7 @@ OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& cont
         taskScheduler->PostTask(
             [eventHub, dragEvent, dragDropManager, eventManager]() {
                 dragDropManager->SetIsDragged(false);
+                dragDropManager->ResetDragging();
                 if (eventManager) {
                     eventManager->DoMouseActionRelease();
                 }
