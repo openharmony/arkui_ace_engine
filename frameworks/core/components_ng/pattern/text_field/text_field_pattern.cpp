@@ -5571,7 +5571,7 @@ void TextFieldPattern::UpdateScrollBarOffset()
         paddingRight = 0.0f;
         contentHeight = GetSingleLineHeight() * GetMaxLines();
     }
-    Size size(contentRect_.Width() + paddingRight, contentHeight + paddingHeight);
+    Size size(frameRect_.Width(), contentHeight + paddingHeight);
     UpdateScrollBarRegion(
         contentRect_.GetY() - textRect_.GetY(), textRect_.Height() + paddingHeight, size, Offset(0.0, 0.0));
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
