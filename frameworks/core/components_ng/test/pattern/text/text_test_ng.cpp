@@ -3517,6 +3517,43 @@ HWTEST_F(TextTestNg, HandleMouseEvent003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMouseEvent004
+ * @tc.desc: test test_pattern.h HandleMouseEvent function when isDoubleClick_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleMouseEvent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textForDisplay_ = "test";
+    pattern->textSelector_.Update(0, 3);
+    pattern->copyOption_ = CopyOptions::InApp;
+
+    /**
+     * @tc.steps: step2. create paragraph
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step3. create MouseInfo and call HandleMouseEvent function
+     * @tc.expected: isDoubleClick_ is false
+     */
+    MouseInfo info;
+    // left RELEASE
+    info.button_ = MouseButton::LEFT_BUTTON;
+    info.action_ = MouseAction::RELEASE;
+    pattern->blockPress_ = true;
+    pattern->isDoubleClick_ = true;
+    pattern->HandleMouseEvent(info);
+    EXPECT_FALSE(pattern->isDoubleClick_);
+}
+
+/**
  * @tc.name: HandleOnCopy001
  * @tc.desc: test test_pattern.h HandleOnCopy function
  * @tc.type: FUNC
@@ -4682,5 +4719,109 @@ HWTEST_F(TextTestNg, GetCopyOptionString001, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetCopyOptionString(), "CopyOptions.Distributed");
     textLayoutProperty->UpdateCopyOption(CopyOptions(10));
     EXPECT_EQ(textLayoutProperty->GetCopyOptionString(), "CopyOptions.None");
+}
+
+/**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: test test_pattern.h HandleTouchEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleTouchEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+
+    /**
+     * @tc.steps: step2. construct spanItemChildren
+     */
+    std::list<RefPtr<SpanItem>> spanItemChildren;
+    auto spanItemChild1 = AceType::MakeRefPtr<SpanItem>();
+    spanItemChildren.emplace_back(spanItemChild1);
+    pattern->spans_ = spanItemChildren;
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. create GestureEvent and call HandleTouchEvent.
+     * @tc.expected: function run rightly
+     */
+    pattern->textSelector_.Update(-2, -2);
+    TouchEventInfo touchEventInfo = TouchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo = TouchLocationInfo(1);
+    touchLocationInfo.SetLocalLocation(Offset(0, 0));
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    pattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -2);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -2);
+}
+
+/**
+ * @tc.name: HandleDoubleClickEvent001
+ * @tc.desc: test test_pattern.h HandleDoubleClickEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+
+    /**
+     * @tc.steps: step2. construct spanItemChildren
+     */
+    std::list<RefPtr<SpanItem>> spanItemChildren;
+    auto spanItemChild1 = AceType::MakeRefPtr<SpanItem>();
+    spanItemChildren.emplace_back(spanItemChild1);
+    pattern->spans_ = spanItemChildren;
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. create GestureEvent and call HandleClickEvent function quickly to trigger doubleClick.
+     * @tc.expected: function run rightly
+     */
+    pattern->textSelector_.Update(-2, -2);
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+
+    // test CopyOptions is None
+    pattern->copyOption_ = CopyOptions::None;
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(pattern->hasClicked_);
+    pattern->HandleClickEvent(info);
+    EXPECT_FALSE(pattern->hasClicked_);
+
+    // test mouse doubleClick
+    pattern->isMousePressed_ = true;
+    pattern->copyOption_ = CopyOptions::Local;
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(pattern->hasClicked_);
+    pattern->HandleClickEvent(info);
+    EXPECT_FALSE(pattern->hasClicked_);
+
+    // test gesture doubleClick
+    pattern->isMousePressed_ = false;
+    pattern->copyOption_ = CopyOptions::Local;
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(pattern->hasClicked_);
+    pattern->HandleClickEvent(info);
+    EXPECT_FALSE(pattern->hasClicked_);
 }
 } // namespace OHOS::Ace::NG
