@@ -726,7 +726,7 @@ RSRecordingPath DrawingDecorationPainter::DrawingCreatePath(const RefPtr<BasicSh
 {
     OffsetF position;
     RSRecordingPath rsPath;
-    if (basicShape == nullptr) {
+    if (basicShape == nullptr || basicShape->GetBasicShapeType() == BasicShapeType::NONE) {
         rsPath.AddRect(RSRect(0.0, 0.0, size.Width(), size.Height()));
         return rsPath;
     }
