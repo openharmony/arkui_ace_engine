@@ -1931,9 +1931,16 @@ RectF RosenRenderContext::AdjustPaintRect()
     CHECK_NULL_RETURN(rsNode_, rect);
     const auto& geometryNode = frameNode->GetGeometryNode();
     rect = geometryNode->GetFrameRect();
-    if (!rect.GetSize().IsPositive()) {
-        LOGD("paint size is zero");
-        return rect;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!rect.GetSize().IsPositive()) {
+            LOGD("paint size is zero");
+            return rect;
+        }
+    } else {
+        if (!rect.GetSize().IsPositive() && !frameNode->IsLayoutComplete()) {
+            LOGD("paint size is zero");
+            return rect;
+        }
     }
     const auto& layoutConstraint = frameNode->GetGeometryNode()->GetParentLayoutConstraint();
     auto widthPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Width()

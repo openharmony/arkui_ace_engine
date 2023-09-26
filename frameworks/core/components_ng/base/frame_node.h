@@ -390,6 +390,11 @@ public:
         return draggable_;
     }
 
+    bool IsLayoutComplete() const
+    {
+        return isLayoutComplete_;
+    }
+
     bool IsUserSet() const
     {
         return userSet_;
@@ -643,6 +648,7 @@ private:
     bool isActive_ = false;
     bool isResponseRegion_ = false;
     bool bypass_ = false;
+    bool isLayoutComplete_ = false;
 
     double lastVisibleRatio_ = 0.0;
 

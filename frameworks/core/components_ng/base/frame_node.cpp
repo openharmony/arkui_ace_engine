@@ -2244,6 +2244,7 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
     }
@@ -2411,6 +2412,7 @@ void FrameNode::SyncGeometryNode()
         geometryTransition->DidLayout(Claim(this));
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
+        isLayoutComplete_ = true;
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
     }
 
