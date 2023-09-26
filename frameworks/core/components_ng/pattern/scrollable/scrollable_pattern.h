@@ -68,9 +68,6 @@ public:
     }
     virtual bool OnScrollCallback(float offset, int32_t source);
 
-private:
-    virtual void OnScrollEndCallback() {};
-
 public:
     virtual void OnScrollStartCallback() {};
     bool ScrollableIdle()
@@ -350,6 +347,8 @@ protected:
     }
 
 private:
+    virtual void OnScrollEndCallback() {};
+
     void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
     bool OnScrollPosition(double offset, int32_t source);

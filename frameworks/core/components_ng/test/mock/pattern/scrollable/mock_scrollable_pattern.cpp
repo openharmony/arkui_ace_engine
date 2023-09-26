@@ -76,4 +76,8 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
     return false;
 }
+
+void ScrollablePattern::OnScrollStartRecursive(float position) {}
+
+void ScrollablePattern::OnScrollEndRecursive() {}
 } // namespace OHOS::Ace::NG

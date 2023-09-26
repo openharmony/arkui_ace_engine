@@ -1331,11 +1331,11 @@ ScrollResult ScrollablePattern::HandleScrollParallel(float& offset, int32_t sour
 ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, NestedState state)
 {
     ScrollResult result = { 0, false };
-    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     auto parent = parent_.Upgrade();
     auto overOffsets = GetOverScrollOffset(offset);
     float backOverOffset = offset > 0 ? overOffsets.end : overOffsets.start;
     if (NearZero(offset) || !NearZero(backOverOffset)) {
+        ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
         ExecuteScrollFrameBegin(offset, scrollState);
     } else if (parent && ((offset < 0 && nestedScroll_.forward == NestedScrollMode::PARENT_FIRST) ||
                              (offset > 0 && nestedScroll_.backward == NestedScrollMode::PARENT_FIRST))) {
