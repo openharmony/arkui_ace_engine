@@ -269,6 +269,7 @@ public:
 
     void UpdateScrollSnapStartOffset(double offset);
     void StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity);
+    void UpdateScrollSnapEndWithOffset(double offset);
 
     bool IsAnimationNotRunning() const;
 

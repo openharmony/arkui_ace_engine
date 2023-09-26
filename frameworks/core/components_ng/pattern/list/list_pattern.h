@@ -287,6 +287,7 @@ private:
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
     std::optional<float> predictSnapOffset_;
+    std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
     bool scrollable_ = true;
     bool paintStateFlag_ = false;
