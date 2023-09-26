@@ -1019,7 +1019,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg0023, TestSize.Level1)
     layoutConstraint.percentReference = CONTAINER_SIZE;
     layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper.GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
+    ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->contentConstraint_ = layoutProperty->CreateContentConstraint();
     layoutAlgorithm->Measure(&layoutWrapper);
@@ -1033,7 +1033,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg0023, TestSize.Level1)
     layoutAlgorithm->preSideBarWidth_ = DEFAULT_MIN;
     layoutAlgorithm->GetAllPropertyValue(layoutProperty, parentWidth);
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    ASSERT_NE(pipeline, nullptr);
     pipeline->minPlatformVersion_ = 12;
     layoutAlgorithm->Measure(&layoutWrapper);
     layoutAlgorithm->type_ = SideBarContainerType::OVERLAY;
@@ -1073,5 +1073,51 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg0024, TestSize.Level1)
     layoutProperty->layoutConstraint_ = layoutConstraint;
     SideBarContainerModelInstance.SetSideBarContainerType(SideBarContainerType::EMBED);
     layoutAlgorithm->LayoutDivider(AccessibilityManager::RawPtr(sideBarLayoutWrapper), sideBarLayoutWrapper);
+}
+
+/**
+ * @tc.name: SideBarLayoutTestNg025
+ * @tc.desc: Test SideBar AdjustMinAndMaxSideBarWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg025, TestSize.Level1)
+{
+    auto sideBarFrameNode =
+        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
+    EXPECT_FALSE(sideBarFrameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    auto layoutWrapper = LayoutWrapperNode(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    EXPECT_FALSE(sideBarPattern == nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
+    EXPECT_FALSE(layoutAlgorithm == nullptr);
+    auto tempFrame =
+        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
+    EXPECT_FALSE(tempFrame == nullptr);
+    auto tempLayoutWrapper = tempFrame->CreateLayoutWrapper();
+    EXPECT_FALSE(tempLayoutWrapper == nullptr);
+    layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+    layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
+    layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
+    layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
+    layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
+    layoutAlgorithm->GetSideBarLayoutWrapper(&layoutWrapper);
+    layoutAlgorithm->UpdateDefaultValueByVersion();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->minPlatformVersion_ = 12;
+    auto sideBarLayoutWrapper = layoutAlgorithm->GetSideBarLayoutWrapper(&layoutWrapper);
+    ASSERT_NE(sideBarLayoutWrapper, nullptr);
+    auto sideBarLayoutProperty = sideBarLayoutWrapper->GetLayoutProperty();
+    EXPECT_FALSE(sideBarLayoutProperty == nullptr);
+    sideBarLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    sideBarLayoutProperty->calcLayoutConstraint_->maxSize =
+        CalcSize(CalcLength(SIDE_BAR_SIZE), CalcLength(SIZEF_WIDTH));
+    sideBarLayoutProperty->calcLayoutConstraint_->minSize =
+        CalcSize(CalcLength(SIDE_BAR_SIZE), CalcLength(SIZEF_WIDTH));
+    sideBarLayoutProperty->calcLayoutConstraint_->minSize->width_ = CalcLength(SIDE_BAR_SIZE);
+    layoutAlgorithm->AdjustMinAndMaxSideBarWidth(&layoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->minSideBarWidth_, layoutAlgorithm->maxSideBarWidth_);
 }
 } // namespace OHOS::Ace::NG
