@@ -5928,11 +5928,11 @@ HWTEST_F(TextFieldPatternTestNg, CursorMove, TestSize.Level2)
 }
 
 /**
- * @tc.name: HandleMouseEvent
+ * @tc.name: HandleMouseEvent001
  * @tc.desc: Verify that the HandleMouseEvent interface calls normally and exits without exception.
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, HandleMouseEvent, TestSize.Level2)
+HWTEST_F(TextFieldPatternTestNg, HandleMouseEvent001, TestSize.Level2)
 {
     /**
      * @tc.steps: step1. Create TextFieldPattern.
@@ -5964,6 +5964,38 @@ HWTEST_F(TextFieldPatternTestNg, HandleMouseEvent, TestSize.Level2)
     layoutProperty->UpdateShowPasswordIcon(true);
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     pattern->HandleMouseEvent(mouseInfo);
+}
+
+/**
+ * @tc.name: HandleMouseEvent002
+ * @tc.desc: Verify that the HandleMouseEvent interface calls normally when isDoubleClick_ is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleMouseEvent002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleMouseEvent.
+     * @tc.expected: Check pattern->isMousePressed_ is false.
+     */
+    pattern->isDoubleClick_ = true;
+    pattern->isMousePressed_ = true;
+    MouseAction action = MouseAction::RELEASE;
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::NONE_BUTTON);
+    mouseInfo.SetAction(action);
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(pattern->isMousePressed_);
 }
 
 /**
@@ -6478,11 +6510,11 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternApplyInlineState002, TestSize.L
 }
 
 /**
- * @tc.name: BeforeCreateLayoutWrapper
+ * @tc.name: BeforeCreateLayoutWrapper001
  * @tc.desc: test BeforeCreateLayoutWrapper
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, BeforeCreateLayoutWrapper, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create TextFieldPattern.
@@ -6523,6 +6555,45 @@ HWTEST_F(TextFieldPatternTestNg, BeforeCreateLayoutWrapper, TestSize.Level1)
     textFieldPattern->BeforeCreateLayoutWrapper();
     textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     EXPECT_FALSE(textFieldPattern->UpdateCaretPositionByMouseMovement());
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper002
+ * @tc.desc: test BeforeCreateLayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, BeforeCreateLayoutWrapper002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step2. set clipboard avoid nullptr and call BeforeCreateLayoutWrapper.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    textFieldPattern->clipboard_ = clipboard;
+
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
+    textFieldPattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
+    EXPECT_FALSE(textFieldPattern->isDoubleClick_);
+
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::EVENT;
+    textFieldPattern->isMousePressed_ = true;
+    textFieldPattern->isDoubleClick_ = true;
+    textFieldPattern->BeforeCreateLayoutWrapper();
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPositionByMouseMovement());
+    EXPECT_FALSE(textFieldPattern->isDoubleClick_);
 }
 
 /**
@@ -7579,29 +7650,94 @@ HWTEST_F(TextFieldPatternTestNg, HandleClickEvent, TestSize.Level1)
     pattern_->HandleClickEvent(info);
 
     focusHub->currentFocus_ = true;
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
 
     focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     focusHub->focusCallbackEvents_->isFocusOnTouch_ = false;
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
 
     pattern_->isMousePressed_ = true;
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
-    EXPECT_TRUE(pattern_->isMousePressed_);
+    EXPECT_FALSE(pattern_->isMousePressed_);
 
     info.SetLocalLocation(Offset(90, 90));
     pattern_->imageRect_.SetWidth(20);
     pattern_->frameRect_.SetWidth(100);
     layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     layoutProperty_->UpdateShowPasswordIcon(true);
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
     EXPECT_EQ(pattern_->caretUpdateType_, CaretUpdateType::ICON_PRESSED);
 
     layoutProperty_->UpdateShowPasswordIcon(false);
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
 
     info.SetLocalLocation(Offset(10, 90));
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
+}
+
+/**
+ * @tc.name: HandleDoubleClickEvent
+ * @tc.desc: test method of HandleDoubleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleDoubleClickEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleClickEvent function quickly to trigger doubleClick.
+     * @tc.expected: Check result.
+     */
+    auto renderContext = host_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF()));
+
+    auto focusHub = host_->GetOrCreateFocusHub();
+    focusHub->eventHub_.Upgrade()->SetEnabled(true);
+    focusHub->focusType_ = FocusType::NODE;
+    layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    focusHub->focusable_ = true;
+    focusHub->parentFocusable_ = true;
+    GestureEvent info;
+    pattern_->HandleClickEvent(info);
+
+    focusHub->currentFocus_ = true;
+    pattern_->hasClicked_ = false;
+    pattern_->HandleClickEvent(info);
+
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->isFocusOnTouch_ = false;
+    pattern_->hasClicked_ = false;
+
+    // test gesture doubleClick
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
+    pattern_->isUsingMouse_ = false;
+    pattern_->HandleClickEvent(info);
+    EXPECT_FALSE(pattern_->hasClicked_);
+
+    // test mouse doubleClick
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
+    pattern_->isUsingMouse_ = true;
+    pattern_->HandleClickEvent(info);
+    EXPECT_FALSE(pattern_->hasClicked_);
+
+    // test timeout > 300 ms
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
+    pattern_->lastClickTimeStamp_ = pattern_->lastClickTimeStamp_ - std::chrono::seconds(1);
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
 }
 
 } // namespace OHOS::Ace::NG
