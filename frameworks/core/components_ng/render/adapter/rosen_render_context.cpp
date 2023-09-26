@@ -1405,6 +1405,9 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
 {
     RectF rect;
     CHECK_NULL_RETURN(rsNode_, rect);
+    if (rsNode_->GetStagingProperties().GetRotation()) {
+        return RectF(0, 0, -1, -1);
+    }
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
