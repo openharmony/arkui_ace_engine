@@ -1675,6 +1675,7 @@ void PipelineContext::SetAppTitle(const std::string& title)
         LOGW("SetAppTitle failed, Window modal is not container.");
         return;
     }
+    CHECK_NULL_VOID(rootNode_);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
@@ -1688,6 +1689,7 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
         LOGW("SetAppIcon failed, Window modal is not container.");
         return;
     }
+    CHECK_NULL_VOID(rootNode_);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
@@ -1998,6 +2000,7 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
         LOGW("SetAppIcon failed, Window modal is not container.");
         return;
     }
+    CHECK_NULL_VOID(rootNode_);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
@@ -2034,6 +2037,7 @@ void PipelineContext::SetCloseButtonStatus(bool isEnabled)
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         return;
     }
+    CHECK_NULL_VOID(rootNode_);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
