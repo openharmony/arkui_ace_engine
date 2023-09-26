@@ -7524,6 +7524,32 @@ HWTEST_F(TextFieldPatternTestNg, OnCursorTwinkling, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test on color configuration update
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<TextTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->textStyle_.textColor_ = Color::BLACK;
+    pattern->OnColorConfigurationUpdate();
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextColor(), Color::BLACK);
+}
+
+/**
  * @tc.name: HandleClickEvent
  * @tc.desc: test method of HandleClickEvent
  * @tc.type: FUNC
