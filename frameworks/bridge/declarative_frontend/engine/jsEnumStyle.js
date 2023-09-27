@@ -808,8 +808,8 @@ var NavBarPosition;
 
 var TitleHeight;
 (function (TitleHeight) {
-  TitleHeight[TitleHeight["MainOnly"] = 0] = "MainOnly";
-  TitleHeight[TitleHeight["MainWithSub"] = 1] = "MainWithSub";
+  TitleHeight["MainOnly"] = "MainOnly";
+  TitleHeight["MainWithSub"] = "MainWithSub";
 })(TitleHeight || (TitleHeight = {}));
 
 var ResponseType;
