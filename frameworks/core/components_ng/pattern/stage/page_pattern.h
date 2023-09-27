@@ -144,17 +144,14 @@ public:
         isRenderDone_ = true;
     }
 
-    void AddDealytLayoutNode(const WeakPtr<FrameNode>& node);
+    void AddDelaytLayoutNode(const WeakPtr<FrameNode>& node);
 
     bool GetPageShowState()
     {
         return isOnShow_;
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<PageLayoutAlgorithm>();
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
 private:
     void OnAttachToFrameNode() override;

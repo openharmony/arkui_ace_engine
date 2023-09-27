@@ -298,7 +298,7 @@ bool PagePattern::AvoidKeyboard() const
     return pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled();
 }
 
-void PagePattern::AddDealytLayoutNode(const WeakPtr<FrameNode>& node)
+void PagePattern::AddDelaytLayoutNode(const WeakPtr<FrameNode>& node)
 {
     delayLayoutNodes_.push_back(node);
 }
@@ -316,5 +316,10 @@ void PagePattern::FlushDelayLayoutNodes()
         }
     }
     pipeline->FlushPipelineImmediately();
+}
+
+RefPtr<LayoutAlgorithm> PagePattern::CreateLayoutAlgorithm()
+{
+    return MakeRefPtr<PageLayoutAlgorithm>();
 }
 } // namespace OHOS::Ace::NG

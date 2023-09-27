@@ -128,14 +128,12 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty, bool checkPage)
 {
-    ACE_SCOPED_TRACE("AddDirtyLayoutNode [%s-%d] pageId %d %d", dirty->GetTag().c_str(), dirty->GetId(),
-        dirty->GetPageId(), stageManager_->GetLastPage() ? stageManager_->GetLastPage()->GetPageId() : -1);
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     if (checkPage && dirty->GetPageId() > 0 && dirty->GetPageId() < GetCurrentPageId()) {
         auto page = stageManager_->GetLastPage();
         auto pagePattern = page->GetPattern<PagePattern>();
-        pagePattern->AddDealytLayoutNode(WeakClaim(RawPtr(dirty)));
+        pagePattern->AddDelaytLayoutNode(WeakClaim(RawPtr(dirty)));
         return;
     }
     taskScheduler_->AddDirtyLayoutNode(dirty);

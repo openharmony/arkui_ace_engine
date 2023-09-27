@@ -20,7 +20,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
-
 class PageLayoutAlgorithm : public BoxLayoutAlgorithm {
 public:
     PageLayoutAlgorithm() = default;
@@ -29,5 +28,4 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_LAYOUT_ALGORITHM_H
