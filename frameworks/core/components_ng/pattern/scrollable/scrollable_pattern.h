@@ -18,14 +18,16 @@
 
 #include "base/geometry/axis.h"
 #include "core/animation/select_motion.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/event/mouse_event.h"
-#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
@@ -33,8 +35,8 @@ constexpr double FRICTION = 0.6;
 #else
 constexpr double FRICTION = 0.9;
 #endif
-class ScrollablePattern : public Pattern {
-    DECLARE_ACE_TYPE(ScrollablePattern, Pattern);
+class ScrollablePattern : public Pattern, NestableScrollContainer {
+    DECLARE_ACE_TYPE(ScrollablePattern, Pattern, NestableScrollContainer);
 
 public:
     bool IsAtomicNode() const override
@@ -43,7 +45,7 @@ public:
     }
 
     // scrollable
-    Axis GetAxis() const
+    Axis GetAxis() const override
     {
         return axis_;
     }
@@ -65,7 +67,8 @@ public:
         return scrollableEvent_;
     }
     virtual bool OnScrollCallback(float offset, int32_t source);
-    virtual void OnScrollEndCallback() {};
+
+public:
     virtual void OnScrollStartCallback() {};
     bool ScrollableIdle()
     {
@@ -164,10 +167,9 @@ public:
 
     void SetScrollFrameBeginCallback(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
     {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_VOID(scrollable);
-        scrollable->SetOnScrollFrameBegin(scrollFrameBeginCallback);
+        // Previous: Set to Scrollable and called in HandleScroll
+        // Now: HandleScroll moved to base class, directly store and call scrollFrameBeginCallback_ here
+        scrollFrameBeginCallback_ = scrollFrameBeginCallback;
     }
 
     bool IsScrollableSpringEffect() const
@@ -182,7 +184,7 @@ public:
     }
 
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
-    RefPtr<ScrollablePattern> GetParentScrollable();
+    RefPtr<NestableScrollContainer> SearchParent();
     void GetParentNavigation();
 
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
@@ -345,9 +347,10 @@ protected:
     }
 
 private:
+    virtual void OnScrollEndCallback() {};
+
     void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
-    void OnScrollEnd();
     bool OnScrollPosition(double offset, int32_t source);
     void SetParentScrollable();
     void ProcessNavBarReactOnStart();
@@ -375,6 +378,40 @@ private:
 
     void ProcessAssociatedScroll(double offset, int32_t source);
 
+    /******************************************************************************
+     * NestableScrollContainer implementations
+     */
+    ScrollResult HandleScroll(float offset, int32_t source, NestedState state = NestedState::GESTURE) override;
+    bool HandleScrollVelocity(float velocity) override;
+
+    void OnScrollEndRecursive() override;
+    void OnScrollStartRecursive(float position) override;
+
+    ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
+
+    void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
+
+    EdgeEffect GetEdgeEffect() const;
+
+    void SetCanOverScroll(bool val);
+    bool GetCanOverScroll() const;
+
+    void OnScrollEnd();
+    void ProcessSpringEffect(float velocity);
+
+    // Scrollable::UpdateScrollPosition
+    bool HandleScrollImpl(float offset, int32_t source);
+    void NotifyMoved(bool value);
+
+    WeakPtr<NestableScrollContainer> parent_;
+    ScrollFrameBeginCallback scrollFrameBeginCallback_;
+    /*
+     *  End of NestableScrollContainer implementations
+     *******************************************************************************/
+
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
@@ -387,8 +424,8 @@ private:
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
-    double scrollBarOutBoundaryExtent_ = 0.0;
     bool isCoordEventNeedSpring_ = true;
+    double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = FRICTION;
     // scroller
     RefPtr<Animator> animator_;

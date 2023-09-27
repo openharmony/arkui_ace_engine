@@ -2577,7 +2577,7 @@ HWTEST_F(ListTestNg, Event006, TestSize.Level1)
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
     auto scrollable = scrollableEvent->GetScrollable();
-    EXPECT_NE(scrollable->scrollFrameBeginCallback_, nullptr);
+    EXPECT_NE(scrollable->callback_, nullptr);
     RunMeasureAndLayout(frameNode_);
 }
 

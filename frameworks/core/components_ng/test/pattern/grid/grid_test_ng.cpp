@@ -1515,7 +1515,7 @@ HWTEST_F(GridTestNg, Event006, TestSize.Level1)
 
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
-    EXPECT_NE(scrollableEvent->GetScrollable()->scrollFrameBeginCallback_, nullptr);
+    EXPECT_NE(scrollableEvent->GetScrollable()->callback_, nullptr);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
 }
 

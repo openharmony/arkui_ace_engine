@@ -66,6 +66,7 @@ group("pattern_unittest") {
     "rich_editor:rich_editor_test_ng",
     "scroll:scroll_test_ng",
     "scroll_bar:scroll_bar_test_ng",
+    "scrollable:scrollable_test_ng",
     "search:search_test_ng",
     "security_component:security_component_pattern_test_ng",
     "select:select_pattern_test_ng",
