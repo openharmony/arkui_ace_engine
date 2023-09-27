@@ -671,6 +671,7 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG:
 {
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+        CHECK_NULL_VOID(frameNode->IsActive());
         if (!frameNode->IsInternal()) {
             if (CheckFrameNodeByAccessibilityLevel(frameNode, false)) {
                 children.emplace_back(frameNode);
@@ -873,6 +874,30 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
     }
     nodeInfo.SetComponentResourceId(node->GetInspectorId().value_or(""));
     UpdateAccessibilityElementInfo(node, nodeInfo);
+}
+
+void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, uint32_t mode, const RefPtr<NG::FrameNode>& node,
+    const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline)
+{
+    uint32_t umode = mode;
+    std::list<RefPtr<NG::FrameNode>> children;
+    // get all children
+    if (umode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN)) {
+        for (const auto& item : node->GetChildren()) {
+            GetFrameNodeChildren(item, children);
+        }
+
+        while (!children.empty()) {
+            RefPtr<NG::FrameNode> parent = children.front();
+            children.pop_front();
+            AccessibilityElementInfo nodeInfo;
+            UpdateAccessibilityElementInfo(parent, commonProperty, nodeInfo, ngPipeline);
+            infos.push_back(nodeInfo);
+            for (const auto& item : parent->GetChildren()) {
+                GetFrameNodeChildren(item, children);
+            }
+        }
+    }
 }
 
 bool CanAccessibilityFocusedNG(const RefPtr<NG::FrameNode>& node)
@@ -1959,8 +1984,8 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
     UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
-
     infos.push_back(nodeInfo);
+    UpdateCacheInfoNG(infos, mode, node, commonProperty, ngPipeline);
 }
 
 void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
