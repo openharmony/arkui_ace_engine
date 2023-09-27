@@ -310,7 +310,6 @@ void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrappe
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
 
-    targetSecurity_ = PREVIEW_MENU_GAP.ConvertToPx();
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
@@ -842,7 +841,7 @@ void MenuLayoutAlgorithm::UpdateScrollAndColumnLayoutConstraint(
             continue;
         }
         auto frameSize = previewGeometryNode->GetMarginFrameSize();
-        auto previewSecurity = static_cast<float>(PREVIEW_INNER_SECURITY.ConvertToPx()) * 2;
+        auto previewSecurity = static_cast<float>(PREVIEW_INNER_SECURITY.ConvertToPx() / previewScale_) * 2;
         geometryNode->SetFrameSize(SizeF(frameSize.Width() - previewSecurity, frameSize.Height() - previewSecurity));
         auto layoutProperty = child->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
