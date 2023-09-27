@@ -633,7 +633,7 @@ void ScrollBar::OnCollectTouchTarget(
 
 void ScrollBar::ScheduleDisappearDelayTask()
 {
-    if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
+    if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_) {
         disappearDelayTask_.Cancel();
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
