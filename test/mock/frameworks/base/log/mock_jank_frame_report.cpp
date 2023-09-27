@@ -42,6 +42,8 @@ void PerfMonitor::SetPageUrl(const std::string& pageUrl) {}
 
 void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank) {}
 
+void PerfMonitor::ReportJankFrameApp(double jank) {}
+
 void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time) {}
 
 int64_t PerfMonitor::GetInputTime(PerfActionType type)
