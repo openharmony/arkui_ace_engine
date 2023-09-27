@@ -32,10 +32,6 @@ export class CommonOptions {
   step?: number;
   onHoverIncrease?: (isHover?: boolean) => void;
   onHoverDecrease?: (isHover?: boolean) => void;
-  onFocusIncrease?: () => void;
-  onFocusDecrease?: () => void;
-  onBlurIncrease?: () => void;
-  onBlurDecrease?: () => void;
 }
 
 export class InlineStyleOptions extends CommonOptions {
@@ -48,6 +44,10 @@ export class InlineStyleOptions extends CommonOptions {
 
 export class NumberStyleOptions extends InlineStyleOptions {
   label?: ResourceStr;
+  onFocusIncrease?: () => void;
+  onFocusDecrease?: () => void;
+  onBlurIncrease?: () => void;
+  onBlurDecrease?: () => void;
 }
 
 export class DateData{
@@ -78,26 +78,11 @@ export class DateStyleOptions extends CommonOptions {
   onDateChange?: (date: DateData) => void;
 }
 
-export class CounterStyleMap {
-  [CounterType.LIST]: NumberStyleOptions;
-  [CounterType.COMPACT]: NumberStyleOptions;
-  [CounterType.INLINE]: InlineStyleOptions;
-  [CounterType.INLINE_DATE]: DateStyleOptions;
-}
-
-export class CounterAttribute<Type extends keyof CounterStyleMap = keyof CounterStyleMap,
-  Style extends CounterStyleMap[Type] = CounterStyleMap[Type]> {
-  type: Type;
-  counterOptions?: Style;
-}
-
-export class CounterOptions<Type extends keyof CounterStyleMap> {
-  constructor(options: CounterAttribute<Type>) {
-    this.type = options.type;
-    this.counterOptions = options.counterOptions;
-  }
+export class CounterOptions {
   type: CounterType;
-  counterOptions?: NumberStyleOptions | InlineStyleOptions | DateStyleOptions;
+  numberOptions?: NumberStyleOptions;
+  inlineOptions?: InlineStyleOptions;
+  dateOptions?: DateStyleOptions;
 }
 
 class CounterResource {
@@ -201,7 +186,7 @@ class CounterConstant {
 
 @Component
 export struct CounterComponent {
-  @Prop  @Watch('onOptionsChange')  options: CounterOptions<keyof CounterStyleMap>;
+  @Prop  @Watch('onOptionsChange')  options: CounterOptions;
   @State type: number = -1;
   @State choverEffect: HoverEffect = HoverEffect.Auto;
   @State focusEnable: boolean = true;
@@ -399,18 +384,6 @@ export struct CounterComponent {
     if (this.inlineStyleOptions.onHoverDecrease !== undefined) {
       this.onHoverDecrease = this.inlineStyleOptions.onHoverDecrease;
     }
-    if (this.inlineStyleOptions.onFocusIncrease !== undefined) {
-      this.onFocusIncrease = this.inlineStyleOptions.onFocusIncrease;
-    }
-    if (this.inlineStyleOptions.onFocusDecrease !== undefined) {
-      this.onFocusDecrease = this.inlineStyleOptions.onFocusDecrease;
-    }
-    if (this.inlineStyleOptions.onBlurIncrease !== undefined) {
-      this.onBlurIncrease = this.inlineStyleOptions.onBlurIncrease;
-    }
-    if (this.inlineStyleOptions.onBlurDecrease !== undefined) {
-      this.onBlurDecrease = this.inlineStyleOptions.onBlurDecrease;
-    }
     if (this.inlineStyleOptions.onChange !== undefined) {
       this.onChange = this.inlineStyleOptions.onChange;
     }
@@ -428,18 +401,6 @@ export struct CounterComponent {
     }
     if (this.dateStyleOptions.onHoverDecrease !== undefined) {
       this.onHoverDecrease = this.dateStyleOptions.onHoverDecrease;
-    }
-    if (this.dateStyleOptions.onFocusIncrease !== undefined) {
-      this.onFocusIncrease = this.dateStyleOptions.onFocusIncrease;
-    }
-    if (this.dateStyleOptions.onFocusDecrease !== undefined) {
-      this.onFocusDecrease = this.dateStyleOptions.onFocusDecrease;
-    }
-    if (this.dateStyleOptions.onBlurIncrease !== undefined) {
-      this.onBlurIncrease = this.dateStyleOptions.onBlurIncrease;
-    }
-    if (this.dateStyleOptions.onBlurDecrease !== undefined) {
-      this.onBlurDecrease = this.dateStyleOptions.onBlurDecrease;
     }
     if (this.dateStyleOptions.year !== undefined &&
         this.dateStyleOptions.year >= this.minYear &&
@@ -469,13 +430,13 @@ export struct CounterComponent {
     this.type = this.options.type;
     if (this.type === CounterType.LIST ||
         this.type === CounterType.COMPACT) {
-      this.numberStyleOptions = this.options.counterOptions;
+      this.numberStyleOptions = this.options.numberOptions;
       this.updateNumberStyleOptions();
     } else if (this.type === CounterType.INLINE) {
-      this.inlineStyleOptions = this.options.counterOptions;
+      this.inlineStyleOptions = this.options.inlineOptions;
       this.updateInlineStyleOptions();
     } else if (this.type === CounterType.INLINE_DATE) {
-      this.dateStyleOptions = this.options.counterOptions;
+      this.dateStyleOptions = this.options.dateOptions;
       this.updateDateStyleOptions();
     } else {
 
