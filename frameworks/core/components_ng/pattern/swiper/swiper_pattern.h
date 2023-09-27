@@ -27,8 +27,6 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
@@ -39,8 +37,8 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
-class SwiperPattern : public Pattern, public NestableScrollContainer {
-    DECLARE_ACE_TYPE(SwiperPattern, Pattern, NestableScrollContainer);
+class SwiperPattern : public Pattern {
+    DECLARE_ACE_TYPE(SwiperPattern, Pattern);
 
 public:
     SwiperPattern();
@@ -438,7 +436,6 @@ public:
     void StopTranslateAnimation();
     void StopSpringAnimation();
     int32_t GetLoopIndex(int32_t originalIndex) const;
-
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -561,25 +558,6 @@ private:
     void StopSpringAnimationAndFlushImmediately();
     void UpdateItemRenderGroup(bool itemRenderGroup);
     void MarkDirtyNodeSelf();
-
-    /**
-     *  NestableScrollContainer implementations
-     */
-    Axis GetAxis() const override
-    {
-        return GetDirection();
-    }
-
-    ScrollResult HandleScroll(float offset, int32_t source, NestedState state = NestedState::GESTURE) override
-    {
-        return {};
-    }
-    bool HandleScrollVelocity(float velocity) override
-    {
-        return false;
-    }
-    void OnScrollStartRecursive(float position) override {}
-    void OnScrollEndRecursive() override {}
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
