@@ -1151,10 +1151,10 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
     auto event1 = [](double) { return true; };
     auto event2 = []() {};
+    auto event3 = [](double) {};
     coordinationEvent->SetOnScrollEvent(event1);
     coordinationEvent->SetOnScrollStartEvent(event2);
-    coordinationEvent->SetOnScrollEndEvent(event2);
-    pattern_->SetCoordinationEvent(coordinationEvent);
+    coordinationEvent->SetOnScrollEndEvent(event3);
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_START));

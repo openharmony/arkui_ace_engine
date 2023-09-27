@@ -76,6 +76,7 @@ ace_unittest("calendar_picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/list/mock_list_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/moc_refresh_coordination.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/mock_scrollable_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/swiper_indicator/mock_swiper_arrow_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_overlay_modifier.cpp",

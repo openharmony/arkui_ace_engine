@@ -130,30 +130,25 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
     if ((isAtTop || isDraggedDown) && (source == SCROLL_FROM_UPDATE) && !isReactInParentMovement_ &&
         (axis_ == Axis::VERTICAL)) {
         isReactInParentMovement_ = true;
-        if (coordinationEvent_) {
-            auto onScrollStart = coordinationEvent_->GetOnScrollStartEvent();
-            if (onScrollStart) {
-                onScrollStart();
-            }
+        if (!refreshCoordination_) {
+            CreateRefreshCoordination();
+        }
+        if (refreshCoordination_) {
+            refreshCoordination_->OnScrollStart();
         }
         ProcessNavBarReactOnStart();
     }
-    if ((coordinationEvent_ || navBarPattern_) && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
+    if ((refreshCoordination_ || navBarPattern_) && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
         isReactInParentMovement_ = false;
-        if (coordinationEvent_) {
-            auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
-            if (onScrollEnd) {
-                onScrollEnd();
-            }
+        if (refreshCoordination_) {
+            refreshCoordination_->OnScrollEnd(GetVelocity());
         }
         ProcessNavBarReactOnEnd();
     }
     if (isReactInParentMovement_) {
         auto needMove = ProcessNavBarReactOnUpdate(offset);
-        if (coordinationEvent_) {
-            auto onScroll = coordinationEvent_->GetOnScroll();
-            CHECK_NULL_RETURN(onScroll, false);
-            if (!onScroll(offset)) {
+        if (refreshCoordination_) {
+            if (!refreshCoordination_->OnScroll(offset)) {
                 isReactInParentMovement_ = false;
                 return true;
             }
@@ -183,13 +178,9 @@ void ScrollablePattern::OnScrollEnd()
     // calls OnScrollEnd in ScrollablePattern
     if (isReactInParentMovement_) {
         ProcessNavBarReactOnEnd();
-        if (coordinationEvent_) {
-            auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
-            if (onScrollEnd) {
-                onScrollEnd();
-            }
+        if (refreshCoordination_) {
+            refreshCoordination_->OnScrollEnd(GetVelocity());
             isReactInParentMovement_ = false;
-            return;
         }
     }
 
@@ -1415,5 +1406,15 @@ void ScrollablePattern::OnScrollEndRecursive()
     if (parent && nestedScroll_.NeedParent()) {
         parent->OnScrollEndRecursive();
     }
+}
+
+float ScrollablePattern::GetVelocity() const
+{
+    float velocity = 0.0f;
+    CHECK_NULL_RETURN(scrollableEvent_, velocity);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_RETURN(scrollable, velocity);
+    velocity = scrollable->GetCurrentVelocity();
+    return velocity;
 }
 } // namespace OHOS::Ace::NG

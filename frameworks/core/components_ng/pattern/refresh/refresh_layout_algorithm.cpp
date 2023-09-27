@@ -16,6 +16,7 @@
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 
 #include "frameworks/base/utils/utils.h"
+#include "frameworks/core/common/container.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
@@ -29,6 +30,56 @@ constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
 } // namespace
 
 RefreshLayoutAlgorithm::RefreshLayoutAlgorithm() = default;
+
+void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    int32_t index = 0;
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            child->Measure(layoutConstraint);
+            ++index;
+            continue;
+        }
+        if (HasCustomBuilderIndex() && index == customBuilderIndex_.value_or(0)) {
+            auto builderLayoutConstraint = layoutConstraint;
+            builderLayoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(
+                CalculateBuilderSize(child, builderLayoutConstraint));
+            child->Measure(builderLayoutConstraint);
+            ++index;
+            continue;
+        }
+        child->Measure(layoutConstraint);
+        ++index;
+    }
+    PerformMeasureSelf(layoutWrapper);
+}
+
+OptionalSizeF RefreshLayoutAlgorithm::CalculateBuilderSize(
+    RefPtr<LayoutWrapper> childLayoutWrapper, LayoutConstraintF& constraint)
+{
+    OptionalSizeF defaultSize;
+    CHECK_NULL_RETURN(childLayoutWrapper, defaultSize);
+    auto layoutProperty = childLayoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, defaultSize);
+    std::optional<CalcLength> width = std::nullopt;
+    auto&& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (!calcLayoutConstraint) {
+        return defaultSize;
+    }
+    std::optional<float> reSetHeight = scrollOffset_;
+    if (calcLayoutConstraint->selfIdealSize.has_value() &&
+        calcLayoutConstraint->selfIdealSize.value().Height().has_value()) {
+        reSetHeight = ConvertToPx(
+            calcLayoutConstraint->selfIdealSize.value().Height().value(), constraint.scaleProperty, scrollOffset_)
+                          .value_or(-1.0f);
+    }
+    if (calcLayoutConstraint->selfIdealSize.has_value()) {
+        width = calcLayoutConstraint->selfIdealSize->Width();
+    }
+    auto reSetWidth = ConvertToPx(width, constraint.scaleProperty, constraint.percentReference.Width());
+    return { reSetWidth, reSetHeight };
+}
 
 void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
@@ -83,6 +134,33 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                 alignChild = Alignment::TOP_CENTER;
             }
         } else {
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                auto builderChild = layoutWrapper->GetOrCreateChildByIndex(customBuilderIndex_.value_or(0));
+                CHECK_NULL_VOID(builderChild);
+                auto geometryNode = builderChild->GetGeometryNode();
+                CHECK_NULL_VOID(geometryNode);
+                auto builderHeight = geometryNode->GetMarginFrameSize().Height();
+                alignChild = Alignment::TOP_CENTER;
+                if (index == customBuilderIndex_.value_or(0)) {
+                    auto builderOffset = 0.0f;
+                    if (GreatNotEqual(builderHeight, scrollOffset_)) {
+                        builderOffset = scrollOffset_ - builderHeight;
+                    }
+                    paddingOffsetChild += OffsetF(0.0f, builderOffset);
+                } else {
+                    auto scrollOffset = builderHeight;
+                    if (GreatNotEqual(builderHeight, scrollOffset_)) {
+                        scrollOffset = scrollOffset_;
+                    }
+                    paddingOffsetChild += OffsetF(0.0f, scrollOffset);
+                }
+                auto translate =
+                    Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), alignChild) +
+                    paddingOffsetChild;
+                child->GetGeometryNode()->SetMarginFrameOffset(translate);
+                index++;
+                continue;
+            }
             if (index == customBuilderIndex_.value_or(0)) {
                 alignChild = Alignment::TOP_CENTER;
                 paddingOffsetChild += OffsetF(0.0f, customBuilderOffset_);
