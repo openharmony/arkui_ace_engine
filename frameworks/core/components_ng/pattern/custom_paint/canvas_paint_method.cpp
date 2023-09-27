@@ -168,8 +168,6 @@ void CanvasPaintMethod::DrawImage(
 #else
     InitImagePaint(imagePaint_, sampleOptions_);
 #endif
-    InitPaintBlend(imagePaint_);
-
     if (globalState_.HasGlobalAlpha()) {
         imagePaint_.setAlphaf(globalState_.GetAlpha());
     }
@@ -189,7 +187,16 @@ void CanvasPaintMethod::DrawImage(
 #ifndef NEW_SKIA
             skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
 #else
-            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
+            if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+                skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
+            } else {
+                SkPaint compositeOperationpPaint;
+                InitPaintBlend(compositeOperationpPaint);
+                skCanvas_->saveLayer(SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()),
+                    &compositeOperationpPaint);
+                skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
+                skCanvas_->restore();
+            }
 #endif
             break;
         }
@@ -198,7 +205,16 @@ void CanvasPaintMethod::DrawImage(
 #ifndef NEW_SKIA
             skCanvas_->drawImageRect(image, rect, &imagePaint_);
 #else
-            skCanvas_->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
+            if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+                skCanvas_->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
+            } else {
+                SkPaint compositeOperationpPaint;
+                InitPaintBlend(compositeOperationpPaint);
+                skCanvas_->saveLayer(SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()),
+                    &compositeOperationpPaint);
+                skCanvas_->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
+                skCanvas_->restore();
+            }
 #endif
             break;
         }
@@ -208,8 +224,18 @@ void CanvasPaintMethod::DrawImage(
 #ifndef NEW_SKIA
             skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
 #else
-            skCanvas_->drawImageRect(
-                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
+            if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+                skCanvas_->drawImageRect(
+                    image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
+            } else {
+                SkPaint compositeOperationpPaint;
+                InitPaintBlend(compositeOperationpPaint);
+                skCanvas_->saveLayer(SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()),
+                    &compositeOperationpPaint);
+                skCanvas_->drawImageRect(
+                    image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
+                skCanvas_->restore();
+            }
 #endif
             break;
         }
