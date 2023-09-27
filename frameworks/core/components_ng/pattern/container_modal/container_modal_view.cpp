@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -266,6 +267,9 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     ImageSourceInfo imageSourceInfo;
     auto imageIcon = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ImagePattern>());
+    auto imageEventHub = imageIcon->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(imageEventHub, nullptr);
+    imageEventHub->RemoveDragEvent();
     imageIcon->SetDraggable(false);
     auto imageFocus = imageIcon->GetFocusHub();
     if (imageFocus) {
@@ -307,14 +311,17 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
 
     auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
-    auto clickEvent = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    buttonEventHub->AddClickEvent(clickEvent);
-    // if can not be drag, cover father panEvent
+    auto clickGesture = MakeRefPtr<TapGesture>();
+    clickGesture->SetOnActionId(clickCallback);
+    auto gestureGroup = MakeRefPtr<NG::GestureGroup>(GestureMode::Parallel);
+    gestureGroup->AddGesture(clickGesture);
     if (!canDrag) {
-        auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+        // if can not be drag, cover father panEvent
         PanDirection panDirection;
-        buttonEventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+        auto panGesture = MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+        gestureGroup->AddGesture(panGesture);
     }
+    buttonEventHub->AddGesture(gestureGroup);
 
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
