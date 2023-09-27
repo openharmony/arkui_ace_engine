@@ -67,6 +67,7 @@ constexpr float MOVE_STEP = 0.06f;
 constexpr float TRANS_OPACITY_SPAN = 0.3f;
 constexpr float FULL_OPACITY = 255.0f;
 constexpr float TWO = 2.0f;
+constexpr float FAKE_DELTA = 0.01f; 
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
     : enableLoading_(AceType::MakeRefPtr<PropertyBool>(true)),
@@ -427,7 +428,7 @@ void LoadingProgressModifier::ChangeRefreshFollowData(float refreshFollowRatio)
     auto ratio = CorrectNormalize(refreshFollowRatio);
     sizeScale_->Set(std::sqrt(TWO) * HALF + (1.0 - std::sqrt(TWO) * HALF) * ratio);
     if (isLoading_) {
-        return;
+        CloseAnimation(FOLLOW_START, COMET_TAIL_ANGLE, 1.0f, 1.0f);
     }
     CHECK_NULL_VOID(date_);
     date_->Set(FOLLOW_START + FOLLOW_SPAN * ratio);
@@ -436,6 +437,29 @@ void LoadingProgressModifier::ChangeRefreshFollowData(float refreshFollowRatio)
     cometSizeScale_->Set(1.0f);
 }
 
+void LoadingProgressModifier::CloseAnimation(float date, float cometLen, float cometOpacity, float cometScale)
+{
+    isLoading_ = false;
+    AnimationOption option = AnimationOption();
+    RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
+    option.SetDuration(0);
+    option.SetIteration(1);
+    option.SetCurve(curve);
+    date_->Set(date + FAKE_DELTA);
+    cometTailLen_->Set(cometLen + FAKE_DELTA);
+    cometOpacity_->Set(cometOpacity + FAKE_DELTA);
+    cometSizeScale_->Set(cometScale + FAKE_DELTA);
+    centerDeviation_->Set(0.0f + FAKE_DELTA);
+    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), date, cometLen, cometOpacity, cometScale]() {
+        auto curObj = weak.Upgrade();
+        CHECK_NULL_VOID(curObj);
+        curObj->date_->Set(date);
+        curObj->cometTailLen_->Set(cometLen);
+        curObj->cometOpacity_->Set(cometOpacity);
+        curObj->cometSizeScale_->Set(cometScale);
+        curObj->centerDeviation_->Set(0.0f);
+    });
+}
 float LoadingProgressModifier::CorrectNormalize(float originData)
 {
     auto ratio = originData;

@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -134,11 +135,6 @@ public:
     double GetMainSize(const SizeF& size) const
     {
         return axis_ == Axis::HORIZONTAL ? size.Width() : size.Height();
-    }
-
-    void SetCoordinationEvent(RefPtr<ScrollableCoordinationEvent> coordinationEvent)
-    {
-        coordinationEvent_ = coordinationEvent;
     }
 
     bool IsScrollableStopped() const
@@ -412,10 +408,19 @@ private:
      *  End of NestableScrollContainer implementations
      *******************************************************************************/
 
+    void CreateRefreshCoordination()
+    {
+        if (!refreshCoordination_) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(host);
+        }
+    }
+    float GetVelocity() const;
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
-    RefPtr<ScrollableCoordinationEvent> coordinationEvent_;
+    RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;

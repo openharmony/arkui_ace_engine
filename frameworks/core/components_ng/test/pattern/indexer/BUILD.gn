@@ -94,6 +94,7 @@ ace_unittest("indexer_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/menu/mock_menu_wrapper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/navigation/mock_menu_view.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/moc_refresh_coordination.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/mock_scrollable_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/test_ng.cpp",

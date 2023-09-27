@@ -88,6 +88,8 @@ public:
         CHECK_NULL_VOID(contentSize_);
         contentSize_->Set(contentSize);
     }
+    void CloseAnimation(float date, float cometLen, float cometOpacity, float cometScale);
+
 private:
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
     float GetCurentCometAngle(float baseAngle, uint32_t index, uint32_t totalNumber);

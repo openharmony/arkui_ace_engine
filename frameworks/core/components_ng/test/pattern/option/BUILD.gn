@@ -117,6 +117,7 @@ ace_unittest("option_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/nav_bar/mock_nav_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/moc_refresh_coordination.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "option_test_ng.cpp",
   ]
