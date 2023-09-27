@@ -73,6 +73,13 @@ var FontWeight;
   FontWeight["Bolder"] = "bolder";
 })(FontWeight || (FontWeight = {}));
 
+var WordBreak;
+(function (WordBreak) {
+  WordBreak[WordBreak["NORMAL"] = 0] = "normal";
+  WordBreak[WordBreak["BREAK_ALL"] = 1] = "break-all";
+  WordBreak[WordBreak["BREAK_WORD"] = 2] = "break-word";
+})(WordBreak || (WordBreak = {}))
+
 var Curve;
 (function (Curve) {
   Curve["Linear"] = "linear";

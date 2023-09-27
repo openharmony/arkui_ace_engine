@@ -29,6 +29,7 @@ public:
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void SetTextSelection(int32_t startIndex, int32_t endIndex) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
@@ -42,6 +43,7 @@ public:
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
+    void SetWordBreak(WordBreak value) override;
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
@@ -52,6 +54,7 @@ public:
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;

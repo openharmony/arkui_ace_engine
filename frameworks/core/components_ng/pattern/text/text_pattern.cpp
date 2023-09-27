@@ -29,6 +29,7 @@
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
@@ -326,7 +327,49 @@ void TextPattern::HandleOnCopy()
     if (copyOption_ != CopyOptions::None) {
         clipboard_->SetData(value, copyOption_);
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnCopy(value);
     ResetSelection();
+}
+
+void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        context->AddAfterLayoutTask([weak = WeakClaim(this), selectionStart, selectionEnd, eventHub]() {
+            auto textPattern = weak.Upgrade();
+            CHECK_NULL_VOID(textPattern);
+            auto renderContext = textPattern->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+            bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+                [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+            auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
+                textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+                return;
+            }
+            if (!ifHaveObscured && eventHub->IsEnabled()) {
+                textPattern->ActSetSelection(selectionStart, selectionEnd);
+            }
+        });
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+RefPtr<RenderContext> TextPattern::GetRenderContext()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetRenderContext();
 }
 
 void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
@@ -338,6 +381,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     SelectOverlayInfo selectInfo;
     selectInfo.firstHandle.paintRect = firstHandle;
     selectInfo.secondHandle.paintRect = secondHandle;
+    CheckHandles(selectInfo.firstHandle);
     CheckHandles(selectInfo.secondHandle);
     selectInfo.onHandleMove = [weak = WeakClaim(this)](const RectF& handleRect, bool isFirst) {
         auto pattern = weak.Upgrade();
@@ -944,11 +988,14 @@ void TextPattern::OnModifyDone()
 
 void TextPattern::ActSetSelection(int32_t start, int32_t end)
 {
-    if (start < 0) {
-        start = GetWideText().length();
-    }
-    if (end < 0) {
-        end = GetWideText().length();
+    int32_t min = 0;
+    int32_t textSize = GetWideText().length() + imageCount_;
+    start = start < min ? min : start;
+    end = end < min ? min : end;
+    start = start > textSize ? textSize : start;
+    end = end > textSize ? textSize : end;
+    if (start >= end) {
+        return;
     }
     textSelector_.Update(start, end);
     CalculateHandleOffsetAndShowOverlay();
@@ -1185,6 +1232,8 @@ void TextPattern::DumpInfo()
         std::string("FontSize: ")
             .append(
                 (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(16.0, DimensionUnit::FP)).ToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const

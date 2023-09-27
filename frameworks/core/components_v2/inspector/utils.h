@@ -464,6 +464,18 @@ inline FontWeight ConvertWrapStringToFontWeight(const std::string& str)
         return index < 0 ? "CopyOptions::None" : copyOptionsTable[index].value;
     }
 
+    inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
+    {
+        static const LinearEnumMapNode<WordBreak, std::string> wordBreakTable[] = {
+            { WordBreak::NORMAL, "normal" },
+            { WordBreak::BREAK_ALL, "break-all" },
+            { WordBreak::BREAK_WORD, "break-word" },
+        };
+
+        auto index = BinarySearchFindIndex(wordBreakTable, ArraySize(wordBreakTable), wordBreak);
+        return index < 0 ? "break-word" : wordBreakTable[index].value;
+    }
+
     inline std::string ConvertColorToString(Color color)
     {
         return color.ColorToString();

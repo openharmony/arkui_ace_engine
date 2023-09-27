@@ -113,6 +113,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
         GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
     json->Put("copyOption", GetCopyOptionString().c_str());
+    json->Put("wordBreak", V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str());
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

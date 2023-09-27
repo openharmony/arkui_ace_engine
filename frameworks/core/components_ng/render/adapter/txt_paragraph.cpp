@@ -49,12 +49,14 @@ void TxtParagraph::CreateBuilder()
     style.text_align = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.max_lines = paraStyle_.maxLines;
     style.font_size = paraStyle_.fontSize; // libtxt style.font_size
+    style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
 #else
     Rosen::TypographyStyle style;
     style.textDirection = Constants::ConvertTxtTextDirection(paraStyle_.direction);
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.maxLines = paraStyle_.maxLines;
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
+    style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
 #endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
