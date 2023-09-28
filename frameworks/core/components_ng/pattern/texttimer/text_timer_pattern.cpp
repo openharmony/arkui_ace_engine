@@ -70,10 +70,10 @@ void TextTimerPattern::FireChangeEvent()
         default:
             break;
     }
-    if (utcTime - lastReportingTime_ >= 1) {
+    if (elapsedTime - lastElapsedTime_ >= 1) {
         textTimerEventHub->FireChangeEvent(std::to_string(utcTime), std::to_string(elapsedTime));
+        lastElapsedTime_ = elapsedTime;
     }
-    lastReportingTime_ = utcTime;
 }
 
 void TextTimerPattern::InitTextTimerController()
@@ -316,6 +316,7 @@ void TextTimerPattern::HandleReset()
         scheduler_->Stop();
     }
     elapsedTime_ = 0;
+    lastElapsedTime_ = 0;
     auto count = isCountDown_ ? inputCount_ : 0;
     UpdateTextTimer(static_cast<uint32_t>(count));
 }
