@@ -240,6 +240,7 @@ public:
         indicatorDoingAnimation_ = indicatorDoingAnimation;
     }
 
+    void UpdateCurrentOffset(float offset);
 
     void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f);
 
@@ -496,9 +497,6 @@ private:
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
-
-    void UpdateCurrentOffset(float offset);
-    bool HandleSpringEdgeOffset(float offset);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
