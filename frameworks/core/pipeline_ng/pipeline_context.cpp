@@ -862,12 +862,13 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         rsTransaction->Begin();
     }
 #endif
-    safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
-    if (keyboardHeight > 0) {
-        // add height of navigation bar
-        keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
-    }
-    auto func = [this, keyboardHeight]() {
+
+    auto func = [this, keyboardHeight]() mutable {
+        safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        if (keyboardHeight > 0) {
+            // add height of navigation bar
+            keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+        }
         float positionY = 0.0f;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
         float height = 0.0f;
