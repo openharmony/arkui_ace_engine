@@ -2134,7 +2134,6 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest012, TestSize.Level1)
      */
     auto allChildNode = pickerPattern->GetAllChildNode();
     auto yearNode = allChildNode["year"];
-    yearNode->pattern_.Reset();
     pickerPattern->HandleSolarDayChange(false, 0);
 }
 
@@ -2725,9 +2724,13 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest001, TestSize.Level1)
     auto dateTimeAnimationController = AceType::MakeRefPtr<DateTimeAnimationController>();
     dateTimeAnimationController->SetMonthDays(monthDaysNode);
     dateTimeAnimationController->SetTimePicker(timeNode);
-    auto monthDaysRender = dateTimeAnimationController->monthDays_->GetRenderContext();
+    auto monthDays = dateTimeAnimationController->monthDays_.Upgrade();
+    ASSERT_NE(monthDays, nullptr);
+    auto monthDaysRender = monthDays->GetRenderContext();
     ASSERT_NE(monthDaysRender, nullptr);
-    auto timePickerRender = dateTimeAnimationController->timePicker_->GetRenderContext();
+    auto timePicker = dateTimeAnimationController->timePicker_.Upgrade();
+    ASSERT_NE(timePicker, nullptr);
+    auto timePickerRender = timePicker->GetRenderContext();
     ASSERT_NE(timePickerRender, nullptr);
     dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
     EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 1.0f);
@@ -2741,7 +2744,9 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest001, TestSize.Level1)
     dateTimeAnimationController->SetDatePicker(dateNode);
     dateNode->children_ = tempChildren;
     dateTimeAnimationController->SetDatePicker(dateNode);
-    auto datePickerLayoutProperty = dateTimeAnimationController->datePicker_->GetLayoutProperty<LayoutProperty>();
+    auto datePicker = dateTimeAnimationController->datePicker_.Upgrade();
+    ASSERT_NE(datePicker, nullptr);
+    auto datePickerLayoutProperty = datePicker->GetLayoutProperty<LayoutProperty>();
     ASSERT_NE(datePickerLayoutProperty, nullptr);
 
     /**
@@ -2759,7 +2764,7 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest001, TestSize.Level1)
      * @tc.steps: step5. PlayOldColumnOpacityInAnimation without datePicker layoutProperty.
      * @tc.expected: datePicker's visibility is not set.
      */
-    dateTimeAnimationController->datePicker_->layoutProperty_ = nullptr;
+    datePicker->layoutProperty_ = nullptr;
     monthDaysRender->UpdateOpacity(0.0f);
     timePickerRender->UpdateOpacity(0.0f);
     dateTimeAnimationController->PlayOldColumnOpacityInAnimation();

@@ -873,8 +873,9 @@ void TextPickerPattern::OnColorConfigurationUpdate()
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
-    if (contentRowNode_) {
-        auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    auto contentRowNode = contentRowNode_.Upgrade();
+    if (contentRowNode) {
+        auto layoutRenderContext = contentRowNode->GetRenderContext();
         CHECK_NULL_VOID(layoutRenderContext);
         layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }

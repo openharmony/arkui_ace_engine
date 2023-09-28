@@ -59,7 +59,7 @@ class TimePickerEventParam : public virtual AceType {
     DECLARE_ACE_TYPE(TimePickerEventParam, AceType)
 
 public:
-    RefPtr<FrameNode> instance_;
+    WeakPtr<FrameNode> instance_;
     int32_t itemIndex_ = 0;
     int32_t itemTotalCounts_ = 0;
 };
@@ -142,12 +142,12 @@ public:
         deltaSize_ = deltaSize;
     }
 
-    const std::map<RefPtr<FrameNode>, uint32_t>& GetOptions() const
+    const std::map<WeakPtr<FrameNode>, uint32_t>& GetOptions() const
     {
         return optionsTotalCount_;
     }
 
-    void SetOptions(const std::map<RefPtr<FrameNode>, uint32_t>& value)
+    void SetOptions(const std::map<WeakPtr<FrameNode>, uint32_t>& value)
     {
         optionsTotalCount_ = value;
     }
@@ -376,7 +376,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
     // column options number
-    std::map<RefPtr<FrameNode>, uint32_t> optionsTotalCount_;
+    std::map<WeakPtr<FrameNode>, uint32_t> optionsTotalCount_;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
     uint32_t currentIndex_ = 0;
