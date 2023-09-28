@@ -646,27 +646,6 @@ void ScrollablePattern::SetFriction(double friction)
     scrollable->SetUnstaticFriction(friction_);
 }
 
-RefPtr<NestableScrollContainer> ScrollablePattern::SearchParent()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
-        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-        if (!frameNode) {
-            continue;
-        }
-        auto pattern = frameNode->GetPattern<NestableScrollContainer>();
-        if (!pattern) {
-            continue;
-        }
-        if (pattern->GetAxis() != GetAxis()) {
-            continue;
-        }
-        return pattern;
-    }
-    return nullptr;
-}
-
 void ScrollablePattern::GetParentNavigation()
 {
     if (navBarPattern_) {
@@ -1324,6 +1303,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
         SetCanOverScroll(false);
         return result;
     }
+    // triggering overScroll, parent always handle it first
     auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL);
     offset += std::abs(overOffset) < std::abs(result.remain) ? overOffset : overRes.remain;
     SetCanOverScroll((!NearZero(overOffset) || NearZero(offset)) && overRes.reachEdge);
@@ -1427,6 +1407,7 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
     auto parent = parent_.Upgrade();
     if (!parent || !nestedScroll_.NeedParent()) {
         if (GetEdgeEffect() == EdgeEffect::SPRING) {
+            // trigger onScrollEnd later, when spring animation finishes
             ProcessSpringEffect(velocity);
             return true;
         }

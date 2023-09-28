@@ -1247,7 +1247,7 @@ HWTEST_F(SwiperTestNg, SwiperFunc004, TestSize.Level1)
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     swiperLayoutProperty->propLoop_ = false;
     swiperNode->geometryNode_->frame_.SetSize(SizeF(GEOMETRY_WIDTH, GEOMETRY_HEIGHT));
-    EXPECT_FALSE(pattern->IsOutOfBoundary(MAIN_DELTA));
+    EXPECT_FALSE(pattern->IsOverScrolling(MAIN_DELTA));
     // Swiper has reached boundary.
     swiperNode->geometryNode_->frame_.SetSize(SizeF(0, 0));
     pattern->panEvent_->actionUpdate_(gestureEvent);

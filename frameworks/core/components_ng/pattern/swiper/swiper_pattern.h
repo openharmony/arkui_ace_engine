@@ -27,6 +27,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
@@ -37,8 +38,8 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
-class SwiperPattern : public Pattern {
-    DECLARE_ACE_TYPE(SwiperPattern, Pattern);
+class SwiperPattern : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
 public:
     SwiperPattern();
@@ -494,7 +495,7 @@ private:
     void FinishAnimation();
     void StopFadeAnimation();
 
-    bool IsOutOfBoundary(float mainOffset = 0.0f) const;
+    bool IsOverScrolling(float mainOffset = 0.0f) const;
     float GetRemainingOffset() const;
     float MainSize() const;
     float GetMainContentSize() const;
@@ -511,7 +512,7 @@ private:
     int32_t GetDisplayCount() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
-    float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
+        float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
@@ -565,6 +566,26 @@ private:
     void MarkDirtyNodeSelf();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
 
+    /**
+     *  NestableScrollContainer implementations
+     */
+    Axis GetAxis() const override
+    {
+        return GetDirection();
+    }
+
+    ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
+    
+    bool HandleScrollVelocity(float velocity) override;
+
+    void OnScrollStartRecursive(float position) override;
+    void OnScrollEndRecursive() override;
+
+    WeakPtr<NestableScrollContainer> parent_;
+    /**
+     *  End of NestableScrollContainer implementations
+     */
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -584,6 +605,7 @@ private:
     RefPtr<SwiperController> swiperController_;
     RefPtr<InputEvent> mouseEvent_;
 
+    bool enableNestedScroll_ = false;
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
