@@ -573,6 +573,7 @@ void NavBarPattern::HandleOnDragStart(float offset)
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     titlePattern->SetCanOverDrag(false);
+    titlePattern->SetTitleScaleChange(true);
     titlePattern->ProcessTitleDragStart(offset);
 }
 
@@ -608,6 +609,7 @@ void NavBarPattern::OnCoordScrollStart()
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     titlePattern->SetCanOverDrag(true);
+    titlePattern->SetTitleScaleChange(false);
     titlePattern->ProcessTitleDragStart(offset_);
 }
 
