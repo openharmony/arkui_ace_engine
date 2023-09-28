@@ -62,6 +62,7 @@ protected:
     static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
     static void SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk);
     static bool GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& swiperArrowParameters);
+    static void SetNestedScroll(const JSCallbackInfo& info);
 };
 
 class JSSwiperController final : public Referenced {

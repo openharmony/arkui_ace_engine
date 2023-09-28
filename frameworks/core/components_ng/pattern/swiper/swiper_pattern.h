@@ -404,6 +404,11 @@ public:
         indicatorIsBoolean_ = isBoolean;
     }
 
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt)
+    {
+        enableNestedScroll_ = nestedOpt.NeedParent();
+    }
+
     bool GetIsAtHotRegion() const
     {
         return isAtHotRegion_;
