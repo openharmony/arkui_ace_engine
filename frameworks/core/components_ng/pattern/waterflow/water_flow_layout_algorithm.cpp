@@ -331,6 +331,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             layoutInfo_.restoreOffset_ = 0.0f;
             layoutInfo_.startIndex_ = layoutInfo_.jumpIndex_;
             layoutInfo_.jumpIndex_ = -1;
+            layoutInfo_.itemStart_ = false;
         }
         currentIndex++;
         position = GetItemPosition(currentIndex);
