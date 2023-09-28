@@ -1184,29 +1184,6 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
     }
 }
 
-bool SwiperPattern::HandleSpringEdgeOffset(float offset)
-{
-    targetIndex_.reset();
-
-    auto visibleSize = CalculateVisibleSize();
-    if (LessOrEqual(visibleSize, 0.0)) {
-        return false;
-    }
-    auto friction = currentOffset_ > 0
-                        ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
-                        : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
-
-    currentDelta_ = currentDelta_ - friction * offset;
-    if (isDragging_) {
-        currentIndexOffset_ += friction * offset;
-        AnimationCallbackInfo callbackInfo;
-        callbackInfo.currentOffset =
-            GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-        FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
-    }
-    return true;
-}
-
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     if (IsVisibleChildrenSizeLessThanSwiper() && !IsAutoFill()) {
@@ -1216,29 +1193,40 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
         return;
     }
     auto edgeEffect = GetEdgeEffect();
-    if (!IsLoop() && IsOutOfBoundary()) {
-        // reached end
-        if (edgeEffect == EdgeEffect::SPRING) {
-            if (!HandleSpringEdgeOffset(offset)) {
-                return;
-            };
-        } else {
-            // edgeEffect == FADE || NONE
-            currentDelta_ = currentDelta_ - offset;
-            if (edgeEffect == EdgeEffect::FADE) {
-                auto host = GetHost();
-                CHECK_NULL_VOID(host);
-                if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
-                    auto remainOffset = GetRemainingOffset();
-                    fadeOffset_ += (offset - remainOffset);
-                }
-                host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-            }
+    if (!IsLoop() && IsOutOfBoundary() && edgeEffect == EdgeEffect::SPRING) {
+        LOGD("Swiper has reached boundary, can't drag any more, effect spring.");
+
+        targetIndex_.reset();
+
+        auto visibleSize = CalculateVisibleSize();
+        if (LessOrEqual(visibleSize, 0.0)) {
+            return;
         }
-        // pass offset to nested scroll
-        // ...
+        auto friction = currentOffset_ > 0
+                            ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
+                            : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
+
+        currentDelta_ = currentDelta_ - friction * offset;
+        if (isDragging_) {
+            currentIndexOffset_ += friction * offset;
+            AnimationCallbackInfo callbackInfo;
+            callbackInfo.currentOffset =
+                GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
+            FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
+        }
+    } else if (!IsLoop() && IsOutOfBoundary(offset) &&
+               (edgeEffect == EdgeEffect::FADE || edgeEffect == EdgeEffect::NONE)) {
+        currentDelta_ = currentDelta_ - offset;
+        if (edgeEffect == EdgeEffect::FADE) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
+                auto remainOffset = GetRemainingOffset();
+                fadeOffset_ += (offset - remainOffset);
+            }
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     } else {
-        // hasn't reached end
         currentDelta_ = currentDelta_ - offset;
         currentIndexOffset_ += offset;
         if (isDragging_) {
@@ -2692,7 +2680,6 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
             lazyForEach->SetRequestLongPredict(useLazyLoad);
         }
     }
-    // fully build ForEach items
     if (useLazyLoad) {
         auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
