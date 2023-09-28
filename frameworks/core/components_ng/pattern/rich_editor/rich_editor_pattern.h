@@ -214,6 +214,18 @@ public:
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
+    const std::string& GetPasteStr() const
+    {
+        return pasteStr_;
+    }
+    void AddPasteStr(const std::string& addedStr)
+    {
+        pasteStr_.append(addedStr);
+    }
+    void ClearPasteStr()
+    {
+        pasteStr_.clear();
+    }
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
     {
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
@@ -360,6 +372,7 @@ private:
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
     OffsetF rightClickOffset_;
+    std::string pasteStr_;
 
     // still in progress
     ParagraphManager paragraphs_;

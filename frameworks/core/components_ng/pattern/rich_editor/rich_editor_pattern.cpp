@@ -2835,6 +2835,8 @@ void RichEditorPattern::ResetAfterPaste()
     SetCaretSpanIndex(-1);
     StartTwinkling();
     CloseSelectOverlay();
+    InsertValueByPaste(GetPasteStr());
+    ClearPasteStr();
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         auto length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
@@ -2866,7 +2868,7 @@ void RichEditorPattern::HandleOnPaste()
         auto richEditor = weak.Upgrade();
         CHECK_NULL_VOID(richEditor);
         LOGI("HandleOnPaste InsertValue: %{public}s", data.c_str());
-        richEditor->InsertValueByPaste(data);
+        richEditor->AddPasteStr(data);
         if (isLastRecord) {
             richEditor->ResetAfterPaste();
         }
@@ -2885,20 +2887,11 @@ void RichEditorPattern::HandleOnPaste()
         size.height = CalcDimension(DEFAULT_IMAGE_SIZE);
         imageAttribute.size = size;
         imageOption.imageAttribute = imageAttribute;
-        int32_t index = 0;
-        if (richEditor->GetCaretSpanIndex() == -1) {
-            imageOption.offset = richEditor->GetCaretPosition() + richEditor->moveLength_;
-            index = richEditor->AddImageSpan(imageOption, true);
-        } else {
-            index = richEditor->AddImageSpan(imageOption, true, richEditor->GetCaretSpanIndex() + 1);
-        }
         if (isLastRecord) {
             richEditor->ResetAfterPaste();
-        } else {
-            richEditor->SetCaretSpanIndex(index);
         }
-        LOGI("after insert pixelMap record, CaretPosition :%{public}d, moveLength_: %{public}d index: %{public}d",
-            richEditor->GetCaretPosition(), richEditor->moveLength_, index);
+        LOGI("after insert pixelMap record, CaretPosition :%{public}d, moveLength_: %{public}d",
+            richEditor->GetCaretPosition(), richEditor->moveLength_);
     };
     auto urlCallback = [weak = WeakClaim(this), textSelector = textSelector_](
                            const std::string& uri, bool isLastRecord) {
@@ -2912,20 +2905,11 @@ void RichEditorPattern::HandleOnPaste()
         size.height = CalcDimension(DEFAULT_IMAGE_SIZE);
         imageAttribute.size = size;
         imageOption.imageAttribute = imageAttribute;
-        int32_t index = 0;
-        if (richEditor->GetCaretSpanIndex() == -1) {
-            imageOption.offset = richEditor->GetCaretPosition() + richEditor->moveLength_;
-            index = richEditor->AddImageSpan(imageOption, true);
-        } else {
-            index = richEditor->AddImageSpan(imageOption, true, richEditor->GetCaretSpanIndex() + 1);
-        }
         if (isLastRecord) {
             richEditor->ResetAfterPaste();
-        } else {
-            richEditor->SetCaretSpanIndex(index);
         }
-        LOGI("after insert pixelMap url, CaretPosition :%{public}d, moveLength_: %{public}d index: %{public}d",
-            richEditor->GetCaretPosition(), richEditor->moveLength_, index);
+        LOGI("after insert pixelMap url, CaretPosition :%{public}d, moveLength_: %{public}d",
+            richEditor->GetCaretPosition(), richEditor->moveLength_);
     };
     clipboard_->GetData(textCallback, pixelMapCallback, urlCallback);
 }
