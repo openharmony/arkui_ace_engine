@@ -159,7 +159,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRun
     if (!(xResult || yResult)) {
         LOGE("the position prop is illegal");
     } else {
-        (*iterLayoutChildren_)->GetGeometryNode()->SetFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
+        (*iterLayoutChildren_)->GetGeometryNode()->SetMarginFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
     }
     (*iterLayoutChildren_)->Layout();
     iterLayoutChildren_++;
