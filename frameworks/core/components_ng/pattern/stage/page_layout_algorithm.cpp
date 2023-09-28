@@ -26,7 +26,8 @@ void PageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto pattern = node->GetPattern<PagePattern>();
-    if (context->GetCurrentPageId() > node->GetPageId() && !(pattern->GetPageShowState())) {
+    auto currentPageId = context->GetCurrentPageId();
+    if (currentPageId != -1 && currentPageId != node->GetPageId() && !(pattern->GetPageShowState())) {
         return;
     }
     BoxLayoutAlgorithm::Measure(layoutWrapper);

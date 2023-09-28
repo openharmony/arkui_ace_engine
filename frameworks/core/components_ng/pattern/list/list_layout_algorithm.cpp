@@ -1224,7 +1224,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
     CHECK_NULL_VOID(pattern);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (context->GetCurrentPageId() > frameNode->GetPageId()) {
+    if (frameNode->GetPageId() != context->GetCurrentPageId()) {
         return;
     }
     if (pattern->GetPredictLayoutParam()) {

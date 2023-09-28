@@ -309,12 +309,14 @@ void PagePattern::FlushDelayLayoutNodes()
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     for (const auto& weak : delayLayoutNodes_) {
         auto node = weak.Upgrade();
         if (node) {
             pipeline->AddDirtyLayoutNode(node, false);
         }
     }
+    delayLayoutNodes_.clear();
     pipeline->FlushPipelineImmediately();
 }
 

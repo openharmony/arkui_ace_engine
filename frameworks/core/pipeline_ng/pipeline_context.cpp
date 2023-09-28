@@ -130,7 +130,8 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty, bool ch
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    if (checkPage && dirty->GetPageId() > 0 && dirty->GetPageId() < GetCurrentPageId()) {
+    auto currentPageId = GetCurrentPageId();
+    if (checkPage && dirty->GetPageId() > 0 && currentPageId != -1 && dirty->GetPageId() != currentPageId) {
         auto page = stageManager_->GetLastPage();
         auto pagePattern = page->GetPattern<PagePattern>();
         pagePattern->AddDelaytLayoutNode(WeakClaim(RawPtr(dirty)));
@@ -153,6 +154,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty, bool ch
 
 int32_t PipelineContext::GetCurrentPageId()
 {
+    CHECK_NULL_RETURN(stageManager_, -1);
     return stageManager_->GetLastPage() ? stageManager_->GetLastPage()->GetPageId() : -1;
 }
 
@@ -1566,7 +1568,7 @@ void PipelineContext::HandleOnAreaChangeEvent()
     }
     auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        if (frameNode->GetPageId() < GetCurrentPageId()) {
+        if (frameNode->GetPageId() != GetCurrentPageId()) {
             continue;
         }
         frameNode->TriggerOnAreaChangeCallback();
