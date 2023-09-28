@@ -2361,6 +2361,7 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
 {
     CHECK_NULL_VOID(nweb_);
     auto setting = nweb_->GetPreference();
+    CHECK_NULL_VOID(setting);
     if (useNewPipe) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
