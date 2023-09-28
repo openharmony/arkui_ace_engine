@@ -297,6 +297,7 @@ private:
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 
+    int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
     RefPtr<UINode> GetChildByIndex(int32_t index) const;
