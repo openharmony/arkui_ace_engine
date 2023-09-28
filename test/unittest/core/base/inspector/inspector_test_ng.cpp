@@ -20,6 +20,8 @@
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock-actions.h"
+#include "gmock/gmock-spec-builders.h"
 #include "gtest/gtest.h"
 
 #define protected public
@@ -100,7 +102,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg001, TestSize.Level1)
 
     auto nodePtr3 = Inspector::GetFrameNodeByKey("");
     ASSERT_NE(nodePtr3, nullptr);
-    context1->rootNode_ = nullptr;
 }
 
 /**
@@ -139,7 +140,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg002, TestSize.Level1)
      * @tc.expected: expect nodePtr2 not null
      */
     auto test3 = Inspector::GetInspectorNodeByKey("");
-    context1->rootNode_ = nullptr;
 }
 
 /**
@@ -167,7 +167,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
     EXPECT_NE(test1, "");
     auto test3 = Inspector::GetInspector(true);
     EXPECT_NE(test3, "");
-    context1->stageManager_ = nullptr;
 }
 
 /**
@@ -191,7 +190,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg004, TestSize.Level1)
     EXPECT_EQ(test3, true);
     test3 = Inspector::SendEventByKey("", 31, "params");
     EXPECT_EQ(test3, true);
-    context->rootNode_ = nullptr;
 }
 
 /**
@@ -290,9 +288,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg006, TestSize.Level1)
     frameNode2->AddChild(frameNode3);
     test3 = Inspector::GetInspector(false);
     EXPECT_NE(test3, "");
-
-    context1->stageManager_ = nullptr;
-    ONE->tag_ = "one";
 }
 
 /**
@@ -318,6 +313,5 @@ HWTEST_F(InspectorTestNg, InspectorTestNg007, TestSize.Level1)
     auto pageRootNode = context1->GetStageManager()->GetLastPage();
     auto test = Inspector::GetInspector(false);
     EXPECT_EQ(test, "{\"$type\":\"root\",\"width\":\"0.000000\",\"height\":\"0.000000\",\"$resolution\":\"0.000000\"}");
-    context1->stageManager_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

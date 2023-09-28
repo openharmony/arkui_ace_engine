@@ -14,10 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("thread_checker_test") {
-  type = "basic/common"
   sources = [
     "$ace_root/frameworks/core/common/thread_checker.cpp",
-    "$ace_root/test/mock/core/common/mock_container.cpp",
     "thread_checker_test.cpp",
   ]
 }

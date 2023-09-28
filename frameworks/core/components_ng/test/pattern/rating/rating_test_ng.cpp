@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <cmath>
 #include <cstdint>
 #include <string>
-#include <cmath>
 
 #include "gtest/gtest.h"
 #define private public
@@ -98,18 +98,18 @@ const std::string RATING_SECONDARY_IMAGE_KEY = "secondaryImageSourceInfo";
 const std::string RATING_BACKGROUND_IMAGE_KEY = "backgroundImageSourceInfo";
 } // namespace
 
-class RatingPatternTestNg : public testing::Test {
+class RatingTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
 };
 
-void RatingPatternTestNg::SetUpTestCase()
+void RatingTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
 
-void RatingPatternTestNg::TearDownTestCase()
+void RatingTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
@@ -119,7 +119,7 @@ void RatingPatternTestNg::TearDownTestCase()
  * @tc.desc: Create Rating.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingCreateTest001, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingCreateTest001, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -133,7 +133,7 @@ HWTEST_F(RatingPatternTestNg, RatingCreateTest001, TestSize.Level1)
  * @tc.desc: Test setting indicator, starStyle and starNum.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingLayoutPropertyTest003, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingLayoutPropertyTest003, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -164,7 +164,7 @@ HWTEST_F(RatingPatternTestNg, RatingLayoutPropertyTest003, TestSize.Level1)
  * @tc.desc: Test rating ratingScore and stepSize default value.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingRenderPropertyTest004, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingRenderPropertyTest004, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -183,7 +183,7 @@ HWTEST_F(RatingPatternTestNg, RatingRenderPropertyTest004, TestSize.Level1)
  * @tc.desc: Test setting rating ratingScore(drawScore) and stepSize.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingRenderPropertyTest005, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingRenderPropertyTest005, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -205,7 +205,7 @@ HWTEST_F(RatingPatternTestNg, RatingRenderPropertyTest005, TestSize.Level1)
  * @tc.desc: Test setting out-of-bounds ratingScore and starNum values.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Rating with its the ratingScore and starNums are both negative.
@@ -275,7 +275,7 @@ HWTEST_F(RatingPatternTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
  * @tc.desc: Invoke GetImageSourceInfoFromTheme and ready, success and fail callback functions.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingPatternGetImageSourceFromThemeTest007, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingPatternGetImageSourceFromThemeTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create RatingModelNG.
@@ -347,7 +347,7 @@ HWTEST_F(RatingPatternTestNg, RatingPatternGetImageSourceFromThemeTest007, TestS
  * @tc.desc: Invoke ToJsonValue function.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingPatternToJsonValueTest008, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingPatternToJsonValueTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create RatingModelNG.
@@ -396,7 +396,7 @@ HWTEST_F(RatingPatternTestNg, RatingPatternToJsonValueTest008, TestSize.Level1)
  * @tc.desc: Test rating measure and layout function and invoke OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingMeasureTest009, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingMeasureTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create RatingModelNG.
@@ -515,7 +515,7 @@ HWTEST_F(RatingPatternTestNg, RatingMeasureTest009, TestSize.Level1)
  * @tc.desc: Test when starStyle is undefined, flag is set by true, and star sourceInfo is from Theme.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingLayoutPropertyTest010, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingLayoutPropertyTest010, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -542,7 +542,7 @@ HWTEST_F(RatingPatternTestNg, RatingLayoutPropertyTest010, TestSize.Level1)
  * @tc.desc: Test when starStyle is 3 different image formats, modifier will also update CanvasImage.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingPatternTest011, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create rating FrameNode and pattern loads ImageLoadingContext.
@@ -631,7 +631,7 @@ HWTEST_F(RatingPatternTestNg, RatingPatternTest011, TestSize.Level1)
  * @tc.desc: Test rating three images render scale.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingPatternTest012, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingPatternTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create rating FrameNode and Pattern, and initialize rating modifier.
@@ -689,7 +689,7 @@ HWTEST_F(RatingPatternTestNg, RatingPatternTest012, TestSize.Level1)
  * @tc.desc: Test rating MeasureContent when rating component's width or height is not fully valid.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingMeasureTest013, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingMeasureTest013, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
@@ -727,7 +727,7 @@ HWTEST_F(RatingPatternTestNg, RatingMeasureTest013, TestSize.Level1)
  * @tc.desc: Test setting out-of-bounds ratingScore and starNum values.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingOnChangeEventTest001, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingOnChangeEventTest001, TestSize.Level1)
 {
     auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
     ratingTheme->starNum_ = DEFAULT_STAR_NUM;
@@ -754,11 +754,11 @@ HWTEST_F(RatingPatternTestNg, RatingOnChangeEventTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RatingPatternTestNg001
+ * @tc.name: RatingTestNg001
  * @tc.desc: Test the HasRange and RangeInfo properties of Rating.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingPatternTestNg001, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingTestNg001, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -777,11 +777,11 @@ HWTEST_F(RatingPatternTestNg, RatingPatternTestNg001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RatingPatternTestNg002
+ * @tc.name: RatingTestNg002
  * @tc.desc: Test the Text property of Rating.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingPatternTestNg002, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingTestNg002, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -801,7 +801,7 @@ HWTEST_F(RatingPatternTestNg, RatingPatternTestNg002, TestSize.Level1)
  * @tc.desc: Test Rating PaintMethod ShouldHighLight
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingPaintPropertyTest001, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Rating without parameters.
@@ -895,7 +895,7 @@ HWTEST_F(RatingPatternTestNg, RatingPaintPropertyTest001, TestSize.Level1)
  * @tc.desc: Test Rating Pattern OnKeyEven()
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPatternTestNg, RatingPatternOnKeyEvent001, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingPatternOnKeyEvent001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Rating pattern.

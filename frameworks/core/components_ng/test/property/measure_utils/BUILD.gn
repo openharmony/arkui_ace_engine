@@ -13,30 +13,8 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("measure_utils_test_ng") {
-  module_out_path = property_test_output_path
-
-  sources = [
-    "$ace_root/frameworks/base/geometry/dimension.cpp",
-    "$ace_root/frameworks/base/utils/string_expression.cpp",
-    "$ace_root/frameworks/core/components/common/properties/color.cpp",
-
-    # components_ng
-    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
-    "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
-    "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
-
-    # mock
-    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
-
-    # self
-    "measure_utils_test_ng.cpp",
-  ]
-
-  deps = [
-    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
-    "$ace_root/test/unittest:ace_unittest_log",
-    "//third_party/googletest:gmock_main",
-  ]
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+ace_unittest("measure_utils_test_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "measure_utils_test_ng.cpp" ]
 }

@@ -15,7 +15,6 @@
 
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
-#include "base/log/ace_performance_check.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/utils/time_util.h"

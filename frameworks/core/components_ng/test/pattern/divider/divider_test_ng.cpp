@@ -25,9 +25,9 @@
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -51,7 +51,7 @@ TestProperty testProperty;
 DirtySwapConfig config;
 } // namespace
 
-class DividerPatternTestNg : public testing::Test {
+class DividerTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -60,7 +60,7 @@ protected:
     static RefPtr<FrameNode> CreateDividerNode(TestProperty& testProperty);
 };
 
-void DividerPatternTestNg::SetUpTestCase()
+void DividerTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
     testProperty.vertical = VERTICAL_TRUE;
@@ -69,12 +69,12 @@ void DividerPatternTestNg::SetUpTestCase()
     testProperty.lineCap = LINE_CAP;
 }
 
-void DividerPatternTestNg::TearDownTestCase()
+void DividerTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
 
-RefPtr<FrameNode> DividerPatternTestNg::CreateDividerNode(TestProperty& testProperty)
+RefPtr<FrameNode> DividerTestNg::CreateDividerNode(TestProperty& testProperty)
 {
     DividerModelNG().Create();
     if (testProperty.vertical.has_value()) {
@@ -99,7 +99,7 @@ RefPtr<FrameNode> DividerPatternTestNg::CreateDividerNode(TestProperty& testProp
  * @tc.desc: Test all the property of divider.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DividerPatternTest001, TestSize.Level1)
+HWTEST_F(DividerTestNg, DividerPatternTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode
@@ -126,7 +126,7 @@ HWTEST_F(DividerPatternTestNg, DividerPatternTest001, TestSize.Level1)
  * @tc.desc: Test all the layoutAlgorithm of divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DividerPatternTest002, TestSize.Level1)
+HWTEST_F(DividerTestNg, DividerPatternTest002, TestSize.Level1)
 {
     bool vertical[2] = { VERTICAL_TRUE, VERTICAL_FALSE };
     testProperty.strokeWidth = STROKE_WIDTH;
@@ -161,7 +161,7 @@ HWTEST_F(DividerPatternTestNg, DividerPatternTest002, TestSize.Level1)
  * @tc.desc: Test all the pattern of divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DividerPatternTest003, TestSize.Level1)
+HWTEST_F(DividerTestNg, DividerPatternTest003, TestSize.Level1)
 {
     RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
@@ -173,7 +173,7 @@ HWTEST_F(DividerPatternTestNg, DividerPatternTest003, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
     bool skipMeasures[2] = { false, true };
-    bool isSwaps[4] = {true, false, false, false};
+    bool isSwaps[4] = { true, false, false, false };
     /**
      * @tc.steps: step1. OnDirtyLayoutWrapperSwap test
      * @tc.expected: step1. adjust skipMeasure and config, OnDirtyLayoutWrapperSwap return true, false
@@ -200,7 +200,7 @@ HWTEST_F(DividerPatternTestNg, DividerPatternTest003, TestSize.Level1)
  * @tc.desc: Test the dynamic effect of the Divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DividerModifierTest001, TestSize.Level1)
+HWTEST_F(DividerTestNg, DividerModifierTest001, TestSize.Level1)
 {
     DividerModifier dividerModifier;
     Testing::MockCanvas rsCanvas;
@@ -214,7 +214,7 @@ HWTEST_F(DividerPatternTestNg, DividerModifierTest001, TestSize.Level1)
  * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_TRUE
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest001, TestSize.Level1)
+HWTEST_F(DividerTestNg, DivideAlgorithmTest001, TestSize.Level1)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_TRUE;
@@ -225,7 +225,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
-    
+
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
     EXPECT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -244,7 +244,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest001, TestSize.Level1)
  * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_FALSE
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest002, TestSize.Level1)
+HWTEST_F(DividerTestNg, DivideAlgorithmTest002, TestSize.Level1)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_FALSE;
@@ -255,7 +255,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest002, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
-    
+
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
     EXPECT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -272,7 +272,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest002, TestSize.Level1)
  * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_FALSE and no selfIdealSize
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest003, TestSize.Level1)
+HWTEST_F(DividerTestNg, DivideAlgorithmTest003, TestSize.Level1)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_FALSE;
@@ -282,7 +282,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest003, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
-    
+
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
     EXPECT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -299,7 +299,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest003, TestSize.Level1)
  * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_TRUE and no selfIdealSize
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest004, TestSize.Level1)
+HWTEST_F(DividerTestNg, DivideAlgorithmTest004, TestSize.Level1)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_TRUE;
@@ -309,7 +309,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest004, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
-    
+
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
     EXPECT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();

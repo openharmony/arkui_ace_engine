@@ -51,32 +51,27 @@ constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr int32_t PLATFORM_VERSION_9 = 9;
 } // namespace
 
-class LinearSplitPatternTestNg : public testing::Test {
+class LinearSplitTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
-void LinearSplitPatternTestNg::SetUpTestCase()
+void LinearSplitTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
 }
 
-void LinearSplitPatternTestNg::TearDownTestCase()
+void LinearSplitTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
 }
-void LinearSplitPatternTestNg::SetUp() {}
-
-void LinearSplitPatternTestNg::TearDown() {}
 
 /**
  * @tc.name: LinearSplitCreatorTest001
  * @tc.desc: Test all the property of split
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitCreatorTest001, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitCreatorTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -106,7 +101,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitCreatorTest001, TestSize.Level1)
  * @tc.desc: Test linearSplit pattern OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -135,7 +130,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
     std::vector<float> dragSplitOffset;
     std::vector<float> childrenDragPos;
     RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm = AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(
-            SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
+        SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
 
     /**
      * @tc.steps: step3. call linearSplitPattern OnDirtyLayoutWrapperSwap function, compare result.
@@ -166,7 +161,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
  * @tc.desc: Test linearSplit pattern OnModifyDone function.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest002, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -199,7 +194,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest002, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest003, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -231,7 +226,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest003, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern HandlePanEvent  when resizeable is false.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest004, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest004, TestSize.Level1)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_10, PLATFORM_VERSION_9 };
     for (int32_t turn = 0; turn < platformVersions.size(); turn++) {
@@ -275,7 +270,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest004, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern HandlePanEvent  when resizeable is true.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest005, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -312,7 +307,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest005, TestSize.Level1)
  * @tc.desc: Test LinearSplit Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest006, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest006, TestSize.Level1)
 {
     std::vector<SplitType> splitType = { SplitType::COLUMN_SPLIT, SplitType::ROW_SPLIT };
     for (int turn = 0; turn < splitType.size(); turn++) {
@@ -365,7 +360,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest006, TestSize.Level1)
  * @tc.desc: Test ColumnSplit Layout with children nodes.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -391,7 +386,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     std::vector<float> dragSplitOffset;
     std::vector<float> childrenDragPos;
     RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm = AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(
-            SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
+        SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
@@ -456,8 +451,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
 
-    auto verticalRemaining = RK356_HEIGHT - SMALL_ITEM_HEIGHT * FIVE_ITEM_SIZE
-                             - DEFAULT_SPLIT_HEIGHT * (FIVE_ITEM_SIZE - 1);
+    auto verticalRemaining =
+        RK356_HEIGHT - SMALL_ITEM_HEIGHT * FIVE_ITEM_SIZE - DEFAULT_SPLIT_HEIGHT * (FIVE_ITEM_SIZE - 1);
     for (int32_t i = 0; i < FIVE_ITEM_SIZE; i++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
@@ -559,7 +554,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
  * @tc.desc: Test RowSplit Layout with children nodes.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create rowSplit and initialize related properties.
@@ -650,8 +645,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
 
-    auto horizontalRemaining = RK356_WIDTH - FIVE_ITEM_SIZE * SMALL_ITEM_WIDTH
-                               - DEFAULT_SPLIT_HEIGHT * (FIVE_ITEM_SIZE - 1);
+    auto horizontalRemaining =
+        RK356_WIDTH - FIVE_ITEM_SIZE * SMALL_ITEM_WIDTH - DEFAULT_SPLIT_HEIGHT * (FIVE_ITEM_SIZE - 1);
     for (int32_t i = 0; i < FIVE_ITEM_SIZE; i++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
@@ -742,7 +737,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern HandleMouseEvent  when resizeable is true.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest009, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -784,7 +779,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest009, TestSize.Level1)
  * @tc.desc: Test RowSplit Layout with children nodes with API9.
  * @tc.type: FUNC
  */
- HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest010, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create rowSplit and initialize related properties.
@@ -964,7 +959,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest009, TestSize.Level1)
  * @tc.desc: Test ColumnSplit Layout with children nodes with API9.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest011, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -990,7 +985,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest011, TestSize.Level1)
     std::vector<float> dragSplitOffset;
     std::vector<float> childrenDragPos;
     RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm = AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(
-            SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
+        SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);

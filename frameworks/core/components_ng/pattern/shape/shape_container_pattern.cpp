@@ -19,11 +19,6 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/utils.h"
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/render/adapter/skia_decoration_painter.h"
-#else
-#include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
-#endif
 
 namespace OHOS::Ace::NG {
 bool ShapeContainerPattern::OnDirtyLayoutWrapperSwap(
