@@ -13373,4 +13373,160 @@ HWTEST_F(SwiperTestNg, SwiperPatternRegisterVisibleAreaChange002, TestSize.Level
     swiperPattern->RegisterVisibleAreaChange();
     EXPECT_EQ(swiperPattern->hasVisibleChangeRegistered_, true);
 }
+
+/**
+ * @tc.name: SwiperPatternInitSurfaceChangedCallback001
+ * @tc.desc: InitSurfaceChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->rightButtonId_ = 1;
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
+    swiperNode->Clean(false, false);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(-1);
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, swiperPattern->GetRightButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(rightArrow, nullptr);
+
+    /**
+     * @tc.steps: step2. call InitSurfaceChangedCallback and then callback.
+     * @tc.expected: Related function is called.
+     */
+    auto host = swiperPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    EXPECT_NE(pipeline, nullptr);
+    swiperPattern->surfaceChangedCallbackId_.emplace(1);
+    swiperPattern->InitSurfaceChangedCallback();
+    pipeline->callbackId_ = 0;
+    swiperPattern->surfaceChangedCallbackId_.reset();
+    EXPECT_FALSE(swiperPattern->HasSurfaceChangedCallback());
+    pipeline->surfaceChangedCallbackMap_.clear();
+    swiperPattern->InitSurfaceChangedCallback();
+    auto callbackmapnumber = pipeline->callbackId_;
+    EXPECT_EQ(callbackmapnumber, 1);
+    auto testFunction = pipeline->surfaceChangedCallbackMap_[1];
+    testFunction(1, 1, 1, 1, WindowSizeChangeReason::CUSTOM_ANIMATION);
+    auto callbacknumber = swiperPattern->surfaceChangedCallbackId_;
+    EXPECT_EQ(callbacknumber, 1);
+
+    /**
+     * @tc.steps: step3. call InitSurfaceChangedCallback and then callback in different conditions.
+     * @tc.expected: Related function is called.
+     */
+    pipeline->callbackId_ = 0;
+    swiperPattern->surfaceChangedCallbackId_.reset();
+    EXPECT_FALSE(swiperPattern->HasSurfaceChangedCallback());
+    pipeline->surfaceChangedCallbackMap_.clear();
+    swiperPattern->InitSurfaceChangedCallback();
+    auto callbackmapnumber2 = pipeline->callbackId_;
+    EXPECT_EQ(callbackmapnumber2, 1);
+    auto testFunction2 = pipeline->surfaceChangedCallbackMap_[1];
+    testFunction2(1, 1, 1, 1, WindowSizeChangeReason::UNDEFINED);
+    auto callbacknumber2 = swiperPattern->surfaceChangedCallbackId_;
+    EXPECT_EQ(callbacknumber2, 1);
+
+    swiperPattern->indicatorController_ = AceType::MakeRefPtr<Animator>();
+    auto childswiperNode1 = FrameNode::CreateFrameNode("childswiper", 1, AceType::MakeRefPtr<SwiperPattern>(), false);
+    childswiperNode1->MountToParent(swiperNode);
+    auto childswiperNode2 =
+        FrameNode::CreateFrameNode(V2::JS_LAZY_FOR_EACH_ETS_TAG, 2, AceType::MakeRefPtr<SwiperPattern>(), false);
+    childswiperNode2->MountToParent(swiperNode);
+    pipeline->callbackId_ = 0;
+    swiperPattern->surfaceChangedCallbackId_.reset();
+    EXPECT_FALSE(swiperPattern->HasSurfaceChangedCallback());
+    pipeline->surfaceChangedCallbackMap_.clear();
+    swiperPattern->InitSurfaceChangedCallback();
+    auto callbackmapnumber3 = pipeline->callbackId_;
+    EXPECT_EQ(callbackmapnumber3, 1);
+    auto testFunction3 = pipeline->surfaceChangedCallbackMap_[1];
+    testFunction3(1, 1, 1, 1, WindowSizeChangeReason::CUSTOM_ANIMATION);
+    auto callbacknumber3 = swiperPattern->surfaceChangedCallbackId_;
+    EXPECT_EQ(callbacknumber3, 1);
+}
+
+/**
+ * @tc.name: SwiperPatternMarkDirtyNodeSelf001
+ * @tc.desc: MarkDirtyNodeSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternMarkDirtyNodeSelf001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->rightButtonId_ = 1;
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
+    swiperNode->Clean(false, false);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(-1);
+
+    /**
+     * @tc.steps: step2. call MarkDirtyNodeSelf.
+     * @tc.expected: Related function is called.
+     */
+    swiperPattern->crossMatchChild_ = true;
+    swiperPattern->MarkDirtyNodeSelf();
+    EXPECT_EQ(swiperPattern->crossMatchChild_, true);
+    swiperPattern->crossMatchChild_ = false;
+    swiperPattern->MarkDirtyNodeSelf();
+    EXPECT_EQ(swiperPattern->crossMatchChild_, false);
+}
+
+/**
+ * @tc.name: SwiperPatternOnWindowHide001
+ * @tc.desc: MarkDirtyNodeSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnWindowHide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->rightButtonId_ = 1;
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
+    swiperNode->Clean(false, false);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(-1);
+
+    /**
+     * @tc.steps: step2. call MarkDirtyNodeSelf.
+     * @tc.expected: Related function is called.
+     */
+    swiperPattern->isDragging_ = true;
+    swiperPattern->OnWindowHide();
+    EXPECT_EQ(swiperPattern->isDragging_, true);
+    swiperPattern->isDragging_ = false;
+    swiperPattern->OnWindowHide();
+    EXPECT_EQ(swiperPattern->isDragging_, false);
+}
 } // namespace OHOS::Ace::NG
