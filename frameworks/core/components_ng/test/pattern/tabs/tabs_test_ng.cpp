@@ -10080,4 +10080,225 @@ HWTEST_F(TabsTestNg, TabsModelGetOrCreateTabsNode002, TestSize.Level1)
         TabsModelNG::GetOrCreateTabsNode("TabsID2", nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     ASSERT_NE(tabsNode2, nullptr);
 }
+
+/**
+ * @tc.name: TabBarPatternOnRestoreInfo001
+ * @tc.desc: Test the TabBarPatternOnRestoreInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternOnRestoreInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and get pattern.
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    auto pattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabsLayoutProperty = tabBarPattern->GetLayoutProperty<TabsLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Set Indicator.
+     * @tc.expected: Function ProvideRestoreInfo is called.
+     */
+    tabBarPattern->UpdateIndicator(0);
+    std::string ret = tabBarPattern->ProvideRestoreInfo();
+    EXPECT_TRUE(ret == R"({"Index":0})");
+
+    /**
+     * @tc.steps: step3. Function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    std::string restoreInfo_ = R"({"Index":0})";
+    auto info = JsonUtil::ParseJsonString(restoreInfo_);
+    auto jsonIsOn = info->GetValue("Index");
+    tabBarPattern->SetTabBarStyle(TabBarStyle::NOSTYLE, 0);
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+    tabBarPattern->SetAnimationDuration(1);
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+    tabBarPattern->swiperController_ = nullptr;
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+    auto columnNode1 =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode1, nullptr);
+    columnNode1->MountToParent(tabBarNode);
+    auto columnNode2 =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode2, nullptr);
+    columnNode2->MountToParent(tabBarNode);
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+}
+
+/**
+ * @tc.name: TabBarPatternInitTurnPageRateEvent002
+ * @tc.desc: test InitTurnPageRateEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternInitTurnPageRateEvent002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    BuildTabBar(tabsNode, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE);
+
+    /**
+     * @tc.steps: steps2. InitTurnPageRateEvent
+     * @tc.expected: steps2. Check the result of InitTurnPageRateEvent
+     */
+
+    tabBarPattern->InitTurnPageRateEvent();
+    int32_t testswipingIndex = 1;
+    float testturnPageRate = 1.0f;
+    tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    AnimationCallbackInfo info;
+    eventHub->animationEndEvent_(testswipingIndex, info);
+    EXPECT_NE(eventHub, nullptr);
+    tabBarPattern->axis_ = Axis::HORIZONTAL;
+    tabBarPattern->isTouchingSwiper_ = true;
+    tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    EXPECT_NE(tabBarPattern, nullptr);
+    tabBarPattern->axis_ = Axis::VERTICAL;
+    tabBarPattern->isTouchingSwiper_ = false;
+    tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    EXPECT_NE(tabBarPattern, nullptr);
+    tabBarPattern->axis_ = Axis::VERTICAL;
+    tabBarPattern->isTouchingSwiper_ = true;
+    tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    EXPECT_NE(tabBarPattern, nullptr);
+    tabBarPattern->turnPageRate_ = 2.0f;
+    eventHub->animationEndEvent_(testswipingIndex, info);
+    tabBarPattern->turnPageRate_ = 1.0f;
+    eventHub->animationEndEvent_(testswipingIndex, info);
+    tabBarPattern->turnPageRate_ = 0.0f;
+    eventHub->animationEndEvent_(testswipingIndex, info);
+    tabBarPattern->turnPageRate_ = -1.0f;
+    eventHub->animationEndEvent_(testswipingIndex, info);
+    EXPECT_NE(eventHub, nullptr);
+}
+
+/**
+ * @tc.name: TabBarPatternOnDirtyLayoutWrapperSwap002
+ * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternOnDirtyLayoutWrapperSwap002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    bool fadingEdge = true;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    tabsModel.SetFadingEdge(fadingEdge);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    EXPECT_EQ(tabsFrameNode->GetTag(), V2::TABS_ETS_TAG);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    EXPECT_EQ(tabBarNode->GetTag(), V2::TAB_BAR_ETS_TAG);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    auto layoutAlgorithm = tabBarPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    DirtySwapConfig config;
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode, tabBarNode->GetGeometryNode(), tabBarLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto algorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false, false);
+    ASSERT_NE(algorithmWrapper, nullptr);
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutWrapper->SetLayoutAlgorithm(algorithmWrapper);
+    EXPECT_EQ(layoutWrapper->layoutAlgorithm_, algorithmWrapper);
+    ASSERT_NE(tabBarPattern, nullptr);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
+    EXPECT_EQ(tabBarPattern->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
+    tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(tabBarPattern->indicator_, 0);
+    
+    /**
+     * @tc.steps: step2. creat different conditions and invoke OnDirtyLayoutWrapperSwap.
+     * @tc.expected: step2. expect The function is run ok.
+     */
+    config.skipMeasure = false;
+    tabBarPattern->isTouchingSwiper_ = true;
+    layoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(tabBarPattern->isTouchingSwiper_, true);
+}
+
+/**
+ * @tc.name: TabBarPatternSetEdgeEffect003
+ * @tc.desc: test SetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternSetEdgeEffect003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEdgeEffect.
+     * @tc.expected: Related function runs ok.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureHub, nullptr);
+    tabBarPattern->SetEdgeEffect(gestureHub);
+    EXPECT_NE(tabBarPattern, nullptr);
+}
 } // namespace OHOS::Ace::NG
