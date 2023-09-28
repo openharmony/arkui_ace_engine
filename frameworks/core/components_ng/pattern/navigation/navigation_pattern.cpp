@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/property/property.h"
+#include "core/common/container.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -211,6 +212,7 @@ void NavigationPattern::CheckTopNavPathChange(
             if (navDestinationPattern->GetIsOnShow()) {
                 auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
                 CHECK_NULL_VOID(eventHub);
+                NotifyPageHide(preTopNavPath->first);
                 eventHub->FireOnHiddenEvent();
                 navDestinationPattern->SetIsOnShow(false);
             }
@@ -258,6 +260,7 @@ void NavigationPattern::CheckTopNavPathChange(
             if (!navDestinationPattern->GetIsOnShow()) {
                 auto eventHub = newTopNavDestination->GetEventHub<NavDestinationEventHub>();
                 CHECK_NULL_VOID(eventHub);
+                NotifyPageShow(newTopNavPath->first);
                 eventHub->FireOnShownEvent();
                 navDestinationPattern->SetIsOnShow(true);
             }
@@ -289,6 +292,28 @@ void NavigationPattern::CheckTopNavPathChange(
         });
     }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+}
+
+void NavigationPattern::NotifyPageHide(const std::string& pageName)
+{
+    auto container = Container::Current();
+    if (container) {
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        if (pageUrlChecker != nullptr) {
+            pageUrlChecker->NotifyPageHide(pageName);
+        }
+    }
+}
+
+void NavigationPattern::NotifyPageShow(const std::string& pageName)
+{
+    auto container = Container::Current();
+    if (container) {
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        if (pageUrlChecker != nullptr) {
+            pageUrlChecker->NotifyPageShow(pageName);
+        }
+    }
 }
 
 void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -696,6 +721,7 @@ void NavigationPattern::OnWindowHide()
     CHECK_NULL_VOID(navDestinationPattern->GetIsOnShow());
     auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
+    NotifyPageHide(curTopNavPath->first);
     eventHub->FireOnHiddenEvent();
     navDestinationPattern->SetIsOnShow(false);
 }
@@ -712,6 +738,7 @@ void NavigationPattern::OnWindowShow()
     CHECK_NULL_VOID(navDestinationPattern);
     CHECK_NULL_VOID(!(navDestinationPattern->GetIsOnShow()));
     auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
+    NotifyPageShow(curTopNavPath->first);
     eventHub->FireOnShownEvent();
     navDestinationPattern->SetIsOnShow(true);
 }

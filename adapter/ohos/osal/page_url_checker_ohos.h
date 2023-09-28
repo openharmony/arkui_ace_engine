@@ -28,14 +28,24 @@ class PageUrlCheckerOhos : public PageUrlChecker {
 public:
     explicit PageUrlCheckerOhos(
         const std::shared_ptr<OHOS::AbilityRuntime::Context>& context) : context_(context) {}
+    PageUrlCheckerOhos(
+        const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
+        const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo)
+        : context_(context), abilityInfo_(abilityInfo) {}
     ~PageUrlCheckerOhos() = default;
     void LoadPageUrl(const std::string& url, const std::function<void()>& callback,
         const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack) override;
     void CheckPreload(const std::string& url) override;
 
+    void NotifyPageShow(const std::string& pageName) override;
+    void NotifyPageHide(const std::string& pageName) override;
+    void SetModuleNameCallback(std::function<std::string(const std::string&)>&& callback) override;
+
 private:
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo_;
+    std::function<std::string(const std::string&)> moduleNameCallback_;
 };
 } // namespace OHOS::Ace
 

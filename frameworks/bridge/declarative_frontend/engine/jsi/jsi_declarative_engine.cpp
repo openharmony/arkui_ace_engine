@@ -1444,6 +1444,15 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
     LOGI("AddToNamedRouterMap name = %{public}s", namedRoute.c_str());
 }
 
+std::string JsiDeclarativeEngine::SearchRouterRegisterMap(const std::string& pageName)
+{
+    auto it = namedRouterRegisterMap_.find(pageName);
+    if (it != namedRouterRegisterMap_.end()) {
+        return it->second.moduleName;
+    }
+    return "";
+}
+
 bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs)
 {
     CHECK_NULL_RETURN(!namedRouterRegisterMap_.empty(), false);
