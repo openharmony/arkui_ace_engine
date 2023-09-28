@@ -4366,7 +4366,8 @@ void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
                          const RefPtr<OHOS::Ace::DragEvent>& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnd");
-        func->Execute(info);
+        auto extraParams = JsonUtil::Create(true);
+        func->Execute(info, extraParams->ToString());
     };
 
     ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(onDragEnd));
