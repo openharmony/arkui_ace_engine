@@ -1903,7 +1903,9 @@ OffsetF FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset += renderContext->GetPaintRectWithTranslate().GetOffset();
+        auto rect = renderContext->GetPaintRectWithTranslate();
+        CHECK_NULL_RETURN(rect.IsValid(), offset + parent->GetPaintRectOffset());
+        offset += rect.GetOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;

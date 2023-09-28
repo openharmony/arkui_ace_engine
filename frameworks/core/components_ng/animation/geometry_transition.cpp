@@ -120,7 +120,8 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     }
     auto node = frameNode.Upgrade();
     CHECK_NULL_VOID(node && node->GetRenderContext() && !id_.empty());
-    LOGD("GeometryTransition: build node: %{public}d %{public}s", node->GetId(), isNodeIn ? "in" : "out");
+    LOGI("GeometryTransition: build node: %{public}d, direction: %{public}d, onTree: %{public}d, removing: %{public}d",
+        node->GetId(), isNodeIn, node->IsOnMainTree(), node->IsRemoving());
     if (!isNodeIn && (frameNode == inNode_ || frameNode == outNode_)) {
         SwapInAndOut(frameNode == inNode_);
         RecordOutNodeFrame();
@@ -156,7 +157,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         }
     }
 
-    LOGD("GeometryTransition: inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
+    LOGI("GeometryTransition: inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
         "inNode: %{public}d, %{public}s, outNode: %{public}d, %{public}s", hasInAnim_, hasOutAnim_, follow,
         inNode->GetId(), inNode->GetTag().c_str(), outNode->GetId(), outNode->GetTag().c_str());
 }
@@ -181,7 +182,7 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
     str += which.Upgrade() ? std::to_string(which.Upgrade()->GetId()) : "null";
     str += ", new value: ";
     str += value.Upgrade() ? std::to_string(value.Upgrade()->GetId()) : "null";
-    LOGD("GeometryTransition: %{public}s", str.c_str());
+    LOGI("GeometryTransition: %{public}s", str.c_str());
     return ret;
 }
 
@@ -213,7 +214,7 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     std::optional<bool> direction = std::nullopt;
 
     if (isRoot && IsNodeInAndActive(node)) {
-        LOGD("GeometryTransition: node: %{public}d in and active", node->GetId());
+        LOGI("GeometryTransition: node: %{public}d in and active", node->GetId());
         state_ = State::IDENTITY;
         auto geometryNode = node->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
@@ -222,13 +223,13 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         node->SetLayoutProperty(layoutPropertyIn_);
         layoutPropertyIn_.Reset();
     } else if (IsNodeInAndIdentity(node)) {
-        LOGD("GeometryTransition: node: %{public}d in and identity", node->GetId());
+        LOGI("GeometryTransition: node: %{public}d in and identity", node->GetId());
         state_ = State::IDLE;
         node->SetLayoutPriority(0);
         direction = true;
         hasInAnim_ = false;
     } else if (isRoot && IsNodeOutAndActive(node)) {
-        LOGD("GeometryTransition: node: %{public}d out and active", node->GetId());
+        LOGI("GeometryTransition: node: %{public}d out and active", node->GetId());
         hasOutAnim_ = false;
         CHECK_NULL_VOID(!hasInAnim_);
         direction = false;
@@ -279,7 +280,7 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(targetSize);
-    LOGD("GeometryTransition: node: %{public}d modify size to: %{public}s",
+    LOGI("GeometryTransition: node: %{public}d modify size to: %{public}s",
         self->GetId(), targetSize.ToString().c_str());
     // if node has aspect ratio we'll ignore it in active state
     const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
@@ -342,11 +343,11 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
             auto renderContext = node->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
             renderContext->SetSandBox(std::nullopt);
-            LOGD("GeometryTransition: node %{public}d animation completed", node->GetId());
+            LOGI("GeometryTransition: node %{public}d animation completed", node->GetId());
         },
         false);
 
-    LOGD("GeometryTransition: node: %{public}d, parent: %{public}s, target: %{public}s, "
+    LOGI("GeometryTransition: node: %{public}d, parent: %{public}s, target: %{public}s, "
         "active frame: %{public}s, identity frame: %{public}s",
         self->GetId(), parentPos.ToString().c_str(), targetPos.ToString().c_str(),
         activeFrameRect.ToString().c_str(), isNodeIn ? geometryNode->GetFrameRect().ToString().c_str() : "no log");
@@ -382,7 +383,7 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         inRenderContext->UnregisterSharedTransition(outRenderContext);
         hasOutAnim_ = false;
-        LOGD("GeometryTransition: follow cancelled, node %{public}d to %{public}d", holder_->GetId(), outNode->GetId());
+        LOGI("GeometryTransition: follow cancelled, node %{public}d to %{public}d", holder_->GetId(), outNode->GetId());
         holder_ = nullptr;
         return false;
     }
@@ -394,11 +395,12 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         holder_ = CreateHolderNode(outNode);
         CHECK_NULL_RETURN(holder_, false);
         RecordOutNodeFrame();
+        auto idx = parent->GetChildIndex(outNode);
         parent->ReplaceChild(outNode, holder_);
-        parent->AddDisappearingChild(outNode);
+        parent->AddDisappearingChild(outNode, idx);
         MarkLayoutDirty(outNode, -1);
         hasOutAnim_ = true;
-        LOGD("GeometryTransition: follow started, node %{public}d to %{public}d", outNode->GetId(), holder_->GetId());
+        LOGI("GeometryTransition: follow started, node %{public}d to %{public}d", outNode->GetId(), holder_->GetId());
     } else {
         auto inNode = inNode_.Upgrade();
         CHECK_NULL_RETURN(inNode && holder_, false);
@@ -412,7 +414,7 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
             MarkLayoutDirty(inNodeParent);
         }
         hasInAnim_ = true;
-        LOGD("GeometryTransition: follow ended, node %{public}d to %{public}d", holder_->GetId(), inNode->GetId());
+        LOGI("GeometryTransition: follow ended, node %{public}d to %{public}d", holder_->GetId(), inNode->GetId());
         holder_ = nullptr;
     }
     return true;
@@ -484,7 +486,7 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
             }
         },
         nullptr);
-    LOGD("GeometryTransition: outNode: %{public}d %{public}s resyncs to inNode: %{public}d %{public}s, "
+    LOGI("GeometryTransition: outNode: %{public}d %{public}s resyncs to inNode: %{public}d %{public}s, "
         "outAnim: %{public}d, option: %{public}d", outNode->GetId(), inNodeAbsRectOld.ToString().c_str(),
         inNode->GetId(), inNodeAbsRect.ToString().c_str(), hasOutAnim_, animationOption_.IsValid());
     animationOption_ = AnimationOption();
@@ -502,7 +504,7 @@ bool GeometryTransition::OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode)
             MarkLayoutDirty(node);
             MarkLayoutDirty(parentNode);
             ret = true;
-            LOGD("GeometryTransition: node: %{public}d, parent node: %{public}d is marked dirty",
+            LOGI("GeometryTransition: node: %{public}d, parent node: %{public}d is marked dirty",
                 node->GetId(), parentNode->GetId());
         }
     } else if (IsNodeOutAndActive(frameNode)) {
