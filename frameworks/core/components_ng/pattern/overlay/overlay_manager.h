@@ -100,8 +100,9 @@ public:
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId);
     RefPtr<FrameNode> GetMenuNode(int32_t targetId);
-    void HideMenuInSubWindow();
+    void HideMenuInSubWindow(bool showPreviewAnimation = true);
     void CleanMenuInSubWindow();
+    void CleanPreviewInSubWindow();
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
 
@@ -302,7 +303,7 @@ private:
     void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
 
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
-    void PopMenuAnimation(const RefPtr<FrameNode>& menu);
+    void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);

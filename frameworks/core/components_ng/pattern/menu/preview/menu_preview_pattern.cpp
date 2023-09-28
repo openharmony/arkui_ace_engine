@@ -84,7 +84,6 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     AnimationOption option;
     option.SetDuration(previewAnimationDuration);
     option.SetCurve(Curves::SHARP);
-    context->UpdateOpacity(0.0);
     AnimationUtils::Animate(
         option,
         [context, previewBorderRadius, shadow]() mutable {
@@ -96,7 +95,6 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
                 BorderRadiusProperty borderRadius;
                 borderRadius.SetRadius(previewBorderRadius);
                 context->UpdateBorderRadius(borderRadius);
-                context->UpdateOpacity(1.0);
             }
         },
         option.GetOnFinishEvent());

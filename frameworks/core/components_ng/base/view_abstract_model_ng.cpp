@@ -152,10 +152,8 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                 CHECK_NULL_VOID(context);
                 auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
                 CHECK_NULL_VOID(gestureHub);
-                if (gestureHub->GetPixelMap() == nullptr) {
-                    auto pixelMap = context->GetThumbnailPixelMap();
-                    gestureHub->SetPixelMap(pixelMap);
-                }
+                auto pixelMap = context->GetThumbnailPixelMap();
+                gestureHub->SetPixelMap(pixelMap);
             }
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };

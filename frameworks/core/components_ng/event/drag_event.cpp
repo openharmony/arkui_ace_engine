@@ -149,7 +149,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
-                SubwindowManager::GetInstance()->HideMenuNG();
+                SubwindowManager::GetInstance()->HideMenuNG(false);
                 AnimationOption option;
                 option.SetDuration(PIXELMAP_ANIMATION_DURATION);
                 option.SetCurve(Curves::SHARP);
@@ -601,7 +601,7 @@ void DragEventActuator::HideFilter()
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->RemoveFilter();
+    manager->RemoveFilterAnimation();
 }
 
 void DragEventActuator::HidePixelMap(bool startDrag, double x, double y)

@@ -693,6 +693,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
         auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
 
         renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
+        renderContext->UpdateOpacity(0.0);
 
         previewRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
@@ -704,6 +705,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
         scaleOption.SetCurve(motion);
         AnimationUtils::Animate(scaleOption, [renderContext, menuPosition, previewRenderContext, previewPosition]() {
             if (renderContext) {
+                renderContext->UpdateOpacity(1.0);
                 renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
                 renderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));

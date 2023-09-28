@@ -494,7 +494,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 
-void SubwindowOhos::HideMenuNG()
+void SubwindowOhos::HideMenuNG(bool showPreviewAnimation)
 {
     if (!isShowed_) {
         return;
@@ -508,7 +508,7 @@ void SubwindowOhos::HideMenuNG()
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     ContainerScope scope(childContainerId_);
-    overlay->HideMenuInSubWindow();
+    overlay->HideMenuInSubWindow(showPreviewAnimation);
 }
 
 void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
