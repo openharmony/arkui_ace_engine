@@ -425,6 +425,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     }
     tabBarLayoutProperty->UpdateIndicator(index);
     PaintFocusState();
+    UpdateTextColor(index);
 }
 
 void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
