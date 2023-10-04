@@ -36,6 +36,8 @@
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "frameworks/base/geometry/ng/size_t.h"
 #include "frameworks/core/components_ng/property/property.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -59,6 +61,7 @@ constexpr Dimension DEFAULT_MIN = 0.0_vp;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
 } // namespace
 
 class SideBarLayoutTestNg : public testing::Test {
@@ -1119,5 +1122,78 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg025, TestSize.Level1)
     sideBarLayoutProperty->calcLayoutConstraint_->minSize->width_ = CalcLength(SIDE_BAR_SIZE);
     layoutAlgorithm->AdjustMinAndMaxSideBarWidth(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->minSideBarWidth_, layoutAlgorithm->maxSideBarWidth_);
+}
+
+/**
+ * @tc.name: SideBarLayoutTestNg026
+ * @tc.desc: Test SideBar LayoutControlButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg026, TestSize.Level1)
+{
+    auto sideBarFrameNode =
+        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
+    EXPECT_FALSE(sideBarFrameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    auto layoutWrapper = LayoutWrapperNode(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    EXPECT_FALSE(sideBarPattern == nullptr);
+    auto sideBarLayoutProperty = sideBarPattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    EXPECT_FALSE(sideBarLayoutProperty == nullptr);
+    SizeF value(SIZEF_WIDTH, SIZEF_HEIGHT);
+    sideBarLayoutProperty->UpdateMarginSelfIdealSize(value);
+    sideBarLayoutProperty->UpdateContentConstraint();
+    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
+    EXPECT_FALSE(layoutAlgorithm == nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->minPlatformVersion_ = TEST_VALUE;
+    auto buttonLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper.GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateControlButtonLeft(Dimension(-1.0f));
+    layoutProperty->UpdateControlButtonTop(Dimension(-1.0f));
+    layoutAlgorithm->LayoutControlButton(&layoutWrapper, buttonLayoutWrapper);
+    ASSERT_TRUE(
+        LessNotEqual(layoutProperty->GetControlButtonLeft().value_or(DEFAULT_CONTROL_BUTTON_LEFT).Value(), 0.0));
+}
+
+/**
+ * @tc.name: SideBarLayoutTestNg027
+ * @tc.desc: Test SideBar container ClipPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg027, TestSize.Level1)
+{
+    SideBarContainerPaintMethod SideBarContainerPaintMethodInstance;
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto indicatorNode =
+        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    RSCanvas canvas;
+    SideBarContainerPaintMethodInstance.ClipPadding(&paintWrapper, canvas);
+    EXPECT_EQ(SideBarContainerPaintMethodInstance.needClipPadding_, false);
+    SideBarContainerPaintMethodInstance.needClipPadding_ = true;
+    SideBarContainerPaintMethodInstance.ClipPadding(&paintWrapper, canvas);
+    EXPECT_EQ(SideBarContainerPaintMethodInstance.needClipPadding_, true);
+    paintWrapper.renderContext_ = nullptr;
+    SideBarContainerPaintMethodInstance.ClipPadding(&paintWrapper, canvas);
+    EXPECT_EQ(SideBarContainerPaintMethodInstance.needClipPadding_, true);
+    paintWrapper.renderContext_ = renderContext;
+    renderContext->UpdateClipEdge(false);
+    SideBarContainerPaintMethodInstance.ClipPadding(&paintWrapper, canvas);
+    EXPECT_EQ(SideBarContainerPaintMethodInstance.needClipPadding_, true);
 }
 } // namespace OHOS::Ace::NG
