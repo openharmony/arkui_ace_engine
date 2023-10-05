@@ -27,9 +27,9 @@ constexpr float DEFAULT_THRESHOLD = 0.75f;
 
 } // namespace
 
-FrictionMotion::FrictionMotion(double friction, double initPosition, double initVelocity)
+FrictionMotion::FrictionMotion(double friction, double initPosition, double initVelocity, double threshold)
 {
-    Reset(friction, initPosition, initVelocity);
+    Reset(friction, initPosition, initVelocity, threshold);
 }
 
 void FrictionMotion::Reset(double friction, double initPosition, double initVelocity, double threshold)
