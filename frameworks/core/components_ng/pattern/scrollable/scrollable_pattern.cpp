@@ -1083,23 +1083,32 @@ float ScrollablePattern::GetOffsetWithLimit(float position, float offset) const
 
 void ScrollablePattern::LimitMouseEndOffset()
 {
-    float limitedOffset = -1.0f;
+    float limitedMainOffset = -1.0f;
+    float limitedCrossOffset = -1.0f;
     auto hostSize = GetHostFrameSize();
-    auto mainBottom = hostSize->MainSize(axis_);
+    auto mainSize = hostSize->MainSize(axis_);
+    auto crossSize = hostSize->CrossSize(axis_);
     auto mainOffset = mouseEndOffset_.GetMainOffset(axis_);
+    auto crossOffset = mouseEndOffset_.GetCrossOffset(axis_);
     if (LessNotEqual(mainOffset, 0.0f)) {
-        limitedOffset = 0.0f;
+        limitedMainOffset = 0.0f;
     }
-    if (GreatNotEqual(mainOffset, mainBottom)) {
-        limitedOffset = mainBottom;
+    if (GreatNotEqual(mainOffset, mainSize)) {
+        limitedMainOffset = mainSize;
     }
-    if (LessNotEqual(limitedOffset, 0.0)) {
-        return;
+    if (LessNotEqual(crossOffset, 0.0f)) {
+        limitedCrossOffset = 0.0f;
     }
+    if (GreatNotEqual(crossOffset, crossSize)) {
+        limitedCrossOffset = crossSize;
+    }
+
     if (axis_ == Axis::VERTICAL) {
-        mouseEndOffset_.SetY(limitedOffset);
+        mouseEndOffset_.SetX(LessNotEqual(limitedCrossOffset, 0.0f) ? mouseEndOffset_.GetX() : limitedCrossOffset);
+        mouseEndOffset_.SetY(LessNotEqual(limitedMainOffset, 0.0f) ? mouseEndOffset_.GetY() : limitedMainOffset);
     } else {
-        mouseEndOffset_.SetX(limitedOffset);
+        mouseEndOffset_.SetX(LessNotEqual(limitedMainOffset, 0.0f) ? mouseEndOffset_.GetX() : limitedMainOffset);
+        mouseEndOffset_.SetY(LessNotEqual(limitedCrossOffset, 0.0f) ? mouseEndOffset_.GetY() : limitedCrossOffset);
     }
 }
 
