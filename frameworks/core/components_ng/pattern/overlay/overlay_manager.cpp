@@ -59,6 +59,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
+#include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -1314,6 +1315,9 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         }
         if (InstanceOf<MenuWrapperPattern>(pattern)) {
             return RemoveMenu(overlay);
+        }
+        if (InstanceOf<ToastPattern>(pattern)) {
+            return false;
         }
         // remove navDestination in navigation first
         do {
