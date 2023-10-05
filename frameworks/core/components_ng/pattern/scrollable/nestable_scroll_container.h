@@ -31,6 +31,7 @@ public:
     virtual Axis GetAxis() const = 0;
 
     // regular scroll motion
+    // RETURN remaining offset
     virtual ScrollResult HandleScroll(float offset, int32_t source, NestedState state) = 0;
 
     // triggered by drag end velocity

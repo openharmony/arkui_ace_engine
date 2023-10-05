@@ -1243,7 +1243,7 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
     auto result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL);
     offset = result.remain;
     if (NearZero(offset)) {
-        SetCanOverScroll(false);
+        SetCanOverScroll(!InstanceOf<ScrollablePattern>(parent));
         return { 0, false };
     }
     float allOffset = offset;
@@ -1296,7 +1296,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
     offset -= overOffset;
     auto result = parent->HandleScroll(overOffset + remainOffset, source, NestedState::CHILD_SCROLL);
     if (NearZero(result.remain)) {
-        SetCanOverScroll(false);
+        SetCanOverScroll(!InstanceOf<ScrollablePattern>(parent));
         return { 0, false };
     }
     if (state == NestedState::CHILD_SCROLL) {
@@ -1416,7 +1416,8 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
     }
     // parent handle over scroll first
     if ((velocity < 0 && (nestedScroll_.forward == NestedScrollMode::SELF_FIRST)) ||
-        (velocity > 0 && (nestedScroll_.backward == NestedScrollMode::SELF_FIRST))) {
+        (velocity > 0 && (nestedScroll_.backward == NestedScrollMode::SELF_FIRST)) ||
+        !InstanceOf<ScrollablePattern>(parent)) {
         if (parent->HandleScrollVelocity(velocity)) {
             OnScrollEnd();
             return true;

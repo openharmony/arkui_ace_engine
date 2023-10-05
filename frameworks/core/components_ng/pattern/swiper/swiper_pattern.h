@@ -500,8 +500,8 @@ private:
     void FinishAnimation();
     void StopFadeAnimation();
 
-    bool IsOverScrolling(float mainOffset = 0.0f) const;
-    float GetRemainingOffset() const;
+    bool IsOutOfBoundary(float mainOffset = 0.0f) const;
+    float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
     void FireChangeEvent() const;
@@ -580,7 +580,8 @@ private:
     }
 
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
-    
+    ScrollResult HandleScrollSelfFirst(float offset, int32_t source, NestedState state);
+
     bool HandleScrollVelocity(float velocity) override;
 
     void OnScrollStartRecursive(float position) override;
@@ -638,6 +639,7 @@ private:
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
+    bool childScrolling_ = false;
     bool isTouchDown_ = false;
     std::optional<bool> preLoop_;
 

@@ -113,7 +113,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     swiperLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     swiperLayoutAlgorithm->SetItemsPosition(itemPosition_);
     swiperLayoutAlgorithm->SetIsNeedResetPrevMarginAndNextMargin();
-    if (IsOverScrolling() && !IsLoop()) {
+    if (IsOutOfBoundary() && !IsLoop()) {
         swiperLayoutAlgorithm->SetOverScrollFeature();
     }
     swiperLayoutAlgorithm->SetTotalItemCount(TotalCount());
@@ -619,11 +619,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             if (context) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
-                bool isNeedOffset = (GetLoopIndex(iter->first) == TotalCount() - 1) &&
-                                    !layoutProperty->GetDisplayCount().has_value() && !IsLoop() &&
-                                    LessNotEqual(iter->second.endPos - iter->second.startPos, CalculateVisibleSize());
-                float offset =
-                    isNeedOffset ? CalculateVisibleSize() - iter->second.endPos + iter->second.startPos : 0.0;
+                bool isNeedOffset = (GetLoopIndex(iter->first) == TotalCount() - 1)
+                    && !layoutProperty->GetDisplayCount().has_value() && !IsLoop()
+                    && LessNotEqual(iter->second.endPos - iter->second.startPos, CalculateVisibleSize());
+                float offset = isNeedOffset
+                    ? CalculateVisibleSize() - iter->second.endPos + iter->second.startPos : 0.0;
                 targetPos -= offset;
                 context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
                                                 nextIndex = iter->first]() {
@@ -1200,7 +1200,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
         return;
     }
     auto edgeEffect = GetEdgeEffect();
-    if (!IsLoop() && IsOverScrolling(offset) && edgeEffect == EdgeEffect::SPRING) {
+    if (!IsLoop() && IsOutOfBoundary(offset) && edgeEffect == EdgeEffect::SPRING) {
         LOGD("Swiper has reached boundary, can't drag any more, effect spring.");
 
         targetIndex_.reset();
@@ -1221,14 +1221,14 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
                 GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
             FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
-    } else if (!IsLoop() && IsOverScrolling(offset) &&
+    } else if (!IsLoop() && IsOutOfBoundary(offset) &&
                (edgeEffect == EdgeEffect::FADE || edgeEffect == EdgeEffect::NONE)) {
         currentDelta_ = currentDelta_ - offset;
         if (edgeEffect == EdgeEffect::FADE) {
             auto host = GetHost();
             CHECK_NULL_VOID(host);
             if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
-                auto remainOffset = GetRemainingOffset();
+                auto remainOffset = GetDistanceToEdge();
                 fadeOffset_ += (offset - remainOffset);
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1293,7 +1293,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
 
 void SwiperPattern::UpdateAnimationProperty(float velocity)
 {
-    if (isDragging_) {
+    if (isDragging_ || childScrolling_) {
         targetIndex_ = ComputeNextIndexByVelocity(velocity);
         velocity_ = velocity;
     } else {
@@ -1355,7 +1355,7 @@ void SwiperPattern::HandleTouchUp()
 {
     isTouchDown_ = false;
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
-    if (!isDragging_ && !NearZero(firstItemInfoInVisibleArea.second.startPos)) {
+    if (!isDragging_ && !childScrolling_ && !NearZero(firstItemInfoInVisibleArea.second.startPos)) {
         UpdateAnimationProperty(0.0);
     }
 
@@ -1397,9 +1397,6 @@ void SwiperPattern::HandleDragStart()
     mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
-
-    // update nestedScroll parent
-    parent_ = enableNestedScroll_ ? SearchParent() : nullptr;
 }
 
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
@@ -1422,7 +1419,6 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     }
 
     HandleScroll(static_cast<float>(mainDelta), SCROLL_FROM_UPDATE, NestedState::GESTURE);
-    // UpdateCurrentOffset(static_cast<float>(mainDelta));
     UpdateItemRenderGroup(true);
 }
 
@@ -1449,8 +1445,8 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     auto edgeEffect = GetEdgeEffect();
     // edge effect is NONE and reached boundary
     bool noneOutOfBoundary = (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) &&
-                             NearZero(GetRemainingOffset()) && edgeEffect == EdgeEffect::NONE;
-    if (!IsLoop() && (IsOverScrolling() || !NearZero(fadeOffset_) || noneOutOfBoundary)) {
+                             NearZero(GetDistanceToEdge()) && edgeEffect == EdgeEffect::NONE;
+    if (!IsLoop() && (IsOutOfBoundary() || !NearZero(fadeOffset_) || noneOutOfBoundary)) {
         isDragging_ = false;
 
         if (edgeEffect == EdgeEffect::SPRING) {
@@ -1487,6 +1483,10 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         }
 
         if (edgeEffect == EdgeEffect::NONE) {
+            auto parent = parent_.Upgrade();
+            if (parent) {
+                parent->HandleScrollVelocity(dragVelocity);
+            }
             UpdateItemRenderGroup(false);
             return;
         }
@@ -1496,8 +1496,14 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
 #endif
 
-    UpdateAnimationProperty(static_cast<float>(dragVelocity));
-
+    // nested and reached end, need to pass velocity to parent scrollable
+    auto parent = parent_.Upgrade();
+    if (!IsLoop() && parent && NearZero(GetDistanceToEdge())) {
+        parent->HandleScrollVelocity(dragVelocity);
+    } else {
+        UpdateAnimationProperty(static_cast<float>(dragVelocity));
+        OnScrollEndRecursive();
+    }
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -1557,15 +1563,15 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
             startNewAnimationFlag = true;
         }
         if (!startNewAnimationFlag) {
-            for (const auto& animaitonItem : itemPositionInAnimation_) {
-                auto iter = itemPosition_.find(animaitonItem.first);
+            for (const auto& animationItem : itemPositionInAnimation_) {
+                auto iter = itemPosition_.find(animationItem.first);
                 if (iter == itemPosition_.end()) {
                     startNewAnimationFlag = true;
                     break;
                 }
-                if (animaitonItem.second.finialOffset != offset ||
-                    !NearEqual(animaitonItem.second.startPos, iter->second.startPos) ||
-                    !NearEqual(animaitonItem.second.endPos, iter->second.endPos)) {
+                if (animationItem.second.finialOffset != offset ||
+                    !NearEqual(animationItem.second.startPos, iter->second.startPos) ||
+                    !NearEqual(animationItem.second.endPos, iter->second.endPos)) {
                     startNewAnimationFlag = true;
                     break;
                 }
@@ -1909,6 +1915,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
     currentIndexOffset_ = firstIndexStartPos;
     UpdateItemRenderGroup(false);
+    OnScrollEndRecursive();
 }
 
 void SwiperPattern::OnFadeAnimationStart()
@@ -2015,7 +2022,7 @@ void SwiperPattern::PlayFadeAnimation()
     fadeController_->Play();
 }
 
-bool SwiperPattern::IsOverScrolling(float mainOffset) const
+bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
 {
     if (IsLoop() || itemPosition_.empty()) {
         return false;
@@ -2033,7 +2040,7 @@ bool SwiperPattern::IsOverScrolling(float mainOffset) const
     return isOutOfStart || isOutOfEnd;
 }
 
-float SwiperPattern::GetRemainingOffset() const
+float SwiperPattern::GetDistanceToEdge() const
 {
     if (IsLoop() || itemPosition_.empty()) {
         return 0.0f;
@@ -2102,22 +2109,18 @@ float SwiperPattern::GetPrevMargin() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, 0.0f);
-    return SwiperUtils::IsStretch(swiperLayoutProperty)
-               ? ConvertToPx(swiperLayoutProperty->GetPrevMargin().value_or(0.0_vp),
-                     swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0)
-                     .value_or(0)
-               : 0.0f;
+    return SwiperUtils::IsStretch(swiperLayoutProperty) ?
+        ConvertToPx(swiperLayoutProperty->GetPrevMargin().value_or(0.0_vp),
+        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0).value_or(0) : 0.0f;
 }
 
 float SwiperPattern::GetNextMargin() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, 0.0f);
-    return SwiperUtils::IsStretch(swiperLayoutProperty)
-               ? ConvertToPx(swiperLayoutProperty->GetNextMargin().value_or(0.0_vp),
-                     swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0)
-                     .value_or(0)
-               : 0.0f;
+    return SwiperUtils::IsStretch(swiperLayoutProperty) ?
+        ConvertToPx(swiperLayoutProperty->GetNextMargin().value_or(0.0_vp),
+        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0).value_or(0) : 0.0f;
 }
 
 Axis SwiperPattern::GetDirection() const
@@ -2376,7 +2379,8 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetLastItemInfoInVisibleArea()
     targetVisableIndex += GetDisplayCount() - 1;
     auto iter = itemPosition_.find(targetVisableIndex);
     if (iter != itemPosition_.end()) {
-        return std::make_pair(iter->first, SwiperItemInfo { iter->second.startPos, iter->second.endPos });
+        return std::make_pair(iter->first,
+            SwiperItemInfo { iter->second.startPos, iter->second.endPos });
     }
     return std::make_pair(itemPosition_.rbegin()->first,
         SwiperItemInfo { itemPosition_.rbegin()->second.startPos, itemPosition_.rbegin()->second.endPos });
@@ -2515,7 +2519,8 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             if (childrenSize <= 0 || displayCount <= 0 || swiper->itemPosition_.empty()) {
                 return;
             }
-            if (!swiper->IsLoop() && swiper->GetLoopIndex(swiper->currentIndex_ + 1) > (childrenSize - displayCount)) {
+            if (!swiper->IsLoop() &&
+                swiper->GetLoopIndex(swiper->currentIndex_ + 1) > (childrenSize - displayCount)) {
                 return;
             }
             swiper->targetIndex_ = swiper->currentIndex_ + 1;
@@ -3121,14 +3126,19 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
 
 void SwiperPattern::OnScrollStartRecursive(float position)
 {
-    auto parent = parent_.Upgrade();
-    if (parent && enableNestedScroll_) {
+    if (!isDragging_) {
+        childScrolling_ = true;
+    }
+    auto parent = enableNestedScroll_ ? SearchParent() : nullptr;
+    if (parent) {
         parent->OnScrollStartRecursive(position);
     }
+    parent_ = parent;
 }
 
 void SwiperPattern::OnScrollEndRecursive()
 {
+    childScrolling_ = false;
     auto parent = parent_.Upgrade();
     if (parent && enableNestedScroll_) {
         parent->OnScrollEndRecursive();
@@ -3137,37 +3147,43 @@ void SwiperPattern::OnScrollEndRecursive()
 
 bool SwiperPattern::HandleScrollVelocity(float velocity)
 {
-    auto effect = GetEdgeEffect();
-    auto parent = parent_.Upgrade();
-    if (!parent || !enableNestedScroll_) {
-        // regular handle
-        OnScrollEndRecursive();
-        return effect == EdgeEffect::SPRING;
+    // haven't reached edge
+    if (GetDistanceToEdge() > 0.0f || IsLoop()) {
+        HandleDragEnd(velocity);
+        return true;
     }
 
-    // after reach end, parent handle velocity first
-    if (parent->HandleScrollVelocity(velocity)) {
-        return true;
+    auto parent = parent_.Upgrade();
+    if (parent && enableNestedScroll_) {
+        // after reach end, parent handle velocity first
+        if (parent->HandleScrollVelocity(velocity)) {
+            return true;
+        }
     }
-    if (effect == EdgeEffect::SPRING) {
-        PlaySpringAnimation(velocity);
-        return true;
-    }
-    // FADE impossible to trigger here, items can't be out of boundary yet
-    return false;
+    HandleDragEnd(velocity);
+    return GetEdgeEffect() == EdgeEffect::SPRING;
 }
 
 ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedState state)
 {
     auto parent = parent_.Upgrade();
     if (!parent || !enableNestedScroll_) {
+        // SELF_ONLY
         UpdateCurrentOffset(offset);
-        return { 0.0f, IsOverScrolling() };
+
+        if (GetEdgeEffect() == EdgeEffect::NONE && IsOutOfBoundary(offset)) {
+            return { offset, true };
+        }
+        return { 0.0f, !IsLoop() && GetDistanceToEdge() <= 0.0f };
     }
-    // SELF_FIRST
-    if (IsOverScrolling()) {
+    return HandleScrollSelfFirst(offset, source, state);
+}
+
+ScrollResult SwiperPattern::HandleScrollSelfFirst(float offset, int32_t source, NestedState state)
+{
+    if (IsOutOfBoundary(offset)) {
         // parent handle overScroll first
-        auto res = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
+        auto res = parent_.Upgrade()->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
         if (res.remain != 0.0f) {
             UpdateCurrentOffset(res.remain);
         }
@@ -3180,6 +3196,6 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
         // regular scroll
         UpdateCurrentOffset(offset);
     }
-    return { 0.0f, IsOverScrolling() };
+    return { 0.0f, !IsLoop() && GetDistanceToEdge() <= 0.0f };
 }
 } // namespace OHOS::Ace::NG

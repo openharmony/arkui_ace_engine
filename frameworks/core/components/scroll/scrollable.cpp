@@ -636,7 +636,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             FrameReport::GetInstance().EndListFling();
         }
 #endif
-    } else if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
+    } else if (!Container::IsCurrentUseNewPipeline() && outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
         ResetContinueDragCount();
         ProcessScrollOverCallback(correctVelocity);
     } else if (canOverScroll_) {

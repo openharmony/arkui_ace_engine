@@ -7463,7 +7463,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetRemainingOffset001, TestSize.Level1)
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperPattern->GetRemainingOffset();
+            swiperPattern->GetDistanceToEdge();
             if (i == 1) {
                 swiperPattern->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
                 continue;
@@ -7473,7 +7473,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetRemainingOffset001, TestSize.Level1)
         swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
     }
     swiperPattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-    swiperPattern->GetRemainingOffset();
+    swiperPattern->GetDistanceToEdge();
 }
 
 /**
