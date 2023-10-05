@@ -865,24 +865,24 @@ void RefreshPattern::QuiteAnimation()
     auto curve = AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
     AnimationOption option;
     option.SetCurve(curve);
-    offsetProperty_->Set(scrollOffset_.GetY());
-    UpdateFirstChildPlacement(scrollOffset_.GetY());
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushUITasks();
+    offsetProperty_->Set(scrollOffset_.GetY() + FAKE_VALUE);
     animation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), scrollOffset = scrollOffset_.GetY(), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->offsetProperty_->Set(scrollOffset + FAKE_VALUE);
-            pattern->UpdateFirstChildPlacement(scrollOffset);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->FlushUITasks();
+            pattern->offsetProperty_->Set(scrollOffset);
         },
-        nullptr);
+        [weak = AceType::WeakClaim(this), id = Container::CurrentId(), animationId = animationId_]() {
+            ContainerScope scope(id);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->animationId_ != animationId) {
+                return;
+            }
+            pattern->updatePerFrame_ = false;
+        });
 }
 
 void RefreshPattern::PlayFollowToRecycleAnimation()
@@ -995,10 +995,12 @@ void RefreshPattern::UpdateFirstChildDragStart()
 
 void RefreshPattern::UpdateRefreshDraw()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    CHECK_NULL_VOID(customBuilder_);
+    if (updatePerFrame_) {
+        UpdateBuilderHeight(scrollOffset_.GetY());
+    }
 }
+
 void RefreshPattern::UpdateFirstChildPlacement(float offset)
 {
     auto host = GetHost();
@@ -1018,7 +1020,10 @@ void RefreshPattern::UpdateBuilderHeight(float builderHeight)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateBuilderMeasureBaseHeight(builderHeight);
+    host->MarkDirtyNode();
 }
 
 void RefreshPattern::UpdateLoadingProgressTranslate(float scrollOffset)
@@ -1049,8 +1054,9 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     auto targetOffset = 0.0f;
     switch (refreshStatus_) {
         case RefreshStatus::OVER_DRAG:
-            PlayFollowToRecycleAnimation();
-            return;
+            UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 0.0f);
+            targetOffset = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+            break;
         case RefreshStatus::REFRESH:
             targetOffset = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
             break;
@@ -1064,14 +1070,11 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     CHECK_NULL_VOID(offsetProperty_);
     animationId_++;
     offsetProperty_->Set(scrollOffset_.GetY());
-    UpdateFirstChildPlacement(scrollOffset_.GetY());
     auto dealSpeed = 0.0f;
     if (!NearEqual(scrollOffset_.GetY(), targetOffset)) {
         dealSpeed = speed / (targetOffset - scrollOffset_.GetY());
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushUITasks();
+    updatePerFrame_ = true;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(dealSpeed, 1.0f, 228.0f, 30.0f);
     AnimationOption option;
     option.SetCurve(curve);
@@ -1082,7 +1085,10 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->offsetProperty_->Set(targetOffset);
-            pattern->UpdateFirstChildPlacement(targetOffset);
+            if (pattern->refreshStatus_ == RefreshStatus::OVER_DRAG) {
+                pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 1.0f);
+            }
+            pattern->UpdateLoadingProgressTranslate(targetOffset);
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->FlushUITasks();
@@ -1099,6 +1105,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
 
 void RefreshPattern::SpeedAnimationFinish()
 {
+    updatePerFrame_ = false;
     switch (refreshStatus_) {
         case RefreshStatus::INACTIVE:
         case RefreshStatus::DONE:

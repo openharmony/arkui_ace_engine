@@ -63,6 +63,7 @@ public:
         value->propScrollableOffset_ = CloneScrollableOffset();
         value->propLoadingProcessOffset_ = CloneLoadingProcessOffset();
         value->propTriggerRefreshDistance_ = CloneTriggerRefreshDistance();
+        value->propBuilderMeasureBaseHeight_ = CloneBuilderMeasureBaseHeight();
         return value;
     }
 
@@ -80,6 +81,7 @@ public:
         ResetScrollableOffset();
         ResetLoadingProcessOffset();
         ResetTriggerRefreshDistance();
+        ResetBuilderMeasureBaseHeight();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -100,6 +102,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollableOffset, OffsetF, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LoadingProcessOffset, OffsetF, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TriggerRefreshDistance, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BuilderMeasureBaseHeight, float, PROPERTY_UPDATE_LAYOUT);
 
     ACE_DEFINE_PROPERTY_GROUP(RefreshStyle, RefreshStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(RefreshStyle, LoadingDistance, Dimension, PROPERTY_UPDATE_LAYOUT);

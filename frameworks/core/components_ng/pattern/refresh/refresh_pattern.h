@@ -177,6 +177,7 @@ private:
     RefPtr<FrameNode> customBuilder_;
     RefPtr<FrameNode> scrollableNode_;
     bool isCustomBuilderExist_ = false;
+    bool updatePerFrame_ = false;
     float customBuilderOffset_ = 0.0f;
     std::optional<int32_t> customBuilderIndex_;
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
