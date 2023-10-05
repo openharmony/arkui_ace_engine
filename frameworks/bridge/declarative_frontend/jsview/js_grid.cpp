@@ -54,14 +54,12 @@ GridModel* GridModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 const size_t GRID_ITEM_SIZE_RESULT_LENGTH = 2;
-
-} // namespace
+const size_t GRID_ITEM_RECT_RESULT_LENGTH = 4;
 
 void ParseGridItemSize(const JSRef<JSVal>& value, GridItemSize& gridItemSize)
 {
@@ -69,7 +67,7 @@ void ParseGridItemSize(const JSRef<JSVal>& value, GridItemSize& gridItemSize)
         JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
         auto length = array->Length();
         if (length != GRID_ITEM_SIZE_RESULT_LENGTH) {
-            LOGE("info is invalid");
+            LOGW("size is invalid");
             return;
         }
         JSRef<JSVal> rows = array->GetValueAt(0);
@@ -81,6 +79,75 @@ void ParseGridItemSize(const JSRef<JSVal>& value, GridItemSize& gridItemSize)
             gridItemSize.columns = columns->ToNumber<int32_t>();
         }
         LOGD("regularSize type: rows:%{public}d, columns:%{public}d", gridItemSize.rows, gridItemSize.columns);
+    }
+}
+
+void ParseGridItemRect(const JSRef<JSVal>& value, GridItemRect& gridItemRect)
+{
+    if (value->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
+        auto length = array->Length();
+        if (length != GRID_ITEM_RECT_RESULT_LENGTH) {
+            LOGW("rect is invalid");
+            return;
+        }
+        JSRef<JSVal> rowStart = array->GetValueAt(GridItemRect::ROW_START);
+        if (rowStart->IsNumber()) {
+            gridItemRect.rowStart = rowStart->ToNumber<int32_t>();
+        }
+        JSRef<JSVal> rowSpan = array->GetValueAt(GridItemRect::ROW_SPAN);
+        if (rowSpan->IsNumber()) {
+            gridItemRect.rowSpan = rowSpan->ToNumber<int32_t>();
+        }
+        JSRef<JSVal> columnStart = array->GetValueAt(GridItemRect::COLUMN_START);
+        if (columnStart->IsNumber()) {
+            gridItemRect.columnStart = columnStart->ToNumber<int32_t>();
+        }
+        JSRef<JSVal> columnSpan = array->GetValueAt(GridItemRect::COLUMN_SPAN);
+        if (columnSpan->IsNumber()) {
+            gridItemRect.columnSpan = columnSpan->ToNumber<int32_t>();
+        }
+        LOGD("rowStart:%{public}d, columnStart:%{public}d", gridItemRect.rowStart, gridItemRect.columnStart);
+    }
+}
+
+void ParseGetGridItemSize(const JSCallbackInfo& info, JSRef<JSObject>& obj, GridLayoutOptions& option)
+{
+    auto getSizeByIndex = obj->GetProperty("onGetIrregularSizeByIndex");
+    if (getSizeByIndex->IsFunction()) {
+        auto onGetIrregularSizeByIndex = [execCtx = info.GetExecutionContext(),
+                                             func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+                                                 JSRef<JSFunc>::Cast(getSizeByIndex))](int32_t index) {
+            GridItemSize gridItemSize;
+            JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
+            auto result = func->ExecuteJS(1, &itemIndex);
+            if (!result->IsArray()) {
+                return gridItemSize;
+            }
+            ParseGridItemSize(result, gridItemSize);
+            return gridItemSize;
+        };
+        option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    }
+}
+
+void ParseGetGridItemRect(const JSCallbackInfo& info, JSRef<JSObject>& obj, GridLayoutOptions& option)
+{
+    auto getRectByIndex = obj->GetProperty("onGetRectByIndex");
+    if (getRectByIndex->IsFunction()) {
+        auto onGetRectByIndex = [execCtx = info.GetExecutionContext(),
+                                    func = AceType::MakeRefPtr<JsFunction>(
+                                        JSRef<JSObject>(), JSRef<JSFunc>::Cast(getRectByIndex))](int32_t index) {
+            GridItemRect gridItemRect;
+            JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
+            auto result = func->ExecuteJS(1, &itemIndex);
+            if (!result->IsArray()) {
+                return gridItemRect;
+            }
+            ParseGridItemRect(result, gridItemRect);
+            return gridItemRect;
+        };
+        option.getRectByIndex = std::move(onGetRectByIndex);
     }
 }
 
@@ -114,24 +181,13 @@ void SetGridLayoutOptions(const JSCallbackInfo& info)
             LOGD("irregularIndexes emplace_back:%{public}d", indexNum);
         }
     }
-    auto getSizeByIndex = obj->GetProperty("onGetIrregularSizeByIndex");
-    if (getSizeByIndex->IsFunction()) {
-        auto onGetIrregularSizeByIndex = [execCtx = info.GetExecutionContext(),
-                                             func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
-                                                 JSRef<JSFunc>::Cast(getSizeByIndex))](int32_t index) {
-            GridItemSize gridItemSize;
-            JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
-            auto result = func->ExecuteJS(1, &itemIndex);
-            if (!result->IsArray()) {
-                return gridItemSize;
-            }
-            ParseGridItemSize(result, gridItemSize);
-            return gridItemSize;
-        };
-        option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    }
+
+    ParseGetGridItemSize(info, obj, option);
+    ParseGetGridItemRect(info, obj, option);
+
     GridModel::GetInstance()->SetLayoutOptions(option);
 }
+} // namespace
 
 void JSGrid::Create(const JSCallbackInfo& info)
 {

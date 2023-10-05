@@ -30,16 +30,36 @@ struct GridItemSize {
     }
 };
 
+struct GridItemRect {
+    int32_t rowStart = -1;
+    int32_t rowSpan = 1;
+    int32_t columnStart = -1;
+    int32_t columnSpan = 1;
+    bool operator==(const GridItemRect& itemRect) const
+    {
+        return (rowStart == itemRect.rowStart) && (rowSpan == itemRect.rowSpan) &&
+               (columnStart == itemRect.columnStart) && (columnSpan == itemRect.columnSpan);
+    }
+    int32_t GetCorssSize(Axis axis) const
+    {
+        return axis == Axis::VERTICAL ? columnSpan : rowSpan;
+    }
+    // [rowStart, columnStart, rowSpan, columnSpan]
+    enum GridItemRectProperty { ROW_START, COLUMN_START, ROW_SPAN, COLUMN_SPAN };
+};
+
 using GetSizeByIndex = std::function<GridItemSize(int32_t)>;
+using GetRectByIndex = std::function<GridItemRect(int32_t)>;
 
 struct GridLayoutOptions {
     GridItemSize regularSize;
     std::set<int32_t> irregularIndexes;
     GetSizeByIndex getSizeByIndex;
+    GetRectByIndex getRectByIndex;
     bool operator==(const GridLayoutOptions& options) const
     {
         return (regularSize == options.regularSize) && (irregularIndexes == options.irregularIndexes) &&
-               (!getSizeByIndex && !options.getSizeByIndex);
+               (!getSizeByIndex && !options.getSizeByIndex) && (!getRectByIndex && !options.getRectByIndex);
     }
 
     bool operator!=(const GridLayoutOptions& options) const
