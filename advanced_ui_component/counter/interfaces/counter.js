@@ -2746,5 +2746,5 @@ export class CounterComponent extends ViewPU {
     }
 }
 
-export default {CounterComponent, CounterOptions, CounterAttribute, CounterStyleMap, DateStyleOptions, DateData,
-    NumberStyleOptions, InlineStyleOptions, CommonOptions, CounterType};
+export default {CounterType, CommonOptions, InlineStyleOptions, NumberStyleOptions,
+    DateData, DateStyleOptions, CounterOptions, CounterComponent};
