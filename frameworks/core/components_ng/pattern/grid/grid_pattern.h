@@ -131,6 +131,11 @@ public:
         gridLayoutInfo_.irregularItemsPosition_.clear();
     }
 
+    void ResetPositionFlags()
+    {
+        gridLayoutInfo_.ResetPositionFlags();
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
