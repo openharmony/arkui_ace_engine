@@ -204,6 +204,8 @@ public:
     {
         return 0;
     }
+
+    static RefPtr<ResourceAdapter> CreateNewResourceAdapter(const std::string& bundleName, const std::string& moduleName);
 };
 
 } // namespace OHOS::Ace

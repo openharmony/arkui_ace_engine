@@ -31,6 +31,7 @@ class ResourceAdapterImpl : public ResourceAdapter {
 
 public:
     ResourceAdapterImpl() = default;
+    explicit ResourceAdapterImpl(std::shared_ptr<Global::Resource::ResourceManager> resourceManager);
     ~ResourceAdapterImpl() override = default;
 
     void Init(const ResourceInfo& resourceInfo) override;

@@ -76,7 +76,7 @@ public:
 
     RefPtr<ThemeConstants> GetThemeConstants() const override
     {
-        return GetThemeConstants("", "");
+        return themeConstants_;
     }
 
     /*

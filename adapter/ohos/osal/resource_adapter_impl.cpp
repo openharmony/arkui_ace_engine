@@ -127,6 +127,28 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
     return AceType::MakeRefPtr<ResourceAdapterImpl>();
 }
 
+RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
+    auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
+    CHECK_NULL_RETURN(context, nullptr);
+    
+    auto resourceManager = context->GetResourceManager();
+    auto newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImpl>(resourceManager);
+
+    return newResourceAdapter;
+}
+
+ResourceAdapterImpl::ResourceAdapterImpl(std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
+{
+    resourceManager_ = resourceManager;
+    sysResourceManager_ = resourceManager;
+}
+
 void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 {
     std::string resPath = resourceInfo.GetPackagePath();
@@ -568,7 +590,6 @@ bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len
 bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest,
     const std::string& bundleName, const std::string& moduleName)
 {
-    UpdateResourceManager(bundleName, moduleName);
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetRawFileFromHap(rawFile, len, dest);
@@ -596,7 +617,6 @@ bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_
 bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest,
     const std::string& bundleName, const std::string& moduleName)
 {
-    UpdateResourceManager(bundleName, moduleName);
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetMediaDataById(resId, len, dest);
@@ -623,7 +643,6 @@ bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, 
 bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest,
     const std::string& bundleName, const std::string& moduleName)
 {
-    UpdateResourceManager(bundleName, moduleName);
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetMediaDataByName(resName.c_str(), len, dest);

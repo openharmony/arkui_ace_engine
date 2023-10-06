@@ -28,6 +28,8 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/components/theme/resource_manager.h"
+#include "core/components/theme/resource_object.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
@@ -56,6 +58,8 @@ enum class ResourceType : uint32_t {
 };
 
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
+
+RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
 
 class JSViewAbstract {
 public:
@@ -367,9 +371,10 @@ public:
             return false;
         }
 
-        auto themeConstants = GetThemeConstants();
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
+        auto resourceObject = GetResourceObject(jsObj);
+        auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
             return false;
         }
 
@@ -382,13 +387,13 @@ public:
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
             if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-                result = static_cast<T>(themeConstants->GetIntByName(param->ToString()));
+                result = static_cast<T>(resourceAdapter->GetIntByName(param->ToString()));
                 return true;
             }
             return false;
         }
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-            result = static_cast<T>(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
+            result = static_cast<T>(resourceAdapter->GetInt(resId->ToNumber<uint32_t>()));
             return true;
         }
         return false;

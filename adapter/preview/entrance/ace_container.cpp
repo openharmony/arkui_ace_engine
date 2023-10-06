@@ -555,6 +555,7 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
         return;
     }
     themeManager->UpdateConfig(resConfig);
+    ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_, config = resConfig,
             weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
@@ -780,6 +781,7 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
         return;
     }
     themeManager->UpdateConfig(resConfig);
+    ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_,
             weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
@@ -880,6 +882,11 @@ void AceContainer::AttachView(
                 themeManager->LoadCustomTheme(assetManager);
                 // get background color from theme
                 aceView->SetBackgroundColor(themeManager->GetBackgroundColor());
+
+                auto sysResourceAdapter = themeManager->GetThemeConstants()->GetResourceAdapter();
+                auto defaultBundleName = "";
+                auto defaultModuleName = "";
+                ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, sysResourceAdapter);
             },
             TaskExecutor::TaskType::UI);
     }
