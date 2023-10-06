@@ -64,6 +64,13 @@ constexpr int32_t STATE_PROGRESS_RECYCLE = 2;
 constexpr int32_t STATE_PROGRESS_DRAG = 3;
 } // namespace
 
+void RefreshPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
+}
+
 void RefreshPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -808,6 +815,13 @@ void RefreshPattern::InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& 
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         pattern->HandleDragUpdate(static_cast<float>(offset));
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (pattern->refreshStatus_ == RefreshStatus::REFRESH) {
+                return GreatNotEqual(
+                           pattern->scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx())) ||
+                       NonNegative(offset);
+            }
+        }
         return Positive(pattern->scrollOffset_.GetY()) || NonNegative(offset);
     };
     coordinationEvent->SetOnScrollEvent(onScrollEvent);
@@ -882,46 +896,6 @@ void RefreshPattern::QuiteAnimation()
                 return;
             }
             pattern->updatePerFrame_ = false;
-        });
-}
-
-void RefreshPattern::PlayFollowToRecycleAnimation()
-{
-    if (!offsetProperty_) {
-        ResetOffsetProperty();
-    }
-    CHECK_NULL_VOID(offsetProperty_);
-    animationId_++;
-    auto curve = AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
-    AnimationOption option;
-    option.SetCurve(curve);
-    option.SetDuration(FOLLOW_TO_RECYCLE_DURATION);
-    offsetProperty_->Set(scrollOffset_.GetY());
-    UpdateFirstChildPlacement(scrollOffset_.GetY());
-    UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 0.0f);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushUITasks();
-    animation_ = AnimationUtils::StartAnimation(
-        option,
-        [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
-            ContainerScope scope(id);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->offsetProperty_->Set(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
-            pattern->UpdateFirstChildPlacement(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
-            pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 1.0f);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->FlushUITasks();
-        },
-        [weak = AceType::WeakClaim(this), animationId = animationId_]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            if (pattern->animationId_ != animationId) {
-                return;
-            }
-            pattern->SwitchToRefresh();
         });
 }
 
@@ -1117,6 +1091,10 @@ void RefreshPattern::SpeedAnimationFinish()
             break;
         case RefreshStatus::REFRESH:
             scrollOffset_.SetY(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+            break;
+        case RefreshStatus::OVER_DRAG:
+            scrollOffset_.SetY(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+            SwitchToRefresh();
             break;
         default:
             break;

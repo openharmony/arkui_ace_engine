@@ -143,13 +143,13 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                 alignChild = Alignment::TOP_CENTER;
                 if (index == customBuilderIndex_.value_or(0)) {
                     auto builderOffset = 0.0f;
-                    if (GreatNotEqual(builderHeight, scrollOffset_)) {
+                    if (!NearEqual(builderHeight, scrollOffset_)) {
                         builderOffset = scrollOffset_ - builderHeight;
                     }
                     paddingOffsetChild += OffsetF(0.0f, builderOffset);
                 } else {
                     auto scrollOffset = builderHeight;
-                    if (GreatNotEqual(builderHeight, scrollOffset_)) {
+                    if (!NearEqual(builderHeight, scrollOffset_)) {
                         scrollOffset = scrollOffset_;
                     }
                     paddingOffsetChild += OffsetF(0.0f, scrollOffset);

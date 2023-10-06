@@ -19,6 +19,7 @@
 #include "base/geometry/point.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
@@ -122,7 +123,47 @@ void ScrollablePattern::ProcessNavBarReactOnEnd()
 
 bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 {
+    if (!refreshCoordination_) {
+        CreateRefreshCoordination();
+    }
     auto isAtTop = (IsAtTop() && Positive(offset));
+    auto overOffsets = GetOverScrollOffset(offset);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !isAtTop && Positive(offset) &&
+        NeedSplitScroll(overOffsets)) {
+        offset = offset - overOffsets.start;
+        OnScrollCallback(offset, source);
+        isRefreshInReactive_ = true;
+        if (refreshCoordination_) {
+            refreshCoordination_->OnScrollStart();
+        }
+    }
+    if (isAtTop && (source == SCROLL_FROM_UPDATE) && !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
+        isRefreshInReactive_ = true;
+        if (refreshCoordination_) {
+            refreshCoordination_->OnScrollStart();
+        }
+    }
+    if ((refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
+        isRefreshInReactive_) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            refreshCoordination_->OnScrollEnd(GetVelocity());
+        } else {
+            isRefreshInReactive_ = false;
+            refreshCoordination_->OnScrollEnd(0.0f);
+        }
+    }
+    if (refreshCoordination_ && refreshCoordination_->InCoordination() && isRefreshInReactive_) {
+        if (!refreshCoordination_->OnScroll(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
+            isRefreshInReactive_ = false;
+            return true;
+        }
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            return false;
+        } else {
+            return scrollEffect_ && scrollEffect_->IsSpringEffect();
+        }
+    }
+
     auto isDraggedDown = navBarPattern_ ? navBarPattern_->GetDraggedDown() : false;
 
     ProcessAssociatedScroll(offset, source);
@@ -130,30 +171,15 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
     if ((isAtTop || isDraggedDown) && (source == SCROLL_FROM_UPDATE) && !isReactInParentMovement_ &&
         (axis_ == Axis::VERTICAL)) {
         isReactInParentMovement_ = true;
-        if (!refreshCoordination_) {
-            CreateRefreshCoordination();
-        }
-        if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart();
-        }
         ProcessNavBarReactOnStart();
     }
-    if ((refreshCoordination_ || navBarPattern_) && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
+
+    if (navBarPattern_ && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
         isReactInParentMovement_ = false;
-        if (refreshCoordination_) {
-            refreshCoordination_->OnScrollEnd(GetVelocity());
-        }
         ProcessNavBarReactOnEnd();
     }
     if (isReactInParentMovement_) {
         auto needMove = ProcessNavBarReactOnUpdate(offset);
-        if (refreshCoordination_) {
-            if (!refreshCoordination_->OnScroll(offset)) {
-                isReactInParentMovement_ = false;
-                return true;
-            }
-            return scrollEffect_ && scrollEffect_->IsSpringEffect();
-        }
         if (navBarPattern_ && navBarPattern_->IsTitleModeFree()) {
             return needMove;
         }
@@ -169,6 +195,12 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
     return true;
 }
 
+bool ScrollablePattern::NeedSplitScroll(OverScrollOffset& overOffsets)
+{
+    return GreatNotEqual(overOffsets.start, 0.0) && refreshCoordination_ && refreshCoordination_->InCoordination() &&
+           !isRefreshInReactive_ && (axis_ == Axis::VERTICAL);
+}
+
 void ScrollablePattern::OnScrollEnd()
 {
     // Previous: Sets ScrollablePattern::OnScrollEnd to Scrollable->scrollEndCallback_
@@ -176,12 +208,14 @@ void ScrollablePattern::OnScrollEnd()
 
     // Now: HandleOverScroll moved to ScrollablePattern and renamed HandleScrollVelocity, directly
     // calls OnScrollEnd in ScrollablePattern
-    if (isReactInParentMovement_) {
-        ProcessNavBarReactOnEnd();
+    if (isRefreshInReactive_) {
         if (refreshCoordination_) {
             refreshCoordination_->OnScrollEnd(GetVelocity());
-            isReactInParentMovement_ = false;
+            isRefreshInReactive_ = false;
         }
+    }
+    if (isReactInParentMovement_) {
+        ProcessNavBarReactOnEnd();
     }
 
     OnScrollEndCallback();

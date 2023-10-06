@@ -126,6 +126,7 @@ private:
     void UpdateLoadingProgress(int32_t state, float ratio);
     void ReplaceLoadingProgressNode();
     void LoadingProgressReset();
+    void OnAttachToFrameNode() override;
     void OnExitAnimationFinish();
     void ResetLoadingProgressColor();
     float GetFollowRatio();
@@ -162,7 +163,6 @@ private:
     void SwitchToRefresh();
     void SwitchToFinish();
     void QuiteAnimation();
-    void PlayFollowToRecycleAnimation();
     void InitChildNode();
     void QuickFirstChildAppear();
     void QuickFirstChildDisappear();

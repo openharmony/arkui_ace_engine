@@ -417,6 +417,7 @@ private:
         }
     }
     float GetVelocity() const;
+    bool NeedSplitScroll(OverScrollOffset& overOffsets);
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
@@ -429,6 +430,7 @@ private:
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
+    bool isRefreshInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = FRICTION;
