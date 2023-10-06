@@ -85,6 +85,9 @@ private:
     void HandlePause();
     void HandleReset();
 
+    uint64_t GetFormatDuration(uint64_t duration) const;
+    uint64_t GetMillisecondsDuration(uint64_t duration) const;
+
     static void UpdateTextLayoutProperty(
         RefPtr<TextTimerLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     std::string GetFormat() const;
