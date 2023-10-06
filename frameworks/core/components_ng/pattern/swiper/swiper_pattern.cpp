@@ -1193,7 +1193,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
         return;
     }
     auto edgeEffect = GetEdgeEffect();
-    if (!IsLoop() && IsOutOfBoundary() && edgeEffect == EdgeEffect::SPRING) {
+    if (!IsLoop() && IsOutOfBoundary(offset) && edgeEffect == EdgeEffect::SPRING) {
         LOGD("Swiper has reached boundary, can't drag any more, effect spring.");
 
         targetIndex_.reset();
@@ -1368,7 +1368,7 @@ void SwiperPattern::HandleDragStart()
         indicatorController_->Stop();
     }
     StopTranslateAnimation();
-    StopSpringAnimation();
+    StopSpringAnimationAndFlushImmediately();
     StopAutoPlay();
 
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
@@ -1387,6 +1387,7 @@ void SwiperPattern::HandleDragStart()
 
     gestureSwipeIndex_ = currentIndex_;
     isDragging_ = true;
+    mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
 }
@@ -1394,6 +1395,15 @@ void SwiperPattern::HandleDragStart()
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 {
     auto mainDelta = static_cast<float>(info.GetMainDelta());
+    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
+        auto mainSize = CalculateVisibleSize();
+        if ((mainDeltaSum_ + std::abs(mainDelta)) > mainSize) {
+            mainDelta = mainDelta > 0 ? (mainSize - mainDeltaSum_) : (mainDeltaSum_ - mainSize);
+            mainDeltaSum_ = mainSize;
+        } else {
+            mainDeltaSum_ += std::abs(mainDelta);
+        }
+    }
 
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
@@ -1516,6 +1526,11 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity) const
 
 void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity)
 {
+    if (NearZero(translate)) {
+        ResetAndUpdateIndexOnAnimationEnd(nextIndex);
+        return;
+    }
+
     AnimationOption option;
     option.SetDuration(GetDuration());
     option.SetCurve(GetCurveIncludeMotion(velocity / translate));
@@ -2617,51 +2632,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
 
 void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    targetIndex_.reset();
-    if (preTargetIndex_.has_value()) {
-        preTargetIndex_.reset();
-    }
-    if (currentIndex_ != nextIndex) {
-        if (isFinishAnimation_) {
-            currentDelta_ = 0.0f;
-            itemPosition_.clear();
-            isVoluntarilyClear_ = true;
-            jumpIndex_ = nextIndex;
-            MarkDirtyNodeSelf();
-            auto pipeline = PipelineContext::GetCurrentContext();
-            if (pipeline) {
-                pipeline->FlushUITasks();
-            }
-            isFinishAnimation_ = false;
-        } else {
-            UpdateCurrentIndex(nextIndex);
-            do {
-                auto curChild = host->GetChildAtIndex(currentIndex_);
-                if (!curChild) {
-                    break;
-                }
-                auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
-                if (!curChildFrame) {
-                    break;
-                }
-                FlushFocus(curChildFrame);
-            } while (0);
-            oldIndex_ = nextIndex;
-            currentFirstIndex_ = GetLoopIndex(nextIndex);
-            turnPageRate_ = 0.0f;
-            currentIndexOffset_ = 0.0f;
-            auto pipeline = PipelineContext::GetCurrentContext();
-            if (pipeline) {
-                pipeline->FlushUITasks();
-                pipeline->FlushMessages();
-            }
-            FireChangeEvent();
-            // lazyBuild feature.
-            SetLazyLoadFeature(true);
-        }
-    }
+    ResetAndUpdateIndexOnAnimationEnd(nextIndex);
 
     AnimationCallbackInfo info;
     info.currentOffset = GetCustomPropertyOffset();
@@ -3080,6 +3051,58 @@ void SwiperPattern::MarkDirtyNodeSelf()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    }
+}
+
+void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    targetIndex_.reset();
+    if (preTargetIndex_.has_value()) {
+        preTargetIndex_.reset();
+    }
+
+    if (currentIndex_ == nextIndex) {
+        return;
+    }
+
+    if (isFinishAnimation_) {
+        currentDelta_ = 0.0f;
+        itemPosition_.clear();
+        isVoluntarilyClear_ = true;
+        jumpIndex_ = nextIndex;
+        MarkDirtyNodeSelf();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+        isFinishAnimation_ = false;
+    } else {
+        UpdateCurrentIndex(nextIndex);
+        do {
+            auto curChild = host->GetChildAtIndex(currentIndex_);
+            if (!curChild) {
+                break;
+            }
+            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+            if (!curChildFrame) {
+                break;
+            }
+            FlushFocus(curChildFrame);
+        } while (0);
+        oldIndex_ = nextIndex;
+        currentFirstIndex_ = GetLoopIndex(nextIndex);
+        turnPageRate_ = 0.0f;
+        currentIndexOffset_ = 0.0f;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+            pipeline->FlushMessages();
+        }
+        FireChangeEvent();
+        // lazyBuild feature.
+        SetLazyLoadFeature(true);
     }
 }
 } // namespace OHOS::Ace::NG
