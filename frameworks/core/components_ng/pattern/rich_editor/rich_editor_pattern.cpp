@@ -42,7 +42,7 @@
 #if defined(ENABLE_STANDARD_INPUT)
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
-#include "core/components_ng/pattern/rich_editor/on_rich_editor_changed_listener_impl.h"
+#include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
 #endif
 
@@ -162,11 +162,6 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
     }
     return ret;
-}
-
-int32_t RichEditorPattern::GetInstanceId() const
-{
-    return instanceId_;
 }
 
 std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
@@ -1339,12 +1334,8 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
                 CHECK_NULL_VOID(pixels);
                 int32_t length = result.valuePixelMap->GetByteCount();
                 std::vector<uint8_t> data(pixels, pixels + length);
-                PixelMapRecordDetails details = {
-                    result.valuePixelMap->GetWidth(),
-                    result.valuePixelMap->GetHeight(),
-                    result.valuePixelMap->GetPixelFormat(),
-                    result.valuePixelMap->GetAlphaType()
-                };
+                PixelMapRecordDetails details = { result.valuePixelMap->GetWidth(), result.valuePixelMap->GetHeight(),
+                    result.valuePixelMap->GetPixelFormat(), result.valuePixelMap->GetAlphaType() };
                 UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
             } else {
                 UdmfClient::GetInstance()->AddImageRecord(unifiedData, result.valueString);
@@ -1530,7 +1521,7 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
         static_cast<MiscServices::TextInputType>(static_cast<int32_t>(TextInputType::UNSPECIFIED)));
     MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
     if (richEditTextChangeListener_ == nullptr) {
-        richEditTextChangeListener_ = new OnRichEditorChangedListenerImpl(WeakClaim(this));
+        richEditTextChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
     }
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     CHECK_NULL_RETURN(inputMethod, false);
@@ -2439,7 +2430,7 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     CalcInsertValueObj(spanInfo);
     auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanInfo.GetSpanIndex() - 1));
     if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG && spanInfo.GetOffsetInSpan() == 0 &&
-            selectEnd == selectStart + 1) {
+        selectEnd == selectStart + 1) {
         FireOnSelect(selectStart, selectEnd);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         StopTwinkling();
@@ -3251,8 +3242,8 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     nextPosition = std::min(nextPosition, GetTextContentLength());
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
-    bool selectedSingle = selectedRects.size() == 1 &&
-                            (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top());
+    bool selectedSingle =
+        selectedRects.size() == 1 && (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top());
     bool selectedLast = selectedRects.size() == 0 && currentPosition == GetTextContentLength();
     if (selectedSingle || selectedLast) {
         if (selectedLast) {

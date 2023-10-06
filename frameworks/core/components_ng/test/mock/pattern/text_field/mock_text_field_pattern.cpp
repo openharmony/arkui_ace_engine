@@ -164,4 +164,40 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
 }
 void TextFieldPattern::DumpInfo() {}
 void TextFieldPattern::OnColorConfigurationUpdate() {}
+
+void TextFieldPattern::InsertValue(const std::string& insertValue) {};
+void TextFieldPattern::DeleteBackward(int32_t length) {}
+void TextFieldPattern::DeleteForward(int32_t length) {}
+bool TextFieldPattern::CursorMoveLeft()
+{
+    return false;
+}
+bool TextFieldPattern::CursorMoveRight()
+{
+    return false;
+}
+bool TextFieldPattern::CursorMoveUp()
+{
+    return false;
+}
+bool TextFieldPattern::CursorMoveDown()
+{
+    return false;
+}
+void TextFieldPattern::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip) {}
+void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle) {}
+void TextFieldPattern::HandleExtendAction(int32_t action) {}
+std::u16string TextFieldPattern::GetLeftTextOfCursor(int32_t number)
+{
+    return StringUtils::DEFAULT_USTRING;
+}
+
+std::u16string TextFieldPattern::GetRightTextOfCursor(int32_t number)
+{
+    return StringUtils::DEFAULT_USTRING;
+}
+int32_t TextFieldPattern::GetTextIndexAtCursor()
+{
+    return -1;
+}
 } // namespace OHOS::Ace::NG
