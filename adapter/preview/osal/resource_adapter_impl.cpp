@@ -265,16 +265,7 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     const std::string& bundleName, const std::string& moduleName)
 {
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
-    CHECK_NULL_RETURN(aceContainer, nullptr);
-    auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
-    
-    auto resourceManager = context->GetResourceManager();
-    auto newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImpl>(resourceManager);
-
-    return newResourceAdapter;
+    return nullptr;
 }
 
 ResourceAdapterImpl::ResourceAdapterImpl(std::shared_ptr<Global::Resource::ResourceManager> resourceManager)

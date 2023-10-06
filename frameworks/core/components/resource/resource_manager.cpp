@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components/theme/resource_manager.h"
+#include "core/components/resource/resource_manager.h"
 
 #include <memory>
+#include <string>
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
+namespace {
+const std::string DEFAULT_BUNDLE_NAME = "";
+const std::string DEFAULT_MODULE_NAME = "";
+}
 
 ResourceManager& ResourceManager::GetInstance()
 {
@@ -39,8 +44,8 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(RefPtr<Resou
         LOGI("create new resource adapter, bundleName: %{public}s, moduleName: %{public}s", bundleName.c_str(), moduleName.c_str());
         auto resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName);
         if (resourceAdapter == nullptr) {
-            LOGW("[GetOrCreateResourceAdapter] resourceAdapter is null of bundleName: %{public}s, moduleName: %{public}s!", bundleName.c_str(), moduleName.c_str());
-            return nullptr;
+            LOGW("resourceAdapter is null of bundleName: %{public}s, moduleName: %{public}s!, use default", bundleName.c_str(), moduleName.c_str());
+            return GetResourceAdapter(DEFAULT_BUNDLE_NAME, DEFAULT_MODULE_NAME);
         }
         AddResourceAdapter(bundleName, moduleName, resourceAdapter);
     }

@@ -27,7 +27,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/resource_configuration.h"
 #include "core/components/theme/resource_adapter.h"
-#include "core/components/theme/resource_object.h"
+#include "core/components/resource/resource_object.h"
 
 namespace OHOS::Ace {
 

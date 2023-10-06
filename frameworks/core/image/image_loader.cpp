@@ -24,8 +24,8 @@
 
 #include "include/utils/SkBase64.h"
 #include "base/memory/ace_type.h"
-#include "core/components/theme/resource_manager.h"
-#include "core/components/theme/resource_object.h"
+#include "core/components/resource/resource_manager.h"
+#include "core/components/resource/resource_object.h"
 
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"

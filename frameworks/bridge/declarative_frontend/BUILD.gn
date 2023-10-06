@@ -292,7 +292,7 @@ template("declarative_js_engine") {
       "view_stack_processor.cpp",
 
       # Models implemenations for classic fw
-      "$ace_root/frameworks/core/components/theme/resource_manager.cpp",
+      "$ace_root/frameworks/core/components/resource/resource_manager.cpp",
       "jsview/models/action_sheet_model_impl.cpp",
       "jsview/models/alert_dialog_model_impl.cpp",
       "jsview/models/animator_model_impl.cpp",
@@ -624,7 +624,7 @@ template("declarative_js_engine_ng") {
       "sharedata/js_share_data.cpp",
 
       # jsviews
-      "$ace_root/frameworks/core/components/theme/resource_manager.cpp",
+      "$ace_root/frameworks/core/components/resource/resource_manager.cpp",
       "interfaces/profiler/js_profiler.cpp",
       "jsview/action_sheet/js_action_sheet.cpp",
       "jsview/dialog/js_alert_dialog.cpp",

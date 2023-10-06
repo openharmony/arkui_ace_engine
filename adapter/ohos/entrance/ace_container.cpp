@@ -61,7 +61,7 @@
 #include "core/common/plugin_manager.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
-#include "core/components/theme/resource_manager.h"
+#include "core/components/resource/resource_manager.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -1272,7 +1272,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
 
     // Load custom style at UI thread before frontend attach, for loading style before building tree.
     auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
-                                    colorScheme = colorScheme_, resourceInfo = resourceInfo_]() {
+                                    colorScheme = colorScheme_, resourceInfo = resourceInfo_, context = runtimeContext_.lock()]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
         LOGD("UIContent load theme");
         ThemeConstants::InitDeviceType();

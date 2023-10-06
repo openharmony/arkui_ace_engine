@@ -53,6 +53,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_window.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
 #include "core/components/theme/app_theme.h"
@@ -869,11 +870,17 @@ void AceContainer::AttachView(
 
     ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
-    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    auto resourceAdapter = ResourceAdapter::Create();
+    resourceAdapter->Init(resourceInfo);
+
+    auto defaultBundleName = "";
+    auto defaultModuleName = "";
+    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource, load theme map.
-        themeManager->InitResource(resourceInfo_);
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
@@ -882,11 +889,6 @@ void AceContainer::AttachView(
                 themeManager->LoadCustomTheme(assetManager);
                 // get background color from theme
                 aceView->SetBackgroundColor(themeManager->GetBackgroundColor());
-
-                auto sysResourceAdapter = themeManager->GetThemeConstants()->GetResourceAdapter();
-                auto defaultBundleName = "";
-                auto defaultModuleName = "";
-                ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, sysResourceAdapter);
             },
             TaskExecutor::TaskType::UI);
     }

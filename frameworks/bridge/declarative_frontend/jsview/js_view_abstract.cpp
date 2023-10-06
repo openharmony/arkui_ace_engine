@@ -25,7 +25,6 @@
 #include <utility>
 #include <vector>
 
-#include "adapter/ohos/osal/resource_adapter_impl.h"
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -61,8 +60,8 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/resource_adapter.h"
-#include "core/components/theme/resource_manager.h"
-#include "core/components/theme/resource_object.h"
+#include "core/components/resource/resource_manager.h"
+#include "core/components/resource/resource_object.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"

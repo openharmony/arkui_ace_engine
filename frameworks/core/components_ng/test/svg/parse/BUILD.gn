@@ -41,7 +41,10 @@ config("config_svg_parse_test") {
 ohos_unittest("parse_test_ng") {
   module_out_path = svg_test_output_path
 
-  sources = [ "parse_test_ng.cpp" ]
+  sources = [
+    "$ace_root/frameworks/core/components/resource/resource_manager.cpp",
+    "parse_test_ng.cpp",
+  ]
 
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
