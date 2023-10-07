@@ -433,6 +433,38 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
     if (GreatNotEqual(mainLength, mainSize)) {
         return;
     }
+    // fill current line first
+    auto mainIter = gridLayoutInfo_.gridMatrix_.find(currentMainLineIndex_);
+    auto nextMain = gridLayoutInfo_.gridMatrix_.find(currentMainLineIndex_ + 1);
+    if (mainIter != gridLayoutInfo_.gridMatrix_.end() && mainIter->second.size() < crossCount_ &&
+        nextMain == gridLayoutInfo_.gridMatrix_.end()) {
+        auto currentIndex = gridLayoutInfo_.endIndex_ + 1;
+        cellAveLength_ = -1.0f;
+        bool hasNormalItem = false;
+        lastCross_ = 0;
+        for (uint32_t i = (mainIter->second.empty() ? 0 : mainIter->second.rbegin()->first); i < crossCount_; i++) {
+            // Step1. Get wrapper of [GridItem]
+            auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+            if (!itemWrapper) {
+                break;
+            }
+            // Step2. Measure child
+            auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
+            auto childState = MeasureNewChild(frameSize, currentIndex, layoutWrapper, itemWrapper, false);
+            if (childState == -1) {
+                cellAveLength_ = LessNotEqual(cellAveLength_, 0.0)
+                                     ? gridLayoutInfo_.lineHeightMap_.find(currentMainLineIndex_ - 1)->second
+                                     : cellAveLength_;
+                --currentIndex;
+                break;
+            }
+            i += childState - 1;
+            // Step3. Measure [GridItem]
+            LargeItemLineHeight(itemWrapper, hasNormalItem);
+            gridLayoutInfo_.endIndex_ = currentIndex;
+            currentIndex++;
+        }
+    }
     // When [mainLength] is still less than [mainSize], do [FillNewLineBackward] repeatedly until filling up the lower
     // part of the viewport
     while (LessNotEqual(mainLength, mainSize)) {
