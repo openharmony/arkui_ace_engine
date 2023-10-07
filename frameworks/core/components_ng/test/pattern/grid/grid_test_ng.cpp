@@ -4465,6 +4465,126 @@ HWTEST_F(GridTestNg, GridScrollWithOptions002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridScrollWithOptions003
+ * @tc.desc: change grid columns after scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridScrollWithOptions003, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 6, 1, 2, 3, 4, 5 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) {
+        GridItemSize gridItemSize { 1, 2 };
+        return gridItemSize;
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    CreateGrid([option](GridModelNG gridModelNG) {
+        gridModelNG.SetColumnsTemplate("1fr");
+        gridModelNG.SetLayoutOptions(option);
+        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+    });
+    pattern_->UpdateStartIndex(3);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto layoutAlgorithm =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(3, option, 1), std::make_pair(0, 2));
+}
+
+/**
+ * @tc.name: GridScrollWithOptions004
+ * @tc.desc: change grid columns after scroll, first line has empty position
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridScrollWithOptions004, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 6, 1, 2, 3, 4, 5 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) {
+        GridItemSize gridItemSize { 1, 2 };
+        return gridItemSize;
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    CreateGrid([option](GridModelNG gridModelNG) {
+        gridModelNG.SetColumnsTemplate("1fr");
+        gridModelNG.SetLayoutOptions(option);
+        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+    });
+    pattern_->UpdateStartIndex(3);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr 1fr");
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto layoutAlgorithm =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(3, option, 1), std::make_pair(0, 2));
+    EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(2, option, 1), std::make_pair(3, 2));
+    EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(1, option, 1), std::make_pair(1, 2));
+}
+
+/**
+ * @tc.name: GridScrollWithOptions005
+ * @tc.desc: second line full
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridScrollWithOptions005, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 6, 1, 2, 3, 4, 5 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) {
+        GridItemSize gridItemSize { 1, 2 };
+        return gridItemSize;
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    CreateGrid([option](GridModelNG gridModelNG) {
+        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        gridModelNG.SetLayoutOptions(option);
+        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+    });
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto layoutAlgorithm =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(3, option, 1), std::make_pair(2, 2));
+    EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(2, option, 1), std::make_pair(0, 2));
+    EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(1, option, 1), std::make_pair(1, 2));
+}
+
+/**
+ * @tc.name: GridScrollWithOptions006
+ * @tc.desc: first irregular item in new line
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridScrollWithOptions006, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 6, 3, 4, 5 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) {
+        GridItemSize gridItemSize { 1, 2 };
+        return gridItemSize;
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    CreateGrid([option](GridModelNG gridModelNG) {
+        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        gridModelNG.SetLayoutOptions(option);
+        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+    });
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto layoutAlgorithm =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(4, option, 1), std::make_pair(2, 2));
+}
+
+/**
  * @tc.name: GridDistributed001
  * @tc.desc: Test the distributed capability of Grid.
  * @tc.type: FUNC
