@@ -18,13 +18,13 @@
 
 #include "input_method_controller.h"
 
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/common/ime/text_input_client.h"
 
 namespace OHOS::Ace::NG {
 
 class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
 public:
-    explicit OnTextChangedListenerImpl(const WeakPtr<TextFieldPattern>& pattern) : pattern_(pattern) {}
+    explicit OnTextChangedListenerImpl(const WeakPtr<TextInputClient>& pattern) : pattern_(pattern) {}
     ~OnTextChangedListenerImpl() override = default;
 
     void InsertText(const std::u16string& text) override;
@@ -48,7 +48,7 @@ private:
     void HandleKeyboardStatus(MiscServices::KeyboardStatus status);
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
 
-    WeakPtr<TextFieldPattern> pattern_;
+    WeakPtr<TextInputClient> pattern_;
 };
 
 } // namespace OHOS::Ace::NG
