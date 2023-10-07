@@ -607,7 +607,7 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
     JSRef<JSObject> decorationObject = JSRef<JSObject>::Cast(decorationObj);
     if (!decorationObject->IsUndefined()) {
         JSRef<JSVal> type = decorationObject->GetProperty("type");
-        if (!type->IsNull()) {
+        if (!type->IsNull() && !type->IsUndefined()) {
             updateSpanStyle.updateTextDecoration = static_cast<TextDecoration>(type->ToNumber<int32_t>());
             style.SetTextDecoration(static_cast<TextDecoration>(type->ToNumber<int32_t>()));
         }
