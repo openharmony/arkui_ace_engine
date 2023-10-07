@@ -399,17 +399,18 @@ void TitleBarPattern::ProcessTitleDragEnd()
         SpringAnimation(overDragOffset_, 0);
         enableAssociatedScroll_ = false;
     }
-
-    auto titleMiddleValue =
-        (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
-    if (LessNotEqual(tempTitleBarHeight_, titleMiddleValue) || NearEqual(tempTitleBarHeight_, titleMiddleValue)) {
-        AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
-        enableAssociatedScroll_ = false;
-        return;
-    } else if (GreatNotEqual(tempTitleBarHeight_, titleMiddleValue)) {
-        AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
-        enableAssociatedScroll_ = false;
-        return;
+    if (CanOverDrag_ || isTitleScaleChange_) {
+        auto titleMiddleValue =
+            (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
+        if (LessNotEqual(tempTitleBarHeight_, titleMiddleValue) || NearEqual(tempTitleBarHeight_, titleMiddleValue)) {
+            AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
+            enableAssociatedScroll_ = false;
+            return;
+        } else if (GreatNotEqual(tempTitleBarHeight_, titleMiddleValue)) {
+            AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
+            enableAssociatedScroll_ = false;
+            return;
+        }
     }
 }
 
@@ -804,7 +805,7 @@ void TitleBarPattern::UpdateAssociatedScrollOffset(float offset)
             return;
         } else {
             if (GreatNotEqual(associatedScrollOffsetMax_ + defaultTitleBarHeight_, titleMiddleValue)) {
-                AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
+                SetTitleStyleByOffset(maxTitleBarHeight_ - defaultTitleBarHeight_);
                 enableAssociatedScroll_ = false;
                 return;
             } else {

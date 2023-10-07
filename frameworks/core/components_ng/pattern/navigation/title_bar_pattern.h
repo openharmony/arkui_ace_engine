@@ -165,6 +165,11 @@ public:
         CanOverDrag_ = CanOverDrag;
     }
 
+    void SetTitleScaleChange(bool isTitleScaleChange)
+    {
+        isTitleScaleChange_ = isTitleScaleChange;
+    }
+
     void ResetAssociatedScroll();
     void UpdateAssociatedScrollOffset(float offset);
 
@@ -236,6 +241,7 @@ private:
     float minTitleHeight_ = 0.0f;
     bool CanOverDrag_ = true;
     bool isOverDrag_ = true;
+    bool isTitleScaleChange_ = true;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
     bool enableAssociatedScroll_ = false;
