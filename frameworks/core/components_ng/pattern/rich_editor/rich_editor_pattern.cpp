@@ -916,6 +916,22 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
     return res;
 }
 
+int32_t RichEditorPattern::GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const
+{
+    if (spans.empty()) {
+        return 0;
+    }
+    int32_t imageSpanCnt = 0;
+    for (auto it = spans.rbegin(); it != spans.rend(); ++it) {
+        auto spanNode = DynamicCast<SpanNode>(*it);
+        if (spanNode) {
+            return spanNode->GetSpanItem()->position + imageSpanCnt;
+        }
+        ++imageSpanCnt;
+    }
+    return imageSpanCnt;
+}
+
 std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start, int32_t end) const
 {
     CHECK_NULL_RETURN(start != end, {});
@@ -923,72 +939,63 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
     CHECK_NULL_RETURN(host, {});
     CHECK_NULL_RETURN(!host->GetChildren().empty(), {});
 
-    std::wstring content;
+    const auto& spans = host->GetChildren();
+    int32_t length = GetParagraphLength(spans);
+    std::vector<RefPtr<SpanNode>> res;
 
-    // find paragraph head
-    auto headIt = host->GetChildren().begin();
+    // start >= all content
+    if (start >= length) {
+        for (const auto& span : spans) {
+            auto spanNode = DynamicCast<SpanNode>(span);
+            if (spanNode) {
+                res.emplace_back(spanNode);
+            }
+        }
+        return res;
+    }
+
+    auto headIt = spans.begin();
+    auto flagNode = headIt;
+    bool isEnd = false;
     int32_t spanEnd = -1;
-    for (auto it = headIt; it != host->GetChildren().end(); ++it) {
-        if (InstanceOf<SpanNode>(*it)) {
-            auto spanNode = DynamicCast<SpanNode>(*it);
+    while (flagNode != spans.end()) {
+        auto spanNode = DynamicCast<SpanNode>(*flagNode);
+        if (spanNode) {
             auto&& info = spanNode->GetSpanItem();
             spanEnd = info->position;
-            content = StringUtils::ToWstring(info->content);
+            isEnd = StringUtils::ToWstring(info->content).back() == '\n';
         } else {
-            // placeholder node
             ++spanEnd;
-            content = L" ";
+            isEnd = false;
         }
-
+        flagNode++;
         if (spanEnd > start) {
             break;
         }
-        if (content.back() == L'\n') {
-            headIt = std::next(it);
+        if (isEnd) {
+            headIt = flagNode;
         }
     }
-
-    // find paragraph tail
-    auto tailIt = host->GetChildren().end();
-    int32_t spanStart = -1;
-    for (auto it = std::prev(tailIt);; --it) {
-        if (InstanceOf<SpanNode>(*it)) {
-            auto spanNode = DynamicCast<SpanNode>(*it);
-            auto&& info = spanNode->GetSpanItem();
-            content = StringUtils::ToWstring(info->content);
-            spanStart = info->position - content.length();
-        } else {
-            // placeholder node
-            --spanStart;
-            content = L" ";
-        }
-
-        if (content.back() == L'\n') {
-            tailIt = std::next(it);
-        }
-        if (spanStart < end) {
-            break;
-        }
-        if (it == host->GetChildren().begin()) {
-            break;
-        }
-    }
-
-    // filter illegal iterator
-    if (headIt == host->GetChildren().end()) {
-        return {};
-    }
-
-    std::vector<RefPtr<SpanNode>> res;
-    // return spans in range [headIt, tailIt)
-    // SPECIAL CASE: only 1 span and *headIt == *tailIt, handled by do-while loop
-    do {
+    while (headIt != flagNode) {
         auto spanNode = DynamicCast<SpanNode>(*headIt);
         if (spanNode) {
             res.emplace_back(spanNode);
         }
-        ++headIt;
-    } while (headIt != host->GetChildren().end() && headIt != tailIt);
+        headIt++;
+    }
+    while (flagNode != spans.end() && (spanEnd < end || !isEnd)) {
+        auto spanNode = DynamicCast<SpanNode>(*flagNode);
+        if (spanNode) {
+            res.emplace_back(spanNode);
+            auto&& info = spanNode->GetSpanItem();
+            spanEnd = info->position;
+            isEnd = StringUtils::ToWstring(info->content).back() == '\n';
+        } else {
+            ++spanEnd;
+            isEnd = false;
+        }
+        flagNode++;
+    }
 
     return res;
 }
