@@ -1134,6 +1134,7 @@ void ViewAbstract::BindPopup(
                 auto overlayManager = pipeline->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
                 overlayManager->ErasePopup(id);
+                SubwindowManager::GetInstance()->HideSubWindowNG();
             };
             targetNode->PushDestroyCallback(destructor);
         } else {
@@ -1144,6 +1145,7 @@ void ViewAbstract::BindPopup(
                 auto overlayManager = subwindow->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
                 overlayManager->ErasePopup(id);
+                SubwindowManager::GetInstance()->HideSubWindowNG();
             };
             targetNode->PushDestroyCallback(destructor);
         }
