@@ -176,6 +176,7 @@ export class SegmentButtonOptions {
   imageSize: SizeOptions
   buttonMargin: Margin | Dimension
   textMargin: Margin | Dimension
+  componentPadding: Padding | Dimension
   showText: boolean = false
   showIcon: boolean = false
   iconTextRadius?: number
@@ -191,8 +192,8 @@ export class SegmentButtonOptions {
     this.backgroundColor = options.backgroundColor ?? $r('sys.color.ohos_id_color_button_normal')
     this.selectedBackgroundColor = options.selectedBackgroundColor ?? $r('sys.color.ohos_id_color_foreground_contrary')
     this.imageSize = options.imageSize ?? { width: 24, height: 24 }
-    this.buttonMargin = options.buttonMargin ?? { top: 2, right: 2, bottom: 2, left: 2 }
-    this.textMargin = options.textMargin ?? { top: 4, right: 8, bottom: 4, left: 8 }
+    this.buttonMargin = options.buttonMargin ?? { top: 4, right: 8, bottom: 4, left: 8 }
+    this.textMargin = options.textMargin ?? 0
     this.type = options.type
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons)
     if (this.type === "capsule") {
@@ -203,17 +204,15 @@ export class SegmentButtonOptions {
       })
       if (this.showText && this.showIcon) {
         this.iconTextRadius = 12
-        this.textMargin = options.textMargin ?? { top: 6, right: 8, bottom: 6, left: 8 }
+        this.buttonMargin = options.buttonMargin ?? { top: 6, right: 8, bottom: 6, left: 8 }
         this.iconTextBackgroundRadius = 14
       }
       this.selectedFontColor = options.selectedFontColor ?? $r('sys.color.ohos_id_color_foreground_contrary')
       this.selectedBackgroundColor = options.selectedBackgroundColor ?? $r('sys.color.ohos_id_color_emphasize')
-      if (this.multiply) {
-        this.buttonMargin = options.buttonMargin ?? 0
-      }
     } else {
       this.showText = true
     }
+    this.componentPadding = this.multiply ? 0 : 2
   }
 
   static tab(options: TabSegmentButtonConstructionOptions): SegmentButtonOptions {
@@ -222,6 +221,29 @@ export class SegmentButtonOptions {
 
   static capsule(options: CapsuleSegmentButtonConstructionOptions): SegmentButtonOptions {
     return new SegmentButtonOptions({ type: "capsule", ...options })
+  }
+}
+
+@Component
+struct MultiSelectBackground {
+  @ObjectLink optionsArray: SegmentButtonItemOptionsArray
+  @ObjectLink options: SegmentButtonOptions
+  @Consume buttonBorderRadius: BorderRadiuses[]
+  @Consume buttonItemsSize: SizeOptions[]
+
+  build() {
+    Row({ space: 1 }) {
+      ForEach(this.optionsArray, (_, index) => {
+        if (index < MAX_ITEM_COUNT) {
+          Stack()
+            .layoutWeight(1)
+            .height(this.buttonItemsSize[index].height)
+            .backgroundColor(this.options.backgroundColor)
+            .borderRadius(this.buttonBorderRadius[index])
+        }
+      })
+    }
+    .padding(this.options.componentPadding)
   }
 }
 
@@ -243,6 +265,7 @@ struct SelectItem {
         .backgroundColor(this.options.selectedBackgroundColor)
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
+        .shadow(ShadowStyle.OUTER_DEFAULT_MD)
     }
   }
 }
@@ -285,8 +308,7 @@ struct MultiSelectItemArray {
         }
       })
     }
-    .width('100%')
-    .height('100%')
+    .padding(this.options.componentPadding)
   }
 }
 
@@ -303,6 +325,7 @@ struct SegmentButtonItem {
         Image(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon)
           .size(this.options.imageSize)
           .focusable(this.index == 0)
+          .draggable(false)
       }
       if (this.options.showText) {
         Text(this.itemOptions.text)
@@ -313,13 +336,14 @@ struct SegmentButtonItem {
           .maxFontSize(this.property.fontSize)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(1)
-          .width('100%')
           .textAlign(TextAlign.Center)
           .focusable(this.index == 0 && !this.options.showIcon)
+          .padding(this.options.textMargin)
       }
     }
-    .padding(this.options.textMargin)
-    .align(Alignment.Center)
+    .justifyContent(FlexAlign.Center)
+    .padding(this.options.buttonMargin)
+    .constraintSize({ minHeight: 28 })
   }
 }
 
@@ -331,23 +355,17 @@ class HoverColorProperty {
 @Component
 struct PressAndHoverEffect {
   @Consume buttonItemsSize: SizeOptions[]
-  @Prop pressOpacity: number
+  @Prop press: boolean
   @ObjectLink colorProperty: HoverColorProperty
   @Consume buttonBorderRadius: BorderRadiuses[]
   pressIndex: number = 0
   pressColor: ResourceColor = $r("sys.color.ohos_id_color_click_effect")
 
   build() {
-    Stack() {
-      Stack()
-        .size(this.buttonItemsSize[this.pressIndex])
-        .backgroundColor(this.pressColor)
-        .opacity(this.pressOpacity)
-        .borderRadius(this.buttonBorderRadius[this.pressIndex])
-    }
-    .size(this.buttonItemsSize[this.pressIndex])
-    .backgroundColor(this.colorProperty.hoverColor)
-    .borderRadius(this.buttonBorderRadius[this.pressIndex])
+    Stack()
+      .size(this.buttonItemsSize[this.pressIndex])
+      .backgroundColor(this.press ? this.pressColor : this.colorProperty.hoverColor)
+      .borderRadius(this.buttonBorderRadius[this.pressIndex])
   }
 }
 
@@ -364,7 +382,7 @@ struct SegmentButtonItemArrayComponent {
   @Consume zoomScaleArray: number[]
   @Consume buttonItemProperty: ItemProperty[]
   @Consume buttonItemsSelected: boolean[]
-  @State pressOpacityArray: number[] = Array.from({ length: MAX_ITEM_COUNT }, () => 0)
+  @State pressArray: boolean[] = Array.from({ length: MAX_ITEM_COUNT }, () => false)
   @State hoverColorArray: HoverColorProperty[] = Array.from({ length: MAX_ITEM_COUNT }, () => new HoverColorProperty())
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, () => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, () => 0)
@@ -479,46 +497,49 @@ struct SegmentButtonItemArrayComponent {
     .align(Alignment.Center)
   }
 
-  calculateBorderRadius(index: number) {
-    let halfButtonItemsSizeHeight = this.buttonItemsSize[index].height as number / 2
-    if (!this.options.multiply) {
-      this.buttonBorderRadius[index].topLeft = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
-      this.buttonBorderRadius[index].topRight = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
-      this.buttonBorderRadius[index].bottomLeft = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
-      this.buttonBorderRadius[index].bottomRight = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
+  calculateBorderRadius() {
+    let borderRadiusArray: BorderRadiuses[] = Array.from({ length: MAX_ITEM_COUNT }, () => {
+      return { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 }
+    })
+    for (let index = 0; index < this.buttonBorderRadius.length; index++) {
+      let halfButtonItemsSizeHeight = this.buttonItemsSize[index].height as number / 2
+      if (!this.options.multiply) {
+        borderRadiusArray[index].topLeft = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
+        borderRadiusArray[index].topRight = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
+        borderRadiusArray[index].bottomLeft = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
+        borderRadiusArray[index].bottomRight = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
+      } else {
+        if (index === 0) {
+          borderRadiusArray[index].topLeft = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
+          borderRadiusArray[index].topRight = 0
+          borderRadiusArray[index].bottomLeft = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
+          borderRadiusArray[index].bottomRight = 0
+        } else if (index === Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
+          borderRadiusArray[index].topLeft = 0
+          borderRadiusArray[index].topRight = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
+          borderRadiusArray[index].bottomLeft = 0
+          borderRadiusArray[index].bottomRight = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
+        } else {
+          borderRadiusArray[index].topLeft = 0
+          borderRadiusArray[index].topRight = 0
+          borderRadiusArray[index].bottomLeft = 0
+          borderRadiusArray[index].bottomRight = 0
+        }
+      }
     }
-    else {
-      if (index === 0) {
-        this.buttonBorderRadius[index].topLeft = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
-        this.buttonBorderRadius[index].topRight = 0
-        this.buttonBorderRadius[index].bottomLeft = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
-        this.buttonBorderRadius[index].bottomRight = 0
-      }
-      else if (index === Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
-        this.buttonBorderRadius[index].topLeft = 0
-        this.buttonBorderRadius[index].topRight = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
-        this.buttonBorderRadius[index].bottomLeft = 0
-        this.buttonBorderRadius[index].bottomRight = this.options.iconTextRadius ?? halfButtonItemsSizeHeight
-      }
-      else {
-        this.buttonBorderRadius[index].topLeft = 0
-        this.buttonBorderRadius[index].topRight = 0
-        this.buttonBorderRadius[index].bottomLeft = 0
-        this.buttonBorderRadius[index].bottomRight = 0
-      }
-    }
+    this.buttonBorderRadius = borderRadiusArray
   }
 
   build() {
     if (this.optionsArray.length > 1) {
-      Row() {
+      Row({ space: 1 }) {
         ForEach(this.optionsArray, (item, index) => {
           if (index < MAX_ITEM_COUNT) {
             Stack() {
               PressAndHoverEffect({
                 pressIndex: index,
                 colorProperty: this.hoverColorArray[index],
-                pressOpacity: this.pressOpacityArray[index]
+                press: this.pressArray[index]
               })
               SegmentButtonItem({
                 index: index,
@@ -532,8 +553,8 @@ struct SegmentButtonItemArrayComponent {
                   let maxHeight = Math.max(...this.buttonItemsRealHeight)
                   for (let index = 0; index < this.buttonItemsSize.length; index++) {
                     this.buttonItemsSize[index] = { width: this.buttonItemsSize[index].width, height: maxHeight }
-                    this.calculateBorderRadius(index)
                   }
+                  this.calculateBorderRadius()
                 })
             }
             .borderRadius(this.buttonBorderRadius[index])
@@ -554,8 +575,7 @@ struct SegmentButtonItemArrayComponent {
                 animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                   this.zoomScaleArray[index] = 0.95
                 })
-              }
-              else if (event.type === TouchType.Up) {
+              } else if (event.type === TouchType.Up) {
                 animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                   this.zoomScaleArray[index] = 1
                 })
@@ -567,8 +587,7 @@ struct SegmentButtonItemArrayComponent {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
                   this.zoomScaleArray[index] = 1.05
                 })
-              }
-              else {
+              } else {
                 this.hoverColorArray[index].hoverColor = Color.Transparent
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
                   this.zoomScaleArray[index] = 1
@@ -582,7 +601,7 @@ struct SegmentButtonItemArrayComponent {
                     this.zoomScaleArray[index] = 1
                   })
                   animateTo({ duration: 100, curve: Curve.Sharp }, () => {
-                    this.pressOpacityArray[index] = 0.1
+                    this.pressArray[index] = true
                   })
                   break;
                 case MouseAction.Release:
@@ -590,22 +609,15 @@ struct SegmentButtonItemArrayComponent {
                     this.zoomScaleArray[index] = 1.05
                   })
                   animateTo({ duration: 100, curve: Curve.Sharp }, () => {
-                    this.pressOpacityArray[index] = 0
+                    this.pressArray[index] = false
                   })
                   break;
               }
             })
           }
-          if ((index < this.optionsArray.length - 1) && this.options.multiply) {
-            Divider()
-              .vertical(true)
-              .color($r('sys.color.ohos_id_color_list_separator'))
-              .strokeWidth(1)
-              .height(this.buttonItemsSize[0].height === void 0 ? 0 : this.buttonItemsSize[0].height)
-          }
         })
       }
-      .padding(this.options.buttonMargin)
+      .padding(this.options.componentPadding)
       .onAreaChange((_, newValue) => {
         this.componentSize = { width: newValue.width, height: newValue.height }
       })
@@ -687,10 +699,18 @@ export struct SegmentButton {
 
   build() {
     Stack() {
-      Stack()
-        .size(this.componentSize)
-        .backgroundColor(this.options.backgroundColor)
-        .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / 2)
+      if (this.options.type === 'capsule' && this.options.multiply) {
+        MultiSelectBackground({
+          optionsArray: this.options.buttons,
+          options: this.options,
+        })
+      } else {
+        Stack()
+          .size(this.componentSize)
+          .backgroundColor(this.options.backgroundColor)
+          .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / 2)
+          .foregroundBlurStyle(BlurStyle.BACKGROUND_THICK, { colorMode: ThemeColorMode.LIGHT })
+      }
       Stack() {
         if (this.options.type === 'capsule' && this.options.multiply) {
           MultiSelectItemArray({
