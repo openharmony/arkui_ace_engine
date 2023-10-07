@@ -35,6 +35,10 @@ public:
     void OnScrollStart() const;
     bool OnScroll(float offset) const;
     void OnScrollEnd(float speed) const;
+    bool InCoordination()
+    {
+        return !!refreshNode_;
+    }
 
 private:
     RefPtr<FrameNode> FindRefreshNode() const;
