@@ -43,6 +43,7 @@ const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
+constexpr double FRICTION_VELOCITY_THRESHOLD = 60.0;
 constexpr double VELOCITY_SCALE = 1.0;
 constexpr double MAX_VELOCITY = 800000.0;
 constexpr double MIN_VELOCITY = -800000.0;
@@ -50,6 +51,7 @@ constexpr double ADJUSTABLE_VELOCITY = 3000.0;
 #else
 constexpr double DISTANCE_EPSILON = 1.0;
 constexpr double FRICTION = 0.9;
+constexpr double FRICTION_VELOCITY_THRESHOLD = 100.0;
 constexpr double VELOCITY_SCALE = 0.8;
 constexpr double MAX_VELOCITY = 5000.0;
 constexpr double MIN_VELOCITY = -5000.0;
@@ -663,9 +665,10 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         LOGD("[scrollMotion]position(%{public}lf), velocity(%{public}lf)", mainPosition, correctVelocity);
         double friction = friction_ > 0 ? friction_ : sFriction_;
         if (motion_) {
-            motion_->Reset(friction, mainPosition, correctVelocity);
+            motion_->Reset(friction, mainPosition, correctVelocity, FRICTION_VELOCITY_THRESHOLD);
         } else {
-            motion_ = AceType::MakeRefPtr<FrictionMotion>(friction, mainPosition, correctVelocity);
+            motion_ = AceType::MakeRefPtr<FrictionMotion>(
+                friction, mainPosition, correctVelocity, FRICTION_VELOCITY_THRESHOLD);
             motion_->AddListener([weakScroll = AceType::WeakClaim(this)](double value) {
                 auto scroll = weakScroll.Upgrade();
                 if (scroll) {

@@ -24,6 +24,7 @@ constexpr int32_t STOP_DURATION = 2000; // 2000ms
 constexpr float KEY_TIME_START = 0.0f;
 constexpr float KEY_TIME_MIDDLE = 0.7f;
 constexpr float KEY_TIME_END = 1.0f;
+constexpr double FRICTION_VELOCITY_THRESHOLD = 100.0;
 } // namespace
 
 void ScrollBarPattern::OnAttachToFrameNode()
@@ -335,9 +336,9 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     }
     frictionPosition_ = 0.0;
     if (frictionMotion_) {
-        frictionMotion_->Reset(friction_, 0, velocity);
+        frictionMotion_->Reset(friction_, 0, velocity, FRICTION_VELOCITY_THRESHOLD);
     } else {
-        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity);
+        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity, FRICTION_VELOCITY_THRESHOLD);
         frictionMotion_->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
             auto scrollBar = weakBar.Upgrade();
             CHECK_NULL_VOID_NOLOG(scrollBar);
