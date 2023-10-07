@@ -176,21 +176,30 @@ public:
         }
         auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, paint);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, paint);
+        auto geometryNode = host->GetGeometryNode();
+        auto frameOffset = geometryNode->GetFrameOffset();
+        auto frameSize = geometryNode->GetFrameSize();
         if (layoutProperty->GetShowErrorTextValue(false) && errorParagraph_) {
-            auto host = GetHost();
-            CHECK_NULL_RETURN(host, paint);
-            auto geometryNode = host->GetGeometryNode();
-            auto frameOffset = geometryNode->GetFrameOffset();
-            auto frameSize = geometryNode->GetFrameSize();
             auto contentOffset = geometryNode->GetContentOffset();
-            float errorTextWidth = 0.0f;
 #ifndef USE_GRAPHIC_TEXT_GINE
-            errorTextWidth = errorParagraph_->GetLongestLine();
+            auto errorTextWidth = errorParagraph_->GetLongestLine();
 #else
-            errorTextWidth = errorParagraph_->GetActualWidth();
+            auto errorTextWidth = errorParagraph_->GetActualWidth();
 #endif
             RectF boundsRect(contentOffset.GetX(), frameOffset.GetY(), errorTextWidth,
                 frameSize.Height() + ERROR_TEXT_BOUNDSRECT_MARGIN);
+            textFieldOverlayModifier->SetBoundsRect(boundsRect);
+        } else {
+            if (NearEqual(maxFrameOffsetY_, 0.0f) && NearEqual(maxFrameHeight_, 0.0f)) {
+                maxFrameOffsetY_ = frameOffset.GetY();
+                maxFrameHeight_ = frameSize.Height();
+            }
+            maxFrameOffsetY_ = LessOrEqual(frameOffset.GetY(), maxFrameOffsetY_)
+                ? frameOffset.GetY() : maxFrameOffsetY_ - frameOffset.GetY();
+            maxFrameHeight_ = LessOrEqual(frameSize.Height(), maxFrameHeight_) ? maxFrameHeight_ : frameSize.Height();
+            RectF boundsRect(frameOffset.GetX(), maxFrameOffsetY_, frameSize.Width(), maxFrameHeight_);
             textFieldOverlayModifier->SetBoundsRect(boundsRect);
         }
         return paint;
@@ -1333,6 +1342,8 @@ private:
     Color underlineColor_;
     bool scrollBarVisible_ = false;
     bool isCounterIdealheight_ = false;
+    float maxFrameOffsetY_ = 0.0f;
+    float maxFrameHeight_ = 0.0f;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
