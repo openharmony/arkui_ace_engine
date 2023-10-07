@@ -310,11 +310,11 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FilterInvalidPointerItem(pointerEvent);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     auto udegree = CalculateTranslateDegree(host->GetId());
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
-    FilterInvalidPointerItem(pointerEvent);
     SetWindowSceneConsumed(pointerEvent->GetPointerAction());
     DispatchPointerEvent(pointerEvent);
     if (SystemProperties::GetDebugEnabled()) {
@@ -343,7 +343,7 @@ void WindowPattern::FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerE
             LOGE("get pointer:%{public}d item failed", id);
             continue;
         }
-        const NG::PointF point { static_cast<float>(item.GetWindowX()), static_cast<float>(item.GetWindowY()) };
+        const NG::PointF point { static_cast<float>(item.GetDisplayX()), static_cast<float>(item.GetDisplayY()) };
         if (host->IsOutOfTouchTestRegion(point, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
             pointerEvent->RemovePointerItem(id);
         }
