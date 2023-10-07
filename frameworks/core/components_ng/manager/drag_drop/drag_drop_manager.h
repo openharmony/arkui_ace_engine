@@ -93,6 +93,8 @@ public:
     {
         summaryMap_ = summaryMap;
     }
+    void ResetRecordSize(uint32_t recordSize = 0);
+    uint32_t GetRecordSize() const;
     Rect GetDragWindowRect(const Point& point);
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
     void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
@@ -198,6 +200,7 @@ private:
     bool isDragCancel_ = false;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::map<std::string, int64_t> summaryMap_;
+    uint32_t recordSize_ = 0;
 #endif // ENABLE_DRAG_FRAMEWORK
     int64_t currentId_ = -1;
 
