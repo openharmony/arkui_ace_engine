@@ -728,7 +728,15 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& s
             return startOffset;
         }
     }
-    return startOffset + textPaintOffset - rootOffset;
+
+    auto caretOffset = startOffset + textPaintOffset - rootOffset;
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, caretOffset);
+    const auto& contentSize = geometryNode->GetContent()->GetRect().GetSize();
+    CHECK_NULL_RETURN(overlayMod_, caretOffset);
+    float caretWidth = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretWidth();
+    caretOffset.SetX(std::clamp(caretOffset.GetX(), 0.0f, static_cast<float>(contentSize.Width()) - caretWidth));
+    return caretOffset;
 }
 
 bool RichEditorPattern::SetCaretPosition(int32_t pos)
@@ -1684,20 +1692,6 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     bool isLineSeparator = false;
     if (insertValueTemp == std::string("\n")) {
         isLineSeparator = true;
-    }
-
-    if (insertValueTemp == std::string(" ")) {
-        CHECK_NULL_VOID(overlayMod_);
-        auto caretOffset = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretOffset();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        const auto& contentSize = geometryNode->GetContent()->GetRect().GetSize();
-        if (caretOffset.GetX() >= contentSize.Width()) {
-            LOGD("replace space with newline character");
-            insertValueTemp = std::string("\n ");
-        }
     }
 
     auto isInsert = BeforeIMEInsertValue(insertValueTemp);
