@@ -255,6 +255,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("menus", &JSNavigation::SetMenus);
     JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
     JSClass<JSNavigation>::StaticMethod("onTitleModeChange", &JSNavigation::SetOnTitleModeChanged);
+    JSClass<JSNavigation>::StaticMethod("onNavigationModeChange", &JSNavigation::SetOnNavigationModeChange);
     JSClass<JSNavigation>::StaticMethod("mode", &JSNavigation::SetUsrNavigationMode);
     JSClass<JSNavigation>::StaticMethod("navBarWidth", &JSNavigation::SetNavBarWidth);
     JSClass<JSNavigation>::StaticMethod("minContentWidth", &JSNavigation::SetMinContentWidth);
@@ -656,5 +657,27 @@ void JSNavigation::SetNavDestination(const JSCallbackInfo& info)
         jsNavigationStack->SetJSExecutionContext(info.GetExecutionContext());
         jsNavigationStack->SetNavDestBuilderFunc(JSRef<JSFunc>::Cast(builder));
     }
+}
+
+void JSNavigation::SetOnNavigationModeChange(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        info.ReturnSelf();
+        return;
+    }
+    auto onModeChangeCallback =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onModeChange = [execCtx = info.GetExecutionContext(),
+        func = std::move(onModeChangeCallback)](NG::NavigationMode mode) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("OnNavigationModeChange");
+        JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(static_cast<int8_t>(mode)));
+        func->ExecuteJS(1, &param);
+    };
+    NavigationModel::GetInstance()->SetOnNavigationModeChange(std::move(onModeChange));
+    info.ReturnSelf();
 }
 } // namespace OHOS::Ace::Framework

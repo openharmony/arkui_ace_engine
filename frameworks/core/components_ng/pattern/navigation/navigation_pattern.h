@@ -266,6 +266,8 @@ public:
         return onStateChangeMap_;
     }
 
+    void OnNavigationModeChange(bool modeChange);
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);

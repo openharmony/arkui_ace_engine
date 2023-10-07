@@ -58,6 +58,7 @@ public:
     void SetNavDestination(std::function<void(std::string)>&& builder) override;
     RefPtr<NG::NavigationStack> GetNavigationStack() override;
     void SetMenuCount(int32_t menuCount) override;
+    void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& modeChange) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_NAVIGATION_MODEL_IMPL_H

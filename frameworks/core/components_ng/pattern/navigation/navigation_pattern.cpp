@@ -383,6 +383,19 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
     }
 }
 
+void NavigationPattern::OnNavigationModeChange(bool modeChange)
+{
+    if (!modeChange) {
+        LOGD("navigation mode doesn't change");
+        return;
+    }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireNavigationModeChangeEvent(navigationMode_);
+}
+
 bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -398,6 +411,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto oldMode = navigationMode_;
     navigationMode_ = navigationLayoutAlgorithm->GetNavigationMode();
     OnNavBarStateChange(oldMode != navigationMode_);
+    OnNavigationModeChange(oldMode != navigationMode_);
     auto curTopNavPath = navigationStack_->GetTopNavPath();
     if (curTopNavPath.has_value()) {
         auto context = PipelineContext::GetCurrentContext();
