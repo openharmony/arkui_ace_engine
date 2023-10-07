@@ -876,14 +876,34 @@ public:
         return isAppWindow_;
     }
 
-    void SetEnableImplicitAnimation(bool enableImplicitAnimation)
+    void SetFormAnimationStartTime(int64_t time)
     {
-        enableImplicitAnimation_ = enableImplicitAnimation;
+        formAnimationStartTime_ = time;
     }
 
-    bool GetEnableImplicitAnimation() const
+    int64_t GetFormAnimationStartTime() const
     {
-        return enableImplicitAnimation_;
+        return formAnimationStartTime_;
+    }
+
+    void SetIsFormAnimation(bool isFormAnimation)
+    {
+        isFormAnimation_ = isFormAnimation;
+    }
+
+    bool IsFormAnimation() const
+    {
+        return isFormAnimation_;
+    }
+
+    void SetFormAnimationFinishCallback(bool isFormAnimationFinishCallback)
+    {
+        isFormAnimationFinishCallback_ = isFormAnimationFinishCallback;
+    }
+
+    bool IsFormAnimationFinishCallback() const
+    {
+        return isFormAnimationFinishCallback_;
     }
 
     // restore
@@ -1038,7 +1058,9 @@ private:
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
-    bool enableImplicitAnimation_ = true;
+    bool isFormAnimationFinishCallback_ = false;
+    int64_t formAnimationStartTime_ = 0;
+    bool isFormAnimation_ = false;
     bool isReloading_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);

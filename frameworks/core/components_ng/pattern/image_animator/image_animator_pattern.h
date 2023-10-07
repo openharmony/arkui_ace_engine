@@ -80,32 +80,6 @@ public:
         status_ = status;
     }
 
-    void SetDuration(int32_t duration)
-    {
-        auto finalDuration = durationTotal_ > 0 ? durationTotal_ : duration;
-        if (animator_->GetDuration() == finalDuration) {
-            animator_->RemoveRepeatListener(repeatCallbackId_);
-            return;
-        }
-        if (animator_->GetStatus() == Animator::Status::IDLE || animator_->GetStatus() == Animator::Status::STOPPED) {
-            animator_->SetDuration(finalDuration);
-            animator_->RemoveRepeatListener(repeatCallbackId_);
-            return;
-        }
-        // if animator is running or paused, duration will work next time
-        animator_->RemoveRepeatListener(repeatCallbackId_);
-        repeatCallbackId_ = animator_->AddRepeatListener([weak = WeakClaim(this), finalDuration]() {
-            auto imageAnimator = weak.Upgrade();
-            CHECK_NULL_VOID(imageAnimator);
-            imageAnimator->animator_->SetDuration(finalDuration);
-        });
-    }
-
-    void SetIteration(int32_t iteration)
-    {
-        animator_->SetIteration(iteration);
-    }
-
     void SetFillMode(FillMode fillMode)
     {
         animator_->SetFillMode(fillMode);
@@ -137,6 +111,9 @@ public:
         }
     }
 
+    void SetDuration(int32_t duration);
+    void SetIteration(int32_t iteration);
+
 private:
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();
@@ -151,6 +128,10 @@ private:
     void AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode);
     static bool IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const std::string& src);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
+    bool IsFormRender();
+    void UpdateFormDurationByRemainder();
+    void ResetFormAnimationStartTime();
+    void ResetFormAnimationFlag();
 
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
@@ -165,6 +146,10 @@ private:
     bool imagesChangedFlag_ = false;
     bool firstUpdateEvent_ = true;
     bool isLayouted_ = false;
+    int64_t formAnimationStartTime_ = 0;
+    int32_t formAnimationRemainder_ = 0;
+    bool isFormAnimationStart_ = true;
+    bool isFormAnimationEnd_ = false;
 };
 
 } // namespace OHOS::Ace::NG
