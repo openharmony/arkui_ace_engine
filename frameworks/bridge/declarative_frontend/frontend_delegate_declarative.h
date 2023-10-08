@@ -26,6 +26,7 @@
 #include "base/utils/measure_util.h"
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
@@ -183,7 +184,8 @@ public:
     double MeasureText(const MeasureContext& context) override;
     Size MeasureTextSize(const MeasureContext& context) override;
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,

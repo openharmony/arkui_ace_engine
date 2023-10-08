@@ -87,7 +87,9 @@ public:
     void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
     const RefPtr<Subwindow>& GetCurrentDialogWindow();
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom);
+    void ClearToastInSubwindow();
+    void ShowToast(
+        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode);
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
