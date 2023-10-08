@@ -99,6 +99,7 @@ ohos_unittest("form_render_test") {
     "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "form_fwk:form_manager",
     "graphic_2d:surface",
     "hilog:libhilog",
