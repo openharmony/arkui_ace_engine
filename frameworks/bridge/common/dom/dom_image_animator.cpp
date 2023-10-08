@@ -37,7 +37,6 @@ DOMImageAnimator::DOMImageAnimator(NodeId nodeId, const std::string& nodeName) :
 bool DOMImageAnimator::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
     if (!imageAnimator_) {
-        LOGE("SetSpecializedAttr failed, The imageAnimator is not created.");
         return false;
     }
     if (attr.first == DOM_ITERATION) {
@@ -81,12 +80,10 @@ bool DOMImageAnimator::SetSpecializedAttr(const std::pair<std::string, std::stri
 bool DOMImageAnimator::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
     if (!imageAnimator_) {
-        LOGE("AddSpecializedEvent failed, The imageAnimator is not created.");
         return false;
     }
     const auto& controller = imageAnimator_->GetImageAnimatorController();
     if (!controller) {
-        LOGE("AddSpecializedEvent failed, controller is null.");
         return false;
     }
     if (event == DOM_IMAGE_ANIMATOR_START) {
@@ -113,12 +110,10 @@ bool DOMImageAnimator::AddSpecializedEvent(int32_t pageId, const std::string& ev
 void DOMImageAnimator::CallSpecializedMethod(const std::string& method, const std::string& args)
 {
     if (!imageAnimator_) {
-        LOGE("CallSpecializedMethod failed, The imageAnimator is not created.");
         return;
     }
     const auto& controller = imageAnimator_->GetImageAnimatorController();
     if (!controller) {
-        LOGE("CallSpecializedMethod failed, controller is null.");
         return;
     }
     controller->CallAnimationFunc(method);
@@ -127,12 +122,10 @@ void DOMImageAnimator::CallSpecializedMethod(const std::string& method, const st
 const char* DOMImageAnimator::GetState() const
 {
     if (!imageAnimator_) {
-        LOGE("GetState failed, The imageAnimator is not created.");
         return STATE_STOPPED;
     }
     const auto& controller = imageAnimator_->GetImageAnimatorController();
     if (!controller) {
-        LOGE("GetState failed, controller is null.");
         return STATE_STOPPED;
     }
     auto currentStatus = controller->CallAnimatorGetStatusFunc();
@@ -149,8 +142,6 @@ const char* DOMImageAnimator::GetState() const
 void DOMImageAnimator::PrepareSpecializedComponent()
 {
     if (!imageAnimator_) {
-        LOGE("The imageAnimator is not created.");
-        EventReport::SendComponentException(ComponentExcepType::IMAGE_ANIMATOR_ERR);
         return;
     }
     if (declaration_) {

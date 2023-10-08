@@ -149,13 +149,12 @@ void DOMInput::CallSpecializedMethod(const std::string& method, const std::strin
     if (method == DOM_INPUT_METHOD_SHOW_ERROR) {
         std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
         if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != METHOD_SHOW_ERROR_ARGS_SIZE) {
-            LOGE("parse args error");
+            LOGW("Input parse args error");
             return;
         }
 
         std::unique_ptr<JsonValue> error = argsValue->GetArrayItem(0)->GetValue("error");
         if (!error || !error->IsString()) {
-            LOGE("get error text failed");
             return;
         }
         std::string errorText = error->GetString();
@@ -204,7 +203,6 @@ void DOMInput::PrepareCheckedListener()
         auto checkableChangeCallback = [weak = AceType::WeakClaim(this)](const std::string& checked) {
             auto domNode = weak.Upgrade();
             if (!domNode) {
-                LOGE("get dom node failed!");
                 return;
             }
             bool isChecked = false;
@@ -590,7 +588,7 @@ void DOMInput::HandlePadding(RefPtr<Component> component, RefPtr<BoxComponent> b
 {
     auto checkable = AceType::DynamicCast<CheckableComponent>(component);
     if (!checkable || !boxComponent) {
-        LOGE("fail to set child attr due to checkbox component is null");
+        LOGW("fail to set child attr due to checkbox component is empty");
         return;
     }
     // Padding is set in radio specially so that it can respond click event.

@@ -112,12 +112,11 @@ void DOMStepper::CallSpecializedMethod(const std::string& method, const std::str
     if (method == DOM_STEPPER_SET_RIGHT_BUTTON_STATUS) {
         auto controller = stepperComponent_->GetStepperController();
         if (!controller) {
-            LOGE("get controller failed");
             return;
         }
         std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
         if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != METHOD_TO_ARGS_SIZE) {
-            LOGE("parse args error");
+            LOGW("stepper parse args error");
             return;
         }
         std::unique_ptr<JsonValue> valueParams = argsValue->GetArrayItem(0);
@@ -141,7 +140,6 @@ void DOMStepper::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
     auto domStepperItem = AceType::DynamicCast<DOMStepperItem>(child);
     if (!domStepperItem) {
-        LOGE("child is not stepper item, add to stepper failed.");
         return;
     }
     auto childIndex = domStepperItem->GetItemIndex();
@@ -157,7 +155,6 @@ void DOMStepper::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 void DOMStepper::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 {
     if (!stepperComponent_ || !child) {
-        LOGE("DOMStepper OnChildNodeRemoved listComponent_ is null");
         return;
     }
     stepperComponent_->RemoveChild(child->GetRootComponent());
@@ -172,7 +169,6 @@ void DOMStepper::ResetInitializedStyle()
 {
     auto theme = GetTheme<StepperTheme>();
     if (!theme) {
-        LOGE("Stepper theme is null");
         return;
     }
     stepperComponent_->SetDefaultPaddingStart(theme->GetDefaultPaddingStart());

@@ -53,9 +53,6 @@ ImageObjectPosition ImageObjectPosition(const std::string& value)
 void DOMImage::InitializeStyle()
 {
     theme_ = GetTheme<ImageTheme>();
-    if (!theme_) {
-        LOGW("ImageTheme is null");
-    }
 }
 
 DOMImage::DOMImage(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)

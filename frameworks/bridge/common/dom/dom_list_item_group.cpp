@@ -38,7 +38,6 @@ bool DOMListItemGroup::SetSpecializedAttr(const std::pair<std::string, std::stri
 {
     auto parent = AceType::DynamicCast<DOMList>(parentNode_.Upgrade());
     if (!parent) {
-        LOGW("DOMListItemGroup parent is null");
         return false;
     }
     if (attr.first == DOM_LISTITEM_TYPE) {
@@ -64,7 +63,6 @@ void DOMListItemGroup::SetCardThemeAttrs()
 {
     cardTheme_ = GetTheme<CardTheme>();
     if (!cardTheme_) {
-        LOGE("cardTheme is null");
         EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
@@ -173,15 +171,12 @@ void DOMListItemGroup::PrepareSpecializedComponent()
     auto domList = AceType::DynamicCast<DOMList>(parentNode_.Upgrade());
     if (domList) {
         listItemGroupComponent_->SetDirection(domList->GetDirection());
-    } else {
-        LOGW("item group has a wrong parent");
     }
 }
 
 void DOMListItemGroup::ResetInitializedStyle()
 {
     if (!listItemGroupComponent_) {
-        LOGE("list item is null, reset style failed.");
         EventReport::SendComponentException(ComponentExcepType::LIST_ITEM_ERR);
         return;
     }
