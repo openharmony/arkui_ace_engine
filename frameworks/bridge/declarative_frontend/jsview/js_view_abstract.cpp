@@ -2492,8 +2492,8 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
     }
 
     if (preview->IsNumber()) {
-        if (preview->ToNumber<int32_t>() == 0) {
-            menuParam.previewMode = MenuPreviewMode::NONE;
+        if (preview->ToNumber<int32_t>() == 1) {
+            menuParam.previewMode = MenuPreviewMode::IMAGE;
         }
     } else {
         auto previewObj = JSRef<JSObject>::Cast(preview);
@@ -5267,7 +5267,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     };
 
     NG::MenuParam menuParam;
-    menuParam.previewMode = MenuPreviewMode::IMAGE;
+    menuParam.previewMode = MenuPreviewMode::NONE;
     std::function<void()> previewBuildFunc = nullptr;
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
