@@ -21,6 +21,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
+#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/search_model_impl.h"
 #include "core/components/common/layout/constants.h"
@@ -117,7 +118,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
     std::optional<std::string> key;
     std::optional<std::string> tip;
     std::optional<std::string> src;
-    JSSearchController* jsController = nullptr;
+    JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
@@ -150,7 +151,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
         }
         auto controllerObj = param->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
+            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
     auto controller = SearchModel::GetInstance()->Create(key, tip, src);
