@@ -310,7 +310,6 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    FilterInvalidPointerItem(pointerEvent);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     auto udegree = CalculateTranslateDegree(host->GetId());
