@@ -15,26 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_controller.h"
 
-#include "base/geometry/dimension.h"
-#include "base/log/ace_scoring_log.h"
-#include "base/utils/utils.h"
-#include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
-#include "bridge/declarative_frontend/jsview/js_container_base.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/text_field_model_impl.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/pipeline/pipeline_base.h"
-
 namespace OHOS::Ace::Framework {
 void JSTextController::JSBind(BindingTarget globalObj)
 {
