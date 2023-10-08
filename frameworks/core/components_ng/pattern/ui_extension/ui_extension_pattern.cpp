@@ -645,13 +645,13 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->transferAbilityResultFunc_ =
         [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor](int32_t code, const AAFwk::Want& want) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->state_ = AbilityState::DESTRUCTION;
-            taskExecutor->PostTask([pattern, instanceId, code, want]() {
+            taskExecutor->PostTask([weak, instanceId, code, want]() {
                 ContainerScope scope(instanceId);
-                LOGI("UIExtension OnResult called");
-                if (pattern && pattern->onResultCallback_) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (pattern && (pattern->state_ != AbilityState::DESTRUCTION) && pattern->onResultCallback_) {
+                    LOGI("UIExtension OnResult called");
+                    pattern->state_ = AbilityState::DESTRUCTION;
                     pattern->onResultCallback_(code, want);
                 }
             }, TaskExecutor::TaskType::UI);
