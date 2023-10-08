@@ -10301,4 +10301,100 @@ HWTEST_F(TabsTestNg, TabBarPatternSetEdgeEffect003, TestSize.Level1)
     tabBarPattern->SetEdgeEffect(gestureHub);
     EXPECT_NE(tabBarPattern, nullptr);
 }
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmUpdateChildConstraint002
+ * @tc.desc: test UpdateChildConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build tabBarNode and ideaSize.
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    LayoutConstraintF childConstraint = LayoutConstraintF();
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarProperty, nullptr);
+    tabBarProperty->UpdateTabBarMode(TabBarMode::FIXED);
+    float width = 1.0;
+    float height = 2.0;
+    auto ideaSize = SizeF(width, height);
+    int32_t childCount = 1;
+    auto axis = Axis::FREE;
+    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+
+    /**
+     * @tc.steps: step2. call UpdateChildConstraint function.
+     * @tc.expected: The function is run ok.
+     */
+    tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis);
+    EXPECT_EQ(tabBarProperty->GetTabBarMode().value(), TabBarMode::FIXED);
+    tabBarProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis);
+    EXPECT_EQ(tabBarProperty->GetTabBarMode().value(), TabBarMode::SCROLLABLE);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmCheckMarqueeForScrollable001
+ * @tc.desc: Test the CheckMarqueeForScrollable function in the TabBarLayoutAlgorithm class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCheckMarqueeForScrollable001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel.
+     */
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabbarLayoutAlgorithm =
+        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarNode->GetPattern<TabBarPattern>()->CreateLayoutAlgorithm());
+    ASSERT_NE(tabbarLayoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper.GetLayoutProperty());
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: steps2. Create different input parameters.
+     */
+    layoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
+    int32_t childCount = 0;
+    BarGridColumnOptions option;
+    option.lg = 2;
+    instance.SetBarGridAlign(option);
+
+    /**
+     * @tc.steps: steps3. CheckMarqueeForScrollable.
+     * @tc.expected: steps3. Check the results of CheckMarqueeForScrollable under different conditions.
+     */
+    tabbarLayoutAlgorithm->CheckMarqueeForScrollable(&layoutWrapper, childCount);
+    EXPECT_NE(tabbarLayoutAlgorithm, nullptr);
+    childCount = 1;
+    tabbarLayoutAlgorithm->CheckMarqueeForScrollable(&layoutWrapper, childCount);
+    EXPECT_NE(tabbarLayoutAlgorithm, nullptr);
+}
 } // namespace OHOS::Ace::NG
