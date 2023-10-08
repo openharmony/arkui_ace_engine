@@ -13,36 +13,36 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_text_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 
 namespace OHOS::Ace::Framework {
-void JSTextController::JSBind(BindingTarget globalObj)
+void JSTextEditableController::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSTextController>::Declare("TextController");
-    JSClass<JSTextController>::Method("caretPosition", &JSTextController::CaretPosition);
-    JSClass<JSTextController>::Method("setTextSelection", &JSTextController::SetTextSelection);
-    JSClass<JSTextController>::CustomMethod("getTextContentRect", &JSTextController::GetTextContentRect);
-    JSClass<JSTextController>::CustomMethod("getTextContentLineCount",
-        &JSTextController::GetTextContentLinesNum);
-    JSClass<JSTextController>::Method("stopEditing", &JSTextController::StopEditing);
-    JSClass<JSTextController>::Bind(globalObj, JSTextController::Constructor, JSTextController::Destructor);
+    JSClass<JSTextEditableController>::Declare("TextController");
+    JSClass<JSTextEditableController>::Method("caretPosition", &JSTextEditableController::CaretPosition);
+    JSClass<JSTextEditableController>::Method("setTextSelection", &JSTextEditableController::SetTextSelection);
+    JSClass<JSTextEditableController>::CustomMethod("getTextContentRect", &JSTextEditableController::GetTextContentRect);
+    JSClass<JSTextEditableController>::CustomMethod("getTextContentLineCount",
+        &JSTextEditableController::GetTextContentLinesNum);
+    JSClass<JSTextEditableController>::Method("stopEditing", &JSTextEditableController::StopEditing);
+    JSClass<JSTextEditableController>::Bind(globalObj, JSTextEditableController::Constructor, JSTextEditableController::Destructor);
 }
 
-void JSTextController::Constructor(const JSCallbackInfo& args)
+void JSTextEditableController::Constructor(const JSCallbackInfo& args)
 {
-    auto scroller = Referenced::MakeRefPtr<JSTextController>();
+    auto scroller = Referenced::MakeRefPtr<JSTextEditableController>();
     scroller->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(scroller));
 }
 
-void JSTextController::Destructor(JSTextController* scroller)
+void JSTextEditableController::Destructor(JSTextEditableController* scroller)
 {
     if (scroller != nullptr) {
         scroller->DecRefCount();
     }
 }
 
-void JSTextController::CaretPosition(int32_t caretPosition)
+void JSTextEditableController::CaretPosition(int32_t caretPosition)
 {
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
@@ -50,7 +50,7 @@ void JSTextController::CaretPosition(int32_t caretPosition)
     }
 }
 
-void JSTextController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
+void JSTextEditableController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
 {
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
@@ -58,7 +58,7 @@ void JSTextController::SetTextSelection(int32_t selectionStart, int32_t selectio
     }
 }
 
-JSRef<JSObject> JSTextController::CreateRectangle(const Rect& info)
+JSRef<JSObject> JSTextEditableController::CreateRectangle(const Rect& info)
 {
     JSRef<JSObject> rectObj = JSRef<JSObject>::New();
     rectObj->SetProperty<double>("x", info.Left());
@@ -68,7 +68,7 @@ JSRef<JSObject> JSTextController::CreateRectangle(const Rect& info)
     return rectObj;
 }
 
-void JSTextController::GetTextContentRect(const JSCallbackInfo& info)
+void JSTextEditableController::GetTextContentRect(const JSCallbackInfo& info)
 {
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
@@ -76,11 +76,11 @@ void JSTextController::GetTextContentRect(const JSCallbackInfo& info)
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         info.SetReturnValue(rect);
     } else {
-        LOGE("GetTextContentRect: The JSTextController is NULL");
+        LOGE("GetTextContentRect: The JSTextEditableController is NULL");
     }
 }
 
-void JSTextController::GetTextContentLinesNum(const JSCallbackInfo& info)
+void JSTextEditableController::GetTextContentLinesNum(const JSCallbackInfo& info)
 {
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
@@ -89,11 +89,11 @@ void JSTextController::GetTextContentLinesNum(const JSCallbackInfo& info)
         auto textLines = JSRef<JSVal>::Make(linesNum);
         info.SetReturnValue(textLines);
     } else {
-        LOGE("GetTextContentRect: The JSTextController is NULL");
+        LOGE("GetTextContentRect: The JSTextEditableController is NULL");
     }
 }
 
-void JSTextController::StopEditing()
+void JSTextEditableController::StopEditing()
 {
     auto controller = controllerWeak_.Upgrade();
     if (controller) {

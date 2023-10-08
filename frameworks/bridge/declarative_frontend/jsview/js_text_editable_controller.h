@@ -22,14 +22,14 @@
 #include "frameworks/core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::Framework {
-class JSTextController final : public Referenced {
+class JSTextEditableController final : public Referenced {
 public:
-    JSTextController() = default;
-    ~JSTextController() override = default;
+    JSTextEditableController() = default;
+    ~JSTextEditableController() override = default;
 
     static void JSBind(BindingTarget globalObj);
     static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSTextController* scroller);
+    static void Destructor(JSTextEditableController* scroller);
     void CaretPosition(int32_t caretPosition);
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void StopEditing();
@@ -44,7 +44,7 @@ private:
     JSRef<JSObject> CreateRectangle(const Rect& info);
 
     WeakPtr<TextFieldControllerBase> controllerWeak_;
-    ACE_DISALLOW_COPY_AND_MOVE(JSTextController);
+    ACE_DISALLOW_COPY_AND_MOVE(JSTextEditableController);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTCONTROLLER_H
