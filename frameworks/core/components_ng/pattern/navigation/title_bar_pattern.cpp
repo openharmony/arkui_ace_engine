@@ -127,7 +127,7 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
     }
     if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||
         currentMaxLine != titleLayoutProperty->GetMaxLinesValue(0)) {
-        titleLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
     titleNode->MarkModifyDone();
 }
