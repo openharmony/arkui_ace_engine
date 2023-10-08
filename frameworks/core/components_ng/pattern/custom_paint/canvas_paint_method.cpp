@@ -353,6 +353,60 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
 #endif
 }
 
+void CanvasPaintMethod::DrawPixelMapWithoutGlobalState(
+    const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& canvasImage)
+{
+#ifndef USE_ROSEN_DRAWING
+    // get skImage form pixelMap
+    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
+
+    // Step2: Create SkImage and draw it, using gpu or cpu
+    sk_sp<SkImage> image =
+        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
+    CHECK_NULL_VOID(image);
+#ifndef NEW_SKIA
+    InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
+
+    switch (canvasImage.flag) {
+        case 0:
+#ifndef NEW_SKIA
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
+#else
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
+#endif
+            break;
+        case 1: {
+            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+#ifndef NEW_SKIA
+            skCanvas_->drawImageRect(image, rect, &imagePaint_);
+#else
+            skCanvas_->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
+#endif
+            break;
+        }
+        case 2: {
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+#ifndef NEW_SKIA
+            skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+#else
+            skCanvas_->drawImageRect(
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
+#endif
+            break;
+        }
+        default:
+            break;
+    }
+#else
+    LOGE("Drawing is not supported");
+#endif
+}
+
 void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
 {
     CHECK_NULL_VOID(imageCache_);
@@ -443,13 +497,117 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(RefPtr<RosenRend
     return imageData;
 }
 
-void CanvasPaintMethod::TransferFromImageBitmap(PaintWrapper* paintWrapper,
-    const RefPtr<OffscreenCanvasPattern>& offscreenCanvas)
+void CanvasPaintMethod::GetImageData(
+    const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Ace::ImageData>& imageData)
 {
+    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    CHECK_NULL_VOID(imageData);
+    auto viewScale = 1.0f;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    viewScale = context->GetViewScale();
+    auto dirtyWidth = std::abs(imageData->dirtyWidth);
+    auto dirtyHeight = std::abs(imageData->dirtyHeight);
+    auto scaledLeft = imageData->dirtyX * viewScale;
+    auto scaledTop = imageData->dirtyY * viewScale;
+    auto dx = 0.0f;
+    auto dy = 0.0f;
+    if (Negative(imageData->dirtyWidth)) {
+        scaledLeft += imageData->dirtyWidth * viewScale;
+    }
+    if (Negative(imageData->dirtyHeight)) {
+        scaledTop += imageData->dirtyHeight * viewScale;
+    }
+    if (Negative(scaledLeft)) {
+        dx = scaledLeft;
+    }
+    if (Negative(scaledTop)) {
+        dy = scaledTop;
+    }
+
+#ifndef USE_ROSEN_DRAWING
+    CHECK_NULL_VOID(rsRecordingCanvas_);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    SkRect rect = SkRect::MakeXYWH(scaledLeft, scaledTop, dirtyWidth * viewScale, dirtyHeight * viewScale);
+    auto pixelMap = imageData->pixelMap;
+    CHECK_NULL_VOID(pixelMap);
+    auto sharedPixelMap = pixelMap->GetPixelMapSharedPtr();
+    auto ret = rosenRenderContext->GetPixelMap(sharedPixelMap, drawCmdList, &rect);
+    if (!ret) {
+        if (!drawCmdList || drawCmdList->GetSize() == 0) {
+            return;
+        }
+        SkBitmap bitmap;
+        SkImageInfo info = SkImageInfo::Make(rect.width(), rect.height(), kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+        bitmap.installPixels(info, pixelMap->GetWritablePixels(), pixelMap->GetRowBytes());
+        SkCanvas canvas(bitmap);
+        canvas.translate(-rect.x(), -rect.y());
+        drawCmdList->Playback(canvas, &rect);
+    }
+#else
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmap tempCache;
+    tempCache.Build(width, height, format);
+
+    RSBitmap currentBitmap;
+    CHECK_NULL_VOID(rsRecordingCanvas_);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = rosenRenderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
+    if (!res || !currentBitmap.IsValid()) {
+        LOGE("Bitmap is empty");
+        return;
+    }
+    LOGE("Drawing is not supported");
+
+    int32_t size = dirtyWidth * dirtyHeight;
+    RSCanvas tempCanvas;
+    tempCanvas.Bind(tempCache);
+    auto srcRect =
+        RSRect(scaledLeft, scaledTop, dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
+    auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
+    RSImage rsImage;
+    rsImage.BuildFromBitmap(currentBitmap);
+    tempCanvas.DrawImageRect(rsImage, srcRect, dstRect, RSSamplingOptions());
+    const uint8_t* pixels = static_cast<const uint8_t*>(tempCache.GetPixels());
+#endif
+}
+
+void CanvasPaintMethod::TransferFromImageBitmap(
+    PaintWrapper* paintWrapper, const RefPtr<OffscreenCanvasPattern>& offscreenCanvas)
+{
+    CHECK_NULL_VOID(offscreenCanvas);
+#ifdef PIXEL_MAP_SUPPORTED
+    OHOS::Media::InitializationOptions options;
+    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
+    auto width = offscreenCanvas->GetWidth();
+    auto height = offscreenCanvas->GetHeight();
+    options.size.width = width;
+    options.size.height = height;
+    options.editable = true;
+    auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
+    if (pixelMap) {
+        std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
+        imageData->pixelMap = pixelMap;
+        imageData->dirtyX = 0.0f;
+        imageData->dirtyY = 0.0f;
+        imageData->dirtyWidth = width;
+        imageData->dirtyHeight = height;
+        offscreenCanvas->GetImageData(imageData);
+        Ace::CanvasImage canvasImage;
+        canvasImage.flag = 0;
+        DrawPixelMapWithoutGlobalState(pixelMap, canvasImage);
+    } else {
+        LOGE("pixelMap create fail");
+    }
+#else
     std::unique_ptr<Ace::ImageData> imageData =
         offscreenCanvas->GetImageData(0, 0, offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
     CHECK_NULL_VOID(imageData);
     PutImageData(paintWrapper, *imageData);
+#endif
 }
 
 void CanvasPaintMethod::FillText(

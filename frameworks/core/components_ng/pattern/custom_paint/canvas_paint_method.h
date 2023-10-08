@@ -63,8 +63,10 @@ public:
     void CloseImageBitmap(const std::string& src);
     void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
-    std::unique_ptr<Ace::ImageData> GetImageData(RefPtr<RosenRenderContext> renderContext,
-        double left, double top, double width, double height);
+    void DrawPixelMapWithoutGlobalState(const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& canvasImage);
+    std::unique_ptr<Ace::ImageData> GetImageData(
+        RefPtr<RosenRenderContext> renderContext, double left, double top, double width, double height);
+    void GetImageData(const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Ace::ImageData>& imageData);
     void TransferFromImageBitmap(PaintWrapper* paintWrapper, const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
     std::string ToDataURL(RefPtr<RosenRenderContext> renderContext, const std::string& args);
 #ifndef USE_ROSEN_DRAWING
