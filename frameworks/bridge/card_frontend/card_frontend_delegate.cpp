@@ -36,8 +36,6 @@ void CardFrontendDelegate::FireCardEvent(const EventMarker& eventMarker, const s
     CHECK_NULL_VOID(page_);
     auto context = page_->GetPipelineContext().Upgrade();
     if (!context) {
-        LOGE("FireCardEvent get pipeline context failed");
-        EventReport::SendFormException(FormExcepType::FIRE_FORM_EVENT_ERR);
         return;
     }
     auto nodeId = eventMarker.GetData().eventId == "_root" ? DOM_ROOT_NODE_ID_BASE + page_->GetPageId()
@@ -45,15 +43,13 @@ void CardFrontendDelegate::FireCardEvent(const EventMarker& eventMarker, const s
     auto action = page_->GetNodeEventAction(nodeId, eventMarker.GetData().eventType);
     auto node = page_->GetDomDocument()->GetDOMNodeById(nodeId);
     if (!node) {
-        LOGE("FireCardEvent get node failed");
-        EventReport::SendFormException(FormExcepType::FIRE_FORM_EVENT_ERR);
         return;
     }
 
     auto routerAction = JsonUtil::ParseJsonString(action);
     auto paramsJson = JsonUtil::ParseJsonString(params);
     if (!routerAction->IsValid()) {
-        LOGE("FireCardEvent router action is null");
+        TAG_LOGW(AceLogTag::ACE_FORM, "FireCardEvent router action is null");
         return;
     }
     auto paramsInfo = routerAction->GetValue("params");
