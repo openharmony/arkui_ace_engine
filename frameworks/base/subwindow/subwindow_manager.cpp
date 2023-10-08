@@ -45,7 +45,7 @@ void SubwindowManager::AddContainerId(uint32_t windowId, int32_t containerId)
     std::lock_guard<std::mutex> lock(mutex_);
     auto result = containerMap_.try_emplace(windowId, containerId);
     if (!result.second) {
-        LOGW("Already have container of this windowId, windowId: %{public}u", windowId);
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Already have container of this windowId, windowId: %{public}u", windowId);
     }
 }
 
@@ -68,12 +68,10 @@ int32_t SubwindowManager::GetContainerId(uint32_t windowId)
 
 void SubwindowManager::AddParentContainerId(int32_t containerId, int32_t parentContainerId)
 {
-    LOGI("Container id is %{public}d, parent id is %{public}d.", containerId, parentContainerId);
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Container id is %{public}d, parent id is %{public}d.", containerId,
+        parentContainerId);
     std::lock_guard<std::mutex> lock(parentMutex_);
-    auto result = parentContainerMap_.try_emplace(containerId, parentContainerId);
-    if (!result.second) {
-        LOGW("Already have container of this %{public}d", containerId);
-    }
+    parentContainerMap_.try_emplace(containerId, parentContainerId);
 }
 
 void SubwindowManager::RemoveParentContainerId(int32_t containerId)
@@ -96,33 +94,28 @@ int32_t SubwindowManager::GetParentContainerId(int32_t containerId)
 void SubwindowManager::AddSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow)
 {
     if (!subwindow) {
-        LOGE("Add subwindow failed, the subwindow is null.");
         return;
     }
-    LOGI("Add subwindow into map, instanceId is %{public}d, subwindow id is %{public}d.", instanceId,
-        subwindow->GetSubwindowId());
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Add subwindow into map, instanceId is %{public}d, subwindow id is %{public}d.",
+        instanceId, subwindow->GetSubwindowId());
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.try_emplace(instanceId, subwindow);
     if (!result.second) {
-        LOGE("Add failed of this instance %{public}d", instanceId);
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Add failed of this instance %{public}d", instanceId);
         return;
     }
-    LOGI("Add subwindow success of this instance %{public}d.", instanceId);
 }
 
 void SubwindowManager::RemoveSubwindow(int32_t instanceId)
 {
-    LOGI("Remove subwindow of this instance %{public}d", instanceId);
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Remove subwindow of this instance %{public}d", instanceId);
     std::lock_guard<std::mutex> lock(subwindowMutex_);
-    int res = static_cast<int>(subwindowMap_.erase(instanceId));
-    if (res == 0) {
-        LOGW("Remove subwindow of instance %{public}d failed.", instanceId);
-    }
+    subwindowMap_.erase(instanceId);
 }
 
 const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
 {
-    LOGI("Get subwindow of instance %{public}d.", instanceId);
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Get subwindow of instance %{public}d.", instanceId);
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.find(instanceId);
     if (result != subwindowMap_.end()) {
@@ -171,8 +164,8 @@ Rect SubwindowManager::GetParentWindowRect()
     return currentSubwindow_->GetParentWindowRect();
 }
 
-void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t targetId,
-    const NG::OffsetF& offset, bool isAboveApps)
+void SubwindowManager::ShowMenuNG(
+    const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps)
 {
     auto containerId = Container::CurrentId();
     auto taskExecutor = Container::CurrentTaskExecutor();
@@ -185,7 +178,7 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t
             CHECK_NULL_VOID(menu);
             auto subwindow = manager->GetSubwindow(containerId);
             if (!subwindow) {
-                LOGI("Subwindow is null, add a new one.");
+                TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Subwindow is null, add a new one.");
                 subwindow = Subwindow::CreateSubwindow(containerId);
                 subwindow->SetAboveApps(isAboveApps);
                 subwindow->InitContainer();
@@ -237,7 +230,6 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [containerId, targetId, popupInfo, manager] {
-                LOGI("Subwindow is null, add a new one.");
                 auto subwindow = Subwindow::CreateSubwindow(containerId);
                 subwindow->InitContainer();
                 manager->AddSubwindow(containerId, subwindow);
@@ -275,7 +267,7 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
             CHECK_NULL_VOID(manager);
             auto subwindow = manager->GetSubwindow(containerId);
             if (!subwindow) {
-                LOGI("Subwindow is null, add a new one.");
+                TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Subwindow is null, add a new one.");
                 subwindow = Subwindow::CreateSubwindow(containerId);
                 subwindow->InitContainer();
                 manager->AddSubwindow(containerId, subwindow);
@@ -309,7 +301,7 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
             CHECK_NULL_VOID(menu);
             auto subwindow = manager->GetSubwindow(containerId);
             if (!subwindow) {
-                LOGI("Subwindow is null, add a new one.");
+                TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Subwindow is null, add a new one.");
                 subwindow = Subwindow::CreateSubwindow(containerId);
                 subwindow->InitContainer();
                 manager->AddSubwindow(containerId, subwindow);
@@ -356,7 +348,7 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     auto containerId = Container::CurrentId();
     auto subwindow = GetSubwindow(containerId);
     if (!subwindow) {
-        LOGI("Subwindow is null, add a new one.");
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Subwindow is null, add a new one.");
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
@@ -367,23 +359,22 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
 void SubwindowManager::AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow)
 {
     if (!subwindow) {
-        LOGE("Add dialog subwindow failed, the subwindow is null.");
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Add dialog subwindow failed, the subwindow is null.");
         return;
     }
-    LOGI("Add dialog subwindow into map, instanceId is %{public}d, subwindow id is %{public}d.", instanceId,
+    LOGD("Add dialog subwindow into map, instanceId is %{public}d, subwindow id is %{public}d.", instanceId,
         subwindow->GetSubwindowId());
     std::lock_guard<std::mutex> lock(dialogSubwindowMutex_);
     auto result = dialogSubwindowMap_.try_emplace(instanceId, subwindow);
     if (!result.second) {
-        LOGE("Add dialog failed of this instance %{public}d", instanceId);
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Add dialog failed of this instance %{public}d", instanceId);
         return;
     }
-    LOGI("Add dialog subwindow success of this instance %{public}d.", instanceId);
 }
 
 const RefPtr<Subwindow> SubwindowManager::GetDialogSubwindow(int32_t instanceId)
 {
-    LOGI("Get dialog subwindow of instance %{public}d.", instanceId);
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Get dialog subwindow of instance %{public}d.", instanceId);
     std::lock_guard<std::mutex> lock(dialogSubwindowMutex_);
     auto result = dialogSubwindowMap_.find(instanceId);
     if (result != dialogSubwindowMap_.end()) {
@@ -408,10 +399,10 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentDialogWindow()
 RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
 {
     auto containerId = Container::CurrentId();
-    LOGI("SubwindowManager::GetOrCreateSubWindow containerId = %{public}d.", containerId);
+    TAG_LOGD(
+        AceLogTag::ACE_SUB_WINDOW, "SubwindowManager::GetOrCreateSubWindow containerId = %{public}d.", containerId);
     auto subwindow = GetDialogSubwindow(containerId);
     if (!subwindow) {
-        LOGI("Subwindow is null, add a new one.");
         subwindow = Subwindow::CreateSubwindow(containerId);
         AddDialogSubwindow(containerId, subwindow);
     }
@@ -443,7 +434,6 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
                 CHECK_NULL_VOID(manager);
                 auto subwindow = manager->GetSubwindow(containerId);
                 if (!subwindow) {
-                    LOGI("Subwindow is null, add a new one.");
                     subwindow = Subwindow::CreateSubwindow(containerId);
                     subwindow->InitContainer();
                     manager->AddSubwindow(containerId, subwindow);
@@ -475,7 +465,6 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
     } else {
         auto subwindow = GetSubwindow(containerId);
         if (!subwindow) {
-            LOGI("Subwindow is null, add a new one.");
             subwindow = Subwindow::CreateSubwindow(containerId);
             subwindow->InitContainer();
             AddSubwindow(containerId, subwindow);
@@ -504,7 +493,6 @@ void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std:
     } else {
         auto subWindow = GetSubwindow(containerId);
         if (!subWindow) {
-            LOGI("SubWindow is null, add a new one.");
             subWindow = Subwindow::CreateSubwindow(containerId);
             subWindow->InitContainer();
             AddSubwindow(containerId, subWindow);
@@ -533,7 +521,6 @@ void SubwindowManager::ShowActionMenu(
     } else {
         auto subwindow = GetSubwindow(containerId);
         if (!subwindow) {
-            LOGI("Subwindow is null, add a new one.");
             subwindow = Subwindow::CreateSubwindow(containerId);
             subwindow->InitContainer();
             AddSubwindow(containerId, subwindow);
@@ -544,10 +531,9 @@ void SubwindowManager::ShowActionMenu(
 
 void SubwindowManager::CloseDialog(int32_t instanceId)
 {
-    LOGI("SubwindowManager::CloseDialog containerId = %{public}d.", instanceId);
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "SubwindowManager closeDialog containerId = %{public}d.", instanceId);
     auto subwindow = GetDialogSubwindow(instanceId);
     if (!subwindow) {
-        LOGE("SubwindowManager::CloseDialog Subwindow is null.");
         return;
     }
     for (auto& containerMap : parentContainerMap_) {
