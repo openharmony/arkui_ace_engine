@@ -860,7 +860,7 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
     auto contentBottomBoundary = contentRect_.GetY() + contentRect_.GetSize().Height();
     if (textRect_.Height() > contentRect_.Height()) {
         if (textRect_.GetY() + textRect_.Height() < contentBottomBoundary) {
-            textDy = contentBottomBoundary - textRect_.GetY() + textRect_.Height();
+            textDy = contentBottomBoundary - textRect_.GetY() - textRect_.Height();
             caretRect_.SetTop(caretRect_.GetY() + textDy);
             textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + textDy));
         }
