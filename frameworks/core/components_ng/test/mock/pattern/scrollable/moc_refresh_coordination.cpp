@@ -33,4 +33,8 @@ bool RefreshCoordination::OnScroll(float offset) const
 }
 
 void RefreshCoordination::OnScrollEnd(float speed) const {}
+bool RefreshCoordination::IsRefreshInScroll() const
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

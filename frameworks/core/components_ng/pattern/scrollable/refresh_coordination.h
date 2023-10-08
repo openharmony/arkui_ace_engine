@@ -39,6 +39,7 @@ public:
     {
         return !!refreshNode_;
     }
+    bool IsRefreshInScroll() const;
 
 private:
     RefPtr<FrameNode> FindRefreshNode() const;
@@ -46,6 +47,12 @@ private:
     RefPtr<FrameNode> refreshNode_;
     RefPtr<FrameNode> scrollableNode_;
     RefPtr<ScrollableCoordinationEvent> coordinationEvent_;
+};
+
+enum class RefreshCoordinationMode : char {
+    UNKNOWN = 0,
+    REFRESH_SCROLL = 1,
+    SCROLLABLE_SCROLL = 2,
 };
 } // namespace OHOS::Ace::NG
 #endif

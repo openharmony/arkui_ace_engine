@@ -76,4 +76,12 @@ void RefreshCoordination::OnScrollEnd(float speed) const
         onScrollEnd(speed);
     }
 }
+
+bool RefreshCoordination::IsRefreshInScroll() const
+{
+    CHECK_NULL_RETURN(refreshNode_, false);
+    auto pattern = refreshNode_->GetPattern<RefreshPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return GreatNotEqual(pattern->GetScrollOffsetValue().GetY(), 0.0);
+}
 } // namespace OHOS::Ace::NG
