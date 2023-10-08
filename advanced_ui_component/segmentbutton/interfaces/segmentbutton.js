@@ -557,7 +557,6 @@ class MultiSelectItemArray extends ViewPU {
                             Stack.width(this.buttonItemsSize[e].width);
                             Stack.height(this.buttonItemsSize[e].height);
                             Stack.backgroundColor(this.multiColor[e]);
-                            Stack.scale({ x: this.zoomScaleArray[e], y: this.zoomScaleArray[e] });
                             Stack.borderRadius(this.buttonBorderRadius[e]);
                             o || Stack.pop();
                             ViewStackProcessor.StopGetAccessRecording()
@@ -1147,7 +1146,10 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                                     Stack.create();
                                     Stack.borderRadius(this.buttonBorderRadius[e]);
-                                    Stack.scale({ x: this.zoomScaleArray[e], y: this.zoomScaleArray[e] });
+                                    Stack.scale({
+                                        x: "capsule" === this.options.type && this.options.multiply ? 1 : this.zoomScaleArray[e],
+                                        y: "capsule" === this.options.type && this.options.multiply ? 1 : this.zoomScaleArray[e]
+                                    });
                                     Stack.layoutWeight(1);
                                     Stack.onAreaChange(((t, o) => {
                                         this.buttonItemsSize[e] = {
@@ -1171,37 +1173,31 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                         })))
                                     }));
                                     Stack.onHover((t => {
-                                        if (t) {
+                                            t ? Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
                                             this.hoverColorArray[e].hoverColor = {
                                                 id: -1,
                                                 type: 10001,
                                                 params: ["sys.color.ohos_id_color_hover"],
                                                 bundleName: "",
                                                 moduleName: ""
-                                            };
-                                            Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
-                                                this.zoomScaleArray[e] = 1.05
-                                            }))
-                                        } else {
-                                            this.hoverColorArray[e].hoverColor = Color.Transparent;
-                                            Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
-                                                this.zoomScaleArray[e] = 1
-                                            }))
-                                        }
+                                            }
+                                        })) : Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
+                                            this.hoverColorArray[e].hoverColor = Color.Transparent
+                                        }))
                                     }));
                                     Stack.onMouse((t => {
                                         switch (t.action) {
                                             case MouseAction.Press:
-                                                Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
-                                                    this.zoomScaleArray[e] = 1
+                                                Context.animateTo({ curve: curves.springMotion(.347, .99) }, (() => {
+                                                    this.zoomScaleArray[e] = .95
                                                 }));
                                                 Context.animateTo({ duration: 100, curve: Curve.Sharp }, (() => {
                                                     this.pressArray[e] = !0
                                                 }));
                                                 break;
                                             case MouseAction.Release:
-                                                Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
-                                                    this.zoomScaleArray[e] = 1.05
+                                                Context.animateTo({ curve: curves.springMotion(.347, .99) }, (() => {
+                                                    this.zoomScaleArray[e] = 1
                                                 }));
                                                 Context.animateTo({ duration: 100, curve: Curve.Sharp }, (() => {
                                                     this.pressArray[e] = !1
@@ -1598,8 +1594,14 @@ class SegmentButton extends ViewPU {
                         break
                     }
                 }
+                this.zoomScaleArray.forEach(((t, e) => {
+                        e === this.selectedIndexes[0] ? this.zoomScaleArray[e] = .95 : this.zoomScaleArray[e] = 1
+                }))
             }));
             PanGesture.onActionEnd((t => {
+                Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, (() => {
+                    this.zoomScaleArray[this.selectedIndexes[0]] = 1
+                }));
                 this.isCurrentPositionSelected = !1
             }));
             PanGesture.pop();

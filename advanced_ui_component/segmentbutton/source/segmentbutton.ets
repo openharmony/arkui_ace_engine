@@ -303,7 +303,6 @@ struct MultiSelectItemArray {
             .width(this.buttonItemsSize[index].width)
             .height(this.buttonItemsSize[index].height)
             .backgroundColor(this.multiColor[index])
-            .scale({ x: this.zoomScaleArray[index], y: this.zoomScaleArray[index] })
             .borderRadius(this.buttonBorderRadius[index])
         }
       })
@@ -558,7 +557,8 @@ struct SegmentButtonItemArrayComponent {
                 })
             }
             .borderRadius(this.buttonBorderRadius[index])
-            .scale({ x: this.zoomScaleArray[index], y: this.zoomScaleArray[index] })
+            .scale({ x: this.options.type === 'capsule' && this.options.multiply ? 1 : this.zoomScaleArray[index],
+              y: this.options.type === 'capsule' && this.options.multiply ? 1 : this.zoomScaleArray[index] })
             .layoutWeight(1)
             .onAreaChange((_, newValue) => {
               this.buttonItemsSize[index] = { width: newValue.width, height: this.buttonItemsSize[index].height }
@@ -583,30 +583,28 @@ struct SegmentButtonItemArrayComponent {
             })
             .onHover((isHover: boolean) => {
               if (isHover) {
-                this.hoverColorArray[index].hoverColor = ($r("sys.color.ohos_id_color_hover"))
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  this.zoomScaleArray[index] = 1.05
+                  this.hoverColorArray[index].hoverColor = ($r("sys.color.ohos_id_color_hover"))
                 })
               } else {
-                this.hoverColorArray[index].hoverColor = Color.Transparent
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  this.zoomScaleArray[index] = 1
+                  this.hoverColorArray[index].hoverColor = Color.Transparent
                 })
               }
             })
             .onMouse((event: MouseEvent) => {
               switch (event.action) {
                 case MouseAction.Press:
-                  animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                    this.zoomScaleArray[index] = 1
+                  animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
+                    this.zoomScaleArray[index] = 0.95
                   })
                   animateTo({ duration: 100, curve: Curve.Sharp }, () => {
                     this.pressArray[index] = true
                   })
                   break;
                 case MouseAction.Release:
-                  animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                    this.zoomScaleArray[index] = 1.05
+                  animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
+                    this.zoomScaleArray[index] = 1
                   })
                   animateTo({ duration: 100, curve: Curve.Sharp }, () => {
                     this.pressArray[index] = false
@@ -866,8 +864,18 @@ export struct SegmentButton {
                 break
               }
             }
+            this.zoomScaleArray.forEach((_, index) => {
+              if (index === this.selectedIndexes[0]) {
+                this.zoomScaleArray[index] = 0.95
+              } else {
+                this.zoomScaleArray[index] = 1
+              }
+            })
           })
           .onActionEnd((_: GestureEvent) => {
+            animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+              this.zoomScaleArray[this.selectedIndexes[0]] = 1
+            })
             this.isCurrentPositionSelected = false
           })
       )
