@@ -191,7 +191,8 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
 void SliderContentModifier::DrawSelect(DrawingContext& context)
 {
     auto& canvas = context.canvas;
-    if (selectStart_->Get() != selectEnd_->Get()) {
+    if (!NearEqual(selectStart_->Get().GetX(), selectEnd_->Get().GetX(), HALF) ||
+        !NearEqual(selectStart_->Get().GetY(), selectEnd_->Get().GetY(), HALF)) {
         auto trackBorderRadius = trackBorderRadius_->Get();
         auto direction = static_cast<Axis>(directionAxis_->Get());
         auto blockCenter = GetBlockCenter();
