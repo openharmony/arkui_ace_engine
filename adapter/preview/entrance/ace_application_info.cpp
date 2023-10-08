@@ -46,7 +46,7 @@ void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std
 
     auto localeInfo = resConfig->GetLocaleInfo();
     if (localeInfo == nullptr) {
-        LOGE("get local info failed");
+        LOGW("get local info failed");
         return;
     }
 

@@ -59,7 +59,7 @@ void SetFontMgrConfig(const std::string& containerSdkPath)
         runtimeOS = "OHOS";
         containerFontBasePath = "";
     }
-    LOGI("Runtime OS is %{public}s, and the container fontBasePath is %{public}s", runtimeOS.c_str(),
+    LOGD("Runtime OS is %{public}s, and the container fontBasePath is %{public}s", runtimeOS.c_str(),
         containerFontBasePath.c_str());
     SkFontMgr::SetFontMgrConfig(runtimeOS, containerFontBasePath);
 }
@@ -67,7 +67,7 @@ void SetFontMgrConfig(const std::string& containerSdkPath)
 std::string GetCustomAssetPath(std::string assetPath)
 {
     if (assetPath.empty()) {
-        LOGE("AssetPath is null.");
+        LOGW("AssetPath is null.");
         return std::string();
     }
     std::string customAssetPath;
@@ -107,7 +107,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
 {
     static std::once_flag onceFlag;
     std::call_once(onceFlag, []() {
-        LOGI("Initialize for current process.");
+        LOGD("Initialize for current process.");
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
     });
     SystemProperties::SetExtSurfaceEnabled(!runArgs.containerSdkPath.empty());
@@ -134,7 +134,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
             AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS, useNewPipeline_);
         }
     } else {
-        LOGE("UnKnown frontend type");
+        LOGW("UnKnown frontend type");
     }
     AceContainer::SetComponentModeFlag(runArgs.isComponentMode);
     SetConfigChanges(runArgs.configChanges);
@@ -268,31 +268,31 @@ void AceAbility::InitializeClipboard() const
 
 void AceAbility::OnBackPressed() const
 {
-    LOGI("Process Back Pressed Event");
+    LOGD("Process Back Pressed Event");
     EventDispatcher::GetInstance().DispatchBackPressedEvent();
 }
 
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
-    LOGI("Process MMI::PointerEvent");
+    LOGD("Process MMI::PointerEvent");
     return EventDispatcher::GetInstance().DispatchTouchEvent(pointerEvent);
 }
 
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
 {
-    LOGI("Process MMI::KeyEvent");
+    LOGD("Process MMI::KeyEvent");
     return EventDispatcher::GetInstance().DispatchKeyEvent(keyEvent);
 }
 
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const
 {
-    LOGI("Process MMI::AxisEvent");
+    LOGD("Process MMI::AxisEvent");
     return false;
 }
 
 bool AceAbility::OnInputMethodEvent(const unsigned int codePoint) const
 {
-    LOGI("Process Input Method Event");
+    LOGD("Process Input Method Event");
     return EventDispatcher::GetInstance().DispatchInputMethodEvent(codePoint);
 }
 
@@ -373,7 +373,7 @@ void AceAbility::OnConfigurationChanged(const DeviceConfig& newConfig)
     SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
-        LOGE("container is null, change configuration failed.");
+        LOGW("container is null, change configuration failed.");
         return;
     }
     container->UpdateDeviceConfig(newConfig);
@@ -473,7 +473,7 @@ bool AceAbility::OperateComponent(const std::string& attrsJson)
     LOGD("OperateComponent attrsJson %{public}s", attrsJson.c_str());
     auto root = JsonUtil::ParseJsonString(attrsJson);
     if (!root || !root->IsValid()) {
-        LOGE("the attrsJson is illegal json format");
+        LOGW("the attrsJson is illegal json format");
         return false;
     }
 

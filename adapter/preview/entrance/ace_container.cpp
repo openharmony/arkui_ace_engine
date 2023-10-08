@@ -115,13 +115,13 @@ void AceContainer::Initialize()
 void AceContainer::Destroy()
 {
     ContainerScope scope(instanceId_);
-    LOGI("AceContainer::Destroy begin");
+    LOGD("AceContainer::Destroy begin");
     if (!pipelineContext_) {
-        LOGE("no context find in %{private}d container", instanceId_);
+        LOGD("no context find in %{private}d container", instanceId_);
         return;
     }
     if (!taskExecutor_) {
-        LOGE("no taskExecutor find in %{private}d container", instanceId_);
+        LOGD("no taskExecutor find in %{private}d container", instanceId_);
         return;
     }
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
@@ -129,7 +129,6 @@ void AceContainer::Destroy()
         [weak]() {
             auto context = weak.Upgrade();
             if (context == nullptr) {
-                LOGE("context is nullptr");
                 return;
             }
             context->Destroy();
@@ -152,7 +151,6 @@ void AceContainer::Destroy()
     assetManager_.Reset();
     pipelineContext_.Reset();
     aceView_ = nullptr;
-    LOGI("AceContainer::Destroy end");
 }
 
 void AceContainer::DestroyView()
@@ -200,9 +198,6 @@ void AceContainer::InitializeFrontend()
         cardFrontend->SetIsFormRender(true);
         cardFrontend->SetTaskExecutor(taskExecutor_);
         SetIsFRSCardContainer(true);
-    } else {
-        LOGE("Frontend type not supported");
-        return;
     }
     ACE_DCHECK(frontend_);
     frontend_->DisallowPopLastPage();
@@ -290,7 +285,7 @@ void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std:
     std::string formConfigs;
     RefPtr<StageCardParser> stageCardParser = AceType::MakeRefPtr<StageCardParser>();
     if (!Framework::GetAssetContentImpl(assetManager_, fullPageProfile, formConfigs)) {
-        LOGI("Can not load the form config.");
+        LOGW("Can not load the form config, formConfigs is %{public}s", formConfigs.c_str());
         return;
     }
     const std::string prefix("./js/");
@@ -314,7 +309,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return;
         }
         context->GetTaskExecutor()->PostTask(
@@ -326,7 +320,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return false;
         }
         bool result = false;
@@ -341,7 +334,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return;
         }
         context->GetTaskExecutor()->PostTask(
@@ -354,7 +346,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return;
         }
         context->GetTaskExecutor()->PostTask(
@@ -366,7 +357,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return false;
         }
         bool result = false;
@@ -380,7 +370,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(instanceId);
         auto context = AceType::DynamicCast<PipelineContext>(weak.Upgrade());
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return;
         }
         context->GetTaskExecutor()->PostSyncTask(
@@ -393,7 +382,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = AceType::DynamicCast<PipelineContext>(weak.Upgrade());
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return;
         }
         context->GetTaskExecutor()->PostSyncTask(
@@ -407,7 +395,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return;
         }
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
@@ -423,7 +410,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return;
         }
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
@@ -436,7 +422,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return;
         }
         ACE_SCOPED_TRACE("SystemBarHeightChangeCallback(%lf, %lf)", statusBar, navigationBar);
@@ -450,7 +435,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return;
         }
         context->GetTaskExecutor()->PostTask(
@@ -462,7 +446,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            LOGE("context is nullptr");
             return;
         }
         context->GetTaskExecutor()->PostTask(
@@ -491,7 +474,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("no AceContainer with id %{private}d in AceEngine", instanceId);
+        LOGD("no AceContainer with id %{private}d in AceEngine", instanceId);
         return;
     }
     container->Destroy();
@@ -523,10 +506,6 @@ bool AceContainer::RunPage(int32_t instanceId, const std::string& url, const std
             (type == FrontendType::ETS_CARD)) {
             front->RunPage(url, params);
             return true;
-        } else {
-            LOGE("Frontend type not supported when runpage");
-            EventReport::SendAppStartException(AppStartExcepType::FRONTEND_TYPE_ERR);
-            return false;
         }
     }
     return false;
@@ -616,7 +595,6 @@ void AceContainer::FetchResponse(const ResponseData responseData, const int32_t 
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(0));
     if (!container) {
-        LOGE("FetchResponse container is null!");
         return;
     }
     ContainerScope scope(instanceId_);
@@ -633,7 +611,6 @@ void AceContainer::FetchResponse(const ResponseData responseData, const int32_t 
             declarativeFrontend->TransferJsResponseDataPreview(callbackId, ACTION_SUCCESS, responseData);
         }
     } else {
-        LOGE("Frontend type not supported");
         return;
     }
 }
@@ -642,7 +619,6 @@ void AceContainer::CallCurlFunction(const RequestData requestData, const int32_t
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(ACE_INSTANCE_ID));
     if (!container) {
-        LOGE("CallCurlFunction container is null!");
         return;
     }
 
@@ -661,7 +637,6 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
 {
     auto front = GetFrontend();
     if (!front) {
-        LOGE("the front jni is nullptr");
         return;
     }
 
@@ -681,7 +656,7 @@ void AceContainer::AddRouterChangeCallback(int32_t instanceId, const OnRouterCha
     }
     ContainerScope scope(instanceId);
     if (!container->pipelineContext_) {
-        LOGE("container pipelineContext not init");
+        LOGW("container pipelineContext not init");
         return;
     }
     container->pipelineContext_->AddRouterChangeCallback(onRouterChangeCallback);
@@ -889,7 +864,6 @@ void AceContainer::AttachView(
         [weak]() {
             auto context = weak.Upgrade();
             if (context == nullptr) {
-                LOGE("context is nullptr");
                 return;
             }
             context->SetupRootElement();
@@ -905,7 +879,6 @@ void AceContainer::AttachView(
             [weak, width, height]() {
                 auto context = weak.Upgrade();
                 if (context == nullptr) {
-                    LOGE("context is nullptr");
                     return;
                 }
                 context->OnSurfaceChanged(width, height);
@@ -952,7 +925,6 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
     }
     resRegister_ = aceView_->GetPlatformResRegister();
     if (useNewPipeline_) {
-        LOGI("New pipeline version creating...");
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
@@ -1013,7 +985,6 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
         [weak]() {
             auto context = weak.Upgrade();
             if (context == nullptr) {
-                LOGE("context is nullptr");
                 return;
             }
             context->SetupRootElement();
@@ -1029,7 +1000,6 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
             [weak, width, height]() {
                 auto context = weak.Upgrade();
                 if (context == nullptr) {
-                    LOGE("context is nullptr");
                     return;
                 }
                 context->OnSurfaceChanged(width, height);
@@ -1061,17 +1031,14 @@ void AceContainer::LoadDocument(const std::string& url, const std::string& compo
 {
     ContainerScope scope(instanceId_);
     if (type_ != FrontendType::DECLARATIVE_JS) {
-        LOGE("component preview not supported");
         return;
     }
     auto frontend = AceType::DynamicCast<OHOS::Ace::DeclarativeFrontend>(frontend_);
     if (!frontend) {
-        LOGE("frontend is null, AceContainer::LoadDocument failed");
         return;
     }
     auto jsEngine = frontend->GetJsEngine();
     if (!jsEngine) {
-        LOGE("jsEngine is null, AceContainer::LoadDocument failed");
         return;
     }
     taskExecutor_->PostTask(
