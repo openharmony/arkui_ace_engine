@@ -97,7 +97,7 @@ const Dimension LUNAR_DAY_HEIGHT = 10.0_vp;
 const Dimension LUNAR_DAY_OFFSET = 2.0_vp;
 } // namespace
 
-class CalendarPatternTestNg : public testing::Test {
+class CalendarTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -106,17 +106,17 @@ protected:
     static RefPtr<FrameNode> CreateCalendarNode(TestProperty& testProperty);
 };
 
-void CalendarPatternTestNg::SetUpTestCase()
+void CalendarTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
 
-void CalendarPatternTestNg::TearDownTestCase()
+void CalendarTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
 
-RefPtr<FrameNode> CalendarPatternTestNg::CreateCalendarNode(TestProperty& testProperty)
+RefPtr<FrameNode> CalendarTestNg::CreateCalendarNode(TestProperty& testProperty)
 {
     return nullptr;
 }
@@ -126,7 +126,7 @@ RefPtr<FrameNode> CalendarPatternTestNg::CreateCalendarNode(TestProperty& testPr
  * @tc.desc: Create Calendar.
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarModelNGTest001, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarModelNGTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Calendar
@@ -290,7 +290,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarModelNGTest001, TestSize.Level1)
     EXPECT_EQ(calendarPaintProperty->GetWorkStateVerticalMovingDistanceValue(1.0_px), SIZE_VALUE);
 }
 
-HWTEST_F(CalendarPatternTestNg, CalendarModelNGTest002, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarModelNGTest002, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     RefPtr<CalendarPattern> initPattern = AceType::MakeRefPtr<CalendarPattern>();
@@ -353,7 +353,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarModelNGTest002, TestSize.Level1)
     EXPECT_EQ(pattern->GetCalendarDay().month.month, MONTH_VALUE);
 }
 
-HWTEST_F(CalendarPatternTestNg, CalendarModelNGTest003, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarModelNGTest003, TestSize.Level1)
 {
     CalendarModelData calendarData;
     CalendarModelNG calendarModelNG;
@@ -386,7 +386,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarModelNGTest003, TestSize.Level1)
  * @tc.desc: Create calendar, and invoke its JumpTo function to calculate the date.
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarTest004, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Calendar
@@ -472,7 +472,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest004, TestSize.Level1)
  * @tc.desc: Create calendar, and check the 6 rows (42 days).
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarTest005, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Calendar
@@ -546,7 +546,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest005, TestSize.Level1)
  * @tc.desc: Create calendar, and check the 5 rows (35 days).
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarTest006, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Calendar
@@ -617,7 +617,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest006, TestSize.Level1)
  * @tc.desc: Create calendar, and check the todayStyle focus status.
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarTest007, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Calendar
@@ -735,7 +735,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest007, TestSize.Level1)
  * @tc.desc: Create calendar, and check the gregorianDayYAxisOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarTest008, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Calendar
@@ -800,7 +800,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest008, TestSize.Level1)
  * @tc.desc: Test CalendarPattern OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarPatternTest001, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarPatternTest001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -818,7 +818,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPatternTest001, TestSize.Level1)
  * @tc.desc: Test CalendarPattern OnModifyDone ChangeDoneEvent
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarPatternTest002, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarPatternTest002, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -884,7 +884,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPatternTest002, TestSize.Level1)
  * @tc.desc: Test CalendarPattern OnModifyDone currentIndex switch
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarPatternTest003, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarPatternTest003, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -1007,7 +1007,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPatternTest003, TestSize.Level1)
  * @tc.desc: Test CalendarPattern FlushFocus
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarPatternTest004, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarPatternTest004, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -1037,7 +1037,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPatternTest004, TestSize.Level1)
  * @tc.desc: Test CalendarPattern ToJsonValue
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarPatternTest005, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarPatternTest005, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -1083,7 +1083,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPatternTest005, TestSize.Level1)
  * @tc.desc: Test CalendarMonthPattern OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest001, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarMonthPatternTest001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -1111,7 +1111,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest001, TestSize.Level1)
  * @tc.desc: Test CalendarMonthPattern ClickCallback
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest002, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarMonthPatternTest002, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -1169,7 +1169,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest002, TestSize.Level1)
  * @tc.desc: Test CalendarMonthPattern JudgeArea
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest003, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarMonthPatternTest003, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -1252,7 +1252,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest003, TestSize.Level1)
  * @tc.desc: Test CalendarLayoutAlgorithm MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarLayoutAlgorithmTest001, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarLayoutAlgorithmTest001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -1298,7 +1298,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarLayoutAlgorithmTest001, TestSize.Level1)
  * @tc.desc: Test CalendarPaintMethod GetContentDrawFunction
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest001, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarPaintMethodTest001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -1324,7 +1324,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest001, TestSize.Level1)
  * @tc.desc: Test CalendarPaintMethod PaintContent
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest002, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarPaintMethodTest002, TestSize.Level1)
 {
     auto calendarPaintProperty = AceType::MakeRefPtr<CalendarPaintProperty>();
     ASSERT_NE(calendarPaintProperty, nullptr);
@@ -1342,7 +1342,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest002, TestSize.Level1)
  * @tc.desc: Test CalendarPaintMethod DrawCalendar
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest003, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarPaintMethodTest003, TestSize.Level1)
 {
     ObtainedMonth obtainedMonth;
     CalendarDay calendarDay;
@@ -1393,7 +1393,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest003, TestSize.Level1)
  * @tc.desc: Test CalendarPaintMethod PaintDay
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest004, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarPaintMethodTest004, TestSize.Level1)
 {
     ObtainedMonth obtainedMonth;
     CalendarDay calendarDay;
@@ -1434,7 +1434,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest004, TestSize.Level1)
  * @tc.desc: Create calendar, and check today off or work status.
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest005, TestSize.Level1)
+HWTEST_F(CalendarTestNg, CalendarPaintMethodTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Calendar

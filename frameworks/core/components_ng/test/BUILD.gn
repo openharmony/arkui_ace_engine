@@ -25,7 +25,6 @@ group("unittest") {
       "manager:manager_unittest",
       "pattern:pattern_unittest",
       "property:property_unittest",
-      "render:render_unittest",
       "svg:svg_unittest",
       "syntax:syntax_unittest",
     ]

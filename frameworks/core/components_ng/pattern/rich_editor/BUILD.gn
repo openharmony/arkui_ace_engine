@@ -11,9 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+import("../../components.gni")
 
-ace_unittest("geometry_transition_test_ng") {
-  type = "new"
-  sources = [ "geometry_transition_test_ng.cpp" ]
+build_component_ng("rich_editor_pattern_ng") {
+  sources = [
+    "paragraph_manager.cpp",
+    "rich_editor_content_modifier.cpp",
+    "rich_editor_controller.cpp",
+    "rich_editor_event_hub.cpp",
+    "rich_editor_layout_algorithm.cpp",
+    "rich_editor_layout_property.cpp",
+    "rich_editor_model_ng.cpp",
+    "rich_editor_overlay_modifier.cpp",
+    "rich_editor_paint_method.cpp",
+    "rich_editor_pattern.cpp",
+  ]
+
+  standard_input_deps = [
+    "hilog:libhilog",
+    "imf:inputmethod_client",
+    "input:libmmi-client",
+  ]
 }

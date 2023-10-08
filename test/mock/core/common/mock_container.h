@@ -32,6 +32,11 @@ public:
         return pipelineContext_;
     }
 
+    RefPtr<TaskExecutor> GetTaskExecutor() const override
+    {
+        return taskExecutor_;
+    }
+
     static void SetUp();
     static void TearDown();
     static RefPtr<MockContainer> Current();
@@ -42,7 +47,6 @@ public:
     MOCK_METHOD(std::string, GetHostClassName, (), (const, override));
 
     MOCK_METHOD(RefPtr<Frontend>, GetFrontend, (), (const, override));
-    MOCK_METHOD(RefPtr<TaskExecutor>, GetTaskExecutor, (), (const, override));
     MOCK_METHOD(RefPtr<AssetManager>, GetAssetManager, (), (const, override));
     MOCK_METHOD(RefPtr<PlatformResRegister>, GetPlatformResRegister, (), (const, override));
     MOCK_METHOD(int32_t, GetViewWidth, (), (const, override));
@@ -58,6 +62,7 @@ public:
     static RefPtr<MockContainer> container_;
 
 private:
+    RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<PipelineBase> pipelineContext_;
 };
 } // namespace OHOS::Ace

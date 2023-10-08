@@ -61,8 +61,7 @@ void SelectOverlayManagerTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
     MockContainer::SetUp();
-    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-    EXPECT_CALL(*(MockContainer::Current()), GetTaskExecutor()).WillRepeatedly(Return(taskExecutor));
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void SelectOverlayManagerTestNg::TearDownTestSuite()
