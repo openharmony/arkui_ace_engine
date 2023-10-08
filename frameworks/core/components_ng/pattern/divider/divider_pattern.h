@@ -36,7 +36,8 @@ public:
         if (!dividerModifier_) {
             dividerModifier_ = AceType::MakeRefPtr<DividerModifier>();
         }
-        return MakeRefPtr<DividerPaintMethod>(constrainStrokeWidth_, dividerLength_, vertical_, dividerModifier_);
+        return MakeRefPtr<DividerPaintMethod>(
+            constrainStrokeWidth_, dividerLength_, vertical_, strokeWidthLimitation_, dividerModifier_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -64,6 +65,7 @@ private:
     float constrainStrokeWidth_ = 0;
     float dividerLength_ = 0;
     bool vertical_ = false;
+    bool strokeWidthLimitation_ = true;
     RefPtr<DividerModifier> dividerModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(DividerPattern);
 };

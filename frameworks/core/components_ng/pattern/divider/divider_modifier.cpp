@@ -30,6 +30,7 @@ DividerModifier::DividerModifier()
     lineCap_ = AceType::MakeRefPtr<PropertyInt>(0);
     vertical_ = AceType::MakeRefPtr<PropertyBool>(false);
     offset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
+    strokeWidthLimitation_ = AceType::MakeRefPtr<PropertyBool>(true);
 
     AttachProperty(color_);
     AttachProperty(strokeWidth_);
@@ -37,12 +38,15 @@ DividerModifier::DividerModifier()
     AttachProperty(lineCap_);
     AttachProperty(vertical_);
     AttachProperty(offset_);
+    AttachProperty(strokeWidthLimitation_);
 }
 
 void DividerModifier::onDraw(DrawingContext& context)
 {
     LineCap lineCap = LineCap(lineCap_->Get());
-    lineCap = lineCap == LineCap::BUTT ? LineCap::SQUARE : lineCap;
+    if (strokeWidthLimitation_->Get()) {
+        lineCap = lineCap == LineCap::BUTT ? LineCap::SQUARE : lineCap;
+    }
     DividerPainter dividerPainter(
         strokeWidth_->Get(), dividerLength_->Get(), vertical_->Get(), color_->Get().ToColor(), lineCap);
     dividerPainter.DrawLine(context.canvas, offset_->Get());

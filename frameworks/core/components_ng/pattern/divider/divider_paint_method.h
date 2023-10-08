@@ -26,10 +26,10 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT DividerPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(DividerPaintMethod, NodePaintMethod)
 public:
-    DividerPaintMethod(
-        float constrainStrokeWidth, float dividerLength, bool vertical, RefPtr<DividerModifier> dividerModifier)
-        : constrainStrokeWidth_(constrainStrokeWidth), dividerLength_(dividerLength),
-        vertical_(vertical), dividerModifier_(dividerModifier)
+    DividerPaintMethod(float constrainStrokeWidth, float dividerLength, bool vertical, bool strokeWidthLimitation,
+        RefPtr<DividerModifier> dividerModifier)
+        : constrainStrokeWidth_(constrainStrokeWidth), dividerLength_(dividerLength), vertical_(vertical),
+          strokeWidthLimitation_(strokeWidthLimitation), dividerModifier_(dividerModifier)
     {}
     ~DividerPaintMethod() override = default;
 
@@ -75,12 +75,14 @@ public:
         dividerModifier_->SetOffset(offset_);
         dividerModifier_->SetColor(LinearColor(dividerColor_));
         dividerModifier_->SetLineCap(lineCap_);
+        dividerModifier_->SetStrokeWidthLimitation(strokeWidthLimitation_);
     }
 
 private:
     float constrainStrokeWidth_;
     float dividerLength_;
     bool vertical_ = false;
+    bool strokeWidthLimitation_ = true;
 
     OffsetF offset_;
     Color dividerColor_;
