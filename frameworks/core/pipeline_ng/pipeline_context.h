@@ -517,7 +517,6 @@ private:
     bool isTabJustTriggerOnKeyEvent_ = false;
     bool isRootFocusNeedUpdate_ = false;
     bool onShow_ = false;
-    bool onFocus_ = true;
     bool isNeedFlushMouseEvent_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;

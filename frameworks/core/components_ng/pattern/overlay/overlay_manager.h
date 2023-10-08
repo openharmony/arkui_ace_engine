@@ -282,6 +282,11 @@ public:
     void MarkDirty(PropertyChangeFlag flag);
     float GetRootHeight() const;
 
+    const WeakPtr<UINode>& GetRootNode() const
+    {
+        return rootNodeWeak_;
+    }
+
 private:
     void PopToast(int32_t targetId);
 
