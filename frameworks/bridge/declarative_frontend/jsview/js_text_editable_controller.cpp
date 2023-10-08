@@ -21,11 +21,13 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
     JSClass<JSTextEditableController>::Declare("TextController");
     JSClass<JSTextEditableController>::Method("caretPosition", &JSTextEditableController::CaretPosition);
     JSClass<JSTextEditableController>::Method("setTextSelection", &JSTextEditableController::SetTextSelection);
-    JSClass<JSTextEditableController>::CustomMethod("getTextContentRect", &JSTextEditableController::GetTextContentRect);
+    JSClass<JSTextEditableController>::CustomMethod("getTextContentRect",
+        &JSTextEditableController::GetTextContentRect);
     JSClass<JSTextEditableController>::CustomMethod("getTextContentLineCount",
         &JSTextEditableController::GetTextContentLinesNum);
     JSClass<JSTextEditableController>::Method("stopEditing", &JSTextEditableController::StopEditing);
-    JSClass<JSTextEditableController>::Bind(globalObj, JSTextEditableController::Constructor, JSTextEditableController::Destructor);
+    JSClass<JSTextEditableController>::Bind(globalObj, JSTextEditableController::Constructor,
+        JSTextEditableController::Destructor);
 }
 
 void JSTextEditableController::Constructor(const JSCallbackInfo& args)
