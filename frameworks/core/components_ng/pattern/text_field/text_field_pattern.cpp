@@ -1121,7 +1121,7 @@ bool TextFieldPattern::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetr
         extent, next, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
 #else
     auto textBoxes = paragraph_->GetTextRectsByBoundary(
-        next, extent, RSTextRectHeightStyle::COVER_TOP_AND_BOTTOM, RSTextRectWidthStyle::TIGHT);
+        extent, next, RSTextRectHeightStyle::COVER_TOP_AND_BOTTOM, RSTextRectWidthStyle::TIGHT);
 #endif
 
     if (textBoxes.empty()) {
