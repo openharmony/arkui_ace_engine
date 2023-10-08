@@ -1222,13 +1222,16 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (frameNode->GetPageId() != context->GetCurrentPageId()) {
+        return;
+    }
     if (pattern->GetPredictLayoutParam()) {
         pattern->SetPredictLayoutParam(param);
         return;
     }
     pattern->SetPredictLayoutParam(param);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
         ACE_SCOPED_TRACE("List predict");
         auto frameNode = weak.Upgrade();

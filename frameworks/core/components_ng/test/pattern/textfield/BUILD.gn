@@ -129,6 +129,7 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/stage/page_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/page_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/stage_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_node.cpp",
