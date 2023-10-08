@@ -400,6 +400,25 @@ void UpdateCacheInfo(std::list<AccessibilityElementInfo>& infos, uint32_t mode, 
             infos.emplace_back(childNodeInfo);
         }
     }
+
+    // get all children
+    if (umode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN)) {
+        std::list<RefPtr<AccessibilityNode>> children;
+        for (const auto& item : node->GetChildList()) {
+            children.emplace_back(item);
+        }
+
+        while (!children.empty()) {
+            auto parent = children.front();
+            children.pop_front();
+            AccessibilityElementInfo childNodeInfo;
+            UpdateAccessibilityNodeInfo(parent, childNodeInfo, jsAccessibilityManager, windowId);
+            infos.push_back(childNodeInfo);
+            for (const auto& item : parent->GetChildList()) {
+                children.emplace_back(item);
+            }
+        }
+    }
 }
 
 inline std::string BoolToString(bool tag)
@@ -667,21 +686,25 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int32_t>
     }
 }
 
-void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG::FrameNode>>& children)
+void GetFrameNodeChildren(
+    const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG::FrameNode>>& children, int32_t pageId = -1)
 {
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
         CHECK_NULL_VOID(frameNode->IsActive());
-        if (!frameNode->IsInternal()) {
+        if (uiNode->GetTag() == "page") {
+            if (pageId != -1 && uiNode->GetPageId() != pageId) {
+                return;
+            }
+        } else if (!frameNode->IsInternal() && uiNode->GetTag() != "stage") {
             if (CheckFrameNodeByAccessibilityLevel(frameNode, false)) {
                 children.emplace_back(frameNode);
                 return;
             }
         }
-    } else {
-        for (const auto& frameChild : uiNode->GetChildren()) {
-            GetFrameNodeChildren(frameChild, children);
-        }
+    }
+    for (const auto& frameChild : uiNode->GetChildren()) {
+        GetFrameNodeChildren(frameChild, children, pageId);
     }
 }
 
@@ -884,7 +907,7 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, uint32_t mode
     // get all children
     if (umode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN)) {
         for (const auto& item : node->GetChildren()) {
-            GetFrameNodeChildren(item, children);
+            GetFrameNodeChildren(item, children, commonProperty.pageId);
         }
 
         while (!children.empty()) {
@@ -894,7 +917,7 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, uint32_t mode
             UpdateAccessibilityElementInfo(parent, commonProperty, nodeInfo, ngPipeline);
             infos.push_back(nodeInfo);
             for (const auto& item : parent->GetChildren()) {
-                GetFrameNodeChildren(item, children);
+                GetFrameNodeChildren(item, children, commonProperty.pageId);
             }
         }
     }
