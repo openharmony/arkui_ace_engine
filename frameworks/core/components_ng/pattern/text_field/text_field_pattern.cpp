@@ -5582,7 +5582,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
     if (source == SCROLL_FROM_START) {
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
-            scrollBar->PlayScrollBarStartAnimation();
+            scrollBar->PlayScrollBarAppearAnimation();
         }
         auto selectOverlayProxy = GetSelectOverlay();
         if (selectOverlayProxy) {

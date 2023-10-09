@@ -279,11 +279,12 @@ public:
 
     void SetOutBoundary(double outBoundary)
     {
-        inSpring_ = !NearEqual(outBoundary_, outBoundary, 0.000001f);
-        if (inSpring_ && adaptAnimator_ && adaptAnimator_->IsRunning()) {
-            adaptAnimator_->Stop();
-        }
         outBoundary_ = outBoundary;
+    }
+
+    void SetIsOutOfBoundary(bool isOutOfBoundary)
+    {
+        isOutOfBoundary_ = isOutOfBoundary;
     }
 
     void SetPosition(const Dimension& position)
@@ -321,7 +322,7 @@ public:
         return opacity_;
     }
 
-    void PlayScrollBarEndAnimation()
+    void PlayScrollBarDisappearAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
             opacityAnimationType_ = OpacityAnimationType::DISAPPEAR;
@@ -329,7 +330,7 @@ public:
         }
     }
 
-    void PlayScrollBarStartAnimation()
+    void PlayScrollBarAppearAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
             disappearDelayTask_.Cancel();
@@ -361,7 +362,7 @@ public:
 
     void PlayScrollBarGrowAnimation()
     {
-        PlayScrollBarStartAnimation();
+        PlayScrollBarAppearAnimation();
         normalWidth_ = activeWidth_;
         FlushBarWidth();
         hoverAnimationType_ = HoverAnimationType::GROW;
@@ -374,6 +375,17 @@ public:
         FlushBarWidth();
         hoverAnimationType_ = HoverAnimationType::SHRINK;
         MarkNeedRender();
+    }
+
+    void PlayScrollBarAdaptAnimation()
+    {
+        needAdaptAnimation_ = true;
+        MarkNeedRender();
+    }
+
+    bool GetNeedAdaptAnimation() const
+    {
+        return needAdaptAnimation_;
     }
 
     void MarkNeedRender()
@@ -487,7 +499,6 @@ public:
     void SetMouseEvent();
     void SetHoverEvent();
     void FlushBarWidth();
-    void PlayAdaptAnimation(double activeSize, double activeMainOffset, double inactiveSize, double inactiveMainOffset);
     void CalcReservedHeight();
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result);
@@ -550,10 +561,11 @@ private:
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
     bool isHover_ = false;
-    bool inSpring_ = false; // whether bar in the spring state
+    bool isOutOfBoundary_ = false; // whether bar in the spring state
     bool positionModeUpdate_ = false;
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;
+    bool needAdaptAnimation_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;
@@ -564,7 +576,6 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanRecognizer> panRecognizer_;
-    RefPtr<Animator> adaptAnimator_;
     RefPtr<Animator> frictionController_;
     RefPtr<FrictionMotion> frictionMotion_;
     std::function<void()> markNeedRenderFunc_;

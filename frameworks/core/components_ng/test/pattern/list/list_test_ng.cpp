@@ -3815,7 +3815,6 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     RSCanvas canvas;
     listPaint->GetForegroundDrawFunction(&paintWrapper);
     listPaint->PaintEdgeEffect(&paintWrapper, canvas);
-    listPaint->PaintScrollBar(canvas);
     SUCCEED();
 }
 
@@ -3852,7 +3851,6 @@ HWTEST_F(ListTestNg, PaintMethod002, TestSize.Level1)
     renderContext->UpdateClipEdge(false);
     PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty_);
     listPaint->UpdateContentModifier(&paintWrapper);
-    listPaint->PaintScrollBar(canvas);
     modifier->onDraw(ctx);
     SUCCEED();
 }
@@ -3880,8 +3878,6 @@ HWTEST_F(ListTestNg, PaintMethod003, TestSize.Level1)
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     listPaint->UpdateContentModifier(&paintWrapper);
     RSCanvas canvas;
-    listPaint->PaintScrollBar(canvas);
-
     auto modifier = pattern_->listContentModifier_;
     DrawingContext ctx = { canvas, 1, 1};
     modifier->onDraw(ctx);

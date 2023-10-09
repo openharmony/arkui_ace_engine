@@ -202,7 +202,7 @@ private:
     float GetAllDelta();
     void CheckRestartSpring();
     void CheckScrollable();
-    bool IsOutOfBoundary();
+    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
     void OnModifyDone() override;

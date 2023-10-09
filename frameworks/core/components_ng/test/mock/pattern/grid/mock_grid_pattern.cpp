@@ -79,6 +79,11 @@ RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
     return MakeRefPtr<ScrollablePaintProperty>();
 }
 
+bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
+{
+    return false;
+}
+
 bool GridPattern::OutBoundaryCallback()
 {
     return false;

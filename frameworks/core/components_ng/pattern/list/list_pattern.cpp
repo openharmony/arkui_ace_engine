@@ -769,7 +769,7 @@ void ListPattern::FireOnScrollStart()
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
-        scrollBar->PlayScrollBarStartAnimation();
+        scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
     auto host = GetHost();

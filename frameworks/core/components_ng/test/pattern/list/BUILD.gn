@@ -153,7 +153,6 @@ common_sources = [
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid/mock_grid_pattern.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/nav_bar/mock_nav_bar_pattern.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
-  "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_painter.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_fade_painter.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_layout_algorithm.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_pattern.cpp",

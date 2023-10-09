@@ -528,6 +528,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
             }
         }
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
+        scrollBar_->SetIsOutOfBoundary(IsOutOfBoundary());
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
     }
@@ -586,7 +587,7 @@ void ScrollablePattern::CreateScrollBarOverlayModifier()
     CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedPaint());
     CHECK_NULL_VOID(!scrollBarOverlayModifier_);
     scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
-    scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect(), scrollBar_->GetBarRect());
+    scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect());
 }
 
 void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)

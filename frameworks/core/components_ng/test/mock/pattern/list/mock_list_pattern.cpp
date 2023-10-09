@@ -65,6 +65,11 @@ bool ListPattern::IsAtTop() const
     return false;
 }
 
+bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
+{
+    return false;
+}
+
 bool ListPattern::OutBoundaryCallback()
 {
     return false;

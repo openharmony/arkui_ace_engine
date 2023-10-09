@@ -163,7 +163,6 @@ ohos_unittest("grid_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/nav_bar/mock_nav_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_fade_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_layout_algorithm.cpp",
