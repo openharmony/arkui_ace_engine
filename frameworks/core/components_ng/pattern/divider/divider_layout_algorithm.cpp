@@ -41,10 +41,13 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
                                                                 : static_cast<float>(defaultStrokeWidth.ConvertToPx());
     vertical_ = dividerLayoutProperty->GetVertical().value_or(false);
     SizeF constrainSize;
+    strokeWidthLimitation_ = dividerLayoutProperty->GetStrokeWidthLimitation().value_or(true);
     if (!vertical_) {
         dividerLength_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()
                                                                    : contentConstraint.percentReference.Width();
-        constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
+        if (strokeWidthLimitation_) {
+            constrainStrokeWidth_ = std::min(constrainStrokeWidth_, dividerLength_);
+        }
         constrainStrokeWidth_ = (contentConstraint.selfIdealSize.Height())
                                     ? std::min(contentConstraint.selfIdealSize.Height().value(), constrainStrokeWidth_)
                                     : constrainStrokeWidth_;
@@ -53,7 +56,9 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     } else {
         dividerLength_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
                                                                     : contentConstraint.percentReference.Height();
-        constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
+        if (strokeWidthLimitation_) {
+            constrainStrokeWidth_ = std::min(constrainStrokeWidth_, dividerLength_);
+        }
         constrainStrokeWidth_ = (contentConstraint.selfIdealSize.Width())
                                     ? std::min(contentConstraint.selfIdealSize.Width().value(), constrainStrokeWidth_)
                                     : constrainStrokeWidth_;
@@ -73,5 +78,9 @@ float DividerLayoutAlgorithm::GetDividerLength() const
 bool DividerLayoutAlgorithm::GetVertical() const
 {
     return vertical_;
+}
+bool DividerLayoutAlgorithm::GetStrokeWidthLimitation() const
+{
+    return strokeWidthLimitation_;
 }
 } // namespace OHOS::Ace::NG
