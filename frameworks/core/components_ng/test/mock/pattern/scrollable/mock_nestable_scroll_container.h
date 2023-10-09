@@ -23,8 +23,8 @@
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 
 namespace OHOS::Ace::NG {
-class MockNestableScrollContainer : public NestableScrollContainer, public Pattern {
-    DECLARE_ACE_TYPE(MockNestableScrollContainer, NestableScrollContainer, Pattern);
+class MockNestableScrollContainer : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(MockNestableScrollContainer, NestableScrollContainer);
 public:
     MOCK_METHOD(OHOS::Ace::Axis, GetAxis, (), (const, override));
     MOCK_METHOD(OHOS::Ace::ScrollResult, HandleScroll, (float, int32_t, OHOS::Ace::NestedState), (override));
