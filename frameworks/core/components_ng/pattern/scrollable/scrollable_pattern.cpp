@@ -123,45 +123,15 @@ void ScrollablePattern::ProcessNavBarReactOnEnd()
 
 bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 {
-    if (!refreshCoordination_) {
-        CreateRefreshCoordination();
-    }
     auto isAtTop = (IsAtTop() && Positive(offset));
-    auto overOffsets = GetOverScrollOffset(offset);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !isAtTop && Positive(offset) &&
-        NeedSplitScroll(overOffsets)) {
-        offset = offset - overOffsets.start;
-        OnScrollCallback(offset, source);
-        isRefreshInReactive_ = true;
-        if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart();
-        }
-    }
-    if (isAtTop && (source == SCROLL_FROM_UPDATE) && !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
-        isRefreshInReactive_ = true;
-        if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart();
-        }
-    }
-    if ((refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
-        isRefreshInReactive_) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            refreshCoordination_->OnScrollEnd(GetVelocity());
-        } else {
-            isRefreshInReactive_ = false;
-            refreshCoordination_->OnScrollEnd(0.0f);
-        }
-    }
-    if (refreshCoordination_ && refreshCoordination_->InCoordination() && isRefreshInReactive_) {
-        if (!refreshCoordination_->OnScroll(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
-            isRefreshInReactive_ = false;
+    auto refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
+    switch (refreshCoordinateMode) {
+        case RefreshCoordinationMode::SCROLLABLE_SCROLL:
             return true;
-        }
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        case RefreshCoordinationMode::REFRESH_SCROLL:
             return false;
-        } else {
-            return scrollEffect_ && scrollEffect_->IsSpringEffect();
-        }
+        default:
+            break;
     }
 
     auto isDraggedDown = navBarPattern_ ? navBarPattern_->GetDraggedDown() : false;
@@ -195,10 +165,74 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
     return true;
 }
 
-bool ScrollablePattern::NeedSplitScroll(OverScrollOffset& overOffsets)
+bool ScrollablePattern::NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source)
 {
     return GreatNotEqual(overOffsets.start, 0.0) && refreshCoordination_ && refreshCoordination_->InCoordination() &&
-           !isRefreshInReactive_ && (axis_ == Axis::VERTICAL);
+           !isRefreshInReactive_ &&
+           (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION_SPRING ||
+               source == SCROLL_FROM_ANIMATION) &&
+           (axis_ == Axis::VERTICAL);
+}
+
+RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop)
+{
+    auto coordinationMode = RefreshCoordinationMode::UNKNOWN;
+    if (!refreshCoordination_) {
+        CreateRefreshCoordination();
+    }
+    auto overOffsets = GetOverScrollOffset(offset);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !isAtTop && Positive(offset) &&
+        NeedSplitScroll(overOffsets, source)) {
+        offset = offset - overOffsets.start;
+        if (source == SCROLL_FROM_ANIMATION_SPRING || source == SCROLL_FROM_ANIMATION) {
+            OnScrollCallback(offset, source);
+            isRefreshInReactive_ = true;
+            if (!refreshCoordination_->OnScroll(overOffsets.start)) {
+                isRefreshInReactive_ = false;
+                coordinationMode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
+            }
+            coordinationMode = RefreshCoordinationMode::REFRESH_SCROLL;
+        }
+        OnScrollCallback(offset, source);
+        isRefreshInReactive_ = true;
+        if (refreshCoordination_) {
+            refreshCoordination_->OnScrollStart();
+        }
+    }
+
+    if (IsAtTop() &&
+        (Positive(offset) || (Negative(offset) && refreshCoordination_ && refreshCoordination_->IsRefreshInScroll())) &&
+        (source == SCROLL_FROM_UPDATE) && !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
+        isRefreshInReactive_ = true;
+        if (refreshCoordination_) {
+            refreshCoordination_->OnScrollStart();
+        }
+    }
+    if ((refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
+        isRefreshInReactive_) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            refreshCoordination_->OnScrollEnd(GetVelocity());
+        } else {
+            isRefreshInReactive_ = false;
+            refreshCoordination_->OnScrollEnd(0.0f);
+        }
+    }
+    if (refreshCoordination_ && refreshCoordination_->InCoordination() && isRefreshInReactive_) {
+        if (!refreshCoordination_->OnScroll(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
+            isRefreshInReactive_ = false;
+            coordinationMode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
+        }
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            coordinationMode = RefreshCoordinationMode::REFRESH_SCROLL;
+        } else {
+            if (scrollEffect_ && scrollEffect_->IsSpringEffect()) {
+                coordinationMode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
+            } else {
+                coordinationMode = RefreshCoordinationMode::REFRESH_SCROLL;
+            }
+        }
+    }
+    return coordinationMode;
 }
 
 void ScrollablePattern::OnScrollEnd()
@@ -210,8 +244,8 @@ void ScrollablePattern::OnScrollEnd()
     // calls OnScrollEnd in ScrollablePattern
     if (isRefreshInReactive_) {
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollEnd(GetVelocity());
             isRefreshInReactive_ = false;
+            refreshCoordination_->OnScrollEnd(GetVelocity());
         }
     }
     if (isReactInParentMovement_) {

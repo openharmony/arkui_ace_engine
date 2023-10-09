@@ -304,6 +304,11 @@ void RefreshPattern::HandleDragUpdate(float delta)
             } else {
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
             }
+        } else {
+            if (NearEqual(scrollOffset_.GetY(), 0.0f)) {
+                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND);
+                UpdateRefreshStatus(RefreshStatus::DONE);
+            }
         }
         UpdateFirstChildPlacement(scrollOffset_.GetY());
         return;
@@ -815,13 +820,6 @@ void RefreshPattern::InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& 
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         pattern->HandleDragUpdate(static_cast<float>(offset));
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            if (pattern->refreshStatus_ == RefreshStatus::REFRESH) {
-                return GreatNotEqual(
-                           pattern->scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx())) ||
-                       NonNegative(offset);
-            }
-        }
         return Positive(pattern->scrollOffset_.GetY()) || NonNegative(offset);
     };
     coordinationEvent->SetOnScrollEvent(onScrollEvent);
@@ -1045,9 +1043,14 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     animationId_++;
     offsetProperty_->Set(scrollOffset_.GetY());
     auto dealSpeed = 0.0f;
-    if (!NearEqual(scrollOffset_.GetY(), targetOffset)) {
-        dealSpeed = speed / (targetOffset - scrollOffset_.GetY());
+    if (NearEqual(scrollOffset_.GetY(), targetOffset)) {
+        scrollOffset_.SetY(scrollOffset_.GetY() + FAKE_VALUE);
+        UpdateFirstChildPlacement(scrollOffset_.GetY());
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITasks();
     }
+    dealSpeed = speed / (targetOffset - scrollOffset_.GetY());
     updatePerFrame_ = true;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(dealSpeed, 1.0f, 228.0f, 30.0f);
     AnimationOption option;
@@ -1187,7 +1190,7 @@ void RefreshPattern::QuickFirstChildDisappear()
             CHECK_NULL_VOID(pattern);
             pattern->offsetProperty_->Set(0.0f);
             pattern->UpdateFirstChildPlacement(0.0f);
-            pattern->UpdateLoadingProgressStatus(RefreshAnimationState::UNKNOWN);
+            pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND);
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->FlushUITasks();
