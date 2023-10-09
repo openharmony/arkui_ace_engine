@@ -226,7 +226,7 @@ void UITaskScheduler::FlushTask() {}
 
 UITaskScheduler::~UITaskScheduler() = default;
 
-void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty, bool checkPage) {}
+void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 
@@ -324,11 +324,6 @@ void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 
 void PipelineContext::SetWindowSceneConsumed(bool isConsumed) {}
-
-int32_t PipelineContext::GetCurrentPageId()
-{
-    return -1;
-}
 } // namespace OHOS::Ace::NG
 
 // pipeline base

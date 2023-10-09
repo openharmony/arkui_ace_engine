@@ -146,7 +146,6 @@ void PagePattern::OnShow()
     // Do not invoke onPageShow unless the initialRender function has been executed.
     CHECK_NULL_VOID(isRenderDone_);
     CHECK_NULL_VOID(!isOnShow_);
-    isOnShow_ = true;
     auto container = Container::Current();
     if (!container || !container->WindowIsShow()) {
         LOGW("no need to trigger onPageShow callback when not in the foreground");
@@ -155,6 +154,7 @@ void PagePattern::OnShow()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(true);
+    isOnShow_ = true;
     JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
     PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     auto pageUrlChecker = container->GetPageUrlChecker();
@@ -169,12 +169,11 @@ void PagePattern::OnShow()
 void PagePattern::OnHide()
 {
     CHECK_NULL_VOID(isOnShow_);
-    isOnShow_ = false;
-    FlushDelayLayoutNodes();
     JankFrameReport::FlushRecord();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);
+    isOnShow_ = false;
     auto container = Container::Current();
     if (container) {
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -296,32 +295,5 @@ bool PagePattern::AvoidKeyboard() const
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled();
-}
-
-void PagePattern::AddDelaytLayoutNode(const WeakPtr<FrameNode>& node)
-{
-    delayLayoutNodes_.push_back(node);
-}
-
-void PagePattern::FlushDelayLayoutNodes()
-{
-    if (delayLayoutNodes_.empty()) {
-        return;
-    }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    for (const auto& weak : delayLayoutNodes_) {
-        auto node = weak.Upgrade();
-        if (node) {
-            pipeline->AddDirtyLayoutNode(node, false);
-        }
-    }
-    delayLayoutNodes_.clear();
-    pipeline->FlushPipelineImmediately();
-}
-
-RefPtr<LayoutAlgorithm> PagePattern::CreateLayoutAlgorithm()
-{
-    return MakeRefPtr<PageLayoutAlgorithm>();
 }
 } // namespace OHOS::Ace::NG
