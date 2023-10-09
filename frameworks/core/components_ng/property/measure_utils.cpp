@@ -130,6 +130,19 @@ PaddingPropertyF ConvertToPaddingPropertyF(
     auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
+    if (left.has_value()) {
+        left = Round(left.value());
+    }
+    if (right.has_value()) {
+        right = Round(right.value());
+    }
+    if (top.has_value()) {
+        top = Round(top.value());
+    }
+    if (bottom.has_value()) {
+        bottom = Round(bottom.value());
+    }
+
     return PaddingPropertyF { left, right, top, bottom };
 }
 
@@ -161,6 +174,18 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
     auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
     auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
+    if (left.has_value()) {
+        left = Round(left.value());
+    }
+    if (right.has_value()) {
+        right = Round(right.value());
+    }
+    if (top.has_value()) {
+        top = Round(top.value());
+    }
+    if (bottom.has_value()) {
+        bottom = Round(bottom.value());
+    }
 
     return BorderWidthPropertyF { left, top, right, bottom };
 }

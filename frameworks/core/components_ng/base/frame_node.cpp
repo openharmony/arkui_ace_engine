@@ -794,6 +794,7 @@ void FrameNode::TriggerOnAreaChangeCallback()
     if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         auto currParentOffsetToWindow = GetOffsetRelativeToWindow() - currFrameRect.GetOffset();
+        currFrameRect.SetOffset(geometryNode_->GetPixelGridRoundOffsetForArea());
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             eventHub_->FireOnAreaChanged(
                 *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
@@ -2377,6 +2378,8 @@ void FrameNode::Layout()
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
         geometryNode_->GetFrameOffset().ToString().c_str());
     SyncGeometryNode();
+
+    UpdateParentAbsoluteOffset();
 }
 
 void FrameNode::SyncGeometryNode()
@@ -2415,7 +2418,7 @@ void FrameNode::SyncGeometryNode()
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         isLayoutComplete_ = true;
-        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
+        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true);
     }
 
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
@@ -2485,6 +2488,18 @@ void FrameNode::SyncGeometryNode()
     AdjustGridOffset();
 
     layoutAlgorithm_.Reset();
+}
+
+void FrameNode::UpdateParentAbsoluteOffset()
+{
+    const auto& children = GetChildren();
+    for (const auto& child : children) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(frameNode);
+        auto childNode = frameNode->GetGeometryNode();
+        CHECK_NULL_VOID(childNode);
+        childNode->SetParentAbsoluteOffset(geometryNode_->GetParentAbsoluteOffset() + GetOffsetRelativeToWindow());
+    }
 }
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)

@@ -339,10 +339,19 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
     }
 }
 
-void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
+void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool needRoundToPixelGrid)
 {
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
     auto paintRect = AdjustPaintRect();
+
+    if (needRoundToPixelGrid) {
+        RoundToPixelGrid(geometryNode->GetParentAbsoluteOffset().GetX(),
+            geometryNode->GetParentAbsoluteOffset().GetY());
+        paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetFrameSize());
+    }
     SyncGeometryProperties(paintRect);
 }
 
@@ -1937,11 +1946,13 @@ RectF RosenRenderContext::AdjustPaintRect()
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!rect.GetSize().IsPositive()) {
             LOGD("paint size is zero");
+            geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
             return rect;
         }
     } else {
         if (!rect.GetSize().IsPositive() && !frameNode->IsLayoutComplete()) {
             LOGD("paint size is zero");
+            geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
             return rect;
         }
     }
@@ -1966,6 +1977,7 @@ RectF RosenRenderContext::AdjustPaintRect()
             resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
         rect.SetLeft(resultX.ConvertToPx() - anchorX.value_or(0));
         rect.SetTop(resultY.ConvertToPx() - anchorY.value_or(0));
+        geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
         return rect;
     }
     if (HasOffset()) {
@@ -1976,13 +1988,108 @@ RectF RosenRenderContext::AdjustPaintRect()
         }
         auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
+        auto offsetForArea = OffsetF(rect.GetX() - anchorX.value_or(0), rect.GetY() - anchorY.value_or(0));
+        geometryNode->SetPixelGridRoundOffsetForArea(offsetForArea);
         rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
         rect.SetTop(rect.GetY() + offsetY.value_or(0) - anchorY.value_or(0));
+        geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
         return rect;
     }
     rect.SetLeft(rect.GetX() - anchorX.value_or(0));
     rect.SetTop(rect.GetY() - anchorY.value_or(0));
+    geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
     return rect;
+}
+
+float RosenRenderContext::RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor)
+{
+    float scaledValue = value;
+    // We want to calculate `fractial` such that `floor(scaledValue) = scaledValue
+    // - fractial`.
+    float fractial = fmod(scaledValue, 1.0);
+    if (fractial < 0) {
+        // This branch is for handling negative numbers for `value`.
+        //
+        // Regarding `floor` and `ceil`. Note that for a number x, `floor(x) <= x <=
+        // ceil(x)` even for negative numbers. Here are a couple of examples:
+        //   - x =  2.2: floor( 2.2) =  2, ceil( 2.2) =  3
+        //   - x = -2.2: floor(-2.2) = -3, ceil(-2.2) = -2
+        //
+        // Regarding `fmodf`. For fractional negative numbers, `fmodf` returns a
+        // negative number. For example, `fmodf(-2.2) = -0.2`. However, we want
+        // `fractial` to be the number such that subtracting it from `value` will
+        // give us `floor(value)`. In the case of negative numbers, adding 1 to
+        // `fmodf(value)` gives us this. Let's continue the example from above:
+        //   - fractial = fmodf(-2.2) = -0.2
+        //   - Add 1 to the fraction: fractial2 = fractial + 1 = -0.2 + 1 = 0.8
+        //   - Finding the `floor`: -2.2 - fractial2 = -2.2 - 0.8 = -3
+        ++fractial;
+    }
+    if (NearEqual(fractial, 0)) {
+        // First we check if the value is already rounded
+        scaledValue = scaledValue - fractial;
+    } else if (NearEqual(fractial, 1.0)) {
+        scaledValue = scaledValue - fractial + 1.0;
+    } else if (forceCeil) {
+        // Next we check if we need to use forced rounding
+        scaledValue = scaledValue - fractial + 1.0;
+    } else if (forceFloor) {
+        scaledValue = scaledValue - fractial;
+    } else {
+        // Finally we just round the value
+        scaledValue = scaledValue - fractial + (!std::isnan(fractial) && (GreatOrEqual(fractial, 0.5)) ? 1.0 : 0.0);
+    }
+    return scaledValue;
+}
+
+void RosenRenderContext::RoundToPixelGrid(float absoluteLeft, float absoluteTop)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+
+    float nodeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
+    float nodeTop = geometryNode->GetPixelGridRoundOffset().GetY();
+
+    float nodeWidth = geometryNode->GetFrameSize().Width();
+    float nodeHeight = geometryNode->GetFrameSize().Height();
+
+    float absoluteNodeLeft = absoluteLeft + nodeLeft;
+    float absoluteNodeTop = absoluteTop + nodeTop;
+
+    float absoluteNodeRight = absoluteNodeLeft + nodeWidth;
+    float absoluteNodeBottom = absoluteNodeTop + nodeHeight;
+
+    // If a node has a custom measure function we never want to round down its
+    // size as this could lead to unwanted text truncation.
+    bool textRounding = frameNode->GetTag() == V2::TEXT_ETS_TAG;
+
+    geometryNode->SetPixelGridRoundOffset(OffsetF(RoundValueToPixelGrid(nodeLeft, false, textRounding),
+        RoundValueToPixelGrid(nodeTop, false, textRounding)));
+
+    if (HasOffset()) {
+        float nodeLeftWithoutOffset = geometryNode->GetPixelGridRoundOffsetForArea().GetX();
+        float nodeTopWithoutOffset = geometryNode->GetPixelGridRoundOffsetForArea().GetY();
+        geometryNode->SetPixelGridRoundOffsetForArea(OffsetF(RoundValueToPixelGrid(nodeLeftWithoutOffset, false,
+            textRounding), RoundValueToPixelGrid(nodeTopWithoutOffset, false, textRounding)));
+    } else {
+        geometryNode->SetPixelGridRoundOffsetForArea(geometryNode->GetPixelGridRoundOffset());
+    }
+
+    // We multiply dimension by scale factor and if the result is close to the
+    // whole number, we don't have any fraction To verify if the result is close
+    // to whole number we want to check both floor and ceil numbers
+    bool hasFractionalWidth =
+        !NearEqual(fmod(nodeWidth, 1.0), 0) && !NearEqual(fmod(nodeWidth, 1.0), 1.0);
+    bool hasFractionalHeight =
+        !NearEqual(fmod(nodeHeight, 1.0), 0) && !NearEqual(fmod(nodeHeight, 1.0), 1.0);
+
+    geometryNode->SetFrameSize(SizeF(
+        RoundValueToPixelGrid(absoluteNodeRight, (textRounding && hasFractionalWidth),
+            (textRounding && !hasFractionalWidth)) - RoundValueToPixelGrid(absoluteNodeLeft, false, textRounding),
+        RoundValueToPixelGrid(absoluteNodeBottom, (textRounding && hasFractionalHeight),
+            (textRounding && !hasFractionalHeight)) - RoundValueToPixelGrid(absoluteNodeTop, false, textRounding)));
 }
 
 void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension& resultY,

@@ -63,7 +63,7 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
-    void SyncGeometryProperties(GeometryNode* geometryNode) override;
+    void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) override;
 
     void SyncGeometryProperties(const RectF& paintRect) override;
 
@@ -431,6 +431,9 @@ private:
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     void SetContentRectToFrame(RectF rect) override;
+
+    float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
+    void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
