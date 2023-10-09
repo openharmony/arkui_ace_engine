@@ -125,6 +125,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
@@ -473,12 +474,10 @@ void JsBindViews(BindingTarget globalObj)
     JSMatrix2d::JSBind(globalObj);
     JSSearch::JSBind(globalObj);
     JSSelect::JSBind(globalObj);
-    JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
     JSTextTimer::JSBind(globalObj);
-    JSTextAreaController::JSBind(globalObj);
-    JSTextInputController::JSBind(globalObj);
+    JSTextEditableController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSCheckbox::JSBind(globalObj);
     JSCheckboxGroup::JSBind(globalObj);
