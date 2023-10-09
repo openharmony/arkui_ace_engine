@@ -275,14 +275,13 @@ public:
     void SetScrollSource(int32_t scrollSource)
     {
         if (scrollSource == SCROLL_FROM_JUMP) {
-            if (scrollBar_ && scrollBarOverlayModifier_) {
+            if (scrollBar_ && scrollBar_->IsScrollable() && scrollBarOverlayModifier_) {
                 scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
                 scrollBar_->ScheduleDisappearDelayTask();
             }
             StopScrollBarAnimatorByProxy();
             StartScrollBarAnimatorByProxy();
         }
-
         scrollSource_ = scrollSource;
     }
 
