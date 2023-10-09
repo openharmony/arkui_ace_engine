@@ -278,7 +278,7 @@ void WindowPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
-int32_t CalculateTranslateDegree(int32_t hostId)
+int32_t WindowPattern::CalculateTranslateDegree(int32_t hostId)
 {
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
@@ -312,7 +312,7 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
-    auto udegree = CalculateTranslateDegree(host->GetId());
+    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
     SetWindowSceneConsumed(pointerEvent->GetPointerAction());
     DispatchPointerEvent(pointerEvent);
