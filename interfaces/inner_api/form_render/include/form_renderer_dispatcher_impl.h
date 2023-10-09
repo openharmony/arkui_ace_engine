@@ -20,8 +20,12 @@
 
 #include "base/utils/macros.h"
 #include "ui_content.h"
+#include "event_handler.h"
 
 namespace OHOS {
+namespace AppExecFwk {
+class EventHandler;
+}
 namespace Ace {
 class FormRenderer;
 /**
@@ -30,8 +34,9 @@ class FormRenderer;
  */
 class ACE_EXPORT FormRendererDispatcherImpl : public FormRendererDispatcherStub {
 public:
-    FormRendererDispatcherImpl(
-        const std::shared_ptr<UIContent> uiContent, const std::shared_ptr<FormRenderer> formRenderer);
+    FormRendererDispatcherImpl(const std::shared_ptr<UIContent> uiContent,
+        const std::shared_ptr<FormRenderer> formRenderer,
+        std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler);
     ~FormRendererDispatcherImpl() override = default;
     /**
      * @brief Dispatcher pointer event.
@@ -50,6 +55,7 @@ public:
 private:
     std::weak_ptr<UIContent> uiContent_;
     std::weak_ptr<FormRenderer> formRenderer_;
+    std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     bool allowUpdate_ = true;
 };
 } // namespace Ace
