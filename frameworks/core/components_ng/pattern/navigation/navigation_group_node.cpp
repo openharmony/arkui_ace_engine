@@ -318,8 +318,7 @@ bool NavigationGroupNode::CheckCanHandleBack()
     auto navigation = AceType::WeakClaim(this).Upgrade();
     CHECK_NULL_RETURN(navigation, false);
     if (navigation->isOnAnimation_) {
-        LOGI("animation is ongoing");
-        return false;
+        return true;
     }
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navigationPattern, false);
