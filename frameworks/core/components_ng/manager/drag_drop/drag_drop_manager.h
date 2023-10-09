@@ -29,6 +29,7 @@
 namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
     IDLE,
+    ABOUT_TO_PREVIEW,
     DRAGGING
 };
 
@@ -159,6 +160,11 @@ public:
     bool IsDragging()
     {
         return dragDropState_ == DragDropMgrState::DRAGGING;
+    }
+
+    bool IsAboutToPreview()
+    {
+        return dragDropState_ == DragDropMgrState::ABOUT_TO_PREVIEW;
     }
 
     void ResetDragging(DragDropMgrState dragDropMgrState = DragDropMgrState::IDLE)
