@@ -31,7 +31,7 @@
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/utils.h"
-#include "adapter/ohos/osal/resource_adapter_impl.h"
+#include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -59,9 +59,9 @@
 #include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
 #include "core/common/plugin_manager.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
-#include "core/components/resource/resource_manager.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -76,7 +76,6 @@
 
 namespace OHOS::Ace::Platform {
 namespace {
-
 
 constexpr uint32_t DIRECTION_OR_DPI_KEY = 0b1100;
 
@@ -1272,21 +1271,24 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
 
     // Load custom style at UI thread before frontend attach, for loading style before building tree.
     auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
-                                    colorScheme = colorScheme_, resourceInfo = resourceInfo_, context = runtimeContext_.lock()]() {
+                                    colorScheme = colorScheme_, resourceInfo = resourceInfo_,
+                                    context = runtimeContext_.lock()]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
         LOGD("UIContent load theme");
+
+        auto resourceAdapter = ResourceAdapter::Create();
+        resourceAdapter->Init(resourceInfo);
+
         ThemeConstants::InitDeviceType();
-        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
         pipelineContext->SetThemeManager(themeManager);
-        themeManager->InitResource(resourceInfo);
         themeManager->SetColorScheme(colorScheme);
         themeManager->LoadCustomTheme(assetManager);
         themeManager->LoadResourceThemes();
 
-        auto sysResourceAdapter = themeManager->GetThemeConstants()->GetResourceAdapter();
         auto defaultBundleName = "";
         auto defaultModuleName = "";
-        ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, sysResourceAdapter);
+        ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
     };
 
     auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
@@ -1547,7 +1549,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     front->OnConfigurationUpdated(configuration);
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
-#endif  
+#endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
 }
 

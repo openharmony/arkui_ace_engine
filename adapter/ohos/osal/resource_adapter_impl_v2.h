@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
-#define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_V2_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_V2_H
 
 #include <mutex>
 #include <shared_mutex>
@@ -26,13 +26,13 @@
 
 namespace OHOS::Ace {
 
-class ResourceAdapterImpl : public ResourceAdapter {
-    DECLARE_ACE_TYPE(ResourceAdapterImpl, ResourceAdapter);
+class ResourceAdapterImplV2 : public ResourceAdapter {
+    DECLARE_ACE_TYPE(ResourceAdapterImplV2, ResourceAdapter);
 
 public:
-    ResourceAdapterImpl() = default;
-    explicit ResourceAdapterImpl(std::shared_ptr<Global::Resource::ResourceManager> resourceManager);
-    ~ResourceAdapterImpl() override = default;
+    ResourceAdapterImplV2() = default;
+    explicit ResourceAdapterImplV2(std::shared_ptr<Global::Resource::ResourceManager> resourceManager);
+    ~ResourceAdapterImplV2() override = default;
 
     void Init(const ResourceInfo& resourceInfo) override;
     void UpdateConfig(const ResourceConfiguration& config) override;
@@ -70,7 +70,7 @@ public:
     bool GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest) override;
     bool GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest,
         const std::string& bundleName, const std::string& moduleName) override;
-    void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) override;
+    void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) override {};
     bool GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const override;
     bool GetMediaById(const int32_t& resId, std::string& mediaPath) const override;
     uint32_t GetResourceLimitKeys() const override;
@@ -81,17 +81,15 @@ private:
     inline std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const
     {
         std::shared_lock<std::shared_mutex> lock(resourceMutex_);
-        return resourceManager_;
+        return sysResourceManager_;
     }
 
-    std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
     std::shared_ptr<Global::Resource::ResourceManager> sysResourceManager_;
-    std::map<std::pair<std::string, std::string>, std::shared_ptr<Global::Resource::ResourceManager>> resourceManagers_;
     std::string packagePathStr_;
     // protect resourceManager_
     mutable std::shared_mutex resourceMutex_;
     std::shared_ptr<Global::Resource::ResConfig> resConfig_;
-    ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImpl);
+    ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
 };
 } // namespace OHOS::Ace
 

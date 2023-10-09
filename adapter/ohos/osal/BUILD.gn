@@ -78,7 +78,7 @@ template("ace_osal_ohos_source_set") {
 
     if (is_ohos_standard_system) {
       sources += [
-        "resource_adapter_impl.cpp",
+        "resource_adapter_impl_v2.cpp",
         "resource_convertor.cpp",
         "resource_theme_style.cpp",
       ]

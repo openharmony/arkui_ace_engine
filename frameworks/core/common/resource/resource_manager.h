@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/resource_configuration.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/theme/resource_adapter.h"
-#include "core/components/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -81,7 +81,6 @@ public:
 private:
     ResourceManager() = default;
 
-    // static thread_local std::unique_ptr<ResourceManager> instance_;
     std::map<std::pair<std::string, std::string>, RefPtr<ResourceAdapter>> resourceAdapters_;
     std::shared_mutex mutex_;
 };

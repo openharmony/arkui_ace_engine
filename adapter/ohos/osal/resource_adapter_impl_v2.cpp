@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "adapter/ohos/osal/resource_adapter_impl.h"
+#include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 
 #include <dirent.h>
 
@@ -22,6 +22,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "adapter/ohos/osal/resource_theme_style.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/theme_attributes.h"
@@ -91,8 +92,7 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_FORM,
     THEME_PATTERN_SIDE_BAR,
     THEME_PATTERN_RICH_EDITOR,
-    THEME_PATTERN_PATTERN_LOCK,
-    THEME_PATTERN_GAUGE
+    THEME_PATTERN_PATTERN_LOCK
 };
 
 bool IsDirExist(const std::string& path)
@@ -124,7 +124,8 @@ DimensionUnit ParseDimensionUnit(const std::string& unit)
 
 RefPtr<ResourceAdapter> ResourceAdapter::Create()
 {
-    return AceType::MakeRefPtr<ResourceAdapterImpl>();
+    LOGI("Use resourceAdapter v2");
+    return AceType::MakeRefPtr<ResourceAdapterImplV2>();
 }
 
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
@@ -136,20 +137,20 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     CHECK_NULL_RETURN(aceContainer, nullptr);
     auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
     CHECK_NULL_RETURN(context, nullptr);
-    
+
+    LOGI("Use resourceAdapter v2");
     auto resourceManager = context->GetResourceManager();
-    auto newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImpl>(resourceManager);
+    auto newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
 
     return newResourceAdapter;
 }
 
-ResourceAdapterImpl::ResourceAdapterImpl(std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
+ResourceAdapterImplV2::ResourceAdapterImplV2(std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
 {
-    resourceManager_ = resourceManager;
     sysResourceManager_ = resourceManager;
 }
 
-void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
+void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
 {
     std::string resPath = resourceInfo.GetPackagePath();
     std::string hapPath = resourceInfo.GetHapPath();
@@ -166,15 +167,11 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
             resConfig->GetColorMode(), resConfig->GetInputDevice());
     }
     sysResourceManager_ = newResMgr;
-    {
-        std::unique_lock<std::shared_mutex> lock(resourceMutex_);
-        resourceManager_ = sysResourceManager_;
-    }
     packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
     resConfig_ = resConfig;
 }
 
-void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
+void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config)
 {
     auto resConfig = ConvertConfigToGlobal(config);
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d, "
@@ -184,15 +181,10 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
     if (sysResourceManager_ && resConfig != nullptr) {
         sysResourceManager_->UpdateResConfig(*resConfig);
     }
-    for (auto& resMgr : resourceManagers_) {
-        if (resConfig != nullptr) {
-            resMgr.second->UpdateResConfig(*resConfig);
-        }
-    }
     resConfig_ = resConfig;
 }
 
-RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
+RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
@@ -228,7 +220,7 @@ RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
     return theme;
 }
 
-Color ResourceAdapterImpl::GetColor(uint32_t resId)
+Color ResourceAdapterImplV2::GetColor(uint32_t resId)
 {
     uint32_t result = 0;
     auto manager = GetResourceManager();
@@ -240,7 +232,7 @@ Color ResourceAdapterImpl::GetColor(uint32_t resId)
     return Color(result);
 }
 
-Color ResourceAdapterImpl::GetColorByName(const std::string& resName)
+Color ResourceAdapterImplV2::GetColorByName(const std::string& resName)
 {
     uint32_t result = 0;
     auto actualResName = GetActualResourceName(resName);
@@ -253,7 +245,7 @@ Color ResourceAdapterImpl::GetColorByName(const std::string& resName)
     return Color(result);
 }
 
-Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
+Dimension ResourceAdapterImplV2::GetDimension(uint32_t resId)
 {
     float dimensionFloat = 0.0f;
 #ifdef NG_BUILD
@@ -289,7 +281,7 @@ Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
 #endif
 }
 
-Dimension ResourceAdapterImpl::GetDimensionByName(const std::string& resName)
+Dimension ResourceAdapterImplV2::GetDimensionByName(const std::string& resName)
 {
     float dimensionFloat = 0.0f;
     auto actualResName = GetActualResourceName(resName);
@@ -303,7 +295,7 @@ Dimension ResourceAdapterImpl::GetDimensionByName(const std::string& resName)
     return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
 }
 
-std::string ResourceAdapterImpl::GetString(uint32_t resId)
+std::string ResourceAdapterImplV2::GetString(uint32_t resId)
 {
     std::string strResult = "";
     auto manager = GetResourceManager();
@@ -315,7 +307,7 @@ std::string ResourceAdapterImpl::GetString(uint32_t resId)
     return strResult;
 }
 
-std::string ResourceAdapterImpl::GetStringByName(const std::string& resName)
+std::string ResourceAdapterImplV2::GetStringByName(const std::string& resName)
 {
     std::string strResult = "";
     auto actualResName = GetActualResourceName(resName);
@@ -328,7 +320,7 @@ std::string ResourceAdapterImpl::GetStringByName(const std::string& resName)
     return strResult;
 }
 
-std::string ResourceAdapterImpl::GetPluralString(uint32_t resId, int quantity)
+std::string ResourceAdapterImplV2::GetPluralString(uint32_t resId, int quantity)
 {
     std::string strResult = "";
     auto manager = GetResourceManager();
@@ -340,7 +332,7 @@ std::string ResourceAdapterImpl::GetPluralString(uint32_t resId, int quantity)
     return strResult;
 }
 
-std::string ResourceAdapterImpl::GetPluralStringByName(const std::string& resName, int quantity)
+std::string ResourceAdapterImplV2::GetPluralStringByName(const std::string& resName, int quantity)
 {
     std::string strResult = "";
     auto actualResName = GetActualResourceName(resName);
@@ -353,7 +345,7 @@ std::string ResourceAdapterImpl::GetPluralStringByName(const std::string& resNam
     return strResult;
 }
 
-std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) const
+std::vector<std::string> ResourceAdapterImplV2::GetStringArray(uint32_t resId) const
 {
     std::vector<std::string> strResults;
     auto manager = GetResourceManager();
@@ -365,7 +357,7 @@ std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) con
     return strResults;
 }
 
-std::vector<std::string> ResourceAdapterImpl::GetStringArrayByName(const std::string& resName) const
+std::vector<std::string> ResourceAdapterImplV2::GetStringArrayByName(const std::string& resName) const
 {
     std::vector<std::string> strResults;
     auto actualResName = GetActualResourceName(resName);
@@ -378,7 +370,7 @@ std::vector<std::string> ResourceAdapterImpl::GetStringArrayByName(const std::st
     return strResults;
 }
 
-double ResourceAdapterImpl::GetDouble(uint32_t resId)
+double ResourceAdapterImplV2::GetDouble(uint32_t resId)
 {
     float result = 0.0f;
     auto manager = GetResourceManager();
@@ -390,7 +382,7 @@ double ResourceAdapterImpl::GetDouble(uint32_t resId)
     return static_cast<double>(result);
 }
 
-double ResourceAdapterImpl::GetDoubleByName(const std::string& resName)
+double ResourceAdapterImplV2::GetDoubleByName(const std::string& resName)
 {
     float result = 0.0f;
     auto actualResName = GetActualResourceName(resName);
@@ -403,7 +395,7 @@ double ResourceAdapterImpl::GetDoubleByName(const std::string& resName)
     return static_cast<double>(result);
 }
 
-int32_t ResourceAdapterImpl::GetInt(uint32_t resId)
+int32_t ResourceAdapterImplV2::GetInt(uint32_t resId)
 {
     int32_t result = 0;
     auto manager = GetResourceManager();
@@ -415,7 +407,7 @@ int32_t ResourceAdapterImpl::GetInt(uint32_t resId)
     return result;
 }
 
-int32_t ResourceAdapterImpl::GetIntByName(const std::string& resName)
+int32_t ResourceAdapterImplV2::GetIntByName(const std::string& resName)
 {
     int32_t result = 0;
     auto actualResName = GetActualResourceName(resName);
@@ -428,7 +420,7 @@ int32_t ResourceAdapterImpl::GetIntByName(const std::string& resName)
     return result;
 }
 
-std::vector<uint32_t> ResourceAdapterImpl::GetIntArray(uint32_t resId) const
+std::vector<uint32_t> ResourceAdapterImplV2::GetIntArray(uint32_t resId) const
 {
     std::vector<int> intVectorResult;
     {
@@ -447,7 +439,7 @@ std::vector<uint32_t> ResourceAdapterImpl::GetIntArray(uint32_t resId) const
     return result;
 }
 
-std::vector<uint32_t> ResourceAdapterImpl::GetIntArrayByName(const std::string& resName) const
+std::vector<uint32_t> ResourceAdapterImplV2::GetIntArrayByName(const std::string& resName) const
 {
     std::vector<int> intVectorResult;
     auto actualResName = GetActualResourceName(resName);
@@ -464,7 +456,7 @@ std::vector<uint32_t> ResourceAdapterImpl::GetIntArrayByName(const std::string& 
     return result;
 }
 
-bool ResourceAdapterImpl::GetBoolean(uint32_t resId) const
+bool ResourceAdapterImplV2::GetBoolean(uint32_t resId) const
 {
     bool result = false;
     auto manager = GetResourceManager();
@@ -476,7 +468,7 @@ bool ResourceAdapterImpl::GetBoolean(uint32_t resId) const
     return result;
 }
 
-bool ResourceAdapterImpl::GetBooleanByName(const std::string& resName) const
+bool ResourceAdapterImplV2::GetBooleanByName(const std::string& resName) const
 {
     bool result = false;
     auto actualResName = GetActualResourceName(resName);
@@ -489,14 +481,14 @@ bool ResourceAdapterImpl::GetBooleanByName(const std::string& resName) const
     return result;
 }
 
-std::shared_ptr<Media::PixelMap> ResourceAdapterImpl::GetPixelMap(uint32_t resId)
+std::shared_ptr<Media::PixelMap> ResourceAdapterImplV2::GetPixelMap(uint32_t resId)
 {
     auto manager = GetResourceManager();
 
     CHECK_NULL_RETURN(manager, nullptr);
     Napi::DrawableDescriptor::DrawableType drawableType;
     Global::Resource::RState state;
-    auto drawableDescriptor = Napi::DrawableDescriptorFactory::Create(resId, resourceManager_, state, drawableType, 0);
+    auto drawableDescriptor = Napi::DrawableDescriptorFactory::Create(resId, sysResourceManager_, state, drawableType, 0);
     if (state != Global::Resource::SUCCESS) {
         LOGE("Failed to Create drawableDescriptor by %{public}d", resId);
         return nullptr;
@@ -505,7 +497,7 @@ std::shared_ptr<Media::PixelMap> ResourceAdapterImpl::GetPixelMap(uint32_t resId
     return drawableDescriptor->GetPixelMap();
 }
 
-std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
+std::string ResourceAdapterImplV2::GetMediaPath(uint32_t resId)
 {
     std::string mediaPath = "";
     auto manager = GetResourceManager();
@@ -526,7 +518,7 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
     return "resource:///" + std::to_string(resId) + mediaPath.substr(pos);
 }
 
-std::string ResourceAdapterImpl::GetMediaPathByName(const std::string& resName)
+std::string ResourceAdapterImplV2::GetMediaPathByName(const std::string& resName)
 {
     std::string mediaPath = "";
     auto actualResName = GetActualResourceName(resName);
@@ -550,7 +542,7 @@ std::string ResourceAdapterImpl::GetMediaPathByName(const std::string& resName)
     return "resource:///" + actualResName + mediaPath.substr(pos);
 }
 
-std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
+std::string ResourceAdapterImplV2::GetRawfile(const std::string& fileName)
 {
     // as web component not support resource format: resource://RAWFILE/{fileName}, use old format
     if (!packagePathStr_.empty()) {
@@ -575,7 +567,7 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
     return "resource://RAWFILE/" + fileName;
 }
 
-bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
+bool ResourceAdapterImplV2::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
 {
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, false);
@@ -587,7 +579,7 @@ bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len
     return true;
 }
 
-bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+bool ResourceAdapterImplV2::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest,
     const std::string& bundleName, const std::string& moduleName)
 {
     auto manager = GetResourceManager();
@@ -602,7 +594,7 @@ bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len
     return true;
 }
 
-bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest)
+bool ResourceAdapterImplV2::GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest)
 {
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, false);
@@ -614,7 +606,7 @@ bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_
     return true;
 }
 
-bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+bool ResourceAdapterImplV2::GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest,
     const std::string& bundleName, const std::string& moduleName)
 {
     auto manager = GetResourceManager();
@@ -628,7 +620,7 @@ bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_
     return true;
 }
 
-bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest)
+bool ResourceAdapterImplV2::GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest)
 {
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, false);
@@ -640,7 +632,7 @@ bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, 
     return true;
 }
 
-bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+bool ResourceAdapterImplV2::GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest,
     const std::string& bundleName, const std::string& moduleName)
 {
     auto manager = GetResourceManager();
@@ -654,34 +646,7 @@ bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, 
     return true;
 }
 
-void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, const std::string& moduleName)
-{
-    std::unique_lock<std::shared_mutex> lcok(resourceMutex_);
-    if (bundleName.empty() || moduleName.empty()) {
-        resourceManager_ = sysResourceManager_;
-        return;
-    }
-
-    auto resourceMgrIter = resourceManagers_.find({ bundleName, moduleName });
-    if (resourceMgrIter != resourceManagers_.end()) {
-        resourceManager_ = resourceMgrIter->second;
-        return;
-    } else {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
-        CHECK_NULL_VOID(aceContainer);
-        auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
-        CHECK_NULL_VOID(context);
-        resourceManagers_[{ bundleName, moduleName }] = context->GetResourceManager();
-        resourceManager_ = context->GetResourceManager();
-        if (resourceManager_ && resConfig_ != nullptr) {
-            resourceManager_->UpdateResConfig(*resConfig_);
-        }
-    }
-}
-
-bool ResourceAdapterImpl::GetRawFileDescription(
+bool ResourceAdapterImplV2::GetRawFileDescription(
     const std::string& rawfileName, RawfileDescription& rawfileDescription) const
 {
     OHOS::Global::Resource::ResourceManager::RawFileDescriptor descriptor;
@@ -698,7 +663,7 @@ bool ResourceAdapterImpl::GetRawFileDescription(
     return true;
 }
 
-bool ResourceAdapterImpl::GetMediaById(const int32_t& resId, std::string& mediaPath) const
+bool ResourceAdapterImplV2::GetMediaById(const int32_t& resId, std::string& mediaPath) const
 {
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, false);
@@ -710,7 +675,7 @@ bool ResourceAdapterImpl::GetMediaById(const int32_t& resId, std::string& mediaP
     return true;
 }
 
-std::string ResourceAdapterImpl::GetActualResourceName(const std::string& resName) const
+std::string ResourceAdapterImplV2::GetActualResourceName(const std::string& resName) const
 {
     auto index = resName.find_last_of('.');
     if (index == std::string::npos) {
@@ -720,7 +685,7 @@ std::string ResourceAdapterImpl::GetActualResourceName(const std::string& resNam
     return resName.substr(index + 1, resName.length() - index - 1);
 }
 
-uint32_t ResourceAdapterImpl::GetResourceLimitKeys() const
+uint32_t ResourceAdapterImplV2::GetResourceLimitKeys() const
 {
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, 0);

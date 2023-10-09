@@ -63,8 +63,6 @@ template("web_pattern_unit_source_set") {
       sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
       defines += [ "ENABLE_DRAG_FRAMEWORK" ]
     }
-    sources +=
-        [ "$ace_root/frameworks/core/components/resource/resource_manager.cpp" ]
   }
 }
 

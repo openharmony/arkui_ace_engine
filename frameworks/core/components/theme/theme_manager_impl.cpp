@@ -56,6 +56,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/card_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/tool_bar/tool_bar_theme.h"
@@ -144,6 +145,11 @@ ThemeManagerImpl::ThemeManagerImpl()
 {
     auto resAdapter = ResourceAdapter::Create();
     themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
+}
+
+ThemeManagerImpl::ThemeManagerImpl(RefPtr<ResourceAdapter>& resourceAdapter)
+{
+    themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
 }
 
 RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)

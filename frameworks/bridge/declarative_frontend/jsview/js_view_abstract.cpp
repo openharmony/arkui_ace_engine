@@ -53,6 +53,8 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/border_image.h"
@@ -60,8 +62,6 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/resource_adapter.h"
-#include "core/components/resource/resource_manager.h"
-#include "core/components/resource/resource_object.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
@@ -1012,7 +1012,7 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
     auto id = jsObj->GetProperty("id")->ToNumber<uint32_t>();
     auto type = jsObj->GetProperty("type")->ToNumber<uint32_t>();
     auto args = jsObj->GetProperty("params");
-    
+
     std::string bundleName;
     std::string moduleName;
     auto bundle = jsObj->GetProperty("bundleName");
@@ -1028,7 +1028,7 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
     LOGI("Parse params in JSObject");
     for (int32_t i = 0; i < size; i++) {
         auto item = params->GetValueAt(i);
-        ResourceObjectParams resObjParams {.value = item->ToString().c_str()};
+        ResourceObjectParams resObjParams { .value = item->ToString().c_str() };
         if (item->IsString()) {
             resObjParams.type = ResourceObjectParamType::STRING;
             LOGI("params %{public}d: string %{public}s", i, item->ToString().c_str());
@@ -3467,14 +3467,16 @@ bool JSViewAbstract::ParseJsDimensionNG(
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = resourceAdapter->GetString(resId->ToNumber<uint32_t>());
-        LOGI("[ParseJsDimensionNG] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, moduleName: %{public}s, "
+        LOGI("[ParseJsDimensionNG] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, moduleName: "
+             "%{public}s, "
              "result: %{public}s",
             resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), value.c_str());
         return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(resourceAdapter->GetInt(resId->ToNumber<uint32_t>()));
-        LOGI("[ParseJsDimensionNG] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: %{public}s, "
+        LOGI("[ParseJsDimensionNG] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: "
+             "%{public}s, "
              "result: %{public}s",
             resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), value.c_str());
         StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
@@ -3483,9 +3485,11 @@ bool JSViewAbstract::ParseJsDimensionNG(
 
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
         result = resourceAdapter->GetDimension(resId->ToNumber<uint32_t>()); // float return true pixel value
-        LOGI("[ParseJsDimensionNG] use resource adapter to get $r(FLOAT) by id, bundleName: %{public}s, moduleName: %{public}s, "
+        LOGI("[ParseJsDimensionNG] use resource adapter to get $r(FLOAT) by id, bundleName: %{public}s, moduleName: "
+             "%{public}s, "
              "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.CalcValue().c_str());
+            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(),
+            result.CalcValue().c_str());
         return true;
     }
 
@@ -3519,7 +3523,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         LOGW("resourceAdapter is nullptr");
         return false;
     }
-    
+
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
@@ -3543,17 +3547,21 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = resourceAdapter->GetString(resId->ToNumber<uint32_t>());
         result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
-        LOGI("[ParseJsDimension] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, moduleName: %{public}s, "
+        LOGI("[ParseJsDimension] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, moduleName: "
+             "%{public}s, "
              "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.CalcValue().c_str());
+            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(),
+            result.CalcValue().c_str());
         return true;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(resourceAdapter->GetInt(resId->ToNumber<uint32_t>()));
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
-        LOGI("[ParseJsDimension] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: %{public}s, "
+        LOGI("[ParseJsDimension] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: "
+             "%{public}s, "
              "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.CalcValue().c_str());
+            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(),
+            result.CalcValue().c_str());
         return true;
     }
     result = resourceAdapter->GetDimension(resId->ToNumber<uint32_t>());
@@ -3633,21 +3641,24 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto numberString = resourceAdapter->GetString(resId);
-        LOGI("[ParseResourceToDouble] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, moduleName: %{public}s, "
+        LOGI("[ParseResourceToDouble] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, "
+             "moduleName: %{public}s, "
              "result: %{public}s",
             resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), numberString.c_str());
         return StringUtils::StringToDouble(numberString, result);
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         result = resourceAdapter->GetInt(resId);
-        LOGI("[ParseResourceToDouble] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: %{public}s, "
+        LOGI("[ParseResourceToDouble] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, "
+             "moduleName: %{public}s, "
              "result: %{public}f",
             resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result);
         return true;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
         result = resourceAdapter->GetDouble(resId);
-        LOGI("[ParseResourceToDouble] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: %{public}s, "
+        LOGI("[ParseResourceToDouble] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, "
+             "moduleName: %{public}s, "
              "result: %{public}f",
             resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result);
         return true;
@@ -3751,23 +3762,27 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = resourceAdapter->GetString(resId->ToNumber<uint32_t>());
-        LOGI("[ParseJsColorFromResource] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, moduleName: %{public}s, "
+        LOGI("[ParseJsColorFromResource] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, "
+             "moduleName: %{public}s, "
              "result: %{public}s",
             resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), value.c_str());
         return Color::ParseColorString(value, result);
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = resourceAdapter->GetInt(resId->ToNumber<uint32_t>());
-        LOGI("[ParseJsColorFromResource] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: %{public}s, "
+        LOGI("[ParseJsColorFromResource] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, "
+             "moduleName: %{public}s, "
              "result: %{public}d",
             resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), value);
         result = Color(ColorAlphaAdapt(value));
         return true;
     }
     result = resourceAdapter->GetColor(resId->ToNumber<uint32_t>());
-    LOGI("[ParseJsColorFromResource] use resource adapter to get $(Color) by id, bundleName: %{public}s, moduleName: %{public}s, "
-             "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.ColorToString().c_str());
+    LOGI("[ParseJsColorFromResource] use resource adapter to get $(Color) by id, bundleName: %{public}s, moduleName: "
+         "%{public}s, "
+         "result: %{public}s",
+        resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(),
+        result.ColorToString().c_str());
     return true;
 }
 

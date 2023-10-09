@@ -17,10 +17,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("canvas_renderer_test_ng") {
   module_out_path = pattern_test_output_path
 
-  sources = [
-    "canvas_renderer_test_ng.cpp",
-    "$ace_root/frameworks/core/components/resource/resource_manager.cpp",
-  ]
+  sources = [ "canvas_renderer_test_ng.cpp" ]
 
   deps = [
     "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",

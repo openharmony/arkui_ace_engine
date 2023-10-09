@@ -24,7 +24,6 @@ ohos_unittest("custom_paint_test_ng") {
 
     #"custom_paint_paint_method_test_ng.cpp",
     #"custom_paint_pattern_test_ng.cpp",
-    "$ace_root/frameworks/core/components/resource/resource_manager.cpp",
     "offscreen_canvas_paint_method_test_ng.cpp",
     "offscreen_canvas_paint_pattern_test_ng.cpp",
   ]
