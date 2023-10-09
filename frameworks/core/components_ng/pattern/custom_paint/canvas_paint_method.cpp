@@ -61,15 +61,15 @@ std::string GetMimeType(const std::string& args)
 {
     // Args example: ["image/png"]
     std::vector<std::string> values;
-    StringUtils::StringSplitter(args, '"', values);
-    if (values.size() < 3) {
+    StringUtils::StringSplitter(args, ',', values);
+    if (values.size() > 2) {
         return IMAGE_PNG;
     }
     // Convert to lowercase string.
-    for (size_t i = 0; i < values[1].size(); ++i) {
-        values[1][i] = static_cast<uint8_t>(tolower(values[1][i]));
+    for (size_t i = 0; i < values[0].size(); ++i) {
+        values[0][i] = static_cast<uint8_t>(tolower(values[0][i]));
     }
-    return values[1];
+    return values[0];
 }
 
 // Quality need between 0.0 and 1.0 for MimeType jpeg and webp
