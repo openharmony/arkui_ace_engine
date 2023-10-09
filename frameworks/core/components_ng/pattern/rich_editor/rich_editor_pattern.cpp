@@ -233,16 +233,24 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     std::function<ImageSourceInfo()> createSourceInfoFunc = CreateImageSourceInfo(options);
     imageLayoutProperty->UpdateImageSourceInfo(createSourceInfoFunc());
     if (options.imageAttribute.has_value()) {
-        if (options.imageAttribute.value().size.has_value()) {
+        auto imgAttr = options.imageAttribute.value();
+        if (imgAttr.size.has_value()) {
             imageLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(options.imageAttribute.value().size.value().width),
-                    CalcLength(options.imageAttribute.value().size.value().height)));
+                CalcSize(CalcLength(imgAttr.size.value().width), CalcLength(imgAttr.size.value().height)));
         }
-        if (options.imageAttribute.value().verticalAlign.has_value()) {
-            imageLayoutProperty->UpdateVerticalAlign(options.imageAttribute.value().verticalAlign.value());
+        if (imgAttr.verticalAlign.has_value()) {
+            imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
         }
-        if (options.imageAttribute.value().objectFit.has_value()) {
-            imageLayoutProperty->UpdateImageFit(options.imageAttribute.value().objectFit.value());
+        if (imgAttr.objectFit.has_value()) {
+            imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
+        }
+        if (imgAttr.marginProp.has_value()) {
+            imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
+        }
+        if (imgAttr.borderRadius.has_value()) {
+            auto imageRenderCtx = imageNode->GetRenderContext();
+            imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
+            imageRenderCtx->SetClipToBounds(true);
         }
     }
     if (isPaste) {
@@ -810,7 +818,7 @@ bool RichEditorPattern::HasSameTypingStyle(const RefPtr<SpanNode>& spanNode)
     }
 }
 
-void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpanAttribute imageStyle)
+void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -825,6 +833,15 @@ void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpan
     if (updateSpanStyle_.updateImageVerticalAlign.has_value()) {
         imageLayoutProperty->UpdateVerticalAlign(imageStyle.verticalAlign.value());
     }
+    if (updateSpanStyle_.borderRadius.has_value()) {
+        auto imageRenderCtx = imageNode->GetRenderContext();
+        imageRenderCtx->UpdateBorderRadius(imageStyle.borderRadius.value());
+        imageRenderCtx->SetClipToBounds(true);
+    }
+    if (updateSpanStyle_.marginProp.has_value()) {
+        imageLayoutProperty->UpdateMargin(imageStyle.marginProp.value());
+    }
+
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

@@ -2568,29 +2568,14 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         }
         return;
     }
-    if (info[0]->IsObject()) {
+    auto tmpInfo = info[0];
+    if (tmpInfo->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
         std::optional<CalcDimension> top;
         std::optional<CalcDimension> bottom;
-        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
-
-        CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
-            left = leftDimen;
-        }
-        CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
-            right = rightDimen;
-        }
-        CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
-            top = topDimen;
-        }
-        CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
-            bottom = bottomDimen;
-        }
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(tmpInfo);
+        ParseMarginOrPaddingCorner(paddingObj, top, bottom, left, right);
         if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
             if (isMargin) {
                 ViewAbstractModel::GetInstance()->SetMargins(top, bottom, left, right);
@@ -2602,7 +2587,7 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
     }
 
     CalcDimension length;
-    if (!ParseJsDimensionVp(info[0], length)) {
+    if (!ParseJsDimensionVp(tmpInfo, length)) {
         // use default value.
         length.Reset();
     }
@@ -2610,6 +2595,27 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         ViewAbstractModel::GetInstance()->SetMargin(length);
     } else {
         ViewAbstractModel::GetInstance()->SetPadding(length);
+    }
+}
+
+void JSViewAbstract::ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
+    std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right)
+{
+    CalcDimension leftDimen;
+    if (ParseJsDimensionVp(obj->GetProperty("left"), leftDimen)) {
+        left = leftDimen;
+    }
+    CalcDimension rightDimen;
+    if (ParseJsDimensionVp(obj->GetProperty("right"), rightDimen)) {
+        right = rightDimen;
+    }
+    CalcDimension topDimen;
+    if (ParseJsDimensionVp(obj->GetProperty("top"), topDimen)) {
+        top = topDimen;
+    }
+    CalcDimension bottomDimen;
+    if (ParseJsDimensionVp(obj->GetProperty("bottom"), bottomDimen)) {
+        bottom = bottomDimen;
     }
 }
 
@@ -3045,7 +3051,6 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderRadius", info, checkList)) {
-        LOGW("args need a string or number or object");
         ViewAbstractModel::GetInstance()->SetBorderRadius({});
         return;
     }
@@ -3055,7 +3060,6 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
     CalcDimension borderRadius;
@@ -3067,17 +3071,11 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension topLeft;
-        GetBorderRadius("topLeft", object, topLeft);
         CalcDimension topRight;
-        GetBorderRadius("topRight", object, topRight);
         CalcDimension bottomLeft;
-        GetBorderRadius("bottomLeft", object, bottomLeft);
         CalcDimension bottomRight;
-        GetBorderRadius("bottomRight", object, bottomRight);
+        ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
-    } else {
-        LOGE("args format error. %{public}s", args->ToString().c_str());
-        return;
     }
 }
 
@@ -3088,6 +3086,15 @@ void JSViewAbstract::GetBorderRadius(const char* key, JSRef<JSObject>& object, C
             radius.Reset();
         }
     }
+}
+
+void JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
+    CalcDimension& bottomLeft, CalcDimension& bottomRight)
+{
+    GetBorderRadius("topLeft", object, topLeft);
+    GetBorderRadius("topRight", object, topRight);
+    GetBorderRadius("bottomLeft", object, bottomLeft);
+    GetBorderRadius("bottomRight", object, bottomRight);
 }
 
 void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)

@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <mutex>
+#include <optional>
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
@@ -26,6 +27,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
@@ -38,6 +40,8 @@ struct ImageSpanAttribute {
     std::optional<ImageSpanSize> size;
     std::optional<VerticalAlign> verticalAlign;
     std::optional<ImageFit> objectFit;
+    std::optional<OHOS::Ace::NG::MarginProperty> marginProp;
+    std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
 };
 struct ImageSpanOptions {
     std::optional<int32_t> offset;
@@ -82,6 +86,8 @@ struct UpdateSpanStyle {
         updateImageHeight.reset();
         updateImageVerticalAlign.reset();
         updateImageFit.reset();
+        marginProp.reset();
+        borderRadius.reset();
     }
 
     std::optional<Color> updateTextColor = std::nullopt;
@@ -96,6 +102,8 @@ struct UpdateSpanStyle {
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
     std::optional<VerticalAlign> updateImageVerticalAlign = std::nullopt;
     std::optional<ImageFit> updateImageFit = std::nullopt;
+    std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
+    std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
 };
 
 struct UpdateParagraphStyle {
