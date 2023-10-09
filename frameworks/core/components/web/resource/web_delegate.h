@@ -573,6 +573,7 @@ public:
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
+    std::string tempDir_;
     void UpdateDragCursor(NWeb::NWebDragData::DragOperation op)
     {
         op_ = op;

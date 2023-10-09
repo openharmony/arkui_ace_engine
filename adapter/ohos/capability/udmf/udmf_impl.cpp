@@ -37,6 +37,7 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "js_native_api_types.h"
 
+#include "base/image/file_uri_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/udmf/unified_data.h"
 namespace OHOS::Ace {
@@ -277,6 +278,44 @@ std::string UdmfClientImpl::GetSinglePlainTextRecord(const RefPtr<UnifiedData>& 
         str = plainText->GetContent();
     }
     return str;
+}
+
+bool UdmfClientImpl::AddFileUriRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_RETURN(udData, false);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), false);
+
+    for (std::string u : uri) {
+        LOGI("DragDrop event AddFileUriRecord, uri:%{public}s", u.c_str());
+        auto record = std::make_shared<UDMF::Image>(u);
+        udData->GetUnifiedData()->AddRecord(record);
+    }
+
+    return true;
+}
+
+bool UdmfClientImpl::GetFileUriRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_RETURN(udData, false);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), false);
+    auto records = udData->GetUnifiedData()->GetRecords();
+
+    for (auto record : records) {
+        UDMF::UDType type = record->GetType();
+        if (type == UDMF::UDType::IMAGE ||
+            type == UDMF::UDType::FILE) {
+            UDMF::File* file = reinterpret_cast<UDMF::File*>(record.get());
+            if (file) {
+                uri.emplace_back(file->GetUri());
+                LOGI("DragDrop event GetFileUri, uri:%{public}s", file->GetUri().c_str());
+            } else {
+                LOGE("DragDrop event GetFileUri file is null");
+            }
+        }
+    }
+    return true;
 }
 
 std::vector<std::string> UdmfClientImpl::GetPlainTextRecords(const RefPtr<UnifiedData>& unifiedData)
