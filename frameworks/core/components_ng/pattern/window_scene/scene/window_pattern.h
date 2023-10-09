@@ -60,6 +60,8 @@ protected:
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
 
+    static int32_t CalculateTranslateDegree(int32_t hostId);
+
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<FrameNode> snapshotNode_;

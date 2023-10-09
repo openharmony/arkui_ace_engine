@@ -966,15 +966,22 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
     float density = 1.0f;
+    int32_t devicePhysicalWidth = 0;
+    int32_t devicePhysicalHeight = 0;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
         density = defaultDisplay->GetVirtualPixelRatio();
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
-        LOGD("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
-            deviceHeight, density);
+        devicePhysicalWidth = defaultDisplay->GetPhysicalWidth();
+        devicePhysicalHeight = defaultDisplay->GetPhysicalHeight();
+        LOGD("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, devicePhysicalWidth=%{public}d, "
+             "devicePhysicalHeight=%{public}d, default density: %{public}f",
+            deviceWidth, deviceHeight, devicePhysicalWidth, devicePhysicalHeight, density);
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
+    SystemProperties::SetDevicePhysicalWidth(devicePhysicalWidth);
+    SystemProperties::SetDevicePhysicalHeight(devicePhysicalHeight);
     // Initialize performance check parameters
     AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
