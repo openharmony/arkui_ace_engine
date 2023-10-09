@@ -93,6 +93,7 @@ private:
         float& spacePerFlex, FlexItemProperties& flexItemProperties, RefPtr<LayoutWrapper>& lastChild);
     void CheckBlankAndKeepMin(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
     float MainAxisMinValue(LayoutWrapper* layoutWrapper);
+    bool MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper);
     bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
 
     OptionalSizeF realSize_;
