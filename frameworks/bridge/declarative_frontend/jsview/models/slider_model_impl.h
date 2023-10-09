@@ -40,7 +40,7 @@ public:
     void SetTrackBorderRadius(const Dimension& value) override;
     void SetBlockSize(const Dimension& width, const Dimension& height) override;
     void SetBlockType(BlockStyleType value) override;
-    void SetBlockImage(const std::string& value) override;
+    void SetBlockImage(const std::string& value, const std::string& bundleName, const std::string& moduleName) override;
     void SetBlockShape(const RefPtr<BasicShape>& value) override;
     void SetStepSize(const Dimension& value) override;
     void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) override;
