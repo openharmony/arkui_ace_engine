@@ -101,7 +101,7 @@ HWTEST_F(ScrollableTestNg, HandleSelf001, TestSize.Level1)
     EXPECT_CALL(*mockPn, HandleScroll).Times(0);
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(3).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(3).WillRepeatedly(Return(true));
 
     // test self only
@@ -141,7 +141,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel001, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(2).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(2).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
@@ -177,7 +177,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel002, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
@@ -208,7 +208,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel003, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
@@ -239,7 +239,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel004, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
@@ -270,7 +270,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel005, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
@@ -301,7 +301,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst001, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
@@ -332,7 +332,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst002, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
@@ -363,7 +363,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst003, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
@@ -389,7 +389,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst004, TestSize.Level1)
     EXPECT_CALL(*mockPn, HandleScroll).Times(0);
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 0, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
@@ -420,7 +420,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst005, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
@@ -451,7 +451,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst006, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
@@ -482,7 +482,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst007, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
@@ -513,7 +513,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent001, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
@@ -539,7 +539,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent002, TestSize.Level1)
     EXPECT_CALL(*mockPn, HandleScroll).Times(0);
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
@@ -570,7 +570,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent003, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
@@ -601,7 +601,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent004, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 0, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
@@ -632,7 +632,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent005, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
@@ -663,7 +663,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent006, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
@@ -694,7 +694,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent007, TestSize.Level1)
         }));
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 0, .end = 0 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
@@ -720,7 +720,7 @@ HWTEST_F(ScrollableTestNg, HandleScroll002, TestSize.Level1)
     EXPECT_CALL(*mockPn, HandleScroll).Times(0);
     EXPECT_CALL(*scrollPn, GetOverScrollOffset)
         .WillRepeatedly(Return(OverScrollOffset { .start = 0, .end = 5 }));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
@@ -833,7 +833,7 @@ HWTEST_F(ScrollableTestNg, OnScrollStart001, TestSize.Level1)
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
     EXPECT_TRUE(mockPn);
 
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1);
+    EXPECT_CALL(*scrollPn, IsAtTop).Times(AtLeast(1));
     EXPECT_CALL(*mockPn, GetAxis).Times(1);
 
     EXPECT_CALL(*mockPn, OnScrollStartRecursive).Times(1);

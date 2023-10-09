@@ -3161,7 +3161,8 @@ bool SwiperPattern::HandleScrollVelocity(float velocity)
         }
     }
     HandleDragEnd(velocity);
-    return GetEdgeEffect() == EdgeEffect::SPRING;
+    // after reached end, NONE doesn't consume velocity, other edge effects do
+    return GetEdgeEffect() != EdgeEffect::NONE;
 }
 
 ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedState state)
