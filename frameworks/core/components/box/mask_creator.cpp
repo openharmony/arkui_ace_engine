@@ -12,12 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "rosen_mask_painter.h"
 
 #include "core/pipeline/base/render_node.h"
-#ifndef NEW_SKIA
-#include "flutter_mask_painter.h"
-#endif
-#include "rosen_mask_painter.h"
 
 namespace OHOS::Ace {
 RefPtr<Mask> Mask::Create()
@@ -29,11 +26,7 @@ RefPtr<Mask> Mask::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterMaskPainter>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

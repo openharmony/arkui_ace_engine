@@ -32,8 +32,8 @@
 #include "core/components/image/image_event.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components_ng/render/adapter/skia_image.h"
-#include "core/image/sk_image_cache.h"
 #include "core/image/image_object.h"
+#include "core/image/sk_image_cache.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/flutter_render_context.h"
 
@@ -529,11 +529,8 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
         colorSpace = skImage->GetImage()->refColorSpace();
     }
     CHECK_NULL_VOID(paint.paint());
-#ifdef USE_SYSTEM_SKIA
-    paint.paint()->setColor4f(paint.paint()->getColor4f(), colorSpace.get());
-#else
+
     paint.paint()->setColor(paint.paint()->getColor4f(), colorSpace.get());
-#endif
     CanvasDrawImageRect(paint, offset, canvas, paintRect);
 }
 
@@ -560,25 +557,6 @@ void FlutterRenderImage::ApplyBorderRadius(const Offset& offset, const ScopedCan
 
 void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
 {
-#ifdef USE_SYSTEM_SKIA
-    if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
-        float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = { 0 };
-        std::copy(colorfilter_.begin(), colorfilter_.end(), colorfiltermatrix);
-        paint.paint()->setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(colorfiltermatrix));
-        return;
-    }
-
-    if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
-        paint.paint()->setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(GRAY_COLOR_MATRIX));
-        return;
-    }
-    if (!color_.has_value()) {
-        return;
-    }
-    Color color = color_.value();
-    paint.paint()->setColorFilter(SkColorFilter::MakeModeFilter(
-        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
-#else
     if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
         float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = { 0 };
         std::copy(colorfilter_.begin(), colorfilter_.end(), colorfiltermatrix);
@@ -596,7 +574,6 @@ void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
     Color color = color_.value();
     paint.paint()->setColorFilter(SkColorFilters::Blend(
         SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
-#endif
 }
 
 void FlutterRenderImage::ApplyBlur(flutter::Paint& paint)
@@ -698,24 +675,7 @@ void FlutterRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstR
         transX = skDstRect.left() + skDstRect.width();
     }
     auto sampleMatrix = SkMatrix::MakeAll(scaleX, skewX, transX, skewY, scaleY, transY, pers0, pers1, pers2);
-#if defined(USE_SYSTEM_SKIA)
-    SkShader::TileMode xTileMode = SkShader::TileMode::kDecal_TileMode;
-    SkShader::TileMode yTileMode = SkShader::TileMode::kDecal_TileMode;
-    switch (imageRepeat_) {
-        case ImageRepeat::REPEAT:
-            xTileMode = SkShader::TileMode::kRepeat_TileMode;
-            yTileMode = SkShader::TileMode::kRepeat_TileMode;
-            break;
-        case ImageRepeat::REPEATX:
-            xTileMode = SkShader::TileMode::kRepeat_TileMode;
-            break;
-        case ImageRepeat::REPEATY:
-            yTileMode = SkShader::TileMode::kRepeat_TileMode;
-            break;
-        default:
-            break;
-    }
-#else
+
     SkTileMode xTileMode = SkTileMode::kDecal;
     SkTileMode yTileMode = SkTileMode::kDecal;
     switch (imageRepeat_) {
@@ -732,7 +692,6 @@ void FlutterRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstR
         default:
             break;
     }
-#endif
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
     CHECK_NULL_VOID(skImage);
     CHECK_NULL_VOID(skImage->GetImage());
@@ -828,8 +787,7 @@ void FlutterRenderImage::UploadImageObjToGpuForRender(const RefPtr<ImageObject>&
         LOGW("image object is null when try UploadImageObjToGpuForRender.");
         return;
     }
-    imageObj->UploadToGpuForRender(
-        context, uploadSuccessCallback, failedCallback, resizeTarget, forceResize, syncMode);
+    imageObj->UploadToGpuForRender(context, uploadSuccessCallback, failedCallback, resizeTarget, forceResize, syncMode);
 }
 
 void FlutterRenderImage::UpdateData(const std::string& uri, const std::vector<uint8_t>& memData)

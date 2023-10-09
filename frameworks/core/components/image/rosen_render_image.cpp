@@ -44,8 +44,8 @@
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
 #include "core/components_ng/render/canvas_image.h"
-#include "core/image/sk_image_cache.h"
 #include "core/image/image_object.h"
+#include "core/image/sk_image_cache.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -647,8 +647,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
 #else
     RSAutoCanvasRestore acr(*canvas, true);
     if (!NearZero(rotate_)) {
-        Offset center =
-            offset + Offset(GetLayoutSize().Width() * FLOAT_HALF, GetLayoutSize().Height() * FLOAT_HALF);
+        Offset center = offset + Offset(GetLayoutSize().Width() * FLOAT_HALF, GetLayoutSize().Height() * FLOAT_HALF);
         if (canvas) {
             canvas->Rotate(rotate_, center.GetX(), center.GetY());
         }
@@ -732,11 +731,8 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
     if (skImage && skImage->GetImage()) {
         colorSpace = skImage->GetImage()->refColorSpace();
     }
-#ifdef USE_SYSTEM_SKIA
-    paint.setColor4f(paint.getColor4f(), colorSpace.get());
-#else
+
     paint.setColor(paint.getColor4f(), colorSpace.get());
-#endif
 
 #else
     ApplyColorFilter(brush);
@@ -794,11 +790,10 @@ void RosenRenderImage::ApplyBorderRadius(const Offset& offset, const Rect& paint
         radii_);
     canvas->clipRRect(rrect, true);
 #else
-    RSRoundRect rrect(RSRect(
-        clipRect.Left() - imageRenderPosition_.GetX(),
-        clipRect.Top() - imageRenderPosition_.GetY(),
-        clipRect.Width() + clipRect.Left() - imageRenderPosition_.GetX(),
-        clipRect.Height() + clipRect.Top() - imageRenderPosition_.GetY()),
+    RSRoundRect rrect(
+        RSRect(clipRect.Left() - imageRenderPosition_.GetX(), clipRect.Top() - imageRenderPosition_.GetY(),
+            clipRect.Width() + clipRect.Left() - imageRenderPosition_.GetX(),
+            clipRect.Height() + clipRect.Top() - imageRenderPosition_.GetY()),
         radii_);
     canvas->ClipRoundRect(rrect, RSClipOp::INTERSECT, true);
 #endif
@@ -812,25 +807,7 @@ void RosenRenderImage::ApplyColorFilter(RSBrush& brush)
 #endif
 {
 #ifndef USE_ROSEN_DRAWING
-#ifdef USE_SYSTEM_SKIA
-    if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
-        float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = { 0 };
-        std::copy(colorfilter_.begin(), colorfilter_.end(), colorfiltermatrix);
-        paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(colorfiltermatrix));
-        return;
-    }
 
-    if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
-        paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(GRAY_COLOR_MATRIX));
-        return;
-    }
-    if (!color_.has_value()) {
-        return;
-    }
-    Color color = color_.value();
-    paint.setColorFilter(SkColorFilter::MakeModeFilter(
-        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
-#else
     if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
         float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = { 0 };
         std::copy(colorfilter_.begin(), colorfilter_.end(), colorfiltermatrix);
@@ -847,7 +824,6 @@ void RosenRenderImage::ApplyColorFilter(RSBrush& brush)
     Color color = color_.value();
     paint.setColorFilter(SkColorFilters::Blend(
         SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
-#endif
 #else
     if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
         RSScalar matrixArray[COLOR_FILTER_MATRIX_SIZE] = { 0 };
@@ -882,24 +858,6 @@ void RosenRenderImage::ApplyColorFilter(RSBrush& brush)
 #ifndef USE_ROSEN_DRAWING
 void RosenRenderImage::ApplyInterpolation(SkPaint& paint)
 {
-#ifndef NEW_SKIA
-    auto skFilterQuality = SkFilterQuality::kNone_SkFilterQuality;
-    switch (imageInterpolation_) {
-        case ImageInterpolation::LOW:
-            skFilterQuality = SkFilterQuality::kLow_SkFilterQuality;
-            break;
-        case ImageInterpolation::MEDIUM:
-            skFilterQuality = SkFilterQuality::kMedium_SkFilterQuality;
-            break;
-        case ImageInterpolation::HIGH:
-            skFilterQuality = SkFilterQuality::kHigh_SkFilterQuality;
-            break;
-        case ImageInterpolation::NONE:
-        default:
-            break;
-    }
-    paint.setFilterQuality(skFilterQuality);
-#else
     options_ = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
     switch (imageInterpolation_) {
         case ImageInterpolation::LOW:
@@ -915,7 +873,6 @@ void RosenRenderImage::ApplyInterpolation(SkPaint& paint)
         default:
             break;
     }
-#endif
 }
 #else
 void RosenRenderImage::ApplyInterpolation(RSBrush& brush)
@@ -972,21 +929,18 @@ void RosenRenderImage::CanvasDrawImageRect(
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
         Rosen::RsImageInfo rsImageInfo(
             fitNum, repeatNum, radii_, scale_, 0, skImage->GetCompressWidth(), skImage->GetCompressHeight());
-#ifndef NEW_SKIA
-        recordingCanvas->DrawImageWithParm(skImage->GetImage(), skImage->GetCompressData(), rsImageInfo, paint);
-#else
+
         recordingCanvas->DrawImageWithParm(
             skImage->GetImage(), skImage->GetCompressData(), rsImageInfo, options_, paint);
-#endif
         skImage->SetCompressData(nullptr, 0, 0);
         return;
 #else
     auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->Translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
-        Rosen::Drawing::AdaptiveImageInfo rsImageInfo = {
-            fitNum, repeatNum, {radii_[0], radii_[1], radii_[2], radii_[3]},
-            scale_, 0, rsImage->GetCompressWidth(), rsImage->GetCompressHeight()};
+        Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { fitNum, repeatNum,
+            { radii_[0], radii_[1], radii_[2], radii_[3] }, scale_, 0, rsImage->GetCompressWidth(),
+            rsImage->GetCompressHeight() };
         recordingCanvas->AttachBrush(brush);
         recordingCanvas->DrawImage(rsImage->GetImage(), rsImage->GetCompressData(), rsImageInfo, RSSamplingOptions());
         recordingCanvas->DetachBrush();
@@ -1025,19 +979,14 @@ void RosenRenderImage::CanvasDrawImageRect(
         SkRect::MakeXYWH(scaledSrcRect.Left(), scaledSrcRect.Top(), scaledSrcRect.Width(), scaledSrcRect.Height());
     auto skDstRect = SkRect::MakeXYWH(realDstRect.Left() - imageRenderPosition_.GetX(),
         realDstRect.Top() - imageRenderPosition_.GetY(), realDstRect.Width(), realDstRect.Height());
-#ifndef NEW_SKIA
-    canvas->drawImageRect(skImage->GetImage(), skSrcRect, skDstRect, &paint);
+
+    canvas->drawImageRect(
+        skImage->GetImage(), skSrcRect, skDstRect, options_, &paint, SkCanvas::kFast_SrcRectConstraint);
 #else
-    canvas->drawImageRect(skImage->GetImage(), skSrcRect, skDstRect, options_, &paint, SkCanvas::kFast_SrcRectConstraint);
-#endif
-#else
-    auto srcRect = RSRect(
-        scaledSrcRect.Left(), scaledSrcRect.Top(), scaledSrcRect.Right(), scaledSrcRect.Bottom());
-    auto dstRect = RSRect(
-        realDstRect.Left() - imageRenderPosition_.GetX(),
-        realDstRect.Top() - imageRenderPosition_.GetY(),
-        realDstRect.Right() - imageRenderPosition_.GetX(),
-        realDstRect.Bottom() - imageRenderPosition_.GetY());
+    auto srcRect = RSRect(scaledSrcRect.Left(), scaledSrcRect.Top(), scaledSrcRect.Right(), scaledSrcRect.Bottom());
+    auto dstRect =
+        RSRect(realDstRect.Left() - imageRenderPosition_.GetX(), realDstRect.Top() - imageRenderPosition_.GetY(),
+            realDstRect.Right() - imageRenderPosition_.GetX(), realDstRect.Bottom() - imageRenderPosition_.GetY());
     RSSamplingOptions sampling;
     canvas->AttachBrush(brush);
     canvas->DrawImageRect(*rsImage->GetImage(), srcRect, dstRect, sampling);
@@ -1053,13 +1002,9 @@ void RosenRenderImage::DrawImageOnCanvas(
 {
 #ifdef OHOS_PLATFORM
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-#ifndef NEW_SKIA
-    auto skSrcRect =
-        SkIRect::MakeXYWH(Round(srcRect.Left()), Round(srcRect.Top()), Round(srcRect.Width()), Round(srcRect.Height()));
-#else
+
     auto skSrcRect =
         SkRect::MakeXYWH(Round(srcRect.Left()), Round(srcRect.Top()), Round(srcRect.Width()), Round(srcRect.Height()));
-#endif
     // only transform one time, set skDstRect.top and skDstRect.left to 0.
     auto skDstRect = SkRect::MakeXYWH(0, 0, dstRect.Width(), dstRect.Height());
 
@@ -1084,25 +1029,20 @@ void RosenRenderImage::DrawImageOnCanvas(
     recordingCanvas->concat(sampleMatrix);
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
     if (skImage && skImage->GetImage()) {
-#ifndef NEW_SKIA
-        recordingCanvas->drawImageRect(
-            skImage->GetImage(), skSrcRect, skDstRect, &paint, SkCanvas::kFast_SrcRectConstraint);
-#else
         recordingCanvas->drawImageRect(
             skImage->GetImage(), skSrcRect, skDstRect, options_, &paint, SkCanvas::kFast_SrcRectConstraint);
-#endif
     }
     recordingCanvas->restore();
 #endif
 }
 #else
-void RosenRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect,
-    const RSBrush& brush, RSCanvas* canvas) const
+void RosenRenderImage::DrawImageOnCanvas(
+    const Rect& srcRect, const Rect& dstRect, const RSBrush& brush, RSCanvas* canvas) const
 {
 #ifdef OHOS_PLATFORM
     auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
-    auto drSrcRect = RSRect(
-        Round(srcRect.Left()), Round(srcRect.Top()), Round(srcRect.Right()), Round(srcRect.Bottom()));
+    auto drSrcRect =
+        RSRect(Round(srcRect.Left()), Round(srcRect.Top()), Round(srcRect.Right()), Round(srcRect.Bottom()));
     // only transform one time, set skDstRect.top and skDstRect.left to 0.
     auto drDstRect = RSRect(0, 0, dstRect.Width(), dstRect.Height());
 
@@ -1122,10 +1062,7 @@ void RosenRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRec
     RSScalar pers1 = 0;
     RSScalar pers2 = 1;
     RSMatrix sampleMatrix;
-    sampleMatrix.SetMatrix(
-        scaleX, skewX, transX,
-        skewY, scaleY, transY,
-        pers0, pers1, pers2);
+    sampleMatrix.SetMatrix(scaleX, skewX, transX, skewY, scaleY, transY, pers0, pers1, pers2);
     RSSamplingOptions sampling;
 
     recordingCanvas->Save();
@@ -1134,8 +1071,8 @@ void RosenRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRec
     auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (rsImage && rsImage->GetImage()) {
         recordingCanvas->AttachBrush(brush);
-        recordingCanvas->DrawImageRect(*rsImage->GetImage(), drSrcRect, drDstRect, sampling,
-            RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+        recordingCanvas->DrawImageRect(
+            *rsImage->GetImage(), drSrcRect, drDstRect, sampling, RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
         recordingCanvas->DetachBrush();
     }
     recordingCanvas->Restore();

@@ -17,9 +17,6 @@
 #include "core/pipeline/pipeline_base.h"
 
 #ifndef NG_BUILD
-#ifndef NEW_SKIA
-#include "flutter_render_offscreen_canvas.h"
-#endif
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "rosen_render_offscreen_canvas.h"
@@ -37,11 +34,7 @@ RefPtr<OffscreenCanvas> RenderOffscreenCanvas::Create(
 #endif
     } else {
 #ifndef NG_BUILD
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderOffscreenCanvas>(context, width, height);
-#else
         return nullptr;
-#endif
 #else
         return nullptr;
 #endif
