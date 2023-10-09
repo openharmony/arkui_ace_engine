@@ -271,7 +271,7 @@ public:
         taskExecutor->PostTask(
             [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, false);
+                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, false, true);
                 SubwindowManager::GetInstance()->HidePopupNG(-1, instanceId);
             },
             TaskExecutor::TaskType::UI);
@@ -339,7 +339,7 @@ void UIContentImpl::DestroyCallback() const
 }
 
 void UIContentImpl::InitializeInner(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage, bool isNamedRouter)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter)
 {
     if (window && StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
         CommonInitialize(window, contentInfo, storage);
@@ -366,16 +366,32 @@ void UIContentImpl::InitializeInner(
 
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
-    InitializeInner(window, url, storage, false);
+    InitializeInner(window, url, reinterpret_cast<napi_value>(storage), false);
 }
 
 void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage)
+{
+    InitializeInner(window, name, reinterpret_cast<napi_value>(storage), true);
+}
+
+void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
+{
+    InitializeInner(window, url, storage, false);
+}
+
+void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
     InitializeInner(window, name, storage, true);
 }
 
 void UIContentImpl::Initialize(
     OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId)
+{
+    Initialize(window, url, reinterpret_cast<napi_value>(storage), focusWindowId);
+}
+
+void UIContentImpl::Initialize(
+    OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId)
 {
     if (window) {
         CommonInitialize(window, url, storage);
@@ -395,24 +411,35 @@ void UIContentImpl::Initialize(
 
 NativeValue* UIContentImpl::GetUIContext()
 {
+    return reinterpret_cast<NativeValue*>(GetUINapiContext());
+}
+
+napi_value UIContentImpl::GetUINapiContext()
+{
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     ContainerScope scope(instanceId_);
+    napi_value result = nullptr;
     auto frontend = container->GetFrontend();
-    CHECK_NULL_RETURN(frontend, nullptr);
+    CHECK_NULL_RETURN(frontend, result);
     if (frontend->GetType() == FrontendType::DECLARATIVE_JS) {
 #ifdef NG_BUILD
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend);
 #else
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend);
 #endif
-        CHECK_NULL_RETURN(declarativeFrontend, nullptr);
+        CHECK_NULL_RETURN(declarativeFrontend, result);
         return declarativeFrontend->GetContextValue();
     }
 
-    return nullptr;
+    return result;
 }
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+{
+    Restore(window, contentInfo, reinterpret_cast<napi_value>(storage));
+}
+
+void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
 {
     CommonInitialize(window, contentInfo, storage);
     startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
@@ -431,7 +458,7 @@ std::string UIContentImpl::GetContentInfo() const
 
 // ArkTSCard start
 void UIContentImpl::CommonInitializeForm(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "Initialize CommonInitializeForm start.");
     ACE_FUNCTION_TRACE();
@@ -803,9 +830,11 @@ void UIContentImpl::CommonInitializeForm(
         if (!storage) {
             container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
         } else {
-            LOGD("SetLocalStorage %{public}d", storage->TypeOf());
+            auto env = reinterpret_cast<napi_env>(nativeEngine);
+            napi_ref ref = nullptr;
+            napi_create_reference(env, storage, 1, &ref);
             container->SetLocalStorage(
-                nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
+                reinterpret_cast<NativeReference*>(ref), context->GetBindingObject()->Get<NativeReference>());
         }
     }
 }
@@ -858,7 +887,7 @@ std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
 }
 // ArkTSCard end
 
-void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
 {
     ACE_FUNCTION_TRACE();
     window_ = window;
@@ -1133,7 +1162,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetWindowId(window_->GetWindowId());
     auto token = context->GetToken();
     container->SetToken(token);
-    container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context));
+    container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -1255,9 +1284,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         if (!storage) {
             container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
         } else {
-            LOGI("SetLocalStorage %{public}d", storage->TypeOf());
+            auto env = reinterpret_cast<napi_env>(nativeEngine);
+            napi_ref ref = nullptr;
+            napi_create_reference(env, storage, 1, &ref);
             container->SetLocalStorage(
-                nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
+                reinterpret_cast<NativeReference*>(ref), context->GetBindingObject()->Get<NativeReference>());
         }
     }
 

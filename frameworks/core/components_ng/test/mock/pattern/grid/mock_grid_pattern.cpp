@@ -117,4 +117,11 @@ bool GridPattern::IsItemSelected(const MouseInfo& info)
 }
 
 void GridPattern::DumpInfo() {}
+
+std::string GridPattern::ProvideRestoreInfo()
+{
+    return "";
+}
+
+void GridPattern::OnRestoreInfo(const std::string& restoreInfo) {}
 } // namespace OHOS::Ace::NG

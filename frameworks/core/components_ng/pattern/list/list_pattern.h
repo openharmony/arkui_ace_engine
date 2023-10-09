@@ -206,6 +206,10 @@ public:
     {
         return predictLayoutParam_;
     }
+
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+
 private:
     void OnScrollEndCallback() override;
     void OnScrollStartCallback() override;
@@ -283,6 +287,7 @@ private:
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
     std::optional<float> predictSnapOffset_;
+    std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
     bool scrollable_ = true;
     bool paintStateFlag_ = false;

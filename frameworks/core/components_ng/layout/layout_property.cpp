@@ -647,7 +647,7 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
     }
     geometryTransition_ = geometryTransitionNew;
 
-    LOGD("GeometryTransition: node: %{public}d update id, old id: %{public}s, new id: %{public}s", host->GetId(),
+    LOGI("GeometryTransition: node: %{public}d update id, old id: %{public}s, new id: %{public}s", host->GetId(),
         geometryTransitionOld ? geometryTransitionOld->GetId().c_str() : "empty",
         geometryTransitionNew ? id.c_str() : "empty");
     ElementRegister::GetInstance()->DumpGeometryTransition();

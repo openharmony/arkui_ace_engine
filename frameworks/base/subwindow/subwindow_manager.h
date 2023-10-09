@@ -68,14 +68,14 @@ public:
     void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t targetId,
         const NG::OffsetF& offset, bool isAboveApps = false);
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
-    void HideMenuNG();
+    void HideMenuNG(bool showPreviewAnimation = true);
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo);
     void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
-    void ClearMenuNG(int32_t instanceId = -1, bool inWindow = true);
+    void ClearMenuNG(int32_t instanceId = -1, bool inWindow = true, bool showAnimation = false);
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     void HideSubWindowNG();
 

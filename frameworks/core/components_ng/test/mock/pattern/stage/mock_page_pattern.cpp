@@ -22,6 +22,7 @@ void PagePattern::BuildSharedTransitionMap() {}
 void PagePattern::AddPageTransition(const RefPtr<PageTransitionEffect>& effect) {}
 void PagePattern::ClearPageTransitionEffect() {}
 void PagePattern::OnAttachToFrameNode() {}
+void PagePattern::AddDelaytLayoutNode(const WeakPtr<FrameNode>& node) {}
 
 void PagePattern::OnShow()
 {
@@ -65,5 +66,10 @@ RefPtr<Framework::AnimatorInfo> PagePattern::GetJsAnimator(const std::string& an
 bool PagePattern::AvoidKeyboard() const
 {
     return false;
+}
+
+RefPtr<LayoutAlgorithm> PagePattern::CreateLayoutAlgorithm()
+{
+    return Pattern::CreateLayoutAlgorithm();
 }
 } // namespace OHOS::Ace::NG

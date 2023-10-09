@@ -267,13 +267,22 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
                 taskExecutor->PostTask([callback]() { callback(""); }, TaskExecutor::TaskType::UI);
                 return;
             }
-            auto textData = pasteData.GetPrimaryText();
-            if (!textData) {
+            std::string resText;
+            for (const auto& pasteDataRecord : pasteData.AllRecords()) {
+                if (pasteDataRecord == nullptr) {
+                    continue;
+                }
+                if (pasteDataRecord->GetPlainText() != nullptr) {
+                    auto textData = pasteDataRecord->GetPlainText();
+                    resText.append(*textData);
+                }
+            }
+            if (resText.empty()) {
                 LOGW("GetDataAsync: Get SystemKeyboardTextData fail from MiscServices");
                 taskExecutor->PostTask([callback]() { callback(""); }, TaskExecutor::TaskType::UI);
                 return;
             }
-            auto result = *textData;
+            auto result = resText;
             taskExecutor->PostTask([callback, result]() { callback(result); }, TaskExecutor::TaskType::UI);
         },
         TaskExecutor::TaskType::PLATFORM);

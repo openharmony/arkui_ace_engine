@@ -77,6 +77,11 @@ struct DataBase {
     BaseInfo baseInfo;
 };
 
+struct JankInfo {
+    int64_t skippedFrameTime {0};
+    BaseInfo baseInfo;
+};
+
 void ConvertRealtimeToSystime(int64_t realTime, int64_t& sysTime);
 std::string GetSourceTypeName(PerfSourceType sourceType);
 
@@ -113,6 +118,7 @@ public:
     void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time);
     int64_t GetInputTime(PerfActionType type);
     void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank);
+    void ReportJankFrameApp(double jank);
     void SetPageUrl(const std::string& pageUrl);
     std::string GetPageUrl();
     static PerfMonitor* GetPerfMonitor();

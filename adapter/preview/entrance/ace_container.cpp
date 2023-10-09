@@ -265,6 +265,25 @@ void AceContainer::SetHspBufferTrackerCallback()
         TaskExecutor::TaskType::JS);
 }
 
+void AceContainer::SetMockModuleListToJsEngine()
+{
+    if (GetSettings().usingSharedRuntime) {
+        LOGI("The callback has been set by ability in the light simulator.");
+        return;
+    }
+    auto frontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+    CHECK_NULL_VOID(frontend);
+    auto weak = WeakPtr(frontend->GetJsEngine());
+    taskExecutor_->PostTask(
+        [weak, instanceId = instanceId_, mockJsonInfo = mockJsonInfo_]() {
+            ContainerScope scope(instanceId);
+            auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(weak.Upgrade());
+            CHECK_NULL_VOID(jsEngine);
+            jsEngine->SetMockModuleList(mockJsonInfo);
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl)
 {
     std::string fullPageProfile = pageProfile + ".json";
@@ -912,6 +931,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
         flutterTaskExecutor->InitJsThread(false);
         InitializeFrontend();
         SetHspBufferTrackerCallback();
+        SetMockModuleListToJsEngine();
         auto front = AceType::DynamicCast<DeclarativeFrontend>(GetFrontend());
         if (front) {
             front->UpdateState(Frontend::State::ON_CREATE);

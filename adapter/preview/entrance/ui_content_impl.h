@@ -57,6 +57,12 @@ public:
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
 
+    void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override {}
+    void Initialize(
+        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
+    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override {}
+
     // UI content event process
     bool ProcessBackPressed() override;
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
@@ -114,7 +120,7 @@ public:
     void CloseModalUIExtension(int32_t sessionId) override;
 
 private:
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void DestroyCallback() const;
 
 private:

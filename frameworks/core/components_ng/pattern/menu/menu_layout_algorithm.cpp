@@ -31,6 +31,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -251,6 +253,15 @@ MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag) : t
         Placement::RIGHT, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
     setVertical_ = { Placement::TOP, Placement::TOP_LEFT, Placement::TOP_RIGHT,
         Placement::BOTTOM, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
+    
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    previewScale_ = menuTheme->GetPreviewAfterAnimationScale();
+    if (LessOrEqual(previewScale_, 0.0f)) {
+        previewScale_ = 1.0f;
+    }
 }
 
 MenuLayoutAlgorithm::~MenuLayoutAlgorithm()
@@ -260,7 +271,7 @@ MenuLayoutAlgorithm::~MenuLayoutAlgorithm()
     setVertical_.clear();
 }
 
-void MenuLayoutAlgorithm::ModifyPhonePreviewMenuPortraitPlacement(LayoutWrapper* layoutWrapper)
+void MenuLayoutAlgorithm::ModifyNormalPreviewMenuPortraitPlacement(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -278,7 +289,7 @@ void MenuLayoutAlgorithm::ModifyPhonePreviewMenuPortraitPlacement(LayoutWrapper*
     }
 }
 
-void MenuLayoutAlgorithm::ModifyPhonePreviewMenuPlacement(LayoutWrapper* layoutWrapper)
+void MenuLayoutAlgorithm::ModifyNormalPreviewMenuPlacement(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -286,7 +297,7 @@ void MenuLayoutAlgorithm::ModifyPhonePreviewMenuPlacement(LayoutWrapper* layoutW
 
     auto hasPlacement = props->GetMenuPlacement().has_value();
     if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
-        ModifyPhonePreviewMenuPortraitPlacement(layoutWrapper);
+        ModifyNormalPreviewMenuPortraitPlacement(layoutWrapper);
     } else if (!hasPlacement) {
         placement_ = Placement::RIGHT_TOP;
         props->UpdateMenuPlacement(placement_);
@@ -299,7 +310,6 @@ void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrappe
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
 
-    targetSecurity_ = PREVIEW_MENU_GAP.ConvertToPx();
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
@@ -312,7 +322,7 @@ void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrappe
 
     auto hasPlacement = props->GetMenuPlacement().has_value();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        ModifyPhonePreviewMenuPlacement(layoutWrapper);
+        ModifyNormalPreviewMenuPlacement(layoutWrapper);
     } else {
         if (!hasPlacement) {
             placement_ = Placement::RIGHT_TOP;
@@ -346,7 +356,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         bottomSpace_ = constraint->maxSize.Height() - position_.GetY();
         leftSpace_ = Infinity<float>();
     } else {
-        if (IsPreviewMenu(layoutWrapper)) {
+        if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
             ModifyPreviewMenuPlacement(layoutWrapper);
         }
         if (props->GetMenuPlacement().has_value()) {
@@ -354,9 +364,16 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
             topSpace_ = std::max(0.0f, targetOffset_.GetY() - targetSecurity - paddingTop_);
             bottomSpace_ = std::max(0.0f,
                 wrapperSize_.Height() - targetOffset_.GetY() - targetSize_.Height() - targetSecurity - paddingBottom_);
+            if (NearZero(topSpace_) && NearZero(bottomSpace_)) {
+                bottomSpace_ = wrapperSize_.Height() - position_.GetY() - paddingTop_;
+            }
             leftSpace_ = std::max(0.0f, targetOffset_.GetX() - paddingStart_ - targetSecurity);
             rightSpace_ = std::max(
                 0.0f, wrapperSize_.Width() - targetSize_.Width() - targetSecurity - paddingStart_ - paddingEnd_);
+            if (NearZero(leftSpace_) && NearZero(rightSpace_)) {
+                leftSpace_ = position_.GetX();
+                rightSpace_ = wrapperSize_.Width() - leftSpace_;
+            }
         } else {
             topSpace_ = position_.GetY() - targetSize.Height() - margin_ * 2.0f;
             bottomSpace_ = wrapperSize_.Height() - position_.GetY() - margin_ * 2.0f;
@@ -471,30 +488,6 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     geometryNode->SetFrameSize(idealSize);
 }
 
-bool MenuLayoutAlgorithm::IsPreviewMenu(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_RETURN(layoutWrapper, false);
-    auto menuNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(menuNode, false);
-    auto parentNode = AceType::DynamicCast<FrameNode>(menuNode->GetParent());
-    CHECK_NULL_RETURN(parentNode, false);
-
-    bool isPreviewMenu = false;
-    for (auto& child : parentNode->GetAllChildrenWithBuild()) {
-        auto hostNode = child->GetHostNode();
-        auto geometryNode = child->GetGeometryNode();
-        if (!hostNode || !geometryNode) {
-            continue;
-        }
-        if (hostNode->GetTag() != V2::MENU_PREVIEW_ETS_TAG && hostNode->GetTag() != V2::IMAGE_ETS_TAG) {
-            continue;
-        }
-        isPreviewMenu = true;
-        break;
-    }
-    return isPreviewMenu;
-}
-
 SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
     RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper)
 {
@@ -512,7 +505,7 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
             auto parent = columnInfo->GetParent();
             CHECK_NULL_RETURN(parent, size);
             parent->BuildColumnWidth(std::min(wrapperSize_.Width(), wrapperSize_.Height()));
-            auto maxWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4));
+            auto maxWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4)) / previewScale_;
             auto frameSize = geometryNode->GetMarginFrameSize();
             static SizeF previewSize;
             static int32_t hostId = -1;
@@ -523,16 +516,18 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
                 } else {
                     frameSize = previewSize;
                 }
+                geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
+            } else {
+                geometryNode->SetFrameSize(frameSize);
             }
-            geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
         }
         if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
             previewLayoutWrapper = child;
-            size += geometryNode->GetMarginFrameSize();
+            size += geometryNode->GetMarginFrameSize() * previewScale_;
         }
         if (hostNode->GetTag() == V2::IMAGE_ETS_TAG) {
             previewLayoutWrapper = child;
-            size += geometryNode->GetMarginFrameSize();
+            size += geometryNode->GetMarginFrameSize() * previewScale_;
         }
         auto menuPattern = hostNode->GetPattern<MenuPattern>();
         if (!menuPattern) {
@@ -544,6 +539,271 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
         }
     }
     return size;
+}
+
+void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
+    const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize)
+{
+    CHECK_NULL_VOID(previewGeometryNode);
+    CHECK_NULL_VOID(menuGeometryNode);
+
+    OffsetF targetCenterOffset(
+        targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    targetCenterOffset_ = targetCenterOffset;
+    auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+    auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
+    if (previewSize.Width() > widthLeftSpace) {
+        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, previewSize.Height() / previewScale_));
+    }
+    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+
+    OffsetF offset(targetCenterOffset.GetX() - previewSize.Width() / 2,
+        std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
+            param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom - totalSize.Height() -
+                param.previewMenuGap));
+
+    auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
+        param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
+    auto y = std::clamp(offset.GetY(), param.windowsOffsetY + param.top + param.topSecurity,
+        param.windowsOffsetY + param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom -
+            previewSize.Height());
+    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
+    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
+    previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
+}
+
+void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
+    const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize)
+{
+    CHECK_NULL_VOID(previewGeometryNode);
+    CHECK_NULL_VOID(menuGeometryNode);
+
+    OffsetF targetCenterOffset(
+        targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    targetCenterOffset_ = targetCenterOffset;
+    auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+    auto menuHeight = totalSize.Height() - previewSize.Height();
+    auto previewHalfHeight = previewSize.Height() / 2;
+    if (menuHeight < previewHalfHeight) {
+        auto menuSize = menuGeometryNode->GetMarginFrameSize();
+        if (param.menuItemTotalHeight > previewHalfHeight) {
+            menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), previewHalfHeight));
+            totalSize = SizeF(totalSize.Width(), previewHalfHeight + previewSize.Height());
+        } else {
+            menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), param.menuItemTotalHeight));
+            totalSize = SizeF(totalSize.Width(), param.menuItemTotalHeight + previewSize.Height());
+        }
+    }
+
+    auto heightLeftSpace = param.windowGlobalSizeF.Height() - param.top - param.bottom - param.topSecurity -
+                           param.bottomSecurity - param.previewMenuGap;
+    auto delta = totalSize.Height() - heightLeftSpace;
+    if (GreatNotEqual(delta, 0.0f)) {
+        auto unitSpace = delta / totalSize.Height();
+        previewGeometryNode->SetFrameSize(SizeF((1 - unitSpace) * previewSize.Width() / previewScale_,
+            (1 - unitSpace) * previewSize.Height() / previewScale_));
+        auto menuSize = menuGeometryNode->GetMarginFrameSize();
+        menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), (1 - unitSpace) * menuSize.Height()));
+        totalSize = totalSize - SizeF(0.0f, delta);
+    }
+    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+
+    auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
+    if (previewSize.Width() > widthLeftSpace) {
+        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, previewSize.Height() / previewScale_));
+    }
+    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+
+    OffsetF offset(targetCenterOffset.GetX() - previewSize.Width() / 2, 0.0f);
+    auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
+        param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
+    auto y = std::clamp(offset.GetY(), param.windowsOffsetY + param.top + param.topSecurity,
+        param.windowsOffsetY + param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom -
+            previewSize.Height());
+    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
+    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
+    previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
+}
+
+void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenu(const RefPtr<GeometryNode>& previewGeometryNode,
+    const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight)
+{
+    CHECK_NULL_VOID(previewGeometryNode);
+    CHECK_NULL_VOID(menuGeometryNode);
+
+    auto pipelineContext = GetCurrentPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
+    float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
+    float screenHeight = wrapperSize_.Height();
+    if (!NearEqual(wrapperSize_.Height(), windowGlobalRect.Height())) {
+        screenHeight += bottom;
+    }
+    SizeF windowGlobalSizeF(windowGlobalRect.Width(), screenHeight - windowsOffsetY);
+
+    float topSecurity = static_cast<float>(PORTRAIT_TOP_SECURITY.ConvertToPx());
+    float bottomSecurity = static_cast<float>(PORTRAIT_BOTTOM_SECURITY.ConvertToPx());
+
+    PreviewMenuParam param;
+    param.windowGlobalSizeF = windowGlobalSizeF;
+    param.windowsOffsetX = windowsOffsetX;
+    param.windowsOffsetY = windowsOffsetY;
+    param.top = top;
+    param.bottom = bottom;
+    param.topSecurity = topSecurity;
+    param.bottomSecurity = bottomSecurity;
+    param.previewMenuGap = targetSecurity_;
+    param.menuItemTotalHeight = menuItemTotalHeight;
+    if (totalSize.Height() + targetSecurity_ <
+        windowGlobalSizeF.Height() - topSecurity - bottomSecurity - top - bottom) {
+        LayoutNormalTopPreviewBottomMenuLessThan(previewGeometryNode, menuGeometryNode, param, totalSize);
+    } else {
+        LayoutNormalTopPreviewBottomMenuGreateThan(previewGeometryNode, menuGeometryNode, param, totalSize);
+    }
+    auto previewSize = previewGeometryNode->GetMarginFrameSize();
+    auto securityHeight = windowGlobalRect.Height() - topSecurity - top - bottomSecurity - bottom;
+    if (GreatNotEqual(windowGlobalSizeF.Height(), windowGlobalRect.Height()) &&
+        GreatNotEqual(previewSize.Height(), securityHeight)) {
+        previewGeometryNode->SetFrameSize(SizeF(previewSize.Width(), securityHeight));
+    }
+}
+
+void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
+    const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize)
+{
+    CHECK_NULL_VOID(previewGeometryNode);
+    CHECK_NULL_VOID(menuGeometryNode);
+
+    OffsetF targetCenterOffset(
+        targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    targetCenterOffset_ = targetCenterOffset;
+    auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+    auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
+    if (previewSize.Width() > widthLeftSpace) {
+        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, previewSize.Height() / previewScale_));
+    }
+    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+
+    OffsetF offset(targetCenterOffset.GetX() - previewSize.Width() / 2,
+        std::max<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
+            param.top + param.topSecurity + totalSize.Height() - previewSize.Height() + param.previewMenuGap));
+
+    auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
+        param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
+    auto y = std::clamp(offset.GetY(), param.windowsOffsetY + param.top + param.topSecurity,
+        param.windowsOffsetY + param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom -
+            previewSize.Height());
+    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
+    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
+    previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
+}
+
+void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
+    const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize)
+{
+    CHECK_NULL_VOID(previewGeometryNode);
+    CHECK_NULL_VOID(menuGeometryNode);
+
+    OffsetF targetCenterOffset(
+        targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    targetCenterOffset_ = targetCenterOffset;
+    auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+    auto menuHeight = totalSize.Height() - previewSize.Height();
+    auto previewHalfHeight = previewSize.Height() / 2;
+    if (menuHeight < previewHalfHeight) {
+        auto menuSize = menuGeometryNode->GetMarginFrameSize();
+        if (param.menuItemTotalHeight > previewHalfHeight) {
+            menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), previewHalfHeight));
+            totalSize = SizeF(totalSize.Width(), previewHalfHeight + previewSize.Height());
+        } else {
+            menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), param.menuItemTotalHeight));
+            totalSize = SizeF(totalSize.Width(), param.menuItemTotalHeight + previewSize.Height());
+        }
+    }
+
+    auto heightLeftSpace = param.windowGlobalSizeF.Height() - param.top - param.topSecurity - param.bottom -
+                           param.bottomSecurity - param.previewMenuGap;
+    auto delta = totalSize.Height() - heightLeftSpace;
+    if (GreatNotEqual(delta, 0.0f)) {
+        auto unitSpace = delta / totalSize.Height();
+        previewGeometryNode->SetFrameSize(SizeF((1 - unitSpace) * previewSize.Width() / previewScale_,
+            (1 - unitSpace) * previewSize.Height() / previewScale_));
+        auto menuSize = menuGeometryNode->GetMarginFrameSize();
+        menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), (1 - unitSpace) * menuSize.Height()));
+        totalSize = totalSize - SizeF(0.0f, delta);
+    }
+    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+
+    auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
+    if (previewSize.Width() > widthLeftSpace) {
+        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, previewSize.Height() / previewScale_));
+    }
+    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+
+    OffsetF offset(targetCenterOffset.GetX() - previewSize.Width() / 2,
+        param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom - previewSize.Height());
+
+    auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
+        param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
+    auto y = std::clamp(offset.GetY(), param.windowsOffsetY + param.top + param.topSecurity,
+        param.windowsOffsetY + param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom -
+            previewSize.Height());
+    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
+    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
+    previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
+}
+
+void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenu(const RefPtr<GeometryNode>& previewGeometryNode,
+    const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight)
+{
+    CHECK_NULL_VOID(previewGeometryNode);
+    CHECK_NULL_VOID(menuGeometryNode);
+
+    auto pipelineContext = GetCurrentPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
+    float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
+    float screenHeight = wrapperSize_.Height();
+    if (!NearEqual(wrapperSize_.Height(), windowGlobalRect.Height())) {
+        screenHeight += bottom;
+    }
+    SizeF windowGlobalSizeF(windowGlobalRect.Width(), screenHeight - windowsOffsetY);
+
+    float topSecurity = static_cast<float>(PORTRAIT_TOP_SECURITY.ConvertToPx());
+    float bottomSecurity = static_cast<float>(PORTRAIT_BOTTOM_SECURITY.ConvertToPx());
+
+    PreviewMenuParam param;
+    param.windowGlobalSizeF = windowGlobalSizeF;
+    param.windowsOffsetX = windowsOffsetX;
+    param.windowsOffsetY = windowsOffsetY;
+    param.top = top;
+    param.bottom = bottom;
+    param.topSecurity = topSecurity;
+    param.bottomSecurity = bottomSecurity;
+    param.previewMenuGap = targetSecurity_;
+    param.menuItemTotalHeight = menuItemTotalHeight;
+    if (totalSize.Height() + targetSecurity_ <
+        windowGlobalSizeF.Height() - topSecurity - bottomSecurity - top - bottom) {
+        LayoutNormalBottomPreviewTopMenuLessThan(previewGeometryNode, menuGeometryNode, param, totalSize);
+    } else {
+        LayoutNormalBottomPreviewTopMenuGreateThan(previewGeometryNode, menuGeometryNode, param, totalSize);
+    }
+    auto previewSize = previewGeometryNode->GetMarginFrameSize();
+    auto securityHeight = windowGlobalRect.Height() - topSecurity - top - bottomSecurity - bottom;
+    if (GreatNotEqual(windowGlobalSizeF.Height(), windowGlobalRect.Height()) &&
+        GreatNotEqual(previewSize.Height(), securityHeight)) {
+        previewGeometryNode->SetFrameSize(SizeF(previewSize.Width(), securityHeight));
+    }
 }
 
 void MenuLayoutAlgorithm::UpdateScrollAndColumnLayoutConstraint(
@@ -581,7 +841,7 @@ void MenuLayoutAlgorithm::UpdateScrollAndColumnLayoutConstraint(
             continue;
         }
         auto frameSize = previewGeometryNode->GetMarginFrameSize();
-        auto previewSecurity = static_cast<float>(PREVIEW_INNER_SECURITY.ConvertToPx()) * 2;
+        auto previewSecurity = static_cast<float>(PREVIEW_INNER_SECURITY.ConvertToPx() / previewScale_) * 2;
         geometryNode->SetFrameSize(SizeF(frameSize.Width() - previewSecurity, frameSize.Height() - previewSecurity));
         auto layoutProperty = child->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
@@ -619,7 +879,61 @@ float MenuLayoutAlgorithm::GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& m
             height += itemGeometryNode->GetMarginFrameSize().Height();
         }
     }
+    auto menuHeight = menuGeometryNode->GetMarginFrameSize().Height();
+    if (height < menuHeight) {
+        height = menuHeight;
+    }
     return height;
+}
+
+void MenuLayoutAlgorithm::LayoutNormalPreviewMenu(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto parentNode = AceType::DynamicCast<FrameNode>(menuNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto menuProp = DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(menuProp);
+
+    RefPtr<LayoutWrapper> menuLayoutWrapper;
+    RefPtr<LayoutWrapper> previewLayoutWrapper;
+    SizeF totalSize = GetPreviewNodeAndMenuNodeTotalSize(parentNode, previewLayoutWrapper, menuLayoutWrapper);
+    CHECK_NULL_VOID(menuLayoutWrapper);
+    CHECK_NULL_VOID(previewLayoutWrapper);
+    RefPtr<GeometryNode> menuGeometryNode = menuLayoutWrapper->GetGeometryNode();
+    RefPtr<GeometryNode> previewGeometryNode = previewLayoutWrapper->GetGeometryNode();
+    auto menuItemTotalHeight = GetMenuItemTotalHeight(menuLayoutWrapper);
+
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
+        if (placement_ == Placement::TOP_LEFT || placement_ == Placement::TOP || placement_ == Placement::TOP_RIGHT) {
+            LayoutNormalBottomPreviewTopMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+        } else {
+            LayoutNormalTopPreviewBottomMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+        }
+    } else {
+        LayoutOtherDeviceLeftPreviewRightMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+    }
+    UpdateScrollAndColumnLayoutConstraint(previewLayoutWrapper, menuLayoutWrapper);
+    auto previewSize = previewGeometryNode->GetMarginFrameSize();
+    previewOffset_ = previewGeometryNode->GetFrameOffset();
+    auto previewOffsetX = previewOffset_.GetX();
+    auto previewOffsetY = previewOffset_.GetY();
+    targetSize_ = previewSize * previewScale_;
+    targetOffset_ = OffsetF(previewOffsetX + (previewSize.Width() - targetSize_.Width()) / 2,
+        previewOffsetY + (previewSize.Height() - targetSize_.Height()) / 2);
+    auto previewHostNode = previewLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(previewHostNode);
+    auto renderContext = previewHostNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(previewOffsetX), Dimension(previewOffsetY)));
+
+    auto menuHostNode = menuLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuHostNode);
+    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / 2, previewSize.Height() / 2);
+    auto menuPattern = menuHostNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
 }
 
 void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
@@ -628,27 +942,34 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(const Re
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
 
-    OffsetF targetCenter(
+    OffsetF targetCenterOffset(
         targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
-    auto previewSize = previewGeometryNode->GetMarginFrameSize();
+    targetCenterOffset_ = targetCenterOffset;
+    auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     auto heightLeftSpace =
         param.windowGlobalSizeF.Height() - param.top - param.topSecurity - param.bottomSecurity - param.bottom;
     auto delta = previewSize.Height() - heightLeftSpace;
     if (GreatNotEqual(delta, 0.0f)) {
         auto unitSpace = delta / previewSize.Height();
-        previewGeometryNode->SetFrameSize(
-            SizeF((1 - unitSpace) * previewSize.Width(), (1 - unitSpace) * previewSize.Height()));
+        previewGeometryNode->SetFrameSize(SizeF((1 - unitSpace) * previewSize.Width() / previewScale_,
+            (1 - unitSpace) * previewSize.Height() / previewScale_));
         totalSize = totalSize - SizeF(unitSpace * previewSize.Width(), unitSpace * previewSize.Height());
     }
-    previewSize = previewGeometryNode->GetMarginFrameSize();
+    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     auto menuSize = menuGeometryNode->GetMarginFrameSize();
-    auto offsetX = targetCenter.GetX() - previewSize.Width() / 2;
-    auto offsetY = std::min<float>(targetCenter.GetY() - previewSize.Height() / 2,
+    menuGeometryNode->SetFrameSize(
+        SizeF(menuSize.Width(), std::min<float>(param.menuItemTotalHeight, heightLeftSpace)));
+    menuSize = menuGeometryNode->GetMarginFrameSize();
+    auto offsetX = targetCenterOffset.GetX() - previewSize.Width() / 2;
+    auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
         param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom - menuSize.Height());
     auto x = std::clamp(offsetX, param.windowsOffsetX + paddingStart_,
-        param.windowsOffsetX + param.windowGlobalSizeF.Width() - paddingEnd_);
+        param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
     auto y = std::clamp(offsetY, param.windowsOffsetY + param.top + param.topSecurity,
-        param.windowsOffsetY + param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom);
+        param.windowsOffsetY + param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom -
+            previewSize.Height());
+    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
+    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
 }
 
@@ -659,41 +980,48 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuGreateThan(
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
 
-    OffsetF targetCenter(
+    OffsetF targetCenterOffset(
         targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
-    auto previewSize = previewGeometryNode->GetMarginFrameSize();
+    targetCenterOffset_ = targetCenterOffset;
+    auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_ - param.previewMenuGap;
     auto delta = totalSize.Width() - widthLeftSpace;
     if (GreatNotEqual(delta, 0.0f)) {
         auto unitSpace = delta / previewSize.Width();
-        previewGeometryNode->SetFrameSize(
-            SizeF((1 - unitSpace) * previewSize.Width(), (1 - unitSpace) * previewSize.Height()));
+        previewGeometryNode->SetFrameSize(SizeF((1 - unitSpace) * previewSize.Width() / previewScale_,
+            (1 - unitSpace) * previewSize.Height() / previewScale_));
         totalSize = totalSize - SizeF(unitSpace * previewSize.Width(), unitSpace * previewSize.Height());
     }
-    previewSize = previewGeometryNode->GetMarginFrameSize();
+    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     auto heightLeftSpace =
         param.windowGlobalSizeF.Height() - param.topSecurity - param.top - param.bottomSecurity - param.bottom;
     delta = previewSize.Height() - heightLeftSpace;
     if (GreatNotEqual(delta, 0.0f)) {
         auto unitSpace = delta / previewSize.Height();
-        previewGeometryNode->SetFrameSize(
-            SizeF((1 - unitSpace) * previewSize.Width(), (1 - unitSpace) * previewSize.Height()));
+        previewGeometryNode->SetFrameSize(SizeF((1 - unitSpace) * previewSize.Width() / previewScale_,
+            (1 - unitSpace) * previewSize.Height() / previewScale_));
         totalSize = totalSize - SizeF(unitSpace * previewSize.Width(), unitSpace * previewSize.Height());
     }
-    previewSize = previewGeometryNode->GetMarginFrameSize();
+    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     auto menuSize = menuGeometryNode->GetMarginFrameSize();
+    menuGeometryNode->SetFrameSize(
+        SizeF(menuSize.Width(), std::min<float>(param.menuItemTotalHeight, heightLeftSpace)));
+    menuSize = menuGeometryNode->GetMarginFrameSize();
     auto offsetX = 0.0f;
-    auto offsetY = std::min<float>(targetCenter.GetY() - previewSize.Height() / 2,
+    auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
         param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom - menuSize.Height());
     auto x = std::clamp(offsetX, param.windowsOffsetX + paddingStart_,
         param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
-    auto y = std::clamp(offsetY, param.windowsOffsetX + param.top + param.topSecurity,
-        param.windowsOffsetX + param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom);
+    auto y = std::clamp(offsetY, param.windowsOffsetY + param.top + param.topSecurity,
+        param.windowsOffsetY + param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom -
+            previewSize.Height());
+    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
+    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
 }
 
-void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenu(
-    const RefPtr<GeometryNode>& previewGeometryNode, const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize)
+void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<GeometryNode>& previewGeometryNode,
+    const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight)
 {
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
@@ -730,10 +1058,17 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenu(
     param.topSecurity = topSecurity;
     param.bottomSecurity = bottomSecurity;
     param.previewMenuGap = targetSecurity_;
+    param.menuItemTotalHeight = menuItemTotalHeight;
     if (totalSize.Width() + targetSecurity_ < windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_) {
         LayoutOtherDeviceLeftPreviewRightMenuLessThan(previewGeometryNode, menuGeometryNode, param, totalSize);
     } else {
         LayoutOtherDeviceLeftPreviewRightMenuGreateThan(previewGeometryNode, menuGeometryNode, param, totalSize);
+    }
+    auto previewSize = previewGeometryNode->GetMarginFrameSize();
+    auto securityHeight = windowGlobalRect.Height() - topSecurity - top - bottomSecurity - bottom;
+    if (GreatNotEqual(windowGlobalSizeF.Height(), windowGlobalRect.Height()) &&
+        GreatNotEqual(previewSize.Height(), securityHeight)) {
+        previewGeometryNode->SetFrameSize(SizeF(previewSize.Width(), securityHeight));
     }
 }
 
@@ -756,15 +1091,28 @@ void MenuLayoutAlgorithm::LayoutOtherDevicePreviewMenu(LayoutWrapper* layoutWrap
     RefPtr<GeometryNode> previewGeometryNode = previewLayoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(menuGeometryNode);
     CHECK_NULL_VOID(previewGeometryNode);
-    LayoutOtherDeviceLeftPreviewRightMenu(previewGeometryNode, menuGeometryNode, totalSize);
+    auto menuItemTotalHeight = GetMenuItemTotalHeight(menuLayoutWrapper);
+    LayoutOtherDeviceLeftPreviewRightMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
     UpdateScrollAndColumnLayoutConstraint(previewLayoutWrapper, menuLayoutWrapper);
-    targetOffset_ = previewGeometryNode->GetFrameOffset();
-    targetSize_ = previewGeometryNode->GetMarginFrameSize();
+    auto previewSize = previewGeometryNode->GetMarginFrameSize();
+    previewOffset_ = previewGeometryNode->GetFrameOffset();
+    auto previewOffsetX = previewGeometryNode->GetFrameOffset().GetX();
+    auto previewOffsetY = previewGeometryNode->GetFrameOffset().GetY();
+    targetSize_ = previewSize * previewScale_;
+    targetOffset_ = OffsetF(previewOffsetX + (previewSize.Width() - targetSize_.Width()) / 2,
+        previewOffsetY + (previewSize.Height() - targetSize_.Height()) / 2);
     auto previewHostNode = previewLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(previewHostNode);
     auto renderContext = previewHostNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(targetOffset_.GetX()), Dimension(targetOffset_.GetY())));
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(previewOffsetX), Dimension(previewOffsetY)));
+
+    auto menuHostNode = menuLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuHostNode);
+    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / 2, previewSize.Height() / 2);
+    auto menuPattern = menuHostNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
 }
 
 void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
@@ -772,7 +1120,9 @@ void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
     auto paintProperty = GetPaintProperty(layoutWrapper);
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateEnableArrow(false);
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        LayoutNormalPreviewMenu(layoutWrapper);
+    } else {
         LayoutOtherDevicePreviewMenu(layoutWrapper);
     }
 }
@@ -787,7 +1137,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
 
-    if (IsPreviewMenu(layoutWrapper)) {
+    if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         LayoutPreviewMenu(layoutWrapper);
     }
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
@@ -802,6 +1152,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
         SetMenuPlacementForAnimation(layoutWrapper);
+        menuPattern->SetOriginOffset(menuPosition - (previewOffset_ - previewOriginOffset_));
         arrowPosition_ = GetArrowPositionWithPlacement(size);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
             LayoutArrow(layoutWrapper);

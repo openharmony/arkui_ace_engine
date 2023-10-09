@@ -11,11 +11,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+ace_unittest("accessibility_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [
+    "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
+    "$ace_root/frameworks/core/accessibility/accessibility_utils.cpp",
+    "accessibility_node_test_ng.cpp",
+    "accessibility_utils_test_ng.cpp",
+  ]
+}
+
+ace_unittest("js_inspector_test") {
+  sources = [
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_badge.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_button.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_camera.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_canvas.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_chart.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_dialog.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_div.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_divider.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_form.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_grid_column.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_grid_container.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_grid_row.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_image.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_image_animator.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_input.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_label.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_list.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_list_item.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_list_item_group.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_marquee.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_menu.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_navigation_bar.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_node.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_option.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_panel.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_picker.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_picker_view.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_piece.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_popup.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_progress.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_qrcode.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_rating.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_refresh.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_search.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_select.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_slider.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_span.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_stack.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_stepper.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_stepper_item.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_swiper.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_switch.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_tab_bar.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_tab_content.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_tabs.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_text.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_textarea.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_toggle.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_toolbar.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_toolbar_item.cpp",
+    "$ace_root/frameworks/core/accessibility/js_inspector/inspect_video.cpp",
+    "js_inspector_test.cpp",
+  ]
+}
+
 group("accessibility_unittest") {
   testonly = true
   deps = [
-    "accessibilitynode:accessibility_node_test_ng",
-    "accessibilityutils:accessibility_utils_test_ng",
-    "js_inspector:js_inspector_test",
+    ":accessibility_test_ng",
+    ":js_inspector_test",
   ]
 }

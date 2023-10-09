@@ -40,6 +40,11 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    Placement GetPlacement() const
+    {
+        return placement_;
+    }
+
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition);
     float HorizontalLayout(const SizeF& size, float clickPosition, bool IsSelectMenu = false);
@@ -124,16 +129,29 @@ private:
     RefPtr<PipelineContext> GetCurrentPipelineContext();
 
     void LayoutPreviewMenu(LayoutWrapper* layoutWrapper);
-    bool IsPreviewMenu(LayoutWrapper* layoutWrapper);
     void ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
-    void ModifyPhonePreviewMenuPlacement(LayoutWrapper* layoutWrapper);
-    void ModifyPhonePreviewMenuPortraitPlacement(LayoutWrapper* layoutWrapper);
+    void ModifyNormalPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
+    void ModifyNormalPreviewMenuPortraitPlacement(LayoutWrapper* layoutWrapper);
     SizeF GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
 
+    void LayoutNormalPreviewMenu(LayoutWrapper* layoutWrapper);
+    void LayoutNormalTopPreviewBottomMenu(const RefPtr<GeometryNode>& previewGeometryNode,
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
+    void LayoutNormalTopPreviewBottomMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
+        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+    void LayoutNormalTopPreviewBottomMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
+        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+    void LayoutNormalBottomPreviewTopMenu(const RefPtr<GeometryNode>& previewGeometryNode,
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
+    void LayoutNormalBottomPreviewTopMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
+        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+    void LayoutNormalBottomPreviewTopMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
+        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+
     void LayoutOtherDevicePreviewMenu(LayoutWrapper* layoutWrapper);
     void LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<GeometryNode>& previewGeometryNode,
-        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
     void LayoutOtherDeviceLeftPreviewRightMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
     void LayoutOtherDeviceLeftPreviewRightMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
@@ -175,6 +193,12 @@ private:
     float paddingTop_ = 0.0f;
     float paddingBottom_ = 0.0f;
     float optionPadding_ = 0.0f;
+    OffsetF targetCenterOffset_;
+    OffsetF previewOriginOffset_;
+    OffsetF previewOffset_;
+
+    // previewSacle_ must be greater than 0
+    float previewScale_ = 1.0f;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

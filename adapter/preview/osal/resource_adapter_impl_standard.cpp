@@ -89,7 +89,8 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_APP_BAR,
     THEME_PATTERN_SECURITY_COMPONENT,
     THEME_PATTERN_SIDE_BAR,
-    THEME_PATTERN_PATTERN_LOCK
+    THEME_PATTERN_PATTERN_LOCK,
+    THEME_PATTERN_HYPERLINK
 };
 } // namespace
 
@@ -125,11 +126,14 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     std::string sysResIndexPath = sysResPath + DELIMITER + "resources.index";
     auto sysResRet = newResMgr->AddResource(sysResIndexPath.c_str());
 
-    auto configRet = newResMgr->UpdateResConfig(*resConfig);
-    LOGI("AddAppRes result=%{public}d, AddSysRes result=%{public}d,  UpdateResConfig result=%{public}d, "
-         "ori=%{public}d, dpi=%{public}f, device=%{public}d",
-        appResRet, sysResRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(),
-        resConfig->GetDeviceType());
+    if (resConfig != nullptr) {
+        auto configRet = newResMgr->UpdateResConfig(*resConfig);
+        LOGI("AddAppRes result=%{public}d, AddSysRes result=%{public}d,  UpdateResConfig result=%{public}d, "
+            "ori=%{public}d, dpi=%{public}f, device=%{public}d",
+            appResRet, sysResRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(),
+            resConfig->GetDeviceType());
+    }
+    
     Platform::AceApplicationInfoImpl::GetInstance().SetResourceManager(newResMgr);
     resourceManager_ = newResMgr;
     packagePathStr_ = appResPath;
@@ -140,7 +144,9 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
     auto resConfig = ConvertConfigToGlobal(config);
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d", resConfig->GetDirection(),
         resConfig->GetScreenDensity(), resConfig->GetDeviceType());
-    resourceManager_->UpdateResConfig(*resConfig);
+    if (resConfig != nullptr) {
+        resourceManager_->UpdateResConfig(*resConfig);
+    }
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)

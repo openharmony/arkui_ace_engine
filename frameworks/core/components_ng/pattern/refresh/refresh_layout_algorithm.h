@@ -31,7 +31,7 @@ class ACE_EXPORT RefreshLayoutAlgorithm : public BoxLayoutAlgorithm {
 public:
     RefreshLayoutAlgorithm();
     ~RefreshLayoutAlgorithm() override = default;
-
+    void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     bool HasCustomBuilderIndex() const
@@ -55,6 +55,7 @@ public:
     }
 
 private:
+    OptionalSizeF CalculateBuilderSize(RefPtr<LayoutWrapper> childLayoutWrapper, LayoutConstraintF& constraint);
     void PerformLayout(LayoutWrapper* layoutWrapper);
     float customBuilderOffset_ = 0.0f;
     float scrollOffset_ = 0.0f;

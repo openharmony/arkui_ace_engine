@@ -60,7 +60,8 @@ public:
 
     void NotifyListener(const T& value) const
     {
-        for (auto&& [id, callback] : callbacks_) {
+        auto callbacks = callbacks_;
+        for (auto&& [id, callback] : callbacks) {
             if (callback) {
                 callback(value);
             }

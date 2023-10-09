@@ -22,17 +22,17 @@ namespace flutter {
 
 PlatformTaskRunnerAdapter::PlatformTaskRunnerAdapter(bool useCurrentEventRunner) : fml::TaskRunner(nullptr) {}
 
-void PlatformTaskRunnerAdapter::PostTask(fml::closure task)
+void PlatformTaskRunnerAdapter::PostTask(fml::closure task, const std::string& caller)
 {
     OHOS::AppExecFwk::EventHandler::PostTask(std::move(task));
 }
 
-void PlatformTaskRunnerAdapter::PostTaskForTime(fml::closure task, fml::TimePoint target_time)
+void PlatformTaskRunnerAdapter::PostTaskForTime(fml::closure task, fml::TimePoint target_time, const std::string& caller)
 {
     OHOS::AppExecFwk::EventHandler::PostTask(std::move(task), target_time.ToEpochDelta().ToMilliseconds());
 }
 
-void PlatformTaskRunnerAdapter::PostDelayedTask(fml::closure task, fml::TimeDelta delay)
+void PlatformTaskRunnerAdapter::PostDelayedTask(fml::closure task, fml::TimeDelta delay, const std::string& caller)
 {
     OHOS::AppExecFwk::EventHandler::PostTask(std::move(task), delay.ToMilliseconds());
 }

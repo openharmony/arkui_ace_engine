@@ -234,6 +234,11 @@ void NavigationModelImpl::SetOnNavBarStateChange(std::function<void(bool)>&& onN
     return;
 }
 
+void NavigationModelImpl::SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onNavigationChange)
+{
+    return;
+}
+
 void NavigationModelImpl::SetNavigationMode(NG::NavigationMode mode)
 {
     return;

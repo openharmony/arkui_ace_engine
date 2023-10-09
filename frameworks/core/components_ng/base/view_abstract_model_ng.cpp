@@ -43,7 +43,7 @@ void ViewAbstractModelNG::CreateCustomMenu(std::function<void()>& buildFunc, con
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
 
     RefPtr<UINode> previewCustomNode;
-    if (previewBuildFunc && menuParam.hasPreview) {
+    if (previewBuildFunc && menuParam.previewMode == MenuPreviewMode::CUSTOM) {
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
@@ -141,27 +141,19 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
 #ifdef ENABLE_DRAG_FRAMEWORK
         auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
-        if (menuParam.hasPreview) {
-            if (previewBuildFunc) {
-                gestureHub->SetPreviewMode(MenuPreviewMode::CUSTOM);
-            } else {
-                gestureHub->SetPreviewMode(MenuPreviewMode::IMAGE);
-            }
-        }
+        gestureHub->SetPreviewMode(menuParam.previewMode);
 #endif
         // create or show menu on long press
         auto event = [builder = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
-            if (!previewBuildFunc && menuParam.hasPreview) {
+            if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
                 auto context = targetNode->GetRenderContext();
                 CHECK_NULL_VOID(context);
                 auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
                 CHECK_NULL_VOID(gestureHub);
-                if (gestureHub->GetPixelMap() == nullptr) {
-                    auto pixelMap = context->GetThumbnailPixelMap();
-                    gestureHub->SetPixelMap(pixelMap);
-                }
+                auto pixelMap = context->GetThumbnailPixelMap();
+                gestureHub->SetPixelMap(pixelMap);
             }
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };

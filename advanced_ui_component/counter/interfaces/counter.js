@@ -55,18 +55,7 @@ export class DateData {
 export class DateStyleOptions extends CommonOptions {
 }
 
-export class CounterStyleMap {
-}
-CounterType.LIST, CounterType.COMPACT, CounterType.INLINE, CounterType.INLINE_DATE;
-
-export class CounterAttribute {
-}
-
 export class CounterOptions {
-    constructor(t) {
-        this.type = t.type;
-        this.counterOptions = t.counterOptions
-    }
 }
 
 class CounterResource {
@@ -860,14 +849,6 @@ export class CounterComponent extends ViewPU {
             (this.onHoverIncrease = this.inlineStyleOptions.onHoverIncrease);
         void 0 !== this.inlineStyleOptions.onHoverDecrease &&
             (this.onHoverDecrease = this.inlineStyleOptions.onHoverDecrease);
-        void 0 !== this.inlineStyleOptions.onFocusIncrease &&
-            (this.onFocusIncrease = this.inlineStyleOptions.onFocusIncrease);
-        void 0 !== this.inlineStyleOptions.onFocusDecrease &&
-            (this.onFocusDecrease = this.inlineStyleOptions.onFocusDecrease);
-        void 0 !== this.inlineStyleOptions.onBlurIncrease &&
-            (this.onBlurIncrease = this.inlineStyleOptions.onBlurIncrease);
-        void 0 !== this.inlineStyleOptions.onBlurDecrease &&
-            (this.onBlurDecrease = this.inlineStyleOptions.onBlurDecrease);
         void 0 !== this.inlineStyleOptions.onChange && (this.onChange = this.inlineStyleOptions.onChange);
         void 0 !== this.inlineStyleOptions.focusable && (this.focusEnable = this.inlineStyleOptions.focusable)
     }
@@ -878,12 +859,6 @@ export class CounterComponent extends ViewPU {
             (this.onHoverIncrease = this.dateStyleOptions.onHoverIncrease);
         void 0 !== this.dateStyleOptions.onHoverDecrease &&
             (this.onHoverDecrease = this.dateStyleOptions.onHoverDecrease);
-        void 0 !== this.dateStyleOptions.onFocusIncrease &&
-            (this.onFocusIncrease = this.dateStyleOptions.onFocusIncrease);
-        void 0 !== this.dateStyleOptions.onFocusDecrease &&
-            (this.onFocusDecrease = this.dateStyleOptions.onFocusDecrease);
-        void 0 !== this.dateStyleOptions.onBlurIncrease && (this.onBlurIncrease = this.dateStyleOptions.onBlurIncrease);
-        void 0 !== this.dateStyleOptions.onBlurDecrease && (this.onBlurDecrease = this.dateStyleOptions.onBlurDecrease);
         void 0 !== this.dateStyleOptions.year && this.dateStyleOptions.year >= this.minYear &&
             this.dateStyleOptions.year <= this.maxYear && (this.year = this.dateStyleOptions.year);
         void 0 !== this.dateStyleOptions.month && this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
@@ -899,13 +874,13 @@ export class CounterComponent extends ViewPU {
     onOptionsChange() {
         this.type = this.options.type;
         if (this.type === CounterType.LIST || this.type === CounterType.COMPACT) {
-            this.numberStyleOptions = this.options.counterOptions;
+            this.numberStyleOptions = this.options.numberOptions;
             this.updateNumberStyleOptions()
         } else if (this.type === CounterType.INLINE) {
-            this.inlineStyleOptions = this.options.counterOptions;
+            this.inlineStyleOptions = this.options.inlineOptions;
             this.updateInlineStyleOptions()
         } else if (this.type === CounterType.INLINE_DATE) {
-            this.dateStyleOptions = this.options.counterOptions;
+            this.dateStyleOptions = this.options.dateOptions;
             this.updateDateStyleOptions()
         }
     }
@@ -2771,5 +2746,5 @@ export class CounterComponent extends ViewPU {
     }
 }
 
-export default {CounterComponent, CounterOptions, CounterAttribute, CounterStyleMap, DateStyleOptions, DateData,
-    NumberStyleOptions, InlineStyleOptions, CommonOptions, CounterType};
+export default {CounterType, CommonOptions, InlineStyleOptions, NumberStyleOptions,
+    DateData, DateStyleOptions, CounterOptions, CounterComponent};

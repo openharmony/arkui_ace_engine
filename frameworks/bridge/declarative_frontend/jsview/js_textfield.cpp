@@ -227,11 +227,10 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         if (fontSize->IsString()) {
             auto result = StringUtils::StringToDimensionWithThemeValue(fontSize->ToString(), true, Dimension(-1));
             font.fontSize = result;
-        } else if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-            font.fontSize = Dimension(-1);
-            LOGW("Parse to dimension FP failed.");
-        } else {
+        } else if (ParseJsDimensionFp(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
             font.fontSize = size;
+        } else {
+            font.fontSize = Dimension(-1);
         }
     }
 

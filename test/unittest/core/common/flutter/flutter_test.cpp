@@ -290,7 +290,7 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest07, TestSize.Level1)
      */
     for (int32_t id = 0; id < 7; id++) {
         auto taskType = static_cast<TaskExecutor::TaskType>(id);
-        auto result = flutterTaskExecutor_->OnPostTask(callBack, taskType, 1);
+        auto result = flutterTaskExecutor_->OnPostTask(callBack, taskType, 1, {});
         switch (taskType) {
             case TaskExecutor::TaskType::PLATFORM:
             case TaskExecutor::TaskType::UI:
@@ -330,7 +330,7 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest08, TestSize.Level1)
      * @tc.expected: task gets executed.
      */
     Container::UpdateCurrent(-1);
-    flutterTaskExecutor_->OnPostTask(callBack, TaskExecutor::TaskType::BACKGROUND, 2);
+    flutterTaskExecutor_->OnPostTask(callBack, TaskExecutor::TaskType::BACKGROUND, 2, {});
     EXPECT_EQ(backgroudTask, "");
     sleep(2);
     EXPECT_EQ(backgroudTask, BACKGROUNDSYNCTASK);

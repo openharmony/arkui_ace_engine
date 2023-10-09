@@ -794,7 +794,6 @@ void FrameNode::TriggerOnAreaChangeCallback()
     if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         auto currParentOffsetToWindow = GetOffsetRelativeToWindow() - currFrameRect.GetOffset();
-        currFrameRect.SetOffset(geometryNode_->GetPixelGridRoundOffsetForArea());
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             eventHub_->FireOnAreaChanged(
                 *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
@@ -1904,7 +1903,9 @@ OffsetF FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset += renderContext->GetPaintRectWithTranslate().GetOffset();
+        auto rect = renderContext->GetPaintRectWithTranslate();
+        CHECK_NULL_RETURN(rect.IsValid(), offset + parent->GetPaintRectOffset());
+        offset += rect.GetOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;
@@ -2245,6 +2246,7 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
     }
@@ -2412,7 +2414,8 @@ void FrameNode::SyncGeometryNode()
         geometryTransition->DidLayout(Claim(this));
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
-        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true);
+        isLayoutComplete_ = true;
+        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
     }
 
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };

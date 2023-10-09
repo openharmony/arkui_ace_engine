@@ -28,6 +28,7 @@ constexpr int NAPI_ACE_ERR_NO_ERROR = 0;
 constexpr int ACE_ARGS_TWO = 2;
 constexpr int ACE_PARAM0 = 0;
 constexpr int ACE_PARAM1 = 1;
+constexpr size_t MAX_STRING_BUFF_SIZE = 1024;
 
 bool AceToJson(napi_env env, napi_value param, Json::Value& jsonObject);
 napi_value ParseJsonToKVObject(napi_env env, Json::Value& jsonObject);
@@ -374,7 +375,6 @@ bool AceUnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<int64_
     return true;
 }
 
-
 napi_value AceWrapArrayInt64ToJS(napi_env env, const std::vector<int64_t>& value)
 {
     napi_value jsArray = nullptr;
@@ -568,15 +568,16 @@ bool AceKVObjectToString(napi_env env, napi_value param, std::string& value)
     napi_value stringifyValue;
     napi_get_named_property(env, jsonValue, "stringify", &stringifyValue);
     napi_value funcArgv[1] = { param };
-    napi_value returnValue;
+    napi_value returnValue = nullptr;
     napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue);
-    auto nativeValue = reinterpret_cast<NativeValue*>(returnValue);
-    auto resultValue = nativeValue->ToString();
-    auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
-    size_t len = nativeString->GetLength() + 1;
-    std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(len);
+    size_t buffSize = 0;
+    napi_status status = napi_get_value_string_utf8(env, returnValue, nullptr, 0, &buffSize);
+    if (status != napi_ok || buffSize == 0 || buffSize >= MAX_STRING_BUFF_SIZE) {
+        return false;
+    }
+    std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(buffSize + 1);
     size_t ret = 0;
-    napi_get_value_string_utf8(env, returnValue, paramsChar.get(), len, &ret);
+    napi_get_value_string_utf8(env, returnValue, paramsChar.get(), buffSize + 1, &ret);
     value = paramsChar.get();
     return true;
 }
@@ -767,8 +768,7 @@ napi_value AceGetPropertyValueByPropertyName(
     return value;
 }
 
-bool AceSetPropertyValueByPropertyName(napi_env env, napi_value jsObject, const char* propertyName,
-    napi_value value)
+bool AceSetPropertyValueByPropertyName(napi_env env, napi_value jsObject, const char* propertyName, napi_value value)
 {
     if (value != nullptr && propertyName != nullptr) {
         NAPI_CALL_BASE(env, napi_set_named_property(env, jsObject, propertyName, value), false);
@@ -858,8 +858,7 @@ bool AceUnwrapBooleanArrayByPropertyName(
  *
  * @return Return true if successful, else return false.
  */
-bool AceUnwrapStringByPropertyName(napi_env env, napi_value jsObject, const char* propertyName,
-    std::string& value)
+bool AceUnwrapStringByPropertyName(napi_env env, napi_value jsObject, const char* propertyName, std::string& value)
 {
     napi_value jsValue = AceGetPropertyValueByPropertyName(env, jsObject, propertyName, napi_string);
     if (jsValue != nullptr) {
@@ -1062,7 +1061,7 @@ void AceCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCal
     napi_value undefined = 0;
     napi_get_undefined(env, &undefined);
     napi_value callResult = 0;
-    napi_value revParam[ACE_ARGS_TWO] = {nullptr};
+    napi_value revParam[ACE_ARGS_TWO] = { nullptr };
 
     revParam[ACE_PARAM0] = AceGetCallbackErrorValue(env, asyncCallbackInfo->error_code);
     AceWrapThreadReturnData(env, &asyncCallbackInfo->native_data, &revParam[ACE_PARAM1]);
@@ -1110,10 +1109,10 @@ void AceCompletePromiseCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncC
  * @param propertyName Indicates the name of the object.
  * @param propName Indicates the name of the property.
  */
-void AceSetNamedPropertyByString(napi_env env, napi_value jsObject, const char *objName, const char *propName)
+void AceSetNamedPropertyByString(napi_env env, napi_value jsObject, const char* objName, const char* propName)
 {
     napi_value prop = nullptr;
     napi_create_string_utf8(env, objName, NAPI_AUTO_LENGTH, &prop);
     napi_set_named_property(env, jsObject, propName, prop);
 }
-}  // namespace OHOS::Ace::Napi
+} // namespace OHOS::Ace::Napi

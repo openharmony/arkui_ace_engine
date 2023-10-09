@@ -25,14 +25,21 @@
 #include "core/components/form/resource/form_request_data.h"
 
 namespace OHOS::Ace {
+struct PixelMapRecordDetails {
+    int32_t width = 0;
+    int32_t height = 0;
+    PixelFormat pixelFormat = PixelFormat::UNKNOWN;
+    AlphaType alphaType = AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+};
+
 class ACE_FORCE_EXPORT UdmfClient : public AceType {
     DECLARE_ACE_TYPE(UdmfClient, AceType);
 
 public:
     static UdmfClient* GetInstance();
-    virtual RefPtr<UnifiedData> TransformUnifiedData(NativeValue* nativeValue) = 0;
-    virtual NativeValue* TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
-    virtual NativeValue* TransformSummary(std::map<std::string, int64_t>& summary) = 0;
+    virtual RefPtr<UnifiedData> TransformUnifiedData(napi_value napiValue) = 0;
+    virtual napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
+    virtual napi_value TransformSummary(std::map<std::string, int64_t>& summary) = 0;
     virtual RefPtr<UnifiedData> CreateUnifiedData() = 0;
     virtual int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) = 0;
     virtual int32_t GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key) = 0;
@@ -47,7 +54,8 @@ public:
         const RefPtr<UnifiedData>& unifiedData, const std::string& htmlContent, const std::string& plainContent) = 0;
     virtual void GetHtmlRecord(
         const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent) = 0;
-    virtual void AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) = 0;
+    virtual void AddPixelMapRecord(
+        const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data, PixelMapRecordDetails& details) = 0;
     virtual void AddImageRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& uri) = 0;
     virtual void AddPlainTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) = 0;
     virtual std::string GetSinglePlainTextRecord(const RefPtr<UnifiedData>& unifiedData) = 0;

@@ -30,8 +30,6 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr Dimension SCROLL_BAR_LEFT_WIDTH = 2.0_vp;
-
 class TextFieldContentModifier;
 class ACE_EXPORT TextFieldLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(TextFieldLayoutAlgorithm, LayoutAlgorithm);

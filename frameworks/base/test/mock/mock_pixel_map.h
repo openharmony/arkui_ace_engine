@@ -37,6 +37,7 @@ public:
     MOCK_CONST_METHOD0(GetByteCount, int32_t());
     MOCK_CONST_METHOD0(GetPixelManager, void*());
     MOCK_CONST_METHOD0(GetRawPixelMapPtr, void*());
+    MOCK_CONST_METHOD0(GetWritablePixels, void*());
     MOCK_METHOD0(GetId, std::string());
     MOCK_METHOD0(GetModifyId, std::string());
     MOCK_METHOD0(GetPixelMapSharedPtr, std::shared_ptr<Media::PixelMap>());

@@ -877,6 +877,34 @@ void SliderPattern::LayoutImageNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
+void SliderPattern::UpdateImagePositionX(float centerX)
+{
+    CHECK_NULL_VOID(imageFrameNode_);
+    auto renderContext = imageFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = imageFrameNode_->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto offset = geometryNode->GetMarginFrameOffset();
+    offset.SetX(centerX - blockSize_.Width() * HALF);
+    geometryNode->SetMarginFrameOffset(offset);
+    renderContext->SyncGeometryProperties(nullptr);
+}
+
+void SliderPattern::UpdateImagePositionY(float centerY)
+{
+    CHECK_NULL_VOID(imageFrameNode_);
+    auto renderContext = imageFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = imageFrameNode_->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto offset = geometryNode->GetMarginFrameOffset();
+    offset.SetY(centerY - blockSize_.Height() * HALF);
+    geometryNode->SetMarginFrameOffset(offset);
+    renderContext->SyncGeometryProperties(nullptr);
+}
+
 void SliderPattern::OpenTranslateAnimation()
 {
     CHECK_NULL_VOID(sliderContentModifier_);

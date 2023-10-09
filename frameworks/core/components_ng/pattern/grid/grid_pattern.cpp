@@ -326,7 +326,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
 
-    offset = Round(offset);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     // check edgeEffect is not springEffect
@@ -1534,6 +1533,7 @@ int32_t GridPattern::GetChildrenCount() const
 void GridPattern::ClearDragState()
 {
     gridLayoutInfo_.ClearDragState();
+    MarkDirtyNodeSelf();
 }
 
 void GridPattern::UpdateRectOfDraggedInItem(int32_t insertIndex)
@@ -1685,5 +1685,16 @@ void GridPattern::DumpInfo()
          "public}d",
         gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.startMainLineIndex_,
         gridLayoutInfo_.endMainLineIndex_, property->GetCachedCountValue(1));
+}
+
+std::string GridPattern::ProvideRestoreInfo()
+{
+    return std::to_string(gridLayoutInfo_.startIndex_);
+}
+
+void GridPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    gridLayoutInfo_.jumpIndex_ = StringUtils::StringToInt(restoreInfo);
+    gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
 }
 } // namespace OHOS::Ace::NG

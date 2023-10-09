@@ -58,6 +58,7 @@ build_component("web") {
     external_deps = [
       "ability_base:base",
       "ability_base:configuration",
+      "ability_runtime:abilitykit_native",
       "ability_runtime:app_manager",
       "ability_runtime:appkit_native",
       "c_utils:utils",
@@ -65,6 +66,7 @@ build_component("web") {
       "graphic_2d:surface",
       "init:libbegetutil",
       "ipc:ipc_core",
+      "napi:ace_napi",
       "webview:libnweb",
       "window_manager:libwm",
     ]

@@ -316,7 +316,8 @@ public:
             if (canRunLongPredictTask && uiNode && itemConstraint) {
                 RefPtr<FrameNode> frameNode = DynamicCast<FrameNode>(uiNode);
                 while (!frameNode) {
-                    uiNode = uiNode->GetFirstChild();
+                    auto tempNode = uiNode;
+                    uiNode = tempNode->GetFirstChild();
                     if (!uiNode) {
                         break;
                     }

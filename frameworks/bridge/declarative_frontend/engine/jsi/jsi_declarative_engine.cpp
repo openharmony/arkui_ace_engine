@@ -27,6 +27,7 @@
 #include <algorithm>
 #endif
 
+#include "ace_forward_compatibility.h"
 #include "scope_manager/native_scope_manager.h"
 
 #include "base/base64/base64_util.h"
@@ -66,7 +67,6 @@
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#include "ace_forward_compatibility.h"
 
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
@@ -476,22 +476,34 @@ void JsiDeclarativeEngineInstance::InitConsoleModule(ArkNativeEngine* engine)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::RegisterConsoleModule");
     LOGD("JsiDeclarativeEngineInstance RegisterConsoleModule to nativeEngine");
-    NativeValue* global = engine->GetGlobal();
-    if (global->TypeOf() != NATIVE_OBJECT) {
-        LOGE("global is not NativeObject");
+    napi_env env = reinterpret_cast<napi_env>(engine);
+    napi_value globalObj;
+    napi_get_global(env, &globalObj);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, globalObj, &valueType);
+    if (valueType != napi_object) {
+        LOGE("global is not napi_object");
         return;
     }
-    auto nativeGlobal = reinterpret_cast<NativeObject*>(global->GetInterface(NativeObject::INTERFACE_ID));
 
-    // app log method
-    NativeValue* console = engine->CreateObject();
-    auto consoleObj = reinterpret_cast<NativeObject*>(console->GetInterface(NativeObject::INTERFACE_ID));
-    consoleObj->SetProperty("log", engine->CreateFunction("log", strlen("log"), AppInfoLogPrint, nullptr));
-    consoleObj->SetProperty("debug", engine->CreateFunction("debug", strlen("debug"), AppDebugLogPrint, nullptr));
-    consoleObj->SetProperty("info", engine->CreateFunction("info", strlen("info"), AppInfoLogPrint, nullptr));
-    consoleObj->SetProperty("warn", engine->CreateFunction("warn", strlen("warn"), AppWarnLogPrint, nullptr));
-    consoleObj->SetProperty("error", engine->CreateFunction("error", strlen("error"), AppErrorLogPrint, nullptr));
-    nativeGlobal->SetProperty("console", console);
+    napi_value logValue;
+    napi_create_function(env, "log", strlen("log"), AppInfoLogPrint, nullptr, &logValue);
+    napi_value debugValue;
+    napi_create_function(env, "debug", strlen("debug"), AppDebugLogPrint, nullptr, &debugValue);
+    napi_value infoValue;
+    napi_create_function(env, "info", strlen("info"), AppInfoLogPrint, nullptr, &infoValue);
+    napi_value warnValue;
+    napi_create_function(env, "warn", strlen("warn"), AppWarnLogPrint, nullptr, &warnValue);
+    napi_value errorValue;
+    napi_create_function(env, "error", strlen("error"), AppErrorLogPrint, nullptr, &errorValue);
+    napi_value consoleObj = nullptr;
+    napi_create_object(env, &consoleObj);
+    napi_set_named_property(env, consoleObj, "log", logValue);
+    napi_set_named_property(env, consoleObj, "debug", debugValue);
+    napi_set_named_property(env, consoleObj, "info", infoValue);
+    napi_set_named_property(env, consoleObj, "warn", warnValue);
+    napi_set_named_property(env, consoleObj, "error", errorValue);
+    napi_set_named_property(env, globalObj, "console", consoleObj);
 }
 
 void JsiDeclarativeEngineInstance::InitPerfUtilModule()
@@ -751,8 +763,8 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::InnerGetCurrentRuntime()
     return engineInstance->GetJsRuntime();
 }
 
-shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetUIContextFunc(const shared_ptr<JsRuntime>& runtime,
-    const std::vector<shared_ptr<JsValue>>& argv)
+shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetUIContextFunc(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv)
 {
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__getUIContext__");
@@ -846,7 +858,7 @@ void JsiDeclarativeEngineInstance::RegisterFaPlugin()
     requireNapiFunc->Call(runtime_, global, argv, argv.size());
 }
 
-NativeValue* JsiDeclarativeEngineInstance::GetContextValue()
+napi_value JsiDeclarativeEngineInstance::GetContextValue()
 {
     auto runtime = GetJsRuntime();
 
@@ -865,14 +877,14 @@ NativeValue* JsiDeclarativeEngineInstance::GetContextValue()
     if (!arkJSValue) {
         return nullptr;
     }
-    auto arkNativeEngine = static_cast<ArkNativeEngine *>(GetNativeEngine());
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(GetNativeEngine());
     if (!arkNativeEngine) {
         return nullptr;
     }
-    NativeValue *nativeValue = ArkNativeEngine::ArkValueToNativeValue(arkNativeEngine,
-        arkJSValue->GetValue(arkJSRuntime));
+    napi_value napiValue = ArkNativeEngine::ArkValueToNapiValue(
+        reinterpret_cast<napi_env>(GetNativeEngine()), arkJSValue->GetValue(arkJSRuntime));
 
-    return nativeValue;
+    return napiValue;
 }
 
 std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
@@ -1032,7 +1044,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
-        panda::JSNApi::DebugOption debugOption = {libraryPath.c_str(), debugMode};
+        panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
         panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
@@ -1432,6 +1444,15 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
     LOGI("AddToNamedRouterMap name = %{public}s", namedRoute.c_str());
 }
 
+std::string JsiDeclarativeEngine::SearchRouterRegisterMap(const std::string& pageName)
+{
+    auto it = namedRouterRegisterMap_.find(pageName);
+    if (it != namedRouterRegisterMap_.end()) {
+        return it->second.moduleName;
+    }
+    return "";
+}
+
 bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs)
 {
     CHECK_NULL_RETURN(!namedRouterRegisterMap_.empty(), false);
@@ -1556,8 +1577,18 @@ void JsiDeclarativeEngine::SetHspBufferTrackerCallback(
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
     CHECK_NULL_VOID(runtime);
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    LOGI("SetHspBufferTrackerCallback is executed successfully.");
     panda::JSNApi::SetHostResolveBufferTracker(vm, std::move(callback));
+    LOGI("Set hsp buffer tracker callback to ark virtual machine successfully.");
+}
+
+void JsiDeclarativeEngine::SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo)
+{
+    CHECK_NULL_VOID(engineInstance_);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    CHECK_NULL_VOID(runtime);
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    panda::JSNApi::SetMockModuleList(vm, mockJsonInfo);
+    LOGI("Set mock module list to ark virtual machine successfully.");
 }
 #endif
 
@@ -1998,7 +2029,7 @@ void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* 
 {
     LOGI("SetLocalStorage instanceId:%{public}d", instanceId);
 #ifdef USE_ARK_ENGINE
-    auto jsValue = JsConverter::ConvertNativeValueToJsVal(*nativeValue);
+    auto jsValue = JsConverter::ConvertNapiValueToJsVal(nativeValue->GetNapiValue());
     if (jsValue->IsObject()) {
         auto storage = JSRef<JSObject>::Cast(jsValue);
         JSLocalStorage::AddStorage(instanceId, storage);
@@ -2014,24 +2045,25 @@ void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativ
 {
     LOGI("SetContext instanceId:%{public}d", instanceId);
 #ifdef USE_ARK_ENGINE
-    NativeScopeManager* scopeManager = nativeEngine_->GetScopeManager();
-    auto nativeScope = scopeManager->Open();
-    NativeValue* value = *nativeValue;
-    Global<JSValueRef> globalRef = *value;
+    napi_handle_scope scope;
+    napi_status status = napi_open_handle_scope(reinterpret_cast<napi_env>(GetNativeEngine()), &scope);
+    if (status != napi_ok) {
+        return;
+    }
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!arkRuntime || !arkRuntime->GetEcmaVm()) {
         LOGE("SetContext null ark runtime");
         return;
     }
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
-    auto localRef = globalRef.ToLocal(arkRuntime->GetEcmaVm());
+    auto localRef = NapiValueToLocalValue(nativeValue->GetNapiValue());
     std::shared_ptr<JsValue> jsValue = std::make_shared<ArkJSValue>(arkRuntime, localRef);
     if (jsValue->IsObject(arkRuntime)) {
         JsiContextModule::AddContext(instanceId_, jsValue);
     } else {
         LOGI("SetContext instanceId:%{public}d invalid context", instanceId);
     }
-    scopeManager->Close(nativeScope);
+    napi_close_handle_scope(reinterpret_cast<napi_env>(GetNativeEngine()), scope);
 #endif
 }
 

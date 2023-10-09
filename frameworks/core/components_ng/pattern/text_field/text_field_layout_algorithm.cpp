@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 
-#include "unicode/uchar.h"
-
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -28,9 +26,8 @@
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/text/text_theme.h"
-#include "core/components/theme/theme_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -69,8 +66,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             // If width is not set, select the maximum value of minWidth and maxWidth to layoutConstraint
             if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
                 calcLayoutConstraint->maxSize.value().Width().has_value()) {
-                frameSize.SetHeight(std::min(layoutConstraint->maxSize.Width(),
-                    contentWidth + pattern->GetHorizontalPaddingSum()));
+                frameSize.SetHeight(
+                    std::min(layoutConstraint->maxSize.Width(), contentWidth + pattern->GetHorizontalPaddingSum()));
             } else if (!calcLayoutConstraint) {
                 // If calcLayoutConstraint has not set, use the LayoutConstraint initial value
                 frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
@@ -86,8 +83,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             // Like width
             if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
                 calcLayoutConstraint->maxSize.value().Height().has_value()) {
-                frameSize.SetHeight(std::min(layoutConstraint->maxSize.Height(),
-                    contentHeight + pattern->GetVerticalPaddingSum()));
+                frameSize.SetHeight(
+                    std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
             } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
                 // calcLayoutConstraint initialized once when setting width, set minHeight=0,
                 // so add "minHeight=0" to the constraint.
@@ -134,8 +131,7 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto height = contentHeight + pattern->GetVerticalPaddingSum() < defaultHeight
                               ? defaultHeight
                               : contentHeight + pattern->GetVerticalPaddingSum();
-            frameSize.SetHeight(
-                std::min(layoutConstraint->maxSize.Height(), static_cast<float>(height)));
+            frameSize.SetHeight(std::min(layoutConstraint->maxSize.Height(), static_cast<float>(height)));
         } else {
             frameSize.SetHeight(layoutConstraint->minSize.Height());
         }
@@ -219,8 +215,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         }
     } else {
-        UpdatePlaceholderTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme,
-            textStyle, pattern->IsDisabled());
+        UpdatePlaceholderTextStyle(
+            frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
@@ -293,8 +289,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
         // for text area, max width is content width without scroll bar.
-        paragraph_->Layout(
-            idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+        paragraph_->Layout(idealWidth);
     }
 
     // counterParagraph Layout.
@@ -304,8 +299,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         auto maxLength = textFieldLayoutProperty->GetMaxLength().value();
         CreateCounterParagraph(textLength, maxLength, textFieldTheme);
         if (counterParagraph_) {
-            counterParagraph_->Layout(
-                idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+            counterParagraph_->Layout(idealWidth);
         }
     }
     // errorParagraph  Layout.
@@ -364,8 +358,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             idealHeight = idealHeight - counterParagraph_->GetHeight();
         }
         textRect_.SetSize(
-            SizeF(idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
-                paragraph_->GetHeight()));
+            SizeF(idealWidth, paragraph_->GetHeight()));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     // check password image size.
@@ -641,8 +634,8 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
     }
 }
 
-void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content,
-    bool needObscureText, int32_t nakedCharPosition, bool disableTextAlign)
+void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
+    int32_t nakedCharPosition, bool disableTextAlign)
 {
     RSParagraphStyle paraStyle;
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -859,12 +852,12 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
     TextDirection textDirection = TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
-        if (u_charDirection(charOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT) {
-            textDirection = TextDirection::LTR;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT) {
-            textDirection = TextDirection::RTL;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
-            textDirection = TextDirection::RTL;
+        if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
+            return TextDirection::LTR;
+        }
+        if (TextLayoutadapter::IsRightToLeft(charOfShowingText) ||
+            TextLayoutadapter::IsRightTOLeftArabic(charOfShowingText)) {
+            return TextDirection::RTL;
         }
     }
     return textDirection;

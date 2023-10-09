@@ -2492,11 +2492,10 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
     }
 
     if (preview->IsNumber()) {
-        if (preview->ToNumber<int32_t>() == 1) {
-            menuParam.hasPreview = true;
+        if (preview->ToNumber<int32_t>() == 0) {
+            menuParam.previewMode = MenuPreviewMode::NONE;
         }
     } else {
-        menuParam.hasPreview = true;
         auto previewObj = JSRef<JSObject>::Cast(preview);
         auto previewBuilder = previewObj->GetProperty("builder");
         if (!previewBuilder->IsFunction()) {
@@ -2509,6 +2508,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
             ACE_SCORING_EVENT("BuildContextMenuPreviwer");
             func->Execute();
         };
+        menuParam.previewMode = MenuPreviewMode::CUSTOM;
     }
 }
 
@@ -4366,7 +4366,8 @@ void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
                          const RefPtr<OHOS::Ace::DragEvent>& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnd");
-        func->Execute(info);
+        auto extraParams = JsonUtil::Create(true);
+        func->Execute(info, extraParams->ToString());
     };
 
     ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(onDragEnd));
@@ -5126,7 +5127,6 @@ void JSViewAbstract::JsRestoreId(int32_t restoreId)
     ViewAbstractModel::GetInstance()->SetRestoreId(restoreId);
 }
 
-#if defined(PREVIEW)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
@@ -5136,7 +5136,6 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 
     ViewAbstractModel::GetInstance()->SetDebugLine(info[0]->ToString());
 }
-#endif
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 {
@@ -5268,12 +5267,13 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     };
 
     NG::MenuParam menuParam;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
     std::function<void()> previewBuildFunc = nullptr;
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
     if (responseType != ResponseType::LONG_PRESS) {
-        menuParam.hasPreview = false;
+        menuParam.previewMode = MenuPreviewMode::NONE;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
@@ -5731,9 +5731,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
-#if defined(PREVIEW)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
-#endif
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);

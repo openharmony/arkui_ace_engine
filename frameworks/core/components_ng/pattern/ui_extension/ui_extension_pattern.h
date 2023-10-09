@@ -51,9 +51,13 @@ class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
 
 public:
-    explicit UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
-    explicit UIExtensionPattern(const AAFwk::Want& want);
+    UIExtensionPattern();
     ~UIExtensionPattern() override;
+
+    void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
+    void UpdateWant(const AAFwk::Want& want);
+
+    void DestorySession();
 
     void OnWindowShow() override;
     void OnWindowHide() override;

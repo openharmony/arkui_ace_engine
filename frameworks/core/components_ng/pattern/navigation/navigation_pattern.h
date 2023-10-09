@@ -266,6 +266,8 @@ public:
         return onStateChangeMap_;
     }
 
+    void OnNavigationModeChange(bool modeChange);
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
@@ -305,6 +307,8 @@ private:
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     bool navigationModeChange_ = false;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
+    void NotifyPageHide(const std::string& pageName);
+    void NotifyPageShow(const std::string& pageName);
 };
 
 } // namespace OHOS::Ace::NG

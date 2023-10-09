@@ -2827,7 +2827,7 @@ export namespace TreeView {
         let flag: Flag = Math.floor(event.getY() / (nodeHeight / FLAG_NUMBER)) % FLAG_NUMBER ? Flag.DOWN_FLAG : Flag.UP_FLAG;
 
         /* Record the node position to which the dragged node moves. */
-        let index: number = Math.floor(event.getY() / LIST_ITEM_HEIGHT);
+        let index = JSON.parse(extraParams).insertIndex;
 
         /* Handle the situation where the focus(index) exceeds the list area. */
         let isOverBorder: boolean = false;
@@ -3025,6 +3025,8 @@ export namespace TreeView {
         if(this.listNodeDataSource.listNode[this.viewLastIndex]) {
           this.listNodeDataSource.listNode[this.viewLastIndex].setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
         }
+
+        this.viewLastIndex = currentFocusIndex;
       })
     }
   }

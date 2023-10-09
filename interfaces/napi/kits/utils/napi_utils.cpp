@@ -34,6 +34,7 @@ enum class ResourceType : uint32_t {
 };
 
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
+constexpr size_t MAX_STRING_BUFF_SIZE = 1024;
 
 } // namespace
 
@@ -105,13 +106,14 @@ void ReplaceHolder(std::string& originStr, const std::vector<std::string>& param
     }
 }
 
-size_t GetParamLen(napi_value param)
+size_t GetParamLen(napi_env env, napi_value param)
 {
-    auto nativeValue = reinterpret_cast<NativeValue*>(param);
-    auto resultValue = nativeValue->ToString();
-    auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
-    size_t len = nativeString->GetLength();
-    return len;
+    size_t buffSize = 0;
+    napi_status status = napi_get_value_string_utf8(env, param, nullptr, 0, &buffSize);
+    if (status != napi_ok || buffSize == 0 || buffSize >= MAX_STRING_BUFF_SIZE) {
+        return 0;
+    }
+    return buffSize;
 }
 
 bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_valuetype& valueType)
@@ -119,7 +121,10 @@ bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_val
     size_t ret = 0;
     napi_typeof(env, value, &valueType);
     if (valueType == napi_string) {
-        size_t valueLen = GetParamLen(value) + 1;
+        if (GetParamLen(env, value) == 0) {
+            return false;
+        }
+        size_t valueLen = GetParamLen(env, value) + 1;
         std::unique_ptr<char[]> buffer = std::make_unique<char[]>(valueLen);
         napi_get_value_string_utf8(env, value, buffer.get(), valueLen, &ret);
         retStr = buffer.get();
@@ -206,7 +211,7 @@ bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
         napi_get_element(env, paramsNApi, i, &indexValue);
         napi_typeof(env, indexValue, &valueType);
         if (valueType == napi_string) {
-            size_t strLen = GetParamLen(indexValue) + 1;
+            size_t strLen = GetParamLen(env, indexValue) + 1;
             std::unique_ptr<char[]> indexStr = std::make_unique<char[]>(strLen);
             napi_get_value_string_utf8(env, indexValue, indexStr.get(), strLen, &ret);
             info.params.emplace_back(indexStr.get());
@@ -220,7 +225,7 @@ bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
     napi_typeof(env, bundleNameNApi, &valueType);
     if (valueType == napi_string) {
         size_t ret = 0;
-        size_t strLen = GetParamLen(bundleNameNApi) + 1;
+        size_t strLen = GetParamLen(env, bundleNameNApi) + 1;
         std::unique_ptr<char[]> bundleNameStr = std::make_unique<char[]>(strLen);
         napi_get_value_string_utf8(env, bundleNameNApi, bundleNameStr.get(), strLen, &ret);
         info.bundleName = bundleNameStr.get();
@@ -229,7 +234,7 @@ bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
     napi_typeof(env, moduleNameNApi, &valueType);
     if (valueType == napi_string) {
         size_t ret = 0;
-        size_t strLen = GetParamLen(moduleNameNApi) + 1;
+        size_t strLen = GetParamLen(env, moduleNameNApi) + 1;
         std::unique_ptr<char[]> moduleNameStr = std::make_unique<char[]>(strLen);
         napi_get_value_string_utf8(env, moduleNameNApi, moduleNameStr.get(), strLen, &ret);
         info.moduleName = moduleNameStr.get();

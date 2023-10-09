@@ -121,7 +121,9 @@ public:
     void FireGestureSwipeEvent(int32_t index, const AnimationCallbackInfo& info) const
     {
         if (gestureSwipeEvent_) {
-            gestureSwipeEvent_(index, info);
+            // gestureSwipeEvent_ may be overwrite in its invoke, so copy it first
+            auto event = gestureSwipeEvent_;
+            event(index, info);
         }
     }
 

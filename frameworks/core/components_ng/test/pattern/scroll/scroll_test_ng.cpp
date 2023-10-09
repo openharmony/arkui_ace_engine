@@ -2546,4 +2546,32 @@ HWTEST_F(ScrollTestNg, Drag001, TestSize.Level1)
     info.SetMainVelocity(1000.0);
     scrollBar->HandleDragEnd(info);
 }
+
+/**
+ * @tc.name: Distributed001
+ * @tc.desc: Test the distributed capability of Scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Distributed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Scroll node
+     */
+    CreateWithContent();
+
+    // need dpi to be 1
+    /**
+     * @tc.steps: step2. get pattern .
+     * @tc.expected: function ProvideRestoreInfo is called.
+     */
+    pattern_->currentOffset_ = 1.0f;
+    std::string ret = pattern_->ProvideRestoreInfo();
+
+    /**
+     * @tc.steps: step3. function OnRestoreInfo is called.
+     * @tc.expected: Passing JSON format.
+     */
+    pattern_->OnRestoreInfo(ret);
+    EXPECT_DOUBLE_EQ(pattern_->currentOffset_, 1.0f);
+}
 } // namespace OHOS::Ace::NG

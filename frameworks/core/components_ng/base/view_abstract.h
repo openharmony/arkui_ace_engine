@@ -86,7 +86,7 @@ struct MenuParam {
     std::optional<Dimension> arrowOffset;
     bool isAboveApps = false;
     MenuType type = MenuType::MENU;
-    bool hasPreview = false;
+    MenuPreviewMode previewMode = MenuPreviewMode::NONE;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {

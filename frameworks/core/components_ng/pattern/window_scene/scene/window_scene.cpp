@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 
 #include "session_manager/include/scene_session_manager.h"
+#include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -123,7 +124,11 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
 
     CHECK_NULL_VOID(session_);
-    if (session_->GetSessionRect() != windowRect || !IsMainWindow()) {
+    auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
+    if (transactionController && (session_->GetSessionRect() != windowRect)) {
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED,
+            transactionController->GetRSTransaction());
+    } else {
         session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
     }
 }
@@ -250,29 +255,6 @@ void WindowScene::OnForeground()
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
         }
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-
-    ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
-}
-
-void WindowScene::OnBackground()
-{
-    CHECK_NULL_VOID(session_);
-    auto snapshot = session_->GetSnapshot();
-
-    auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        host->RemoveChild(self->contentNode_);
-        self->CreateSnapshotNode(snapshot);
-        host->AddChild(self->snapshotNode_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 

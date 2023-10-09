@@ -1493,7 +1493,7 @@ export var TreeView;
                     i[t + 1+a].setNodeIsShow(!1);
                     i[t + 1+a].setListItemHeight(0)
                 }
-                this.notifyDataReload();
+                this.notifyDataChange(t);
                 return
             }
             let d = new Array(i[t].getChildNodeInfo().childNum);
@@ -1510,7 +1510,7 @@ export var TreeView;
                 this.expandAndCollapseInfo.get(e) == NodeStatus.Expand && this.handleExpandAndCollapse(d[a])
             }
             d = null;
-            this.notifyDataReload()
+            this.notifyDataChange(t)
         }
 
         init(e) {
@@ -2339,6 +2339,7 @@ export var TreeView;
     class h extends ViewPU {
         constructor(e, t, i, s = -1) {
             super(e, i, s);
+            this.__listFirstIndex = new ObservedPropertySimplePU(0, this, "listFirstIndex");
             this.__nodeList = new ObservedPropertyObjectPU([], this, "nodeList");
             this.listNodeDataSource = void 0;
             this.__item = new ObservedPropertyObjectPU(null, this, "item");
@@ -2396,6 +2397,7 @@ export var TreeView;
         }
 
         setInitiallyProvidedValue(e) {
+            void 0 !== e.listFirstIndex && (this.listFirstIndex = e.listFirstIndex);
             void 0 !== e.nodeList && (this.nodeList = e.nodeList);
             void 0 !== e.listNodeDataSource && (this.listNodeDataSource = e.listNodeDataSource);
             void 0 !== e.item && (this.item = e.item);
@@ -2420,6 +2422,7 @@ export var TreeView;
         }
 
         purgeVariableDependenciesOnElmtId(e) {
+            this.__listFirstIndex.purgeDependencyOnElmtId(e);
             this.__nodeList.purgeDependencyOnElmtId(e);
             this.__item.purgeDependencyOnElmtId(e);
             this.__touchCount.purgeDependencyOnElmtId(e);
@@ -2429,6 +2432,7 @@ export var TreeView;
         }
 
         aboutToBeDeleted() {
+            this.__listFirstIndex.aboutToBeDeleted();
             this.__nodeList.aboutToBeDeleted();
             this.__item.aboutToBeDeleted();
             this.__touchCount.aboutToBeDeleted();
@@ -2437,6 +2441,14 @@ export var TreeView;
             this.__listItemBgColor.aboutToBeDeleted();
             SubscriberManager.Get().delete(this.id__());
             this.aboutToBeDeletedInternal()
+        }
+
+        get listFirstIndex() {
+            return this.__listFirstIndex.get()
+        }
+
+        set listFirstIndex(e) {
+            this.__listFirstIndex.set(e)
         }
 
         get nodeList() {
@@ -2720,35 +2732,35 @@ export var TreeView;
             this.observeComponentCreation(((e, t) => {
                 ViewStackProcessor.StartGetAccessRecordingFor(e);
                 List.create({});
-                List.onDragMove((e => {
+                List.onDragMove(((e, t) => {
                     if (this.isMultiPress) {
                         console.error("drag error, a item has been dragged");
                         return
                     }
-                    let t = Math.floor(e.getY() / 24) % 2 ? Flag.DOWN_FLAG : Flag.UP_FLAG;
-                    let i = Math.floor(e.getY() / 48);
-                    let o = !1;
-                    if (i >= this.listNodeDataSource.totalCount()) {
-                        t = Flag.DOWN_FLAG;
-                        i = this.listNodeDataSource.totalCount() - 1;
-                        this.listNodeDataSource.getData(i).setIsOverBorder(!0);
-                        o = !0
-                    } else this.listNodeDataSource.getData(i).setIsOverBorder(!1);
-                    let s = this.listNodeDataSource.getData(i).getCurrentNodeId();
-                    if (i != this.listNodeDataSource.getLastPassIndex() && this.listNodeDataSource.getIsInnerDrag()) {
-                        if (this.listNodeDataSource.getIsParentOfInsertNode(s)) {
-                            this.listNodeDataSource.setPassIndex(i);
+                    let i = Math.floor(e.getY() / 24) % 2 ? Flag.DOWN_FLAG : Flag.UP_FLAG;
+                    let o = JSON.parse(t).insertIndex;
+                    let s = !1;
+                    if (o >= this.listNodeDataSource.totalCount()) {
+                        i = Flag.DOWN_FLAG;
+                        o = this.listNodeDataSource.totalCount() - 1;
+                        this.listNodeDataSource.getData(o).setIsOverBorder(!0);
+                        s = !0
+                    } else this.listNodeDataSource.getData(o).setIsOverBorder(!1);
+                    let a = this.listNodeDataSource.getData(o).getCurrentNodeId();
+                    if (o != this.listNodeDataSource.getLastPassIndex() && this.listNodeDataSource.getIsInnerDrag()) {
+                        if (this.listNodeDataSource.getIsParentOfInsertNode(a)) {
+                            this.listNodeDataSource.setPassIndex(o);
                             let e = this;
-                            this.listNodeDataSource.clearTimeOutAboutDelayHighLightAndExpand(findCurrentNodeIndex.call(e, s));
+                            this.listNodeDataSource.clearTimeOutAboutDelayHighLightAndExpand(findCurrentNodeIndex.call(e, a));
                             this.listNodeDataSource.setFlag(Flag.NONE);
                             return
                         }
                     }
-                    this.listNodeDataSource.setLastPassIndex(i);
-                    this.listNodeDataSource.setVisibility(t, i - 1, o);
-                    if (s != this.listNodeDataSource.getDraggingCurrentNodeId()) {
+                    this.listNodeDataSource.setLastPassIndex(o);
+                    this.listNodeDataSource.setVisibility(i, o - 1, s);
+                    if (a != this.listNodeDataSource.getDraggingCurrentNodeId()) {
                         let e = this;
-                        this.listNodeDataSource.delayHighLightAndExpandNode(findCurrentNodeIndex.call(e, s), s, i)
+                        this.listNodeDataSource.delayHighLightAndExpandNode(findCurrentNodeIndex.call(e, a), a, o)
                     }
                 }));
                 List.onDragEnter(((e, t) => {
@@ -2813,12 +2825,10 @@ export var TreeView;
                         let e = this;
                         this.listNodeDataSource.expandAndCollapseNode(findCurrentNodeIndex.call(e, n))
                     }
-                    let h = !1;
                     if (this.listNodeDataSource.getExpandAndCollapseInfo(a) == NodeStatus.Collapse) {
                         let e = this;
                         let t = findCurrentNodeIndex.call(e, a);
-                        this.listNodeDataSource.ListNode[t].getIsHighLight() && this.listNodeDataSource.expandAndCollapseNode(t);
-                        h = !0
+                        this.listNodeDataSource.ListNode[t].getIsHighLight() && this.listNodeDataSource.expandAndCollapseNode(t)
                     }
                     this.listNodeDataSource.setLastDelayHighLightId();
                     if (n != a) {
@@ -2829,17 +2839,17 @@ export var TreeView;
                         this.listNodeDataSource.setLastPassId(n);
                         this.listNodeDataSource.hideLastLine()
                     }
-                    let c = findCurrentNodeIndex.call(this, this.listNodeDataSource.getLastDelayHighLightId());
-                    this.listNodeDataSource.setLastDelayHighLightIndex(c);
+                    let h = findCurrentNodeIndex.call(this, this.listNodeDataSource.getLastDelayHighLightId());
+                    this.listNodeDataSource.setLastDelayHighLightIndex(h);
                     this.listNodeDataSource.clearLastTimeoutHighLight();
                     this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
                     this.listNodeDataSource.setIsDrag(!1);
-                    let u = findCurrentNodeIndex.call(this, n);
-                    this.listNodeDataSource.setClickIndex(u);
-                    this.listNodeDataSource.handleEvent(Event.DRAG, u);
+                    let c = findCurrentNodeIndex.call(this, n);
+                    this.listNodeDataSource.setClickIndex(c);
+                    this.listNodeDataSource.handleEvent(Event.DRAG, c);
                     this.listNodeDataSource.setIsInnerDrag(!1);
                     this.listNodeDataSource.notifyDataReload();
-                    this.listNodeDataSource.listNode[u].fontColor = {
+                    this.listNodeDataSource.listNode[c].fontColor = {
                         id: -1,
                         type: 10001,
                         params: ["sys.color.ohos_id_color_text_primary_activated"],
@@ -2857,6 +2867,7 @@ export var TreeView;
                         bundleName: "",
                         moduleName: ""
                     });
+                    this.listNodeDataSource.setClickIndex(c);
                     this.listNodeDataSource.lastIndex = this.viewLastIndex;
                     if (this.listNodeDataSource.listNode[this.viewLastIndex] && null != this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem().imageNode) {
                         this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem().imageNode.setImageSource(InteractionStatus.Normal);
@@ -2868,7 +2879,8 @@ export var TreeView;
                         params: ["sys.color.ohos_id_color_background_transparent"],
                         bundleName: "",
                         moduleName: ""
-                    })
+                    });
+                    this.viewLastIndex = c
                 }));
                 t || List.pop();
                 ViewStackProcessor.StopGetAccessRecording()
@@ -3489,10 +3501,6 @@ export class TreeViewInner extends ViewPU {
                         autoCancel: !0,
                         enableArrow: this.item.getPopUpInfo().popUpEnableArrow
                     });
-                    Column.onAreaChange(((e, t) => {
-                        let i = Number(parseInt(t.width.toString(), 0));
-                        this.columnWidth = i
-                    }));
                     t || Column.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
@@ -3613,12 +3621,14 @@ export class TreeViewInner extends ViewPU {
                             Row.backgroundColor(this.item.getNodeItem().inputText.backgroundColor);
                             Row.borderRadius(this.item.getNodeItem().inputText.borderRadius);
                             Row.margin({ right: this.item.getNodeItem().inputText.itemRightMargin });
+                            Row.focusable(!0);
                             t || Row.pop();
                             ViewStackProcessor.StopGetAccessRecording()
                         }));
                         this.observeComponentCreation(((e, t) => {
                             ViewStackProcessor.StartGetAccessRecordingFor(e);
                             TextInput.create({ text: this.item.getNodeItem().mainTitleNode.title });
+                            TextInput.focusable(!0);
                             TextInput.height(this.item.getNodeItem().inputText.itemHeight);
                             TextInput.fontSize(this.item.getNodeItem().inputText.size);
                             TextInput.fontColor(this.item.getNodeItem().inputText.color);
@@ -3697,6 +3707,7 @@ export class TreeViewInner extends ViewPU {
                             Text.fontSize(this.listNodeDataSource.getSubTitlePara().fontSize);
                             Text.fontColor(this.listNodeDataSource.getSubTitleFontColor(this.item.getIsHighLight() || this.item.getIsModify()));
                             Text.fontWeight(this.listNodeDataSource.getSubTitlePara().fontWeight);
+                            Text.focusable(!0);
                             t || Text.pop();
                             ViewStackProcessor.StopGetAccessRecording()
                         }));

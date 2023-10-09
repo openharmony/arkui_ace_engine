@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 using OnCoordinatingScrollEvent = std::function<bool(double)>;
 using OnCoordinatingScrollStartEvent = std::function<void()>;
-using OnCoordinatingScrollEndEvent = std::function<void()>;
+using OnCoordinatingScrollEndEvent = std::function<void(double)>;
 
 class ScrollableCoordinationEvent : public AceType {
 public:

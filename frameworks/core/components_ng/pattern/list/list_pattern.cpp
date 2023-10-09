@@ -101,6 +101,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
+    auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
     if (listLayoutAlgorithm->GetEstimateOffset().has_value()) {
         float absoluteOffset = listLayoutAlgorithm->GetEstimateOffset().value_or(currentOffset_);
         relativeOffset += absoluteOffset - currentOffset_;
@@ -148,7 +149,21 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             scrollSnapVelocity_ = 0.0f;
         }
         predictSnapOffset_.reset();
+        if (predictSnapEndPos.has_value()) {
+            predictSnapEndPos_ = predictSnapEndPos;
+        } else {
+            predictSnapEndPos_.reset();
+        }
     }
+    if (predictSnapEndPos.has_value() && predictSnapEndPos_.has_value() &&
+        !NearEqual(predictSnapEndPos.value(), predictSnapEndPos_.value())) {
+        if (scrollableTouchEvent_) {
+            scrollableTouchEvent_->UpdateScrollSnapEndWithOffset(
+                predictSnapEndPos.value() - predictSnapEndPos_.value());
+        }
+        predictSnapEndPos_.reset();
+    }
+
     if (isScrollEnd_) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -454,8 +469,8 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     }
     if (predictSnapOffset_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
-        listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
     }
+    listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
@@ -468,6 +483,9 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     listLayoutAlgorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     if (chainAnimation_) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
+    }
+    if (predictSnapEndPos_.has_value()) {
+        listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
     }
     return listLayoutAlgorithm;
 }
@@ -642,7 +660,6 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
-    offset = Round(offset);
     if (itemPosition_.empty()) {
         return false;
     }
@@ -1724,5 +1741,15 @@ void ListPattern::RefreshLanesItemRange()
             it++;
         }
     }
+}
+
+std::string ListPattern::ProvideRestoreInfo()
+{
+    return std::to_string(startIndex_);
+}
+
+void ListPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    jumpIndex_ = StringUtils::StringToInt(restoreInfo);
 }
 } // namespace OHOS::Ace::NG

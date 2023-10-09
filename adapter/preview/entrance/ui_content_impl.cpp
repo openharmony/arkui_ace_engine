@@ -223,11 +223,17 @@ void UIContentImpl::DestroyCallback() const
     pipelineContext->SetNextFrameLayoutCallback(nullptr);
 }
 
-void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
+void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
     CommonInitialize(window, url, storage);
     AceContainer::RunPage(instanceId_, url, "");
 }
+
+void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
+{
+    Initialize(window, url, reinterpret_cast<napi_value>(storage));
+}
+
 
 std::string UIContentImpl::GetContentInfo() const
 {
@@ -235,7 +241,7 @@ std::string UIContentImpl::GetContentInfo() const
     return AceContainer::GetContentInfo(instanceId_);
 }
 
-void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
 {
     static std::once_flag onceFlag;
     std::call_once(onceFlag, []() {

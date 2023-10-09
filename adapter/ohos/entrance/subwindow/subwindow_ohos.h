@@ -60,7 +60,7 @@ public:
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
-    void HideMenuNG() override;
+    void HideMenuNG(bool showPreviewAnimation) override;
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) override;
     void HidePopupNG(int32_t targetId) override;
@@ -68,7 +68,7 @@ public:
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;
-    void ClearMenuNG(bool inWindow) override;
+    void ClearMenuNG(bool inWindow, bool showAnimation = false) override;
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
     void HideSubWindowNG() override;
     bool GetShown() override

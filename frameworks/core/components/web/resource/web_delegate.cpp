@@ -20,6 +20,7 @@
 #include <optional>
 #include <sstream>
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "base/log/ace_trace.h"
@@ -2427,6 +2428,7 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
 {
     CHECK_NULL_VOID(nweb_);
     auto setting = nweb_->GetPreference();
+    CHECK_NULL_VOID(setting);
 #ifdef NG_BUILD
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
@@ -2658,6 +2660,7 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(upgradeContext);
             auto window_id = upgradeContext->GetWindowId();
             delegate->nweb_->SetWindowId(window_id);
+            delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -5421,5 +5424,15 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset)
             }
         },
         TaskExecutor::TaskType::JS);
+}
+
+void WebDelegate::SetToken()
+{
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_VOID(container);
+    auto token = container->GetToken();
+    if (nweb_) {
+        nweb_->SetToken(static_cast<void*>(token));
+    }
 }
 } // namespace OHOS::Ace

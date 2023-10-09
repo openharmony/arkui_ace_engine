@@ -90,6 +90,8 @@ public:
     void StrokeRect(const BaseInfo& baseInfo, const Rect& rect) override;
     void ClearRect(const BaseInfo& baseInfo, const Rect& rect) override;
     void DrawBitmapMesh(const BitmapMeshInfo& bitmapMeshInfo) override;
+    RefPtr<Ace::PixelMap> GetPixelMap(const BaseInfo& baseInfo, const ImageSize& imageSize) override;
+    void GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CANVAS_RENDERER_MODEL_IMPL_H

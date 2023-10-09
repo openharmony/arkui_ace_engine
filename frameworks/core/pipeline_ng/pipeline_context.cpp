@@ -60,6 +60,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
@@ -125,10 +126,17 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     RequestFrame();
 }
 
-void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
+void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty, bool checkPage)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
+    auto currentPageId = GetCurrentPageId();
+    if (checkPage && dirty->GetPageId() > 0 && currentPageId != -1 && dirty->GetPageId() != currentPageId) {
+        auto page = stageManager_->GetLastPage();
+        auto pagePattern = page->GetPattern<PagePattern>();
+        pagePattern->AddDelaytLayoutNode(WeakClaim(RawPtr(dirty)));
+        return;
+    }
     taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -142,6 +150,12 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
+}
+
+int32_t PipelineContext::GetCurrentPageId()
+{
+    CHECK_NULL_RETURN(stageManager_, -1);
+    return stageManager_->GetLastPage() ? stageManager_->GetLastPage()->GetPageId() : -1;
 }
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
@@ -261,11 +275,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAnimation) {
         RequestFrame();
     }
+    FlushMessages();
     if (dragCleanTask_) {
         dragCleanTask_();
         dragCleanTask_ = nullptr;
     }
-    FlushMessages();
     InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
@@ -691,20 +705,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
     switch (type) {
         case WindowSizeChangeReason::RECOVER:
         case WindowSizeChangeReason::MAXIMIZE: {
-            LOGI("PipelineContext::Root node RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d",
-                width, height);
-            AnimationOption option;
-            constexpr int32_t duration = 400;
-            option.SetDuration(duration);
-            auto curve = MakeRefPtr<DecelerationCurve>();
-            option.SetCurve(curve);
-            auto weak = WeakClaim(this);
-            Animate(option, curve, [width, height, weak]() {
-                auto pipeline = weak.Upgrade();
-                CHECK_NULL_VOID(pipeline);
-                pipeline->SetRootRect(width, height, 0.0);
-                pipeline->FlushUITasks();
-            });
+            StartWindowMaximizeAnimation(width, height, rsTransaction);
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
@@ -727,6 +728,36 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             SetRootRect(width, height, 0.0f);
         }
     }
+}
+
+void PipelineContext::StartWindowMaximizeAnimation(int32_t width, int32_t height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    LOGI("PipelineContext::Root node RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d",
+        width, height);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+    AnimationOption option;
+    constexpr int32_t duration = 400;
+    option.SetDuration(duration);
+    auto curve = MakeRefPtr<DecelerationCurve>();
+    option.SetCurve(curve);
+    auto weak = WeakClaim(this);
+    Animate(option, curve, [width, height, weak]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetRootRect(width, height, 0.0);
+        pipeline->FlushUITasks();
+    });
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
 }
 
 void PipelineContext::SetRootRect(double width, double height, double offset)
@@ -845,12 +876,13 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         rsTransaction->Begin();
     }
 #endif
-    safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
-    if (keyboardHeight > 0) {
-        // add height of navigation bar
-        keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
-    }
-    auto func = [this, keyboardHeight]() {
+
+    auto func = [this, keyboardHeight]() mutable {
+        safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        if (keyboardHeight > 0) {
+            // add height of navigation bar
+            keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+        }
         float positionY = 0.0f;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
         float height = 0.0f;
@@ -1554,6 +1586,9 @@ void PipelineContext::HandleOnAreaChangeEvent()
     }
     auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
+        if (frameNode->GetPageId() != GetCurrentPageId()) {
+            continue;
+        }
         frameNode->TriggerOnAreaChangeCallback();
     }
     UpdateFormLinkInfos();
@@ -1675,6 +1710,7 @@ void PipelineContext::SetAppTitle(const std::string& title)
         LOGW("SetAppTitle failed, Window modal is not container.");
         return;
     }
+    CHECK_NULL_VOID(rootNode_);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
@@ -1688,6 +1724,7 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
         LOGW("SetAppIcon failed, Window modal is not container.");
         return;
     }
+    CHECK_NULL_VOID(rootNode_);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
@@ -1998,6 +2035,7 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
         LOGW("SetAppIcon failed, Window modal is not container.");
         return;
     }
+    CHECK_NULL_VOID(rootNode_);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
@@ -2034,6 +2072,7 @@ void PipelineContext::SetCloseButtonStatus(bool isEnabled)
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         return;
     }
+    CHECK_NULL_VOID(rootNode_);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();

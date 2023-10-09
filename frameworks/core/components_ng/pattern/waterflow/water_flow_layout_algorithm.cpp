@@ -197,6 +197,10 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             wrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
             wrapper->Layout();
+            // recode restore info
+            if (item.first == layoutInfo_.startIndex_) {
+                layoutInfo_.storedOffset_ = mainOffset;
+            }
         }
     }
     if (layoutInfo_.itemEnd_ && layoutInfo_.footerIndex_ >= 0) {
@@ -321,8 +325,13 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             }
         }
         if (layoutInfo_.jumpIndex_ == currentIndex) {
-            layoutInfo_.currentOffset_ = -(layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex].first);
+            layoutInfo_.currentOffset_ =
+                -(layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex].first) + layoutInfo_.restoreOffset_;
+            // restoreOffSet only be used once
+            layoutInfo_.restoreOffset_ = 0.0f;
+            layoutInfo_.startIndex_ = layoutInfo_.jumpIndex_;
             layoutInfo_.jumpIndex_ = -1;
+            layoutInfo_.itemStart_ = false;
         }
         currentIndex++;
         position = GetItemPosition(currentIndex);

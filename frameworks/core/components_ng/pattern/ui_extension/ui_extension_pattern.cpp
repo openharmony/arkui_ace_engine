@@ -78,34 +78,35 @@ private:
     WeakPtr<UIExtensionPattern> uiExtensionPattern_;
 };
 
-UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
+UIExtensionPattern::UIExtensionPattern() = default;
+
+UIExtensionPattern::~UIExtensionPattern()
 {
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_VOID(container);
-    auto callerToken = container->GetToken();
-    auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
-    if (want.GetElement().GetBundleName() == "AbilityComp") {
-        return;
-    }
-    Rosen::SessionInfo extensionSessionInfo = {
-        .bundleName_ = want.GetElement().GetBundleName(),
-        .abilityName_ = want.GetElement().GetAbilityName(),
-        .callerToken_ = callerToken,
-        .want = std::make_shared<Want>(want),
-    };
-    session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
-    CHECK_NULL_VOID(session_);
-    RegisterLifecycleListener();
-    LOGI("UIExtension request UIExtensionAbility start");
-    RequestExtensionSessionActivation();
-    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    sptr<Rosen::ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback =
-        new (std::nothrow) Rosen::ExtensionSession::ExtensionSessionEventCallback();
-    extensionSession->RegisterExtensionSessionEventCallback(extSessionEventCallback);
+    DestorySession();
 }
 
-UIExtensionPattern::UIExtensionPattern(const AAFwk::Want& want)
+void UIExtensionPattern::DestorySession()
 {
+    UnregisterLifecycleListener();
+    UnregisterAbilityResultListener();
+    RequestExtensionSessionDestruction();
+    // Native modal page destroy callback
+    if (onModalDestroy_) {
+        onModalDestroy_();
+    }
+}
+
+void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
+{
+    auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
+    UpdateWant(want);
+}
+
+void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
+{
+    if (session_ && (!session_->GetSessionInfo().want->IsEquals(want))) {
+        DestorySession();
+    }
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID(container);
     auto callerToken = container->GetToken();
@@ -124,17 +125,6 @@ UIExtensionPattern::UIExtensionPattern(const AAFwk::Want& want)
     sptr<Rosen::ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback =
         new (std::nothrow) Rosen::ExtensionSession::ExtensionSessionEventCallback();
     extensionSession->RegisterExtensionSessionEventCallback(extSessionEventCallback);
-}
-
-UIExtensionPattern::~UIExtensionPattern()
-{
-    UnregisterLifecycleListener();
-    UnregisterAbilityResultListener();
-    RequestExtensionSessionDestruction();
-    // Native modal page destroy callback
-    if (onModalDestroy_) {
-        onModalDestroy_();
-    }
 }
 
 void UIExtensionPattern::OnConnect()

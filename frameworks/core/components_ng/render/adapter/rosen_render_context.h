@@ -63,7 +63,7 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
-    void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) override;
+    void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
     void SyncGeometryProperties(const RectF& paintRect) override;
 
@@ -260,6 +260,10 @@ public:
 #else
     bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
 #endif
+#ifndef USE_ROSEN_DRAWING
+    bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr, SkRect* rect = nullptr);
+#endif
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
 
@@ -427,9 +431,6 @@ private:
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     void SetContentRectToFrame(RectF rect) override;
-
-    float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
-    void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;

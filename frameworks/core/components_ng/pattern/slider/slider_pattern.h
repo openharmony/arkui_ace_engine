@@ -41,11 +41,17 @@ public:
         }
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
-            sliderContentModifier_ =
-                AceType::MakeRefPtr<SliderContentModifier>(paintParameters, [weak = WeakClaim(this)]() {
+            sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(
+                paintParameters,
+                [weak = WeakClaim(this)](float x) {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->LayoutImageNode();
+                    pattern->UpdateImagePositionX(x);
+                },
+                [weak = WeakClaim(this)](float y) {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateImagePositionY(y);
                 });
         }
         SliderPaintMethod::TipParameters tipParameters { bubbleFlag_,
@@ -174,6 +180,8 @@ private:
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void UpdateBlock();
     void LayoutImageNode();
+    void UpdateImagePositionX(float centerX);
+    void UpdateImagePositionY(float centerY);
     OffsetF GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
     void SetAccessibilityAction();
 

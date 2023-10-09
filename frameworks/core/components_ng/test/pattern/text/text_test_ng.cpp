@@ -22,6 +22,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
 #include "base/geometry/dimension.h"
@@ -38,6 +39,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -57,9 +59,7 @@
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 #undef private
 #undef protected
-#include "test/mock/core/common/mock_container.h"
 
-#include "core/components_ng/pattern/text/span_model_ng.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -130,6 +130,7 @@ const Color FOREGROUND_COLOR_VALUE = Color::FOREGROUND;
 const RectF CONTENT_RECT(3.0, 3.0, TEXT_WIDTH, TEXT_HEIGHT);
 constexpr int32_t ROOT_NODE_ID = 113;
 const std::string EMPTY_TEXT = "";
+const CopyOptions copyOption = CopyOptions::None;
 constexpr int32_t UNKNOWN_REASON = 1;
 constexpr float TEXT_RECT_SIZE_ZEOR = 0.0f;
 constexpr float TEXT_RECT_WIDTH = 10.0f;
@@ -143,14 +144,17 @@ const std::string TEXT_EQUALS_VALUE =
 
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+
 void onClickFunc(const BaseEventInfo* info) {};
+
 void onRemoteMessage() {};
-const CopyOptions copyOption = CopyOptions::None;
+
 DragDropBaseInfo OnDragStartFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)
 {
     DragDropBaseInfo temp;
     return temp;
-};
+}
+
 void OnDragDropFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {};
 
 void TestUpdateScenario(const RefPtr<TextPattern>& pattern)
@@ -200,7 +204,6 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void InitTextObject();
     RefPtr<SpanNode> CreateSpanNodeWithSetDefaultProperty(const std::string& content);
 
 protected:
@@ -225,15 +228,12 @@ void TextTestNg::TearDownTestSuite()
 void TextTestNg::SetUp()
 {
     MockParagraph::GetOrCreateMockParagraph();
-    InitTextObject();
 }
 
 void TextTestNg::TearDown()
 {
     MockParagraph::TearDown();
 }
-
-void TextTestNg::InitTextObject() {}
 
 RefPtr<SpanNode> TextTestNg::CreateSpanNodeWithSetDefaultProperty(const std::string& content)
 {
@@ -368,8 +368,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> Init()
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     pattern->AttachToFrameNode(frameNode);
-    auto host = pattern->GetHost();
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->rootNode_ =
         FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());
     ;
@@ -2736,6 +2735,7 @@ HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
     EXPECT_CALL(*paragraph, AddPlaceholder).Times(1);
     EXPECT_CALL(*paragraph, Build).Times(2);
     EXPECT_CALL(*paragraph, GetRectsForPlaceholders).Times(2);
+    EXPECT_CALL(*paragraph, PopStyle).Times(1);
 
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -2755,19 +2755,6 @@ HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
     auto imageSpanNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ASSERT_NE(imageSpanNode, nullptr);
-    pattern->AddChildSpanItem(imageSpanNode);
-    frameNode->AddChild(imageSpanNode);
-    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    TextStyle textStyle;
-    LayoutConstraintF contentConstraint;
-    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_TRUE(ret);
-    rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    frameNode->AddChild(nullptr);
-    pattern->AddChildSpanItem(nullptr);
-    rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
-    EXPECT_TRUE(ret);
 }
 
 /**
@@ -3518,6 +3505,43 @@ HWTEST_F(TextTestNg, HandleMouseEvent003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMouseEvent004
+ * @tc.desc: test test_pattern.h HandleMouseEvent function when isDoubleClick_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleMouseEvent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textForDisplay_ = "test";
+    pattern->textSelector_.Update(0, 3);
+    pattern->copyOption_ = CopyOptions::InApp;
+
+    /**
+     * @tc.steps: step2. create paragraph
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step3. create MouseInfo and call HandleMouseEvent function
+     * @tc.expected: isDoubleClick_ is false
+     */
+    MouseInfo info;
+    // left RELEASE
+    info.button_ = MouseButton::LEFT_BUTTON;
+    info.action_ = MouseAction::RELEASE;
+    pattern->blockPress_ = true;
+    pattern->isDoubleClick_ = true;
+    pattern->HandleMouseEvent(info);
+    EXPECT_FALSE(pattern->isDoubleClick_);
+}
+
+/**
  * @tc.name: HandleOnCopy001
  * @tc.desc: test test_pattern.h HandleOnCopy function
  * @tc.type: FUNC
@@ -3714,7 +3738,7 @@ HWTEST_F(TextTestNg, HandlePanUpdateAndEnd001, TestSize.Level1)
      */
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipelineContext, nullptr);
     auto rect = pipelineContext->GetCurrentWindowRect();
     auto contentRect_ = CONTENT_RECT;
@@ -4112,6 +4136,7 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
      */
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
@@ -4302,7 +4327,7 @@ HWTEST_F(TextTestNg, OnHandleMove002, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern and some environment for running process.
      */
     auto [host, pattern] = Init();
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     SelectOverlayInfo selectOverlayInfo;
     selectOverlayInfo.singleLineHeight = NODE_ID;
@@ -4338,7 +4363,7 @@ HWTEST_F(TextTestNg, GetGlobalOffset001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern and some environment for running process.
      */
     auto [host, pattern] = Init();
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
 
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
@@ -4627,6 +4652,31 @@ HWTEST_F(TextTestNg, GetDragUpperLeftCoordinates001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test on color configuration update
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto context = textFrameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    context->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    auto theme = context->GetTheme<TextTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->textStyle_.textColor_ = Color::BLACK;
+    textPattern->OnColorConfigurationUpdate();
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
+}
+
+/**
  * @tc.name: GetCopyOptionString001
  * @tc.desc: Test if GetCopyOptionString is successful
  * @tc.type: FUNC
@@ -4658,5 +4708,109 @@ HWTEST_F(TextTestNg, GetCopyOptionString001, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetCopyOptionString(), "CopyOptions.Distributed");
     textLayoutProperty->UpdateCopyOption(CopyOptions(10));
     EXPECT_EQ(textLayoutProperty->GetCopyOptionString(), "CopyOptions.None");
+}
+
+/**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: test test_pattern.h HandleTouchEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleTouchEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+
+    /**
+     * @tc.steps: step2. construct spanItemChildren
+     */
+    std::list<RefPtr<SpanItem>> spanItemChildren;
+    auto spanItemChild1 = AceType::MakeRefPtr<SpanItem>();
+    spanItemChildren.emplace_back(spanItemChild1);
+    pattern->spans_ = spanItemChildren;
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. create GestureEvent and call HandleTouchEvent.
+     * @tc.expected: function run rightly
+     */
+    pattern->textSelector_.Update(-2, -2);
+    TouchEventInfo touchEventInfo = TouchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo = TouchLocationInfo(1);
+    touchLocationInfo.SetLocalLocation(Offset(0, 0));
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    pattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -2);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -2);
+}
+
+/**
+ * @tc.name: HandleDoubleClickEvent001
+ * @tc.desc: test test_pattern.h HandleDoubleClickEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+
+    /**
+     * @tc.steps: step2. construct spanItemChildren
+     */
+    std::list<RefPtr<SpanItem>> spanItemChildren;
+    auto spanItemChild1 = AceType::MakeRefPtr<SpanItem>();
+    spanItemChildren.emplace_back(spanItemChild1);
+    pattern->spans_ = spanItemChildren;
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. create GestureEvent and call HandleClickEvent function quickly to trigger doubleClick.
+     * @tc.expected: function run rightly
+     */
+    pattern->textSelector_.Update(-2, -2);
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+
+    // test CopyOptions is None
+    pattern->copyOption_ = CopyOptions::None;
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(pattern->hasClicked_);
+    pattern->HandleClickEvent(info);
+    EXPECT_FALSE(pattern->hasClicked_);
+
+    // test mouse doubleClick
+    pattern->isMousePressed_ = true;
+    pattern->copyOption_ = CopyOptions::Local;
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(pattern->hasClicked_);
+    pattern->HandleClickEvent(info);
+    EXPECT_FALSE(pattern->hasClicked_);
+
+    // test gesture doubleClick
+    pattern->isMousePressed_ = false;
+    pattern->copyOption_ = CopyOptions::Local;
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(pattern->hasClicked_);
+    pattern->HandleClickEvent(info);
+    EXPECT_FALSE(pattern->hasClicked_);
 }
 } // namespace OHOS::Ace::NG

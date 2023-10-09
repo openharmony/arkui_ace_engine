@@ -25,9 +25,9 @@ class PlatformTaskRunnerAdapter : public fml::TaskRunner {
 public:
     explicit PlatformTaskRunnerAdapter(bool useCurrentEventRunner);
     ~PlatformTaskRunnerAdapter() = default;
-    void PostTask(fml::closure task) override;
-    void PostTaskForTime(fml::closure task, fml::TimePoint target_time) override;
-    void PostDelayedTask(fml::closure task, fml::TimeDelta delay) override;
+    void PostTask(fml::closure task, const std::string& caller) override;
+    void PostTaskForTime(fml::closure task, fml::TimePoint target_time, const std::string& caller) override;
+    void PostDelayedTask(fml::closure task, fml::TimeDelta delay, const std::string& caller) override;
     bool RunsTasksOnCurrentThread() override;
     fml::TaskQueueId GetTaskQueueId() override;
     static fml::RefPtr<fml::TaskRunner> CurrentTaskRunner(bool useCurrentEventRunner = false);

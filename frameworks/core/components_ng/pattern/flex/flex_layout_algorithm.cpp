@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/ace_trace.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -637,43 +638,54 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
         CheckIsGrowOrShrink(getFlex, remainSpace, spacePerFlex, flexItemProperties, lastChild);
         iter = secondaryMeasureList_.rbegin();
         while (iter != secondaryMeasureList_.rend()) {
-            auto child = *iter;
+            auto& child = *iter;
             auto childLayoutWrapper = child.layoutWrapper;
             if (!childLayoutWrapper) {
                 continue;
             }
             if (GetSelfAlign(childLayoutWrapper) == FlexAlign::STRETCH) {
-                UpdateLayoutConstraintOnCrossAxis((*iter).layoutConstraint, crossAxisSize);
-                (*iter).needSecondMeasure = true;
+                UpdateLayoutConstraintOnCrossAxis(child.layoutConstraint, crossAxisSize);
+                child.needSecondMeasure = true;
             }
             if (LessOrEqual(totalFlexWeight_, 0.0f) &&
                 (!isInfiniteLayout_ || GreatNotEqual(MainAxisMinValue(layoutWrapper), 0.0f) ||
                     (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && !selfAdaptive_ &&
                         Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)))) {
+                if (child.needKeepMinCalcSize) {
+                    ++iter;
+                    continue;
+                }
                 float childMainAxisMargin = GetMainAxisMargin(childLayoutWrapper, direction_);
                 float itemFlex = getFlex(child.layoutWrapper);
                 float flexSize =
                     (child.layoutWrapper == lastChild) ? (remainSpace - allocatedFlexSpace)
                     : GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1)
                         ? spacePerFlex * itemFlex
-                        : spacePerFlex * itemFlex * (GetChildMainAxisSize(child.layoutWrapper) - childMainAxisMargin);
+                        : spacePerFlex * itemFlex * (GetChildMainAxisSize(childLayoutWrapper) - childMainAxisMargin);
                 if (!NearZero(flexSize) && childLayoutWrapper->IsActive()) {
                     flexSize += GetChildMainAxisSize(childLayoutWrapper);
-                    (*iter).needSecondMeasure = true;
+                    child.needSecondMeasure = true;
                     CheckBlankAndKeepMin(childLayoutWrapper, flexSize);
                     if (LessOrEqual(flexSize, 0.0f)) {
-                        (*iter).layoutWrapper->SetActive(false);
+                        child.layoutWrapper->SetActive(false);
                         flexItemProperties.totalShrink -=
-                            itemFlex * (GetChildMainAxisSize(child.layoutWrapper) - childMainAxisMargin);
-                        reserveMainAxisSize += GetChildMainAxisSize(child.layoutWrapper);
+                            itemFlex * (GetChildMainAxisSize(childLayoutWrapper) - childMainAxisMargin);
+                        reserveMainAxisSize += GetChildMainAxisSize(childLayoutWrapper);
                         needSecondMeasure = true;
-                        UpdateLayoutConstraintOnMainAxis((*iter).layoutConstraint, 0.0f);
+                        UpdateLayoutConstraintOnMainAxis(child.layoutConstraint, 0.0f);
                         break;
                     }
-                    UpdateLayoutConstraintOnMainAxis((*iter).layoutConstraint, flexSize);
+                    if (IsKeepMinSize(childLayoutWrapper, flexSize)) {
+                        needSecondMeasure = true;
+                        auto shrinkSize = itemFlex * (GetChildMainAxisSize(childLayoutWrapper) - childMainAxisMargin);
+                        reserveMainAxisSize -= (flexSize - shrinkSize);
+                        child.needKeepMinCalcSize = true;
+                        flexItemProperties.totalShrink -= shrinkSize;
+                    }
+                    UpdateLayoutConstraintOnMainAxis(child.layoutConstraint, flexSize);
                 } else if (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && NearZero(flexSize) &&
                            childLayoutWrapper->IsActive()) {
-                    (*iter).needSecondMeasure = true;
+                    child.needSecondMeasure = true;
                 }
             }
             ++iter;
@@ -751,6 +763,18 @@ void FlexLayoutAlgorithm::CheckBlankAndKeepMin(const RefPtr<LayoutWrapper>& chil
     if (GreatOrEqual(blankMin->ConvertToPx(), flexSize)) {
         flexSize = blankMin->ConvertToPx();
     }
+}
+
+bool FlexLayoutAlgorithm::IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize)
+{
+    auto child = childLayoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(child, false);
+    auto minSize = MainAxisMinValue(AceType::RawPtr(childLayoutWrapper));
+    if (GreatOrEqual(minSize, flexSize)) {
+        flexSize = minSize;
+        return true;
+    }
+    return false;
 }
 
 void FlexLayoutAlgorithm::UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size)

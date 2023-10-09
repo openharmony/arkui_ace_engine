@@ -2577,7 +2577,7 @@ HWTEST_F(ListTestNg, Event006, TestSize.Level1)
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
     auto scrollable = scrollableEvent->GetScrollable();
-    EXPECT_NE(scrollable->scrollFrameBeginCallback_, nullptr);
+    EXPECT_NE(scrollable->callback_, nullptr);
     RunMeasureAndLayout(frameNode_);
 }
 
@@ -5273,5 +5273,32 @@ HWTEST_F(ListTestNg, ListPattern_SetFriction001, TestSize.Level1)
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), DEFAULT_FRICTION);
     CreateListWithItem([](ListModelNG listModelNG) { listModelNG.SetFriction(1); });
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 1);
+}
+
+/**
+ * @tc.name: ListPattern_Distributed001
+ * @tc.desc: Test the distributed capability of List.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_Distributed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List node
+     */
+    CreateListWithItem();
+
+    /**
+     * @tc.steps: step2. get pattern .
+     * @tc.expected: function ProvideRestoreInfo is called.
+     */
+    pattern_->startIndex_ = 1;
+    std::string ret = pattern_->ProvideRestoreInfo();
+
+    /**
+     * @tc.steps: step3. function OnRestoreInfo is called.
+     * @tc.expected: Passing JSON format.
+     */
+    pattern_->OnRestoreInfo(ret);
+    EXPECT_EQ(pattern_->jumpIndex_, 1);
 }
 } // namespace OHOS::Ace::NG

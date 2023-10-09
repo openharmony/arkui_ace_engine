@@ -74,7 +74,6 @@ public:
         return inspectorTag_;
     }
 
-#if defined(PREVIEW)
     void SetDebugLine(const std::string& debugLine)
     {
         debugLine_ = debugLine;
@@ -94,7 +93,6 @@ public:
     {
         return viewId_;
     }
-#endif
 
     // dimension settings
     virtual std::string GetWidth() const = 0;
@@ -229,10 +227,8 @@ protected:
     int32_t inspectorId_ = 0;
     int32_t inspectorParentId_ = -1;
     std::string inspectorTag_;
-#if defined(PREVIEW)
     std::string debugLine_;
     std::string viewId_;
-#endif
 };
 
 } // namespace OHOS::Ace::V2

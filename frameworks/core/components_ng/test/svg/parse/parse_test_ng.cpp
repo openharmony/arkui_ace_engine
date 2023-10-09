@@ -14,9 +14,11 @@
  */
 
 #include <string>
+
+#include "gtest/gtest.h"
+
 #define private public
 #define protected public
-#include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
@@ -24,6 +26,11 @@
 #include "core/components/declaration/svg/svg_animate_declaration.h"
 #include "core/components/declaration/svg/svg_circle_declaration.h"
 #include "core/components/declaration/svg/svg_declaration.h"
+#include "core/components/declaration/svg/svg_ellipse_declaration.h"
+#include "core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
+#include "core/components/declaration/svg/svg_fe_composite_declaration.h"
+#include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
+#include "core/components/declaration/svg/svg_filter_declaration.h"
 #include "core/components/declaration/svg/svg_gradient_declaration.h"
 #include "core/components/declaration/svg/svg_line_declaration.h"
 #include "core/components/declaration/svg/svg_mask_declaration.h"
@@ -32,19 +39,16 @@
 #include "core/components/declaration/svg/svg_polygon_declaration.h"
 #include "core/components/declaration/svg/svg_rect_declaration.h"
 #include "core/components/declaration/svg/svg_stop_declaration.h"
-#include "core/components/declaration/svg/svg_filter_declaration.h"
-#include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
-#include "core/components_ng/svg/parse/svg_fe_gaussian_blur.h"
-#include "core/components/declaration/svg/svg_fe_composite_declaration.h"
-#include "core/components_ng/svg/parse/svg_fe_composite.h"
-#include "core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
-#include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
-#include "core/components_ng/svg/parse/svg_filter.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
 #include "core/components_ng/svg/parse/svg_circle.h"
 #include "core/components_ng/svg/parse/svg_clip_path.h"
 #include "core/components_ng/svg/parse/svg_defs.h"
+#include "core/components_ng/svg/parse/svg_ellipse.h"
+#include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
+#include "core/components_ng/svg/parse/svg_fe_composite.h"
+#include "core/components_ng/svg/parse/svg_fe_gaussian_blur.h"
+#include "core/components_ng/svg/parse/svg_filter.h"
 #include "core/components_ng/svg/parse/svg_g.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
 #include "core/components_ng/svg/parse/svg_line.h"
@@ -57,11 +61,7 @@
 #include "core/components_ng/svg/parse/svg_style.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/parse/svg_use.h"
-#include "core/components/declaration/svg/svg_ellipse_declaration.h"
-#include "core/components_ng/svg/parse/svg_ellipse.h"
-#include "core/components_ng/svg/parse/svg_animation.h"
 #include "core/components_ng/svg/svg_dom.h"
-#include "core/components_ng/test/svg/parse/svg_const.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -115,7 +115,7 @@ constexpr float STROKE_WIDTH = 1;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t STROKE = 0xff0000ff;
 const std::string STYLE_SVG_LABEL = "<svg viewBox=\"0 0 10 10\"><style>circle{fill:gold;stroke:maroon;stroke-width : "
-                              "2px;}</style><circle cx =\"5\" cy=\"5\" r=\"4\" /></svg>";
+                                    "2px;}</style><circle cx =\"5\" cy=\"5\" r=\"4\" /></svg>";
 const std::string STOP_SVG_LABEL =
     "<svg height=\"150\" width=\"400\"><defs><linearGradient id=\"grad1\" x1=\"0%\" y1=\"0%\" x2=\"100%\" "
     "y2=\"0%\"><stop offset=\"0%\" style=\"stop-color:rgb(255,255,0);stop-opacity:1\" /><stop offset=\"20px\" "
@@ -125,11 +125,11 @@ constexpr int32_t INDEX_ZEARO = 0;
 constexpr int32_t CHILD_NUMBER = 2;
 constexpr float STOP_OPACITY = 1.0f;
 const std::string RECT_SVG_LABEL = "<svg width=\"400\" height=\"400\" version=\"1.1\" fill=\"red\" "
-                              "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
-                              "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"10\" ry=\"10\"></rect></svg>";
+                                   "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
+                                   "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"10\" ry=\"10\"></rect></svg>";
 const std::string RECT_SVG_LABEL2 = "<svg version=\"1.1\" fill=\"red\" "
-                               "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
-                               "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"10\" ry=\"10\"></rect></svg>";
+                                    "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
+                                    "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"10\" ry=\"10\"></rect></svg>";
 constexpr float X = 150.0f;
 constexpr float Y = 20.0f;
 constexpr float RX = 10.0f;
@@ -254,6 +254,9 @@ const std::string SVG_ANIMATE_TRANSFORM(
     "<path d =\"M50 50L20 50A30 30 0 0 0 80 50Z\">"
     "<animateTransform attributeName =\"transform\" type=\"rotate\" repeatCount=\"3\" dur=\"1s\""
     " values=\"0 50 50;45 50 50;0 50 50\" keyTimes=\"0;0.5;1\"></animateTransform></path></svg>");
+
+constexpr float IMAGE_COMPONENT_WIDTH = 100.0f;
+constexpr float IMAGE_COMPONENT_HEIGHT = 100.0f;
 } // namespace
 class ParseTestNg : public testing::Test {
 public:
@@ -387,7 +390,7 @@ HWTEST_F(ParseTestNg, ParseCircleTest001, TestSize.Level1)
  */
 HWTEST_F(ParseTestNg, ParseAnimation, TestSize.Level1)
 {
-    SvgAnimation *svgAnimation = new SvgAnimation(SvgAnimateType::ANIMATE);
+    SvgAnimation* svgAnimation = new SvgAnimation(SvgAnimateType::ANIMATE);
     EXPECT_NE(svgAnimation, nullptr);
     auto svgAnimate = svgAnimation->Create();
     EXPECT_NE(svgAnimate, nullptr);
@@ -642,8 +645,8 @@ HWTEST_F(ParseTestNg, ParsePatternTest001, TestSize.Level1)
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
 
     BorderRadiusArray radius;
-    for (auto&& corner: radius) {
-        corner = {0.0f, 0.0f};
+    for (auto&& corner : radius) {
+        corner = { 0.0f, 0.0f };
     }
     svgDom->SetRadius(radius);
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
@@ -971,7 +974,6 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest001, TestSize.Level1)
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
 
-
 /**
  * @tc.name: ParseFeCompositeTest002
  * @tc.desc: parse Fe label
@@ -979,7 +981,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest001, TestSize.Level1)
  */
 HWTEST_F(ParseTestNg, ParseFeCompositeTest002, TestSize.Level1)
 {
-    SvgFe *svgFe = new SvgFe();
+    SvgFe* svgFe = new SvgFe();
     EXPECT_NE(svgFe, nullptr);
     sk_sp<SkImageFilter> imageFilter = nullptr;
     ColorInterpolationType colorInterpolationType = ColorInterpolationType::LINEAR_RGB;
@@ -999,7 +1001,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest002, TestSize.Level1)
  */
 HWTEST_F(ParseTestNg, ParseFeCompositeTest003, TestSize.Level1)
 {
-    SvgFeColorMatrix *colorMatrix = new SvgFeColorMatrix();
+    SvgFeColorMatrix* colorMatrix = new SvgFeColorMatrix();
     EXPECT_NE(colorMatrix, nullptr);
     colorMatrix->OnInitStyle();
     sk_sp<SkImageFilter> imageFilter = nullptr;
@@ -1091,7 +1093,7 @@ HWTEST_F(ParseTestNg, ParseEllipseTest003, TestSize.Level1)
  */
 HWTEST_F(ParseTestNg, ParseEllipseTest004, TestSize.Level1)
 {
-    SvgEllipse *sEllipse = new SvgEllipse();
+    SvgEllipse* sEllipse = new SvgEllipse();
     const Size viewPort = Size(0.0, 0.0);
     EXPECT_EQ(viewPort.Width(), 0.0);
     EXPECT_EQ(viewPort.Height(), 0.0);

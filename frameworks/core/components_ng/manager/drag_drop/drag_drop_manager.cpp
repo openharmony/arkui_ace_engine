@@ -211,10 +211,8 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             if (!eventHub) {
                 continue;
             }
-            bool hasMoveFunction = eventHub->HasOnDragMove() || eventHub->HasOnItemDragMove()
-                || eventHub->HasOnDragLeave() || eventHub->HasOnDragEnter();
             if ((findDrop && (eventHub->HasOnDrop() || eventHub->HasOnItemDrop()))
-                || (!findDrop && hasMoveFunction)) {
+                || (!findDrop && (eventHub->HasOnDrop() || eventHub->HasOnItemDrop()))) {
                 return parentFrameNode;
             }
             if (SystemProperties::GetDebugEnabled()) {
@@ -303,8 +301,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        auto recordSize = summaryMap_.size();
-        if (recordSize > 1) {
+        if (recordSize_ > 1) {
             InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
         } else {
             InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
@@ -380,7 +377,7 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
 #ifdef ENABLE_DRAG_FRAMEWORK
         if (!isMouseDragged_ || isDragWindowShow_) {
             InteractionManager::GetInstance()->UpdateDragStyle(
-                summaryMap_.size() > 1 ? DragCursorStyle::MOVE : DragCursorStyle::DEFAULT);
+                recordSize_ > 1 ? DragCursorStyle::MOVE : DragCursorStyle::DEFAULT);
         }
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
@@ -508,7 +505,26 @@ void DragDropManager::RequireSummary()
     if (ret != 0) {
         LOGW("OnDragStart: UDMF GetSummary failed: %{public}d", ret);
     }
+    previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_ = summary;
+    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
+    ret = UdmfClient::GetInstance()->GetData(udData, udKey);
+    if (ret != 0) {
+        LOGW("OnDragStart: UDMF GetData failed: %{public}d", ret);
+        return;
+    }
+    CHECK_NULL_VOID(udData);
+    ResetRecordSize(udData->GetSize());
+}
+
+void DragDropManager::ResetRecordSize(uint32_t recordSize)
+{
+    recordSize_ = recordSize;
+}
+
+uint32_t DragDropManager::GetRecordSize() const
+{
+    return recordSize_;
 }
 
 Rect DragDropManager::GetDragWindowRect(const Point& point)
@@ -532,6 +548,7 @@ void DragDropManager::ClearSummary()
 {
     previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_.clear();
+    ResetRecordSize();
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -891,6 +908,7 @@ void DragDropManager::DestroyDragWindow()
         dragWindow_->Destroy();
         dragWindow_ = nullptr;
     }
+    ResetRecordSize();
 #endif // ENABLE_DRAG_FRAMEWORK
     if (dragWindowRootNode_) {
         dragWindowRootNode_ = nullptr;

@@ -505,6 +505,9 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
                 pos->second.endPos, prevMargin_ != 0.0f ? startMainPos_ - prevMargin_ - spaceWidth_ : startMainPos_)) {
             break;
         }
+
+        ResetOffscreenItemPosition(layoutWrapper, GetLoopIndex(pos->first), true, axis);
+
         layoutWrapper->RemoveChildInRenderTree(GetLoopIndex(pos->first));
         itemPosition_.erase(pos++);
     }
@@ -597,6 +600,9 @@ void SwiperLayoutAlgorithm::LayoutBackward(
                 pos->second.startPos, nextMargin_ != 0.0f ? endMainPos_ + nextMargin_ + spaceWidth_ : endMainPos_)) {
             break;
         }
+
+        ResetOffscreenItemPosition(layoutWrapper, GetLoopIndex(pos->first), false, axis);
+
         layoutWrapper->RemoveChildInRenderTree(GetLoopIndex(pos->first));
         removeIndexes.emplace_back(pos->first);
     }
@@ -914,6 +920,29 @@ void SwiperLayoutAlgorithm::ArrowLayout(
     }
     arrowGeometryNode->SetMarginFrameOffset(arrowOffset);
     arrowWrapper->Layout();
+}
+
+void SwiperLayoutAlgorithm::ResetOffscreenItemPosition(
+    LayoutWrapper* layoutWrapper, int32_t index, bool isForward, Axis axis) const
+{
+    auto swiperGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(swiperGeometryNode);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(childWrapper);
+    auto childGeometryNode = childWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(childGeometryNode);
+    auto swiperFrameRect = swiperGeometryNode->GetFrameRect();
+    auto childFrameRect = childGeometryNode->GetFrameRect();
+
+    OffsetF offset(0.0f, 0.0f);
+    if (axis == Axis::HORIZONTAL) {
+        offset.SetX(isForward ? -childFrameRect.Width() : swiperFrameRect.Width());
+    } else {
+        offset.SetY(isForward ? -childFrameRect.Height() : swiperFrameRect.Height());
+    }
+
+    childGeometryNode->SetMarginFrameOffset(offset);
+    childWrapper->Layout();
 }
 
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
@@ -176,6 +177,12 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPattern::GetImageData(
     double left, double top, double width, double height)
 {
     return offscreenPaintMethod_->GetImageData(left, top, width, height);
+}
+
+void OffscreenCanvasPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
+{
+    CHECK_NULL_VOID(offscreenPaintMethod_);
+    offscreenPaintMethod_->GetImageData(imageData);
 }
 
 void OffscreenCanvasPattern::PutImageData(const Ace::ImageData& imageData)

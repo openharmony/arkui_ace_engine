@@ -76,15 +76,16 @@ TaskExecutor::Task WrapTaskWithContainer(
     return wrappedTask;
 }
 
-bool PostTaskToTaskRunner(const fml::RefPtr<fml::TaskRunner>& taskRunner, TaskExecutor::Task&& task, uint32_t delayTime)
+bool PostTaskToTaskRunner(const fml::RefPtr<fml::TaskRunner>& taskRunner, TaskExecutor::Task&& task, uint32_t delayTime,
+    const std::string& callerInfo = {})
 {
     CHECK_NULL_RETURN(taskRunner, false);
     CHECK_NULL_RETURN(task, false);
 
     if (delayTime > 0) {
-        taskRunner->PostDelayedTask(std::move(task), fml::TimeDelta::FromMilliseconds(delayTime));
+        taskRunner->PostDelayedTask(std::move(task), fml::TimeDelta::FromMilliseconds(delayTime), callerInfo);
     } else {
-        taskRunner->PostTask(std::move(task));
+        taskRunner->PostTask(std::move(task), callerInfo);
     }
     return true;
 }
@@ -211,7 +212,8 @@ void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunne
         gpuRunner_, [weak = AceType::WeakClaim(this)] { FillTaskTypeTable(weak, TaskType::GPU); }, 0);
 }
 
-bool FlutterTaskExecutor::OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const
+bool FlutterTaskExecutor::OnPostTask(
+    Task&& task, TaskType type, uint32_t delayTime, const std::string& callerInfo) const
 {
     int32_t currentId = Container::CurrentId();
     auto traceIdFunc = [weak = WeakClaim(const_cast<FlutterTaskExecutor*>(this)), type]() {
@@ -225,15 +227,15 @@ bool FlutterTaskExecutor::OnPostTask(Task&& task, TaskType type, uint32_t delayT
 
     switch (type) {
         case TaskType::PLATFORM:
-            return PostTaskToTaskRunner(platformRunner_, std::move(wrappedTask), delayTime);
+            return PostTaskToTaskRunner(platformRunner_, std::move(wrappedTask), delayTime, callerInfo);
         case TaskType::UI:
-            return PostTaskToTaskRunner(uiRunner_, std::move(wrappedTask), delayTime);
+            return PostTaskToTaskRunner(uiRunner_, std::move(wrappedTask), delayTime, callerInfo);
         case TaskType::IO:
             return PostTaskToTaskRunner(ioRunner_, std::move(wrappedTask), delayTime);
         case TaskType::GPU:
             return PostTaskToTaskRunner(gpuRunner_, std::move(wrappedTask), delayTime);
         case TaskType::JS:
-            return PostTaskToTaskRunner(jsRunner_, std::move(wrappedTask), delayTime);
+            return PostTaskToTaskRunner(jsRunner_, std::move(wrappedTask), delayTime, callerInfo);
         case TaskType::BACKGROUND:
             // Ignore delay time
             return BackgroundTaskExecutor::GetInstance().PostTask(std::move(wrappedTask));

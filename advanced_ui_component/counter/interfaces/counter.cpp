@@ -23,7 +23,7 @@ extern const char _binary_counter_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_counter_GetABCCode(const char **buf, int *buflen)
+void NAPI_arkui_advanced_Counter_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_counter_abc_start;
@@ -36,11 +36,11 @@ void NAPI_arkui_advanced_counter_GetABCCode(const char **buf, int *buflen)
 /*
  * Module define
  */
-static napi_module counterModule = {
+static napi_module CounterModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.counter",
+    .nm_modname = "arkui.advanced.Counter",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -50,5 +50,5 @@ static napi_module counterModule = {
  */
 extern "C" __attribute__((constructor)) void CounterRegisterModule(void)
 {
-    napi_module_register(&counterModule);
+    napi_module_register(&CounterModule);
 }

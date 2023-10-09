@@ -107,6 +107,19 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    double GetStoredOffset() const
+    {
+        return layoutInfo_.storedOffset_;
+    }
+
+    void SetRestoreOffset(double restoreOffset)
+    {
+        layoutInfo_.restoreOffset_ = restoreOffset;
+    }
+
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

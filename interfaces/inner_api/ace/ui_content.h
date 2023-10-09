@@ -66,6 +66,7 @@ class PixelMap;
 
 class NativeEngine;
 class NativeValue;
+typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
 
@@ -97,6 +98,12 @@ public:
     virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) = 0;
     virtual std::string GetContentInfo() const = 0;
     virtual void DestroyUIDirector() = 0;
+
+    virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
+    virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) = 0;
+    virtual void Initialize(
+        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID) = 0;
+    virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) = 0;
 
     // UI content event process
     virtual bool ProcessBackPressed() = 0;
@@ -168,6 +175,12 @@ public:
     virtual NativeValue* GetUIContext()
     {
         return nullptr;
+    }
+
+    virtual napi_value GetUINapiContext()
+    {
+        napi_value result = nullptr;
+        return result;
     }
 
     /**

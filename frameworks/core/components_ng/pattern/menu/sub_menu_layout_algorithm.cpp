@@ -34,9 +34,7 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto parentMenuItem = menuPattern->GetParentMenuItem();
     CHECK_NULL_VOID(parentMenuItem);
     auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
-    auto parentFrameSize = parentMenuItem->GetGeometryNode()->GetMarginFrameSize();
-    position_ = parentMenuItem->GetPaintRectOffset() + OffsetF(parentFrameSize.Width(), 0.0);
-
+    position_ = GetSubMenuPosition(parentMenuItem);
     float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
     float y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
 
@@ -69,6 +67,30 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
     child->Layout();
+}
+
+OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem)
+{
+    auto parentFrameSize = parentMenuItem->GetGeometryNode()->GetMarginFrameSize();
+    auto position = parentMenuItem->GetPaintRectOffset() + OffsetF(parentFrameSize.Width(), 0.0);
+    auto parentMenu = AceType::DynamicCast<FrameNode>(parentMenuItem->GetParent());
+    CHECK_NULL_RETURN(parentMenu, position);
+    auto scroll = AceType::DynamicCast<FrameNode>(parentMenu->GetParent());
+    CHECK_NULL_RETURN(scroll, position);
+    while (scroll->GetTag() != V2::SCROLL_ETS_TAG) {
+        scroll = AceType::DynamicCast<FrameNode>(scroll->GetParent());
+    }
+    CHECK_NULL_RETURN(scroll, position);
+    auto scrollGeometryNode = scroll->GetGeometryNode();
+    CHECK_NULL_RETURN(scrollGeometryNode, position);
+    auto scrollTop = scroll->GetPaintRectOffset().GetY();
+    auto scrollHeight = scrollGeometryNode->GetFrameSize().Height();
+    auto bottomOffset = scrollTop + scrollHeight;
+    if (parentMenuItem->GetPaintRectOffset().GetY() > bottomOffset) {
+        return scroll->GetPaintRectOffset() + OffsetF(parentFrameSize.Width(), 0.0);
+    } else {
+        return position;
+    }
 }
 
 // return submenu vertical offset

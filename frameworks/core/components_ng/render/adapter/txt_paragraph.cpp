@@ -323,7 +323,10 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
     }
 
     const auto& textBox = *boxes.begin();
-
+    // when text_ ends with a \n, return the top position of the next line.
+    auto last = extent - placeHolderIndex_ - 1;
+    auto index = static_cast<size_t>(last) == text_.length() ? last : extent;
+    prevChar = text_[std::max(0, index - 1)];
     if (prevChar == NEWLINE_CODE) {
         // Return the start of next line.
         result.offset.SetX(0.0);

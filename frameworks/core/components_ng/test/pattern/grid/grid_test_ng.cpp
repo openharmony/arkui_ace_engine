@@ -22,6 +22,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/grid/grid_layout_info.h"
 #define protected public
 #define private public
 #include "core/components/button/button_theme.h"
@@ -1150,10 +1151,10 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
     auto event1 = [](double) { return true; };
     auto event2 = []() {};
+    auto event3 = [](double) {};
     coordinationEvent->SetOnScrollEvent(event1);
     coordinationEvent->SetOnScrollStartEvent(event2);
-    coordinationEvent->SetOnScrollEndEvent(event2);
-    pattern_->SetCoordinationEvent(coordinationEvent);
+    coordinationEvent->SetOnScrollEndEvent(event3);
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_START));
@@ -1514,7 +1515,7 @@ HWTEST_F(GridTestNg, Event006, TestSize.Level1)
 
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
-    EXPECT_NE(scrollableEvent->GetScrollable()->scrollFrameBeginCallback_, nullptr);
+    EXPECT_NE(scrollableEvent->GetScrollable()->callback_, nullptr);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
 }
 
@@ -4461,5 +4462,32 @@ HWTEST_F(GridTestNg, GridScrollWithOptions002, TestSize.Level1)
         layoutAlgorithmWrapper->GetLayoutAlgorithm());
     layoutAlgorithm->GetTargetIndexInfoWithBenchMark(AccessibilityManager::RawPtr(frameNode_), false, 5);
     EXPECT_EQ(layoutAlgorithm->gridLayoutInfo_.startMainLineIndex_, 5);
+}
+
+/**
+ * @tc.name: GridDistributed001
+ * @tc.desc: Test the distributed capability of Grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridDistributed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Grid node
+     */
+    CreateGrid();
+
+    /**
+     * @tc.steps: step2. get pattern .
+     * @tc.expected: function ProvideRestoreInfo is called.
+     */
+    pattern_->gridLayoutInfo_.startIndex_ = 1;
+    std::string ret = pattern_->ProvideRestoreInfo();
+
+    /**
+     * @tc.steps: step3. function OnRestoreInfo is called.
+     * @tc.expected: Passing JSON format.
+     */
+    pattern_->OnRestoreInfo(ret);
+    EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 1);
 }
 } // namespace OHOS::Ace::NG

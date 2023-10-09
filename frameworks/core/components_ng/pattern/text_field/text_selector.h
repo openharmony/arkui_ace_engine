@@ -22,6 +22,11 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 
+// avoid windows build error about macro defined in wincon.h
+#ifdef DOUBLE_CLICK
+#undef DOUBLE_CLICK
+#endif
+
 namespace OHOS::Ace::NG {
 
 using OnAccessibilityCallback = std::function<void()>;
