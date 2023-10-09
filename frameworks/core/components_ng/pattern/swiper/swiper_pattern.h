@@ -557,6 +557,7 @@ private:
     void OnLoopChange();
     void StopSpringAnimationAndFlushImmediately();
     void UpdateItemRenderGroup(bool itemRenderGroup);
+    void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -645,6 +646,8 @@ private:
     bool isVoluntarilyClear_ = false;
     bool isIndicatorLongPress_ = false;
     bool stopIndicatorAnimation_ = true;
+
+    float mainDeltaSum_ = 0.0f;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
