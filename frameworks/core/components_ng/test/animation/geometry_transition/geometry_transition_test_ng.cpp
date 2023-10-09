@@ -33,14 +33,14 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-auto node_1 = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
-WeakPtr<FrameNode> inNode = AceType::WeakClaim(AceType::RawPtr(node_1));
+auto node1 = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+WeakPtr<FrameNode> weakNode1 = AceType::WeakClaim(AceType::RawPtr(node1));
 
-auto node_2 = AceType::MakeRefPtr<FrameNode>("test2", 2, AceType::MakeRefPtr<Pattern>());
-WeakPtr<FrameNode> outNode = AceType::WeakClaim(AceType::RawPtr(node_2));
+auto node2 = AceType::MakeRefPtr<FrameNode>("test2", 2, AceType::MakeRefPtr<Pattern>());
+WeakPtr<FrameNode> weakNode2 = AceType::WeakClaim(AceType::RawPtr(node2));
 
-auto node_3 = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<Pattern>());
-WeakPtr<FrameNode> otherNode = AceType::WeakClaim(AceType::RawPtr(node_3));
+auto node3 = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<Pattern>());
+WeakPtr<FrameNode> weakNode3 = AceType::WeakClaim(AceType::RawPtr(node3));
 
 } // namespace
 
@@ -50,12 +50,16 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
+
+    void Create(const WeakPtr<FrameNode>& frameNode, bool followWithoutTransition = false);
+
+    RefPtr<GeometryTransition> gt_;
 };
 
 void GeometryTransitionTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
-    node_2->AddChild(node_1);
+    node2->AddChild(node1);
 }
 
 void GeometryTransitionTestNg::TearDownTestSuite()
@@ -65,134 +69,193 @@ void GeometryTransitionTestNg::TearDownTestSuite()
 
 void GeometryTransitionTestNg::SetUp() {}
 
-void GeometryTransitionTestNg::TearDown() {}
+void GeometryTransitionTestNg::TearDown()
+{
+    gt_ = nullptr;
+}
+
+void GeometryTransitionTestNg::Create(const WeakPtr<FrameNode>& node, bool followWithoutTransition)
+{
+    gt_ = AceType::MakeRefPtr<GeometryTransition>("test", node, followWithoutTransition);
+}
+
 
 /**
- * @tc.name: GeometryTransitionTest001
+ * @tc.name: GeometryTransition001
  * @tc.desc: Test
  * @tc.type: FUNC
  */
-HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest001, TestSize.Level1)
+HWTEST_F(GeometryTransitionTestNg, GeometryTransition001, TestSize.Level1)
 {
-    GeometryTransition GT("test", inNode);
-    GT.inNode_ = inNode;
-    GT.outNode_ = outNode;
-    GT.WillLayout(node_2);
-    GT.DidLayout(node_2);
-    node_2->SetRootMeasureNode();
-    node_1->SetRootMeasureNode();
-    GT.WillLayout(node_2);
-    GT.DidLayout(node_2);
-    GT.SyncGeometry(true);
-    GT.hasOutAnim_ = true;
-    GT.WillLayout(node_2);
-    node_2->GetLayoutProperty()->UpdateAspectRatio(1.0f);
-    GT.WillLayout(node_2);
-    GT.inNode_.Upgrade()->GetGeometryNode()->SetFrameSize(SizeF(1.0f, 1.0f));
-    GT.WillLayout(node_2);
-    GT.DidLayout(node_2);
-    GT.state_ = GeometryTransition::State::ACTIVE;
-    GT.hasInAnim_ = true;
-    GT.WillLayout(node_1);
-    GT.DidLayout(node_1);
-    GT.state_ = GeometryTransition::State::IDENTITY;
-    GT.DidLayout(node_1);
-    GT.outNode_.Upgrade()->isRemoving_ = true;
-    GT.SyncGeometry(true);
-    GT.outNode_.Upgrade()->isRemoving_ = false;
-    bool ret = GT.Update(inNode, inNode);
-    EXPECT_TRUE(ret);
-    ret = GT.Update(outNode, outNode);
-    EXPECT_TRUE(ret);
-    ret = GT.Update(nullptr, outNode);
-    EXPECT_FALSE(ret);
-    GT.SyncGeometry(false);
-    inNode.Upgrade()->MarkRemoving();
-    GT.SyncGeometry(false);
+    /**
+     * @tc.steps: step1. Build with empty node.
+     * @tc.expected: hasInAnim_ and hasOutAnim_ are false
+     */
+    Create(nullptr);
+    EXPECT_TRUE(gt_->IsInAndOutEmpty());
+    gt_->Build(nullptr, true);
+    EXPECT_FALSE(gt_->hasInAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
+
+    Create(weakNode1, true);
+    gt_->Build(weakNode1, false);
+    gt_->WillLayout(node1);
+    gt_->DidLayout(node1);
+    gt_->Build(weakNode2, true);
+    gt_->WillLayout(node2);
+    gt_->DidLayout(node2);
+    EXPECT_TRUE(gt_->hasInAnim_);
+    EXPECT_TRUE(gt_->hasOutAnim_);
+
+    Create(weakNode1, true);
+    gt_->Build(weakNode1, true);
+    gt_->WillLayout(node1);
+    gt_->DidLayout(node1);
+    EXPECT_FALSE(gt_->hasInAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
+
+    Create(weakNode1, true);
+    gt_->Build(weakNode2, true);
+    gt_->WillLayout(node2);
+    gt_->DidLayout(node2);
+    EXPECT_FALSE(gt_->hasInAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
 }
 
 /**
- * @tc.name: GeometryTransitionTest002
+ * @tc.name: GeometryTransition002
+ * @tc.desc: Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransition002, TestSize.Level1)
+{
+    Create(weakNode1, true);
+    gt_->inNode_ = weakNode1;
+    gt_->outNode_ = weakNode2;
+    gt_->WillLayout(node2);
+    gt_->DidLayout(node2);
+    node2->SetRootMeasureNode();
+    node1->SetRootMeasureNode();
+    gt_->WillLayout(node2);
+    gt_->DidLayout(node2);
+    gt_->SyncGeometry(true);
+    gt_->hasOutAnim_ = true;
+    gt_->WillLayout(node2);
+    node2->GetLayoutProperty()->UpdateAspectRatio(1.0f);
+    gt_->WillLayout(node2);
+    gt_->inNode_.Upgrade()->GetGeometryNode()->SetFrameSize(SizeF(1.0f, 1.0f));
+    gt_->WillLayout(node2);
+    gt_->DidLayout(node2);
+    gt_->state_ = GeometryTransition::State::ACTIVE;
+    gt_->hasInAnim_ = true;
+    gt_->WillLayout(node1);
+    gt_->DidLayout(node1);
+    gt_->state_ = GeometryTransition::State::IDENTITY;
+    gt_->DidLayout(node1);
+    gt_->outNode_.Upgrade()->isRemoving_ = true;
+    gt_->SyncGeometry(true);
+    gt_->outNode_.Upgrade()->isRemoving_ = false;
+    bool ret = gt_->Update(weakNode1, weakNode1);
+    EXPECT_TRUE(ret);
+    ret = gt_->Update(weakNode2, weakNode2);
+    EXPECT_TRUE(ret);
+    ret = gt_->Update(nullptr, weakNode2);
+    EXPECT_FALSE(ret);
+    gt_->SyncGeometry(false);
+    weakNode1.Upgrade()->MarkRemoving();
+    gt_->SyncGeometry(false);
+}
+
+/**
+ * @tc.name: GeometryTransition003
  * @tc.desc: Test the Build function in the GeometryTransition
  * @tc.type: FUNC
  */
-HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest002, TestSize.Level1)
+HWTEST_F(GeometryTransitionTestNg, GeometryTransition003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create GeometryTransition with inNode.
+     * @tc.steps: step1. create GeometryTransition with weakNode1.
      */
-    GeometryTransition GT("test", inNode);
+    Create(weakNode1, true);
     /**
      * @tc.steps: step2. try build with some condition.
-     * @tc.expected: inNode in the GeometryTransition swap to outNode.
+     * @tc.expected: weakNode1 in the GeometryTransition swap to weakNode2.
      */
-    GT.Build(inNode, false);
-    GT.Build(inNode, false);
-    GT.Build(outNode, false);
-    EXPECT_EQ(inNode, GT.outNode_);
+    gt_->Build(weakNode1, false);
+    gt_->Build(weakNode1, false);
+    gt_->Build(weakNode2, false);
+    EXPECT_EQ(weakNode1, gt_->outNode_);
     /**
      * @tc.steps: step3. try change node status.
-     * @tc.expected: the location of inNode and outNode meetings expectations.
+     * @tc.expected: the location of weakNode1 and weakNode2 meetings expectations.
      */
-    GT.Build(inNode, true);
-    EXPECT_EQ(GT.inNode_, GT.outNode_);
-    GT.inNode_.Upgrade()->isRemoving_ = true;
-    GT.outNode_ = outNode;
-    GT.Build(outNode, true);
-    EXPECT_EQ(outNode, GT.inNode_);
-    GT.hasInAnim_ = false;
-    GT.Build(outNode, false);
-    GT.inNode_.Upgrade()->isRemoving_ = false;
-    GT.inNode_.Upgrade()->onMainTree_ = true;
-    GT.hasOutAnim_ = false;
-    GT.Build(outNode, true);
-    EXPECT_EQ(outNode, GT.inNode_);
-    GT.outNode_.Upgrade()->onMainTree_ = false;
-    GT.Build(inNode, true);
-    GT.Build(inNode, true);
-    EXPECT_EQ(inNode, GT.inNode_);
+    gt_->Build(weakNode1, true);
+    EXPECT_EQ(gt_->inNode_, gt_->outNode_);
+    gt_->inNode_.Upgrade()->isRemoving_ = true;
+    gt_->outNode_ = weakNode2;
+    gt_->Build(weakNode2, true);
+    EXPECT_EQ(weakNode2, gt_->inNode_);
+    gt_->hasInAnim_ = false;
+    gt_->Build(weakNode2, false);
+    gt_->inNode_.Upgrade()->isRemoving_ = false;
+    gt_->inNode_.Upgrade()->onMainTree_ = true;
+    gt_->hasOutAnim_ = false;
+    gt_->Build(weakNode2, true);
+    EXPECT_EQ(weakNode2, gt_->inNode_);
+    gt_->outNode_.Upgrade()->onMainTree_ = false;
+    gt_->Build(weakNode1, true);
+    gt_->Build(weakNode1, true);
+    EXPECT_EQ(weakNode1, gt_->inNode_);
 }
 
 /**
- * @tc.name: GeometryTransitionTest003
+ * @tc.name: GeometryTransition004
  * @tc.desc: Test the OnReSync and OnAdditionalLayout function in the GeometryTransition
  * @tc.type: FUNC
  */
-HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest003, TestSize.Level1)
+HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create GeometryTransition with inNode.
+     * @tc.steps: step1. create GeometryTransition with weakNode1.
      */
-    GeometryTransition GT("test", inNode);
-    GT.inNode_ = inNode;
-    GT.outNode_ = outNode;
+    Create(weakNode1, true);
+    node2->AddChild(node1);
+    gt_->inNode_ = weakNode1;
+    gt_->outNode_ = weakNode2;
     /**
      * @tc.steps: step2. call OnReSync with some useless condition.
      * @tc.expected: hasOutAnim_ in GeometryTransition is false
      */
-    GT.OnReSync();
-    inNode.Upgrade()->GetRenderContext()->isSynced_ = true;
-    GT.OnReSync();
-    outNode.Upgrade()->MarkRemoving();
-    GT.OnReSync();
-    EXPECT_FALSE(GT.hasOutAnim_);
+    gt_->OnReSync();
+    weakNode1.Upgrade()->GetRenderContext()->isSynced_ = true;
+    gt_->OnReSync();
+    weakNode2.Upgrade()->MarkRemoving();
+    gt_->OnReSync();
+    EXPECT_FALSE(gt_->hasOutAnim_);
     /**
      * @tc.steps: step3. make outNodeTargetAbsRect_ and recall OnReSync.
      * @tc.expected: hasOutAnim_ in GeometryTransition is true
      */
-    GT.outNodeTargetAbsRect_ = RectF(1.0f, 1.0f, 1.0f, 1.0f);
-    GT.OnReSync();
-    EXPECT_TRUE(GT.hasOutAnim_);
+    gt_->outNodeTargetAbsRect_ = RectF(1.0f, 1.0f, 1.0f, 1.0f);
+    gt_->OnReSync();
+    EXPECT_TRUE(gt_->hasOutAnim_);
+
     /**
-     * @tc.steps: step4. call OnAdditionalLayout with different condition.
+     * @tc.steps: step4. during outNode animation is running target inNode's frame is changed
+     */
+    gt_->RecordAnimationOption(weakNode3, AnimationOption());
+    EXPECT_FALSE(gt_->animationOption_.IsValid());
+
+    /**
+     * @tc.steps: step5. call OnAdditionalLayout with different condition.
      * @tc.expected: the result meetings expectations.
      */
-    EXPECT_FALSE(GT.OnAdditionalLayout(inNode));
-    EXPECT_TRUE(GT.OnAdditionalLayout(outNode));
-    GT.hasInAnim_ = true;
-    GT.state_ = GeometryTransition::State::ACTIVE;
-    EXPECT_TRUE(GT.OnAdditionalLayout(inNode));
-    inNode.Upgrade()->parent_ = nullptr;
-    EXPECT_FALSE(GT.OnAdditionalLayout(inNode));
+    EXPECT_FALSE(gt_->OnAdditionalLayout(weakNode1));
+    EXPECT_TRUE(gt_->OnAdditionalLayout(weakNode2));
+    gt_->hasInAnim_ = true;
+    gt_->state_ = GeometryTransition::State::ACTIVE;
+    EXPECT_TRUE(gt_->OnAdditionalLayout(weakNode1));
+    weakNode1.Upgrade()->parent_ = nullptr;
+    EXPECT_FALSE(gt_->OnAdditionalLayout(weakNode1));
 }
 } // namespace OHOS::Ace::NG
