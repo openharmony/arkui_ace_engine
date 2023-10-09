@@ -301,11 +301,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        if (recordSize_ > 1) {
-            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
-        } else {
-            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
-        }
+        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
         return;
     }
     for (const auto& it : summaryMap_) {
@@ -376,8 +372,7 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
 
 #ifdef ENABLE_DRAG_FRAMEWORK
         if (!isMouseDragged_ || isDragWindowShow_) {
-            InteractionManager::GetInstance()->UpdateDragStyle(
-                recordSize_ > 1 ? DragCursorStyle::MOVE : DragCursorStyle::DEFAULT);
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
         }
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
@@ -507,14 +502,6 @@ void DragDropManager::RequireSummary()
     }
     previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_ = summary;
-    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
-    ret = UdmfClient::GetInstance()->GetData(udData, udKey);
-    if (ret != 0) {
-        LOGW("OnDragStart: UDMF GetData failed: %{public}d", ret);
-        return;
-    }
-    CHECK_NULL_VOID(udData);
-    ResetRecordSize(udData->GetSize());
 }
 
 void DragDropManager::ResetRecordSize(uint32_t recordSize)
