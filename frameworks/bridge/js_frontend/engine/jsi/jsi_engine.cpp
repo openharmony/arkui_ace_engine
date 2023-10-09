@@ -3668,9 +3668,11 @@ std::string JsiEngine::GetStacktraceMessage()
         return "";
     }
     std::string stack;
-    arkNativeEngine->SuspendVM();
-    bool getStackSuccess = arkNativeEngine->BuildJsStackTrace(stack);
-    arkNativeEngine->ResumeVM();
+    bool getStackSuccess = false;
+    if (arkNativeEngine->SuspendVM()) {
+        getStackSuccess = arkNativeEngine->BuildJsStackTrace(stack);
+        arkNativeEngine->ResumeVM();
+    }
     if (!getStackSuccess) {
         LOGE("GetStacktraceMessage arkNativeEngine get stack failed");
         return "JS stacktrace is empty";
