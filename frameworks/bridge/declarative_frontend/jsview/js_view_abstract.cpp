@@ -1041,6 +1041,7 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
                 LOGI("params %{public}d: int %{public}s", i, item->ToString().c_str());
             }
         }
+        resObjParamsList.push_back(resObjParams);
     }
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>(id, type, resObjParamsList, bundleName, moduleName);
     return resourceObject;

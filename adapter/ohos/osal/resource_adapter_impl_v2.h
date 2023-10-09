@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,8 @@ public:
     ~ResourceAdapterImplV2() override = default;
 
     void Init(const ResourceInfo& resourceInfo) override;
+    void Init(
+        const ResourceInfo& resourceInfo, std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateConfig(const ResourceConfiguration& config) override;
 
     RefPtr<ThemeStyle> GetTheme(int32_t themeId) override;
@@ -80,14 +82,11 @@ private:
 
     inline std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const
     {
-        std::shared_lock<std::shared_mutex> lock(resourceMutex_);
         return sysResourceManager_;
     }
 
     std::shared_ptr<Global::Resource::ResourceManager> sysResourceManager_;
     std::string packagePathStr_;
-    // protect resourceManager_
-    mutable std::shared_mutex resourceMutex_;
     std::shared_ptr<Global::Resource::ResConfig> resConfig_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
 };

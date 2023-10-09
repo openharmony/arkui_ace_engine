@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -167,6 +167,24 @@ void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
             resConfig->GetColorMode(), resConfig->GetInputDevice());
     }
     sysResourceManager_ = newResMgr;
+    packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
+    resConfig_ = resConfig;
+}
+
+void ResourceAdapterImplV2::Init(
+    const ResourceInfo& resourceInfo, std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+{
+    std::string resPath = resourceInfo.GetPackagePath();
+    std::string hapPath = resourceInfo.GetHapPath();
+    auto resConfig = ConvertConfigToGlobal(resourceInfo.GetResourceConfiguration());
+    sysResourceManager_ = resourceManager;
+    if (resConfig != nullptr) {
+        auto configRet = sysResourceManager_->UpdateResConfig(*resConfig);
+        LOGI("UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}f, "
+             "device=%{public}d, colorMode=%{public}d, inputDevice=%{public}d",
+            configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
+            resConfig->GetColorMode(), resConfig->GetInputDevice());
+    }
     packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
     resConfig_ = resConfig;
 }
@@ -488,7 +506,8 @@ std::shared_ptr<Media::PixelMap> ResourceAdapterImplV2::GetPixelMap(uint32_t res
     CHECK_NULL_RETURN(manager, nullptr);
     Napi::DrawableDescriptor::DrawableType drawableType;
     Global::Resource::RState state;
-    auto drawableDescriptor = Napi::DrawableDescriptorFactory::Create(resId, sysResourceManager_, state, drawableType, 0);
+    auto drawableDescriptor =
+        Napi::DrawableDescriptorFactory::Create(resId, sysResourceManager_, state, drawableType, 0);
     if (state != Global::Resource::SUCCESS) {
         LOGE("Failed to Create drawableDescriptor by %{public}d", resId);
         return nullptr;

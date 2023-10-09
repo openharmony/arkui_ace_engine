@@ -1277,7 +1277,23 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
         LOGD("UIContent load theme");
 
         auto resourceAdapter = ResourceAdapter::Create();
-        resourceAdapter->Init(resourceInfo);
+        bool isResourceAdapterInit = false;
+        if (context) {
+            auto sysResourceManager = context->GetResourceManager();
+            if (sysResourceManager) {
+                resourceAdapter->Init(resourceInfo, sysResourceManager);
+                isResourceAdapterInit = true;
+
+                auto bundleName = context->GetBundleName();
+                auto moduleName = context->GetHapModuleInfo()->moduleName;
+                if (!bundleName.empty() && !moduleName.empty()) {
+                    ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+                }
+            }           
+        }
+        if (!isResourceAdapterInit) {
+            resourceAdapter->Init(resourceInfo);
+        }
 
         ThemeConstants::InitDeviceType();
         auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);

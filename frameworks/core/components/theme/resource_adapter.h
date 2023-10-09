@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/resource_configuration.h"
 #include "core/components/theme/theme_style.h"
+
+#include "resource_manager.h"
 namespace OHOS::Ace {
 
 struct RawfileDescription {
@@ -40,6 +42,8 @@ public:
     static RefPtr<ResourceAdapter> Create();
 
     virtual void Init(const ResourceInfo& resourceInfo) {}
+
+    virtual void Init(const ResourceInfo& resourceInfo, std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) {}
 
     virtual void UpdateConfig(const ResourceConfiguration& config) {}
 
