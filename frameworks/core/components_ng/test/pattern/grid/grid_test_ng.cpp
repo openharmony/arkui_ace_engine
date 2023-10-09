@@ -481,6 +481,10 @@ HWTEST_F(GridTestNg, Property003, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetCrossSpan(Axis::HORIZONTAL), 2);
     EXPECT_EQ(layoutProperty->GetMainStart(Axis::HORIZONTAL), 1);
     EXPECT_EQ(layoutProperty->GetCrossStart(Axis::HORIZONTAL), 1);
+    EXPECT_EQ(layoutProperty->GetMainEnd(Axis::VERTICAL), 2);
+    EXPECT_EQ(layoutProperty->GetMainEnd(Axis::HORIZONTAL), 2);
+    EXPECT_EQ(layoutProperty->GetCrossEnd(Axis::VERTICAL), 2);
+    EXPECT_EQ(layoutProperty->GetCrossEnd(Axis::HORIZONTAL), 2);
     auto pattern = frameNode->GetPattern<GridItemPattern>();
     EXPECT_TRUE(pattern->forceRebuild_);
     auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
@@ -4489,5 +4493,186 @@ HWTEST_F(GridTestNg, GridDistributed001, TestSize.Level1)
      */
     pattern_->OnRestoreInfo(ret);
     EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 1);
+}
+
+/**
+ * @tc.name: SearchIrregularFocusableChildInScroll001
+ * @tc.desc: Test the function when the gridItem cannot be focused
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, SearchIrregularFocusableChildInScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gridItems with irregular shape in scroll grid.
+     */
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 6, 1, 2, 3, 4, 5, 0 };
+    CreateGrid([option](GridModelNG gridModelNG) {
+        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        gridModelNG.SetLayoutOptions(option);
+        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+    });
+
+    /**
+     * @tc.steps: step2. Find target child with specified index parameters.
+     * @tc.expected: Can not find the target focus child.
+     */
+    int32_t tarMainIndex = 1;
+    int32_t tarCrossIndex = 1;
+    auto IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    RefPtr<FocusHub> result = IrregularFocusableChild.Upgrade();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: SearchIrregularFocusableChildInScroll002
+ * @tc.desc: Test the function when the gridItem can be focused
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, SearchIrregularFocusableChildInScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gridItems with irregular shape in scroll grid.
+     */
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 6, 1, 2, 3, 4, 5, 0 };
+    CreateGrid([option](GridModelNG gridModelNG) {
+        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        gridModelNG.SetLayoutOptions(option);
+        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE, true);
+    });
+
+    /**
+     * @tc.steps: step2. Find target child with specified index parameters.
+     * @tc.expected: Can not find the target focus child.
+     */
+    int32_t tarMainIndex = 1;
+    int32_t tarCrossIndex = 1;
+    auto IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    RefPtr<FocusHub> result = IrregularFocusableChild.Upgrade();
+    EXPECT_EQ(result, nullptr);
+
+    /**
+     * @tc.steps: step3. Call the function when isLeftStep_ is true.
+     * @tc.expected: Can find the target focus child.
+     */
+    tarCrossIndex = 0;
+    pattern_->isLeftStep_ = true;
+    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    result = IrregularFocusableChild.Upgrade();
+    EXPECT_NE(result, nullptr);
+
+    /**
+     * @tc.steps: step4. Call the function when isRightStep_ is true.
+     * @tc.expected: Can find the target focus child.
+     */
+    pattern_->isLeftStep_ = false;
+    pattern_->isRightStep_ = true;
+    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    result = IrregularFocusableChild.Upgrade();
+    EXPECT_NE(result, nullptr);
+
+    /**
+     * @tc.steps: step5. Call the function when isUpStep_ is true.
+     * @tc.expected: Can find the target focus child.
+     */
+    pattern_->isRightStep_ = false;
+    pattern_->isUpStep_ = true;
+    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    result = IrregularFocusableChild.Upgrade();
+    EXPECT_NE(result, nullptr);
+
+    /**
+     * @tc.steps: step6. Call the function when isDownStep_ is true.
+     * @tc.expected: Can find the target focus child.
+     */
+    pattern_->isUpStep_ = false;
+    pattern_->isDownStep_ = true;
+    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    result = IrregularFocusableChild.Upgrade();
+    EXPECT_NE(result, nullptr);
+
+    /**
+     * @tc.steps: step7. Call the function when isLeftEndStep_ is true.
+     * @tc.expected: Can find the target focus child.
+     */
+    pattern_->isDownStep_ = false;
+    pattern_->isLeftEndStep_  = true;
+    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    result = IrregularFocusableChild.Upgrade();
+    EXPECT_NE(result, nullptr);
+
+    /**
+     * @tc.steps: step8. Call the function when isRightEndStep_ is true.
+     * @tc.expected: Can find the target focus child.
+     */
+    pattern_->isLeftEndStep_ = false;
+    pattern_->isRightEndStep_  = true;
+    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    result = IrregularFocusableChild.Upgrade();
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: SearchIrregularFocusableChildInNormalGrid001
+ * @tc.desc: Test ability of a fixed shape grid to obtain irregular shape focal item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, SearchIrregularFocusableChildInNormalGrid001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gridItems with irregular shape in fixed shape grid.
+     */
+    CreateGrid([](GridModelNG gridModelNG) {
+        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateSingleGridItem(1, 2, 1, 2);
+        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE, true);
+    });
+
+    /**
+     * @tc.steps: step2. Find target child with specified index parameters.
+     * @tc.expected: Can find the target focus child.
+     */
+    int32_t tarMainIndex = 1;
+    int32_t tarCrossIndex = 1;
+    pattern_->isLeftStep_ = true;
+    auto IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    RefPtr<FocusHub> result = IrregularFocusableChild.Upgrade();
+    EXPECT_NE(result, nullptr);
+
+    /**
+     * @tc.steps: step3. Call the function when isRightStep_ is true.
+     * @tc.expected: Can find the target focus child.
+     */
+    pattern_->isLeftStep_ = false;
+    pattern_->isRightStep_ = true;
+    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    result = IrregularFocusableChild.Upgrade();
+    EXPECT_NE(result, nullptr);
+
+    /**
+     * @tc.steps: step4. Call the function when isUpStep_ is true.
+     * @tc.expected: Can find the target focus child.
+     */
+    pattern_->isRightStep_ = false;
+    pattern_->isUpStep_ = true;
+    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    result = IrregularFocusableChild.Upgrade();
+    EXPECT_NE(result, nullptr);
+
+    /**
+     * @tc.steps: step5. Call the function when isDownStep_ is true.
+     * @tc.expected: Can find the target focus child.
+     */
+    pattern_->isUpStep_ = false;
+    pattern_->isDownStep_ = true;
+    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    result = IrregularFocusableChild.Upgrade();
+    EXPECT_NE(result, nullptr);
 }
 } // namespace OHOS::Ace::NG
