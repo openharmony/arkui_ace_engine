@@ -730,7 +730,7 @@ void PipelineContext::StartWindowMaximizeAnimation(int32_t width, int32_t height
     AnimationOption option;
     constexpr int32_t duration = 400;
     option.SetDuration(duration);
-    auto curve = MakeRefPtr<DecelerationCurve>();
+    auto curve = Curves::EASE_OUT;
     option.SetCurve(curve);
     auto weak = WeakClaim(this);
     Animate(option, curve, [width, height, weak]() {
