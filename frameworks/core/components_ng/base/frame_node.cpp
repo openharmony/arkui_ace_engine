@@ -385,19 +385,7 @@ void FrameNode::InitializePatternAndContext()
     }
 }
 
-void FrameNode::DumpOverlayInfo()
-{
-    if (!layoutProperty_->IsOverlayNode()) {
-        return;
-    }
-    DumpLog::GetInstance().AddDesc(std::string("IsOverlayNode: ").append(std::string("true")));
-    Dimension offsetX, offsetY;
-    layoutProperty_->GetOverlayOffset(offsetX, offsetY);
-    DumpLog::GetInstance().AddDesc(
-        std::string("OverlayOffset: ").append(offsetX.ToString()).append(std::string(", ")).append(offsetY.ToString()));
-}
-
-void FrameNode::DumpInfo()
+void FrameNode::DumpCommonInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
     DumpLog::GetInstance().AddDesc(
@@ -439,8 +427,37 @@ void FrameNode::DumpInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
     DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
+}
+
+void FrameNode::DumpOverlayInfo()
+{
+    if (!layoutProperty_->IsOverlayNode()) {
+        return;
+    }
+    DumpLog::GetInstance().AddDesc(std::string("IsOverlayNode: ").append(std::string("true")));
+    Dimension offsetX, offsetY;
+    layoutProperty_->GetOverlayOffset(offsetX, offsetY);
+    DumpLog::GetInstance().AddDesc(
+        std::string("OverlayOffset: ").append(offsetX.ToString()).append(std::string(", ")).append(offsetY.ToString()));
+}
+
+void FrameNode::DumpInfo()
+{
+    DumpCommonInfo();
     if (pattern_) {
         pattern_->DumpInfo();
+    }
+    if (renderContext_) {
+        renderContext_->DumpInfo();
+    }
+}
+
+void FrameNode::DumpAdvanceInfo()
+{
+    DumpCommonInfo();
+    if (pattern_) {
+        pattern_->DumpInfo();
+        pattern_->DumpAdvanceInfo();
     }
     if (renderContext_) {
         renderContext_->DumpInfo();
@@ -1526,8 +1543,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (!child) {
             continue;
         }
-        auto childHitResult = child->TouchTest(globalPoint, localPoint, subRevertPoint, touchRestrict,
-            newComingTargets, touchId);
+        auto childHitResult =
+            child->TouchTest(globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
