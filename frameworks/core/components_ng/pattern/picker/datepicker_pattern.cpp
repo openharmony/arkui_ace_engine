@@ -155,10 +155,14 @@ void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool is
         OnDataLinking(tag, isAdd, index, tags);
     }
     for (const auto& tag : tags) {
-        auto iter = std::find_if(datePickerColumns_.begin(), datePickerColumns_.end(),
-            [&tag](const RefPtr<FrameNode>& column) { return column->GetId() == tag->GetId(); });
+        auto iter = std::find_if(datePickerColumns_.begin(), datePickerColumns_.end(), [&tag](const auto& c) {
+                auto column = c.Upgrade();
+                return column && column->GetId() == tag->GetId();
+            });
         if (iter != datePickerColumns_.end()) {
-            auto datePickerColumnPattern = (*iter)->GetPattern<DatePickerColumnPattern>();
+            auto datePickerColumn = (*iter).Upgrade();
+            CHECK_NULL_VOID(datePickerColumn);
+            auto datePickerColumnPattern = datePickerColumn->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
             datePickerColumnPattern->FlushCurrentOptions(isAdd, true, false);
         }
@@ -218,11 +222,12 @@ void DatePickerPattern::OnColorConfigurationUpdate()
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
-    CHECK_NULL_VOID(buttonTitleNode_);
-    auto titleLayoutRenderContext = buttonTitleNode_->GetRenderContext();
+    auto buttonTitleNode = buttonTitleNode_.Upgrade();
+    CHECK_NULL_VOID(buttonTitleNode);
+    auto titleLayoutRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_VOID(titleLayoutRenderContext);
     titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
-    auto childButton = buttonTitleNode_->GetFirstChild();
+    auto childButton = buttonTitleNode->GetFirstChild();
     CHECK_NULL_VOID(childButton);
     auto ButtonNode = DynamicCast<FrameNode>(childButton);
     CHECK_NULL_VOID(ButtonNode);
@@ -236,8 +241,9 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-    CHECK_NULL_VOID(contentRowNode_);
-    auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    auto contentRowNode = contentRowNode_.Upgrade();
+    CHECK_NULL_VOID(contentRowNode);
+    auto layoutRenderContext = contentRowNode->GetRenderContext();
     CHECK_NULL_VOID(layoutRenderContext);
     layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     OnModifyDone();

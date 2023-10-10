@@ -87,7 +87,7 @@ public:
 
     void OnColumnsBuilding();
 
-    const std::unordered_map<std::string, RefPtr<FrameNode>>& GetAllChildNode()
+    const std::unordered_map<std::string, WeakPtr<FrameNode>>& GetAllChildNode()
     {
         return allChildNode_;
     }
@@ -171,7 +171,7 @@ public:
 
     const std::string& GetOptionsValue(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex);
 
-    const std::map<RefPtr<FrameNode>, uint32_t>& GetOptionsCount() const
+    const std::map<WeakPtr<FrameNode>, uint32_t>& GetOptionsCount() const
     {
         return optionsTotalCount_;
     }
@@ -194,7 +194,6 @@ public:
         // Hour24 : Index = [0, 23] -> hour = [0, 23]
         // Hour12 : Index = [0, 11] -> hour = [1, 12]
         auto hourColumn = allChildNode_["hour"];
-        CHECK_NULL_VOID(hourColumn);
         options_[hourColumn].clear();
     }
 
@@ -293,9 +292,11 @@ public:
 
     RefPtr<FrameNode> GetColumn(int32_t tag) const
     {
-        auto iter = std::find_if(timePickerColumns_.begin(), timePickerColumns_.end(),
-            [tag](const RefPtr<FrameNode>& column) { return column->GetId() == tag; });
-        return (iter == timePickerColumns_.end()) ? nullptr : *iter;
+        auto iter = std::find_if(timePickerColumns_.begin(), timePickerColumns_.end(), [tag](const auto& c) {
+                auto column = c.Upgrade();
+                return column && column->GetId() == tag;
+            });
+        return (iter == timePickerColumns_.end()) ? nullptr : (*iter).Upgrade();
     }
 
     void SetColumn(const RefPtr<FrameNode>& value)
@@ -382,9 +383,9 @@ private:
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
-    std::unordered_map<std::string, RefPtr<FrameNode>> allChildNode_;
-    std::map<RefPtr<FrameNode>, std::unordered_map<uint32_t, std::string>> options_;
-    std::map<RefPtr<FrameNode>, uint32_t> optionsTotalCount_;
+    std::unordered_map<std::string, WeakPtr<FrameNode>> allChildNode_;
+    std::map<WeakPtr<FrameNode>, std::unordered_map<uint32_t, std::string>> options_;
+    std::map<WeakPtr<FrameNode>, uint32_t> optionsTotalCount_;
     uint32_t showCount_ = 0;
     Color backgroundColor_ = Color::WHITE;
     // true, use 24 hours style; false, use 12 hours style.
@@ -403,13 +404,13 @@ private:
 
     bool hasSecond_ = false;
     bool wheelModeEnabled_ = true;
-    std::vector<RefPtr<FrameNode>> timePickerColumns_;
+    std::vector<WeakPtr<FrameNode>> timePickerColumns_;
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowPattern);
 
-    RefPtr<FrameNode> buttonTitleNode_;
-    RefPtr<FrameNode> contentRowNode_;
+    WeakPtr<FrameNode> buttonTitleNode_;
+    WeakPtr<FrameNode> contentRowNode_;
     bool isPicker_ = false;
 };
 } // namespace OHOS::Ace::NG

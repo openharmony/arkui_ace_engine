@@ -336,7 +336,7 @@ private:
     std::vector<NG::RangeContent> options_;
     uint32_t columnsKind_;
     std::vector<NG::TextCascadePickerOptions> cascadeOptions_;
-    std::map<RefPtr<FrameNode>, std::vector<NG::RangeContent>> optionsWithNode_;
+    std::map<WeakPtr<FrameNode>, std::vector<NG::RangeContent>> optionsWithNode_;
     std::vector<NG::TextCascadePickerOptions> cascadeOriginptions_;
     bool isCascade_ = false;
     bool isHasSelectAttr_ = false;
@@ -353,7 +353,7 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 
-    RefPtr<NG::FrameNode> contentRowNode_;
+    WeakPtr<NG::FrameNode> contentRowNode_;
     bool isPicker_ = true;
 };
 } // namespace OHOS::Ace::NG
