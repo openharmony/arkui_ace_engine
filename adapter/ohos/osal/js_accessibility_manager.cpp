@@ -1775,13 +1775,17 @@ static void DumpTreeNG(
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(rect.Width()));
     DumpLog::GetInstance().AddDesc("height: " + std::to_string(rect.Height()));
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->IsVisible()));
-    auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
-    DumpLog::GetInstance().AddDesc(
-        "clickable: " + std::to_string(gestureEventHub ? gestureEventHub->IsAccessibilityClickable() : false));
+    auto eventHub = node->GetEventHub<NG::EventHub>();
+    if (eventHub) {
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        DumpLog::GetInstance().AddDesc(
+            "clickable: " + std::to_string(gestureEventHub ? gestureEventHub->IsAccessibilityClickable() : false));
+        DumpLog::GetInstance().AddDesc(
+            "longclickable: " +
+            std::to_string(gestureEventHub ? gestureEventHub->IsAccessibilityLongClickable() : false));
+    }
     DumpLog::GetInstance().AddDesc(
         "checkable: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsCheckable()));
-    DumpLog::GetInstance().AddDesc(
-        "longclickable: " + std::to_string(gestureEventHub ? gestureEventHub->IsAccessibilityLongClickable() : false));
     DumpLog::GetInstance().AddDesc(
         "scrollable: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsScrollable()));
     DumpLog::GetInstance().AddDesc(
