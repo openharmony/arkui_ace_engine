@@ -63,7 +63,6 @@ ohos_unittest("distributed_ui_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/page_event_hub.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/stage/page_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/page_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",

@@ -60,7 +60,6 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
@@ -126,17 +125,10 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     RequestFrame();
 }
 
-void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty, bool checkPage)
+void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    auto currentPageId = GetCurrentPageId();
-    if (checkPage && dirty->GetPageId() > 0 && currentPageId != -1 && dirty->GetPageId() != currentPageId) {
-        auto page = stageManager_->GetLastPage();
-        auto pagePattern = page->GetPattern<PagePattern>();
-        pagePattern->AddDelaytLayoutNode(WeakClaim(RawPtr(dirty)));
-        return;
-    }
     taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -150,12 +142,6 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty, bool ch
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
-}
-
-int32_t PipelineContext::GetCurrentPageId()
-{
-    CHECK_NULL_RETURN(stageManager_, -1);
-    return stageManager_->GetLastPage() ? stageManager_->GetLastPage()->GetPageId() : -1;
 }
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
@@ -1586,9 +1572,6 @@ void PipelineContext::HandleOnAreaChangeEvent()
     }
     auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        if (frameNode->GetPageId() != GetCurrentPageId()) {
-            continue;
-        }
         frameNode->TriggerOnAreaChangeCallback();
     }
     UpdateFormLinkInfos();
