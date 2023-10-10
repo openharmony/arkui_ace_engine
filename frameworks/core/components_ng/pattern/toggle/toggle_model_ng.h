@@ -33,6 +33,7 @@ public:
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
     void OnChangeEvent(ChangeEvent&& onChangeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    void SetHoverEffect(HoverEffectType hoverEffect) override;
 
 private:
     static void CreateCheckbox(int32_t nodeId);
