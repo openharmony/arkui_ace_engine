@@ -1082,14 +1082,12 @@ void JSSwiper::SetNestedScroll(const JSCallbackInfo& args)
     };
     if (args.Length() < 1 || !args[0]->IsNumber()) {
         SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
-        LOGW("Invalid params");
         return;
     }
     int32_t value = -1;
     JSViewAbstract::ParseJsInt32(args[0], value);
     auto mode = static_cast<NestedScrollMode>(value);
     if (mode < NestedScrollMode::SELF_ONLY || mode > NestedScrollMode::SELF_FIRST) {
-        LOGW("ScrollFroward params invalid");
         SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
         return;
     }
