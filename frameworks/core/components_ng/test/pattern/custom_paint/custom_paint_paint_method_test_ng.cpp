@@ -29,20 +29,20 @@
 #include "core/components_ng/test/pattern/custom_paint/common_constants.h"
 #include "core/components_ng/test/pattern/custom_paint/mock/mock_paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/test/mock/mock_interface.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/test/mock/mock_interface.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
 
+#include "core/components/common/properties/decoration.h"
+#include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/image/image_object.h"
-#include "core/components/common/properties/decoration.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -85,9 +85,7 @@ void CustomPaintPaintMethodTestNg::TearDown()
     GTEST_LOG_(INFO) << "CustomPaintPaintMethodTestNg TearDown";
 }
 
-void CustomPaintPaintMethodTestNg::UpdateRecordingCanvas(SizeF frameSize, RefPtr<CanvasPaintMethod> paintMethod)
-{
-}
+void CustomPaintPaintMethodTestNg::UpdateRecordingCanvas(SizeF frameSize, RefPtr<CanvasPaintMethod> paintMethod) {}
 
 /**
  * @tc.name: CustomPaintPaintMethodTestNg001
@@ -146,79 +144,11 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg002, TestSize
      * @tc.steps3: Call the function SetLineDash.
      * @tc.expected: Some of the specified value are added to the LineDash.lineDash.
      */
-    const std::vector<double> lineDash2 = {10, 20};
+    const std::vector<double> lineDash2 = { 10, 20 };
     paintMethod->strokeState_.SetLineDash(lineDash2);
     paintMethod->UpdateLineDash(paint);
     EXPECT_NE(paint.getPathEffect(), nullptr);
 }
-
-#ifndef NEW_SKIA
-/**
- * @tc.name: CustomPaintPaintMethodTestNg003
- * @tc.desc: Test the functions InitImagePaint of CustomPaintPaintMethod.
- * @tc.type: FUNC
- */
-HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = CreateCanvasPaintMethod();
-    ASSERT_NE(paintMethod, nullptr);
-    SizeF frameSize;
-    UpdateRecordingCanvas(frameSize, paintMethod);
-
-    /**
-     * @tc.steps1: initialize parameters.
-     */
-    const std::string qualityUndefined("undefined");
-    const std::string qualityLow("low");
-    const std::string qualityMedium("medium");
-    const std::string qualityHigh("high");
-
-    /**
-     * @tc.steps2: Test the function InitImagePaint with smoothingEnabled_ = true and smoothingQuality_ = "undefined".
-     * @tc.expected: The filterQuality of imagePaint_ is equal to kNone_SkFilterQuality.
-     */
-    paintMethod->SetSmoothingEnabled(true);
-    paintMethod->smoothingQuality_ = qualityUndefined;
-    paintMethod->InitImagePaint(paintMethod->imagePaint_);
-    EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kNone_SkFilterQuality);
-
-    /**
-     * @tc.steps3: Test the function InitImagePaint with smoothingEnabled_ = true and smoothingQuality_ = "low".
-     * @tc.expected: The filterQuality of imagePaint_ is equal to kLow_SkFilterQuality.
-     */
-    paintMethod->smoothingQuality_ = qualityLow;
-    paintMethod->InitImagePaint(paintMethod->imagePaint_);
-    EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kLow_SkFilterQuality);
-
-    /**
-     * @tc.steps4: Test the function InitImagePaint with smoothingEnabled_ = true and smoothingQuality_ = "medium".
-     * @tc.expected: The filterQuality of imagePaint_ is equal to kMedium_SkFilterQuality.
-     */
-    paintMethod->smoothingQuality_ = qualityMedium;
-    paintMethod->InitImagePaint(paintMethod->imagePaint_);
-    EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kMedium_SkFilterQuality);
-
-    /**
-     * @tc.steps5: Test the function InitImagePaint with smoothingEnabled_ = true and smoothingQuality_ = "high".
-     * @tc.expected: The filterQuality of imagePaint_ is equal to kHigh_SkFilterQuality.
-     */
-    paintMethod->smoothingQuality_ = qualityHigh;
-    paintMethod->InitImagePaint(paintMethod->imagePaint_);
-    EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kHigh_SkFilterQuality);
-
-    /**
-     * @tc.steps6: Test the function InitImagePaint with smoothingEnabled_ = false.
-     * @tc.expected: The filterQuality of imagePaint_ is equal to kNone_SkFilterQuality.
-     */
-    paintMethod->SetSmoothingEnabled(false);
-    paintMethod->InitImagePaint(paintMethod->imagePaint_);
-    EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kNone_SkFilterQuality);
-}
-#endif
 
 /**
  * @tc.name: CustomPaintPaintMethodTestNg004
@@ -242,22 +172,16 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg004, TestSize
      */
     CanvasFillRule rule = CanvasFillRule::NONZERO;
     paintMethod->SetFillRuleForPath(rule);
-#ifndef NEW_SKIA
-    EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPath::FillType::kWinding_FillType);
-#else
+
     EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPathFillType::kWinding);
-#endif
     /**
      * @tc.steps2: Test the function SetFillRuleForPath with rule = CanvasFillRule::EVENODD.
      * @tc.expected: The value of getFillType is SkPath::FillType::kEvenOdd_FillType.
      */
     rule = CanvasFillRule::EVENODD;
     paintMethod->SetFillRuleForPath(rule);
-#ifndef NEW_SKIA
-    EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPath::FillType::kEvenOdd_FillType);
-#else
+
     EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPathFillType::kEvenOdd);
-#endif
 }
 
 /**
@@ -282,11 +206,8 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg005, TestSize
      */
     CanvasFillRule rule = CanvasFillRule::NONZERO;
     paintMethod->SetFillRuleForPath2D(rule);
-#ifndef NEW_SKIA
-    EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPath::FillType::kWinding_FillType);
-#else
+
     EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPathFillType::kWinding);
-#endif
 
     /**
      * @tc.steps2: Test the function SetFillRuleForPath2D with rule = CanvasFillRule::EVENODD.
@@ -294,11 +215,8 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg005, TestSize
      */
     rule = CanvasFillRule::EVENODD;
     paintMethod->SetFillRuleForPath2D(rule);
-#ifndef NEW_SKIA
-    EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPath::FillType::kEvenOdd_FillType);
-#else
+
     EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPathFillType::kEvenOdd);
-#endif
 }
 
 /**
@@ -415,95 +333,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg008, TestSize
     paintMethod->PutImageData(paintWrapper, imageData);
     EXPECT_TRUE(imageData.data.empty());
 }
-
-#ifndef NEW_SKIA
-/**
- * @tc.name: CustomPaintPaintMethodTestNg009
- * @tc.desc: Test the functions GetStrokePaint of CustomPaintPaintMethod.
- * @tc.type: FUNC
- */
-HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg009, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = CreateCanvasPaintMethod();
-    ASSERT_NE(paintMethod, nullptr);
-
-    /**
-     * @tc.steps2: Test the function GetStrokePaint with Alpha = DEFAULT_DOUBLE1.
-     * @tc.expected: The value of getAlphaf is DEFAULT_DOUBLE1.
-     */
-    SkPaint paint;
-    paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE1);
-    paintMethod->GetStrokePaint(paint);
-    EXPECT_DOUBLE_EQ(paint.getAlphaf(), DEFAULT_DOUBLE1);
-
-    /**
-     * @tc.steps3: Test the function GetStrokePaint with Alpha = DEFAULT_DOUBLE10.
-     * @tc.expected: The value of getFillType is not equal to DEFAULT_DOUBLE1.
-     */
-    paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE10);
-    paintMethod->GetStrokePaint(paint);
-    EXPECT_NE(paint.getAlphaf(), DEFAULT_DOUBLE1);
 }
-#endif
-
-/**
- * @tc.name: CustomPaintPaintMethodTestNg010
- * @tc.desc: Test the functions FillRect of CustomPaintPaintMethod.
- * @tc.type: FUNC
- */
-HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg010, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = CreateCanvasPaintMethod();
-    ASSERT_NE(paintMethod, nullptr);
-    SizeF frameSize;
-    UpdateRecordingCanvas(frameSize, paintMethod);
-
-    /**
-     * @tc.steps2: Test the function FillRect with Alpha = DEFAULT_DOUBLE10.
-     * @tc.expected: The value of HasGlobalAlpha is true.
-     */
-    PaintWrapper* paintWrapper = nullptr;
-    Rect rect;
-    paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE10);
-    paintMethod->FillRect(paintWrapper, rect);
-    EXPECT_TRUE(paintMethod->globalState_.HasGlobalAlpha());
-
-    /**
-     * @tc.steps3: Test the function FillRect with shadow_.
-     * @tc.expected: The value of HasShadow is true.
-     */
-    paintMethod->shadow_.SetBlurRadius(DEFAULT_DOUBLE1);
-    paintMethod->shadow_.SetOffsetX(DEFAULT_DOUBLE1);
-    paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
-    paintMethod->FillRect(paintWrapper, rect);
-    EXPECT_TRUE(paintMethod->HasShadow());
-#ifndef NEW_SKIA
-    /**
-     * @tc.steps4: Test the function FillRect with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_OVER);
-    paintMethod->FillRect(paintWrapper, rect);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_BEGIN);
-
-    /**
-     * @tc.steps5: Test the function FillRect with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_IN.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
-    paintMethod->FillRect(paintWrapper, rect);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
-#endif
-}
-
 /**
  * @tc.name: CustomPaintPaintMethodTestNg011
  * @tc.desc: Test the functions StrokeRect of CustomPaintPaintMethod.
@@ -531,23 +361,6 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg011, TestSize
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->StrokeRect(paintWrapper, rect);
     EXPECT_TRUE(paintMethod->HasShadow());
-#ifndef NEW_SKIA
-    /**
-     * @tc.steps3: Test the function StrokeRect with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_OVER);
-    paintMethod->StrokeRect(paintWrapper, rect);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_BEGIN);
-
-    /**
-     * @tc.steps4: Test the function StrokeRect with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_IN.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
-    paintMethod->StrokeRect(paintWrapper, rect);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
-#endif
 }
 
 /**
@@ -586,23 +399,6 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg012, TestSize
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->Fill(paintWrapper);
     EXPECT_TRUE(paintMethod->HasShadow());
-#ifndef NEW_SKIA
-    /**
-     * @tc.steps4: Test the function Fill with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_OVER);
-    paintMethod->Fill(paintWrapper);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_BEGIN);
-
-    /**
-     * @tc.steps5: Test the function Fill with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_IN.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
-    paintMethod->Fill(paintWrapper);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
-#endif
 }
 
 /**
@@ -640,23 +436,6 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg013, TestSize
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->Path2DFill(offset);
     EXPECT_TRUE(paintMethod->HasShadow());
-#ifndef NEW_SKIA
-    /**
-     * @tc.steps4: Test the function Path2DFill with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_OVER);
-    paintMethod->Path2DFill(offset);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_BEGIN);
-
-    /**
-     * @tc.steps5: Test the function Path2DFill with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_IN.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
-    paintMethod->Path2DFill(offset);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
-#endif
 }
 
 /**
@@ -685,23 +464,6 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg014, TestSize
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->Stroke(paintWrapper);
     EXPECT_TRUE(paintMethod->HasShadow());
-#ifndef NEW_SKIA
-    /**
-     * @tc.steps3: Test the function Stroke with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_OVER);
-    paintMethod->Stroke(paintWrapper);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_BEGIN);
-
-    /**
-     * @tc.steps4: Test the function Stroke with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_IN.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
-    paintMethod->Stroke(paintWrapper);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
-#endif
 }
 
 /**
@@ -730,23 +492,6 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg015, TestSize
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->Path2DStroke(offset);
     EXPECT_TRUE(paintMethod->HasShadow());
-#ifndef NEW_SKIA
-    /**
-     * @tc.steps3: Test the function Path2DStroke with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_OVER);
-    paintMethod->Path2DStroke(offset);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_BEGIN);
-
-    /**
-     * @tc.steps4: Test the function Path2DStroke with SetType.
-     * @tc.expected: The value of GetType is CompositeOperation::SOURCE_IN.
-     */
-    paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
-    paintMethod->Path2DStroke(offset);
-    EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
-#endif
 }
 
 /**
@@ -771,7 +516,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg016, TestSize
      */
     PaintWrapper* paintWrapper = nullptr;
     ArcParam param;
-    param.startAngle = 1.5 * M_PI;    // start angle of the circle
+    param.startAngle = 1.5 * M_PI; // start angle of the circle
     param.endAngle = 3.5 * M_PI;
     double sweepAngle = (param.endAngle - param.startAngle) * HALF_CIRCLE_ANGLE / M_PI;
     paintMethod->Arc(paintWrapper, param);
@@ -781,7 +526,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg016, TestSize
      * @tc.steps3: Test the function Arc with angle.
      * @tc.expected: The value of angle is true.
      */
-    param.startAngle = 3.5 * M_PI;    // start angle of the circle
+    param.startAngle = 3.5 * M_PI; // start angle of the circle
     param.endAngle = 1.3 * M_PI;
     sweepAngle = (param.endAngle - param.startAngle) * HALF_CIRCLE_ANGLE / M_PI;
     paintMethod->Arc(paintWrapper, param);
@@ -792,7 +537,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg016, TestSize
      * @tc.steps4: Test the function Arc with angle.
      * @tc.expected: The value of angle is true.
      */
-    param.startAngle = 1.0 * M_PI;    // start angle of the circle
+    param.startAngle = 1.0 * M_PI; // start angle of the circle
     param.endAngle = 3.5 * M_PI;
     sweepAngle = (param.endAngle - param.startAngle) * HALF_CIRCLE_ANGLE / M_PI;
     double results2 = FULL_CIRCLE_ANGLE + 0.5 * HALF_CIRCLE_ANGLE;
@@ -804,11 +549,11 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg016, TestSize
      * @tc.expected: The value of angle is true.
      */
     param.anticlockwise = true;
-    param.startAngle = 3.5 * M_PI;    // start angle of the circle
+    param.startAngle = 3.5 * M_PI; // start angle of the circle
     param.endAngle = 0.5 * M_PI;
     sweepAngle = (param.endAngle - param.startAngle) * HALF_CIRCLE_ANGLE / M_PI;
     paintMethod->Arc(paintWrapper, param);
-    results2 = - FULL_CIRCLE_ANGLE - HALF_CIRCLE_ANGLE;
+    results2 = -FULL_CIRCLE_ANGLE - HALF_CIRCLE_ANGLE;
     EXPECT_DOUBLE_EQ(sweepAngle, results2);
 
     /**
@@ -816,7 +561,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg016, TestSize
      * @tc.expected: The value of angle is true.
      */
     param.anticlockwise = true;
-    param.startAngle = 1.5 * M_PI;    // start angle of the circle
+    param.startAngle = 1.5 * M_PI; // start angle of the circle
     param.endAngle = 3.5 * M_PI;
     sweepAngle = (param.endAngle - param.startAngle) * HALF_CIRCLE_ANGLE / M_PI;
     paintMethod->Arc(paintWrapper, param);
@@ -846,7 +591,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg017, TestSize
      */
     OffsetF offset;
     PathArgs param;
-    param.para4 = 1.5 * M_PI;    // start angle of the circle
+    param.para4 = 1.5 * M_PI; // start angle of the circle
     param.para5 = 3.5 * M_PI;
     double sweepAngle = (param.para5 - param.para4) * HALF_CIRCLE_ANGLE / M_PI;
     paintMethod->Path2DArc(offset, param);
@@ -856,7 +601,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg017, TestSize
      * @tc.steps3: Test the function Path2DArc with angle.
      * @tc.expected: The value of angle is true.
      */
-    param.para4 = 3.5 * M_PI;    // start angle of the circle
+    param.para4 = 3.5 * M_PI; // start angle of the circle
     param.para5 = 1.3 * M_PI;
     sweepAngle = (param.para5 - param.para4) * HALF_CIRCLE_ANGLE / M_PI;
     paintMethod->Path2DArc(offset, param);
@@ -867,7 +612,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg017, TestSize
      * @tc.steps4: Test the function Path2DArc with angle.
      * @tc.expected: The value of angle is true.
      */
-    param.para4 = 1.0 * M_PI;    // start angle of the circle
+    param.para4 = 1.0 * M_PI; // start angle of the circle
     param.para5 = 3.5 * M_PI;
     sweepAngle = (param.para5 - param.para4) * HALF_CIRCLE_ANGLE / M_PI;
     paintMethod->Path2DArc(offset, param);
@@ -879,7 +624,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg017, TestSize
      * @tc.expected: The value of angle is true.
      */
     param.para6 = 1.0;
-    param.para4 = 3.5 * M_PI;    // start angle of the circle
+    param.para4 = 3.5 * M_PI; // start angle of the circle
     param.para5 = 0.5 * M_PI;
     sweepAngle = (param.para5 - param.para4) * HALF_CIRCLE_ANGLE / M_PI;
     results2 = -HALF_CIRCLE_ANGLE - FULL_CIRCLE_ANGLE;
@@ -891,12 +636,12 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg017, TestSize
      * @tc.expected: The value of angle is true.
      */
     param.para6 = 1.0;
-    param.para4 = 1.5 * M_PI;    // start angle of the circle
+    param.para4 = 1.5 * M_PI; // start angle of the circle
     param.para5 = 3.5 * M_PI;
     sweepAngle = (param.para5 - param.para4) * HALF_CIRCLE_ANGLE / M_PI;
     paintMethod->Path2DArc(offset, param);
     results = std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE;
-    EXPECT_DOUBLE_EQ(results, - FULL_CIRCLE_ANGLE);
+    EXPECT_DOUBLE_EQ(results, -FULL_CIRCLE_ANGLE);
 }
 
 /**
@@ -921,7 +666,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg018, TestSize
      */
     PaintWrapper* paintWrapper = nullptr;
     EllipseParam param;
-    param.startAngle = 1.5 * M_PI;    // start angle of the Ellipse
+    param.startAngle = 1.5 * M_PI; // start angle of the Ellipse
     param.endAngle = 3.5 * M_PI;
     double startAngle = std::fmod(param.startAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
     double endAngle = std::fmod(param.endAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
@@ -933,7 +678,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg018, TestSize
      * @tc.steps3: Test the function Ellipse with angle.
      * @tc.expected: The value of angle is true.
      */
-    param.startAngle = 3.5 * M_PI;    // start angle of the Ellipse
+    param.startAngle = 3.5 * M_PI; // start angle of the Ellipse
     param.endAngle = 1.3 * M_PI;
     startAngle = std::fmod(param.startAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
     endAngle = std::fmod(param.endAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
@@ -946,7 +691,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg018, TestSize
      * @tc.expected: The value of angle is true.
      */
     param.anticlockwise = true;
-    param.startAngle = -1.5 * M_PI;    // start angle of the Ellipse
+    param.startAngle = -1.5 * M_PI; // start angle of the Ellipse
     param.endAngle = -3.5 * M_PI;
     startAngle = std::fmod(param.startAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
     endAngle = std::fmod(param.endAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
@@ -960,7 +705,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg018, TestSize
      */
     param.anticlockwise = true;
     param.rotation = 1.0;
-    param.startAngle = -5.5 * M_PI;    // start angle of the Ellipse
+    param.startAngle = -5.5 * M_PI; // start angle of the Ellipse
     param.endAngle = -2.5 * M_PI;
     startAngle = std::fmod(param.startAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
     endAngle = std::fmod(param.endAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
@@ -973,7 +718,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg018, TestSize
      * @tc.expected: The value of angle is true.
      */
     param.anticlockwise = true;
-    param.startAngle = 1.5 * M_PI;    // start angle of the Ellipse
+    param.startAngle = 1.5 * M_PI; // start angle of the Ellipse
     param.endAngle = 1.5 * M_PI;
     startAngle = std::fmod(param.startAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
     endAngle = std::fmod(param.endAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
@@ -1004,7 +749,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg019, TestSize
      */
     OffsetF offset;
     PathArgs args;
-    args.para6 = 1.5 * M_PI;    // start angle of the Ellipse
+    args.para6 = 1.5 * M_PI; // start angle of the Ellipse
     args.para7 = 3.5 * M_PI;
     double startAngle = std::fmod(args.para6, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
     double endAngle = std::fmod(args.para7, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
@@ -1016,7 +761,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg019, TestSize
      * @tc.steps3: Test the function Path2DEllipse with angle.
      * @tc.expected: The value of angle is true.
      */
-    args.para6 = 3.5 * M_PI;    // start angle of the Ellipse
+    args.para6 = 3.5 * M_PI; // start angle of the Ellipse
     args.para7 = 1.3 * M_PI;
     startAngle = std::fmod(args.para6, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
     endAngle = std::fmod(args.para7, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
@@ -1029,7 +774,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg019, TestSize
      * @tc.expected: The value of angle is true.
      */
     args.para8 = true;
-    args.para6 = -1.5 * M_PI;    // start angle of the Ellipse
+    args.para6 = -1.5 * M_PI; // start angle of the Ellipse
     args.para7 = -3.5 * M_PI;
     startAngle = std::fmod(args.para6, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
     endAngle = std::fmod(args.para7, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
@@ -1043,7 +788,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg019, TestSize
      */
     args.para8 = true;
     args.para5 = 1.0;
-    args.para6 = -5.5 * M_PI;    // start angle of the Ellipse
+    args.para6 = -5.5 * M_PI; // start angle of the Ellipse
     args.para7 = -2.5 * M_PI;
     startAngle = std::fmod(args.para6, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
     endAngle = std::fmod(args.para7, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
@@ -1056,7 +801,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg019, TestSize
      * @tc.expected: The value of angle is true.
      */
     args.para8 = true;
-    args.para6 = 1.5 * M_PI;    // start angle of the Ellipse
+    args.para6 = 1.5 * M_PI; // start angle of the Ellipse
     args.para7 = 1.5 * M_PI;
     startAngle = std::fmod(args.para6, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
     endAngle = std::fmod(args.para7, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;

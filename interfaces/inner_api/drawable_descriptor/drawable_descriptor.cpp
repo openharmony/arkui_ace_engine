@@ -19,12 +19,10 @@
 #include <memory>
 #include <string>
 
-#include "base/utils/string_utils.h"
-
-#ifdef NEW_SKIA
-#include "include/core/SkSamplingOptions.h"
-#endif
 #include "cJSON.h"
+#include "include/core/SkSamplingOptions.h"
+
+#include "base/utils/string_utils.h"
 #ifndef PREVIEW
 #include "image_source.h"
 #endif
@@ -34,8 +32,8 @@
 // 区分此函数是在Windows环境调用还是Linux/mac环境调用
 #ifdef PREVIEW
 #ifdef WINDOWS_PLATFORM
-#include <windows.h>
 #include <direct.h>
+#include <windows.h>
 #elif defined(MAC_PLATFORM)
 #include <mach-o/dyld.h>
 #else
@@ -268,12 +266,9 @@ void LayeredDrawableDescriptor::DrawOntoCanvas(
     auto y = static_cast<float>((bitMap->height() - static_cast<float>(height)) / 2);
     auto rect1 = SkRect::MakeXYWH(x, y, static_cast<float>(width), static_cast<float>(width));
     auto rect2 = SkRect::MakeWH(static_cast<float>(width), static_cast<float>(width));
-#ifndef NEW_SKIA
-    canvas.drawImageRect(SkImage::MakeFromBitmap(*bitMap), rect1, rect2, &paint);
-#else
+
     canvas.drawImageRect(
         SkImage::MakeFromBitmap(*bitMap), rect1, rect2, SkSamplingOptions(), &paint, SkCanvas::kFast_SrcRectConstraint);
-#endif
 }
 
 bool LayeredDrawableDescriptor::CreatePixelMap()
@@ -355,14 +350,14 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 #ifdef PREVIEW
     std::string pathTmp = "";
 #ifdef WINDOWS_PLATFORM
-    char pathBuf [MAX_PATH];
+    char pathBuf[MAX_PATH];
     _getcwd(pathBuf, MAX_PATH);
     pathTmp = pathBuf;
 #elif defined(MAC_PLATFORM)
     uint32_t size = 0;
     _NSGetExecutablePath(nullptr, &size);
 
-    char pathBuf [size + 1];
+    char pathBuf[size + 1];
     if (_NSGetExecutablePath(pathBuf, &size) != 0) {
         pathBuf[0] = '\0';
         HILOG_ERROR("Failed, buffer too small!");
@@ -373,7 +368,7 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
     size_t lastPathIdx = previewFullPath.find_last_of("\\/");
     pathTmp = (lastPathIdx != std::string::npos) ? previewFullPath.substr(0, lastPathIdx) : "";
 #else
-    char pathBuf [MAX_PATH_LEN];
+    char pathBuf[MAX_PATH_LEN];
     readlink("/proc/self/exe", pathBuf, MAX_PATH_LEN);
     pathTmp = pathBuf;
 #endif

@@ -32,7 +32,6 @@ public:
     void Draw(Rosen::RSDrawingContext& context) const override
     {
 #ifndef USE_ROSEN_DRAWING
-#ifdef NEW_SKIA
         CHECK_NULL_VOID(pixelMap_);
         std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap_->GetPixelMapSharedPtr();
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
@@ -57,7 +56,6 @@ public:
             desSKRect.fBottom = context.height;
         }
         recordingCanvas->DrawPixelMapRect(mediaPixelMap, srcSKRect, desSKRect, samplingOptions, &paint);
-#endif
 #endif
     }
 

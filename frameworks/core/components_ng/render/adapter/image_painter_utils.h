@@ -19,9 +19,7 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
 #include "include/core/SkPoint.h"
-#ifdef NEW_SKIA
 #include "include/core/SkSamplingOptions.h"
-#endif
 #endif
 
 #include "core/components_ng/render/canvas_image.h"
@@ -36,16 +34,13 @@ public:
 #ifndef USE_ROSEN_DRAWING
     static std::unique_ptr<SkVector[]> ToSkRadius(const BorderRadiusArray& radiusXY);
     static void ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
-#ifndef NEW_SKIA
-    static void AddFilter(SkPaint& paint, const ImagePaintConfig& config);
-#else
+
     static void AddFilter(SkPaint& paint, SkSamplingOptions& options, const ImagePaintConfig& config);
- #endif
 #else
     static std::unique_ptr<RSPoint[]> ToRSRadius(const BorderRadiusArray& radiusXY);
     static void ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
     static void AddFilter(RSBrush& brush, RSSamplingOptions& options, const ImagePaintConfig& config);
- #endif
+#endif
 };
 } // namespace OHOS::Ace::NG
 

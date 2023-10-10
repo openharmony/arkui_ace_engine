@@ -132,12 +132,9 @@ sk_sp<SkImage> ImageDecoder::ForceResizeImage(const sk_sp<SkImage>& image, const
     SkBitmap bitmap;
     bitmap.allocPixels(info);
 
-#ifdef NEW_SKIA
     auto res = image->scalePixels(
         bitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone), SkImage::kDisallow_CachingHint);
-#else
-    auto res = image->scalePixels(bitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint);
-#endif
+
     CHECK_NULL_RETURN(res, image);
 
     bitmap.setImmutable();
