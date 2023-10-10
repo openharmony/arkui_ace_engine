@@ -495,16 +495,17 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                 }
                 auto node = weakNode.Upgrade();
                 CHECK_NULL_VOID(node);
-                bool needSetInVisible = false;
+                bool needSetInvisible = false;
                 if (isNavBar) {
-                    needSetInVisible =
+                    needSetInvisible =
                         AceType::DynamicCast<NavBarNode>(node)->GetTransitionType() == PageTransitionType::EXIT_PUSH;
                 } else {
-                    needSetInVisible = AceType::DynamicCast<NavDestinationGroupNode>(node)->GetTransitionType() ==
+                    needSetInvisible = AceType::DynamicCast<NavDestinationGroupNode>(node)->GetTransitionType() ==
                                        PageTransitionType::EXIT_PUSH;
                 }
+                navigation->SetNeedSetInvisible(needSetInvisible);
                 // for the case, the navBar form EXIT_PUSH to push during animation
-                if (needSetInVisible) {
+                if (needSetInvisible) {
                     node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 }
                 node->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -641,6 +642,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
+                navigation->SetNeedSetInvisible(false);
             },
             TaskExecutor::TaskType::UI);
     });
