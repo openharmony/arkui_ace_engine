@@ -1272,28 +1272,12 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
     // Load custom style at UI thread before frontend attach, for loading style before building tree.
     auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
                                     colorScheme = colorScheme_, resourceInfo = resourceInfo_,
-                                    context = runtimeContext_.lock()]() {
+                                    context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock()]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
         LOGD("UIContent load theme");
 
-        auto resourceAdapter = ResourceAdapter::Create();
-        bool isResourceAdapterInit = false;
-        if (context) {
-            auto sysResourceManager = context->GetResourceManager();
-            if (sysResourceManager) {
-                resourceAdapter->Init(resourceInfo, sysResourceManager);
-                isResourceAdapterInit = true;
-
-                auto bundleName = context->GetBundleName();
-                auto moduleName = context->GetHapModuleInfo()->moduleName;
-                if (!bundleName.empty() && !moduleName.empty()) {
-                    ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
-                }
-            }           
-        }
-        if (!isResourceAdapterInit) {
-            resourceAdapter->Init(resourceInfo);
-        }
+        auto resourceAdapter = ResourceAdapter::CreateV2();
+        resourceAdapter->Init(resourceInfo);
 
         ThemeConstants::InitDeviceType();
         auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
@@ -1305,6 +1289,20 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
         auto defaultBundleName = "";
         auto defaultModuleName = "";
         ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+
+        if (context) {
+            auto bundleName = context->GetBundleName();
+            auto moduleName = context->GetHapModuleInfo()->name;
+            if (!bundleName.empty() && !moduleName.empty()) {
+                ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            }
+        } else if (abilityInfo) {
+            auto bundleName = abilityInfo->bundleName;
+            auto moduleName = abilityInfo->moduleName;
+            if (!bundleName.empty() && !moduleName.empty()) {
+                ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            }
+        }
     };
 
     auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
@@ -1692,12 +1690,35 @@ void AceContainer::UpdateResource()
 {
     // Reload theme and resource
     CHECK_NULL_VOID(pipelineContext_);
-    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+
+    auto resourceAdapter = ResourceAdapter::CreateV2();
+    resourceAdapter->Init(resourceInfo_);
+
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     pipelineContext_->SetThemeManager(themeManager);
-    themeManager->InitResource(resourceInfo_);
     themeManager->SetColorScheme(colorScheme_);
     themeManager->LoadCustomTheme(assetManager_);
     themeManager->LoadResourceThemes();
+
+    ResourceManager::GetInstance().Reset();
+    auto context = runtimeContext_.lock();
+    auto abilityInfo = abilityInfo_.lock();
+    if (context) {
+        auto bundleName = context->GetBundleName();
+        auto moduleName = context->GetHapModuleInfo()->name;
+        if (!bundleName.empty() && !moduleName.empty()) {
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+        }
+    } else if (abilityInfo) {
+        auto bundleName = abilityInfo->bundleName;
+        auto moduleName = abilityInfo->moduleName;
+        if (!bundleName.empty() && !moduleName.empty()) {
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+        }
+    }
+    auto defaultBundleName = "";
+    auto defaultModuleName = "";
+    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
 
     auto cache = pipelineContext_->GetImageCache();
     if (cache) {

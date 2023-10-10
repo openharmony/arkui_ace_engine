@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_MANAGER_IMPL_H
-#define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_MANAGER_IMPL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_RESOURCE_RESOURCE_MANAGER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_RESOURCE_RESOURCE_MANAGER_H
 
 #include <functional>
 #include <map>
@@ -76,6 +76,11 @@ public:
         for (auto iter = resourceAdapters_.begin(); iter != resourceAdapters_.end(); ++iter) {
             iter->second->UpdateConfig(config);
         }
+    }
+
+    void Reset()
+    {
+        resourceAdapters_.clear();
     }
 
 private:

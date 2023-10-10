@@ -35,8 +35,6 @@ public:
     ~ResourceAdapterImplV2() override = default;
 
     void Init(const ResourceInfo& resourceInfo) override;
-    void Init(
-        const ResourceInfo& resourceInfo, std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateConfig(const ResourceConfiguration& config) override;
 
     RefPtr<ThemeStyle> GetTheme(int32_t themeId) override;
@@ -92,4 +90,4 @@ private:
 };
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
+#endif

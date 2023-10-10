@@ -122,7 +122,7 @@ DimensionUnit ParseDimensionUnit(const std::string& unit)
 
 } // namespace
 
-RefPtr<ResourceAdapter> ResourceAdapter::Create()
+RefPtr<ResourceAdapter> ResourceAdapter::CreateV2()
 {
     LOGI("Use resourceAdapter v2");
     return AceType::MakeRefPtr<ResourceAdapterImplV2>();
@@ -167,24 +167,6 @@ void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
             resConfig->GetColorMode(), resConfig->GetInputDevice());
     }
     sysResourceManager_ = newResMgr;
-    packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
-    resConfig_ = resConfig;
-}
-
-void ResourceAdapterImplV2::Init(
-    const ResourceInfo& resourceInfo, std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
-{
-    std::string resPath = resourceInfo.GetPackagePath();
-    std::string hapPath = resourceInfo.GetHapPath();
-    auto resConfig = ConvertConfigToGlobal(resourceInfo.GetResourceConfiguration());
-    sysResourceManager_ = resourceManager;
-    if (resConfig != nullptr) {
-        auto configRet = sysResourceManager_->UpdateResConfig(*resConfig);
-        LOGI("UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}f, "
-             "device=%{public}d, colorMode=%{public}d, inputDevice=%{public}d",
-            configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
-            resConfig->GetColorMode(), resConfig->GetInputDevice());
-    }
     packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
     resConfig_ = resConfig;
 }

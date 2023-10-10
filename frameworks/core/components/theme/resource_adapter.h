@@ -19,8 +19,6 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/resource_configuration.h"
 #include "core/components/theme/theme_style.h"
-
-#include "resource_manager.h"
 namespace OHOS::Ace {
 
 struct RawfileDescription {
@@ -40,10 +38,9 @@ public:
     ~ResourceAdapter() override = default;
 
     static RefPtr<ResourceAdapter> Create();
+    static RefPtr<ResourceAdapter> CreateV2();
 
     virtual void Init(const ResourceInfo& resourceInfo) {}
-
-    virtual void Init(const ResourceInfo& resourceInfo, std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) {}
 
     virtual void UpdateConfig(const ResourceConfiguration& config) {}
 
@@ -209,7 +206,8 @@ public:
         return 0;
     }
 
-    static RefPtr<ResourceAdapter> CreateNewResourceAdapter(const std::string& bundleName, const std::string& moduleName);
+    static RefPtr<ResourceAdapter> CreateNewResourceAdapter(
+        const std::string& bundleName, const std::string& moduleName);
 };
 
 } // namespace OHOS::Ace
