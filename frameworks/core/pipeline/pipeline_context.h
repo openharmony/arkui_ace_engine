@@ -472,11 +472,6 @@ public:
         return isKeyEvent_;
     }
 
-    bool IsJsPlugin() const
-    {
-        return isJsPlugin_;
-    }
-
     void RefreshRootBgColor() const override;
     void AddToHoverList(const RefPtr<RenderNode>& node);
 
