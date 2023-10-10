@@ -26,13 +26,9 @@
 #include "include/core/SkImage.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/effects/Sk1DPathEffect.h"
-#ifndef NEW_SKIA
-#include "include/effects/SkBlurImageFilter.h"
-#else
-#include "include/effects/SkImageFilters.h"
-#endif
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
+#include "include/effects/SkImageFilters.h"
 #include "include/utils/SkShadowUtils.h"
 #endif
 #include "render_service_client/core/ui/rs_node.h"
@@ -251,8 +247,7 @@ public:
         : GradientShader(gradient), firstPoint_(firstPoint), secondPoint_(secondPoint)
     {}
 #else
-    LinearGradientShader(const Gradient& gradient, const RSPoint& firstPoint,
-        const RSPoint& secondPoint)
+    LinearGradientShader(const Gradient& gradient, const RSPoint& firstPoint, const RSPoint& secondPoint)
         : GradientShader(gradient), firstPoint_(firstPoint), secondPoint_(secondPoint)
     {}
 #endif
@@ -273,17 +268,10 @@ public:
         std::vector<SkColor> colors;
         ToSkColors(pos, colors);
         SkPoint pts[2] = { firstPoint_, secondPoint_ };
-#ifdef USE_SYSTEM_SKIA
-        SkShader::TileMode tileMode = SkShader::kClamp_TileMode;
-#else
+
         SkTileMode tileMode = SkTileMode::kClamp;
-#endif
         if (isRepeat_) {
-#ifdef USE_SYSTEM_SKIA
-            tileMode = SkShader::kRepeat_TileMode;
-#else
             tileMode = SkTileMode::kRepeat;
-#endif
         }
         return SkGradientShader::MakeLinear(pts, &colors[0], &pos[0], colors.size(), tileMode);
     }
@@ -345,8 +333,7 @@ public:
         return std::make_unique<LinearGradientShader>(gradient, firstPoint, secondPoint);
     }
 #else
-    static std::unique_ptr<GradientShader> CreateLinearGradient(const Gradient& gradient,
-        const RSSize& size)
+    static std::unique_ptr<GradientShader> CreateLinearGradient(const Gradient& gradient, const RSSize& size)
     {
         auto linearGradient = gradient.GetLinearGradient();
         RSPoint firstPoint { 0.0f, 0.0f };
@@ -374,7 +361,7 @@ public:
                     firstPoint.SetY(size.Height() - secondPoint.GetY());
                 }
             } else {
-                secondPoint = {0.0f, size.Height()};
+                secondPoint = { 0.0f, size.Height() };
             }
         }
         return std::make_unique<LinearGradientShader>(gradient, firstPoint, secondPoint);
@@ -449,8 +436,7 @@ private:
         firstPoint.set(halfWidth - endX, halfHeight + endY);
     }
 #else
-    static void EndPointsFromAngle(float angle, const RSSize& size,
-        RSPoint& firstPoint, RSPoint& secondPoint)
+    static void EndPointsFromAngle(float angle, const RSSize& size, RSPoint& firstPoint, RSPoint& secondPoint)
     {
         angle = fmod(angle, 360.0f);
         if (LessNotEqual(angle, 0.0)) {
@@ -458,20 +444,20 @@ private:
         }
 
         if (NearEqual(angle, 0.0)) {
-            firstPoint = {0.0f, size.Height()};
-            secondPoint = {0.0f, 0.0f};
+            firstPoint = { 0.0f, size.Height() };
+            secondPoint = { 0.0f, 0.0f };
             return;
         } else if (NearEqual(angle, 90.0)) {
-            firstPoint = {0.0f, 0.0f};
-            secondPoint = {size.Width(), 0.0f};
+            firstPoint = { 0.0f, 0.0f };
+            secondPoint = { size.Width(), 0.0f };
             return;
         } else if (NearEqual(angle, 180.0)) {
-            firstPoint = {0.0f, 0.0f};
-            secondPoint = {0, size.Height()};
+            firstPoint = { 0.0f, 0.0f };
+            secondPoint = { 0, size.Height() };
             return;
         } else if (NearEqual(angle, 270.0)) {
-            firstPoint = {size.Width(), 0.0f};
-            secondPoint = {0.0f, 0.0f};
+            firstPoint = { size.Width(), 0.0f };
+            secondPoint = { 0.0f, 0.0f };
             return;
         }
         float slope = tan(Deg2rad(90.0f - angle));
@@ -481,13 +467,13 @@ private:
         float halfWidth = size.Width() / 2;
         RSPoint cornerPoint { 0.0f, 0.0f };
         if (angle < 90.0) {
-            cornerPoint = {halfWidth, halfHeight};
+            cornerPoint = { halfWidth, halfHeight };
         } else if (angle < 180) {
-            cornerPoint = {halfWidth, -halfHeight};
+            cornerPoint = { halfWidth, -halfHeight };
         } else if (angle < 270) {
-            cornerPoint = {-halfWidth, -halfHeight};
+            cornerPoint = { -halfWidth, -halfHeight };
         } else {
-            cornerPoint = {-halfWidth, halfHeight};
+            cornerPoint = { -halfWidth, halfHeight };
         }
 
         // Compute b (of y = kx + b) using the corner point.
@@ -495,8 +481,8 @@ private:
         float endX = b / (slope - perpendicularSlope);
         float endY = perpendicularSlope * endX + b;
 
-        secondPoint = {halfWidth + endX, halfHeight - endY};
-        firstPoint = {halfWidth - endX, halfHeight + endY};
+        secondPoint = { halfWidth + endX, halfHeight - endY };
+        firstPoint = { halfWidth - endX, halfHeight + endY };
     }
 #endif
 
@@ -525,8 +511,7 @@ private:
     }
 #else
     static RSPoint DirectionToPoint(
-        const std::optional<GradientDirection>& x, const std::optional<GradientDirection>& y,
-        const RSSize& size)
+        const std::optional<GradientDirection>& x, const std::optional<GradientDirection>& y, const RSSize& size)
     {
         RSPoint point { 0.0f, 0.0f };
         if (x) {
@@ -566,8 +551,7 @@ public:
         : GradientShader(gradient), center_(center), radius0_(radius0), radius1_(radius1), ratio_(ratio)
     {}
 #else
-    RadialGradientShader(const Gradient& gradient, const RSPoint& center,
-        float radius0, float radius1, float ratio)
+    RadialGradientShader(const Gradient& gradient, const RSPoint& center, float radius0, float radius1, float ratio)
         : GradientShader(gradient), center_(center), radius0_(radius0), radius1_(radius1), ratio_(ratio)
     {}
 #endif
@@ -590,18 +574,11 @@ public:
             AdjustRadius(startOffset, endOffset);
         }
 
-#ifdef USE_SYSTEM_SKIA
-        SkShader::TileMode tileMode = SkShader::kClamp_TileMode;
-#else
         SkTileMode tileMode = SkTileMode::kClamp;
-#endif
         if (isRepeat_) {
             ClampNegativeOffsets();
-#ifdef USE_SYSTEM_SKIA
-            tileMode = SkShader::kRepeat_TileMode;
-#else
+
             tileMode = SkTileMode::kRepeat;
-#endif
         }
         std::vector<SkScalar> pos;
         std::vector<SkColor> colors;
@@ -731,19 +708,19 @@ private:
         return center;
     }
 #else
-    static RSPoint GetCenter(const RadialGradient& radialGradient,
-        const RSSize& size, float dipScale)
+    static RSPoint GetCenter(const RadialGradient& radialGradient, const RSSize& size, float dipScale)
     {
         RSPoint center = RSPoint(size.Width() / 2.0f, size.Height() / 2.0f);
         if (radialGradient.radialCenterX) {
             const auto& value = radialGradient.radialCenterX.value();
-            center.SetX(static_cast<float>(value.Unit() == DimensionUnit::PERCENT
-                ? value.Value() / 100.0 * size.Width() : value.ConvertToPx(dipScale)));
+            center.SetX(static_cast<float>(value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0 * size.Width()
+                                                                                  : value.ConvertToPx(dipScale)));
         }
         if (radialGradient.radialCenterY) {
             const auto& value = radialGradient.radialCenterY.value();
-            center.SetY(static_cast<float>(value.Unit() ==
-                DimensionUnit::PERCENT ? value.Value() / 100.0 * size.Height() : value.ConvertToPx(dipScale)));
+            center.SetY(
+                static_cast<float>(value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0 * size.Height()
+                                                                          : value.ConvertToPx(dipScale)));
         }
         return center;
     }
@@ -769,7 +746,7 @@ private:
             RadialShapeType shape = RadialShapeType::ELLIPSE;
             if ((radialGradient.radialShape && radialGradient.radialShape.value() == RadialShapeType::CIRCLE) ||
                 (!radialGradient.radialShape && !radialGradient.radialSizeType && radialGradient.radialHorizontalSize &&
-                !radialGradient.radialVerticalSize)) {
+                    !radialGradient.radialVerticalSize)) {
                 shape = RadialShapeType::CIRCLE;
             }
             auto sizeType =
@@ -794,8 +771,8 @@ private:
         return circleSize;
     }
 #else
-    static RSSize GetCircleSize(const RadialGradient& radialGradient, const RSSize& size,
-        const RSPoint& center, float dipScale)
+    static RSSize GetCircleSize(
+        const RadialGradient& radialGradient, const RSSize& size, const RSPoint& center, float dipScale)
     {
         RSSize circleSize { 0.0f, 0.0f };
         if (radialGradient.radialHorizontalSize) {
@@ -807,14 +784,14 @@ private:
             if (radialGradient.radialVerticalSize) {
                 const auto& wValue = radialGradient.radialVerticalSize.value();
                 value = static_cast<float>(wValue.Unit() == DimensionUnit::PERCENT ? wValue.Value() * size.Height()
-                    : wValue.ConvertToPx(dipScale));
+                                                                                   : wValue.ConvertToPx(dipScale));
                 circleSize.SetHeight(value);
             }
         } else {
             RadialShapeType shape = RadialShapeType::ELLIPSE;
             if ((radialGradient.radialShape && radialGradient.radialShape.value() == RadialShapeType::CIRCLE) ||
                 (!radialGradient.radialShape && !radialGradient.radialSizeType && radialGradient.radialHorizontalSize &&
-                !radialGradient.radialVerticalSize)) {
+                    !radialGradient.radialVerticalSize)) {
                 shape = RadialShapeType::CIRCLE;
             }
             auto sizeType =
@@ -860,8 +837,8 @@ private:
         return SkSize::Make(dx, dy);
     }
 #else
-    static RSSize RadiusToSide(const RSPoint& center,
-        const RSSize& size, RadialShapeType type, const CompareType& compare)
+    static RSSize RadiusToSide(
+        const RSPoint& center, const RSSize& size, RadialShapeType type, const CompareType& compare)
     {
         auto dx1 = static_cast<float>(std::fabs(center.GetX()));
         auto dy1 = static_cast<float>(std::fabs(center.GetY()));
@@ -934,8 +911,8 @@ private:
             NearZero(sideRadius.height()) ? 1.0f : sideRadius.width() / sideRadius.height());
     }
 #else
-    static RSSize RadiusToCorner(const RSPoint& center,
-        const RSSize& size, RadialShapeType type, const CompareType& compare)
+    static RSSize RadiusToCorner(
+        const RSPoint& center, const RSSize& size, RadialShapeType type, const CompareType& compare)
     {
         const RSPoint corners[4] = {
             RSPoint(0.0f, 0.0f),
@@ -985,8 +962,8 @@ public:
         : GradientShader(gradient), center_(center), startAngle_(startAngle), endAngle_(endAngle), rotation_(rotation)
     {}
 #else
-    SweepGradientShader(const Gradient& gradient, const RSPoint& center,
-        float startAngle, float endAngle, float rotation)
+    SweepGradientShader(
+        const Gradient& gradient, const RSPoint& center, float startAngle, float endAngle, float rotation)
         : GradientShader(gradient), center_(center), startAngle_(startAngle), endAngle_(endAngle), rotation_(rotation)
     {}
 #endif
@@ -1011,17 +988,10 @@ public:
         std::vector<SkScalar> pos;
         std::vector<SkColor> colors;
         ToSkColors(pos, colors);
-#ifdef USE_SYSTEM_SKIA
-        SkShader::TileMode tileMode = SkShader::kClamp_TileMode;
-#else
+
         SkTileMode tileMode = SkTileMode::kClamp;
-#endif
         if (isRepeat_) {
-#ifdef USE_SYSTEM_SKIA
-            tileMode = SkShader::kRepeat_TileMode;
-#else
             tileMode = SkTileMode::kRepeat;
-#endif
         }
         return SkGradientShader::MakeSweep(
             center_.fX, center_.fY, &colors[0], &pos[0], colors.size(), tileMode, startAngle_, endAngle_, 0, &matrix);
@@ -1106,20 +1076,21 @@ private:
         return center;
     }
 #else
-    static RSPoint GetCenter(const SweepGradient& sweepGradient,
-        const RSSize& size, float dipScale)
+    static RSPoint GetCenter(const SweepGradient& sweepGradient, const RSSize& size, float dipScale)
     {
         RSPoint center = RSPoint(size.Width() / 2.0f, size.Height() / 2.0f);
 
         if (sweepGradient.centerX) {
             const auto& value = sweepGradient.centerX.value();
-            center.SetX(static_cast<float>(value.Unit() == DimensionUnit::PERCENT
-                ? value.Value() / 100.0f * size.Width() : value.ConvertToPx(dipScale)));
+            center.SetX(
+                static_cast<float>(value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0f * size.Width()
+                                                                          : value.ConvertToPx(dipScale)));
         }
         if (sweepGradient.centerY) {
             const auto& value = sweepGradient.centerY.value();
-            center.SetY(static_cast<float>(value.Unit() == DimensionUnit::PERCENT
-                ? value.Value() / 100.0f * size.Height() : value.ConvertToPx(dipScale)));
+            center.SetY(
+                static_cast<float>(value.Unit() == DimensionUnit::PERCENT ? value.Value() / 100.0f * size.Height()
+                                                                          : value.ConvertToPx(dipScale)));
         }
         return center;
     }
@@ -1153,8 +1124,7 @@ RosenDecorationPainter::RosenDecorationPainter(
 #ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context)
 #else
-void RosenDecorationPainter::PaintDecoration(const Offset& offset, RSCanvas* canvas,
-    RenderContext& context)
+void RosenDecorationPainter::PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context)
 #endif
 {
     auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
@@ -1186,12 +1156,9 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, RSCanvas* can
         PaintColorAndImage(offset, canvas, brush, context);
 #endif
         if (border.HasRadius()) {
-            cornerRadius.SetValues(
-                NormalizeToPx(border.TopLeftRadius().GetX()),
-                NormalizeToPx(border.TopRightRadius().GetX()),
-                NormalizeToPx(border.BottomRightRadius().GetX()),
-                NormalizeToPx(border.BottomLeftRadius().GetX())
-            );
+            cornerRadius.SetValues(NormalizeToPx(border.TopLeftRadius().GetX()),
+                NormalizeToPx(border.TopRightRadius().GetX()), NormalizeToPx(border.BottomRightRadius().GetX()),
+                NormalizeToPx(border.BottomLeftRadius().GetX()));
         }
         if (border.HasValue()) {
             borderFour = border;
@@ -1232,18 +1199,13 @@ void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& dec
             return;
         }
         canvas->save();
-#ifndef NEW_SKIA
-        SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize.Width()),
-            SkDoubleToMScalar(paintSize.Height()));
-#else
-        SkSize skPaintSize = SkSize::Make(paintSize.Width(),
-            paintSize.Height());
-#endif
+
+        SkSize skPaintSize = SkSize::Make(paintSize.Width(), paintSize.Height());
         auto shader = CreateGradientShader(gradient, skPaintSize, dipScale);
         paint.setShader(std::move(shader));
 
-        auto imageInfo = SkImageInfo::Make(paintSize.Width(), paintSize.Height(),
-            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+        auto imageInfo = SkImageInfo::Make(paintSize.Width(), paintSize.Height(), SkColorType::kRGBA_8888_SkColorType,
+            SkAlphaType::kOpaque_SkAlphaType);
         SkBitmap skBitmap;
         skBitmap.allocPixels(imageInfo);
         std::unique_ptr<SkCanvas> skCanvas = std::make_unique<SkCanvas>(skBitmap);
@@ -1259,8 +1221,7 @@ void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& dec
 }
 #else
 void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize,
-    const Offset& position, RSCanvas* canvas, const std::shared_ptr<RSImage>& image,
-    double dipScale)
+    const Offset& position, RSCanvas* canvas, const std::shared_ptr<RSImage>& image, double dipScale)
 {
     if (!decoration->GetHasBorderImageSource() && !decoration->GetHasBorderImageGradient()) {
         return;
@@ -1352,8 +1313,8 @@ void RosenDecorationPainter::PaintDecoration(
     }
 }
 #else
-void RosenDecorationPainter::PaintDecoration(const Offset& offset, RSCanvas* canvas,
-    RenderContext& context, const std::shared_ptr<RSImage>& image)
+void RosenDecorationPainter::PaintDecoration(
+    const Offset& offset, RSCanvas* canvas, RenderContext& context, const std::shared_ptr<RSImage>& image)
 {
     auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
     if (!canvas || !rsNode) {
@@ -1420,20 +1381,16 @@ void RosenDecorationPainter::PaintGrayScale(
             matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
             matrix[2] = matrix[7] = matrix[12] = 0.0722f * scale;
             matrix[18] = 1.0f * scale;
-#ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
-#else
+
             paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 #else
-void RosenDecorationPainter::PaintGrayScale(const RSRoundRect& outerRRect, RSCanvas* canvas,
-    const Dimension& grayscale, const Color& color)
+void RosenDecorationPainter::PaintGrayScale(
+    const RSRoundRect& outerRRect, RSCanvas* canvas, const Dimension& grayscale, const Color& color)
 {
     double scale = grayscale.Value();
     if (GreatNotEqual(scale, 0.0)) {
@@ -1481,19 +1438,15 @@ void RosenDecorationPainter::PaintBrightness(
         bright = bright - 1;
         matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
         matrix[4] = matrix[9] = matrix[14] = bright;
-#ifdef USE_SYSTEM_SKIA
-        auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-        paint.setColorFilter(filter);
-#else
+
         paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
         SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
         canvas->saveLayer(slr);
     }
 }
 #else
-void RosenDecorationPainter::PaintBrightness(const RSRoundRect& outerRRect,
-    RSCanvas* canvas, const Dimension& brightness, const Color& color)
+void RosenDecorationPainter::PaintBrightness(
+    const RSRoundRect& outerRRect, RSCanvas* canvas, const Dimension& brightness, const Color& color)
 {
     double bright = brightness.Value();
     // brightness range = (0, 2)
@@ -1513,8 +1466,7 @@ void RosenDecorationPainter::PaintBrightness(const RSRoundRect& outerRRect,
         matrix[4] = matrix[9] = matrix[14] = bright;
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(matrix);
-        std::shared_ptr<RSColorFilter> colorFilter =
-            RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+        std::shared_ptr<RSColorFilter> colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix);
         RSFilter filter;
         filter.SetColorFilter(colorFilter);
         RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::INIT_WITH_PREVIOUS);
@@ -1541,19 +1493,15 @@ void RosenDecorationPainter::PaintContrast(
         matrix[0] = matrix[6] = matrix[12] = contrasts;
         matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts) / 255;
         matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-        auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-        paint.setColorFilter(filter);
-#else
+
         paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
         SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
         canvas->saveLayer(slr);
     }
 }
 #else
-void RosenDecorationPainter::PaintContrast(const RSRoundRect& outerRRect, RSCanvas* canvas,
-    const Dimension& contrast, const Color& color)
+void RosenDecorationPainter::PaintContrast(
+    const RSRoundRect& outerRRect, RSCanvas* canvas, const Dimension& contrast, const Color& color)
 {
     double contrasts = contrast.Value();
     // skip painting if contrast is normal
@@ -1571,8 +1519,7 @@ void RosenDecorationPainter::PaintContrast(const RSRoundRect& outerRRect, RSCanv
         matrix[18] = 1.0f;
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(matrix);
-        std::shared_ptr<RSColorFilter> colorFilter =
-            RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+        std::shared_ptr<RSColorFilter> colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix);
         RSFilter filter;
         filter.SetColorFilter(colorFilter);
         brush.SetFilter(filter);
@@ -1592,31 +1539,25 @@ void RosenDecorationPainter::PaintColorBlend(
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
-            paint.setColorFilter(SkColorFilter::MakeModeFilter(
-                SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
-                SkBlendMode::kPlus));
-#else
+
             paint.setColorFilter(SkColorFilters::Blend(
                 SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
                 SkBlendMode::kPlus));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 #else
-void RosenDecorationPainter::PaintColorBlend(const RSRoundRect& outerRRect,
-    RSCanvas* canvas, const Color& colorBlend, const Color& color)
+void RosenDecorationPainter::PaintColorBlend(
+    const RSRoundRect& outerRRect, RSCanvas* canvas, const Color& colorBlend, const Color& color)
 {
     if (colorBlend.GetValue() != COLOR_MASK) {
         if (canvas) {
             RSAutoCanvasRestore acr(*canvas, true);
             canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
             std::shared_ptr<RSColorFilter> colorFilter =
-                RSColorFilter::CreateBlendModeColorFilter(
-                    colorBlend.GetValue(), RSBlendMode::PLUS);
+                RSColorFilter::CreateBlendModeColorFilter(colorBlend.GetValue(), RSBlendMode::PLUS);
             RSFilter filter;
             filter.SetColorFilter(colorFilter);
 
@@ -1649,20 +1590,16 @@ void RosenDecorationPainter::PaintSaturate(
             matrix[6] = 0.6094f * (1 - saturates) + saturates;
             matrix[12] = 0.0820f * (1 - saturates) + saturates;
             matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
-#else
+
             paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 #else
-void RosenDecorationPainter::PaintSaturate(const RSRoundRect& outerRRect,
-    RSCanvas* canvas, const Dimension& saturate, const Color& color)
+void RosenDecorationPainter::PaintSaturate(
+    const RSRoundRect& outerRRect, RSCanvas* canvas, const Dimension& saturate, const Color& color)
 {
     double saturates = saturate.Value();
     if (!NearEqual(saturates, 1.0) && GreatOrEqual(saturates, 0.0)) {
@@ -1681,8 +1618,7 @@ void RosenDecorationPainter::PaintSaturate(const RSRoundRect& outerRRect,
             matrix[18] = 1.0f;
             RSColorMatrix colorMatrix;
             colorMatrix.SetArray(matrix);
-            std::shared_ptr<RSColorFilter> colorFilter =
-                RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+            std::shared_ptr<RSColorFilter> colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix);
             RSFilter filter;
             filter.SetColorFilter(colorFilter);
             brush.SetFilter(filter);
@@ -1720,20 +1656,16 @@ void RosenDecorationPainter::PaintSepia(
             matrix[11] = 0.534f * sepias;
             matrix[12] = 0.131f * sepias;
             matrix[18] = 1.0f * sepias;
-#ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
-#else
+
             paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 #else
-void RosenDecorationPainter::PaintSepia(const RSRoundRect& outerRRect,
-    RSCanvas* canvas, const Dimension& sepia, const Color& color)
+void RosenDecorationPainter::PaintSepia(
+    const RSRoundRect& outerRRect, RSCanvas* canvas, const Dimension& sepia, const Color& color)
 {
     double sepias = sepia.Value();
     if (sepias > 1.0) {
@@ -1760,8 +1692,7 @@ void RosenDecorationPainter::PaintSepia(const RSRoundRect& outerRRect,
             matrix[18] = 1.0f * sepias;
             RSColorMatrix colorMatrix;
             colorMatrix.SetArray(matrix);
-            std::shared_ptr<RSColorFilter> colorFilter =
-                RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+            std::shared_ptr<RSColorFilter> colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix);
             RSFilter filter;
             filter.SetColorFilter(colorFilter);
 
@@ -1794,21 +1725,16 @@ void RosenDecorationPainter::PaintInvert(
             matrix[18] = 1.0f;
             // inverts = 0.5 -> RGB = (0.5, 0.5, 0.5) -> image completely gray
             matrix[4] = matrix[9] = matrix[14] = inverts;
-#ifdef USE_SYSTEM_SKIA
-            LOGD("start set invert: %f", inverts);
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
-#else
+
             paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 #else
-void RosenDecorationPainter::PaintInvert(const RSRoundRect& outerRRect,
-    RSCanvas* canvas, const Dimension& invert, const Color& color)
+void RosenDecorationPainter::PaintInvert(
+    const RSRoundRect& outerRRect, RSCanvas* canvas, const Dimension& invert, const Color& color)
 {
     double inverts = invert.Value();
     if (GreatNotEqual(inverts, 0.0)) {
@@ -1829,8 +1755,7 @@ void RosenDecorationPainter::PaintInvert(const RSRoundRect& outerRRect,
             matrix[4] = matrix[9] = matrix[14] = 1.0f;
             RSColorMatrix colorMatrix;
             colorMatrix.SetArray(matrix);
-            std::shared_ptr<RSColorFilter> colorFilter =
-                RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+            std::shared_ptr<RSColorFilter> colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix);
             RSFilter filter;
             filter.SetColorFilter(colorFilter);
 
@@ -1881,20 +1806,16 @@ void RosenDecorationPainter::PaintHueRotate(
                 default:
                     break;
             }
-#ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
-#else
+
             paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 #else
-void RosenDecorationPainter::PaintHueRotate(const RSRoundRect& outerRRect,
-    RSCanvas* canvas, const float& hueRotate, const Color& color)
+void RosenDecorationPainter::PaintHueRotate(
+    const RSRoundRect& outerRRect, RSCanvas* canvas, const float& hueRotate, const Color& color)
 {
     float hueRotates = hueRotate;
     if (GreatNotEqual(hueRotates, 0.0)) {
@@ -1933,8 +1854,7 @@ void RosenDecorationPainter::PaintHueRotate(const RSRoundRect& outerRRect,
             }
             RSColorMatrix colorMatrix;
             colorMatrix.SetArray(matrix);
-            std::shared_ptr<RSColorFilter> colorFilter =
-                RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+            std::shared_ptr<RSColorFilter> colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix);
             RSFilter filter;
             filter.SetColorFilter(colorFilter);
 
@@ -1965,18 +1885,14 @@ void RosenDecorationPainter::PaintBorder(std::shared_ptr<RSNode>& rsNode, Border
         return;
     }
     AdjustBorderStyle(border);
-    rsNode->SetBorderColor(border.Left().GetColor().GetValue(),
-                           border.Top().GetColor().GetValue(),
-                           border.Right().GetColor().GetValue(),
-                           border.Bottom().GetColor().GetValue());
+    rsNode->SetBorderColor(border.Left().GetColor().GetValue(), border.Top().GetColor().GetValue(),
+        border.Right().GetColor().GetValue(), border.Bottom().GetColor().GetValue());
     rsNode->SetBorderWidth(border.Left().GetWidth().ConvertToPx(dipScale),
-                           border.Top().GetWidth().ConvertToPx(dipScale),
-                           border.Right().GetWidth().ConvertToPx(dipScale),
-                           border.Bottom().GetWidth().ConvertToPx(dipScale));
+        border.Top().GetWidth().ConvertToPx(dipScale), border.Right().GetWidth().ConvertToPx(dipScale),
+        border.Bottom().GetWidth().ConvertToPx(dipScale));
     rsNode->SetBorderStyle(static_cast<uint32_t>(border.Left().GetBorderStyle()),
-                           static_cast<uint32_t>(border.Top().GetBorderStyle()),
-                           static_cast<uint32_t>(border.Right().GetBorderStyle()),
-                           static_cast<uint32_t>(border.Bottom().GetBorderStyle()));
+        static_cast<uint32_t>(border.Top().GetBorderStyle()), static_cast<uint32_t>(border.Right().GetBorderStyle()),
+        static_cast<uint32_t>(border.Bottom().GetBorderStyle()));
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -2002,8 +1918,7 @@ RSRoundRect RosenDecorationPainter::GetBoxOuterRRect(const Offset& offset)
         outerRRect = GetBoxRRect(offset + margin_.GetOffsetInPx(scale_), border, 0.0, true);
     } else {
         Rect paintSize = paintRect_ + offset;
-        outerRRect.SetRect(
-            RSRect(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom()));
+        outerRRect.SetRect(RSRect(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom()));
     }
     return outerRRect;
 }
@@ -2013,8 +1928,8 @@ RSRoundRect RosenDecorationPainter::GetBoxOuterRRect(const Offset& offset)
 void RosenDecorationPainter::PaintColorAndImage(
     const Offset& offset, SkCanvas* canvas, SkPaint& paint, RenderContext& renderContext)
 #else
-void RosenDecorationPainter::PaintColorAndImage(const Offset& offset, RSCanvas* canvas,
-    RSBrush& brush, RenderContext& renderContext)
+void RosenDecorationPainter::PaintColorAndImage(
+    const Offset& offset, RSCanvas* canvas, RSBrush& brush, RenderContext& renderContext)
 #endif
 {
     auto rsNode = static_cast<RosenRenderContext*>(&renderContext)->GetRSNode();
@@ -2102,8 +2017,8 @@ RSRoundRect RosenDecorationPainter::GetOuterRRect(const Offset& offset, const Bo
     float bottomRightRadiusY = NormalizeToPx(border.BottomRightRadius().GetY());
     float bottomLeftRadiusX = NormalizeToPx(border.BottomLeftRadius().GetX());
     float bottomLeftRadiusY = NormalizeToPx(border.BottomLeftRadius().GetY());
-    RSRect outerRect = RSRect(offset.GetX(), offset.GetY(),
-        paintSize_.Width() + offset.GetX(), paintSize_.Height() + offset.GetY());
+    RSRect outerRect =
+        RSRect(offset.GetX(), offset.GetY(), paintSize_.Width() + offset.GetX(), paintSize_.Height() + offset.GetY());
     std::vector<RSPoint> outerRadii;
     outerRadii.push_back(RSPoint(topLeftRadiusX, topLeftRadiusY));
     outerRadii.push_back(RSPoint(topRightRadiusX, topRightRadiusY));
@@ -2369,39 +2284,38 @@ RSRoundRect RosenDecorationPainter::GetBoxRRect(
             static_cast<RSScalar>(paintSize_.Width() - shrinkFactor * borderWidth + offset.GetX()),
             static_cast<RSScalar>(paintSize_.Height() - shrinkFactor * borderWidth + offset.GetY()));
         if (isRound) {
-            fRadii.push_back(RSPoint(
-                static_cast<RSScalar>(
-                    std::max(NormalizeToPx(border.TopLeftRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
-                static_cast<RSScalar>(
-                    std::max(NormalizeToPx(border.TopLeftRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
-            fRadii.push_back(RSPoint(
-                static_cast<RSScalar>(
-                    std::max(NormalizeToPx(border.TopRightRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
-                static_cast<RSScalar>(
-                    std::max(NormalizeToPx(border.TopRightRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
-            fRadii.push_back(RSPoint(
-                static_cast<RSScalar>(
-                    std::max(NormalizeToPx(border.BottomRightRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
-                static_cast<RSScalar>(
-                    std::max(NormalizeToPx(border.BottomRightRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
-            fRadii.push_back(RSPoint(
-                static_cast<RSScalar>(
-                    std::max(NormalizeToPx(border.BottomLeftRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
-                static_cast<RSScalar>(
-                    std::max(NormalizeToPx(border.BottomLeftRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
+            fRadii.push_back(
+                RSPoint(static_cast<RSScalar>(
+                            std::max(NormalizeToPx(border.TopLeftRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
+                    static_cast<RSScalar>(
+                        std::max(NormalizeToPx(border.TopLeftRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
+            fRadii.push_back(
+                RSPoint(static_cast<RSScalar>(
+                            std::max(NormalizeToPx(border.TopRightRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
+                    static_cast<RSScalar>(
+                        std::max(NormalizeToPx(border.TopRightRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
+            fRadii.push_back(
+                RSPoint(static_cast<RSScalar>(std::max(
+                            NormalizeToPx(border.BottomRightRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
+                    static_cast<RSScalar>(
+                        std::max(NormalizeToPx(border.BottomRightRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
+            fRadii.push_back(
+                RSPoint(static_cast<RSScalar>(std::max(
+                            NormalizeToPx(border.BottomLeftRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
+                    static_cast<RSScalar>(
+                        std::max(NormalizeToPx(border.BottomLeftRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
         }
         rrect = RSRoundRect(rect, fRadii);
     } else {
-        rect = RSRect(
-            static_cast<RSScalar>(offset.GetX() + shrinkFactor * NormalizeToPx(border.Left().GetWidth())),
+        rect = RSRect(static_cast<RSScalar>(offset.GetX() + shrinkFactor * NormalizeToPx(border.Left().GetWidth())),
             static_cast<RSScalar>(offset.GetY() + shrinkFactor * NormalizeToPx(border.Top().GetWidth())),
+            static_cast<RSScalar>(paintSize_.Width() -
+                                  shrinkFactor * DOUBLE_WIDTH * NormalizeToPx(border.Right().GetWidth()) +
+                                  offset.GetX() + shrinkFactor * NormalizeToPx(border.Left().GetWidth())),
             static_cast<RSScalar>(
-                paintSize_.Width() - shrinkFactor * DOUBLE_WIDTH * NormalizeToPx(border.Right().GetWidth())
-                + offset.GetX() + shrinkFactor * NormalizeToPx(border.Left().GetWidth())),
-            static_cast<RSScalar>(
-                paintSize_.Height()
-                - shrinkFactor * (NormalizeToPx(border.Bottom().GetWidth()) + NormalizeToPx(border.Top().GetWidth()))
-                + offset.GetY() + shrinkFactor * NormalizeToPx(border.Top().GetWidth())));
+                paintSize_.Height() -
+                shrinkFactor * (NormalizeToPx(border.Bottom().GetWidth()) + NormalizeToPx(border.Top().GetWidth())) +
+                offset.GetY() + shrinkFactor * NormalizeToPx(border.Top().GetWidth())));
         rrect.SetRect(rect);
     }
     return rrect;
@@ -2439,8 +2353,8 @@ void RosenDecorationPainter::SetBorderStyle(
                     delLen = (DASHED_LINE_LENGTH + 1 - leftLen) * width /
                              static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1) + DEL_NUM);
                 } else {
-                    addLen = leftLen * width /
-                             static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1));
+                    addLen =
+                        leftLen * width / static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1));
                 }
             }
             const float intervals[] = { width * DASHED_LINE_LENGTH - delLen, width + addLen };
@@ -2451,8 +2365,8 @@ void RosenDecorationPainter::SetBorderStyle(
     }
 }
 #else
-void RosenDecorationPainter::SetBorderStyle(const BorderEdge& borderEdge,
-    RSPen& pen, bool useDefaultColor, double spaceBetweenDot, double borderLength)
+void RosenDecorationPainter::SetBorderStyle(
+    const BorderEdge& borderEdge, RSPen& pen, bool useDefaultColor, double spaceBetweenDot, double borderLength)
 {
     if (borderEdge.HasValue()) {
         double width = NormalizeToPx(borderEdge.GetWidth());
@@ -2465,8 +2379,8 @@ void RosenDecorationPainter::SetBorderStyle(const BorderEdge& borderEdge,
                 spaceBetweenDot = width * 2.0;
             }
             dotPath.AddCircle(0.0f, 0.0f, static_cast<RSScalar>(width / 2.0));
-            pen.SetPathEffect(RSPathEffect::CreatePathDashEffect(
-                dotPath, spaceBetweenDot, 0.0, RSPathDashStyle::ROTATE));
+            pen.SetPathEffect(
+                RSPathEffect::CreatePathDashEffect(dotPath, spaceBetweenDot, 0.0, RSPathDashStyle::ROTATE));
         } else if (borderEdge.GetBorderStyle() == BorderStyle::DASHED) {
             double addLen = 0.0; // When left < 2 * gap, splits left to gaps.
             double delLen = 0.0; // When left > 2 * gap, add one dash and shortening them.
@@ -2480,14 +2394,12 @@ void RosenDecorationPainter::SetBorderStyle(const BorderEdge& borderEdge,
                     delLen = (DASHED_LINE_LENGTH + 1 - leftLen) * width /
                              static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1) + DEL_NUM);
                 } else {
-                    addLen = leftLen * width /
-                             static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1));
+                    addLen =
+                        leftLen * width / static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1));
                 }
             }
             const RSScalar intervals[] = { width * DASHED_LINE_LENGTH - delLen, width + addLen };
-            pen.SetPathEffect(
-                RSPathEffect::CreateDashPathEffect(
-                    intervals, sizeof(intervals)/sizeof(RSScalar), 0.0));
+            pen.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, sizeof(intervals) / sizeof(RSScalar), 0.0));
         } else {
             pen.SetPathEffect(nullptr);
         }
@@ -2498,8 +2410,7 @@ void RosenDecorationPainter::SetBorderStyle(const BorderEdge& borderEdge,
 #ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint)
 #else
-void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& border,
-    RSCanvas* canvas, RSPen& pen)
+void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& border, RSCanvas* canvas, RSPen& pen)
 #endif
 {
     float offsetX = offset.GetX();
@@ -2589,8 +2500,7 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
         rightBorder.arcTo(rectStart, RIGHT_START, SWEEP_ANGLE, false);
         rightBorder.arcTo(rectEnd, RIGHT_END, SWEEP_ANGLE + 0.5f, false);
         if (NearZero(brX) && !NearZero(bottomW)) {
-            rightBorder.lineTo(offsetX + width - rightW / 2.0f,
-                               offsetY + height);
+            rightBorder.lineTo(offsetX + width - rightW / 2.0f, offsetY + height);
             SkPath rightClipPath;
             rightClipPath.moveTo(offsetX + width + rightW, offsetY + height + bottomW);
             rightClipPath.lineTo(offsetX + width - rightW * EXTEND, offsetY + height - bottomW * EXTEND);
@@ -2616,8 +2526,7 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
             canvas->save();
         }
         if (NearZero(brX) && !NearZero(rightW)) {
-            bottomBorder.moveTo(offsetX + width,
-                                offsetY + height - bottomW / 2.0f);
+            bottomBorder.moveTo(offsetX + width, offsetY + height - bottomW / 2.0f);
             bottomBorder.lineTo(x + w - brX * 2.0f, y + h - brY * 2.0f);
             SkPath bottomClipPath;
             bottomClipPath.moveTo(offsetX + width + rightW, offsetY + height + bottomW);
@@ -2746,8 +2655,7 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
         }
         LOGE("Drawing is not supported");
         if (NearZero(brX) && !NearZero(bottomW)) {
-            rightBorder.LineTo(offsetX + width - rightW / 2.0f,
-                               offsetY + height);
+            rightBorder.LineTo(offsetX + width - rightW / 2.0f, offsetY + height);
             RSRecordingPath rightClipPath;
             rightClipPath.MoveTo(offsetX + width + rightW, offsetY + height + bottomW);
             rightClipPath.LineTo(offsetX + width - rightW * EXTEND, offsetY + height - bottomW * EXTEND);
@@ -2775,8 +2683,7 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
             canvas->Save();
         }
         if (NearZero(brX) && !NearZero(rightW)) {
-            bottomBorder.MoveTo(offsetX + width,
-                                offsetY + height - bottomW / 2.0f);
+            bottomBorder.MoveTo(offsetX + width, offsetY + height - bottomW / 2.0f);
             bottomBorder.LineTo(x + w - brX * 2.0f, y + h - brY * 2.0f);
             RSRecordingPath bottomClipPath;
             bottomClipPath.MoveTo(offsetX + width + rightW, offsetY + height + bottomW);
@@ -2877,11 +2784,9 @@ void RosenDecorationPainter::PaintBorderWithLine(
 #else
         SetBorderStyle(left, pen, false, borderLength / rawNumber, borderLength);
         canvas->AttachPen(pen);
-        canvas->DrawLine(
-            RSPoint(offset.GetX() + FLOAT_HALF * NormalizeToPx(left.GetWidth()),
-                offset.GetY() + addLen * NormalizeToPx(left.GetWidth())),
-            RSPoint(offset.GetX() + FLOAT_HALF * NormalizeToPx(left.GetWidth()),
-                offset.GetY() + paintSize_.Height()));
+        canvas->DrawLine(RSPoint(offset.GetX() + FLOAT_HALF * NormalizeToPx(left.GetWidth()),
+                             offset.GetY() + addLen * NormalizeToPx(left.GetWidth())),
+            RSPoint(offset.GetX() + FLOAT_HALF * NormalizeToPx(left.GetWidth()), offset.GetY() + paintSize_.Height()));
         canvas->DetachPen();
 #endif
     }
@@ -2908,9 +2813,8 @@ void RosenDecorationPainter::PaintBorderWithLine(
 #else
         SetBorderStyle(bottom, pen, false, borderLength / rawNumber, borderLength);
         canvas->AttachPen(pen);
-        canvas->DrawLine(
-            RSPoint(offset.GetX() + addLen * NormalizeToPx(bottom.GetWidth()),
-                offset.GetY() + paintSize_.Height() - FLOAT_HALF * NormalizeToPx(bottom.GetWidth())),
+        canvas->DrawLine(RSPoint(offset.GetX() + addLen * NormalizeToPx(bottom.GetWidth()),
+                             offset.GetY() + paintSize_.Height() - FLOAT_HALF * NormalizeToPx(bottom.GetWidth())),
             RSPoint(offset.GetX() + paintSize_.Width(),
                 offset.GetY() + paintSize_.Height() - FLOAT_HALF * NormalizeToPx(bottom.GetWidth())));
         canvas->DetachPen();
@@ -2938,7 +2842,7 @@ void RosenDecorationPainter::PaintBorderWithLine(
         SetBorderStyle(right, pen, false, borderLength / rawNumber, borderLength);
         canvas->AttachPen(pen);
         canvas->DrawLine(RSPoint(offset.GetX() + paintSize_.Width() - FLOAT_HALF * NormalizeToPx(right.GetWidth()),
-            offset.GetY() + paintSize_.Height() - addLen * NormalizeToPx(right.GetWidth())),
+                             offset.GetY() + paintSize_.Height() - addLen * NormalizeToPx(right.GetWidth())),
             RSPoint(offset.GetX() + paintSize_.Width() - FLOAT_HALF * NormalizeToPx(right.GetWidth()), offset.GetY()));
         canvas->DetachPen();
 #endif
@@ -2965,7 +2869,7 @@ void RosenDecorationPainter::PaintBorderWithLine(
         SetBorderStyle(top, pen, false, borderLength / rawNumber, borderLength);
         canvas->AttachPen(pen);
         canvas->DrawLine(RSPoint(offset.GetX() + addLen * NormalizeToPx(top.GetWidth()),
-            offset.GetY() + FLOAT_HALF * NormalizeToPx(top.GetWidth())),
+                             offset.GetY() + FLOAT_HALF * NormalizeToPx(top.GetWidth())),
             RSPoint(offset.GetX() + paintSize_.Width(), offset.GetY() + FLOAT_HALF * NormalizeToPx(top.GetWidth())));
         canvas->DetachPen();
 #endif
@@ -2973,8 +2877,7 @@ void RosenDecorationPainter::PaintBorderWithLine(
 }
 
 // Add for box-shadow, otherwise using PaintShadow().
-void RosenDecorationPainter::PaintBoxShadows(
-    const std::vector<Shadow>& shadows, const std::shared_ptr<RSNode>& rsNode)
+void RosenDecorationPainter::PaintBoxShadows(const std::vector<Shadow>& shadows, const std::shared_ptr<RSNode>& rsNode)
 {
     if (!rsNode) {
         LOGE("PaintBoxShadows failed, rsNode is null.");
@@ -3075,8 +2978,7 @@ void RosenDecorationPainter::PaintShadow(
     canvas->restore();
 }
 #else
-void RosenDecorationPainter::PaintShadow(const RSPath& path,
-    const Shadow& shadow, RSCanvas* canvas)
+void RosenDecorationPainter::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas)
 {
     if (!canvas) {
         LOGE("PaintShadow failed, canvas is null.");
@@ -3099,14 +3001,13 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path,
         // of the component.
         auto tmpPath = drPath.GetCmdList()->Playback();
         auto drRect = tmpPath->GetBounds();
-        RSPoint3 lightPos = RSPoint3(
-            drRect.GetLeft() * FLOAT_HALF + drRect.GetRight() * FLOAT_HALF,
+        RSPoint3 lightPos = RSPoint3(drRect.GetLeft() * FLOAT_HALF + drRect.GetRight() * FLOAT_HALF,
             drRect.GetTop() * FLOAT_HALF + drRect.GetBottom() * FLOAT_HALF, shadow.GetLightHeight());
 
         // Current ambient color is not available.
         RSColorQuad ambientColor = RSColor::ColorQuadSetARGB(0, 0, 0, 0);
-        canvas->DrawShadow(drPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor,
-            spotColor, RSShadowFlags::TRANSPARENT_OCCLUDER);
+        canvas->DrawShadow(drPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor, spotColor,
+            RSShadowFlags::TRANSPARENT_OCCLUDER);
     } else {
         RSBrush brush;
         brush.SetColor(spotColor);
@@ -3145,16 +3046,12 @@ bool RosenDecorationPainter::GetGradientPaint(RSBrush& brush)
     }
 
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-    SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()), SkDoubleToMScalar(paintSize_.Height()));
-#else
+
     SkSize skPaintSize = SkSize::Make(paintSize_.Width(), paintSize_.Height());
-#endif
     auto shader = CreateGradientShader(gradient, skPaintSize);
     paint.setShader(std::move(shader));
 #else
-    RSSize paintSize = RSSize(static_cast<RSScalar>(paintSize_.Width()),
-        static_cast<RSScalar>(paintSize_.Height()));
+    RSSize paintSize = RSSize(static_cast<RSScalar>(paintSize_.Width()), static_cast<RSScalar>(paintSize_.Height()));
     auto shader = CreateGradientShader(gradient, paintSize);
     brush.SetShaderEffect(shader);
 #endif

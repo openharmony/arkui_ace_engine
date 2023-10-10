@@ -26,11 +26,7 @@
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 
-#ifndef NEW_SKIA
-#define SkPathkCCWDirection SkPath::Direction::kCCW_Direction
-#else
 #define SkPathkCCWDirection SkPathDirection::kCCW
-#endif
 
 namespace OHOS::Ace {
 
@@ -171,8 +167,7 @@ void FlutterRenderBubble::PaintTopBubbleInJs(SkCanvas* skCanvas, const SkPaint& 
     path_.lineTo(arrowPosition_.GetX() + (childHalfWidth - NormalizeToPx(border_.BottomRightRadius().GetX())),
         arrowPosition_.GetY() - bubbleSpacing);
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
-        arrowPosition_.GetX() + childHalfWidth,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection, arrowPosition_.GetX() + childHalfWidth,
         arrowPosition_.GetY() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetY()));
     path_.lineTo(arrowPosition_.GetX() + childHalfWidth,
         arrowPosition_.GetY() - bubbleSpacing - (childHeight - NormalizeToPx(border_.TopRightRadius().GetY())));

@@ -57,22 +57,15 @@ void RosenRenderQrcode::DrawQRCode(
         auto clipLayer = SkRRect::MakeRectXY(clipRect, size / 2.0, size / 2.0);
         canvas->clipRRect(clipLayer, SkClipOp::kIntersect, true);
     }
-#ifndef NEW_SKIA
-    canvas->drawBitmap(ProcessQrcodeData(size, qrCode), topLeft.GetX(), topLeft.GetY());
-#else
+
     SkBitmap skBitmap = ProcessQrcodeData(size, qrCode);
     canvas->drawImage(skBitmap.asImage(), topLeft.GetX(), topLeft.GetY(), SkSamplingOptions());
-#endif
     if (qrcode_->GetType() == QrcodeType::CIRCLE) {
         int32_t smallSquareWidth = size / sqrt(2);
-#ifndef NEW_SKIA
-        canvas->drawBitmap(ProcessQrcodeData(smallSquareWidth, qrCode),
-            topLeft.GetX() + (size - smallSquareWidth) / 2.0, topLeft.GetY() + (size - smallSquareWidth) / 2.0);
-#else
+
         skBitmap = ProcessQrcodeData(smallSquareWidth, qrCode);
         canvas->drawImage(skBitmap.asImage(),
             topLeft.GetX() + (size - smallSquareWidth) / 2.0, topLeft.GetY() + (size - smallSquareWidth) / 2.0, SkSamplingOptions());
-#endif
     }
 #else
     if (qrcode_->GetType() == QrcodeType::CIRCLE) {

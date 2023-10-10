@@ -27,11 +27,8 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/image/render_image.h"
-#ifndef NEW_SKIA
-#include "core/pipeline/base/flutter_render_context.h"
-#endif
-#include "core/pipeline/layers/clip_layer.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
+#include "core/pipeline/layers/clip_layer.h"
 
 namespace flutter {
 class Canvas;
@@ -55,37 +52,35 @@ public:
 
     static void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas);
 
-    void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context,
-        const sk_sp<SkImage>& image, bool paintBorder = true);
+    void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context, const sk_sp<SkImage>& image,
+        bool paintBorder = true);
 
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context);
 
     void PaintBoxShadows(const SkRRect& rrect, const std::vector<Shadow>& shadows, SkCanvas* canvas);
 
-    void PaintGrayScale(const flutter::RRect& outerRRect, SkCanvas* canvas,
-                        const Dimension& grayscale, const Color& color);
+    void PaintGrayScale(
+        const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& grayscale, const Color& color);
 
-    void PaintBrightness(const flutter::RRect& outerRRect, SkCanvas* canvas,
-                         const Dimension& brightness, const Color& color);
+    void PaintBrightness(
+        const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& brightness, const Color& color);
 
-    void PaintContrast(const flutter::RRect& outerRRect, SkCanvas* canvas,
-                       const Dimension& contrast, const Color& color);
+    void PaintContrast(
+        const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& contrast, const Color& color);
 
-    void PaintSaturate(const flutter::RRect& outerRRect, SkCanvas* canvas,
-                       const Dimension& saturate, const Color& color);
+    void PaintSaturate(
+        const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& saturate, const Color& color);
 
-    void PaintSepia(const flutter::RRect& outerRRect, SkCanvas* canvas,
-                    const Dimension& sepia, const Color& color);
+    void PaintSepia(const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& sepia, const Color& color);
 
-    void PaintInvert(const flutter::RRect& outerRRect, SkCanvas* canvas,
-                     const Dimension& invert, const Color& color);
+    void PaintInvert(const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& invert, const Color& color);
 
     void PaintHueRotate(const flutter::RRect& outerRRect, SkCanvas* canvas, const float& hueRotate, const Color& color);
 
     void PaintBlur(const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& blurRadius, const Color& color);
 
-    void PaintColorBlend(const flutter::RRect& outerRRect, SkCanvas* canvas, const Color& colorBlend,
-                         const Color& color);
+    void PaintColorBlend(
+        const flutter::RRect& outerRRect, SkCanvas* canvas, const Color& colorBlend, const Color& color);
 
     void PaintGradient(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
 
@@ -127,13 +122,13 @@ protected:
     void PaintColorAndImage(const Offset& offset, SkCanvas* canvas, SkPaint& paint, RenderContext& context);
 
     void PaintAllEqualBorder(const flutter::RRect& rrect, const Border& border, SkCanvas* canvas, SkPaint& paint);
-    void SetBorderStyle(const BorderEdge& borderEdge, SkPaint& paint,
-        bool useDefaultColor = false, double spaceBetweenDot = 0.0, double borderLength = 0.0);
+    void SetBorderStyle(const BorderEdge& borderEdge, SkPaint& paint, bool useDefaultColor = false,
+        double spaceBetweenDot = 0.0, double borderLength = 0.0);
 
     void PaintBorderWithPath(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint);
     void PaintBorderWithLine(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint);
-    void PaintBorderImage(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint,
-        const sk_sp<SkImage>& image);
+    void PaintBorderImage(
+        const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint, const sk_sp<SkImage>& image);
     void PaintImage(const Offset& offset, RenderContext& context);
     sk_sp<SkShader> CreateGradientShader(const Gradient& gradient, const SkSize& size);
     flutter::RRect GetOuterRRect(const Offset& offset, const Border& border);
@@ -184,7 +179,6 @@ protected:
     double topOutset_ = 0.0;
     double rightOutset_ = 0.0;
     double bottomOutset_ = 0.0;
-
 };
 
 } // namespace OHOS::Ace
