@@ -166,6 +166,12 @@ private:
     void InitChildNode();
     void QuickFirstChildAppear();
     void QuickFirstChildDisappear();
+    float GetLoadingVisibleHeight();
+    void LoadingProgressFadeAwayStage();
+    void UpdateScrollTransition(float scrollOffset);
+    void UpdateLoadingProgressFadeAway(float scrollOffset, float fadeAwayRatio);
+    int32_t GetLoadingProgressStatus();
+    void RefreshStatusChangeEffect();
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;
