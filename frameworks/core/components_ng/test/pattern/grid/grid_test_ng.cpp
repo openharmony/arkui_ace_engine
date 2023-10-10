@@ -127,6 +127,10 @@ void GridTestNg::SetUp() {}
 
 void GridTestNg::TearDown()
 {
+    if (frameNode_ && frameNode_->renderContext_) {
+        // the destructor is not virtual, the MockRenderContext destructor will not be called
+        frameNode_->renderContext_ = nullptr;
+    }
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -142,10 +146,6 @@ void GridTestNg::GetInstance()
     eventHub_ = frameNode_->GetEventHub<GridEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<GridLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<GridAccessibilityProperty>();
-    EXPECT_CALL(
-        *AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_),
-        GetPaintRectWithTransform())
-        .WillRepeatedly(Return(RectF()));
 }
 
 void GridTestNg::CreateGrid(const std::function<void(GridModelNG)>& callback)
@@ -2619,10 +2619,7 @@ HWTEST_F(GridTestNg, EventHub001, TestSize.Level1)
         CreateGridItem(8, NULL_VALUE, ITEM_HEIGHT);
     });
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_CALL(
-        *AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_),
-        GetPaintRectWithTransform())
-        .WillRepeatedly(Return(gridRect));
+    MockGetPaintRectWithTransform(frameNode_, gridRect);
 
     /**
      * @tc.steps: step1. call GetInsertPosition func.
@@ -3908,10 +3905,7 @@ HWTEST_F(GridTestNg, ScrollLayout001, TestSize.Level1)
     // MOCK GetPaintRectWithTransform()
     const float smallerHeight = GRID_HEIGHT - ITEM_HEIGHT;
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, smallerHeight);
-    EXPECT_CALL(
-        *AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_),
-        GetPaintRectWithTransform())
-        .WillRepeatedly(Return(gridRect));
+    MockGetPaintRectWithTransform(frameNode_, gridRect);
 
     /**
      * @tc.steps: step1. Change to smaller mainSize
