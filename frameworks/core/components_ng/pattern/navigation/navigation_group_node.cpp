@@ -500,11 +500,12 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                 if (isNavBar) {
                     needSetInvisible =
                         AceType::DynamicCast<NavBarNode>(node)->GetTransitionType() == PageTransitionType::EXIT_PUSH;
+                    // store this flag for navBar layout only
+                    navigation->SetNeedSetInvisible(needSetInvisible);
                 } else {
                     needSetInvisible = AceType::DynamicCast<NavDestinationGroupNode>(node)->GetTransitionType() ==
                                        PageTransitionType::EXIT_PUSH;
                 }
-                navigation->SetNeedSetInvisible(needSetInvisible);
                 // for the case, the navBar form EXIT_PUSH to push during animation
                 if (needSetInvisible) {
                     node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
@@ -629,7 +630,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
     }
     CHECK_NULL_VOID(titleNode);
 
-    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), id = Container::CurrentId()] {
+    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), id = Container::CurrentId(), isNavBar] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -637,13 +638,16 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
-            [weakNavigation]() {
+            [weakNavigation, isNavBar]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 LOGI("navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
-                navigation->SetNeedSetInvisible(false);
+                // clear this flag for navBar layout only
+                if (isNavBar) {
+                    navigation->SetNeedSetInvisible(false);
+                }
             },
             TaskExecutor::TaskType::UI);
     });
