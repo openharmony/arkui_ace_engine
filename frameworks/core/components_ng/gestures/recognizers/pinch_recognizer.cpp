@@ -103,7 +103,7 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch up event");
-    if (currentFingers_ < fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         LOGW("PinchGesture current finger number is less than requiried finger number.");
         return;
     }
@@ -114,7 +114,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         SendCallbackMsg(onActionEnd_);
     }
 }
@@ -139,7 +139,7 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch move event");
-    if (currentFingers_ < fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         LOGW("PinchGesture current finger number is less than requiried finger number.");
         return;
     }
