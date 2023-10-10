@@ -874,7 +874,7 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
 
         // Only the onDrop callback of dragged frame node is triggered.
         // The onDrop callback of target frame node is triggered in PipelineContext::OnDragEvent.
-        if (eventHub->HasOnDrop()) {
+        if (eventHub->HasOnDrop() || eventHub->HasOnCustomDrop()) {
             RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
             if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
                 LOGI("web on drag end");
@@ -886,7 +886,8 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
             }
             event->SetScreenX(info.GetScreenLocation().GetX());
             event->SetScreenY(info.GetScreenLocation().GetY());
-            eventHub->FireOnDrop(event, "");
+            eventHub->FireOnCustomDrop(event, "");
+            eventHub->HandleFireOnDrop(event, "");
         }
     }
 
@@ -1129,6 +1130,7 @@ OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& cont
                 if (eventManager) {
                     eventManager->DoMouseActionRelease();
                 }
+                eventHub->FireOnCustomDragEnd(dragEvent);
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }

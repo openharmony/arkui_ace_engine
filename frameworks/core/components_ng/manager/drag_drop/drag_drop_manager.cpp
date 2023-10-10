@@ -211,8 +211,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             if (!eventHub) {
                 continue;
             }
-            if ((findDrop && (eventHub->HasOnDrop() || eventHub->HasOnItemDrop()))
-                || (!findDrop && (eventHub->HasOnDrop() || eventHub->HasOnItemDrop()))) {
+            if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasOnCustomDrop()) {
                 return parentFrameNode;
             }
             if (SystemProperties::GetDebugEnabled()) {
@@ -461,7 +460,8 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     UpdateDragEvent(event, point);
-    eventHub->FireOnDrop(event, extraParams);
+    eventHub->FireOnCustomDrop(event, extraParams);
+    eventHub->HandleFireOnDrop(event, extraParams);
     ClearVelocityInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     SetIsDragged(false);
@@ -560,6 +560,35 @@ void DragDropManager::onDragCancel()
     draggedFrameNode_ = nullptr;
 }
 
+void DragDropManager::FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
+    RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
+{
+    switch (type) {
+        case DragEventType::ENTER: {
+            eventHub->FireOnCustomDragEnter(event, extraParams);
+            eventHub->FireOnDragEnter(event, extraParams);
+            break;
+        }
+        case DragEventType::MOVE: {
+            eventHub->FireOnCustomDragMove(event, extraParams);
+            eventHub->FireOnDragMove(event, extraParams);
+            break;
+        }
+        case DragEventType::LEAVE: {
+            eventHub->FireOnCustomDragLeave(event, extraParams);
+            eventHub->FireOnDragLeave(event, extraParams);
+            break;
+        }
+        case DragEventType::DROP: {
+            eventHub->FireOnCustomDrop(event, extraParams);
+            eventHub->HandleFireOnDrop(event, extraParams);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void DragDropManager::FireOnDragEvent(
     const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo)
 {
@@ -580,22 +609,7 @@ void DragDropManager::FireOnDragEvent(
     event->SetPreviewRect(GetDragWindowRect(point));
 #endif // ENABLE_DRAG_FRAMEWORK
 
-    switch (type) {
-        case DragEventType::ENTER:
-            eventHub->FireOnDragEnter(event, extraParams);
-            break;
-        case DragEventType::MOVE:
-            eventHub->FireOnDragMove(event, extraParams);
-            break;
-        case DragEventType::LEAVE:
-            eventHub->FireOnDragLeave(event, extraParams);
-            break;
-        case DragEventType::DROP:
-            eventHub->FireOnDrop(event, extraParams);
-            break;
-        default:
-            break;
-    }
+    FireOnDragEventWithDragType(eventHub, type, event, extraParams);
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (isMouseDragged_ && !isDragWindowShow_) {

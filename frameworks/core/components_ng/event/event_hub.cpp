@@ -104,4 +104,105 @@ void EventHub::MarkModifyDone()
     OnModifyDone();
 }
 
+void EventHub::SetOnCustomDragEnter(OnDragFunc&& onCustomDragEnter)
+{
+    onCustomDragEnter_ = std::move(onCustomDragEnter);
+}
+
+void EventHub::FireOnCustomDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragDropManager fire onCustomDragEnter");
+    }
+    if (onCustomDragEnter_ != nullptr) {
+        auto onCustomDragEnter = onCustomDragEnter_;
+        onCustomDragEnter(info, extraParams);
+    }
+}
+
+void EventHub::SetOnCustomDragLeave(OnDragFunc&& onCustomDragLeave)
+{
+    onCustomDragLeave_ = std::move(onCustomDragLeave);
+}
+
+void EventHub::FireOnCustomDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragDropManager fire onCustomDragLeave");
+    }
+    if (onCustomDragLeave_ != nullptr) {
+        auto onCustomDragLeave = onCustomDragLeave_;
+        onCustomDragLeave(info, extraParams);
+    }
+}
+
+void EventHub::SetOnCustomDragMove(OnDragFunc&& onCustomDragMove)
+{
+    onCustomDragMove_ = std::move(onCustomDragMove);
+}
+
+void EventHub::FireOnCustomDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragDropManager fire onCustomDragMove");
+    }
+    if (onCustomDragMove_ != nullptr) {
+        auto onCustomDragMove = onCustomDragMove_;
+        onCustomDragMove(info, extraParams);
+    }
+}
+
+void EventHub::SetOnCustomDrop(OnDragFunc&& onCustomDrop)
+{
+    onCustomDrop_ = std::move(onCustomDrop);
+}
+
+void EventHub::FireOnCustomDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragDropManager fire onCustomDrop");
+    }
+    if (onCustomDrop_ != nullptr) {
+        auto onCustomDrop = onCustomDrop_;
+        onCustomDrop(info, extraParams);
+    }
+}
+
+void EventHub::SetOnCustomDragEnd(OnNewDragFunc&& onCustomDragEnd)
+{
+    onCustomDragEnd_ = std::move(onCustomDragEnd);
+}
+
+void EventHub::FireOnCustomDragEnd(const RefPtr<OHOS::Ace::DragEvent>& info)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragDropManager fire onCustomDragEnd");
+    }
+    if (onCustomDragEnd_ != nullptr) {
+        auto onCustomDragEnd = onCustomDragEnd_;
+        onCustomDragEnd(info);
+    }
+}
+
+bool EventHub::IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
+{
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragDropManager fire IsFireOnDrop, drag ret: %d", info->GetResult());
+    }
+    return !HasOnCustomDrop()
+        || info->GetResult() == DragRet::DRAG_DEFAULT
+        || info->GetResult() == DragRet::ENABLE_DROP
+        || info->GetResult() == DragRet::DISABLE_DROP;
+#endif
+    return true;
+}
+
+void EventHub::HandleFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
+{
+    if (IsFireOnDrop(info)) {
+        FireOnDrop(info, extraParams);
+    }
+}
+
 } // namespace OHOS::Ace::NG

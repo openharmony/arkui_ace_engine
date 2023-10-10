@@ -309,6 +309,11 @@ public:
         return static_cast<bool>(onDrop_);
     }
 
+    bool HasOnCustomDrop() const
+    {
+        return static_cast<bool>(onCustomDrop_);
+    }
+
     virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
     {
         auto json = JsonUtil::Create(true);
@@ -410,6 +415,30 @@ public:
         return keyboardShortcut_;
     }
 
+    void SetOnCustomDragEnter(OnDragFunc&& onCustomDragEnter);
+
+    void FireOnCustomDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
+
+    void SetOnCustomDragLeave(OnDragFunc&& onCustomDragLeave);
+
+    void FireOnCustomDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
+
+    void SetOnCustomDragMove(OnDragFunc&& onCustomDragMove);
+
+    void FireOnCustomDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
+
+    void SetOnCustomDrop(OnDragFunc&& onCustomDrop);
+
+    void FireOnCustomDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
+
+    void SetOnCustomDragEnd(OnNewDragFunc&& onCustomDragEnd);
+
+    void FireOnCustomDragEnd(const RefPtr<OHOS::Ace::DragEvent>& info);
+
+    bool IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
+
+    void HandleFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
+
 protected:
     virtual void OnModifyDone() {}
 
@@ -430,6 +459,12 @@ private:
     OnDragFunc onDragMove_;
     OnDragFunc onDrop_;
     OnNewDragFunc onDragEnd_;
+
+    OnDragFunc onCustomDragEnter_;
+    OnDragFunc onCustomDragLeave_;
+    OnDragFunc onCustomDragMove_;
+    OnDragFunc onCustomDrop_;
+    OnNewDragFunc onCustomDragEnd_;
 
     bool enabled_ { true };
     bool developerEnabled_ { true };
