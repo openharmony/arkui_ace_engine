@@ -576,6 +576,7 @@ void DragDropManager::FireOnDragEvent(
     event->SetScreenY((double)point.GetScreenY());
     event->SetVelocity(velocityTracker_.GetVelocity());
 #ifdef ENABLE_DRAG_FRAMEWORK
+    event->SetSummary(summaryMap_);
     event->SetPreviewRect(GetDragWindowRect(point));
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -945,6 +946,7 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     }
     auto unifiedData = udData;
     event->SetData(unifiedData);
+    event->SetSummary(summaryMap_);
     int x = -1;
     int y = -1;
     int width = -1;
