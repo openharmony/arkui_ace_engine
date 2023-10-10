@@ -37,6 +37,7 @@ constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 constexpr double MAX_THRESHOLD = 20.0;
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
+constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 
 } // namespace
 
@@ -119,6 +120,10 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && pipeline->IsFormRender()) {
+        touchDownTime_ = event.time;
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
@@ -150,6 +155,16 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
+    // logic when the formal scenario is complete.
+    if (pipeline && pipeline->IsFormRender()) {
+        if (event.time.time_since_epoch().count() - touchDownTime_.time_since_epoch().count() >
+            DEFAULT_LONGPRESS_DURATION) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            return;
+        }
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
