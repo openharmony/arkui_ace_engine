@@ -260,7 +260,7 @@ void GridPattern::FireOnScrollStart()
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
-        scrollBar->PlayScrollBarStartAnimation();
+        scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
     auto host = GetHost();
@@ -1580,7 +1580,7 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
     }
 }
 
-bool GridPattern::IsOutOfBoundary()
+bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
     bool outOfStart = gridLayoutInfo_.reachStart_ && Positive(gridLayoutInfo_.currentOffset_);
     float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;

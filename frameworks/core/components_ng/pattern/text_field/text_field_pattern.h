@@ -171,7 +171,7 @@ public:
         if (scrollBar) {
             paint->SetScrollBar(scrollBar);
             if (scrollBar->NeedPaint()) {
-                textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect(), scrollBar->GetBarRect());
+                textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect());
             }
         }
         auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();

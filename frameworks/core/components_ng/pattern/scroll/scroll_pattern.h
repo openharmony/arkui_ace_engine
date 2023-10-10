@@ -166,7 +166,7 @@ public:
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
-    bool IsOutOfBoundary() const;
+    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     void OnAnimateStop() override;

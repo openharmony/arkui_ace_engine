@@ -62,6 +62,12 @@ public:
     {
         return IsAtTop() || IsAtBottom();
     }
+
+    virtual bool IsOutOfBoundary(bool useCurrentDelta = true)
+    {
+        return false;
+    }
+
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
     {
