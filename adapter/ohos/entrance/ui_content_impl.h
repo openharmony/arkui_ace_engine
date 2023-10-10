@@ -120,6 +120,8 @@ public:
 
     void OnFormSurfaceChange(float width, float height) override;
 
+    void SetFormBackgroundColor(const std::string& color) override;
+
     SerializeableObjectArray DumpUITree() override
     {
         return uiManager_->DumpUITree();
