@@ -493,6 +493,9 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
 {
     SizeF size;
     CHECK_NULL_RETURN(frameNode, size);
+    auto pipelineContext = GetCurrentPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, size);
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     for (auto& child : frameNode->GetAllChildrenWithBuild()) {
         auto hostNode = child->GetHostNode();
         auto geometryNode = child->GetGeometryNode();
@@ -504,7 +507,7 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
             CHECK_NULL_RETURN(columnInfo, size);
             auto parent = columnInfo->GetParent();
             CHECK_NULL_RETURN(parent, size);
-            parent->BuildColumnWidth(std::min(wrapperSize_.Width(), wrapperSize_.Height()));
+            parent->BuildColumnWidth(std::min(windowGlobalRect.Width(), windowGlobalRect.Height()));
             auto maxWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4)) / previewScale_;
             auto frameSize = geometryNode->GetMarginFrameSize();
             static SizeF previewSize;
@@ -520,12 +523,6 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
             } else {
                 geometryNode->SetFrameSize(frameSize);
             }
-        }
-        if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
-            previewLayoutWrapper = child;
-            size += geometryNode->GetMarginFrameSize() * previewScale_;
-        }
-        if (hostNode->GetTag() == V2::IMAGE_ETS_TAG) {
             previewLayoutWrapper = child;
             size += geometryNode->GetMarginFrameSize() * previewScale_;
         }
