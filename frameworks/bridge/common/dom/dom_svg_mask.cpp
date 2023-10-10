@@ -37,7 +37,6 @@ void DOMSvgMask::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
     auto declaration = AceType::DynamicCast<SvgMaskDeclaration>(declaration_);
     if (!declaration) {
-        LOGE("declaration is null");
         return;
     }
     // inherit presentation attributes

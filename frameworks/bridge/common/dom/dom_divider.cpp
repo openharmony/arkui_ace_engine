@@ -49,7 +49,7 @@ bool DOMDivider::SetSpecializedStyle(const std::pair<std::string, std::string>& 
                 } else if (val == "square") {
                     divider.dividerChild_->SetLineCap(LineCap::SQUARE);
                 } else {
-                    LOGE("not support value: %{public}s", val.c_str());
+                    LOGW("not support value: %{public}s", val.c_str());
                 }
             } },
         { DOM_DIVIDER_STROKE_WIDTH,

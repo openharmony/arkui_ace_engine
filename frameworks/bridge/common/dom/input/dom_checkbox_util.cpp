@@ -71,7 +71,6 @@ void DOMCheckboxUtil::SetChildAttr(
     const RefPtr<CheckboxComponent>& component, const std::map<std::string, std::string>& attrs)
 {
     if (!component) {
-        LOGE("fail to set child attr due to checkbox component is null");
         return;
     }
     static const LinearMapNode<void (*)(const RefPtr<CheckboxComponent>&, const std::string&)> attrOperators[] = {
@@ -92,7 +91,6 @@ void DOMCheckboxUtil::AddChildEvent(const RefPtr<CheckboxComponent>& component, 
     const std::string& nodeId, const std::vector<std::string>& events)
 {
     if (!component) {
-        LOGE("fail to add child event due to checkbox component is null");
         return;
     }
     for (const auto& event : events) {

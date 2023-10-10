@@ -44,12 +44,10 @@ void DOMXComponent::PrepareSpecializedComponent()
 std::string DOMXComponent::GetSurfaceId() const
 {
     if (!xComponentChild_) {
-        LOGE("GetSurfaceId failed, The xComponent is not created.");
         return 0;
     }
     const auto& controller = xComponentChild_->GetXComponentController();
     if (!controller) {
-        LOGE("GetSurfaceId failed, controller is null.");
         return 0;
     }
     auto surfaceId = controller->GetSurfaceId();
@@ -59,12 +57,10 @@ std::string DOMXComponent::GetSurfaceId() const
 void DOMXComponent::SetSurfaceSize(uint32_t surfaceWidth, uint32_t surfaceHeight) const
 {
     if (!xComponentChild_) {
-        LOGE("SetSurfaceSize failed, The xComponent is not created.");
         return;
     }
     const auto& controller = xComponentChild_->GetXComponentController();
     if (!controller) {
-        LOGE("SetSurfaceSize failed, controller is null.");
         return;
     }
     controller->ConfigSurface(surfaceWidth, surfaceHeight);

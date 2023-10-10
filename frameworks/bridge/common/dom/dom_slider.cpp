@@ -60,7 +60,6 @@ void DOMSlider::CallSpecializedMethod(const std::string& method, const std::stri
                               ? watchSliderChild_->GetRotationController()
                               : sliderChild_->GetRotationController();
         if (controller) {
-            LOGD("Rotation focus request");
             controller->RequestRotation(true);
         }
     }

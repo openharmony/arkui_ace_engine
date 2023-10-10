@@ -41,20 +41,17 @@ void DOMDiv::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
     ACE_DCHECK(child);
     if (GetDisplay() == DisplayType::GRID) {
         if (!grid_) {
-            LOGE("DOMDiv GridLayout is null");
             return;
         }
         grid_->InsertChild(slot, child->GetRootComponent());
     } else {
         if (isFlexWrap_) {
             if (!wrapChild_) {
-                LOGE("DOMDiv wrapChild is null");
                 return;
             }
             wrapChild_->InsertChild(slot, child->GetRootComponent());
         } else {
             if (!flexChild_) {
-                LOGE("DOMDiv FlexChild is null");
                 return;
             }
             flexChild_->InsertChild(slot, child->GetRootComponent());
@@ -66,20 +63,17 @@ void DOMDiv::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 {
     if (GetDisplay() == DisplayType::GRID) {
         if (!grid_) {
-            LOGE("DOMDiv GridLayout is null");
             return;
         }
         grid_->RemoveChild(child->GetRootComponent());
     } else {
         if (isFlexWrap_) {
             if (!wrapChild_) {
-                LOGE("DOMDiv wrapChild is null");
                 return;
             }
             wrapChild_->RemoveChild(child->GetRootComponent());
         } else {
             if (!flexChild_) {
-                LOGE("DOMDiv FlexChild is null");
                 return;
             }
             flexChild_->RemoveChild(child->GetRootComponent());
@@ -462,7 +456,6 @@ void DOMDiv::SetCardThemeAttrs()
 {
     cardTheme_ = GetTheme<CardTheme>();
     if (!cardTheme_) {
-        LOGE("cardTheme is null");
         EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }

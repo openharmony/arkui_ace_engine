@@ -84,7 +84,7 @@ void DomGridContainer::CallSpecializedMethod(const std::string& method, const st
     }
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
     if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != 1) {
-        LOGE("parse args error");
+        LOGW("Image animator parse args error");
         return;
     }
     auto callbackId = argsValue->GetArrayItem(0)->GetString();
