@@ -850,15 +850,14 @@ size_t FrontendDelegateDeclarativeNG::GetComponentsCount()
 void FrontendDelegateDeclarativeNG::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
-    LOGD("FrontendDelegateDeclarativeNG ShowToast.");
-
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
                     const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
-        LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
+        TAG_LOGD(AceLogTag::ACE_PROMPT_ACTION_TOAST, "Begin to show toast message %{public}s, duration is %{public}d",
+            message.c_str(), durationTime);
         overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
     };
     MainWindowOverlay(std::move(task));

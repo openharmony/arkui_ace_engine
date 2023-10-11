@@ -444,7 +444,6 @@ void SubwindowManager::ShowToast(
                 CHECK_NULL_VOID(manager);
                 auto subwindow = manager->GetSubwindow(containerId);
                 if (!subwindow) {
-                    LOGI("Subwindow is null, add a new one.");
                     subwindow = Subwindow::CreateSubwindow(containerId);
                     subwindow->SetAboveApps(showMode == NG::ToastShowMode::TOP_MOST);
                     subwindow->InitContainer();

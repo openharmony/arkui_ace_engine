@@ -568,7 +568,7 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
 
 void OverlayManager::PopToast(int32_t toastId)
 {
-    LOGI("OverlayManager::PopToast");
+    TAG_LOGD(AceLogTag::ACE_PROMPT_ACTION_TOAST, "Overlay starts to pop Toast");
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetCurve(curve);
@@ -588,12 +588,10 @@ void OverlayManager::PopToast(int32_t toastId)
                 CHECK_NULL_VOID(overlayManager);
                 auto toastIter = overlayManager->toastMap_.find(toastId);
                 if (toastIter == overlayManager->toastMap_.end()) {
-                    LOGI("No toast under pop");
                     return;
                 }
                 auto toastUnderPop = toastIter->second.Upgrade();
                 CHECK_NULL_VOID(toastUnderPop);
-                LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 auto rootNode = context->GetRootElement();
@@ -614,7 +612,6 @@ void OverlayManager::PopToast(int32_t toastId)
     });
     auto toastIter = toastMap_.find(toastId);
     if (toastIter == toastMap_.end()) {
-        LOGI("No toast under pop");
         return;
     }
     auto toastUnderPop = toastIter->second.Upgrade();

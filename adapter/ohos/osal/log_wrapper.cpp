@@ -48,6 +48,7 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_DRAG, "AceDrag" },
     { AceLogTag::ACE_VIDEO, "AceVideo" },
     { AceLogTag::ACE_FONT, "AceFont" },
+    { AceLogTag::ACE_PROMPT_ACTION_TOAST, "AcePromptActionToast" },
     { AceLogTag::ACE_TEXTINPUT, "AceTextInput" },
 };
 
