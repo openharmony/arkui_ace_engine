@@ -44,6 +44,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float PAN_MAX_VELOCITY = 2000.0f;
+
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
 {
@@ -159,6 +161,14 @@ void MenuPattern::OnModifyDone()
         CopyMenuAttr(menuFirstNode);
     }
     SetAccessibilityAction();
+
+    if (previewMode_ != MenuPreviewMode::NONE) {
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitPanEvent(gestureHub);
+    }
 }
 
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
@@ -843,6 +853,39 @@ void MenuPattern::OnColorConfigurationUpdate()
     }
     host->SetNeedCallChildrenUpdate(false);
 }
+
+void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto offsetX = static_cast<float>(info.GetOffsetX());
+        auto offsetY = static_cast<float>(info.GetOffsetY());
+        auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
+        auto offsetPerSecondY = info.GetVelocity().GetOffsetPerSecond().GetY();
+        auto velocity =
+            static_cast<float>(std::sqrt(offsetPerSecondX * offsetPerSecondX + offsetPerSecondY * offsetPerSecondY));
+        pattern->HandleDragEnd(offsetX, offsetY, velocity);
+    };
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+}
+
+void MenuPattern::HandleDragEnd(float offsetX, float offsetY, float velocity)
+{
+    if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || LessOrEqual(offsetY, 0.0f)) &&
+        LessOrEqual(velocity, PAN_MAX_VELOCITY)) {
+        return;
+    }
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->HideMenu();
+}
+
 void MenuPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
