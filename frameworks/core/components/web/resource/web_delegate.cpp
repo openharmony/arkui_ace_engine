@@ -1612,6 +1612,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     bundlePath_ = bundlePath;
     bundleDataPath_ = dataPath;
     hapPath_ = container->GetWebHapPath();
+    // get app temp dir
+    tempDir_ = container->GetTempDir();
     // load webview so
     OHOS::NWeb::NWebHelper::Instance().SetBundlePath(bundlePath_);
     if (!OHOS::NWeb::NWebHelper::Instance().Init()) {
@@ -2602,6 +2604,13 @@ void WebDelegate::InitWebViewWithSurface()
                 initArgs.web_engine_args_to_add.push_back(
                     std::string("--user-hap-path=").append(delegate->hapPath_));
             }
+
+            if (!delegate->tempDir_.empty()) {
+                initArgs.web_engine_args_to_add.push_back(
+                    std::string("--ohos-temp-dir=").append(delegate->tempDir_));
+                LOGI("Init --ohos-temp-dir:%{public}s", delegate->tempDir_.c_str());
+            }
+
             std::string customScheme = delegate->GetCustomScheme();
             if (!customScheme.empty()) {
                 LOGI("custome scheme %{public}s", customScheme.c_str());

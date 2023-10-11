@@ -1273,6 +1273,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     InitializeSafeArea(container);
 
+    // set container temp dir
+    if (abilityContext) {
+        if (!abilityContext->GetTempDir().empty()) {
+            container->SetTempDir(abilityContext->GetTempDir());
+        }
+    } else {
+        LOGI("UIContentImpl::OnStart abilityContext is null");
+    }
+
     LayoutInspector::SetCallback(instanceId_);
 }
 

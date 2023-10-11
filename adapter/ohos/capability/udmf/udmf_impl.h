@@ -42,6 +42,8 @@ public:
         const RefPtr<UnifiedData>& unifiedData, const std::string& url, const std::string& description) override;
     void GetLinkRecord(
         const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) override;
+    bool GetFileUriRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) override;
+    bool AddFileUriRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) override;
     void AddHtmlRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& htmlContent,
         const std::string& plainContent) override;
     void GetHtmlRecord(
