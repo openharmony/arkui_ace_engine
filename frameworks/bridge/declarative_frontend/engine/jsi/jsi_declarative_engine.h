@@ -66,7 +66,7 @@ public:
     void DestroyRootViewHandle(int32_t pageId);
     void DestroyAllRootViewHandle();
     void FlushReload();
-    NativeValue* GetContextValue();
+    napi_value GetContextValue();
 
     static std::unique_ptr<JsonValue> GetI18nStringResource(
         const std::string& targetStringKey, const std::string& targetStringValue);
@@ -377,10 +377,11 @@ public:
         pluginModuleName_ = pluginModuleName;
     }
 
-    NativeValue* GetContextValue() override
+    napi_value GetContextValue() override
     {
         return engineInstance_->GetContextValue();
     }
+
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
@@ -394,7 +395,10 @@ public:
         assetPath_ = assetPath;
         isBundle_ = isBundle;
     }
+    // Support the hsp on the previewer
     void SetHspBufferTrackerCallback(std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback);
+    // Support to execute the ets code mocked by developer
+    void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo);
 #endif
     static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);

@@ -152,7 +152,7 @@ void ScrollBarProxy::StartScrollBarAnimator() const
             continue;
         }
         if (scrollBar->GetDisplayMode() == DisplayMode::AUTO) {
-            scrollBar->StartAnimator();
+            scrollBar->StartDisappearAnimator();
         }
         scrollBar->SendAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     }
@@ -165,7 +165,7 @@ void ScrollBarProxy::StopScrollBarAnimator() const
         if (!scrollBar) {
             continue;
         }
-        scrollBar->StopAnimator();
+        scrollBar->StopDisappearAnimator();
         scrollBar->SendAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     }
 }

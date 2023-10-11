@@ -91,7 +91,8 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_FORM,
     THEME_PATTERN_SIDE_BAR,
     THEME_PATTERN_RICH_EDITOR,
-    THEME_PATTERN_PATTERN_LOCK
+    THEME_PATTERN_PATTERN_LOCK,
+    THEME_PATTERN_GAUGE
 };
 
 bool IsDirExist(const std::string& path)
@@ -134,11 +135,14 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     std::shared_ptr<Global::Resource::ResourceManager> newResMgr(Global::Resource::CreateResourceManager());
     std::string resIndexPath = hapPath.empty() ? (resPath + "resources.index") : hapPath;
     auto resRet = newResMgr->AddResource(resIndexPath.c_str());
-    auto configRet = newResMgr->UpdateResConfig(*resConfig);
-    LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}f, "
-         "device=%{public}d, colorMode=%{public}d, inputDevice=%{public}d",
-        resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
-        resConfig->GetColorMode(), resConfig->GetInputDevice());
+
+    if (resConfig != nullptr) {
+        auto configRet = newResMgr->UpdateResConfig(*resConfig);
+        LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}f, "
+             "device=%{public}d, colorMode=%{public}d, inputDevice=%{public}d",
+            resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
+            resConfig->GetColorMode(), resConfig->GetInputDevice());
+    }
     sysResourceManager_ = newResMgr;
     {
         std::unique_lock<std::shared_mutex> lock(resourceMutex_);
@@ -155,11 +159,13 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
          "colorMode=%{public}d, inputDevice=%{public}d",
         resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(), resConfig->GetColorMode(),
         resConfig->GetInputDevice());
-    if (sysResourceManager_) {
+    if (sysResourceManager_ && resConfig != nullptr) {
         sysResourceManager_->UpdateResConfig(*resConfig);
     }
     for (auto& resMgr : resourceManagers_) {
-        resMgr.second->UpdateResConfig(*resConfig);
+        if (resConfig != nullptr) {
+            resMgr.second->UpdateResConfig(*resConfig);
+        }
     }
     resConfig_ = resConfig;
 }
@@ -650,7 +656,7 @@ void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, c
         CHECK_NULL_VOID(context);
         resourceManagers_[{ bundleName, moduleName }] = context->GetResourceManager();
         resourceManager_ = context->GetResourceManager();
-        if (resourceManager_) {
+        if (resourceManager_ && resConfig_ != nullptr) {
             resourceManager_->UpdateResConfig(*resConfig_);
         }
     }

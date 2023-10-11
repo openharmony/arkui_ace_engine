@@ -106,10 +106,12 @@ public:
     {
         isInitialSubtitle_ = isInitialSubtitle;
     }
+    void ProcessTitleAssociatedUpdate(float offset);
+    void ProcessTitleDragStart(float offset);
+    void SetTitleStyleByOffset(float offset);
 
-    void ProcessTittleDragStart(float offset);
-    void ProcessTittleDragUpdate(float offset);
-    void ProcessTittleDragEnd();
+    void ProcessTitleDragUpdate(float offset, float dragOffsetY);
+    void ProcessTitleDragEnd();
     
     float GetCurrentOffset()
     {
@@ -163,6 +165,11 @@ public:
         CanOverDrag_ = CanOverDrag;
     }
 
+    void SetTitleScaleChange(bool isTitleScaleChange)
+    {
+        isTitleScaleChange_ = isTitleScaleChange;
+    }
+
     void ResetAssociatedScroll();
     void UpdateAssociatedScrollOffset(float offset);
 
@@ -176,7 +183,6 @@ private:
     void SpringAnimation(float startPos, float endPos);
     void UpdateScaleByDragOverDragOffset(float overDragOffset);
     void AnimateTo(float offset);
-    void SetTitleStyleByOffset(float offset);
 
     void OnAttachToFrameNode() override;
 
@@ -234,7 +240,8 @@ private:
     bool isInitialSubtitle_ = true;
     float minTitleHeight_ = 0.0f;
     bool CanOverDrag_ = true;
-
+    bool isOverDrag_ = true;
+    bool isTitleScaleChange_ = true;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
     bool enableAssociatedScroll_ = false;

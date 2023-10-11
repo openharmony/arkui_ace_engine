@@ -91,7 +91,7 @@ SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = __decorate([Ob
 
 let SegmentButtonOptions = SegmentButtonOptions_1 = class {
     constructor(t) {
-        var e, o, s, i, n, r, d, a, h, c, p, u, l, m, _, b;
+        var e, o, s, i, n, r, d, a, h, c, p, u, l, m, _;
         this.multiply = !1;
         this.showText = !1;
         this.showIcon = !1;
@@ -141,12 +141,12 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
                                                                                                       };
         this.imageSize = null !== (h = t.imageSize) && void 0 !== h ? h : { width: 24, height: 24 };
         this.buttonMargin = null !== (c = t.buttonMargin) && void 0 !== c ? c : {
-                                                                                    top: 2,
-                                                                                    right: 2,
-                                                                                    bottom: 2,
-                                                                                    left: 2
+                                                                                    top: 4,
+                                                                                    right: 8,
+                                                                                    bottom: 4,
+                                                                                    left: 8
                                                                                 };
-        this.textMargin = null !== (p = t.textMargin) && void 0 !== p ? p : { top: 4, right: 8, bottom: 4, left: 8 };
+        this.textMargin = null !== (p = t.textMargin) && void 0 !== p ? p : 0;
         this.type = t.type;
         this.buttons = new SegmentButtonItemOptionsArray(t.buttons);
         if ("capsule" === this.type) {
@@ -157,12 +157,12 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
             }));
             if (this.showText && this.showIcon) {
                 this.iconTextRadius = 12;
-                this.textMargin = null !== (l = t.textMargin) && void 0 !== l ? l : {
-                                                                                        top: 6,
-                                                                                        right: 8,
-                                                                                        bottom: 6,
-                                                                                        left: 8
-                                                                                    };
+                this.buttonMargin = null !== (l = t.buttonMargin) && void 0 !== l ? l : {
+                                                                                            top: 6,
+                                                                                            right: 8,
+                                                                                            bottom: 6,
+                                                                                            left: 8
+                                                                                        };
                 this.iconTextBackgroundRadius = 14
             }
             this.selectedFontColor = null !== (m = t.selectedFontColor) && void 0 !== m ? m : {
@@ -178,9 +178,9 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
                                                                                                               params: ["sys.color.ohos_id_color_emphasize"],
                                                                                                               bundleName: "",
                                                                                                               moduleName: ""
-                                                                                                          };
-            this.multiply && (this.buttonMargin = null !== (b = t.buttonMargin) && void 0 !== b ? b : 0)
-        } else this.showText = !0
+                                                                                                          }
+        } else this.showText = !0;
+        this.componentPadding = this.multiply ? 0 : 2
     }
 
     static tab(t) {
@@ -192,6 +192,113 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
     }
 };
 SegmentButtonOptions = SegmentButtonOptions_1 = __decorate([Observed], SegmentButtonOptions);
+
+class MultiSelectBackground extends ViewPU {
+    constructor(t, e, o, s = -1, i = void 0) {
+        super(t, o, s);
+        "function" == typeof i && (this.paramsGenerator_ = i);
+        this.__optionsArray = new SynchedPropertyNesedObjectPU(e.optionsArray, this, "optionsArray");
+        this.__options = new SynchedPropertyNesedObjectPU(e.options, this, "options");
+        this.__buttonBorderRadius = this.initializeConsume("buttonBorderRadius", "buttonBorderRadius");
+        this.__buttonItemsSize = this.initializeConsume("buttonItemsSize", "buttonItemsSize");
+        this.setInitiallyProvidedValue(e)
+    }
+
+    setInitiallyProvidedValue(t) {
+        this.__optionsArray.set(t.optionsArray);
+        this.__options.set(t.options)
+    }
+
+    updateStateVars(t) {
+        this.__optionsArray.set(t.optionsArray);
+        this.__options.set(t.options)
+    }
+
+    purgeVariableDependenciesOnElmtId(t) {
+        this.__optionsArray.purgeDependencyOnElmtId(t);
+        this.__options.purgeDependencyOnElmtId(t);
+        this.__buttonBorderRadius.purgeDependencyOnElmtId(t);
+        this.__buttonItemsSize.purgeDependencyOnElmtId(t)
+    }
+
+    aboutToBeDeleted() {
+        this.__optionsArray.aboutToBeDeleted();
+        this.__options.aboutToBeDeleted();
+        this.__buttonBorderRadius.aboutToBeDeleted();
+        this.__buttonItemsSize.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal()
+    }
+
+    get optionsArray() {
+        return this.__optionsArray.get()
+    }
+
+    get options() {
+        return this.__options.get()
+    }
+
+    get buttonBorderRadius() {
+        return this.__buttonBorderRadius.get()
+    }
+
+    set buttonBorderRadius(t) {
+        this.__buttonBorderRadius.set(t)
+    }
+
+    get buttonItemsSize() {
+        return this.__buttonItemsSize.get()
+    }
+
+    set buttonItemsSize(t) {
+        this.__buttonItemsSize.set(t)
+    }
+
+    initialRender() {
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Row.create({ space: 1 });
+            Row.padding(this.options.componentPadding);
+            e || Row.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            ForEach.create();
+            this.forEachUpdateFunction(t, this.optionsArray, ((t, e) => {
+                this.observeComponentCreation(((t, o) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
+                    If.create();
+                        e < 5 ? this.ifElseBranchUpdateFunction(0, (() => {
+                        this.observeComponentCreation(((t, o) => {
+                            ViewStackProcessor.StartGetAccessRecordingFor(t);
+                            Stack.create();
+                            Stack.layoutWeight(1);
+                            Stack.height(this.buttonItemsSize[e].height);
+                            Stack.backgroundColor(this.options.backgroundColor);
+                            Stack.borderRadius(this.buttonBorderRadius[e]);
+                            o || Stack.pop();
+                            ViewStackProcessor.StopGetAccessRecording()
+                        }));
+                        Stack.pop()
+                    })) : this.ifElseBranchUpdateFunction(1, (() => {
+                    }));
+                    o || If.pop();
+                    ViewStackProcessor.StopGetAccessRecording()
+                }));
+                If.pop()
+            }), void 0,!0,!1);
+            e || ForEach.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        ForEach.pop();
+        Row.pop()
+    }
+
+    rerender() {
+        this.updateDirtyElements()
+    }
+}
 
 class SelectItem extends ViewPU {
     constructor(t, e, o, s = -1, i = void 0) {
@@ -303,6 +410,7 @@ class SelectItem extends ViewPU {
                         x: this.zoomScaleArray[this.selectedIndexes[0]],
                         y: this.zoomScaleArray[this.selectedIndexes[0]]
                     });
+                    Stack.shadow(ShadowStyle.OUTER_DEFAULT_MD);
                     e || Stack.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
@@ -431,8 +539,7 @@ class MultiSelectItemArray extends ViewPU {
         this.observeComponentCreation(((t, e) => {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Row.create({ space: 1 });
-            Row.width("100%");
-            Row.height("100%");
+            Row.padding(this.options.componentPadding);
             e || Row.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -450,7 +557,6 @@ class MultiSelectItemArray extends ViewPU {
                             Stack.width(this.buttonItemsSize[e].width);
                             Stack.height(this.buttonItemsSize[e].height);
                             Stack.backgroundColor(this.multiColor[e]);
-                            Stack.scale({ x: this.zoomScaleArray[e], y: this.zoomScaleArray[e] });
                             Stack.borderRadius(this.buttonBorderRadius[e]);
                             o || Stack.pop();
                             ViewStackProcessor.StopGetAccessRecording()
@@ -529,8 +635,9 @@ class SegmentButtonItem extends ViewPU {
         this.observeComponentCreation(((t, e) => {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Column.create({ space: 2 });
-            Column.padding(this.options.textMargin);
-            Column.align(Alignment.Center);
+            Column.justifyContent(FlexAlign.Center);
+            Column.padding(this.options.buttonMargin);
+            Column.constraintSize({ minHeight: 28 });
             e || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -543,6 +650,7 @@ class SegmentButtonItem extends ViewPU {
                     Image.create(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon);
                     Image.size(this.options.imageSize);
                     Image.focusable(0 == this.index);
+                    Image.draggable(!1);
                     e || Image.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }))
@@ -566,9 +674,9 @@ class SegmentButtonItem extends ViewPU {
                     Text.maxFontSize(this.property.fontSize);
                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                     Text.maxLines(1);
-                    Text.width("100%");
                     Text.textAlign(TextAlign.Center);
                     Text.focusable(0 == this.index && !this.options.showIcon);
+                    Text.padding(this.options.textMargin);
                     e || Text.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
@@ -599,7 +707,7 @@ class PressAndHoverEffect extends ViewPU {
         super(t, o, s);
         "function" == typeof i && (this.paramsGenerator_ = i);
         this.__buttonItemsSize = this.initializeConsume("buttonItemsSize", "buttonItemsSize");
-        this.__pressOpacity = new SynchedPropertySimpleOneWayPU(e.pressOpacity, this, "pressOpacity");
+        this.__press = new SynchedPropertySimpleOneWayPU(e.press, this, "press");
         this.__colorProperty = new SynchedPropertyNesedObjectPU(e.colorProperty, this, "colorProperty");
         this.__buttonBorderRadius = this.initializeConsume("buttonBorderRadius", "buttonBorderRadius");
         this.pressIndex = 0;
@@ -620,20 +728,20 @@ class PressAndHoverEffect extends ViewPU {
     }
 
     updateStateVars(t) {
-        this.__pressOpacity.reset(t.pressOpacity);
+        this.__press.reset(t.press);
         this.__colorProperty.set(t.colorProperty)
     }
 
     purgeVariableDependenciesOnElmtId(t) {
         this.__buttonItemsSize.purgeDependencyOnElmtId(t);
-        this.__pressOpacity.purgeDependencyOnElmtId(t);
+        this.__press.purgeDependencyOnElmtId(t);
         this.__colorProperty.purgeDependencyOnElmtId(t);
         this.__buttonBorderRadius.purgeDependencyOnElmtId(t)
     }
 
     aboutToBeDeleted() {
         this.__buttonItemsSize.aboutToBeDeleted();
-        this.__pressOpacity.aboutToBeDeleted();
+        this.__press.aboutToBeDeleted();
         this.__colorProperty.aboutToBeDeleted();
         this.__buttonBorderRadius.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
@@ -648,12 +756,12 @@ class PressAndHoverEffect extends ViewPU {
         this.__buttonItemsSize.set(t)
     }
 
-    get pressOpacity() {
-        return this.__pressOpacity.get()
+    get press() {
+        return this.__press.get()
     }
 
-    set pressOpacity(t) {
-        this.__pressOpacity.set(t)
+    set press(t) {
+        this.__press.set(t)
     }
 
     get colorProperty() {
@@ -673,22 +781,11 @@ class PressAndHoverEffect extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Stack.create();
             Stack.size(this.buttonItemsSize[this.pressIndex]);
-            Stack.backgroundColor(this.colorProperty.hoverColor);
+            Stack.backgroundColor(this.press ? this.pressColor : this.colorProperty.hoverColor);
             Stack.borderRadius(this.buttonBorderRadius[this.pressIndex]);
             e || Stack.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
-        this.observeComponentCreation(((t, e) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t);
-            Stack.create();
-            Stack.size(this.buttonItemsSize[this.pressIndex]);
-            Stack.backgroundColor(this.pressColor);
-            Stack.opacity(this.pressOpacity);
-            Stack.borderRadius(this.buttonBorderRadius[this.pressIndex]);
-            e || Stack.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
-        Stack.pop();
         Stack.pop()
     }
 
@@ -712,9 +809,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__zoomScaleArray = this.initializeConsume("zoomScaleArray", "zoomScaleArray");
         this.__buttonItemProperty = this.initializeConsume("buttonItemProperty", "buttonItemProperty");
         this.__buttonItemsSelected = this.initializeConsume("buttonItemsSelected", "buttonItemsSelected");
-        this.__pressOpacityArray = new ObservedPropertyObjectPU(Array.from({
-            length: 5
-        }, (() => 0)), this, "pressOpacityArray");
+        this.__pressArray = new ObservedPropertyObjectPU(Array.from({ length: 5 }, (() =>!1)), this, "pressArray");
         this.__hoverColorArray = new ObservedPropertyObjectPU(Array.from({
             length: 5
         }, (() => new HoverColorProperty)), this, "hoverColorArray");
@@ -729,7 +824,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     setInitiallyProvidedValue(t) {
         this.__optionsArray.set(t.optionsArray);
         this.__options.set(t.options);
-        void 0 !== t.pressOpacityArray && (this.pressOpacityArray = t.pressOpacityArray);
+        void 0 !== t.pressArray && (this.pressArray = t.pressArray);
         void 0 !== t.hoverColorArray && (this.hoverColorArray = t.hoverColorArray);
         void 0 !== t.buttonWidth && (this.buttonWidth = t.buttonWidth);
         void 0 !== t.buttonHeight && (this.buttonHeight = t.buttonHeight);
@@ -753,7 +848,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__zoomScaleArray.purgeDependencyOnElmtId(t);
         this.__buttonItemProperty.purgeDependencyOnElmtId(t);
         this.__buttonItemsSelected.purgeDependencyOnElmtId(t);
-        this.__pressOpacityArray.purgeDependencyOnElmtId(t);
+        this.__pressArray.purgeDependencyOnElmtId(t);
         this.__hoverColorArray.purgeDependencyOnElmtId(t);
         this.__buttonWidth.purgeDependencyOnElmtId(t);
         this.__buttonHeight.purgeDependencyOnElmtId(t)
@@ -771,7 +866,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__zoomScaleArray.aboutToBeDeleted();
         this.__buttonItemProperty.aboutToBeDeleted();
         this.__buttonItemsSelected.aboutToBeDeleted();
-        this.__pressOpacityArray.aboutToBeDeleted();
+        this.__pressArray.aboutToBeDeleted();
         this.__hoverColorArray.aboutToBeDeleted();
         this.__buttonWidth.aboutToBeDeleted();
         this.__buttonHeight.aboutToBeDeleted();
@@ -859,12 +954,12 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__buttonItemsSelected.set(t)
     }
 
-    get pressOpacityArray() {
-        return this.__pressOpacityArray.get()
+    get pressArray() {
+        return this.__pressArray.get()
     }
 
-    set pressOpacityArray(t) {
-        this.__pressOpacityArray.set(t)
+    set pressArray(t) {
+        this.__pressArray.set(t)
     }
 
     get hoverColorArray() {
@@ -993,30 +1088,34 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         Stack.pop()
     }
 
-    calculateBorderRadius(t) {
-        var e, o, s, i, n, r, d, a;
-        let h = this.buttonItemsSize[t].height / 2;
-        if (this.options.multiply) if (0 === t) {
-            this.buttonBorderRadius[t].topLeft = null !== (n = this.options.iconTextRadius) && void 0 !== n ? n : h;
-            this.buttonBorderRadius[t].topRight = 0;
-            this.buttonBorderRadius[t].bottomLeft = null !== (r = this.options.iconTextRadius) && void 0 !== r ? r : h;
-            this.buttonBorderRadius[t].bottomRight = 0
-        } else if (t === Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
-            this.buttonBorderRadius[t].topLeft = 0;
-            this.buttonBorderRadius[t].topRight = null !== (d = this.options.iconTextRadius) && void 0 !== d ? d : h;
-            this.buttonBorderRadius[t].bottomLeft = 0;
-            this.buttonBorderRadius[t].bottomRight = null !== (a = this.options.iconTextRadius) && void 0 !== a ? a : h
-        } else {
-            this.buttonBorderRadius[t].topLeft = 0;
-            this.buttonBorderRadius[t].topRight = 0;
-            this.buttonBorderRadius[t].bottomLeft = 0;
-            this.buttonBorderRadius[t].bottomRight = 0
-        } else {
-            this.buttonBorderRadius[t].topLeft = null !== (e = this.options.iconTextRadius) && void 0 !== e ? e : h;
-            this.buttonBorderRadius[t].topRight = null !== (o = this.options.iconTextRadius) && void 0 !== o ? o : h;
-            this.buttonBorderRadius[t].bottomLeft = null !== (s = this.options.iconTextRadius) && void 0 !== s ? s : h;
-            this.buttonBorderRadius[t].bottomRight = null !== (i = this.options.iconTextRadius) && void 0 !== i ? i : h
+    calculateBorderRadius() {
+        var t, e, o, s, i, n, r, d;
+        let a = Array.from({ length: 5 }, (() => ({ topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 })));
+        for (let h = 0;h < this.buttonBorderRadius.length; h++) {
+            let c = this.buttonItemsSize[h].height / 2;
+            if (this.options.multiply) if (0 === h) {
+                a[h].topLeft = null !== (i = this.options.iconTextRadius) && void 0 !== i ? i : c;
+                a[h].topRight = 0;
+                a[h].bottomLeft = null !== (n = this.options.iconTextRadius) && void 0 !== n ? n : c;
+                a[h].bottomRight = 0
+            } else if (h === Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
+                a[h].topLeft = 0;
+                a[h].topRight = null !== (r = this.options.iconTextRadius) && void 0 !== r ? r : c;
+                a[h].bottomLeft = 0;
+                a[h].bottomRight = null !== (d = this.options.iconTextRadius) && void 0 !== d ? d : c
+            } else {
+                a[h].topLeft = 0;
+                a[h].topRight = 0;
+                a[h].bottomLeft = 0;
+                a[h].bottomRight = 0
+            } else {
+                a[h].topLeft = null !== (t = this.options.iconTextRadius) && void 0 !== t ? t : c;
+                a[h].topRight = null !== (e = this.options.iconTextRadius) && void 0 !== e ? e : c;
+                a[h].bottomLeft = null !== (o = this.options.iconTextRadius) && void 0 !== o ? o : c;
+                a[h].bottomRight = null !== (s = this.options.iconTextRadius) && void 0 !== s ? s : c
+            }
         }
+        this.buttonBorderRadius = a
     }
 
     initialRender() {
@@ -1026,8 +1125,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                 this.optionsArray.length > 1 ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation(((t, e) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
-                    Row.create();
-                    Row.padding(this.options.buttonMargin);
+                    Row.create({ space: 1 });
+                    Row.padding(this.options.componentPadding);
                     Row.onAreaChange(((t, e) => {
                         this.componentSize = { width: e.width, height: e.height }
                     }));
@@ -1047,7 +1146,10 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                                     Stack.create();
                                     Stack.borderRadius(this.buttonBorderRadius[e]);
-                                    Stack.scale({ x: this.zoomScaleArray[e], y: this.zoomScaleArray[e] });
+                                    Stack.scale({
+                                        x: "capsule" === this.options.type && this.options.multiply ? 1 : this.zoomScaleArray[e],
+                                        y: "capsule" === this.options.type && this.options.multiply ? 1 : this.zoomScaleArray[e]
+                                    });
                                     Stack.layoutWeight(1);
                                     Stack.onAreaChange(((t, o) => {
                                         this.buttonItemsSize[e] = {
@@ -1071,40 +1173,34 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                         })))
                                     }));
                                     Stack.onHover((t => {
-                                        if (t) {
+                                            t ? Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
                                             this.hoverColorArray[e].hoverColor = {
                                                 id: -1,
                                                 type: 10001,
                                                 params: ["sys.color.ohos_id_color_hover"],
                                                 bundleName: "",
                                                 moduleName: ""
-                                            };
-                                            Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
-                                                this.zoomScaleArray[e] = 1.05
-                                            }))
-                                        } else {
-                                            this.hoverColorArray[e].hoverColor = Color.Transparent;
-                                            Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
-                                                this.zoomScaleArray[e] = 1
-                                            }))
-                                        }
+                                            }
+                                        })) : Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
+                                            this.hoverColorArray[e].hoverColor = Color.Transparent
+                                        }))
                                     }));
                                     Stack.onMouse((t => {
                                         switch (t.action) {
                                             case MouseAction.Press:
-                                                Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
-                                                    this.zoomScaleArray[e] = 1
+                                                Context.animateTo({ curve: curves.springMotion(.347, .99) }, (() => {
+                                                    this.zoomScaleArray[e] = .95
                                                 }));
                                                 Context.animateTo({ duration: 100, curve: Curve.Sharp }, (() => {
-                                                    this.pressOpacityArray[e] = .1
+                                                    this.pressArray[e] = !0
                                                 }));
                                                 break;
                                             case MouseAction.Release:
-                                                Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
-                                                    this.zoomScaleArray[e] = 1.05
+                                                Context.animateTo({ curve: curves.springMotion(.347, .99) }, (() => {
+                                                    this.zoomScaleArray[e] = 1
                                                 }));
                                                 Context.animateTo({ duration: 100, curve: Curve.Sharp }, (() => {
-                                                    this.pressOpacityArray[e] = 0
+                                                    this.pressArray[e] = !1
                                                 }))
                                         }
                                     }));
@@ -1117,16 +1213,16 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                         let o = () => ({
                                             pressIndex: e,
                                             colorProperty: this.hoverColorArray[e],
-                                            pressOpacity: this.pressOpacityArray[e]
+                                            press: this.pressArray[e]
                                         });
                                         ViewPU.create(new PressAndHoverEffect(this, {
                                             pressIndex: e,
                                             colorProperty: this.hoverColorArray[e],
-                                            pressOpacity: this.pressOpacityArray[e]
+                                            press: this.pressArray[e]
                                         }, void 0, t, o))
                                     } else this.updateStateVarsOfChildByElmtId(t, {
                                         colorProperty: this.hoverColorArray[e],
-                                        pressOpacity: this.pressOpacityArray[e]
+                                        press: this.pressArray[e]
                                     });
                                     ViewStackProcessor.StopGetAccessRecording()
                                 }));
@@ -1136,13 +1232,11 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                     __Common__.onAreaChange(((t, o) => {
                                         this.buttonItemsRealHeight[e] = o.height;
                                         let s = Math.max(...this.buttonItemsRealHeight);
-                                        for (let t = 0;t < this.buttonItemsSize.length; t++) {
-                                            this.buttonItemsSize[t] = {
-                                                width: this.buttonItemsSize[t].width,
-                                                height: s
-                                            };
-                                            this.calculateBorderRadius(t)
-                                        }
+                                        for (let t = 0;t < this.buttonItemsSize.length; t++) this.buttonItemsSize[t] = {
+                                            width: this.buttonItemsSize[t].width,
+                                            height: s
+                                        };
+                                        this.calculateBorderRadius()
                                     }));
                                     o || __Common__.pop();
                                     ViewStackProcessor.StopGetAccessRecording()
@@ -1174,32 +1268,6 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                             })) : this.ifElseBranchUpdateFunction(1, (() => {
                             }));
                             s || If.pop();
-                            ViewStackProcessor.StopGetAccessRecording()
-                        }));
-                        If.pop();
-                        this.observeComponentCreation(((t, o) => {
-                            ViewStackProcessor.StartGetAccessRecordingFor(t);
-                            If.create();
-                                e < this.optionsArray.length - 1 && this.options.multiply ? this.ifElseBranchUpdateFunction(0, (() => {
-                                this.observeComponentCreation(((t, e) => {
-                                    ViewStackProcessor.StartGetAccessRecordingFor(t);
-                                    Divider.create();
-                                    Divider.vertical(!0);
-                                    Divider.color({
-                                        id: -1,
-                                        type: 10001,
-                                        params: ["sys.color.ohos_id_color_list_separator"],
-                                        bundleName: "",
-                                        moduleName: ""
-                                    });
-                                    Divider.strokeWidth(1);
-                                    Divider.height(void 0 === this.buttonItemsSize[0].height ? 0 : this.buttonItemsSize[0].height);
-                                    e || Divider.pop();
-                                    ViewStackProcessor.StopGetAccessRecording()
-                                }))
-                            })) : this.ifElseBranchUpdateFunction(1, (() => {
-                            }));
-                            o || If.pop();
                             ViewStackProcessor.StopGetAccessRecording()
                         }));
                         If.pop()
@@ -1526,8 +1594,14 @@ class SegmentButton extends ViewPU {
                         break
                     }
                 }
+                this.zoomScaleArray.forEach(((t, e) => {
+                        e === this.selectedIndexes[0] ? this.zoomScaleArray[e] = .95 : this.zoomScaleArray[e] = 1
+                }))
             }));
             PanGesture.onActionEnd((t => {
+                Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, (() => {
+                    this.zoomScaleArray[this.selectedIndexes[0]] = 1
+                }));
                 this.isCurrentPositionSelected = !1
             }));
             PanGesture.pop();
@@ -1537,16 +1611,41 @@ class SegmentButton extends ViewPU {
             ViewStackProcessor.StopGetAccessRecording()
         }));
         this.observeComponentCreation(((t, e) => {
-            var o;
             ViewStackProcessor.StartGetAccessRecordingFor(t);
-            Stack.create();
-            Stack.size(ObservedObject.GetRawObject(this.componentSize));
-            Stack.backgroundColor(this.options.backgroundColor);
-            Stack.borderRadius(null !== (o = this.options.iconTextBackgroundRadius) && void 0 !== o ? o : this.componentSize.height / 2);
-            e || Stack.pop();
+            If.create();
+                "capsule" === this.options.type && this.options.multiply ? this.ifElseBranchUpdateFunction(0, (() => {
+                this.observeComponentCreation(((t, e) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
+                    if (e) {
+                        let e = () => ({ optionsArray: this.options.buttons, options: this.options });
+                        ViewPU.create(new MultiSelectBackground(this, {
+                            optionsArray: this.options.buttons,
+                            options: this.options
+                        }, void 0, t, e))
+                    } else this.updateStateVarsOfChildByElmtId(t, {
+                        optionsArray: this.options.buttons,
+                        options: this.options
+                    });
+                    ViewStackProcessor.StopGetAccessRecording()
+                }))
+            })) : this.ifElseBranchUpdateFunction(1, (() => {
+                this.observeComponentCreation(((t, e) => {
+                    var o;
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
+                    Stack.create();
+                    Stack.size(ObservedObject.GetRawObject(this.componentSize));
+                    Stack.backgroundColor(this.options.backgroundColor);
+                    Stack.borderRadius(null !== (o = this.options.iconTextBackgroundRadius) && void 0 !== o ? o : this.componentSize.height / 2);
+                    Stack.foregroundBlurStyle(BlurStyle.BACKGROUND_THICK, { colorMode: ThemeColorMode.LIGHT });
+                    e || Stack.pop();
+                    ViewStackProcessor.StopGetAccessRecording()
+                }));
+                Stack.pop()
+            }));
+            e || If.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
-        Stack.pop();
+        If.pop();
         this.observeComponentCreation(((t, e) => {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Stack.create();

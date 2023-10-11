@@ -18,13 +18,11 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 
-class NativeValue;
-
 namespace OHOS::Ace::Framework {
 
 class JsConverter {
 public:
-    static JSRef<JSVal> ConvertNativeValueToJsVal(NativeValue* nativeValue);
+    static JSRef<JSVal> ConvertNapiValueToJsVal(napi_value nativeValue);
 };
 
 } // namespace OHOS::Ace::Framework

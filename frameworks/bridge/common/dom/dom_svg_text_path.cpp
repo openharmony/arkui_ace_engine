@@ -35,7 +35,6 @@ void DOMSvgTextPath::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
     auto declaration = AceType::DynamicCast<SvgTextPathDeclaration>(declaration_);
     if (!declaration) {
-        LOGE("declaration is null");
         return;
     }
     auto svgNode = AceType::DynamicCast<DOMSvgBase>(parentNode);

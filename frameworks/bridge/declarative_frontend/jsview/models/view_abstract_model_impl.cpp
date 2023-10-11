@@ -1357,12 +1357,10 @@ void ViewAbstractModelImpl::SetRestoreId(int32_t restoreId)
 
 void ViewAbstractModelImpl::SetDebugLine(const std::string& line)
 {
-#if defined(PREVIEW)
     auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (component) {
         component->SetDebugLine(line);
     }
-#endif
 }
 
 void ViewAbstractModelImpl::SetHoverEffect(HoverEffectType hoverEffect)

@@ -84,9 +84,10 @@ void JSUIExtensionProxy::Send(const JSCallbackInfo& info)
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
-    ScopeRAII scopeRAII(nativeEngine->GetScopeManager());
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-    auto wantParams = WantParamsWrap::CreateWantWrap(nativeEngine, nativeValue);
+    ScopeRAII scopeNapi(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    
+    auto wantParams = WantParamsWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
     if (proxy_) {
         proxy_->SendData(wantParams);
     }
@@ -161,8 +162,9 @@ void JSUIExtension::OnReceive(const JSCallbackInfo& info)
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
         CHECK_NULL_VOID(nativeEngine);
-        auto nativeWantParams = WantWrap::ConvertParamsToNativeValue(wantParams, nativeEngine);
-        auto wantParamsJSVal = JsConverter::ConvertNativeValueToJsVal(nativeWantParams);
+        auto env = reinterpret_cast<napi_env>(nativeEngine);
+        auto nativeWantParams = WantWrap::ConvertParamsToNativeValue(wantParams, env);
+        auto wantParamsJSVal = JsConverter::ConvertNapiValueToJsVal(nativeWantParams);
         func->ExecuteJS(1, &wantParamsJSVal);
     };
     UIExtensionModel::GetInstance()->SetOnReceive(std::move(onReceive));
@@ -201,8 +203,8 @@ void JSUIExtension::OnResult(const JSCallbackInfo& info)
             CHECK_NULL_VOID(engine);
             NativeEngine* nativeEngine = engine->GetNativeEngine();
             CHECK_NULL_VOID(nativeEngine);
-            auto nativeWant = WantWrap::ConvertToNativeValue(want, nativeEngine);
-            auto wantJSVal = JsConverter::ConvertNativeValueToJsVal(nativeWant);
+            auto nativeWant = WantWrap::ConvertToNativeValue(want, reinterpret_cast<napi_env>(nativeEngine));
+            auto wantJSVal = JsConverter::ConvertNapiValueToJsVal(nativeWant);
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             obj->SetProperty<int32_t>("code", code);
             obj->SetPropertyObject("want", wantJSVal);

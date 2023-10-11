@@ -705,7 +705,7 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
     }
 }
 
-NativeValue* DeclarativeFrontend::GetContextValue()
+napi_value DeclarativeFrontend::GetContextValue()
 {
     return jsEngine_->GetContextValue();
 }

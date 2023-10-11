@@ -31,7 +31,7 @@
 
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
 
-class NativeValue;
+typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
 
@@ -109,8 +109,7 @@ public:
     }
 
     // Get the stage mode sourceMap.
-    virtual void GetStageSourceMap(
-        std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {}
+    virtual void GetStageSourceMap(std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {}
 
     virtual void RunPage(const std::string& content, const std::string& params) = 0;
 
@@ -126,9 +125,9 @@ public:
     // Get window config of front end, which is used to calculate the pixel ratio of the real device.
     virtual WindowConfig& GetWindowConfig() = 0;
 
-    std::unique_lock<std::mutex> GetLock() const
+    std::unique_lock<std::recursive_mutex> GetLock() const
     {
-        return std::unique_lock<std::mutex>(mutex_);
+        return std::unique_lock<std::recursive_mutex>(mutex_);
     }
 
     FrontendType GetType() const
@@ -261,11 +260,13 @@ public:
     }
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
-    
-    virtual NativeValue* GetContextValue()
+
+    virtual napi_value GetContextValue()
     {
-        return nullptr;
+        napi_value value = nullptr;
+        return value;
     }
+
 #ifdef PREVIEW
     virtual void RunNativeEngineLoop() {}
 #endif
@@ -299,7 +300,7 @@ protected:
     bool disallowPopLastPage_ = false;
     FrontendDialogCallback dialogCallback_ = nullptr;
     State state_ = State::UNDEFINE;
-    mutable std::mutex mutex_;
+    mutable std::recursive_mutex mutex_;
 };
 
 } // namespace OHOS::Ace

@@ -22,6 +22,7 @@
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "napi/native_common.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_value.h"
 #include "node_api.h"
 
@@ -151,9 +152,7 @@ void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNo
                 LOGE("status = %{public}d", status);
                 return;
             }
-            auto* nativeValue = reinterpret_cast<NativeValue*>(eventNapi);
-            panda::CopyableGlobal<JSValueRef> globalRef = *nativeValue;
-            auto localRef = globalRef.ToLocal();
+            auto localRef = NapiValueToLocalValue(eventNapi);
             if (localRef->IsNull()) {
                 LOGE("localRef is null");
                 return;
@@ -385,12 +384,7 @@ bool ParseDragInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
     napi_get_named_property(asyncCtx->env, asyncCtx->argv[1], "data", &dataNApi);
     napi_typeof(asyncCtx->env, dataNApi, &valueType);
     if (valueType == napi_object) {
-        auto* nativeValue = reinterpret_cast<NativeValue*>(dataNApi);
-        if (!nativeValue) {
-            errMsg = "parse data fail";
-            return false;
-        }
-        asyncCtx->unifiedData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
+        asyncCtx->unifiedData = UdmfClient::GetInstance()->TransformUnifiedData(dataNApi);
     } else if (valueType != napi_undefined) {
         errMsg = "data's type is wrong";
         return false;

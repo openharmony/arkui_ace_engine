@@ -142,6 +142,11 @@ public:
         gridLayoutInfo_.irregularItemsPosition_.clear();
     }
 
+    void ResetPositionFlags()
+    {
+        gridLayoutInfo_.ResetPositionFlags();
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
@@ -194,12 +199,15 @@ public:
 
     void DumpInfo() override;
 
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+
 private:
     float GetMainGap();
     float GetAllDelta();
     void CheckRestartSpring();
     void CheckScrollable();
-    bool IsOutOfBoundary();
+    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
     void OnModifyDone() override;

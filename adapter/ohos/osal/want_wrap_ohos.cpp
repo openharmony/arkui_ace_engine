@@ -15,42 +15,39 @@
 
 #include "want_wrap_ohos.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
 #include "napi_common_want.h"
 
+#include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
-RefPtr<WantParamsWrap> WantParamsWrap::CreateWantWrap(NativeEngine* engine, NativeValue* value)
+RefPtr<WantParamsWrap> WantParamsWrap::CreateWantWrap(napi_env env, napi_value value)
 {
-    return AceType::MakeRefPtr<WantParamsWrapOhos>(engine, value);
+    return AceType::MakeRefPtr<WantParamsWrapOhos>(env, value);
 }
-WantParamsWrapOhos::WantParamsWrapOhos(NativeEngine* engine, NativeValue* value)
+WantParamsWrapOhos::WantParamsWrapOhos(napi_env env, napi_value value)
 {
-    AppExecFwk::UnwrapWantParams(
-        reinterpret_cast<napi_env>(engine), reinterpret_cast<napi_value>(value), params_);
-}
-
-NativeValue* WantWrap::ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine)
-{
-    return reinterpret_cast<NativeValue*>(OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(engine), want));
+    AppExecFwk::UnwrapWantParams(env, value, params_);
 }
 
-NativeValue* WantWrap::ConvertParamsToNativeValue(const OHOS::AAFwk::WantParams& wantParams, NativeEngine* engine)
+napi_value WantWrap::ConvertToNativeValue(const OHOS::AAFwk::Want& want, napi_env env)
 {
-    return reinterpret_cast<NativeValue*>(
-        OHOS::AppExecFwk::WrapWantParams(reinterpret_cast<napi_env>(engine), wantParams));
+    return OHOS::AppExecFwk::WrapWant(env, want);
 }
 
-RefPtr<WantWrap> WantWrap::CreateWantWrap(void* nativeEngine, void* nativeValue)
+napi_value WantWrap::ConvertParamsToNativeValue(const OHOS::AAFwk::WantParams& wantParams, napi_env env)
 {
-    NativeEngine* engine = reinterpret_cast<NativeEngine*>(nativeEngine);
-    NativeValue* value = reinterpret_cast<NativeValue*>(nativeValue);
-    if (engine == nullptr || value == nullptr) {
+    return OHOS::AppExecFwk::WrapWantParams(env, wantParams);
+}
+
+RefPtr<WantWrap> WantWrap::CreateWantWrap(napi_env env, napi_value value)
+{
+    if (env == nullptr || value == nullptr) {
         LOGW("engine or value is nullptr when CreateWantWrap.");
         return nullptr;
     }
 
-    return AceType::MakeRefPtr<WantWrapOhos>(engine, value);
+    return AceType::MakeRefPtr<WantWrapOhos>(env, value);
 }
 
 RefPtr<WantWrap> WantWrap::CreateWantWrap(const std::string& bundleName, const std::string& abilityName)
@@ -58,11 +55,9 @@ RefPtr<WantWrap> WantWrap::CreateWantWrap(const std::string& bundleName, const s
     return AceType::MakeRefPtr<WantWrapOhos>(bundleName, abilityName);
 }
 
-WantWrapOhos::WantWrapOhos(NativeEngine* engine, NativeValue* value)
+WantWrapOhos::WantWrapOhos(napi_env env, napi_value value)
 {
-    OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(engine),
-                                 reinterpret_cast<napi_value>(value),
-                                 want_);
+    OHOS::AppExecFwk::UnwrapWant(env, value, want_);
 }
 
 WantWrapOhos::WantWrapOhos(const std::string& bundleName, const std::string& abilityName)

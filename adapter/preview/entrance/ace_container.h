@@ -286,10 +286,18 @@ public:
 
     void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange) override;
 
+    // Support to execute the ets code mocked by developer
+    void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo)
+    {
+        mockJsonInfo_ = mockJsonInfo;
+    }
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
     void SetHspBufferTrackerCallback();
+    // Support to execute the ets code mocked by developer
+    void SetMockModuleListToJsEngine();
 
 #ifndef ENABLE_ROSEN_BACKEND
     void AttachView(
@@ -318,6 +326,9 @@ private:
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
     void* sharedRuntime_ = nullptr;
+
+    // Support to execute the ets code mocked by developer
+    std::map<std::string, std::string> mockJsonInfo_;
 
     // app bar to use
     bool installationFree_ = false;

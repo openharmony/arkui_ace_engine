@@ -42,40 +42,32 @@ std::string FormFrontendDeclarative::GetFormSrcPath(const std::string& uri, cons
         }
     }
 
-    LOGE("can't find this page %{private}s path", uri.c_str());
     return "";
 }
 
 void FormFrontendDeclarative::RunPage(const std::string& url, const std::string& params)
 {
-    LOGI("FormFrontendDeclarative::RunPage url = %{public}s", url.c_str());
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormFrontendDeclarative run page url = %{public}s", url.c_str());
     std::string urlPath = GetFormSrcPath(url, FILE_TYPE_BIN);
     if (urlPath.empty()) {
-        LOGE("fail to eTS Card run page due to path url is empty");
-        EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
         return;
     }
-    LOGI("FormFrontendDeclarative::RunPage urlPath = %{public}s", urlPath.c_str());
     if (delegate_) {
         auto container = Container::Current();
         if (!container) {
-            LOGE("RunPage host container null");
-            EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
             return;
         }
         container->SetCardFrontend(AceType::WeakClaim(this), cardId_);
         auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
         if (delegate) {
             delegate->RunCard(urlPath, params, "", cardId_);
-        } else {
-            LOGE("FormFrontendDeclarative::RunPage delegate nullptr");
         }
     }
 }
 
 void FormFrontendDeclarative::UpdateData(const std::string& dataList)
 {
-    LOGI("FormFrontendDeclarative::UpdateData dataList = %{public}s", dataList.c_str());
+    TAG_LOGD(AceLogTag::ACE_FORM, "FormFrontendDeclarative updateData dataList = %{public}s", dataList.c_str());
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), dataList] {
@@ -92,8 +84,6 @@ void FormFrontendDeclarative::UpdatePageData(const std::string& dataList)
     CHECK_RUN_ON(UI); // eTSCard UI == Main JS/UI/PLATFORM
     auto delegate = GetDelegate();
     if (!delegate) {
-        LOGE("the delegate is null");
-        EventReport::SendFormException(FormExcepType::UPDATE_PAGE_ERR);
         return;
     }
     delegate->UpdatePageData(dataList);

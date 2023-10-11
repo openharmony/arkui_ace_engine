@@ -80,7 +80,7 @@ public:
             ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_HTTPPROXYTUNNEL, 1L);
         }
 
-#if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
+#if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM) || defined(PREVIEW)
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_SSL_VERIFYPEER, 0L);
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_SSL_VERIFYHOST, 0L);
 #endif

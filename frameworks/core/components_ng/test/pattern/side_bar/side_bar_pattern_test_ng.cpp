@@ -1571,4 +1571,106 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg048, TestSize.Level1)
     pattern->CreateAnimation();
     pattern->leftToRightAnimation_->callbacks_.begin()->second(1.0f);
 }
+
+/**
+ * @tc.name: SideBarPatternTestNg049
+ * @tc.desc: Test SideBar GetDividerNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg049, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton1 = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton3 = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern->GetDividerNode();
+    frameNode->children_.push_back(backButton);
+    frameNode->children_.push_back(backButton1);
+    frameNode->children_.push_back(backButton2);
+    frameNode->children_.push_back(backButton3);
+    auto sideBarNode = pattern->GetSideBarNode(host);
+    ASSERT_NE(sideBarNode, nullptr);
+    auto sideBarContext = sideBarNode->GetRenderContext();
+    ASSERT_NE(sideBarContext, nullptr);
+    pattern->GetDividerNode();
+    ASSERT_FALSE(pattern->GetDividerNode());
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg050
+ * @tc.desc: Test SideBar OnUpdateShowSideBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern frameNode layoutProperty and newShowSideBar,
+     *  modify showSideBar_.
+     * @tc.expected: check whether the showSideBar_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+    auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
+    EXPECT_TRUE(newShowSideBar);
+    EXPECT_TRUE(pattern->showSideBar_);
+    pattern->showSideBar_ = false;
+    EXPECT_FALSE(pattern->showSideBar_);
+    pattern->hasInit_ = true;
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_TRUE(pattern->showSideBar_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg051
+ * @tc.desc: Test SideBar AddDividerHotZoneRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg051, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern, frameNode, sideBarLayoutProperty
+        layoutWrapper .
+     * @tc.expected: check whether the pattern->needInitRealSideBarWidth_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    WeakPtr<FrameNode> hostNode = frameNode;
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    auto algorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(algorithmWrapper, nullptr);
+    auto algorithm = AceType::DynamicCast<SideBarContainerLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(algorithm, nullptr);
+    pattern->realDividerWidth_ = 1.0f;
+    pattern->AddDividerHotZoneRect(algorithm);
+    EXPECT_TRUE(pattern->realDividerWidth_);
+}
 } // namespace OHOS::Ace::NG

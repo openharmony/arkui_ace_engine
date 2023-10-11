@@ -18,8 +18,10 @@
 
 #include <optional>
 
+#include "base/geometry/calc_dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/utils/macros.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -90,6 +92,10 @@ void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size);
 
 void UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
     const std::optional<CalcSize>& calcLayoutConstraintMaxMinSize, const SizeT<float> percentReference, bool IsMaxSize);
+
+ACE_FORCE_EXPORT PaddingProperty ConvertToCalcPaddingProperty(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right);
 
 /**
  * @brief Create node IdealSize.

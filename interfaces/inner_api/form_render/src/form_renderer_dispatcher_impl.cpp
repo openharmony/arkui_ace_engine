@@ -20,19 +20,29 @@
 namespace OHOS {
 namespace Ace {
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(
-    const std::shared_ptr<UIContent> uiContent, const std::shared_ptr<FormRenderer> formRenderer)
-    : uiContent_(uiContent), formRenderer_(formRenderer)
+    const std::shared_ptr<UIContent> uiContent,
+    const std::shared_ptr<FormRenderer> formRenderer,
+    std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler)
+    : uiContent_(uiContent), formRenderer_(formRenderer), eventHandler_(eventHandler)
 {}
 
 void FormRendererDispatcherImpl::DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    auto uiContent = uiContent_.lock();
-    if (!uiContent) {
-        HILOG_ERROR("uiContent is nullptr");
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
         return;
     }
 
-    uiContent->ProcessPointerEvent(pointerEvent);
+    handler->PostTask([=]() {
+        auto uiContent = uiContent_.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+
+        uiContent->ProcessPointerEvent(pointerEvent);
+    });
 }
 
 bool FormRendererDispatcherImpl::IsAllowUpdate()
@@ -47,14 +57,22 @@ void FormRendererDispatcherImpl::SetAllowUpdate(bool allowUpdate)
 
 void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float height)
 {
-    auto uiContent = uiContent_.lock();
-    if (!uiContent) {
-        HILOG_ERROR("uiContent is nullptr");
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
         return;
     }
-    uiContent->SetFormWidth(width);
-    uiContent->SetFormHeight(height);
-    uiContent->OnFormSurfaceChange(width, height);
+
+    handler->PostTask([=]() {
+        auto uiContent = uiContent_.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        uiContent->SetFormWidth(width);
+        uiContent->SetFormHeight(height);
+        uiContent->OnFormSurfaceChange(width, height);
+    });
 
     auto formRenderer = formRenderer_.lock();
     if (!formRenderer) {

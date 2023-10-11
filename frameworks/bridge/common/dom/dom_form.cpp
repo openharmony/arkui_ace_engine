@@ -63,7 +63,6 @@ void DOMForm::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 void DOMForm::Submit()
 {
     if (!onSubmit_) {
-        LOGE("the submit callback is nullptr");
         return;
     }
     // call on the ui thread.

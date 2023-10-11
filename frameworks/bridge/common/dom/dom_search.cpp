@@ -57,7 +57,7 @@ void DOMSearch::InitializeStyle()
         // theme is null, set default decoration to text field component
         RefPtr<Decoration> decoration = AceType::MakeRefPtr<Decoration>();
         textFieldComponent_->SetDecoration(decoration);
-        LOGE("textFieldTheme or searchTheme is null");
+        LOGW("textFieldTheme or searchTheme is null");
         return;
     }
 

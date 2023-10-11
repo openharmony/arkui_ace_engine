@@ -1509,4 +1509,223 @@ HWTEST_F(EventManagerTestNg, EventManagerTest033, TestSize.Level1)
     eventManager->mouseHoverNode_ = RenderAbilityComponent::Create();
     eventManager->mouseHoverNodePre_ = RenderAbilityComponent::Create();
 }
+
+/**
+ * @tc.name: EventManagerTest034
+ * @tc.desc: Test DispatchTouchEvent:hoverNodeCur and hoverNodePre both null
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    eventManager->currHoverNode_ = FrameNode::GetOrCreateFrameNode(CTRL, 0, nullptr);
+    eventManager->lastHoverNode_ = FrameNode::GetOrCreateFrameNode(CTRL, 0, nullptr);
+
+    /**
+     * @tc.steps: step2. Call DispatchMouseHoverAnimationNG with MouseAction::PRESS;
+     * @tc.expected: ret is false
+     */
+    MouseEvent event;
+    event.button = MouseButton::NONE_BUTTON;
+    event.action = MouseAction::PRESS;
+    eventManager->DispatchMouseHoverAnimationNG(event);
+    EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step3. Call DispatchMouseHoverAnimationNG with MouseAction::RELEASE;
+     * @tc.expected: ret is false
+     */
+    event.action = MouseAction::RELEASE;
+    eventManager->DispatchMouseHoverAnimationNG(event);
+    EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step4. Call DispatchMouseHoverAnimationNG with MouseAction::MOVE;
+     * @tc.expected: ret is false
+     */
+    event.action = MouseAction::MOVE;
+    eventManager->DispatchMouseHoverAnimationNG(event);
+    EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step5. Call DispatchMouseHoverAnimationNG with MouseAction::WINDOW_ENTER;
+     * @tc.expected: ret is false
+     */
+    event.action = MouseAction::WINDOW_ENTER;
+    eventManager->DispatchMouseHoverAnimationNG(event);
+    EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step6. Call DispatchMouseHoverAnimationNG with MouseAction::WINDOW_LEAVE;
+     * @tc.expected: ret is false
+     */
+    event.action = MouseAction::WINDOW_LEAVE;
+    eventManager->DispatchMouseHoverAnimationNG(event);
+    EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step6. Call DispatchMouseHoverAnimationNG with MouseAction::HOVER;
+     * @tc.expected: ret is false
+     */
+    event.action = MouseAction::HOVER;
+    eventManager->DispatchMouseHoverAnimationNG(event);
+    EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: DispatchMouseHoverAnimation001
+ * @tc.desc: Test EventManager DispatchMouseHoverAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchMouseHoverAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Assign values to mouseHoverNode_ and mouseHoverNodePre_.
+     * @tc.expected: mouseHoverNode_ and mouseHoverNodePre_ both non null.
+     */
+    eventManager->mouseHoverNode_ = RenderAbilityComponent::Create();
+    eventManager->mouseHoverNodePre_ = RenderAbilityComponent::Create();
+
+    /**
+     * @tc.cases: case. cover branch action is true PRESS.
+     */
+    MouseEvent event;
+    event.action = MouseAction::PRESS;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_EQ(eventManager->mouseHoverNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is RELEASE.
+     */
+    event.action = MouseAction::RELEASE;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is MOVE and event button is NONE_BUTTON.
+     */
+    event.button = MouseButton::NONE_BUTTON;
+    event.action = MouseAction::MOVE;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is not MOVE and event button is NONE_BUTTON.
+     */
+    event.button = MouseButton::NONE_BUTTON;
+    event.action = MouseAction::RELEASE;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is WINDOW_ENTER.
+     */
+    event.action = MouseAction::WINDOW_ENTER;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is WINDOW_ENTER.
+     */
+    event.action = MouseAction::WINDOW_LEAVE;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is HOVER.
+     */
+    event.action = MouseAction::HOVER;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: DispatchMouseHoverAnimation002
+ * @tc.desc: Test EventManager DispatchMouseHoverAnimation:hoverNodeCur and hoverNodePre not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchMouseHoverAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Assign values to mouseHoverNode_ and mouseHoverNodePre_.
+     * @tc.expected: hoverNodeCur and hoverNodePre both non null.
+     */
+    auto currentMouseHoverNode = RenderAbilityComponent::Create();
+    eventManager->mouseHoverNode_ = currentMouseHoverNode;
+    auto currentMouseHoverNodePre = RenderAbilityComponent::Create();
+    eventManager->mouseHoverNodePre_ = currentMouseHoverNodePre;
+
+    /**
+     * @tc.cases: case. cover branch action is true PRESS.
+     */
+    MouseEvent event;
+    event.action = MouseAction::PRESS;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_NE(eventManager->mouseHoverNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is RELEASE.
+     */
+    event.action = MouseAction::RELEASE;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_NE(eventManager->mouseHoverNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is MOVE and event button is NONE_BUTTON.
+     */
+    event.button = MouseButton::NONE_BUTTON;
+    event.action = MouseAction::MOVE;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_NE(eventManager->mouseHoverNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is not MOVE and event button is NONE_BUTTON.
+     */
+    event.button = MouseButton::NONE_BUTTON;
+    event.action = MouseAction::RELEASE;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_NE(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is WINDOW_ENTER.
+     */
+    event.button = MouseButton::LEFT_BUTTON;
+    event.action = MouseAction::WINDOW_ENTER;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_NE(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is WINDOW_LEAVE.
+     */
+    event.action = MouseAction::WINDOW_LEAVE;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_NE(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+
+    /**
+     * @tc.cases: case. cover branch action is HOVER.
+     */
+    event.action = MouseAction::HOVER;
+    eventManager->DispatchMouseHoverAnimation(event);
+    EXPECT_NE(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+}
 } // namespace OHOS::Ace::NG

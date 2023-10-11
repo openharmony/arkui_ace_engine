@@ -29,7 +29,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow_config.h"
-#include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -47,6 +46,9 @@
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components/custom_paint/rosen_render_custom_paint.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -109,12 +111,12 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
+#ifdef ENABLE_ROSEN_BACKEND
     MeasureContext content;
     content.textContent = data;
     content.fontSize = textStyle.GetFontSize();
     auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
     content.fontWeight = fontweight;
-#ifdef ENABLE_ROSEN_BACKEND
     buttonWidth = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
 #else
     buttonWidth = 0.0f;
@@ -179,13 +181,13 @@ RefPtr<FrameNode> BuildButton(
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
     text->MarkModifyDone();
 
+#ifdef ENABLE_ROSEN_BACKEND
     // Calculate the width of entension option include button padding.
     MeasureContext content;
     content.textContent = data;
     content.fontSize = textStyle.GetFontSize();
     auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
     content.fontWeight = fontweight;
-#ifdef ENABLE_ROSEN_BACKEND
     contentWidth = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
 #else
     contentWidth = 0.0f;

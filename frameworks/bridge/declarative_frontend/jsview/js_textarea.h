@@ -31,30 +31,5 @@ public:
     static void Create(const JSCallbackInfo& info);
 };
 
-class JSTextAreaController final : public Referenced {
-public:
-    JSTextAreaController() = default;
-    ~JSTextAreaController() override = default;
-
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSTextAreaController* scroller);
-    void CaretPosition(int32_t caretPosition);
-    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
-    void StopEditing();
-    void SetController(const RefPtr<TextFieldControllerBase>& controller)
-    {
-        controllerWeak_ = controller;
-    }
-
-    void GetTextContentRect(const JSCallbackInfo& info);
-    void GetTextContentLinesNum(const JSCallbackInfo& info);
-private:
-    JSRef<JSObject> CreateRectangle(const Rect& info);
-
-    WeakPtr<TextFieldControllerBase> controllerWeak_;
-    ACE_DISALLOW_COPY_AND_MOVE(JSTextAreaController);
-};
-
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H

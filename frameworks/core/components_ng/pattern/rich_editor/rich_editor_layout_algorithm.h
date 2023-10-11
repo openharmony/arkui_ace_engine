@@ -37,6 +37,8 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
 private:
     void GetPlaceholderRects(std::vector<Rect>& rects) override;
     int32_t GetPreviousLength() const override;

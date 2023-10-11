@@ -159,22 +159,39 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildTitle(RefPtr<FrameNode>& conta
     return AddControlButtons(containerNode, titleContainer);
 }
 
-RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>& containerNode,
-    RefPtr<FrameNode>& containerTitleRow)
+RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
+    RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
     RefPtr<FrameNode> maximizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MAX,
-        {});
+        [weak = AceType::WeakClaim(AceType::RawPtr(containerNode)),
+            wk = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+            auto containerNode = weak.Upgrade();
+            CHECK_NULL_VOID(containerNode);
+            auto windowManager = wk.Upgrade();
+            CHECK_NULL_VOID(windowManager);
+            ResetHoverTimer();
+            auto mode = windowManager->GetWindowMode();
+            auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
+            if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+                LOGD("recover button clicked");
+                windowManager->WindowRecover();
+            } else {
+                LOGD("maximize button clicked");
+                windowManager->WindowMaximize(true);
+            }
+            containerNode->OnWindowFocused();
+        });
     maximizeBtn->UpdateInspectorId("EnhanceMaximizeBtn");
     BondingMaxBtnGestureEvent(maximizeBtn, containerNode);
     BondingMaxBtnInputEvent(maximizeBtn, containerNode);
     containerTitleRow->AddChild(maximizeBtn);
-    
+
     RefPtr<FrameNode> minimizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MIN,
-        [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))] (GestureEvent& info) {
+        [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
             auto windowManager = weak.Upgrade();
             if (!windowManager) {
                 LOGE("create minBtn callback func failed,windowManager is null!");
@@ -185,11 +202,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
         });
     // minimizeBtn add empty panEvent to over fater container event
     minimizeBtn->UpdateInspectorId("EnhanceMinimizeBtn");
-    auto minimizeBtnEventHub = minimizeBtn->GetOrCreateGestureEventHub();
-    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
-    PanDirection panDirection;
-    panDirection.type = PanDirection::ALL;
-    minimizeBtnEventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
     containerTitleRow->AddChild(minimizeBtn);
 
     RefPtr<FrameNode> closeBtn = BuildControlButton(
@@ -202,42 +214,21 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
             }
             LOGI("close button clicked");
             windowManager->WindowClose();
-        }, true);
+        },
+        true);
     // closeBtn add empty panEvent to over fater container event
     closeBtn->UpdateInspectorId("EnhanceCloseBtn");
-    auto closeBtnEventHub = closeBtn->GetOrCreateGestureEventHub();
-    closeBtnEventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
     containerTitleRow->AddChild(closeBtn);
 
     return containerTitleRow;
 }
 
-void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn,
-    RefPtr<FrameNode>& containerNode)
+void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(
+    RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
-    // add click event
-    auto event = [weak = AceType::WeakClaim(AceType::RawPtr(containerNode)),
-        wk = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
-        auto containerNode = weak.Upgrade();
-        CHECK_NULL_VOID(containerNode);
-        auto windowManager = wk.Upgrade();
-        CHECK_NULL_VOID(windowManager);
-        ResetHoverTimer();
-        auto mode = windowManager->GetWindowMode();
-        auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
-        if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode== MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-            LOGD("recover button clicked");
-            windowManager->WindowRecover();
-        } else {
-            LOGD("maximize button clicked");
-            windowManager->WindowMaximize(true);
-        }
-        containerNode->OnWindowFocused();
-    };
     auto hub = maximizeBtn->GetOrCreateGestureEventHub();
-    hub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(event)));
 
     // add long press event
     auto longPressCallback = [weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn))](GestureEvent& info) {
@@ -253,12 +244,6 @@ void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(RefPtr<FrameNode>& max
     // diable mouse left!
     auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
     hub->SetLongPressEvent(longPressEvent, false, true);
-
-    // add empty panEvent to over fater container event
-    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
-    PanDirection panDirection;
-    panDirection.type = PanDirection::ALL;
-    hub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maximizeBtn,

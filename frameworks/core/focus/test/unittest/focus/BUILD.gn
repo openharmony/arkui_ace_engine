@@ -51,7 +51,7 @@ ohos_unittest("FocusTest") {
     "$ace_root/frameworks/core/pipeline/base/element.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
-    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
     "focus_test.cpp",
 
     #mock

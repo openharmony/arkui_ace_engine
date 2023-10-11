@@ -117,7 +117,6 @@ public:
         return inspectorFunctionImpl_;
     }
 
-#if defined(PREVIEW)
     void SetDebugLine(std::string debugLine)
     {
         debugLine_ = debugLine;
@@ -132,7 +131,6 @@ public:
     {
         viewId_ = viewId;
     }
-#endif
 
     static bool HasInspectorFinished(std::string tag);
     static std::string GetEtsTag(const std::string& tag);
@@ -150,10 +148,8 @@ private:
     RefPtr<InspectorFunctionImpl> inspectorFunctionImpl_ = MakeRefPtr<InspectorFunctionImpl>();
     static thread_local int32_t composedElementId_;
 
-#if defined(PREVIEW)
     std::string debugLine_;
     std::string viewId_;
-#endif
 };
 
 } // namespace OHOS::Ace::V2

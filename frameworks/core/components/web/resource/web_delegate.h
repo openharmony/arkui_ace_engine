@@ -628,6 +628,7 @@ public:
         parentNWebId_ = parentNWebId;
     }
 #endif
+    void SetToken();
 private:
     void InitWebEvent();
     void RegisterWebEvent();

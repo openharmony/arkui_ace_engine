@@ -15,24 +15,23 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 
-#include "base/log/log.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_engine/native_value.h"
 
-#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 
 namespace OHOS::Ace::Framework {
 
-JsiRef<JsiValue> JsConverter::ConvertNativeValueToJsVal(NativeValue* nativeValue)
+JsiRef<JsiValue> JsConverter::ConvertNapiValueToJsVal(napi_value napiValue)
 {
-    if (!nativeValue || !JsiDeclarativeEngineInstance::GetCurrentRuntime()) {
+    if (!napiValue || !JsiDeclarativeEngineInstance::GetCurrentRuntime()) {
         LOGE("ConvertNativeValueToJsVal wrong nativeValue or js runtime not ready");
         return JsiRef<JsiValue>::Make();
     }
-    panda::CopyableGlobal<JSValueRef> globalRef = *nativeValue;
-    auto localRef = globalRef.ToLocal();
+    auto localRef = NapiValueToLocalValue(napiValue);
     JsiValue jsiValue(localRef);
     return JsiRef<JsiValue>::Make(jsiValue);
 }
-
 } // namespace OHOS::Ace::Framework

@@ -175,6 +175,12 @@ std::shared_ptr<Media::PixelMap> PixelMapOhos::GetPixelMapSharedPtr()
     return pixmap_;
 }
 
+void* PixelMapOhos::GetWritablePixels() const
+{
+    CHECK_NULL_RETURN(pixmap_, nullptr);
+    return pixmap_->GetWritablePixels();
+}
+
 RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(
     const uint32_t* colors, uint32_t colorLength, int32_t width, int32_t height)
 {

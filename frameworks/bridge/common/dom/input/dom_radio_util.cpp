@@ -27,26 +27,22 @@ std::shared_ptr<JsPageRadioGroups> GetRadioGroups(const DOMNode& node)
 {
     auto context = node.GetPipelineContext().Upgrade();
     if (!context) {
-        LOGE("pipeline context is null");
         return nullptr;
     }
     auto frontend = context->GetFrontend();
     if (!frontend) {
-        LOGE("frontend is null");
         return nullptr;
     }
     auto page = frontend->GetPage(node.GetPageId());
     if (!page) {
         auto jsFrontend = AceType::DynamicCast<JsFrontend>(frontend);
         if (!jsFrontend) {
-            LOGE("not js frontend");
             return nullptr;
         }
         page = jsFrontend->GetCurrentReadyPage().Upgrade();
     }
     auto jsPage = AceType::DynamicCast<JsAcePage>(page);
     if (!jsPage) {
-        LOGE("js page is null");
         return nullptr;
     }
     return jsPage->GetRadioGroups();
@@ -73,7 +69,6 @@ RefPtr<RadioComponent<std::string>> DOMRadioUtil::CreateComponentAndSetChildAttr
     auto boxComponent = node.GetBoxComponent();
     if (LessOrEqual(node.GetWidth().Value(), 0.0)) {
         if (theme == nullptr) {
-            LOGE("node.width.value is less or equal 0.0, theme is nullptr");
             return nullptr;
         }
         node.SetWidth(theme->GetWidth());
@@ -81,7 +76,6 @@ RefPtr<RadioComponent<std::string>> DOMRadioUtil::CreateComponentAndSetChildAttr
     }
     if (LessOrEqual(node.GetHeight().Value(), 0.0)) {
         if (theme == nullptr) {
-            LOGE("node.height.value is less or equal 0.0, theme is nullptr");
             return nullptr;
         }
         node.SetHeight(theme->GetHeight());
@@ -105,7 +99,6 @@ void DOMRadioUtil::SetChildAttr(const DOMInput& node, const RefPtr<RadioComponen
     const std::map<std::string, std::string>& attrs)
 {
     if (!component) {
-        LOGE("fail to set child attr due to radio component is null");
         return;
     }
     bool checked = false;
@@ -132,7 +125,6 @@ void DOMRadioUtil::SetChildStyle(const RefPtr<BoxComponent>& boxComponent,
     const RefPtr<RadioComponent<std::string>>& component, const std::map<std::string, std::string>& styles)
 {
     if (!component) {
-        LOGE("fail to set child attr due to radio component is null");
         return;
     }
     // Padding is set in radio specially so that it can respond click event.
@@ -152,7 +144,6 @@ void DOMRadioUtil::AddChildEvent(const RefPtr<RadioComponent<std::string>>& comp
     const std::string& nodeId, const std::vector<std::string>& events)
 {
     if (!component) {
-        LOGE("fail to add child event due to radio component is null");
         return;
     }
     for (const auto& event : events) {

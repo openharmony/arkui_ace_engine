@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
@@ -408,6 +409,19 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
     }
 }
 
+void NavigationPattern::OnNavigationModeChange(bool modeChange)
+{
+    if (!modeChange) {
+        LOGD("navigation mode doesn't change");
+        return;
+    }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireNavigationModeChangeEvent(navigationMode_);
+}
+
 bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -423,6 +437,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto oldMode = navigationMode_;
     navigationMode_ = navigationLayoutAlgorithm->GetNavigationMode();
     OnNavBarStateChange(oldMode != navigationMode_);
+    OnNavigationModeChange(oldMode != navigationMode_);
     auto curTopNavPath = navigationStack_->GetTopNavPath();
     if (curTopNavPath.has_value()) {
         auto context = PipelineContext::GetCurrentContext();
@@ -445,6 +460,16 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                         hostNode->SetBackButtonVisible(curTopNavDestination, true);
                     }
                     pattern->UpdateContextRect(curTopNavDestination, hostNode);
+                    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+                    CHECK_NULL_VOID(navBarNode);
+                    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+                    CHECK_NULL_VOID(navBarLayoutProperty);
+                    if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
+                        (pattern->GetNavigationMode() == NavigationMode::STACK && hostNode->GetNeedSetInvisible())) {
+                        navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+                    } else {
+                        navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+                    }
                 },
                 TaskExecutor::TaskType::UI);
         }

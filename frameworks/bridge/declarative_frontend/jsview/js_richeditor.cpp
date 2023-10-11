@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/richeditor_model_impl.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
@@ -60,6 +61,67 @@ RichEditorModel* RichEditorModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+
+std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
+{
+    std::optional<NG::MarginProperty> marginProp = std::nullopt;
+
+    if (marginAttr->IsObject()) {
+        auto marginObj = JSRef<JSObject>::Cast(marginAttr);
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
+        JSViewAbstract::ParseMarginOrPaddingCorner(marginObj, top, bottom, left, right);
+        marginProp = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
+    } else if (marginAttr->IsNumber() || marginAttr->IsString()) {
+        CalcDimension length;
+        if (!JSViewAbstract::ParseJsDimensionVp(marginAttr, length)) {
+            // use default value.
+            length.Reset();
+        }
+        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
+    }
+    return marginProp;
+}
+
+std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
+{
+    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        return prop;
+    }
+    CalcDimension radiusDim;
+    if (JSViewAbstract::ParseJsDimensionVp(args, radiusDim)) {
+        if (radiusDim.Unit() == DimensionUnit::PERCENT) {
+            radiusDim.Reset();
+        }
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(radiusDim);
+        borderRadius.multiValued = false;
+        prop = borderRadius;
+    } else if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        CalcDimension topLeft;
+        CalcDimension topRight;
+        CalcDimension bottomLeft;
+        CalcDimension bottomRight;
+        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.radiusTopLeft = topLeft;
+        borderRadius.radiusTopRight = topRight;
+        borderRadius.radiusBottomLeft = bottomLeft;
+        borderRadius.radiusBottomRight = bottomRight;
+        borderRadius.multiValued = true;
+        prop = borderRadius;
+    }
+    return prop;
+}
+
+} // namespace
+
 void JSRichEditor::Create(const JSCallbackInfo& info)
 {
     JSRichEditorController* jsController = nullptr;
@@ -593,6 +655,12 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     } else {
         imageStyle.objectFit = ImageFit::COVER;
     }
+    auto marginAttr = imageAttribute->GetProperty("margin");
+    imageStyle.marginProp = ParseMarginAttr(marginAttr);
+    updateSpanStyle_.marginProp = imageStyle.marginProp;
+    auto borderRadiusAttr = imageAttribute->GetProperty("borderRadius");
+    imageStyle.borderRadius = ParseBorderRadiusAttr(borderRadiusAttr);
+    updateSpanStyle_.borderRadius = imageStyle.borderRadius;
     return imageStyle;
 }
 
@@ -608,6 +676,12 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFp(fontSize, size)) {
+        updateSpanStyle.updateFontSize = size;
+        style.SetFontSize(size);
+    } else {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        size = theme->GetTextStyle().GetFontSize();
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
@@ -631,6 +705,13 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
         updateSpanStyle.updateFontFamily = family;
         style.SetFontFamilies(family);
     }
+    ParseTextDecoration(styleObject, style, updateSpanStyle);
+    return style;
+}
+
+void JSRichEditorController::ParseTextDecoration(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
     auto decorationObj = styleObject->GetProperty("decoration");
     JSRef<JSObject> decorationObject = JSRef<JSObject>::Cast(decorationObj);
     if (!decorationObject->IsUndefined()) {
@@ -646,7 +727,6 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
             style.SetTextDecorationColor(decorationColor);
         }
     }
-    return style;
 }
 
 void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)

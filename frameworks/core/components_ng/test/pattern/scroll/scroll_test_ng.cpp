@@ -875,7 +875,6 @@ HWTEST_F(ScrollTestNg, PaintMethod001, TestSize.Level1)
     CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::NONE); });
     auto paint = pattern_->CreateNodePaintMethod();
     auto scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
-    scrollPaint->PaintScrollBar(canvas, &paintWrapper);
     auto scrollBar = scrollPaint->scrollBar_.Upgrade();
     EXPECT_FALSE(scrollBar->NeedPaint());
     auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
@@ -889,7 +888,6 @@ HWTEST_F(ScrollTestNg, PaintMethod001, TestSize.Level1)
     CreateWithContent();
     paint = pattern_->CreateNodePaintMethod();
     scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
-    scrollPaint->PaintScrollBar(canvas, &paintWrapper);
     scrollBar = scrollPaint->scrollBar_.Upgrade();
     EXPECT_TRUE(scrollBar->NeedPaint());
     modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
@@ -2545,5 +2543,33 @@ HWTEST_F(ScrollTestNg, Drag001, TestSize.Level1)
     EXPECT_FALSE(scrollBar->isDriving_);
     info.SetMainVelocity(1000.0);
     scrollBar->HandleDragEnd(info);
+}
+
+/**
+ * @tc.name: Distributed001
+ * @tc.desc: Test the distributed capability of Scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Distributed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Scroll node
+     */
+    CreateWithContent();
+
+    // need dpi to be 1
+    /**
+     * @tc.steps: step2. get pattern .
+     * @tc.expected: function ProvideRestoreInfo is called.
+     */
+    pattern_->currentOffset_ = 1.0f;
+    std::string ret = pattern_->ProvideRestoreInfo();
+
+    /**
+     * @tc.steps: step3. function OnRestoreInfo is called.
+     * @tc.expected: Passing JSON format.
+     */
+    pattern_->OnRestoreInfo(ret);
+    EXPECT_DOUBLE_EQ(pattern_->currentOffset_, 1.0f);
 }
 } // namespace OHOS::Ace::NG

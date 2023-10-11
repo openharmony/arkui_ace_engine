@@ -47,13 +47,7 @@ constexpr int32_t WIDE_TEXT_TEST_LENGTH = 30;
 constexpr int32_t BEFOR_SELECTION_TEST_LENGTH = 12;
 } // namespace
 
-class ImeTest : public testing::Test {
-public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown() {}
-};
+class ImeTest : public testing::Test {};
 
 /**
  * @tc.name: CastToTextInputTypeTest001

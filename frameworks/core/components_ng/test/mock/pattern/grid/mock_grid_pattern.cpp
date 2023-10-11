@@ -79,6 +79,11 @@ RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
     return MakeRefPtr<ScrollablePaintProperty>();
 }
 
+bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
+{
+    return false;
+}
+
 bool GridPattern::OutBoundaryCallback()
 {
     return false;
@@ -117,4 +122,11 @@ bool GridPattern::IsItemSelected(const MouseInfo& info)
 }
 
 void GridPattern::DumpInfo() {}
+
+std::string GridPattern::ProvideRestoreInfo()
+{
+    return "";
+}
+
+void GridPattern::OnRestoreInfo(const std::string& restoreInfo) {}
 } // namespace OHOS::Ace::NG

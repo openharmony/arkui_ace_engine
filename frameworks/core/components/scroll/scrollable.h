@@ -59,9 +59,10 @@ using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
 using ScrollSnapCallback = std::function<bool(double targetOffset, double velocity)>;
-using ContinuousSlidingCallback= std::function<double()>;
+using ContinuousSlidingCallback = std::function<double()>;
 using CalePredictSnapOffsetCallback = std::function<std::optional<float>(float delta)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
+using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -175,10 +176,23 @@ public:
     void HandleScrollEnd();
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
-    ScrollResult HandleScrollParentFirst(double& offset, int32_t source, NestedState state);
-    ScrollResult HandleScrollSelfFirst(double& offset, int32_t source, NestedState state);
-    ScrollResult HandleScrollSelfOnly(double& offset, int32_t source, NestedState state);
-    ScrollResult HandleScrollParallel(double& offset, int32_t source, NestedState state);
+    [[deprecated]] ScrollResult HandleScrollParentFirst(double& offset, int32_t source, NestedState state);
+    [[deprecated]] ScrollResult HandleScrollSelfFirst(double& offset, int32_t source, NestedState state);
+    [[deprecated]] ScrollResult HandleScrollSelfOnly(double& offset, int32_t source, NestedState state);
+    [[deprecated]] ScrollResult HandleScrollParallel(double& offset, int32_t source, NestedState state);
+
+    void SetMoved(bool value)
+    {
+        moved_ = value;
+    }
+    void SetCanOverScroll(bool value)
+    {
+        canOverScroll_ = value;
+    }
+    bool CanOverScroll() const
+    {
+        return canOverScroll_;
+    }
 
     void ProcessScrollMotionStop();
 
@@ -269,6 +283,7 @@ public:
 
     void UpdateScrollSnapStartOffset(double offset);
     void StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity);
+    void UpdateScrollSnapEndWithOffset(double offset);
 
     bool IsAnimationNotRunning() const;
 
@@ -330,7 +345,7 @@ public:
         scrollBeginCallback_ = scrollBeginCallback;
     }
 
-    void SetOnScrollFrameBegin(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
+    [[deprecated]] void SetOnScrollFrameBegin(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
     {
         scrollFrameBeginCallback_ = scrollFrameBeginCallback;
     }
@@ -343,15 +358,31 @@ public:
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
-    void SetNestedScrollOptions(NestedScrollOptions opt)
+    [[deprecated]] void SetNestedScrollOptions(NestedScrollOptions opt)
     {
         nestedOpt_ = opt;
     }
-    void SetOverScrollOffsetCallback(std::function<OverScrollOffset(double)>&& overScroll)
+    [[deprecated]] void SetOverScrollOffsetCallback(std::function<OverScrollOffset(double)>&& overScroll)
     {
         overScrollOffsetCallback_ = std::move(overScroll);
     }
-    void SetParent(RefPtr<Scrollable> parent)
+    void SetHandleScrollCallback(NestableScrollCallback&& func)
+    {
+        handleScrollCallback_ = std::move(func);
+    }
+    void SetHandleVelocityCallback(std::function<bool(float)>&& func)
+    {
+        handleVelocityCallback_ = std::move(func);
+    }
+    void SetOnScrollStartRec(std::function<void(float)>&& func)
+    {
+        onScrollStartRec_ = std::move(func);
+    }
+    void SetOnScrollEndRec(std::function<void()>&& func)
+    {
+        onScrollEndRec_ = std::move(func);
+    }
+    [[deprecated]] void SetParent(RefPtr<Scrollable> parent)
     {
         parent_ = AceType::WeakClaim(AceType::RawPtr(parent));
     }
@@ -417,7 +448,7 @@ public:
     {
         return needScrollSnapChange_;
     }
-    
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -425,7 +456,7 @@ private:
     void ProcessScrollSnapMotion(double position);
     void FixScrollMotion(double position);
     void ExecuteScrollBegin(double& mainDelta);
-    void ExecuteScrollFrameBegin(double& mainDelta, ScrollState state);
+    [[deprecated]] void ExecuteScrollFrameBegin(double& mainDelta, ScrollState state);
     double ComputeCap(int dragCount);
     double GetGain(double delta);
     void SetDelayedTask();
@@ -440,7 +471,7 @@ private:
 
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
-    ScrollFrameBeginCallback scrollFrameBeginCallback_;
+    [[deprecated]] ScrollFrameBeginCallback scrollFrameBeginCallback_;
     ScrollSnapCallback scrollSnapCallback_;
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
@@ -489,9 +520,18 @@ private:
 #endif
 
     // nested scroll
-    WeakPtr<Scrollable> parent_;
-    NestedScrollOptions nestedOpt_ = { NestedScrollMode::SELF_ONLY, NestedScrollMode::SELF_ONLY };
-    std::function<OverScrollOffset(double)> overScrollOffsetCallback_;
+    [[deprecated]] WeakPtr<Scrollable> parent_;
+    [[deprecated]] NestedScrollOptions nestedOpt_ = { NestedScrollMode::SELF_ONLY, NestedScrollMode::SELF_ONLY };
+    [[deprecated]] std::function<OverScrollOffset(double)> overScrollOffsetCallback_;
+    // ScrollablePattern::HandleScroll
+    NestableScrollCallback handleScrollCallback_;
+    // ScrollablePattern::HandleScrollVelocity
+    std::function<bool(float)> handleVelocityCallback_;
+    // ScrollablePattern::onScrollStartRecursive
+    std::function<void(float)> onScrollStartRec_;
+    // ScrollablePattern::onScrollEndRecursive
+    std::function<void()> onScrollEndRec_;
+
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;
 

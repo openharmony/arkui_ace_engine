@@ -38,14 +38,9 @@ bool DOMListItem::SetSpecializedAttr(const std::pair<std::string, std::string>& 
     if (!parent) {
         auto group = AceType::DynamicCast<DOMListItemGroup>(parentNode_.Upgrade());
         if (!group) {
-            LOGE("DOMListItem parent is null");
             EventReport::SendComponentException(ComponentExcepType::LIST_ITEM_ERR);
             return false;
-        } else {
-            LOGD("DOMListItem parent is list item group");
         }
-    } else {
-        LOGD("DOMListItem parent is list");
     }
 
     if (attr.first == DOM_LISTITEM_TYPE) {
@@ -98,17 +93,14 @@ void DOMListItem::SetCardThemeAttrs()
 {
     cardTheme_ = GetTheme<CardTheme>();
     if (!cardTheme_) {
-        LOGE("cardTheme is null");
         EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
     if (!boxComponent_) {
-        LOGE("boxComponent is null");
         return;
     }
 
     if (!isCard_) {
-        LOGW("it is not card");
         return;
     }
     RefPtr<Decoration> backDecoration = boxComponent_->GetBackDecoration();
@@ -222,7 +214,6 @@ bool DOMListItem::SetSpecializedStyle(const std::pair<std::string, std::string>&
     if (style.first == DOM_LISTITEM_COLUMN_SPAN) {
         auto columnSpan = StringUtils::StringToInt(style.second);
         if (columnSpan <= 0) {
-            LOGD("ListItem column-span must greater than 0");
             columnSpan = DEFAULT_COLUMN_SPAN;
         }
         columnSpan_ = columnSpan;
@@ -304,7 +295,7 @@ void DOMListItem::OnMounted(const RefPtr<DOMNode>& parentNode)
             SetDividerStyle(parentNode->GetParentNode());
         }
     } else {
-        LOGW("list item parent is valid type.");
+        LOGW("list item parent is invalid type.");
     }
 }
 
@@ -328,8 +319,6 @@ void DOMListItem::SetDividerStyle(const RefPtr<DOMNode>& parentNode)
 void DOMListItem::ResetInitializedStyle()
 {
     if (!listItemComponent_) {
-        LOGE("list item is null, reset style failed.");
-        EventReport::SendComponentException(ComponentExcepType::LIST_ITEM_ERR);
         return;
     }
     RefPtr<FocusAnimationTheme> theme = GetTheme<FocusAnimationTheme>();

@@ -721,7 +721,9 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
         CHECK_NULL_VOID(pixels);
         int32_t length = pixelMap->GetByteCount();
         std::vector<uint8_t> data(pixels, pixels + length);
-        UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data);
+        PixelMapRecordDetails details = { pixelMap->GetWidth(), pixelMap->GetHeight(), pixelMap->GetPixelFormat(),
+            pixelMap->GetAlphaType() };
+        UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
     } else {
         UdmfClient::GetInstance()->AddImageRecord(unifiedData, loadingCtx_->GetSourceInfo().GetSrc());
     }

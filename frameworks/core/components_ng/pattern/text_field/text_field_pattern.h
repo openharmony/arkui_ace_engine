@@ -123,6 +123,7 @@ struct PasswordModeStyle {
     BorderColorProperty borderColor;
     BorderRadiusProperty radius;
     PaddingProperty padding;
+    MarginProperty margin;
 };
 
 struct PreInlineState {
@@ -170,19 +171,35 @@ public:
         if (scrollBar) {
             paint->SetScrollBar(scrollBar);
             if (scrollBar->NeedPaint()) {
-                textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect(), scrollBar->GetBarRect());
+                textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect());
             }
         }
         auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, paint);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, paint);
+        auto geometryNode = host->GetGeometryNode();
+        auto frameOffset = geometryNode->GetFrameOffset();
+        auto frameSize = geometryNode->GetFrameSize();
         if (layoutProperty->GetShowErrorTextValue(false) && errorParagraph_) {
-            auto host = GetHost();
-            CHECK_NULL_RETURN(host, paint);
-            auto geometryNode = host->GetGeometryNode();
-            auto frameOffset = geometryNode->GetFrameOffset();
-            auto frameSize = geometryNode->GetFrameSize();
-            RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(),
+            auto contentOffset = geometryNode->GetContentOffset();
+#ifndef USE_GRAPHIC_TEXT_GINE
+            auto errorTextWidth = errorParagraph_->GetLongestLine();
+#else
+            auto errorTextWidth = errorParagraph_->GetActualWidth();
+#endif
+            RectF boundsRect(contentOffset.GetX(), frameOffset.GetY(), errorTextWidth,
                 frameSize.Height() + ERROR_TEXT_BOUNDSRECT_MARGIN);
+            textFieldOverlayModifier->SetBoundsRect(boundsRect);
+        } else {
+            if (NearEqual(maxFrameOffsetY_, 0.0f) && NearEqual(maxFrameHeight_, 0.0f)) {
+                maxFrameOffsetY_ = frameOffset.GetY();
+                maxFrameHeight_ = frameSize.Height();
+            }
+            maxFrameOffsetY_ = LessOrEqual(frameOffset.GetY(), maxFrameOffsetY_)
+                ? frameOffset.GetY() : maxFrameOffsetY_ - frameOffset.GetY();
+            maxFrameHeight_ = LessOrEqual(frameSize.Height(), maxFrameHeight_) ? maxFrameHeight_ : frameSize.Height();
+            RectF boundsRect(frameOffset.GetX(), maxFrameOffsetY_, frameSize.Width(), maxFrameHeight_);
             textFieldOverlayModifier->SetBoundsRect(boundsRect);
         }
         return paint;
@@ -214,10 +231,6 @@ public:
     }
 
     void OnModifyDone() override;
-    int32_t GetInstanceId() const
-    {
-        return instanceId_;
-    }
 
     void UpdateCaretPositionByTextEdit();
     void UpdateCaretPositionByPressOffset();
@@ -238,9 +251,9 @@ public:
 
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
 
-    void InsertValue(const std::string& insertValue);
-    void DeleteBackward(int32_t length);
-    void DeleteForward(int32_t length);
+    void InsertValue(const std::string& insertValue) override;
+    void DeleteBackward(int32_t length) override;
+    void DeleteForward(int32_t length) override;
 
     float GetTextOrPlaceHolderFontSize();
 
@@ -512,23 +525,23 @@ public:
         return textEditingValue_.ToString().length() > 1;
     }
 
-    bool CursorMoveLeft();
+    bool CursorMoveLeft() override;
     bool CursorMoveLeftWord();
     bool CursorMoveLineBegin();
     bool CursorMoveToParagraphBegin();
     bool CursorMoveHome();
-    bool CursorMoveRight();
+    bool CursorMoveRight() override;
     bool CursorMoveRightWord();
     bool CursorMoveLineEnd();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveEnd();
-    bool CursorMoveUp();
-    bool CursorMoveDown();
+    bool CursorMoveUp() override;
+    bool CursorMoveDown() override;
     void SetCaretPosition(int32_t position);
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
-    void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true);
-    void HandleExtendAction(int32_t action);
-    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
+    void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
+    void HandleExtendAction(int32_t action) override;
+    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip) override;
     OffsetF GetDragUpperLeftCoordinates() override;
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -552,15 +565,15 @@ public:
     bool SelectOverlayIsOn();
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
-    void SetInputMethodStatus(bool keyboardShown)
+    void SetInputMethodStatus(bool keyboardShown) override
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeShown_ = keyboardShown;
 #endif
     }
-    std::u16string GetLeftTextOfCursor(int32_t number);
-    std::u16string GetRightTextOfCursor(int32_t number);
-    int32_t GetTextIndexAtCursor();
+    std::u16string GetLeftTextOfCursor(int32_t number) override;
+    std::u16string GetRightTextOfCursor(int32_t number) override;
+    int32_t GetTextIndexAtCursor() override;
 
     bool HasConnection() const
     {
@@ -1020,7 +1033,7 @@ public:
         return inlineState_.frameRect.Width();
     }
 
-    void ResetTouchAtLeftOffsetFlag()
+    void ResetTouchAtLeftOffsetFlag() override
     {
         isTouchAtLeftOffset_ = true;
     }
@@ -1325,6 +1338,8 @@ private:
     Color underlineColor_;
     bool scrollBarVisible_ = false;
     bool isCounterIdealheight_ = false;
+    float maxFrameOffsetY_ = 0.0f;
+    float maxFrameHeight_ = 0.0f;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
@@ -1370,7 +1385,6 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-    int32_t instanceId_ = -1;
     bool isFocusedBeforeClick_ = false;
     bool originalIsMenuShow_ = false;
     bool isCustomKeyboardAttached_ = false;

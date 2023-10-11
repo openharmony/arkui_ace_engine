@@ -77,8 +77,6 @@ void DomNavigationBar::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
     auto selectPopup = AceType::DynamicCast<SelectComponent>(child->GetSpecializedComponent());
     if (selectPopup) {
         navigationBarData_->selectPopup = nullptr;
-    } else {
-        LOGW("navigation bar child node type not support");
     }
 }
 
@@ -102,8 +100,6 @@ void DomNavigationBar::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t sl
     auto selectPopup = AceType::DynamicCast<SelectComponent>(child->GetSpecializedComponent());
     if (selectPopup) {
         navigationBarData_->selectPopup = selectPopup;
-    } else {
-        LOGW("navigation bar child node type not support");
     }
 }
 #endif
@@ -111,7 +107,6 @@ void DomNavigationBar::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t sl
 void DomNavigationBar::CallSpecializedMethod(const std::string& method, const std::string& args)
 {
     if (!navigationBarData_->controller) {
-        LOGE("get navigation bar controller failed");
         EventReport::SendComponentException(ComponentExcepType::NAVIGATION_BAR_ERR);
         return;
     }
@@ -119,8 +114,6 @@ void DomNavigationBar::CallSpecializedMethod(const std::string& method, const st
         navigationBarData_->controller->Show();
     } else if (method == DOM_NAVIGATION_BAR_METHOD_HIDE) {
         navigationBarData_->controller->Hide();
-    } else {
-        LOGE("call not support method: %{private}s", method.c_str());
     }
 }
 

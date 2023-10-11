@@ -160,7 +160,7 @@ HWTEST_F(RefreshTestNg, Drag001, TestSize.Level1)
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
     pattern_->HandleDragUpdate(greaterThanRefreshDistance);
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
-    pattern_->HandleDragEnd();
+    pattern_->HandleDragEnd(0.0f);
     EXPECT_EQ(refreshStatus, RefreshStatus::REFRESH);
     EXPECT_TRUE(isRefreshTrigger);
     // The front end set isRefreshing to false
@@ -180,7 +180,7 @@ HWTEST_F(RefreshTestNg, Drag001, TestSize.Level1)
     pattern_->HandleDragUpdate(lessThanOffset);
     pattern_->HandleDragUpdate(greaterThanOffset);
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
-    pattern_->HandleDragEnd();
+    pattern_->HandleDragEnd(0.0f);
     pattern_->OnExitAnimationFinish();
     EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
 
@@ -226,7 +226,7 @@ HWTEST_F(RefreshTestNg, Drag002, TestSize.Level1)
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
     pattern_->HandleDragUpdate(greaterThanRefreshDistance + CUSTOM_NODE_HEIGHT / radio);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
-    pattern_->HandleDragEnd();
+    pattern_->HandleDragEnd(0.0f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
     // The front end set isRefreshing to false
     paintProperty_->UpdateIsRefreshing(false);
@@ -246,7 +246,7 @@ HWTEST_F(RefreshTestNg, Drag002, TestSize.Level1)
     pattern_->HandleDragUpdate(lessThanOffset);
     pattern_->HandleDragUpdate(greaterThanOffset);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
-    pattern_->HandleDragEnd();
+    pattern_->HandleDragEnd(0.0f);
     pattern_->OnExitAnimationFinish();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
 
@@ -290,7 +290,7 @@ HWTEST_F(RefreshTestNg, Drag003, TestSize.Level1)
      */
     pattern_->HandleDragUpdate(155.f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
-    pattern_->HandleDragEnd();
+    pattern_->HandleDragEnd(0.0f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
 
     /**
@@ -299,7 +299,7 @@ HWTEST_F(RefreshTestNg, Drag003, TestSize.Level1)
      */
     pattern_->HandleDragStart();
     pattern_->HandleDragUpdate(10.f);
-    pattern_->HandleDragEnd();
+    pattern_->HandleDragEnd(0.0f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
 }
 

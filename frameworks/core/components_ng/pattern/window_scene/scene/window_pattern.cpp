@@ -278,7 +278,7 @@ void WindowPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
-int32_t CalculateTranslateDegree(int32_t hostId)
+int32_t WindowPattern::CalculateTranslateDegree(int32_t hostId)
 {
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
@@ -312,9 +312,8 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
-    auto udegree = CalculateTranslateDegree(host->GetId());
+    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
-    FilterInvalidPointerItem(pointerEvent);
     SetWindowSceneConsumed(pointerEvent->GetPointerAction());
     DispatchPointerEvent(pointerEvent);
     if (SystemProperties::GetDebugEnabled()) {
@@ -343,7 +342,7 @@ void WindowPattern::FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerE
             LOGE("get pointer:%{public}d item failed", id);
             continue;
         }
-        const NG::PointF point { static_cast<float>(item.GetWindowX()), static_cast<float>(item.GetWindowY()) };
+        const NG::PointF point { static_cast<float>(item.GetDisplayX()), static_cast<float>(item.GetDisplayY()) };
         if (host->IsOutOfTouchTestRegion(point, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
             pointerEvent->RemovePointerItem(id);
         }

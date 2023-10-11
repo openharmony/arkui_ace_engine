@@ -1134,6 +1134,7 @@ void ViewAbstract::BindPopup(
                 auto overlayManager = pipeline->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
                 overlayManager->ErasePopup(id);
+                SubwindowManager::GetInstance()->HideSubWindowNG();
             };
             targetNode->PushDestroyCallback(destructor);
         } else {
@@ -1144,6 +1145,7 @@ void ViewAbstract::BindPopup(
                 auto overlayManager = subwindow->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
                 overlayManager->ErasePopup(id);
+                SubwindowManager::GetInstance()->HideSubWindowNG();
             };
             targetNode->PushDestroyCallback(destructor);
         }
@@ -1374,12 +1376,10 @@ void ViewAbstract::SetRestoreId(int32_t restoreId)
 
 void ViewAbstract::SetDebugLine(const std::string& line)
 {
-#ifdef PREVIEW
     auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
         uiNode->SetDebugLine(line);
     }
-#endif
 }
 
 void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)

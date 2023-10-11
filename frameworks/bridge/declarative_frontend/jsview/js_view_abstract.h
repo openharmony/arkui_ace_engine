@@ -111,6 +111,8 @@ public:
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
+    static void ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
+        std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void ParseBorderWidth(const JSRef<JSVal>& args);
@@ -259,9 +261,7 @@ public:
     static void JsFocusOnTouch(const JSCallbackInfo& info);
     static void JsDefaultFocus(const JSCallbackInfo& info);
     static void JsGroupDefaultFocus(const JSCallbackInfo& info);
-#if defined(PREVIEW)
     static void JsDebugLine(const JSCallbackInfo& info);
-#endif
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
@@ -337,6 +337,8 @@ public:
     static bool JsWidth(const JSRef<JSVal>& jsValue);
     static bool JsHeight(const JSRef<JSVal>& jsValue);
     static void GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
+    static void ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
+        CalcDimension& bottomLeft, CalcDimension& bottomRight);
 
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)

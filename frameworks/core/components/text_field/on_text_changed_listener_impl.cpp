@@ -33,7 +33,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
             LOGE("text field is null");
             return;
         }
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         auto value = client->GetEditingValue();
         auto prevLength = value.GetWideText().length();
         if (GreatOrEqual(client->GetMaxLength(), 0) && GreatOrEqual(prevLength, client->GetMaxLength())) {
@@ -72,7 +72,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
             LOGE("text field is null");
             return;
         }
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         auto value = client->GetEditingValue();
         auto start = value.selection.GetStart();
         auto end = value.selection.GetEnd();
@@ -93,7 +93,7 @@ std::u16string OnTextChangedListenerImpl::GetLeftTextOfCursor(int32_t number)
     auto task = [textField = field_, &leftResult, number] {
         auto client = textField.Upgrade();
         CHECK_NULL_VOID(client);
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         leftResult = client->GetLeftTextOfCursor(number);
     };
     PostSyncTaskToUI(task);
@@ -107,7 +107,7 @@ std::u16string OnTextChangedListenerImpl::GetRightTextOfCursor(int32_t number)
     auto task = [textField = field_, &rightResult, number] {
         auto client = textField.Upgrade();
         CHECK_NULL_VOID(client);
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         rightResult = client->GetRightTextOfCursor(number);
     };
     PostSyncTaskToUI(task);
@@ -121,7 +121,7 @@ int32_t OnTextChangedListenerImpl::GetTextIndexAtCursor()
     auto task = [textField = field_, &index] {
         auto client = textField.Upgrade();
         CHECK_NULL_VOID(client);
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         index = client->GetTextIndexAtCursor();
     };
     PostSyncTaskToUI(task);
@@ -142,7 +142,7 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
             LOGE("text field is null");
             return;
         }
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         auto value = client->GetEditingValue();
         auto start = value.selection.GetStart();
         auto end = value.selection.GetEnd();
@@ -162,7 +162,7 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
     auto task = [textField = field_, status] {
         auto client = textField.Upgrade();
         if (client) {
-            ContainerScope scope(client->instanceId_);
+            ContainerScope scope(client->GetInstanceId());
             client->SetInputMethodStatus(status);
         }
     };
@@ -198,7 +198,7 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
             LOGE("text field is null");
             return;
         }
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         TextInputAction action_ = static_cast<TextInputAction>(functionKey.GetEnterKeyType());
         switch (action_) {
             case TextInputAction::DONE:
@@ -223,7 +223,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
         if (!client) {
             return;
         }
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         switch (direction) {
             case MiscServices::Direction::UP:
                 client->CursorMoveUp();
@@ -253,7 +253,7 @@ void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
             LOGE("text field is null");
             return;
         }
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         client->HandleSetSelection(start, end);
     };
     PostTaskToUI(task);
@@ -267,7 +267,7 @@ void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
             LOGE("text field is null");
             return;
         }
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         client->HandleExtendAction(action);
     };
     PostTaskToUI(task);
@@ -281,7 +281,7 @@ void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMove
             LOGE("text field is null");
             return;
         }
-        ContainerScope scope(client->instanceId_);
+        ContainerScope scope(client->GetInstanceId());
         client->HandleSelect(keyCode, cursorMoveSkip);
     };
     PostTaskToUI(task);

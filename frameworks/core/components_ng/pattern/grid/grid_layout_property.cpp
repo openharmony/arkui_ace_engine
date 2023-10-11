@@ -36,6 +36,15 @@ void GridLayoutProperty::ResetGridLayoutInfoAndMeasure() const
     }
 }
 
+void GridLayoutProperty::ResetPositionFlags() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetPositionFlags();
+}
+
 void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     LayoutProperty::ToJsonValue(json);

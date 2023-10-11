@@ -40,7 +40,9 @@ public:
     void FireStartEvent(const std::string& param)
     {
         if (onStart_) {
-            onStart_(param);
+            // onStart_ may be overwritten in its invoke so we copy it first
+            auto onStart = onStart_;
+            onStart(param);
         }
     }
 
@@ -51,7 +53,9 @@ public:
     void FirePauseEvent(const std::string& param)
     {
         if (onPause_) {
-            onPause_(param);
+            // onPause_ may be overwritten in its invoke so we copy it first
+            auto onPause = onPause_;
+            onPause(param);
         }
     }
 
@@ -62,7 +66,9 @@ public:
     void FireFinishEvent(const std::string& param)
     {
         if (onFinish_) {
-            onFinish_(param);
+            // onFinish_ may be overwritten in its invoke so we copy it first
+            auto onFinish = onFinish_;
+            onFinish(param);
         }
     }
 
@@ -73,7 +79,9 @@ public:
     void FireErrorEvent(const std::string& param)
     {
         if (onError_) {
-            onError_(param);
+            // onError_ may be overwritten in its invoke so we copy it first
+            auto onError = onError_;
+            onError(param);
         }
     }
 
@@ -84,7 +92,9 @@ public:
     void FirePreparedEvent(const std::string& param)
     {
         if (onPrepared_) {
-            onPrepared_(param);
+            // onPrepared_ may be overwritten in its invoke so we copy it first
+            auto onPrepared = onPrepared_;
+            onPrepared(param);
         }
     }
 
@@ -95,7 +105,9 @@ public:
     void FireSeekingEvent(const std::string& param)
     {
         if (onSeeking_) {
-            onSeeking_(param);
+            // onSeeking_ may be overwritten in its invoke so we copy it first
+            auto onSeeking = onSeeking_;
+            onSeeking(param);
         }
     }
 
@@ -106,7 +118,9 @@ public:
     void FireSeekedEvent(const std::string& param)
     {
         if (onSeeked_) {
-            onSeeked_(param);
+            // onSeeked_ may be overwritten in its invoke so we copy it first
+            auto onSeeked = onSeeked_;
+            onSeeked(param);
         }
     }
 
@@ -117,7 +131,9 @@ public:
     void FireUpdateEvent(const std::string& param)
     {
         if (onUpdate_) {
-            onUpdate_(param);
+            // onUpdate_ may be overwritten in its invoke so we copy it first
+            auto onUpdate = onUpdate_;
+            onUpdate(param);
         }
     }
 
@@ -128,7 +144,9 @@ public:
     void FireFullScreenChangeEvent(const std::string& param)
     {
         if (onFullScreenChange_) {
-            onFullScreenChange_(param);
+            // onFullScreenChange_ may be overwritten in its invoke so we copy it first
+            auto onFullScreenChange = onFullScreenChange_;
+            onFullScreenChange(param);
         }
     }
 

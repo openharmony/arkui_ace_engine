@@ -163,10 +163,20 @@ public:
     double GetEditingBoxTopY() const override;
     bool GetEditingBoxModel() const override;
     void Delete(int32_t start, int32_t end);
-    void CursorMoveLeft(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
-    void CursorMoveRight(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
-    void CursorMoveUp();
-    void CursorMoveDown();
+    bool CursorMoveLeft() override
+    {
+        CursorMoveLeft(CursorMoveSkip::CHARACTER);
+        return true;
+    }
+    void CursorMoveLeft(CursorMoveSkip skip);
+    bool CursorMoveRight() override
+    {
+        CursorMoveRight(CursorMoveSkip::CHARACTER);
+        return true;
+    }
+    void CursorMoveRight(CursorMoveSkip skip);
+    bool CursorMoveUp() override;
+    bool CursorMoveDown() override;
     void Insert(const std::string& text);
     void StartTwinkling();
     void StopTwinkling();
@@ -188,12 +198,12 @@ public:
         return estimateHeight_;
     }
 
-    void HandleSetSelection(int32_t start, int32_t end);
-    void HandleExtendAction(int32_t action);
-    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
-    std::u16string GetLeftTextOfCursor(int32_t number);
-    std::u16string GetRightTextOfCursor(int32_t number);
-    int32_t GetTextIndexAtCursor();
+    void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
+    void HandleExtendAction(int32_t action) override;
+    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip) override;
+    std::u16string GetLeftTextOfCursor(int32_t number) override;
+    std::u16string GetRightTextOfCursor(int32_t number) override;
+    int32_t GetTextIndexAtCursor() override;
     bool IsSelected() const;
     void DeleteLeft();
     void DeleteRight();
@@ -396,7 +406,7 @@ public:
     }
 
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    void SetInputMethodStatus(bool imeAttached)
+    void SetInputMethodStatus(bool imeAttached) override
     {
         imeAttached_ = imeAttached;
     }
@@ -405,7 +415,6 @@ public:
     // distribute
     std::string ProvideRestoreInfo() override;
 
-    int32_t instanceId_ = -1;
     int32_t scrollBarOpacity_ = 0;
 
     bool hasFocus_ = false;
@@ -471,6 +480,8 @@ public:
     {
         surfacePositionChangedCallbackId_ = id;
     }
+
+    int32_t GetInstanceId() const override;
 
 protected:
     // Describe where caret is and how tall visually.
@@ -744,7 +755,6 @@ private:
     void HandleDeviceOrientationChange();
     void OnOverlayFocusChange(bool isFocus, bool needCloseKeyboard);
     void FireSelectChangeIfNeeded(const TextEditingValue& newValue, bool needFireSelectChangeEvent) const;
-    int32_t GetInstanceId() const;
     void ApplyAspectRatio(); // If aspect ratio is setted, height will follow box parent.
 
     /**

@@ -65,6 +65,11 @@ bool ListPattern::IsAtTop() const
     return false;
 }
 
+bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
+{
+    return false;
+}
+
 bool ListPattern::OutBoundaryCallback()
 {
     return false;
@@ -112,4 +117,11 @@ bool ListPattern::IsItemSelected(const MouseInfo& info)
 {
     return false;
 }
+
+std::string ListPattern::ProvideRestoreInfo()
+{
+    return "";
+}
+
+void ListPattern::OnRestoreInfo(const std::string& restoreInfo) {}
 } // namespace OHOS::Ace::NG

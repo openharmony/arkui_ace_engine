@@ -24,7 +24,7 @@ constexpr float DEFAULT_MULTIPLIER = 60.0f;
 
 class ACE_EXPORT FrictionMotion : public Motion {
 public:
-    FrictionMotion(double friction, double initPosition, double initVelocity);
+    FrictionMotion(double friction, double initPosition, double initVelocity, double threshold = DEFAULT_MULTIPLIER);
     ~FrictionMotion() override = default;
 
     // Called when do a new friction motion

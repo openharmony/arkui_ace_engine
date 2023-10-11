@@ -105,7 +105,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     ResourceInfo recv;
     napi_typeof(env, messageNApi, &valueType);
     if (valueType == napi_string) {
-        size_t messageLen = GetParamLen(messageNApi) + 1;
+        size_t messageLen = GetParamLen(env, messageNApi) + 1;
         std::unique_ptr<char[]> message = std::make_unique<char[]>(messageLen);
         napi_get_value_string_utf8(env, messageNApi, message.get(), messageLen, &ret);
         messageString = message.get();
@@ -148,7 +148,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 
     napi_typeof(env, bottomNApi, &valueType);
     if (valueType == napi_string) {
-        size_t bottomLen = GetParamLen(bottomNApi) + 1;
+        size_t bottomLen = GetParamLen(env, bottomNApi) + 1;
         std::unique_ptr<char[]> bottom = std::make_unique<char[]>(bottomLen);
         napi_get_value_string_utf8(env, bottomNApi, bottom.get(), bottomLen, &ret);
         bottomString = bottom.get();
@@ -317,9 +317,8 @@ bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValu
 }
 
 void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
-                        std::optional<DialogAlignment>& alignment,
-                        std::optional<DimensionOffset>& offset,
-                        std::optional<DimensionRect>& maskRect)
+    std::optional<DialogAlignment>& alignment, std::optional<DimensionOffset>& offset,
+    std::optional<DimensionRect>& maskRect)
 {
     napi_valuetype valueType = napi_undefined;
     // parse alignment
@@ -366,7 +365,7 @@ void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>&
         ParseNapiDimension(env, width, widthApi, DimensionUnit::VP);
         ParseNapiDimension(env, height, heightApi, DimensionUnit::VP);
         DimensionOffset dimensionOffset = { x, y };
-        maskRect = DimensionRect { width, height, dimensionOffset};
+        maskRect = DimensionRect { width, height, dimensionOffset };
     }
 }
 
@@ -540,8 +539,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
-            delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack),
-                                 asyncContext->callbacks);
+            delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
         } else {
             LOGE("delegate is null");
             // throw internal error
@@ -565,14 +563,13 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             }
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack),
-                                                    asyncContext->callbacks);
+        SubwindowManager::GetInstance()->ShowDialog(
+            promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
-            delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack),
-                                 asyncContext->callbacks);
+        delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
     } else {
         LOGE("delegate is null");
         // throw internal error

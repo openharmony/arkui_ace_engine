@@ -205,13 +205,12 @@ std::unique_ptr<JsonValue> DOMVideo::GetParamFromJson(const std::string& json, c
 {
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(json);
     if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != METHOD_VIDEO_TO_ARGS_SIZE) {
-        LOGE("parse args error");
+        LOGW("Video parse args error");
         return nullptr;
     }
 
     std::unique_ptr<JsonValue> Value = argsValue->GetArrayItem(0)->GetValue(key);
     if (!Value) {
-        LOGE("get index failed");
         return nullptr;
     }
     return Value;
@@ -237,7 +236,6 @@ RefPtr<Component> DOMVideo::FireFullscreen(
             return nullptr;
         }
         if (!originComponent_) {
-            LOGE("the origin component is null");
             return nullptr;
         }
         videoChild_->SetFullscreen(false);
@@ -313,7 +311,7 @@ ImageObjectPosition DOMVideo::ConvertStrToPosition(const std::string& position)
 {
     ImageObjectPosition objectPosition;
     if (!ParseBackgroundImagePosition(position, objectPosition)) {
-        LOGE("ConvertStrToPosition failed");
+        LOGD("ConvertStrToPosition failed");
     }
     return objectPosition;
 }

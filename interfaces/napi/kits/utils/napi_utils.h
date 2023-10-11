@@ -39,7 +39,7 @@ struct ResourceInfo {
     std::optional<std::string> moduleName = std::nullopt;
 };
 
-size_t GetParamLen(napi_value param);
+size_t GetParamLen(napi_env env, napi_value param);
 bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_valuetype& valueType);
 
 void NapiThrow(napi_env env, const std::string& message, int32_t errCode);

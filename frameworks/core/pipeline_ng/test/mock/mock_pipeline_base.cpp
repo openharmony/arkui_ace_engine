@@ -16,6 +16,7 @@
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -265,7 +266,7 @@ void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
 
 void PipelineContext::FlushPipelineImmediately() {}
 
-FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
+FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_t /* timeStamp */)
 {
     return nullptr;
 }
@@ -279,6 +280,7 @@ void PipelineContext::AddVisibleAreaChangeNode(
     callback(false, 0.0);
     callback(true, ratio);
 }
+
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
@@ -324,6 +326,7 @@ void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 void PipelineContext::SetWindowSceneConsumed(bool isConsumed) {}
 } // namespace OHOS::Ace::NG
 
+// pipeline base
 namespace OHOS::Ace {
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
@@ -375,7 +378,8 @@ double PipelineBase::NormalizeToPx(const Dimension& dimension) const
 {
     if ((dimension.Unit() == DimensionUnit::VP) || (dimension.Unit() == DimensionUnit::FP)) {
         return (dimension.Value() * dipScale_);
-    } else if (dimension.Unit() == DimensionUnit::LPX) {
+    }
+    if (dimension.Unit() == DimensionUnit::LPX) {
         return (dimension.Value() * designWidthScale_);
     }
     return dimension.Value();

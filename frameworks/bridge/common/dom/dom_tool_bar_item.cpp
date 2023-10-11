@@ -45,7 +45,6 @@ void DOMToolBarItem::ResetInitializedStyle()
 {
     theme_ = GetTheme<ToolBarTheme>();
     if (!theme_) {
-        LOGE("ToolBarTheme is null");
         return;
     }
     InitImageStyle();

@@ -59,8 +59,8 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 #endif
     JSValueWrapper valueWrapper = value;
 
-    ScopeRAII scope(nativeEngine->GetScopeManager());
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
     PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
     if (!pixelMapNapiEntry) {
@@ -68,8 +68,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
         return nullptr;
     }
 
-    void* pixmapPtrAddr =
-        pixelMapNapiEntry(reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
+    void* pixmapPtrAddr = pixelMapNapiEntry(reinterpret_cast<napi_env>(nativeEngine), napiValue);
     if (pixmapPtrAddr == nullptr) {
         LOGE("Failed to get pixmap pointer");
         return nullptr;
@@ -94,12 +93,18 @@ void* UnwrapNapiValue(const JSRef<JSVal>& obj)
 #endif
     JSValueWrapper valueWrapper = value;
 
-    ScopeRAII scope(nativeEngine->GetScopeManager());
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-    CHECK_NULL_RETURN(nativeValue, nullptr);
-    NativeObject* object = static_cast<NativeObject*>(nativeValue->GetInterface(NativeObject::INTERFACE_ID));
-    CHECK_NULL_RETURN(object, nullptr);
-    return object->GetNativePointer();
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType != napi_object) {
+        LOGE("napiValue is not napi_object");
+        return nullptr;
+    }
+    void* objectNapi = nullptr;
+    napi_unwrap(env, napiValue, &objectNapi);
+    return objectNapi;
 }
 } // namespace
 
@@ -137,11 +142,9 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
-
-    ScopeRAII scope(nativeEngine->GetScopeManager());
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-
-    return WantWrap::CreateWantWrap(reinterpret_cast<void*>(nativeEngine), reinterpret_cast<void*>(nativeValue));
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    return WantWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
 }
 
 #endif
@@ -160,8 +163,7 @@ JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap)
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     auto* env = reinterpret_cast<napi_env>(nativeEngine);
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap->GetPixelMapSharedPtr());
-    auto* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
-    return JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    return JsConverter::ConvertNapiValueToJsVal(napiValue);
 }
 #endif
 } // namespace OHOS::Ace::Framework

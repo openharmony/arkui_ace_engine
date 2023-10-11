@@ -70,7 +70,7 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
-#if defined(ANDROID_PLATFORM)  || defined(IOS_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "render_service_client/core/pipeline/rs_render_thread.h"
 #endif
 #ifndef USE_ROSEN_DRAWING
@@ -251,10 +251,9 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
     SetPivot(xPivot, yPivot, zPivot);
 }
 
-void RosenRenderContext::SetSurfaceChangedCallBack(
-    const std::function<void(float, float, float, float)>& callback)
+void RosenRenderContext::SetSurfaceChangedCallBack(const std::function<void(float, float, float, float)>& callback)
 {
-#if defined(ANDROID_PLATFORM)  || defined(IOS_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     if (rsNode_) {
         RSRenderThread::Instance().AddSurfaceChangedCallBack(rsNode_->GetId(), callback);
     }
@@ -263,7 +262,7 @@ void RosenRenderContext::SetSurfaceChangedCallBack(
 
 void RosenRenderContext::RemoveSurfaceChangedCallBack()
 {
-#if defined(ANDROID_PLATFORM)  || defined(IOS_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     if (rsNode_) {
         RSRenderThread::Instance().RemoveSurfaceChangedCallBack(rsNode_->GetId());
     }
@@ -455,6 +454,7 @@ void RosenRenderContext::PaintDebugBoundary()
         rsNode_->AddModifier(debugBoundaryModifier_);
     }
     if (debugBoundaryModifier_) {
+        debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
         auto rect = GetPaintRectWithoutTransform();
         auto marginOffset = geometryNode->GetMarginFrameOffset();
         std::shared_ptr<Rosen::RectF> drawRect =
@@ -684,9 +684,9 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
 #else
     float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
 #endif
-    std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
-        backblurRadius, static_cast<float>(effectOption->saturation),
-        static_cast<float>(effectOption->brightness), effectOption->color.GetValue());
+    std::shared_ptr<Rosen::RSFilter> backFilter =
+        Rosen::RSFilter::CreateMaterialFilter(backblurRadius, static_cast<float>(effectOption->saturation),
+            static_cast<float>(effectOption->brightness), effectOption->color.GetValue());
     rsNode_->SetBackgroundFilter(backFilter);
 }
 
@@ -1211,6 +1211,18 @@ bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdLi
     return rsCanvasDrawingNode->GetBitmap(bitmap, drawCmdList);
 }
 
+#ifndef USE_ROSEN_DRAWING
+bool RosenRenderContext::GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList, SkRect* rect)
+{
+    auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
+    if (!rsCanvasDrawingNode) {
+        return false;
+    }
+    return rsCanvasDrawingNode->GetPixelmap(pixelMap, drawCmdList, rect);
+}
+#endif
+
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -1392,6 +1404,9 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
 {
     RectF rect;
     CHECK_NULL_RETURN(rsNode_, rect);
+    if (rsNode_->GetStagingProperties().GetRotation()) {
+        return RectF(0, 0, -1, -1);
+    }
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
@@ -1411,11 +1426,11 @@ void RosenRenderContext::GetPointWithRevert(PointF& point)
 
     auto translateMat = Matrix4::CreateTranslate(translate[0], translate[1], 0);
     auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-        Matrix4::CreateRotate(degree, 0, 0, 1) *
-        Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+                       Matrix4::CreateRotate(degree, 0, 0, 1) *
+                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
     auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-        Matrix4::CreateScale(scale[0], scale[1], 1) *
-        Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+                    Matrix4::CreateScale(scale[0], scale[1], 1) *
+                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
 
     auto invertMat = Matrix4::Invert(translateMat * rotationMat * scaleMat);
     Point tmp(point.GetX(), point.GetY());
@@ -1451,7 +1466,6 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
         point.SetY(currentPointY - rect.Top());
     }
 }
-
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
 {
@@ -1649,8 +1663,7 @@ void RosenRenderContext::PaintAccessibilityFocus()
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
     frameRect.SetRect(RectF(ACCESSIBILITY_FOCUS_WIDTH, ACCESSIBILITY_FOCUS_WIDTH,
-        bounds.z_ - (2 * ACCESSIBILITY_FOCUS_WIDTH),
-        bounds.w_ - (2 * ACCESSIBILITY_FOCUS_WIDTH)));
+        bounds.z_ - (2 * ACCESSIBILITY_FOCUS_WIDTH), bounds.w_ - (2 * ACCESSIBILITY_FOCUS_WIDTH)));
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
@@ -1918,9 +1931,16 @@ RectF RosenRenderContext::AdjustPaintRect()
     CHECK_NULL_RETURN(rsNode_, rect);
     const auto& geometryNode = frameNode->GetGeometryNode();
     rect = geometryNode->GetFrameRect();
-    if (!rect.GetSize().IsPositive()) {
-        LOGD("paint size is zero");
-        return rect;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!rect.GetSize().IsPositive()) {
+            LOGD("paint size is zero");
+            return rect;
+        }
+    } else {
+        if (!rect.GetSize().IsPositive() && !frameNode->IsLayoutComplete()) {
+            LOGD("paint size is zero");
+            return rect;
+        }
     }
     const auto& layoutConstraint = frameNode->GetGeometryNode()->GetParentLayoutConstraint();
     auto widthPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Width()
@@ -2827,8 +2847,8 @@ void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& cli
         clipBoundModifier_ = std::make_shared<Rosen::RSClipBoundsModifier>(prop);
         rsNode_->AddModifier(clipBoundModifier_);
     } else {
-        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSPath>>>(
-            clipBoundModifier_->GetProperty());
+        auto property =
+            std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSPath>>>(clipBoundModifier_->GetProperty());
         property->Set(shapePath);
     }
 #else
@@ -2839,8 +2859,8 @@ void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& cli
         clipBoundModifier_ = std::make_shared<Rosen::RSClipBoundsModifier>(prop);
         rsNode_->AddModifier(clipBoundModifier_);
     } else {
-        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<RSPath>>>(
-            clipBoundModifier_->GetProperty());
+        auto property =
+            std::static_pointer_cast<RSProperty<std::shared_ptr<RSPath>>>(clipBoundModifier_->GetProperty());
         property->Set(shapePath);
     }
 #endif
@@ -2863,26 +2883,23 @@ void RosenRenderContext::PaintClipMask(const std::unique_ptr<ClipProperty>& clip
         clipMaskModifier_ = std::make_shared<Rosen::RSMaskModifier>(prop);
         rsNode_->AddModifier(clipMaskModifier_);
     } else {
-        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSMask>>>(
-            clipMaskModifier_->GetProperty());
+        auto property =
+            std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSMask>>>(clipMaskModifier_->GetProperty());
         property->Set(maskPath);
     }
 #else
     auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
-    auto maskPath = Rosen::RSMask::CreatePathMask(
-        rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
+    auto maskPath = Rosen::RSMask::CreatePathMask(rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
     if (!clipMaskModifier_) {
         auto prop = std::make_shared<RSProperty<RSMask>>(maskPath);
         clipMaskModifier_ = std::make_shared<Rosen::RSMaskModifier>(prop);
         rsNode_->AddModifier(clipMaskModifier_);
     } else {
-        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<RSMask>>>(
-            clipMaskModifier_->GetProperty());
+        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<RSMask>>>(clipMaskModifier_->GetProperty());
         property->Set(maskPath);
     }
 #endif
 }
-
 
 void RosenRenderContext::PaintClip(const SizeF& frameSize)
 {

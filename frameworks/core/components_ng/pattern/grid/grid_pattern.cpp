@@ -260,7 +260,7 @@ void GridPattern::FireOnScrollStart()
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
-        scrollBar->PlayScrollBarStartAnimation();
+        scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
     auto host = GetHost();
@@ -1533,6 +1533,7 @@ int32_t GridPattern::GetChildrenCount() const
 void GridPattern::ClearDragState()
 {
     gridLayoutInfo_.ClearDragState();
+    MarkDirtyNodeSelf();
 }
 
 void GridPattern::UpdateRectOfDraggedInItem(int32_t insertIndex)
@@ -1579,7 +1580,7 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
     }
 }
 
-bool GridPattern::IsOutOfBoundary()
+bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
     bool outOfStart = gridLayoutInfo_.reachStart_ && Positive(gridLayoutInfo_.currentOffset_);
     float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
@@ -1684,5 +1685,16 @@ void GridPattern::DumpInfo()
          "public}d",
         gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.startMainLineIndex_,
         gridLayoutInfo_.endMainLineIndex_, property->GetCachedCountValue(1));
+}
+
+std::string GridPattern::ProvideRestoreInfo()
+{
+    return std::to_string(gridLayoutInfo_.startIndex_);
+}
+
+void GridPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    gridLayoutInfo_.jumpIndex_ = StringUtils::StringToInt(restoreInfo);
+    gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
 }
 } // namespace OHOS::Ace::NG

@@ -12,18 +12,9 @@
 # limitations under the License.
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
 ace_unittest("ime_test") {
-  type = "basic/common"
-  sources = [
-    "$ace_root/frameworks/core/common/ime/text_editing_value.cpp",
-    "$ace_root/frameworks/core/common/ime/text_input_action.cpp",
-    "$ace_root/frameworks/core/common/ime/text_input_configuration.cpp",
-    "$ace_root/frameworks/core/common/ime/text_input_connection.cpp",
-    "$ace_root/frameworks/core/common/ime/text_input_formatter.cpp",
-    "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",
-    "$ace_root/frameworks/core/common/ime/text_input_type.cpp",
-    "ime_test.cpp",
-  ]
+  sources = [ "ime_test.cpp" ]
 
   external_deps = [ "ability_base:base" ]
   external_deps += [

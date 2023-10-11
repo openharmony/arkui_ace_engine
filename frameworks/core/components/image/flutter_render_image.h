@@ -16,11 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_FLUTTER_RENDER_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_FLUTTER_RENDER_IMAGE_H
 
-#ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
-#else
-#include "experimental/svg/model/SkSVGDOM.h"
-#endif
 
 #include "core/components/image/render_image.h"
 #include "core/image/image_provider.h"
@@ -73,14 +69,9 @@ public:
     static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
-    static void UploadImageObjToGpuForRender(
-        const RefPtr<ImageObject>& imageObj,
-        const WeakPtr<PipelineContext> context,
-        UploadSuccessCallback uploadSuccessCallback,
-        FailedCallback failedCallback,
-        Size resizeTarget,
-        bool forceResize,
-        bool syncMode = false);
+    static void UploadImageObjToGpuForRender(const RefPtr<ImageObject>& imageObj,
+        const WeakPtr<PipelineContext> context, UploadSuccessCallback uploadSuccessCallback,
+        FailedCallback failedCallback, Size resizeTarget, bool forceResize, bool syncMode = false);
 
     void ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image);
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
@@ -119,16 +110,9 @@ private:
     void SetSkRadii(const Radius& radius, SkVector& radii);
     void SetClipRadius();
     void CanvasDrawImageRect(
-        const flutter::Paint& paint,
-        const Offset& offset,
-        const ScopedCanvas& canvas,
-        const Rect& paintRect);
-    void DrawImageOnCanvas(
-        const Rect& srcRect,
-        const Rect& dstRect,
-        const ScopedCanvas& canvas,
-        const flutter::Paint& paint,
-        const Offset& dstOffset = Offset()) const;
+        const flutter::Paint& paint, const Offset& offset, const ScopedCanvas& canvas, const Rect& paintRect);
+    void DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect, const ScopedCanvas& canvas,
+        const flutter::Paint& paint, const Offset& dstOffset = Offset()) const;
     void PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayoutSelf = false);
     void DrawSVGImage(const Offset& offset, ScopedCanvas& canvas);
     void DrawSVGImageCustom(RenderContext& context, const Offset& offset);

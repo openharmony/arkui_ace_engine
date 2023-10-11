@@ -61,6 +61,7 @@ constexpr float PIXELMAP_ANIMATION_SCALE = 1.1f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float SPRING_RESPONSE = 0.416f;
 constexpr float SPRING_DAMPING_FRACTION = 0.73f;
+constexpr Dimension PIXELMAP_BORDER_RADIUS = 16.0_vp;
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace
 
@@ -148,7 +149,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
-                SubwindowManager::GetInstance()->HideMenuNG();
+                SubwindowManager::GetInstance()->HideMenuNG(false);
                 AnimationOption option;
                 option.SetDuration(PIXELMAP_ANIMATION_DURATION);
                 option.SetCurve(Curves::SHARP);
@@ -188,64 +189,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     };
     actionStart_ = actionStart;
     panRecognizer_->SetOnActionStart(actionStart);
-
-#ifdef ENABLE_DRAG_FRAMEWORK
-    if (touchRestrict.sourceType == SourceType::MOUSE) {
-        auto&& callback = [weakPtr = gestureEventHub_, weak = WeakClaim(this)]() {
-            auto gestureHub = weakPtr.Upgrade();
-            CHECK_NULL_VOID(gestureHub);
-            std::shared_ptr<Media::PixelMap> pixelMap;
-            auto frameNode = gestureHub->GetFrameNode();
-            CHECK_NULL_VOID(frameNode);
-            if (gestureHub->GetTextDraggable()) {
-                auto pattern = frameNode->GetPattern<TextDragBase>();
-                CHECK_NULL_VOID(pattern);
-                auto dragNode = pattern->MoveDragNode();
-                CHECK_NULL_VOID(dragNode);
-                auto context = dragNode->GetRenderContext();
-                CHECK_NULL_VOID(context);
-                auto thumbnailPixelMap = context->GetThumbnailPixelMap();
-                CHECK_NULL_VOID(thumbnailPixelMap);
-                pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
-            } else {
-                auto context = frameNode->GetRenderContext();
-                CHECK_NULL_VOID(context);
-                auto thumbnailPixelMap = context->GetThumbnailPixelMap();
-                CHECK_NULL_VOID(thumbnailPixelMap);
-                pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
-            }
-            CHECK_NULL_VOID(pixelMap);
-            float scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
-            pixelMap->scale(scale, scale);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto dragDropManager = pipeline->GetDragDropManager();
-            CHECK_NULL_VOID(dragDropManager);
-            if (!dragDropManager->IsDragged()) {
-                return;
-            }
-            int32_t width = pixelMap->GetWidth();
-            int32_t height = pixelMap->GetHeight();
-            Msdp::DeviceStatus::ShadowInfo shadowInfo { pixelMap, width * PIXELMAP_WIDTH_RATE,
-                height * PIXELMAP_HEIGHT_RATE };
-            int ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateShadowPic(shadowInfo);
-            if (ret != 0) {
-                LOGE("InteractionManager: UpdateShadowPic error");
-                return;
-            }
-            if (SystemProperties::GetDebugEnabled()) {
-                LOGI("In setThumbnailPixelMap callback, set DragWindowVisible true.");
-            }
-            Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
-            dragDropManager->SetIsDragWindowShow(true);
-        };
-        auto gestureHub = gestureEventHub_.Upgrade();
-        CHECK_NULL_VOID(gestureHub);
-        if (!gestureHub->HasThumbnailCallback()) {
-            gestureHub->SetThumbnailPixelMapCallback(callback);
-        }
-    };
-#endif // ENABLE_DRAG_FRAMEWORK
 
     auto actionUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
         if (SystemProperties::GetDebugEnabled()) {
@@ -658,7 +601,7 @@ void DragEventActuator::HideFilter()
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->RemoveFilter();
+    manager->RemoveFilterAnimation();
 }
 
 void DragEventActuator::HidePixelMap(bool startDrag, double x, double y)
@@ -715,6 +658,9 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
             shadow->SetColor(newColor);
             imageContext->UpdateBackShadow(shadow.value());
             imageContext->UpdateTransformScale({ PIXELMAP_ANIMATION_SCALE, PIXELMAP_ANIMATION_SCALE });
+            BorderRadiusProperty borderRadius;
+            borderRadius.SetRadius(PIXELMAP_BORDER_RADIUS);
+            imageContext->UpdateBorderRadius(borderRadius);
         },
         option.GetOnFinishEvent());
 }

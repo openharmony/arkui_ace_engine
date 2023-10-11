@@ -337,7 +337,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     } else {
         SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
     }
-    UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
             GetScrollBar()->ScheduleDisappearDelayTask();
@@ -373,6 +372,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         secondInfo.paintRect = { textSelector_.secondHandleOffset_, handlePaintSize };
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstInfo, secondInfo);
     }
+    UpdateScrollBarOffset();
     caretUpdateType_ = CaretUpdateType::NONE;
     return true;
 }
@@ -552,6 +552,7 @@ bool TextFieldPattern::CaretPositionCloseToTouchPosition()
 
 bool TextFieldPattern::IsTextArea() const
 {
+    CHECK_NULL_RETURN(GetHost(), false);
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, true);
     return layoutProperty->HasMaxLines() ? layoutProperty->GetMaxLinesValue(1) > 1 : true;
@@ -859,7 +860,7 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
     auto contentBottomBoundary = contentRect_.GetY() + contentRect_.GetSize().Height();
     if (textRect_.Height() > contentRect_.Height()) {
         if (textRect_.GetY() + textRect_.Height() < contentBottomBoundary) {
-            textDy = contentBottomBoundary - textRect_.GetY() + textRect_.Height();
+            textDy = contentBottomBoundary - textRect_.GetY() - textRect_.Height();
             caretRect_.SetTop(caretRect_.GetY() + textDy);
             textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + textDy));
         }
@@ -1300,7 +1301,7 @@ Offset TextFieldPattern::GetGlobalOffset() const
     Offset offset;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto globalOffset = host->GetPaintRectOffset() - rootOffset;
@@ -1321,9 +1322,7 @@ double TextFieldPattern::GetEditingBoxTopY() const
 bool TextFieldPattern::GetEditingBoxModel() const
 {
     bool isDeclarative = false;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline && pipeline->GetIsDeclarative()) {
         isDeclarative = true;
     }
@@ -1336,7 +1335,7 @@ void TextFieldPattern::HandleFocusEvent()
     LOGI("TextField %{public}d on focus", GetHost()->GetId());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
@@ -2219,7 +2218,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         lastClickTimeStamp_ = info.GetTimeStamp();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
+        auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
         // emulate clicking bottom of the textField
@@ -2293,9 +2292,7 @@ void TextFieldPattern::ScheduleCursorTwinkling()
     if (isTransparent_) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
     if (!context->GetTaskExecutor()) {
@@ -2395,7 +2392,7 @@ void TextFieldPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     instanceId_ = context->GetInstanceId();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2404,6 +2401,11 @@ void TextFieldPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE && !IsNormalInlineState()) {
+        layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    }
     CheckIfNeedToResetKeyboard();
     if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         underlineWidth_ = UNDERLINE_WIDTH;
@@ -2446,8 +2448,6 @@ void TextFieldPattern::OnModifyDone()
     textRect_.SetLeft(textRect_.GetX() + offsetDifference_.GetX());
     textRect_.SetTop(textRect_.GetY() + offsetDifference_.GetY());
     CalculateDefaultCursor();
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
     if (renderContext->HasBackgroundColor()) {
         paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
     }
@@ -4656,7 +4656,7 @@ void TextFieldPattern::OnAreaChangedInner()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     if (parentGlobalOffset != parentGlobalOffset_) {
@@ -4732,9 +4732,7 @@ void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY) 
 
 void TextFieldPattern::InitSurfaceChangedCallback()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -4752,9 +4750,7 @@ void TextFieldPattern::InitSurfaceChangedCallback()
 
 void TextFieldPattern::InitSurfacePositionChangedCallback()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfacePositionChangedCallback()) {
         auto callbackId =
@@ -5166,11 +5162,9 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
     if (selectionStart > selectionEnd) {
         selectionStart = selectionEnd;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto instanceId = GetInstanceId();
     ContainerScope scope(instanceId);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -5577,7 +5571,7 @@ void TextFieldPattern::UpdateScrollBarOffset()
         paddingRight = 0.0f;
         contentHeight = GetSingleLineHeight() * GetMaxLines();
     }
-    Size size(contentRect_.Width() + paddingRight, contentHeight + paddingHeight);
+    Size size(frameRect_.Width(), contentHeight + paddingHeight);
     UpdateScrollBarRegion(
         contentRect_.GetY() - textRect_.GetY(), textRect_.Height() + paddingHeight, size, Offset(0.0, 0.0));
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -5588,7 +5582,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
     if (source == SCROLL_FROM_START) {
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
-            scrollBar->PlayScrollBarStartAnimation();
+            scrollBar->PlayScrollBarAppearAnimation();
         }
         auto selectOverlayProxy = GetSelectOverlay();
         if (selectOverlayProxy) {
@@ -5727,10 +5721,16 @@ void TextFieldPattern::UpdateErrorTextMargin()
     auto errorTextCapsuleMargin = theme->GetErrorTextCapsuleMargin();
     if (layoutProperty->GetShowErrorTextValue(false) && (preErrorMargin_ < errorTextCapsuleMargin.ConvertToPx())) {
         errorMargin.bottom = CalcLength(errorTextCapsuleMargin);
+        errorMargin.right = CalcLength(passwordModeStyle_.margin.right->GetDimension());
+        errorMargin.left = CalcLength(passwordModeStyle_.margin.left->GetDimension());
+        errorMargin.top = CalcLength(passwordModeStyle_.margin.top->GetDimension());
         layoutProperty->UpdateMargin(errorMargin);
         restoreMarginState_ = true;
     } else if (restoreMarginState_ == true) {
         errorMargin.bottom = CalcLength(preErrorMargin_);
+        errorMargin.right = CalcLength(passwordModeStyle_.margin.right->GetDimension());
+        errorMargin.left = CalcLength(passwordModeStyle_.margin.left->GetDimension());
+        errorMargin.top = CalcLength(passwordModeStyle_.margin.top->GetDimension());
         layoutProperty->UpdateMargin(errorMargin);
         restoreMarginState_ = false;
     }
@@ -5776,6 +5776,18 @@ void TextFieldPattern::SavePasswordModeStates()
         passwordModeStyle_.padding.top = CalcLength(0.0);
         passwordModeStyle_.padding.bottom = CalcLength(0.0);
         passwordModeStyle_.padding.right = CalcLength(0.0);
+    }
+    const auto& marginProperty = layoutProperty->GetMarginProperty();
+    if (marginProperty) {
+        passwordModeStyle_.margin.left = CalcLength(marginProperty->left->GetDimension().ConvertToPx());
+        passwordModeStyle_.margin.top = CalcLength(marginProperty->top->GetDimension().ConvertToPx());
+        passwordModeStyle_.margin.bottom = CalcLength(marginProperty->bottom->GetDimension().ConvertToPx());
+        passwordModeStyle_.margin.right = CalcLength(marginProperty->right->GetDimension().ConvertToPx());
+    } else {
+        passwordModeStyle_.margin.left = CalcLength(0.0_vp);
+        passwordModeStyle_.margin.top = CalcLength(0.0_vp);
+        passwordModeStyle_.margin.bottom = CalcLength(0.0_vp);
+        passwordModeStyle_.margin.right = CalcLength(0.0_vp);
     }
 }
 
@@ -6457,7 +6469,7 @@ void TextFieldPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);

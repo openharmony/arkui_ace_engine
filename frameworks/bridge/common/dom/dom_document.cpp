@@ -276,7 +276,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
                 domNode = phoneNodeCreators[creatorIndex].value(nodeId, tag, itemIndex);
             }
         } else {
-            LOGW("node type %{public}s is invalid", tag.c_str());
             return nullptr;
         }
 #endif
@@ -290,13 +289,11 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
                 tag.c_str());
         }
 #endif
-        LOGW("node type %{public}s is invalid", tag.c_str());
         return nullptr;
     }
 
     auto result = domNodes_.try_emplace(nodeId, domNode);
     if (!result.second) {
-        LOGW("the node has already in the map");
         return nullptr;
     }
     domNode->SetIsRootNode(nodeId == rootNodeId_);
@@ -312,7 +309,6 @@ RefPtr<DOMProxy> DOMDocument::CreateProxyNodeWithId(const std::string& tag, Node
     auto proxy = AceType::MakeRefPtr<DOMProxy>(proxyId, proxyTag);
     auto result = domNodes_.try_emplace(proxyId, proxy);
     if (!result.second) {
-        LOGW("the node has already in the map");
         return nullptr;
     }
     proxyRelatedNode_.emplace(nodeId);
@@ -323,7 +319,7 @@ RefPtr<DOMNode> DOMDocument::GetDOMNodeById(NodeId nodeId) const
 {
     const auto itNode = domNodes_.find(nodeId);
     if (itNode == domNodes_.end()) {
-        LOGE("the node is not in the map");
+        LOGI("the node is not in the map");
         return nullptr;
     }
     return itNode->second;
@@ -332,7 +328,6 @@ RefPtr<DOMNode> DOMDocument::GetDOMNodeById(NodeId nodeId) const
 void DOMDocument::RemoveNodes(const RefPtr<DOMNode>& node, bool scheduleUpdate)
 {
     if (!node) {
-        LOGE("remove null node");
         return;
     }
     auto children = node->GetChildList();
@@ -407,7 +402,7 @@ void DOMDocument::HandleComponentPostBinding()
     for (auto iterTarget = nodeWithTargetVec_.begin(); iterTarget != nodeWithTargetVec_.end();) {
         auto targetNode = iterTarget->second.Upgrade();
         if (!targetNode) {
-            LOGW("DOM:: Node with target %{public}s has been invalid", iterTarget->first.c_str());
+            LOGW("DOM Node with target %{public}s has been invalid", iterTarget->first.c_str());
             iterTarget = nodeWithTargetVec_.erase(iterTarget);
             continue;
         }
@@ -415,7 +410,7 @@ void DOMDocument::HandleComponentPostBinding()
         for (auto iterId = nodeWithIdVec_.begin(); iterId != nodeWithIdVec_.end();) {
             auto idNode = iterId->second.Upgrade();
             if (!idNode) {
-                LOGW("DOM:: Node with id %{public}s has been invalid, add targetNode fail", iterId->first.c_str());
+                LOGW("DOM Node with id %{public}s has been invalid, add targetNode fail", iterId->first.c_str());
                 iterId = nodeWithIdVec_.erase(iterId);
                 continue;
             }
@@ -449,8 +444,6 @@ void DOMDocument::HandleComponentPostBinding()
                 // DOMTabBar in navigation bar bind tabs with ID node
                 tabBarNode->BindToTabs(idNode);
 #endif
-            } else {
-                LOGW("component type not supported");
             }
             ++iterId;
         }
@@ -471,7 +464,6 @@ void DOMDocument::SetUpRootComponent(const RefPtr<DOMNode>& node)
 {
     LOGD("DOMDocument SetUpRootComponent");
     if (!node) {
-        LOGE("fail to set up root component due to node is null");
         EventReport::SendComponentException(ComponentExcepType::SET_ROOT_DOM_NODE_ERR);
         return;
     }

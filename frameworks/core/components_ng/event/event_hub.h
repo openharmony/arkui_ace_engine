@@ -206,11 +206,6 @@ public:
         return static_cast<bool>(onDragStart_);
     }
 
-    bool HasOnDragEnter() const
-    {
-        return static_cast<bool>(onDragEnter_);
-    }
-
     void SetOnDragEnter(OnDragFunc&& onDragEnter)
     {
         onDragEnter_ = std::move(onDragEnter);
@@ -226,11 +221,6 @@ public:
             auto onDragEnter = onDragEnter_;
             onDragEnter(info, extraParams);
         }
-    }
-
-    bool HasOnDragLeave() const
-    {
-        return static_cast<bool>(onDragLeave_);
     }
 
     void SetOnDragLeave(OnDragFunc&& onDragLeave)

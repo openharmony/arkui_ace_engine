@@ -33,7 +33,6 @@ build_component_ng("base_ng") {
     "event_ng",
     "layout_ng",
     "manager_ng",
-    "pattern_ability_component_ng",
     "pattern_ng",
     "property_ng",
     "render_ng",

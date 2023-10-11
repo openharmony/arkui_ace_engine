@@ -41,7 +41,6 @@ public:
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
-    void PaintScrollBar(RSCanvas& canvas);
     void PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas);
 
     void SetScrollBar(WeakPtr<ScrollBar>&& scrollBar)

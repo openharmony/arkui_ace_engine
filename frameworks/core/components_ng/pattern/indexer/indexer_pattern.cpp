@@ -81,7 +81,6 @@ void IndexerPattern::OnModifyDone()
     if (propSelect != lastSelectProp_) {
         selected_ = propSelect;
         lastSelectProp_ = propSelect;
-        selectChanged_ = true;
         ResetStatus();
     }
     auto itemSize =
@@ -89,8 +88,7 @@ void IndexerPattern::OnModifyDone()
     auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
     lastItemSize_ = itemSize;
     auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
-    ApplyIndexChanged(needMarkDirty,
-        initialized_ && selectChanged_, false, indexerSizeChanged);
+    ApplyIndexChanged(needMarkDirty, false, false, indexerSizeChanged);
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
         InitPanEvent(gesture);
@@ -427,8 +425,6 @@ void IndexerPattern::OnSelect(bool changed)
 void IndexerPattern::ApplyIndexChanged(
     bool isTextNodeInTree, bool selectChanged, bool fromTouchUp, bool indexerSizeChanged)
 {
-    initialized_ = true;
-    selectChanged_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();

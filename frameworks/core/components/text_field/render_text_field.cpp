@@ -38,12 +38,12 @@
 #include "core/common/text_field_manager.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/text_utils.h"
+#include "core/components/text_field/text_field_scroll_bar_controller.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/mouse_event.h"
-#include "core/components/text_field/text_field_scroll_bar_controller.h"
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
 #endif
@@ -472,7 +472,7 @@ void RenderTextField::CalculateMainScrollExtent()
     SetEstimatedHeight(GetLongestLine());
     auto len = GetEditingValue().GetWideText().length();
     if (len != 0) {
-        auto averageItemWidth = GetLongestLine() / len ;
+        auto averageItemWidth = GetLongestLine() / len;
         lastOffset_ = initIndex_ * averageItemWidth - currentOffset_;
     }
     if (scrollBar_) {
@@ -1423,7 +1423,7 @@ void RenderTextField::StopTwinkling()
     }
 }
 
-void RenderTextField::HandleSetSelection(int32_t start, int32_t end)
+void RenderTextField::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
 {
     LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
     UpdateSelection(start, end);
@@ -2281,10 +2281,10 @@ void RenderTextField::CursorMoveRight(CursorMoveSkip skip)
     MarkNeedLayout();
 }
 
-void RenderTextField::CursorMoveUp()
+bool RenderTextField::CursorMoveUp()
 {
     if (keyboard_ != TextInputType::MULTILINE) {
-        return;
+        return false;
     }
     isValueFromRemote_ = false;
     auto value = GetEditingValue();
@@ -2292,12 +2292,13 @@ void RenderTextField::CursorMoveUp()
     SetEditingValue(std::move(value));
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
+    return true;
 }
 
-void RenderTextField::CursorMoveDown()
+bool RenderTextField::CursorMoveDown()
 {
     if (keyboard_ != TextInputType::MULTILINE) {
-        return;
+        return false;
     }
     isValueFromRemote_ = false;
     auto value = GetEditingValue();
@@ -2305,6 +2306,7 @@ void RenderTextField::CursorMoveDown()
     SetEditingValue(std::move(value));
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
+    return true;
 }
 
 void RenderTextField::HandleOnBlur()

@@ -186,6 +186,11 @@ public:
         isDragEvent_ = isDragEvent;
     }
 
+    void SetShowHoverEffect(bool showHoverEffect)
+    {
+        showHoverEffect_ = showHoverEffect;
+    }
+
 private:
     float actualWidth_ = 0.0f;
     float actualHeight_ = 0.0f;
@@ -204,6 +209,7 @@ private:
     float pointAnimationDuration_ = 0.0f;
     bool isDragEvent_ = false;
     bool isFirstCreated_ = true;
+    bool showHoverEffect_ = true;
 
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;

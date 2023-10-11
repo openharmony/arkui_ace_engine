@@ -31,13 +31,9 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPoint.h"
-#ifndef NEW_SKIA
-#include "include/effects/SkBlurImageFilter.h"
-#else
-#include "include/effects/SkImageFilters.h"
-#endif
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
+#include "include/effects/SkImageFilters.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
@@ -323,11 +319,8 @@ void FlutterRenderOffscreenCanvas::SetPaintImage()
 {
     float matrix[20] = { 0 };
     matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
+
     imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
 
     imagePaint_.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
     imagePaint_.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
@@ -590,11 +583,7 @@ void FlutterRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradi
         pos[i] = gradientColor.GetDimension().Value();
     }
 
-#ifdef USE_SYSTEM_SKIA
-    auto mode = SkShader::kClamp_TileMode;
-#else
     auto mode = SkTileMode::kClamp;
-#endif
 
     sk_sp<SkShader> skShader = nullptr;
     if (gradient.GetType() == GradientType::LINEAR) {
@@ -640,35 +629,19 @@ void FlutterRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkP
     static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&)> staticPattern[] = {
         { "no-repeat",
             [](sk_sp<SkImage> image, SkPaint& paint) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kDecal_TileMode, nullptr));
-#else
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, nullptr));
-#endif
             } },
         { "repeat",
             [](sk_sp<SkImage> image, SkPaint& paint) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, nullptr));
-#else
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, nullptr));
-#endif
             } },
         { "repeat-x",
             [](sk_sp<SkImage> image, SkPaint& paint) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kDecal_TileMode, nullptr));
-#else
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, nullptr));
-#endif
             } },
         { "repeat-y",
             [](sk_sp<SkImage> image, SkPaint& paint) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kRepeat_TileMode, nullptr));
-#else
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, nullptr));
-#endif
             } },
     };
     auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
@@ -1443,8 +1416,8 @@ void FlutterRenderOffscreenCanvas::UpdateTextStyleForeground(bool isStroke, Rose
 double FlutterRenderOffscreenCanvas::GetBaselineOffset(
     TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
 #else
-double FlutterRenderOffscreenCanvas::GetBaselineOffset(TextBaseline baseline,
-    std::unique_ptr<Rosen::Typography>& paragraph)
+double FlutterRenderOffscreenCanvas::GetBaselineOffset(
+    TextBaseline baseline, std::unique_ptr<Rosen::Typography>& paragraph)
 #endif
 {
     double y = 0.0;
@@ -1959,14 +1932,6 @@ void FlutterRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterP
 
 void FlutterRenderOffscreenCanvas::SetColorFilter(float matrix[20])
 {
-#ifdef USE_SYSTEM_SKIA
-    matrix[4] *= 255;
-    matrix[9] *= 255;
-    matrix[14] *= 255;
-    matrix[19] *= 255;
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
     imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
 }
 } // namespace OHOS::Ace

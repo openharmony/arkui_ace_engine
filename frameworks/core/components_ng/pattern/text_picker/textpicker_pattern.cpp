@@ -861,8 +861,6 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -872,9 +870,12 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     if (isPicker_) {
         return;
     }
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
-    if (contentRowNode_) {
-        auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    auto contentRowNode = contentRowNode_.Upgrade();
+    if (contentRowNode) {
+        auto layoutRenderContext = contentRowNode->GetRenderContext();
         CHECK_NULL_VOID(layoutRenderContext);
         layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }

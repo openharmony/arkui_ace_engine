@@ -53,6 +53,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    pManager_->Reset();
     if (spans_.empty()) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, std::nullopt);
@@ -96,6 +97,17 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         return std::nullopt;
     }
     return res;
+}
+
+void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    OptionalSizeF frameSize =
+        CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT_MAIN_AXIS);
+    if (layoutConstraint->maxSize.Width() < layoutConstraint->minSize.Width()) {
+        frameSize.SetWidth(layoutConstraint->minSize.Width());
+    }
+    TextLayoutAlgorithm::Measure(layoutWrapper);
 }
 
 void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

@@ -35,9 +35,10 @@ std::string TimePickerRowAccessibilityProperty::GetText() const
     auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, "");
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
-    auto amPmColumn = allChildNode["amPm"];
-    auto hourColumn = allChildNode["hour"];
-    auto minuteColumn = allChildNode["minute"];
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    CHECK_NULL_RETURN(hourColumn, "");
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    CHECK_NULL_RETURN(minuteColumn, "");
     auto hourPickerColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_RETURN(hourPickerColumnPattern, "");
     int hour = hourPickerColumnPattern->GetCurrentIndex(); // + 1;
@@ -58,7 +59,8 @@ std::string TimePickerRowAccessibilityProperty::GetText() const
     }
 
     if (!timePickerRowPattern->GetHour24()) {
-        auto amPmColumn = allChildNode["amPm"];
+        auto amPmColumn = allChildNode["amPm"].Upgrade();
+        CHECK_NULL_RETURN(amPmColumn, "");
         auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
         if (amPmPickerColumnPattern->GetCurrentIndex() == 0) {
             return AM + textHour + COLON + textMinute;

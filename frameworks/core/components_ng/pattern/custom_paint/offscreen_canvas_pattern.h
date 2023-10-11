@@ -61,6 +61,7 @@ public:
     void DrawImage(const Ace::CanvasImage& image, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
+    void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
     void PutImageData(const Ace::ImageData& imageData);
 
     void SetAntiAlias(bool isEnabled);

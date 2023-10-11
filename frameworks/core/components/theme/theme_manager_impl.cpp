@@ -62,11 +62,13 @@
 #include "core/components/video/video_theme.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/form/form_theme.h"
+#include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "core/components/theme/advanced_pattern_theme.h"
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 namespace OHOS::Ace {
@@ -132,7 +134,9 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { CloseIconTheme::TypeId(), &ThemeBuildFunc<CloseIconTheme::Builder> },
     { NG::SideBarTheme::TypeId(), &ThemeBuildFunc<NG::SideBarTheme::Builder> },
     { NG::RichEditorTheme::TypeId(), &ThemeBuildFunc<NG::RichEditorTheme::Builder> },
-    { NG::GridItemTheme::TypeId(), &ThemeBuildFunc<NG::GridItemTheme::Builder> }
+    { NG::GridItemTheme::TypeId(), &ThemeBuildFunc<NG::GridItemTheme::Builder> },
+    { NG::MenuTheme::TypeId(), &ThemeBuildFunc<NG::MenuTheme::Builder> },
+    { NG::GaugeTheme::TypeId(), &ThemeBuildFunc<NG::GaugeTheme::Builder> },
 };
 } // namespace
 

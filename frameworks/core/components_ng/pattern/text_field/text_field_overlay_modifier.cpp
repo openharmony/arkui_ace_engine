@@ -17,7 +17,6 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -206,7 +205,7 @@ void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (textFieldPattern->GetScrollBarVisible()) {
+    if (textFieldPattern->GetScrollBarVisible() && textFieldPattern->IsFocus()) {
         ScrollBarOverlayModifier::onDraw(context);
     }
 }

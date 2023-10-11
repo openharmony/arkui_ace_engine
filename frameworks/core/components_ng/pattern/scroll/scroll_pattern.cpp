@@ -161,7 +161,7 @@ void ScrollPattern::FireOnScrollStart()
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
-        scrollBar->PlayScrollBarStartAnimation();
+        scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
     auto host = GetHost();
@@ -278,7 +278,7 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
     return offset;
 }
 
-bool ScrollPattern::IsOutOfBoundary() const
+bool ScrollPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
     return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
 }
@@ -818,5 +818,17 @@ bool ScrollPattern::NeedScrollSnapToSide(float delta)
         }
     }
     return false;
+}
+
+std::string ScrollPattern::ProvideRestoreInfo()
+{
+    Dimension dimension(currentOffset_);
+    return StringUtils::DoubleToString(dimension.ConvertToVp());
+}
+
+void ScrollPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    Dimension dimension = StringUtils::StringToDimension(restoreInfo, true);
+    currentOffset_ = dimension.ConvertToPx();
 }
 } // namespace OHOS::Ace::NG

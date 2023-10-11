@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_LAYOUT_ALGORITHM_H
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -51,7 +52,7 @@ public:
 
 private:
     void CalculateBlockOffset(
-        LayoutWrapper* layoutWrapper, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse);
+        LayoutWrapper* layoutWrapper, const RectF& contentRect, float selectOffset, Axis axis, bool reverse);
     SizeF CalculateHotSize(const SizeF& blockSize, float themeBlockHotSize);
 
 private:

@@ -40,7 +40,6 @@ void DOMCanvas::PrepareSpecializedComponent()
     // This Func will be triggered when style/attr updated.
     auto declaration = AceType::DynamicCast<CanvasDeclaration>(declaration_);
     if (!declaration) {
-        LOGE("Get Canvas Declaration failed.");
         return;
     }
 }

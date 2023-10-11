@@ -33,6 +33,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propVertical_ = CloneVertical();
         value->propStrokeWidth_ = CloneStrokeWidth();
+        value->propStrokeWidthLimitation_ = CloneStrokeWidthLimitation();
         return value;
     }
 
@@ -41,6 +42,7 @@ public:
         LayoutProperty::Reset();
         ResetVertical();
         ResetStrokeWidth();
+        ResetStrokeWidthLimitation();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -65,6 +67,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Vertical, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidthLimitation, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DividerLayoutProperty);

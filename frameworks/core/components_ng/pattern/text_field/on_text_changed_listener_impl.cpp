@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 
+#include "core/common/container_scope.h"
+#include "core/pipeline/pipeline_base.h"
+
 namespace OHOS::Ace::NG {
 
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
@@ -254,7 +257,7 @@ void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& ta
     CHECK_NULL_VOID(textFieldPattern);
     auto instanceId = textFieldPattern->GetInstanceId();
     ContainerScope scope(instanceId);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
     auto taskExecutor = context->GetTaskExecutor();
@@ -270,9 +273,7 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
     CHECK_NULL_VOID(textFieldPattern);
     auto instanceId = textFieldPattern->GetInstanceId();
     ContainerScope scope(instanceId);
-    auto host = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
     auto taskExecutor = context->GetTaskExecutor();

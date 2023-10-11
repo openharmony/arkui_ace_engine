@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NEW_SKIA
-#include "flutter_render_picker_base.h"
-#endif
+
 #include "rosen_render_picker_base.h"
 
 namespace OHOS::Ace {
@@ -27,11 +25,7 @@ RefPtr<RenderNode> RenderPickerBase::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderPickerBase>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

@@ -447,11 +447,15 @@ void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
     auto type = static_cast<SliderModel::BlockStyleType>(getType->ToNumber<int32_t>());
     if (type == SliderModel::BlockStyleType::IMAGE) {
         std::string src;
-        if (!ParseJsMedia(jsObj->GetProperty("image"), src)) {
+        auto image = jsObj->GetProperty("image");
+        if (!ParseJsMedia(image, src)) {
             ResetBlockStyle();
             return;
         }
-        SliderModel::GetInstance()->SetBlockImage(src);
+        std::string bundleName;
+        std::string moduleName;
+        GetJsMediaBundleInfo(image, bundleName, moduleName);
+        SliderModel::GetInstance()->SetBlockImage(src, bundleName, moduleName);
     } else if (type == SliderModel::BlockStyleType::SHAPE) {
         auto shape = jsObj->GetProperty("shape");
         if (!shape->IsObject()) {

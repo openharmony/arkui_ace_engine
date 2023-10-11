@@ -16,6 +16,7 @@
 #include "base/log/log_wrapper.h"
 
 #include <cstring>
+#include <map>
 #include <unordered_map>
 
 #include "hilog/log.h"
@@ -40,11 +41,12 @@ const ::LogLevel LOG_LEVELS[] = {
     LOG_FATAL,
 };
 
-const std::unordered_map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
+const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::DEFAULT, "Ace" },
     { AceLogTag::ACE_SUB_WINDOW, "AceSubWindow" },
     { AceLogTag::ACE_FORM, "AceForm" },
     { AceLogTag::ACE_DRAG, "AceDrag" },
+    { AceLogTag::ACE_VIDEO, "AceVideo" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";

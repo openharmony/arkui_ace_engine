@@ -31,7 +31,7 @@ public:
     MOCK_METHOD1(ShowMenu, void(const RefPtr<Component>& newComponent));
     MOCK_METHOD3(ShowMenuNG, void(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset));
     MOCK_METHOD2(HideMenuNG, void(const RefPtr<NG::FrameNode>& menu, int32_t targetId));
-    MOCK_METHOD0(HideMenuNG, void());
+    MOCK_METHOD1(HideMenuNG, void(bool showPreviewAnimation));
     MOCK_METHOD2(ShowPopup, void(const RefPtr<Component>& newComponent, bool disableTouchEvent));
     MOCK_METHOD2(ShowPopupNG, void(int32_t targetId, const NG::PopupInfo& popupInfo));
     MOCK_METHOD1(HidePopupNG, void(int32_t targetId));
@@ -39,7 +39,7 @@ public:
     MOCK_METHOD1(CancelPopup, bool(const std::string& id));
     MOCK_METHOD0(CloseMenu, void());
     MOCK_METHOD0(ClearMenu, void());
-    MOCK_METHOD1(ClearMenuNG, void(bool inWindow));
+    MOCK_METHOD2(ClearMenuNG, void(bool inWindow, bool showAnimation));
     MOCK_METHOD2(
         ShowDialogNG, RefPtr<NG::FrameNode>(const DialogProperties& dialogProps, std::function<void()>&& buildFunc));
     MOCK_METHOD0(HideSubWindowNG, void());

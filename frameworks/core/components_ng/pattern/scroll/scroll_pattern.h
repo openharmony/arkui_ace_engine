@@ -166,7 +166,7 @@ public:
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
-    bool IsOutOfBoundary() const;
+    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     void OnAnimateStop() override;
@@ -257,6 +257,9 @@ public:
         CHECK_NULL_RETURN(scrollLayoutProperty, ScrollSnapAlign::NONE);
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
+
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);

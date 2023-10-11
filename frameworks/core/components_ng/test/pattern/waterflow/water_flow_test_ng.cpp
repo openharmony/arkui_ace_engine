@@ -905,4 +905,37 @@ HWTEST_F(WaterFlowTestNg, WaterFlowSetFriction001, TestSize.Level1)
     CreateWithItem([](WaterFlowModelNG model) { model.SetFriction(1); });
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 1);
 }
+
+/**
+ * @tc.name: WaterFlowPattern_distributed001
+ * @tc.desc: Test the distributed capability of WaterFlow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Waterflow node
+     */
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    GetInstance();
+
+    // need dpi to be 1
+    /**
+     * @tc.steps: step2. get pattern .
+     * @tc.expected: function ProvideRestoreInfo is called.
+     */
+    pattern_->layoutInfo_.startIndex_ = 1;
+    pattern_->layoutInfo_.storedOffset_ = 1.0f;
+    std::string ret = pattern_->ProvideRestoreInfo();
+
+    /**
+     * @tc.steps: step3. function OnRestoreInfo is called.
+     * @tc.expected: Passing JSON format.
+     */
+    // std::string restoreInfo = R"({"beginIndex":1,"offset":1.1})";
+    pattern_->OnRestoreInfo(ret);
+    EXPECT_EQ(pattern_->layoutInfo_.jumpIndex_, 1);
+    EXPECT_DOUBLE_EQ(pattern_->layoutInfo_.restoreOffset_, 1.0f);
+}
 } // namespace OHOS::Ace::NG

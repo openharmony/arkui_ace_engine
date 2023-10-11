@@ -1253,6 +1253,34 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest021, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test on color configuration update
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    buttonTheme->bgColor_ = Color::RED;
+    buttonTheme->textStyle_.textColor_ = Color::RED;
+    buttonPattern->OnColorConfigurationUpdate();
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::RED);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::RED);
+}
+
+/**
  * @tc.name: ButtonAccessibilityPropertyTest001
  * @tc.desc: Test button property
  * @tc.type: FUNC

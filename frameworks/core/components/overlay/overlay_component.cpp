@@ -16,9 +16,6 @@
 #include "core/components/overlay/overlay_component.h"
 
 #include "core/components/overlay/overlay_element.h"
-#ifndef NEW_SKIA
-#include "core/components/stack/flutter_render_stack.h"
-#endif
 #include "core/components/stack/rosen_render_stack.h"
 
 namespace OHOS::Ace {
@@ -40,15 +37,7 @@ RefPtr<RenderNode> OverlayComponent::CreateRenderNode()
             rosenRenderNode->SetBoundary();
         }
     } else {
-#ifndef NEW_SKIA
-        auto flutterRenderNode = AceType::DynamicCast<FlutterRenderStack>(renderNode);
-        if (flutterRenderNode) {
-            flutterRenderNode->SetVisible(false);
-            flutterRenderNode->SetBoundary();
-        }
-#else
         return nullptr;
-#endif
     }
 
     return renderNode;
