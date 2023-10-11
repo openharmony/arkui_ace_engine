@@ -683,6 +683,7 @@ private:
     bool isVoluntarilyClear_ = false;
     bool isIndicatorLongPress_ = false;
     bool stopIndicatorAnimation_ = true;
+    bool isTouchPad_ = false;
 
     float mainDeltaSum_ = 0.0f;
 
