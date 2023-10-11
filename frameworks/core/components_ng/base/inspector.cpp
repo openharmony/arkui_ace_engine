@@ -345,7 +345,7 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     CHECK_NULL_VOID(frameNode);
     rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
     rectangle.localOffset = frameNode->GetGeometryNode()->GetFrameOffset();
-    rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
+    rectangle.windowOffset = frameNode->GetTransformRelativeOffset();
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
