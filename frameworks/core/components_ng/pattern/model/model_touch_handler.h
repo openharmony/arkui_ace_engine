@@ -19,19 +19,21 @@
 #include <functional>
 #include <unordered_map>
 
+#include "data_type/pointer_event.h"
+
 #include "base/memory/referenced.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/scene_viewer_touch_event.h"
+#include "core/components_ng/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
-using ModelEventCallback = std::function<void(const OHOS::Render3D::SceneViewerTouchEvent&)>;
+using ModelEventCallback = std::function<void(const Render3D::PointerEvent&)>;
 
 class ModelTouchHandler : public Referenced {
 public:
     explicit ModelTouchHandler() {}
     ~ModelTouchHandler() override = default;
 
-    bool HandleTouchEvent(const TouchEventInfo& info);
+    bool HandleTouchEvent(const TouchEventInfo& info, uint32_t viewWidth, uint32_t viewHeight);
 
     void SetCameraEventCallback(const ModelEventCallback& eventCallback)
     {
@@ -54,10 +56,9 @@ public:
     }
 
 private:
-    OHOS::Render3D::SceneViewerTouchEvent CreateSceneTouchEvent(const TouchEvent& event) const;
-    OHOS::Ace::TouchEvent CreateTouchEvent(const TouchEventInfo& info);
-
-private:
+    Render3D::PointerEvent CreateSceneTouchEvent(const TouchEvent& event, uint32_t viewWidth,
+        uint32_t viewHeight) const;
+    TouchEvent CreateTouchEvent(const TouchEventInfo& info) const;
     ModelEventCallback cameraEventCallback_;
     ModelEventCallback clickEventCallback_;
     std::unordered_map<int32_t, TouchEvent> touches_;

@@ -133,19 +133,6 @@ template("build_component_ng") {
         ]
       }
 
-      if (defined(config.model_component_support) &&
-          config.model_component_support) {
-        deps += [ "//foundation/graphic/graphic_3d/3d_widget_adapter:widget_adapter_source" ]
-        include_dirs += [
-          "//foundation/graphic/graphic_3d/3d_widget_adapter/include",
-          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/custom",
-          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type",
-          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry",
-          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/ohos",
-          "//foundation/graphic/graphic_2d/rosen/modules/",
-        ]
-      }
-
       if (platform == "ohos" || platform == "ohos_ng") {
         deps += [
           "//third_party/EGL:libEGL",
