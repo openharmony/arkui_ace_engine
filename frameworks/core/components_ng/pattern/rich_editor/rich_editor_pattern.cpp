@@ -740,10 +740,10 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& s
     auto caretOffset = startOffset + textPaintOffset - rootOffset;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, caretOffset);
-    const auto& contentSize = geometryNode->GetContent()->GetRect().GetSize();
+    auto frameSize = geometryNode->GetFrameRect().GetSize();
     CHECK_NULL_RETURN(overlayMod_, caretOffset);
     float caretWidth = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretWidth();
-    caretOffset.SetX(std::clamp(caretOffset.GetX(), 0.0f, static_cast<float>(contentSize.Width()) - caretWidth));
+    caretOffset.SetX(std::clamp(caretOffset.GetX(), 0.0f, static_cast<float>(frameSize.Width()) - caretWidth));
     return caretOffset;
 }
 
