@@ -13,38 +13,31 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/preview_mock/preview_mock_model_ng.h"
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
 #include "core/components_ng/pattern/preview_mock/preview_mock_model.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/preview_mock/preview_mock_pattern.h"
 
 namespace OHOS::Ace::NG {
 void PreviewMockModelNG::Create(const std::string& content)
 {
-    constexpr double DEFAULT_OFFSET = 25;
     constexpr double DEFAULT_HEIGHT = 30;
-    constexpr Dimension DEFAULT_FONT_SIZE = 30.0_px;
     const Color bgColor = Color::FromString("#808080");
-    const std::string presentationText("This component is not supported on PC preview.");
+    constexpr Dimension DEFAULT_FONT_SIZE = 20.0_vp;
+    const std::string presentationText("Preview not available for this component.");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(content, nodeId, []() { return AceType::MakeRefPtr<CustomPaintPattern>(); });
+        FrameNode::GetOrCreateFrameNode(content, nodeId, []() { return AceType::MakeRefPtr<PreviewMockPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
-    auto pattern = frameNode->GetPattern<CustomPaintPattern>();
-    pattern->SetAntiAlias(true);
-    pattern->UpdateFontSize(DEFAULT_FONT_SIZE);
-    std::optional<double> maxWidth;
-    pattern->FillText(presentationText, 0, DEFAULT_OFFSET, maxWidth);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, presentationText);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, DEFAULT_FONT_SIZE);
     auto renderContext = frameNode->GetRenderContext();
     if (renderContext) {
         renderContext->UpdateBackgroundColor(bgColor);
     }
+    ViewAbstract::SetHeight(CalcLength(DEFAULT_HEIGHT));
 }
 } // namespace OHOS::Ace::NG
