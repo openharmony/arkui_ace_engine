@@ -106,8 +106,8 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormSharedImage(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormData(_)).WillOnce(Return());
-    NativeValue* value = nullptr;
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Initialize(An<OHOS::Rosen::Window*>(), _, value))
+
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Initialize(An<OHOS::Rosen::Window*>(), _, _))
         .WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetActionEventHandler(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetErrorEventHandler(_)).WillOnce(Return());
@@ -231,8 +231,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormSharedImage(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormData(_)).WillOnce(Return());
-    NativeValue* value = nullptr;
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Initialize(An<OHOS::Rosen::Window*>(), _, value))
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Initialize(An<OHOS::Rosen::Window*>(), _, _))
         .WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetActionEventHandler(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetErrorEventHandler(_)).WillOnce(Return());

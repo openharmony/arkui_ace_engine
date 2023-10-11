@@ -361,16 +361,6 @@ void UIContentImpl::InitializeInner(
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
-void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
-{
-    InitializeInner(window, url, reinterpret_cast<napi_value>(storage), false);
-}
-
-void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage)
-{
-    InitializeInner(window, name, reinterpret_cast<napi_value>(storage), true);
-}
-
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
     InitializeInner(window, url, storage, false);
@@ -379,12 +369,6 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
     InitializeInner(window, name, storage, true);
-}
-
-void UIContentImpl::Initialize(
-    OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId)
-{
-    Initialize(window, url, reinterpret_cast<napi_value>(storage), focusWindowId);
 }
 
 void UIContentImpl::Initialize(
@@ -406,11 +390,6 @@ void UIContentImpl::Initialize(
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
-NativeValue* UIContentImpl::GetUIContext()
-{
-    return reinterpret_cast<NativeValue*>(GetUINapiContext());
-}
-
 napi_value UIContentImpl::GetUINapiContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -429,11 +408,6 @@ napi_value UIContentImpl::GetUINapiContext()
     }
 
     return result;
-}
-
-void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
-{
-    Restore(window, contentInfo, reinterpret_cast<napi_value>(storage));
 }
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
