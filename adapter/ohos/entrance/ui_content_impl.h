@@ -197,7 +197,6 @@ private:
     std::string moduleName_;
     std::string hapPath_;
     bool isBundle_ = false;
-    int32_t minCompatibleVersionCode_ = 0;
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
     std::string formData_;
