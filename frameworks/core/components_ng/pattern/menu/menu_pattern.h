@@ -287,6 +287,9 @@ private:
     Offset GetTransformCenter() const;
     void ShowPreviewMenuAnimation();
 
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragEnd(float offsetX, float offsetY, float velocity);
+
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
