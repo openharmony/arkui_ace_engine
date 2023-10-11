@@ -29,7 +29,6 @@
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
-#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -93,7 +92,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
 {
     std::optional<std::string> placeholderSrc;
     std::optional<std::string> value;
-    JSTextEditableController* jsController = nullptr;
+    JSTextInputController* jsController = nullptr;
     JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     if (info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -122,7 +121,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
+            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextInputController>();
         }
     }
 
@@ -141,7 +140,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
 {
     std::optional<std::string> placeholderSrc;
     std::optional<std::string> value;
-    JSTextEditableController* jsController = nullptr;
+    JSTextAreaController* jsController = nullptr;
     JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     if (info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -170,7 +169,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
+            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextAreaController>();
         }
     }
     auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
