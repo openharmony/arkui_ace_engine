@@ -166,24 +166,27 @@ void CalendarDialogPattern::InitHoverEvent()
 
 bool CalendarDialogPattern::IsInEntryRegion(const Offset& globalLocation)
 {
-    CHECK_NULL_RETURN(entryNode_, false);
-    return entryNode_->GetTransformRectRelativeToWindow().IsInRegion(
+    auto entryNode = entryNode_.Upgrade();
+    CHECK_NULL_RETURN(entryNode, false);
+    return entryNode->GetTransformRectRelativeToWindow().IsInRegion(
         PointF(globalLocation.GetX(), globalLocation.GetY()));
 }
 
 void CalendarDialogPattern::HandleEntryNodeHoverEvent(bool state, const Offset& globalLocation)
 {
-    CHECK_NULL_VOID(entryNode_);
-    auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
+    auto entryNode = entryNode_.Upgrade();
+    CHECK_NULL_VOID(entryNode);
+    auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->HandleHoverEvent(state, globalLocation);
 }
 
 void CalendarDialogPattern::HandleEntryNodeTouchEvent(bool isPressed, const Offset& globalLocation)
 {
-    CHECK_NULL_VOID(entryNode_);
+    auto entryNode = entryNode_.Upgrade();
+    CHECK_NULL_VOID(entryNode);
     if (IsInEntryRegion(globalLocation)) {
-        auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
+        auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->HandleTouchEvent(isPressed, globalLocation);
     }
@@ -206,9 +209,10 @@ void CalendarDialogPattern::InitClickEvent()
 
 void CalendarDialogPattern::HandleClickEvent(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(entryNode_);
+    auto entryNode = entryNode_.Upgrade();
+    CHECK_NULL_VOID(entryNode);
     if (IsInEntryRegion(info.GetGlobalLocation())) {
-        auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
+        auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->HandleClickEvent(info.GetGlobalLocation());
     }
@@ -255,8 +259,9 @@ void CalendarDialogPattern::InitOnKeyEvent()
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         if (event.IsNumberKey() && event.action == KeyAction::DOWN) {
-            CHECK_NULL_RETURN(pattern->entryNode_, false);
-            auto entryPattern = pattern->entryNode_->GetPattern<CalendarPickerPattern>();
+            auto entryNode = pattern->entryNode_.Upgrade();
+            CHECK_NULL_RETURN(entryNode, false);
+            auto entryPattern = entryNode->GetPattern<CalendarPickerPattern>();
             CHECK_NULL_RETURN(entryPattern, false);
             entryPattern->HandleNumberKeyEvent(event);
         }
@@ -292,8 +297,9 @@ void CalendarDialogPattern::InitOnKeyEvent()
 
 void CalendarDialogPattern::InitEntryChangeEvent()
 {
-    CHECK_NULL_VOID(entryNode_);
-    auto eventHub = entryNode_->GetEventHub<CalendarPickerEventHub>();
+    auto entryNode = entryNode_.Upgrade();
+    CHECK_NULL_VOID(entryNode);
+    auto eventHub = entryNode->GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto callback = [weak = WeakClaim(this)](const std::string& info) {
         auto pattern = weak.Upgrade();
@@ -738,8 +744,9 @@ void CalendarDialogPattern::ClearCalendarFocusedState()
 
 void CalendarDialogPattern::ChangeEntryState()
 {
-    CHECK_NULL_VOID(entryNode_);
-    auto enrtyPattern = entryNode_->GetPattern<CalendarPickerPattern>();
+    auto entryNode = entryNode_.Upgrade();
+    CHECK_NULL_VOID(entryNode);
+    auto enrtyPattern = entryNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(enrtyPattern);
     if (focusAreaID_ == TITLE_NODE_INDEX) {
         if (focusAreaChildID_ == TITLE_LAST_YEAR_BUTTON_NODE_INDEX ||
@@ -768,10 +775,10 @@ void CalendarDialogPattern::InitTitleArrowsEvent()
         int32_t childIndex = title->GetChildIndex(child);
         auto buttonNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(buttonNode);
-        auto event = [buttonNode, childIndex, wp = WeakClaim(this)](GestureEvent& /* info */) {
+        auto event = [childIndex, wp = WeakClaim(this)](GestureEvent& /* info */) {
             auto pattern = wp.Upgrade();
             if (pattern) {
-                pattern->HandleTitleArrowsClickEvent(buttonNode, childIndex);
+                pattern->HandleTitleArrowsClickEvent(childIndex);
             }
         };
         auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
@@ -781,7 +788,7 @@ void CalendarDialogPattern::InitTitleArrowsEvent()
     }
 }
 
-void CalendarDialogPattern::HandleTitleArrowsClickEvent(const RefPtr<FrameNode>& buttonNode, int32_t nodeIndex)
+void CalendarDialogPattern::HandleTitleArrowsClickEvent(int32_t nodeIndex)
 {
     auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_VOID(swiperPattern);
@@ -870,9 +877,10 @@ void CalendarDialogPattern::GetCalendarMonthData(int32_t year, int32_t month, Ob
 
 void CalendarDialogPattern::AddHotZoneRect()
 {
-    CHECK_NULL_VOID(entryNode_);
-    auto rect = entryNode_->GetPaintRectWithTransform();
-    rect.SetOffset(entryNode_->GetPaintRectOffsetToPage());
+    auto entryNode = entryNode_.Upgrade();
+    CHECK_NULL_VOID(entryNode);
+    auto rect = entryNode->GetPaintRectWithTransform();
+    rect.SetOffset(entryNode->GetPaintRectOffsetToPage());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(
         Dimension(rect.Width()), Dimension(rect.Height())));
@@ -947,7 +955,8 @@ int32_t CalendarDialogPattern::GetIndexByFocusedDay()
 
 void CalendarDialogPattern::HandleEntryLayoutChange()
 {
-    CHECK_NULL_VOID(entryNode_);
+    auto entryNode = entryNode_.Upgrade();
+    CHECK_NULL_VOID(entryNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto wrapperNode = host->GetParent();
@@ -956,7 +965,7 @@ void CalendarDialogPattern::HandleEntryLayoutChange()
     CHECK_NULL_VOID(dialogNode);
     auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
     CHECK_NULL_VOID(dialogLayoutProp);
-    auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
+    auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pattern);
     dialogLayoutProp->UpdateDialogOffset(DimensionOffset(pattern->CalculateDialogOffset()));
     dialogOffset_ = pattern->CalculateDialogOffset();
