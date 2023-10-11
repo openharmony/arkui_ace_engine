@@ -53,7 +53,7 @@ inline constexpr Dimension BUBBLE_POSITION_X = 48.0_vp;
 inline constexpr Dimension BUBBLE_POSITION_Y = 96.0_vp;
 inline constexpr uint32_t BUBBLE_FONT_COLOR = 0xFF254FF7;
 inline constexpr uint32_t BUBBLE_BG_COLOR = 0xFFF1F3F5;
-inline constexpr double INDEXER_ITEM_SIZE = 24.0;      // circle mode, item size (VP)
+inline constexpr double INDEXER_ITEM_SIZE = 16.0;      // circle mode, item size (VP)
 inline constexpr double INDEXER_ITEM_TEXT_SIZE = 12.0; // circle, mode font size (VP)
 // data for circle mode
 inline constexpr int32_t INDEXER_COLLAPSE_ITEM_COUNT = 4;
