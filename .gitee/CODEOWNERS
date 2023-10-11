@@ -83,7 +83,7 @@ frameworks/core/components_ng/pattern/overlay/  @yangfan229
 frameworks/core/components_ng/pattern/panel/  @zhou-chaobo
 frameworks/core/components_ng/pattern/patternlock/  @cheng-feiwang
 frameworks/core/components_ng/pattern/picker/  @cheng-feiwang
-frameworks/core/components_ng/pattern/plugin/  @wangchensu1
+frameworks/core/components_ng/pattern/plugin/  @wangchensu1 @keerecles @ZhangYu-Home
 frameworks/core/components_ng/pattern/preview_mock/  @laigerendaqiu
 frameworks/core/components_ng/pattern/progress/  @cheng-feiwang
 frameworks/core/components_ng/pattern/qrcode/  @techbuilding
@@ -121,7 +121,7 @@ frameworks/core/components_ng/pattern/texttimer/  @lijuan124
 frameworks/core/components_ng/pattern/time_picker/  @cheng-feiwang
 frameworks/core/components_ng/pattern/toast/  @cheng-feiwang
 frameworks/core/components_ng/pattern/toggle/  @zhang-xiao150
-frameworks/core/components_ng/pattern/ui_extension/  @lushi1202
+frameworks/core/components_ng/pattern/ui_extension/  @lushi1202 @keerecles @ZhangYu-Home
 frameworks/core/components_ng/pattern/video/  @xzken
 frameworks/core/components_ng/pattern/view_context/  @hehongyang9
 frameworks/core/components_ng/pattern/waterflow/  @zcdqs
