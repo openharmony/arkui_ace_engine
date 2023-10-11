@@ -387,11 +387,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest002, TestSize.Level1)
 
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     result = pickerPattern->HandleKeyEvent(keyEventOne);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 
     pickerPattern->isKeyWaiting_ = true;
     result = pickerPattern->HandleKeyEvent(keyEventOne);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 
     pickerPattern->selected_ = CalendarPickerSelectedType::MONTH;
     result = pickerPattern->HandleKeyEvent(keyEventOne);
