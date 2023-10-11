@@ -196,7 +196,6 @@ void JSBadge::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badg
 {
     auto badgeTheme = GetTheme<BadgeTheme>();
     if (!badgeTheme) {
-        LOGE("Get badge theme error");
         return;
     }
 
