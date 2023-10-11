@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_web.h"
-#endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "rosen_render_web.h"
 #endif
@@ -30,11 +27,7 @@ RefPtr<RenderNode> RenderWeb::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderWeb>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

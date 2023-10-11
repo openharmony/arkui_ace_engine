@@ -469,12 +469,8 @@ std::unique_ptr<ImageData> FlutterRenderOffscreenCanvas::GetImageData(
     SkBitmap tempCache;
     tempCache.allocPixels(imageInfo);
     SkCanvas tempCanvas(tempCache);
-#ifdef USE_SYSTEM_SKIA_S
-    tempCanvas.drawImageRect(
-        skBitmap_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
-#else
+
     tempCanvas.drawBitmapRect(skBitmap_, srcRect, dstRect, nullptr);
-#endif
     // write color
     std::unique_ptr<uint8_t[]> pixels = std::make_unique<uint8_t[]>(size * 4);
     tempCanvas.readPixels(imageInfo, pixels.get(), dirtyWidth * imageInfo.bytesPerPixel(), 0, 0);
@@ -519,12 +515,8 @@ std::string FlutterRenderOffscreenCanvas::ToDataURL(const std::string& type, con
     double viewScale = pipeline->GetViewScale();
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
-#ifdef USE_SYSTEM_SKIA_S
-    // The return value of the dual framework interface has no alpha
-    tempCanvas.drawImage(skBitmap_.asImage(), 0.0f, 0.0f);
-#else
+
     tempCanvas.drawBitmap(skBitmap_, 0.0f, 0.0f);
-#endif
     SkPixmap src;
     bool success = tempCache.peekPixels(&src);
     if (!success) {
