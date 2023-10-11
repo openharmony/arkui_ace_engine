@@ -16,13 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_SVG_DOM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_SVG_DOM_H
 
-#if defined(FLUTTER_2_5) || defined(NEW_SKIA)
 #include "include/core/SkColor.h"
-#include "modules/svg/include/SkSVGDOM.h"
-#else
-#include "experimental/svg/model/SkSVGDOM.h"
-#endif
 #include "include/core/SkStream.h"
+#include "modules/svg/include/SkSVGDOM.h"
 
 #include "core/components_ng/image_provider/svg_dom_base.h"
 
@@ -42,8 +38,7 @@ public:
 
     static RefPtr<SkiaSvgDom> CreateSkiaSvgDom(SkStream& svgStream, const std::optional<Color>& svgFillColor);
 
-    void DrawImage(
-        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) override;
+    void DrawImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) override;
 
     const sk_sp<SkSVGDOM>& GetSkiaSvgDom() const;
 

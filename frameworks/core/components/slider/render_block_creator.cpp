@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_circle_block.h"
-#endif
 #include "rosen_render_circle_block.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderBlock::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderCircleBlock>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

@@ -84,8 +84,9 @@ void RosenRenderTextOverlay::PaintHandles(RenderContext& context) const
     // Paint start handle of textOverlay.
     if (showOption_.showStartHandle &&
         clipRect_.IsInRegion(Point(startHandleOffset_.GetX(), startHandleOffset_.GetY()))) {
-        PaintHandle(canvas, startHandleOffset_ + Offset(0.0, -startHandleHeight_.value_or(lineHeight_) -
-                    NormalizeToPx(handleRadius_)), true);
+        PaintHandle(canvas,
+            startHandleOffset_ + Offset(0.0, -startHandleHeight_.value_or(lineHeight_) - NormalizeToPx(handleRadius_)),
+            true);
     }
 
     // Paint end handle of textOverlay.
@@ -119,8 +120,8 @@ void RosenRenderTextOverlay::PaintHandle(SkCanvas* skCanvas, Offset centerOffset
     // 1.0 is avoid separation of handle circle and handle line.
     Offset startPoint(Offset(0.0, NormalizeToPx(-handleRadius_) + 1.0));
     // 1.0_dp is designed by UX, handle line is higher than height of select region.
-    Offset endPoint(Offset(0.0,
-        NormalizeToPx(-handleRadius_) - endHandleHeight_.value_or(lineHeight_) - NormalizeToPx(1.0_vp)));
+    Offset endPoint(
+        Offset(0.0, NormalizeToPx(-handleRadius_) - endHandleHeight_.value_or(lineHeight_) - NormalizeToPx(1.0_vp)));
     if (isLeftHandle) {
         startPoint.SetY(NormalizeToPx(handleRadius_) - 1.0);
         endPoint.SetY(NormalizeToPx(handleRadius_) + startHandleHeight_.value_or(lineHeight_) + NormalizeToPx(1.0_vp));
@@ -157,15 +158,14 @@ void RosenRenderTextOverlay::PaintHandle(RSCanvas* canvas, Offset centerOffset, 
     // 1.0 is avoid separation of handle circle and handle line.
     Offset startPoint(Offset(0.0, NormalizeToPx(-handleRadius_) + 1.0));
     // 1.0_dp is designed by UX, handle line is higher than height of select region.
-    Offset endPoint(Offset(0.0,
-        NormalizeToPx(-handleRadius_) - endHandleHeight_.value_or(lineHeight_) - NormalizeToPx(1.0_vp)));
+    Offset endPoint(
+        Offset(0.0, NormalizeToPx(-handleRadius_) - endHandleHeight_.value_or(lineHeight_) - NormalizeToPx(1.0_vp)));
     if (isLeftHandle) {
         startPoint.SetY(NormalizeToPx(handleRadius_) - 1.0);
         endPoint.SetY(NormalizeToPx(handleRadius_) + startHandleHeight_.value_or(lineHeight_) + NormalizeToPx(1.0_vp));
     }
     canvas->AttachPen(pen);
-    canvas->DrawLine(
-        RSPoint(startPoint.GetX(), startPoint.GetY()), RSPoint(endPoint.GetX(), endPoint.GetY()));
+    canvas->DrawLine(RSPoint(startPoint.GetX(), startPoint.GetY()), RSPoint(endPoint.GetX(), endPoint.GetY()));
     canvas->DetachPen();
     canvas->Restore();
 }
@@ -223,8 +223,8 @@ void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
         SkRect::MakeXYWH(globalX, globalY, NormalizeToPx(MAGNIFIER_WIDTH), NormalizeToPx(MAGNIFIER_WIDTH)),
         NormalizeToPx(MAGNIFIER_WIDTH), NormalizeToPx(MAGNIFIER_WIDTH));
 
-    RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect),
-        ShadowConfig::DefaultShadowM, static_cast<RosenRenderContext*>(&context)->GetRSNode());
+    RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect), ShadowConfig::DefaultShadowM,
+        static_cast<RosenRenderContext*>(&context)->GetRSNode());
 
     SkRRect ScaleRrect =
         SkRRect::MakeRectXY(SkRect::MakeXYWH(globalX * viewScale, globalY * viewScale,
@@ -239,20 +239,13 @@ void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
     paint.setColor(SK_ColorWHITE);
     paint.setAntiAlias(true);
     canvas->drawRRect(ScaleRrect, paint);
-#ifndef NEW_SKIA
-    canvas->drawBitmapRect(bitmap,
-        SkRect::MakeXYWH(x * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET, y * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET,
-            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale),
-        SkRect::MakeXYWH(globalX * viewScale, globalY * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale,
-            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale), nullptr);
-#else
+
     canvas->drawImageRect(bitmap.asImage(),
         SkRect::MakeXYWH(x * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET, y * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET,
             NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale),
         SkRect::MakeXYWH(globalX * viewScale, globalY * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale,
             NormalizeToPx(MAGNIFIER_WIDTH) * viewScale),
-            SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
-#endif
+        SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
     canvas->restore();
 #else
     RSRoundRect rrect(
@@ -261,12 +254,12 @@ void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
     RSRecordingPath path;
     path.AddRoundRect(rrect);
 
-    RosenDecorationPainter::PaintShadow(path,
-        ShadowConfig::DefaultShadowM, static_cast<RosenRenderContext*>(&context)->GetRSNode());
+    RosenDecorationPainter::PaintShadow(
+        path, ShadowConfig::DefaultShadowM, static_cast<RosenRenderContext*>(&context)->GetRSNode());
 
     RSRoundRect ScaleRrect(RSRect(globalX * viewScale, globalY * viewScale,
-        NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalX * viewScale,
-        NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalY * viewScale),
+                               NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalX * viewScale,
+                               NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalY * viewScale),
         NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale);
 
     canvas->Save();

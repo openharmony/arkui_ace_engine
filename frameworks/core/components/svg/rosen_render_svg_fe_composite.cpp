@@ -15,11 +15,7 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_composite.h"
 
-#ifndef NEW_SKIA
-#include "include/effects/SkArithmeticImageFilter.h"
-#else
 #include "third_party/skia/include/effects/SkImageFilters.h"
-#endif
 
 namespace OHOS::Ace {
 
@@ -33,13 +29,8 @@ void RosenRenderSvgFeComposite::OnAsImageFilter(const std::shared_ptr<RSImageFil
 {
     if (operatorType_ == FeOperatorType::FE_ARITHMETIC) {
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-        imageFilter =
-            SkArithmeticImageFilter::Make(k1_, k2_, k3_, k4_, true, backImageFilter, foreImageFilter, nullptr);
-#else
-        imageFilter =
-            SkImageFilters::Arithmetic(k1_, k2_, k3_, k4_, true, backImageFilter, foreImageFilter, nullptr);
-#endif
+
+        imageFilter = SkImageFilters::Arithmetic(k1_, k2_, k3_, k4_, true, backImageFilter, foreImageFilter, nullptr);
 #else // USE_ROSEN_DRAWING
         std::vector<RSScalar> coefficients { k1_, k2_, k3_, k4_ };
         imageFilter =

@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_circular_track.h"
-#endif
 #include "rosen_render_circular_track.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderCircleTrack::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderCircularTrack>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

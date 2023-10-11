@@ -385,12 +385,8 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     SkBitmap tempCache;
     tempCache.allocPixels(imageInfo);
     SkCanvas tempCanvas(tempCache);
-#if defined(USE_SYSTEM_SKIA_S) || defined(NEW_SKIA)
     tempCanvas.drawImageRect(
         bitmap_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
-#else
-    tempCanvas.drawBitmapRect(bitmap_, srcRect, dstRect, nullptr);
-#endif
     // write color
     std::unique_ptr<uint8_t[]> pixels = std::make_unique<uint8_t[]>(size * 4);
     tempCanvas.readPixels(imageInfo, pixels.get(), dirtyWidth * imageInfo.bytesPerPixel(), 0, 0);
@@ -963,12 +959,8 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     double viewScale = context->GetViewScale();
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
-#if defined(USE_SYSTEM_SKIA_S) || defined(NEW_SKIA)
     // The return value of the dual framework interface has no alpha
     tempCanvas.drawImage(bitmap_.asImage(), 0.0f, 0.0f);
-#else
-    tempCanvas.drawBitmap(bitmap_, 0.0f, 0.0f);
-#endif
     SkPixmap src;
     bool success = tempCache.peekPixels(&src);
 #else
