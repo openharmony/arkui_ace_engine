@@ -31,6 +31,11 @@ bool AnimationUtils::CloseImplicitAnimation()
     return false;
 }
 
+bool AnimationUtils::IsImplicitAnimationOpen()
+{
+    return false;
+}
+
 void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
     const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
