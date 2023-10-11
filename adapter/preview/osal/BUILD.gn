@@ -119,7 +119,7 @@ ohos_source_set("preview_osal_source") {
     } else {
       sources += [
         "frame_trace_adapter_impl.cpp",
-        "resource_adapter_impl_v2.cpp",
+        "resource_adapter_impl.cpp",
       ]
       include_dirs = [ "//prebuilts/ace-toolkit/preview/rich/include/resmgr/resourcemanager/include" ]
       if (platform == "windows") {
