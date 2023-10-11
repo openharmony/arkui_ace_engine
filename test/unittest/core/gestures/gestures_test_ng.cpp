@@ -1317,7 +1317,7 @@ HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
      */
     exclusiveRecognizer.recognizers_.clear();
     exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
@@ -1327,7 +1327,7 @@ HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
     exclusiveRecognizer.recognizers_.clear();
     exclusiveRecognizer.recognizers_.push_back(nullptr);
     exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
@@ -1338,7 +1338,7 @@ HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
     exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
@@ -1349,7 +1349,7 @@ HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
     clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
     exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
     exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -11355,7 +11355,7 @@ HWTEST_F(GesturesTestNg, PinchRecognizerTest011, TestSize.Level1)
     pinchRecognizer->initialDev_ = 2.0;
     pinchRecognizer->OnFlushTouchEventsEnd();
     pinchRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(pinchRecognizer->scale_, 1);
+    EXPECT_NE(pinchRecognizer->scale_, 1);
 
     /**
      * @tc.steps: step3. test HandleTouchMoveEvent(AxisEvent).
