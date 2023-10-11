@@ -1201,7 +1201,8 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
         return;
     }
     auto edgeEffect = GetEdgeEffect();
-    if (!IsLoop() && IsOutOfBoundary(offset) && edgeEffect == EdgeEffect::SPRING) {
+    auto isOutOfBoundary = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
+    if (!IsLoop() && isOutOfBoundary && edgeEffect == EdgeEffect::SPRING) {
         LOGD("Swiper has reached boundary, can't drag any more, effect spring.");
 
         targetIndex_.reset();
@@ -1408,6 +1409,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 {
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
+        isTouchPad_ = true;
         auto mainSize = CalculateVisibleSize();
         if ((mainDeltaSum_ + std::abs(mainDelta)) > mainSize) {
             mainDelta = mainDelta > 0 ? (mainSize - mainDeltaSum_) : (mainDeltaSum_ - mainSize);
@@ -1420,11 +1422,13 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
     if (IsOutOfHotRegion(dragPoint)) {
+        isTouchPad_ = false;
         return;
     }
 
     UpdateCurrentOffset(static_cast<float>(mainDelta));
     UpdateItemRenderGroup(true);
+    isTouchPad_ = false;
 }
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
