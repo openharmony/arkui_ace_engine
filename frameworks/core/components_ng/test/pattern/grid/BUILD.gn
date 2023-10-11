@@ -122,6 +122,7 @@ ohos_unittest("grid_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/nestable_scroll_container.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/refresh_coordination.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_paint_property.cpp",

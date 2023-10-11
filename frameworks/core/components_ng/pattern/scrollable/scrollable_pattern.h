@@ -36,8 +36,8 @@ constexpr double FRICTION = 0.6;
 #else
 constexpr double FRICTION = 0.9;
 #endif
-class ScrollablePattern : public Pattern, NestableScrollContainer {
-    DECLARE_ACE_TYPE(ScrollablePattern, Pattern, NestableScrollContainer);
+class ScrollablePattern : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
     bool IsAtomicNode() const override
@@ -186,7 +186,6 @@ public:
     }
 
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
-    RefPtr<NestableScrollContainer> SearchParent();
     void GetParentNavigation();
 
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
