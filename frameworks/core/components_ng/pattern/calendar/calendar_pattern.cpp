@@ -104,9 +104,12 @@ void CalendarPattern::OnModifyDone()
         } else {
             initialize_ = false;
         }
-        auto requestDataCallBack = [weak = WeakClaim(this), swiperEventHub = swiperEventHub]() {
+        auto requestDataCallBack = [weak = WeakClaim(this),
+                                    swiperEventHubWeak = WeakPtr<SwiperEventHub>(swiperEventHub)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            auto swiperEventHub = swiperEventHubWeak.Upgrade();
+            CHECK_NULL_VOID(swiperEventHub);
             auto direction = swiperEventHub->GetDirection();
             if (direction == NG::Direction::NEXT) {
                 pattern->FireRequestData(MonthState::NEXT_MONTH);

@@ -2757,7 +2757,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest007, TestSize.Level1)
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
 
-    dialogPattern->GetEntryNode();
     dialogPattern->GetDialogOffset();
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
@@ -3375,13 +3374,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest018, TestSize.Level1)
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
 
-    const RefPtr<FrameNode> buttonNode;
     auto currentMonthData = dialogPattern->GetCalendarPattern()->GetCurrentMonthData();
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 0);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 1);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 2);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 3);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 4);
+    dialogPattern->HandleTitleArrowsClickEvent(0);
+    dialogPattern->HandleTitleArrowsClickEvent(1);
+    dialogPattern->HandleTitleArrowsClickEvent(2);
+    dialogPattern->HandleTitleArrowsClickEvent(3);
+    dialogPattern->HandleTitleArrowsClickEvent(4);
 }
 
 /**
@@ -3531,13 +3529,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest022, TestSize.Level1)
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
 
-    const RefPtr<FrameNode> buttonNode;
     auto currentMonthData = dialogPattern->GetCalendarPattern()->GetCurrentMonthData();
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 0);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 1);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 2);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 3);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 4);
+    dialogPattern->HandleTitleArrowsClickEvent(0);
+    dialogPattern->HandleTitleArrowsClickEvent(1);
+    dialogPattern->HandleTitleArrowsClickEvent(2);
+    dialogPattern->HandleTitleArrowsClickEvent(3);
+    dialogPattern->HandleTitleArrowsClickEvent(4);
 }
 
 /**
