@@ -42,6 +42,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
@@ -82,9 +83,7 @@ constexpr Dimension UNDERLINE_NORMAL_PADDING = 12.0_vp;
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
-constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
-constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
 constexpr uint32_t FIND_TEXT_ZERO_INDEX = 1;
@@ -2186,96 +2185,92 @@ void TextFieldPattern::InitTouchEvent()
 
 void TextFieldPattern::InitClickEvent()
 {
-    CHECK_NULL_VOID(!clickListener_);
+    CHECK_NULL_VOID(!clickEventInitialized_);
     auto gesture = GetHost()->GetOrCreateGestureEventHub();
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+    RefPtr<GestureGroup> gestureGroup = AceType::MakeRefPtr<GestureGroup>(GestureMode::Parallel);
+
+    auto doubleClickTapGesture = AceType::MakeRefPtr<NG::TapGesture>(2, 1);
+    doubleClickTapGesture->SetOnActionId([weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDoubleClickEvent(info);
+    });
+    gestureGroup->AddGesture(doubleClickTapGesture);
+
+    auto singleClickTapGesture = AceType::MakeRefPtr<NG::TapGesture>(1, 1);
+    singleClickTapGesture->SetOnActionId([weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleClickEvent(info);
-    };
-
-    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickEvent(clickListener_);
+    });
+    gestureGroup->AddGesture(singleClickTapGesture);
+    gesture->AddGesture(gestureGroup);
+    clickEventInitialized_ = true;
 }
 
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
     LOGI("TextFieldPattern::HandleClickEvent");
-    if (hasClicked_) {
-        hasClicked_ = false;
-        TimeStamp clickTimeStamp = info.GetTimeStamp();
-        std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout =
-            clickTimeStamp - lastClickTimeStamp_;
-        lastClickTimeStamp_ = info.GetTimeStamp();
-        if (timeout.count() < DOUBLECLICK_INTERVAL_MS) {
-            lastTouchOffset_ = info.GetLocalLocation();
-            HandleDoubleClickEvent(info);
-        } else {
-            HandleClickEvent(info);
-        }
-    } else {
-        hasClicked_ = true;
-        lastClickTimeStamp_ = info.GetTimeStamp();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-        // emulate clicking bottom of the textField
-        UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-        auto focusHub = host->GetOrCreateFocusHub();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    // emulate clicking bottom of the textField
+    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
+    auto focusHub = host->GetOrCreateFocusHub();
 
-        if (IsSearchParentNode()) {
-            auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-            focusHub = parentFrameNode->GetOrCreateFocusHub();
-        }
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+        focusHub = parentFrameNode->GetOrCreateFocusHub();
+    }
 
-        if (!focusHub->IsFocusable()) {
-            LOGI("Textfield %{public}d is not focusable ,cannot request keyboard", host->GetId());
-            return;
-        }
-        lastTouchOffset_ = info.GetLocalLocation();
-        isTouchAtLeftOffset_ = IsTouchAtLeftOffset(lastTouchOffset_.GetX());
-        caretUpdateType_ = CaretUpdateType::PRESSED;
-        isFocusedBeforeClick_ = HasFocus();
-        selectionMode_ = SelectionMode::NONE;
-        isUsingMouse_ = false;
-        CloseSelectOverlay(true);
-        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-        if (lastTouchOffset_.GetX() > frameRect_.Width() - imageRect_.Width() - GetIconRightOffset() &&
-            NeedShowPasswordIcon()) {
-            LOGI("Password Icon pressed, change text to be shown only");
-            textObscured_ = !textObscured_;
-            ProcessPasswordIcon();
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            caretUpdateType_ = CaretUpdateType::ICON_PRESSED;
-            return;
-        }
-        ResetObscureTickCountDown();
+    if (!focusHub->IsFocusable()) {
+        LOGI("Textfield %{public}d is not focusable ,cannot request keyboard", host->GetId());
+        return;
+    }
+    lastTouchOffset_ = info.GetLocalLocation();
+    isTouchAtLeftOffset_ = IsTouchAtLeftOffset(lastTouchOffset_.GetX());
+    caretUpdateType_ = CaretUpdateType::PRESSED;
+    isFocusedBeforeClick_ = HasFocus();
+    selectionMode_ = SelectionMode::NONE;
+    isUsingMouse_ = false;
+    CloseSelectOverlay(true);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    if (lastTouchOffset_.GetX() > frameRect_.Width() - imageRect_.Width() - GetIconRightOffset() &&
+        NeedShowPasswordIcon()) {
+        LOGI("Password Icon pressed, change text to be shown only");
+        textObscured_ = !textObscured_;
+        ProcessPasswordIcon();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        StartTwinkling();
+        caretUpdateType_ = CaretUpdateType::ICON_PRESSED;
+        return;
+    }
+    ResetObscureTickCountDown();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    StartTwinkling();
 
-        if (isMousePressed_) {
-            LOGI("TextFieldPattern::HandleTouchUp of mouse");
-            isMousePressed_ = false;
-            return;
-        }
-        if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
-            LOGW("Request focus failed, cannot open input method");
-            StopTwinkling();
-            return;
-        }
-        if (RequestKeyboard(false, true, true)) {
-            auto eventHub = host->GetEventHub<TextFieldEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireOnEditChanged(true);
-        }
+    if (isMousePressed_) {
+        LOGI("TextFieldPattern::HandleTouchUp of mouse");
+        isMousePressed_ = false;
+        return;
+    }
+    if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
+        LOGW("Request focus failed, cannot open input method");
+        StopTwinkling();
+        return;
+    }
+    if (RequestKeyboard(false, true, true)) {
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnEditChanged(true);
     }
 }
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     LOGI("TextFieldPattern::HandleDoubleClickEvent");
+    lastTouchOffset_ = info.GetLocalLocation();
     isDoubleClick_ = true;
     StopTwinkling();
     if (!IsUsingMouse()) {

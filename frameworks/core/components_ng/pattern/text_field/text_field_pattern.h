@@ -1255,7 +1255,6 @@ private:
     RefPtr<CanvasImage> showPasswordCanvasImage_;
     RefPtr<CanvasImage> hidePasswordCanvasImage_;
 
-    RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -1392,9 +1391,8 @@ private:
     bool isTouchAtLeftOffset_ = true;
     bool isCustomFont_ = false;
     bool textRectWillChange_ = false;
-    bool hasClicked_ = false;
+    bool clickEventInitialized_ = false;
     bool isDoubleClick_ = false;
-    TimeStamp lastClickTimeStamp_;
 };
 } // namespace OHOS::Ace::NG
 
