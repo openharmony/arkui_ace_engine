@@ -54,8 +54,7 @@ void FormRenderer::InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     uiContent_->SetFormHeight(height_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
-    NativeValue* storage = nullptr;
-    uiContent_->Initialize(nullptr, formJsInfo.formSrc, storage);
+    uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
 
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
         auto formRenderer = weak.lock();

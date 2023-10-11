@@ -229,12 +229,6 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     AceContainer::RunPage(instanceId_, url, "");
 }
 
-void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
-{
-    Initialize(window, url, reinterpret_cast<napi_value>(storage));
-}
-
-
 std::string UIContentImpl::GetContentInfo() const
 {
     LOGI("UIContent GetContentInfo");
