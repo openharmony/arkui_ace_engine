@@ -21,7 +21,6 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
-#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/search_model_impl.h"
 #include "core/components/common/layout/constants.h"
@@ -118,7 +117,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
     std::optional<std::string> key;
     std::optional<std::string> tip;
     std::optional<std::string> src;
-    JSTextEditableController* jsController = nullptr;
+    JSSearchController* jsController = nullptr;
     JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
@@ -151,7 +150,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
         }
         auto controllerObj = param->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
+            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
         }
     }
     auto controller = SearchModel::GetInstance()->Create(key, tip, src);
@@ -670,6 +669,81 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
     std::function<void()> buildFunc;
     if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
         SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+    }
+}
+
+void JSSearchController::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSSearchController>::Declare("SearchController");
+    JSClass<JSSearchController>::Method("caretPosition", &JSSearchController::CaretPosition);
+    JSClass<JSSearchController>::CustomMethod("getTextContentRect", &JSSearchController::GetTextContentRect);
+    JSClass<JSSearchController>::CustomMethod("getTextContentLineCount", &JSSearchController::GetTextContentLinesNum);
+    JSClass<JSSearchController>::Method("stopEditing", &JSSearchController::StopEditing);
+    JSClass<JSSearchController>::Bind(globalObj, JSSearchController::Constructor, JSSearchController::Destructor);
+}
+
+void JSSearchController::Constructor(const JSCallbackInfo& args)
+{
+    auto scroller = Referenced::MakeRefPtr<JSSearchController>();
+    scroller->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(scroller));
+}
+
+void JSSearchController::Destructor(JSSearchController* scroller)
+{
+    if (scroller != nullptr) {
+        scroller->DecRefCount();
+    }
+}
+
+void JSSearchController::CaretPosition(int32_t caretPosition)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->CaretPosition(caretPosition);
+    }
+}
+
+JSRef<JSObject> JSSearchController::CreateRectangle(const Rect& info)
+{
+    JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+    rectObj->SetProperty<double>("x", info.Left());
+    rectObj->SetProperty<double>("y", info.Top());
+    rectObj->SetProperty<double>("width", info.Width());
+    rectObj->SetProperty<double>("height", info.Height());
+    return rectObj;
+}
+
+void JSSearchController::GetTextContentRect(const JSCallbackInfo& info)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        auto rectObj = CreateRectangle(controller->GetTextContentRect());
+        JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
+        info.SetReturnValue(rect);
+    } else {
+        LOGE("GetTextContentRect: The JSSearchController is NULL");
+    }
+}
+
+void JSSearchController::GetTextContentLinesNum(const JSCallbackInfo& info)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        auto lines = controller->GetTextContentLinesNum();
+        auto linesNum = JSVal(ToJSValue(lines));
+        auto textLines = JSRef<JSVal>::Make(linesNum);
+        info.SetReturnValue(textLines);
+    } else {
+        LOGE("GetTextContentRect: The JSSearchController is NULL");
+    }
+}
+
+void JSSearchController::StopEditing()
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->StopEditing();
     }
 }
 } // namespace OHOS::Ace::Framework
