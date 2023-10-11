@@ -382,7 +382,7 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
     return true;
 }
 
-bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node, SecCompType& scType)
+bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
@@ -396,7 +396,6 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         buttonInfo.bg_ = static_cast<SecCompBackground>(
             layoutProperty->GetBackgroundType().value());
         buttonInfo.type_ = SecCompType::LOCATION_COMPONENT;
-        scType = SecCompType::LOCATION_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
             return false;
         }
@@ -409,7 +408,6 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         buttonInfo.bg_ = static_cast<SecCompBackground>(
             layoutProperty->GetBackgroundType().value());
         buttonInfo.type_ = SecCompType::PASTE_COMPONENT;
-        scType = SecCompType::PASTE_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
             return false;
         }
@@ -422,7 +420,6 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         buttonInfo.bg_ = static_cast<SecCompBackground>(
             layoutProperty->GetBackgroundType().value());
         buttonInfo.type_ = SecCompType::SAVE_COMPONENT;
-        scType = SecCompType::SAVE_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
             return false;
         }
@@ -437,20 +434,18 @@ int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& n
 {
     SecurityComponentHandler::probe.InitProbeTask();
     std::string componentInfo;
-    SecCompType type;
-    if (!InitButtonInfo(componentInfo, node, type)) {
+    if (!InitButtonInfo(componentInfo, node)) {
         return -1;
     }
     int32_t ret = SecCompKit::RegisterSecurityComponent(
-        type, componentInfo, scId);
+        SecCompType::LOCATION_COMPONENT, componentInfo, scId);
     return ret;
 }
 
 int32_t SecurityComponentHandler::UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t scId)
 {
     std::string componentInfo;
-    SecCompType type;
-    if (!InitButtonInfo(componentInfo, node, type)) {
+    if (!InitButtonInfo(componentInfo, node)) {
         return -1;
     }
     int32_t ret = SecCompKit::UpdateSecurityComponent(scId, componentInfo);
@@ -473,8 +468,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId
         return -1;
     }
     std::string componentInfo;
-    SecCompType type;
-    if (!InitButtonInfo(componentInfo, node, type)) {
+    if (!InitButtonInfo(componentInfo, node)) {
         return -1;
     }
     SecCompClickEvent secEvent;
