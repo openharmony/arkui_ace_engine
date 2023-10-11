@@ -22,14 +22,9 @@
 #include "rosen_text/typography_create.h"
 #include "rosen_text/typography_style.h"
 #endif
-#include "include/core/SkMaskFilter.h"
-#include "core/components/common/properties/paint_state.h"
-#ifndef NEW_SKIA
-#include "include/effects/SkBlurImageFilter.h"
-#else
 #include "include/core/SkColorFilter.h"
+#include "include/core/SkMaskFilter.h"
 #include "include/effects/SkImageFilters.h"
-#endif
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
@@ -40,14 +35,9 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#ifndef NEW_SKIA
-#include "core/components/common/painter/flutter_decoration_painter.h"
-#endif
 #include "core/components/common/painter/rosen_decoration_painter.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components/font/constants_converter.h"
-#ifndef NEW_SKIA
-#include "core/components/font/flutter_font_collection.h"
-#endif
 #include "core/components/font/rosen_font_collection.h"
 
 namespace OHOS::Ace::NG {
@@ -159,11 +149,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
             SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
     }
 
-#ifndef NEW_SKIA
-    InitImagePaint(imagePaint_);
-#else
     InitImagePaint(imagePaint_, sampleOptions_);
-#endif
 
     if (globalState_.HasGlobalAlpha()) {
         imagePaint_.setAlphaf(globalState_.GetAlpha());
@@ -182,24 +168,17 @@ void OffscreenCanvasPaintMethod::DrawImage(
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-#ifndef NEW_SKIA
-            skCanvas->drawImageRect(image, rect, &imagePaint_);
-#else
+
             skCanvas->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
-#endif
+
             break;
         }
         case 2: {
-            SkRect dstRect =
-                SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            SkRect srcRect =
-                SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-#ifndef NEW_SKIA
-            skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
-#else
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+
             skCanvas->drawImageRect(
                 image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
-#endif
             break;
         }
         default:
@@ -226,8 +205,8 @@ void OffscreenCanvasPaintMethod::DrawImage(
 
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     if (HasImageShadow()) {
-        RSRect rsRect = RSRect(canvasImage.dx, canvasImage.dy,
-            canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+        RSRect rsRect = RSRect(
+            canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
         RSPath path;
         path.AddRect(rsRect);
         RosenDecorationPainter::PaintShadow(path, *imageShadow_, rsCanvas);
@@ -241,18 +220,18 @@ void OffscreenCanvasPaintMethod::DrawImage(
             rsCanvas->DrawImage(*image, canvasImage.dx, canvasImage.dy, RSSamplingOptions());
             break;
         case 1: {
-            RSRect rect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            RSRect rect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
             rsCanvas->AttachBrush(imageBrush_);
             rsCanvas->DrawImageRect(*image, rect, sampleOptions_);
             rsCanvas->DetachBrush();
             break;
         }
         case 2: {
-            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
-            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy,
-                canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
+                canvasImage.sHeight + canvasImage.sy);
             rsCanvas->AttachBrush(imageBrush_);
             rsCanvas->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
             rsCanvas->DetachBrush();
@@ -288,9 +267,6 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
             SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
     }
 
-#ifndef NEW_SKIA
-    InitImagePaint(imagePaint_);
-#else
     InitImagePaint(imagePaint_, sampleOptions_);
 
     if (globalState_.HasGlobalAlpha()) {
@@ -303,31 +279,22 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
         path.addRect(skRect);
         RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas, &imagePaint_);
     }
-#endif
     switch (canvasImage.flag) {
         case 0:
             skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-#ifndef NEW_SKIA
-            skCanvas->drawImageRect(image, rect, &imagePaint_);
-#else
+
             skCanvas->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
-#endif
             break;
         }
         case 2: {
-            SkRect dstRect =
-                SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            SkRect srcRect =
-                SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-#ifndef NEW_SKIA
-            skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
-#else
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+
             skCanvas->drawImageRect(
                 image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
-#endif
             break;
         }
         default:
@@ -363,18 +330,18 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
             rsCanvas->DrawImage(*image, canvasImage.dx, canvasImage.dy, RSSamplingOptions());
             break;
         case 1: {
-            RSRect rect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            RSRect rect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
             rsCanvas->AttachBrush(imageBrush_);
             rsCanvas->DrawImageRect(*image, rect, sampleOptions_);
             rsCanvas->DetachBrush();
             break;
         }
         case 2: {
-            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
-            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy,
-                canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
+                canvasImage.sHeight + canvasImage.sy);
             rsCanvas->AttachBrush(imageBrush_);
             rsCanvas->DrawImageRect(
                 *image, srcRect, dstRect, sampleOptions_, RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
@@ -409,9 +376,8 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     }
     // copy the bitmap to tempCanvas
 #ifndef USE_ROSEN_DRAWING
-    auto imageInfo =
-        SkImageInfo::Make(dirtyWidth, dirtyHeight,
-        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+    auto imageInfo = SkImageInfo::Make(
+        dirtyWidth, dirtyHeight, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
 
     int32_t size = dirtyWidth * dirtyHeight;
     auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, dirtyWidth * viewScale, dirtyHeight * viewScale);
@@ -419,7 +385,7 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     SkBitmap tempCache;
     tempCache.allocPixels(imageInfo);
     SkCanvas tempCanvas(tempCache);
-#if defined(USE_SYSTEM_SKIA_S) || defined (NEW_SKIA)
+#if defined(USE_SYSTEM_SKIA_S) || defined(NEW_SKIA)
     tempCanvas.drawImageRect(
         bitmap_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
 #else
@@ -431,8 +397,8 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
 #else
     RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
     int32_t size = dirtyWidth * dirtyHeight;
-    auto srcRect = RSRect(scaledLeft, scaledTop,
-        dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
+    auto srcRect =
+        RSRect(scaledLeft, scaledTop, dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
     auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
     RSBitmap tempCache;
     tempCache.Build(width, height, format);
@@ -495,7 +461,7 @@ void OffscreenCanvasPaintMethod::GetImageData(const std::shared_ptr<Ace::ImageDa
     }
     auto pixelMap = imageData->pixelMap;
     CHECK_NULL_VOID(pixelMap);
-    auto *rawData = pixelMap->GetWritablePixels();
+    auto* rawData = pixelMap->GetWritablePixels();
     CHECK_NULL_VOID(rawData);
     subBitmap.readPixels(imageInfo, rawData, dirtyWidth * imageInfo.bytesPerPixel(), dx, dy);
 #else
@@ -748,7 +714,8 @@ void OffscreenCanvasPaintMethod::PaintText(
 #ifndef USE_GRAPHIC_TEXT_GINE
 double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
 #else
-double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph)
+double OffscreenCanvasPaintMethod::GetBaselineOffset(
+    TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph)
 #endif
 {
     double y = 0.0;
@@ -779,10 +746,11 @@ double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std:
 }
 
 #ifndef USE_GRAPHIC_TEXT_GINE
-bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow)
+bool OffscreenCanvasPaintMethod::UpdateOffParagraph(
+    const std::string& text, bool isStroke, const PaintState& state, bool hasShadow)
 #else
-bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, bool isStroke,
-    const PaintState& state, bool hasShadow)
+bool OffscreenCanvasPaintMethod::UpdateOffParagraph(
+    const std::string& text, bool isStroke, const PaintState& state, bool hasShadow)
 #endif
 {
     using namespace Constants;
@@ -873,12 +841,9 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             SkPaint paint;
-#ifndef NEW_SKIA
-            InitImagePaint(paint);
-#else
+
             SkSamplingOptions options;
             InitImagePaint(paint, options);
-#endif
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(OffsetF(0, 0), paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
@@ -898,12 +863,9 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
 #endif
             } else {
                 SkPaint paint;
-#ifndef NEW_SKIA
-                InitImagePaint(paint);
-#else
+
                 SkSamplingOptions options;
                 InitImagePaint(paint, options);
-#endif
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 txtStyle.foreground = paint;
@@ -915,12 +877,9 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
     } else {
         // use foreground to draw stroke
         SkPaint paint;
-#ifndef NEW_SKIA
-        GetStrokePaint(paint);
-#else
+
         SkSamplingOptions options;
         GetStrokePaint(paint, options);
-#endif
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
 #ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
@@ -947,7 +906,8 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
 }
 
 #ifndef USE_ROSEN_DRAWING
-void OffscreenCanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint)
+void OffscreenCanvasPaintMethod::PaintShadow(
+    const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint)
 {
     RosenDecorationPainter::PaintShadow(path, shadow, canvas, paint);
 }
@@ -1003,8 +963,8 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     double viewScale = context->GetViewScale();
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
-#if defined(USE_SYSTEM_SKIA_S) || defined (NEW_SKIA)
-    //The return value of the dual framework interface has no alpha
+#if defined(USE_SYSTEM_SKIA_S) || defined(NEW_SKIA)
+    // The return value of the dual framework interface has no alpha
     tempCanvas.drawImage(bitmap_.asImage(), 0.0f, 0.0f);
 #else
     tempCanvas.drawBitmap(bitmap_, 0.0f, 0.0f);
@@ -1013,7 +973,8 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     bool success = tempCache.peekPixels(&src);
 #else
     RSBitmap tempCache;
-    tempCache.Build(width_, height_, { RSColorType::COLORTYPE_BGRA_8888,
+    tempCache.Build(width_, height_,
+        { RSColorType::COLORTYPE_BGRA_8888,
             (mimeType == IMAGE_JPEG) ? RSAlphaType::ALPHATYPE_OPAQUE : RSAlphaType::ALPHATYPE_UNPREMUL });
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);

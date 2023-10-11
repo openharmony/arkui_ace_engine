@@ -4414,18 +4414,11 @@ bool TextFieldPattern::CursorMoveUp()
     // multiply by 0.5f to convert to the grapheme center point of the previous line.
     float verticalOffset = offsetY - PreferredLineHeight() * 0.5f;
     textEditingValue_.caretPosition = static_cast<int32_t>(
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-        paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
-#else
-        paragraph_->GetGlyphIndexByCoordinate(caretRect_.GetX(), verticalOffset).index);
-#endif
-#else
+
 #ifndef USE_GRAPHIC_TEXT_GINE
         paragraph_->GetGlyphPositionAtCoordinate(offsetX, verticalOffset).pos_);
 #else
         paragraph_->GetGlyphIndexByCoordinate(offsetX, verticalOffset).index);
-#endif
 #endif
     OnCursorMoveDone();
     if (originCaretPosition == textEditingValue_.caretPosition) {
@@ -4444,18 +4437,11 @@ bool TextFieldPattern::CursorMoveDown()
     // multiply by 1.5f to convert to the grapheme center point of the next line.
     float verticalOffset = offsetY + PreferredLineHeight() * 1.5f;
     textEditingValue_.caretPosition = static_cast<int32_t>(
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-        paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
-#else
-        paragraph_->GetGlyphIndexByCoordinate(caretRect_.GetX(), verticalOffset).index);
-#endif
-#else
+
 #ifndef USE_GRAPHIC_TEXT_GINE
         paragraph_->GetGlyphPositionAtCoordinate(offsetX, verticalOffset).pos_);
 #else
         paragraph_->GetGlyphIndexByCoordinate(offsetX, verticalOffset).index);
-#endif
 #endif
     OnCursorMoveDone();
     if (originCaretPosition == textEditingValue_.caretPosition) {
@@ -4881,18 +4867,11 @@ void TextFieldPattern::HandleSelectionUp()
     }
     auto newOffsetY = caretRect_.GetY() - PreferredLineHeight() * 0.5 - textRect_.GetY();
     textEditingValue_.caretPosition =
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-        static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), newOffsetY).pos_);
-#else
-        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(caretRect_.GetX(), newOffsetY).index);
-#endif
-#else
+
 #ifndef USE_GRAPHIC_TEXT_GINE
         static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), newOffsetY).pos_);
 #else
         static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(caretRect_.GetX(), newOffsetY).index);
-#endif
 #endif
     UpdateSelection(textSelector_.GetStart(), textEditingValue_.caretPosition);
     selectionMode_ = SelectionMode::SELECT;
@@ -4914,18 +4893,11 @@ void TextFieldPattern::HandleSelectionDown()
     }
     auto newOffsetY = caretRect_.GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
     textEditingValue_.caretPosition =
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-        static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), newOffsetY).pos_);
-#else
-        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(caretRect_.GetX(), newOffsetY).index);
-#endif
-#else
+
 #ifndef USE_GRAPHIC_TEXT_GINE
         static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), newOffsetY).pos_);
 #else
         static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(caretRect_.GetX(), newOffsetY).index);
-#endif
 #endif
     UpdateSelection(textSelector_.GetStart(), textEditingValue_.caretPosition);
     selectionMode_ = SelectionMode::SELECT;
