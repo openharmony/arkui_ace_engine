@@ -2448,10 +2448,9 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     CalcInsertValueObj(spanInfo);
     auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanInfo.GetSpanIndex() - 1));
     if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG && spanInfo.GetOffsetInSpan() == 0 &&
-        selectEnd == selectStart + 1) {
+        selectEnd == selectStart + 1 && BetweenSelectedPosition(info.GetGlobalLocation())) {
         FireOnSelect(selectStart, selectEnd);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        StopTwinkling();
         return;
     }
     if (textSelector_.IsValid()) {
@@ -3256,10 +3255,25 @@ bool RichEditorPattern::IsDisabled() const
 void RichEditorPattern::InitSelection(const Offset& pos)
 {
     int32_t currentPosition = paragraphs_.GetIndex(pos);
+    currentPosition = std::min(currentPosition, GetTextContentLength());
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
+    if (selectedRects.size() == 0 && !spans_.empty()) {
+        auto it = std::find_if(spans_.begin(), spans_.end(),
+            [caretPosition = currentPosition](const RefPtr<SpanItem>& spanItem) {
+                return (spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length()) <=
+                           caretPosition) &&
+                       (caretPosition < spanItem->position);
+            });
+        auto spanIndex = std::distance(spans_.begin(), it);
+        auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanIndex - 1));
+        if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG) {
+            textSelector_.Update(currentPosition - 1, currentPosition);
+            return;
+        }
+    }
     bool selectedSingle =
         selectedRects.size() == 1 && (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top());
     bool selectedLast = selectedRects.size() == 0 && currentPosition == GetTextContentLength();
