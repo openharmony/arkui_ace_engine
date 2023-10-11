@@ -10537,6 +10537,7 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchUpEventTest006, TestSize.Leve
     touchEvent.time = swipeRecognizer->touchDownTime_;
 
     swipeRecognizer->refereeState_ = RefereeState::SUCCEED;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
     swipeRecognizer->HandleTouchUpEvent(touchEvent);
     EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
 
