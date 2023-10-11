@@ -2451,7 +2451,7 @@ void FrameNode::SyncGeometryNode()
     }
 
     // update border.
-    if (layoutProperty_->GetBorderWidthProperty() && !renderContext_->HasBorderImage()) {
+    if (layoutProperty_->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderColor()) {
             BorderColorProperty borderColorProperty;
             borderColorProperty.SetColor(Color::BLACK);
