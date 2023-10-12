@@ -65,13 +65,7 @@ public:
     MediaQueryListener(bool match, const std::string& media) : MediaQueryResult(match, media) {}
     ~MediaQueryListener() override
     {
-        auto container = Container::Current();
-        if (!container) {
-            return;
-        }
-        if (container->IsUseStageModel()) {
-            CleanListenerSet();
-        } else {
+        {
             std::lock_guard<std::mutex> lock(mutex_);
             CleanListenerSet();
         }
@@ -82,20 +76,11 @@ public:
         for (auto& item : cbList_) {
             napi_delete_reference(env_, item);
         }
-        if (thisVarRef_ != nullptr) {
-            napi_delete_reference(env_, thisVarRef_);
-        }
     }
 
     static void NapiCallback(JsEngine* jsEngine)
     {
-        auto container = Container::Current();
-        if (!container) {
-            return;
-        }
-        if (container->IsUseStageModel()) {
-            OnNapiCallback(jsEngine);
-        } else {
+        {
             std::lock_guard<std::mutex> lock(mutex_);
             OnNapiCallback(jsEngine);
         }
@@ -104,6 +89,11 @@ public:
     static void OnNapiCallback(JsEngine* jsEngine)
     {
         MediaQueryer queryer;
+        std::set<std::unique_ptr<MediaQueryListener>> delayDeleteListenerSets;
+        if (delayDeleteListenerSets_) {
+            abort();
+        }
+        delayDeleteListenerSets_ = &delayDeleteListenerSets;
         for (auto listener : listenerSets_[jsEngine]) {
             auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
             listener->matches_ = queryer.MatchCondition(listener->media_, json);
@@ -111,10 +101,9 @@ public:
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(listener->env_, &scope);
                 if (scope == nullptr) {
+                    delayDeleteListenerSets_ = nullptr;
                     return;
                 }
-                napi_value thisVal = nullptr;
-                napi_get_reference_value(listener->env_, listener->thisVarRef_, &thisVal);
 
                 napi_value cb = nullptr;
                 napi_get_reference_value(listener->env_, cbRef, &cb);
@@ -123,10 +112,11 @@ public:
                 listener->MediaQueryResult::NapiSerializer(listener->env_, resultArg);
 
                 napi_value result = nullptr;
-                napi_call_function(listener->env_, thisVal, cb, 1, &resultArg, &result);
+                napi_call_function(listener->env_, nullptr, cb, 1, &resultArg, &result);
                 napi_close_handle_scope(listener->env_, scope);
             }
         }
+        delayDeleteListenerSets_ = nullptr;
     }
 
     static napi_value On(napi_env env, napi_callback_info info)
@@ -217,7 +207,9 @@ public:
             env, result, this,
             [](napi_env env, void* data, void* hint) {
                 MediaQueryListener* listener = static_cast<MediaQueryListener*>(data);
-                if (listener != nullptr) {
+                if (delayDeleteListenerSets_) {
+                    delayDeleteListenerSets_->emplace(listener);
+                } else {
                     delete listener;
                 }
             },
@@ -259,22 +251,13 @@ private:
         if (env_ == nullptr) {
             env_ = env;
         }
-        if (thisVarRef_ == nullptr) {
-            napi_create_reference(env, thisVar, 1, &thisVarRef_);
-        }
         napi_close_handle_scope(env, scope);
         auto jsEngine = EngineHelper::GetCurrentEngine();
         if (!jsEngine) {
             LOGE("get jsEngine failed");
             return;
         }
-        auto container = Container::Current();
-        if (!container) {
-            return;
-        }
-        if (container->IsUseStageModel()) {
-            listenerSets_[AceType::RawPtr(jsEngine)].emplace(this);
-        } else {
+        {
             std::lock_guard<std::mutex> lock(mutex_);
             listenerSets_[AceType::RawPtr(jsEngine)].emplace(this);
         }
@@ -316,12 +299,13 @@ private:
         return argc;
     }
 
-    napi_ref thisVarRef_ = nullptr;
     napi_env env_ = nullptr;
     std::list<napi_ref> cbList_;
+    static std::set<std::unique_ptr<MediaQueryListener>>* delayDeleteListenerSets_;
     static std::map<JsEngine*, std::set<MediaQueryListener*>> listenerSets_;
     static std::mutex mutex_;
 };
+std::set<std::unique_ptr<MediaQueryListener>>* MediaQueryListener::delayDeleteListenerSets_;
 std::map<JsEngine*, std::set<MediaQueryListener*>> MediaQueryListener::listenerSets_;
 std::mutex MediaQueryListener::mutex_;
 
