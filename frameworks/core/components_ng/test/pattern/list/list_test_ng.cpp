@@ -385,7 +385,7 @@ void ListTestNg::ScrollDown(float itemNumber)
 
 void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
-    pattern_->ScrollToEdge(scrollEdgeType);
+    pattern_->ScrollToEdge(scrollEdgeType, false);
     RunMeasureAndLayout(frameNode_);
 }
 
@@ -3390,9 +3390,9 @@ HWTEST_F(ListTestNg, PositionController001, TestSize.Level1)
     /**
      * @tc.steps: step2. Test ScrollBy
      */
-    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, true);
+    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, false);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT));
-    controller->ScrollBy(ITEM_WIDTH, -ITEM_HEIGHT, true);
+    controller->ScrollBy(ITEM_WIDTH, -ITEM_HEIGHT, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -3406,11 +3406,11 @@ HWTEST_F(ListTestNg, PositionController001, TestSize.Level1)
     /**
      * @tc.steps: step4. Test ScrollToEdge
      */
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(IsEqualTotalOffset((itemNumber - VIEW_LINE_NUMBER) * ITEM_HEIGHT));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -3471,9 +3471,9 @@ HWTEST_F(ListTestNg, PositionController002, TestSize.Level1)
     /**
      * @tc.steps: step2. Test ScrollBy
      */
-    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, true);
+    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, false);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_WIDTH));
-    controller->ScrollBy(-ITEM_WIDTH, ITEM_HEIGHT, true);
+    controller->ScrollBy(-ITEM_WIDTH, ITEM_HEIGHT, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -3487,11 +3487,11 @@ HWTEST_F(ListTestNg, PositionController002, TestSize.Level1)
     /**
      * @tc.steps: step4. Test ScrollToEdge
      */
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(IsEqualTotalOffset((itemNumber - VIEW_LINE_NUMBER) * ITEM_WIDTH));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**

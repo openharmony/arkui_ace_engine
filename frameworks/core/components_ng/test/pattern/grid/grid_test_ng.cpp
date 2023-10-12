@@ -2969,7 +2969,7 @@ HWTEST_F(GridTestNg, PositionController004, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateColItem(20);
     });
-    pattern_->gridLayoutInfo_.axis_ = Axis::NONE;
+    pattern_->SetAxis(Axis::NONE);
     auto controller = pattern_->positionController_;
     controller->ScrollPage(true, true);
     controller->GetCurrentOffset();

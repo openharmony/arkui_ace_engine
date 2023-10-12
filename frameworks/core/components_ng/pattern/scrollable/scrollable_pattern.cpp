@@ -1507,4 +1507,23 @@ void ScrollablePattern::FireAndCleanScrollingListener()
     }
     scrollingListener_.clear();
 }
+
+float ScrollablePattern::GetMainContentSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    return geometryNode->GetPaddingSize().MainSize(axis_);
+}
+
+void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
+{
+    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
+        ScrollToIndex(0, smooth, ScrollAlign::START);
+    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
+        // use LAST_ITEM for children count changed after scrollEdge(Edge.Bottom) and before layout
+        ScrollToIndex(LAST_ITEM, smooth, ScrollAlign::END);
+    }
+}
 } // namespace OHOS::Ace::NG

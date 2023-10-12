@@ -24,7 +24,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
-#include "core/components_ng/pattern/grid/grid_position_controller.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -41,7 +40,7 @@ void GridModelNG::Create(const RefPtr<ScrollControllerBase>& positionController,
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     if (positionController) {
-        auto controller = AceType::DynamicCast<GridPositionController>(positionController);
+        auto controller = AceType::DynamicCast<ScrollableController>(positionController);
         pattern->SetPositionController(controller);
     }
     if (scrollProxy) {
@@ -364,7 +363,7 @@ void GridModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 
 RefPtr<ScrollControllerBase> GridModelNG::CreatePositionController()
 {
-    return AceType::MakeRefPtr<GridPositionController>();
+    return AceType::MakeRefPtr<ScrollableController>();
 }
 
 RefPtr<ScrollProxy> GridModelNG::CreateScrollBarProxy()
