@@ -321,7 +321,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         LOGI("Set MinPlatformVersion to %{public}d", compatibleVersion_);
         pipelineContext->SetMinPlatformVersion(compatibleVersion_);
     }
-    container->InitializeStageAppConfig(assetPath_, bundleName_, moduleName_, compileMode_);
+    container->InitializeAppConfig(assetPath_, bundleName_, moduleName_, compileMode_);
     AceContainer::AddRouterChangeCallback(instanceId_, onRouterChange_);
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
     view->NotifySurfaceChanged(deviceWidth_, deviceHeight_);
