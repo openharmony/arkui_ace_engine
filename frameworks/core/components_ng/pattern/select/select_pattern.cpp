@@ -690,6 +690,9 @@ void SelectPattern::UpdateText(int32_t index)
     CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
+    if (index >= options_.size() || index < 0) {
+        return;
+    }
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(newSelected);
     textProps->UpdateContent(newSelected->GetText());
