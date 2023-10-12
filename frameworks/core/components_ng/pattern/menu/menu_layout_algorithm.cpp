@@ -503,7 +503,8 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
             continue;
         }
         if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || hostNode->GetTag() == V2::IMAGE_ETS_TAG) {
-            RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+            RefPtr<GridColumnInfo> columnInfo =
+                GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CARD_TYPE);
             CHECK_NULL_RETURN(columnInfo, size);
             auto parent = columnInfo->GetParent();
             CHECK_NULL_RETURN(parent, size);
