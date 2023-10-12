@@ -744,7 +744,6 @@ void PipelineBase::RemoveJsFormVsyncCallback(int32_t subWindowId)
 
 bool PipelineBase::MaybeRelease()
 {
-    CHECK_RUN_ON(UI);
     CHECK_NULL_RETURN(taskExecutor_, true);
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         LOGI("Destroy Pipeline on UI thread.");

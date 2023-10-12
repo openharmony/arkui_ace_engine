@@ -165,6 +165,18 @@ void AceContainer::Initialize()
     }
 }
 
+bool AceContainer::MaybeRelease()
+{
+    CHECK_NULL_RETURN(taskExecutor_, true);
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
+        LOGI("Destroy AceContainer on PLATFORM thread.");
+        return true;
+    } else {
+        LOGI("Post Destroy AceContainer Task to PLATFORM thread.");
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::PLATFORM);
+    }
+}
+
 void AceContainer::Destroy()
 {
     LOGI("AceContainer Destroy begin");
