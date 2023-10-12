@@ -211,7 +211,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             if (!eventHub) {
                 continue;
             }
-            if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasOnCustomDrop()) {
+            if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasCustomerOnDrop()) {
                 return parentFrameNode;
             }
             if (SystemProperties::GetDebugEnabled()) {
@@ -460,8 +460,8 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     UpdateDragEvent(event, point);
-    eventHub->FireOnCustomDrop(event, extraParams);
-    eventHub->HandleFireOnDrop(event, extraParams);
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
+    eventHub->HandleInternalOnDrop(event, extraParams);
     ClearVelocityInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     SetIsDragged(false);
@@ -565,23 +565,23 @@ void DragDropManager::FireOnDragEventWithDragType(const RefPtr<EventHub>& eventH
 {
     switch (type) {
         case DragEventType::ENTER: {
-            eventHub->FireOnCustomDragEnter(event, extraParams);
+            eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_ENTER, event, extraParams);
             eventHub->FireOnDragEnter(event, extraParams);
             break;
         }
         case DragEventType::MOVE: {
-            eventHub->FireOnCustomDragMove(event, extraParams);
+            eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_MOVE, event, extraParams);
             eventHub->FireOnDragMove(event, extraParams);
             break;
         }
         case DragEventType::LEAVE: {
-            eventHub->FireOnCustomDragLeave(event, extraParams);
+            eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, event, extraParams);
             eventHub->FireOnDragLeave(event, extraParams);
             break;
         }
         case DragEventType::DROP: {
-            eventHub->FireOnCustomDrop(event, extraParams);
-            eventHub->HandleFireOnDrop(event, extraParams);
+            eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
+            eventHub->HandleInternalOnDrop(event, extraParams);
             break;
         }
         default:

@@ -39,6 +39,14 @@ struct KeyboardShortcut {
     std::function<void()> onKeyboardShortcutAction = nullptr;
 };
 
+enum class DragFuncType {
+    DRAG_ENTER,
+    DRAG_LEAVE,
+    DRAG_MOVE,
+    DRAG_DROP,
+    DRAG_END,
+}
+
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType)
@@ -306,12 +314,12 @@ public:
 
     bool HasOnDrop() const
     {
-        return static_cast<bool>(onDrop_);
+        return onDrop_ != nullptr;
     }
 
-    bool HasOnCustomDrop() const
+    bool HasCustomerOnDrop() const
     {
-        return static_cast<bool>(onCustomDrop_);
+        return customerOnDrop_ != nullptr;
     }
 
     virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
@@ -415,29 +423,16 @@ public:
         return keyboardShortcut_;
     }
 
-    void SetOnCustomDragEnter(OnDragFunc&& onCustomDragEnter);
+    void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnDragFunc&& onDragFunc);
 
-    void FireOnCustomDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
+    void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnNewDragFunc&& onDragEnd);
 
-    void SetOnCustomDragLeave(OnDragFunc&& onCustomDragLeave);
-
-    void FireOnCustomDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
-
-    void SetOnCustomDragMove(OnDragFunc&& onCustomDragMove);
-
-    void FireOnCustomDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
-
-    void SetOnCustomDrop(OnDragFunc&& onCustomDrop);
-
-    void FireOnCustomDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
-
-    void SetOnCustomDragEnd(OnNewDragFunc&& onCustomDragEnd);
-
-    void FireOnCustomDragEnd(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info,
+        const std::string& extraParams = "");
 
     bool IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
 
-    void HandleFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
+    void HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
 
 protected:
     virtual void OnModifyDone() {}
@@ -460,11 +455,11 @@ private:
     OnDragFunc onDrop_;
     OnNewDragFunc onDragEnd_;
 
-    OnDragFunc onCustomDragEnter_;
-    OnDragFunc onCustomDragLeave_;
-    OnDragFunc onCustomDragMove_;
-    OnDragFunc onCustomDrop_;
-    OnNewDragFunc onCustomDragEnd_;
+    OnDragFunc customerOnDragEnter_;
+    OnDragFunc customerOnDragLeave_;
+    OnDragFunc customerOnDragMove_;
+    OnDragFunc customerOnDrop_;
+    OnNewDragFunc customerOnDragEnd_;
 
     bool enabled_ { true };
     bool developerEnabled_ { true };
