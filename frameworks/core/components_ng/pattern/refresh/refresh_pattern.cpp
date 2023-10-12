@@ -317,22 +317,21 @@ void RefreshPattern::HandleDragUpdate(float delta)
         LOGI("Delta is near zero or isRefreshing!");
         return;
     }
-
     scrollOffset_.SetY(GetScrollOffset(delta));
     if (customBuilder_) {
         HandleCustomBuilderDragUpdateStage();
         return;
     }
     CHECK_NULL_VOID(progressChild_);
+    float refreshFollowRadio = 0.0f;
     if (scrollOffset_.GetY() > triggerLoadingDistance_) {
-        auto refreshFollowRadio = GetFollowRatio();
-        UpdateLoadingProgress(STATE_PROGRESS_DRAG, refreshFollowRadio);
-        UpdateLoadingMarginTop(scrollOffset_.GetY());
-        auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
-        CHECK_NULL_VOID(progressPaintProperty);
-        progressPaintProperty->UpdateRefreshFollowRatio(refreshFollowRadio);
+        refreshFollowRadio = GetFollowRatio();
     }
-
+    UpdateLoadingProgress(STATE_PROGRESS_DRAG, refreshFollowRadio);
+    UpdateLoadingMarginTop(scrollOffset_.GetY());
+    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    progressPaintProperty->UpdateRefreshFollowRatio(refreshFollowRadio);
     if (scrollOffset_.GetY() > TRIGGER_REFRESH_DISTANCE.ConvertToPx()) {
         UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
     }
