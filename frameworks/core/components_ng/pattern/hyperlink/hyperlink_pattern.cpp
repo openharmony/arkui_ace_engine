@@ -86,6 +86,8 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(theme);
     if (!enabled) {
         hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextDisabledColor());
+    } else {
+        hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor());
     }
     if (host->IsDraggable()) {
         EnableDrag();
