@@ -2695,6 +2695,7 @@ void WebDelegate::UpdateUserAgent(const std::string& userAgent)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutUserAgent(userAgent);
             }
         },
@@ -2771,6 +2772,7 @@ void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutJavaScriptEnabled(isJsEnabled);
             }
         },
@@ -2788,6 +2790,7 @@ void WebDelegate::UpdateAllowFileAccess(const bool& isFileAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutEnableRawFileAccess(isFileAccessEnabled);
             }
         },
@@ -2805,6 +2808,7 @@ void WebDelegate::UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutLoadImageFromNetworkDisabled(onLineImageAccessEnabled);
             }
         },
@@ -2822,6 +2826,7 @@ void WebDelegate::UpdateLoadsImagesAutomatically(const bool& isImageAccessEnable
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutImageLoadingAllowed(isImageAccessEnabled);
             }
         },
@@ -2839,6 +2844,7 @@ void WebDelegate::UpdateMixedContentMode(const MixedModeContent& mixedMode)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutAccessModeForSecureOriginLoadFromInsecure(
                     static_cast<OHOS::NWeb::NWebPreference::AccessMode>(mixedMode));
             }
@@ -2857,6 +2863,7 @@ void WebDelegate::UpdateSupportZoom(const bool& isZoomAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutZoomingFunctionEnabled(isZoomAccessEnabled);
             }
         },
@@ -2873,6 +2880,7 @@ void WebDelegate::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutDomStorageEnabled(isDomStorageAccessEnabled);
             }
         },
@@ -2889,6 +2897,7 @@ void WebDelegate::UpdateGeolocationEnabled(const bool& isGeolocationAccessEnable
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutGeolocationAllowed(isGeolocationAccessEnabled);
             }
         },
@@ -2906,6 +2915,7 @@ void WebDelegate::UpdateCacheMode(const WebCacheMode& mode)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutCacheMode(static_cast<OHOS::NWeb::NWebPreference::CacheModeFlag>(mode));
             }
         },
@@ -2934,6 +2944,7 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            CHECK_NULL_VOID(setting);
             if (mode == WebDarkMode::On) {
                 delegate->UnRegisterConfigObserver();
                 setting->PutDarkSchemeEnabled(true);
@@ -2966,6 +2977,7 @@ void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate,
     appMgrClient->GetConfiguration(systemConfig);
     std::string colorMode =
         systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    CHECK_NULL_VOID(setting);
     if (colorMode == "dark") {
         setting->PutDarkSchemeEnabled(true);
         if (delegate->GetForceDarkMode()) {
@@ -2991,6 +3003,7 @@ void WebDelegate::UpdateForceDarkAccess(const bool& access)
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            CHECK_NULL_VOID(setting);
             delegate->forceDarkMode_ = access;
             if (setting->DarkSchemeEnabled()) {
                 setting->PutForceDarkModeEnabled(access);
@@ -3044,6 +3057,7 @@ void WebDelegate::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnab
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutLoadWithOverviewMode(isOverviewModeAccessEnabled);
             }
         },
@@ -3061,6 +3075,7 @@ void WebDelegate::UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnable
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutEnableRawFileAccessFromFileURLs(isFileFromUrlAccessEnabled);
             }
         },
@@ -3078,6 +3093,7 @@ void WebDelegate::UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutDatabaseAllowed(isDatabaseAccessEnabled);
             }
         },
@@ -3095,6 +3111,7 @@ void WebDelegate::UpdateTextZoomRatio(const int32_t& textZoomRatioNum)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutZoomingForTextFactor(textZoomRatioNum);
             }
         },
@@ -3112,6 +3129,7 @@ void WebDelegate::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutWebDebuggingAccess(isWebDebuggingAccessEnabled);
             }
         },
@@ -3129,6 +3147,7 @@ void WebDelegate::UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutPinchSmoothMode(isPinchSmoothModeEnabled);
             }
         },
@@ -3165,6 +3184,7 @@ void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutMultiWindowAccess(isMultiWindowAccessEnabled);
             }
         },
