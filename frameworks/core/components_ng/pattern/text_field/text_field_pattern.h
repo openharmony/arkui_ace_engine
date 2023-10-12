@@ -174,10 +174,10 @@ public:
                 textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect());
             }
         }
-        auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, paint);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, paint);
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, paint);
         auto geometryNode = host->GetGeometryNode();
         auto frameOffset = geometryNode->GetFrameOffset();
         auto frameSize = geometryNode->GetFrameSize();
