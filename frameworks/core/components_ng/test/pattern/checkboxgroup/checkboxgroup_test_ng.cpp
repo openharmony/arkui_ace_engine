@@ -1494,21 +1494,21 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest023, TestSize.Level1)
      */
     checkBoxGroupPattern->preGroup_ = std::make_optional<std::string>(NAME);
     eventHub->SetGroupName(NAME);
-    checkBoxGroupPattern->isClick_ = true;
+    checkBoxGroupPattern->updateFlag_ = true;
     checkBoxGroupPattern->SetIsAddToMap(true);
     checkBoxGroupPattern->UpdateState();
     EXPECT_EQ(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
-    EXPECT_FALSE(checkBoxGroupPattern->isClick_);
+    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
 
     paintProperty->UpdateCheckBoxGroupSelect(true);
     checkBoxGroupPattern->SetIsAddToMap(false);
     checkBoxGroupPattern->UpdateState();
     EXPECT_EQ(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
-    EXPECT_FALSE(checkBoxGroupPattern->isClick_);
+    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
 
     paintProperty->UpdateCheckBoxGroupSelect(false);
     checkBoxGroupPattern->UpdateState();
-    EXPECT_FALSE(checkBoxGroupPattern->isClick_);
+    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
 }
 
 /**
