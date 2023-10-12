@@ -126,9 +126,12 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
+    // Prohibit rebuilding the session unless the Want is updated.
     if (session_ && (!session_->GetSessionInfo().want->IsEquals(want))) {
         DestorySession();
+        session_ = nullptr;
     }
+    CHECK_NULL_VOID(!session_);
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID(container);
     auto callerToken = container->GetToken();
