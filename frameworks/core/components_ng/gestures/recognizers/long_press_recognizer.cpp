@@ -117,6 +117,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     LOGI("long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
     int32_t curDuration = duration_;
+#ifndef PREVIEW
     int64_t currentTimeStamp = GetSysTimestamp();
     int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
     if (currentTimeStamp > eventTimeStamp) {
@@ -127,6 +128,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             curDuration = 0;
         }
     }
+#endif
 
     if (isForDrag_ && event.sourceType == SourceType::MOUSE) {
         curDuration = 0;
