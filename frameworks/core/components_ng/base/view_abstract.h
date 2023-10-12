@@ -87,6 +87,7 @@ struct MenuParam {
     bool isAboveApps = false;
     MenuType type = MenuType::MENU;
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
+    std::optional<EffectOption> backgroundEffectOption;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
