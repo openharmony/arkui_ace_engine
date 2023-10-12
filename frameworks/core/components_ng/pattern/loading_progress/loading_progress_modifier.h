@@ -93,7 +93,6 @@ public:
 private:
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
     float GetCurentCometAngle(float baseAngle, uint32_t index, uint32_t totalNumber);
-
     uint32_t GetCometNumber();
     // no Animatable
     RefPtr<PropertyBool> enableLoading_;
@@ -106,7 +105,7 @@ private:
     RefPtr<AnimatablePropertyFloat> cometOpacity_;
     RefPtr<AnimatablePropertyFloat> cometSizeScale_;
     RefPtr<AnimatablePropertyFloat> cometTailLen_;
-    RefPtr<AnimatablePropertyFloat> sizeScale_;
+    float sizeScale_;
 
     LoadingProgressOwner loadingProgressOwner_;
     bool isLoading_ = false;

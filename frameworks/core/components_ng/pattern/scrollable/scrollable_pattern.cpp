@@ -181,18 +181,9 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         CreateRefreshCoordination();
     }
     auto overOffsets = GetOverScrollOffset(offset);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !isAtTop && Positive(offset) &&
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !IsAtTop() && Positive(offset) &&
         NeedSplitScroll(overOffsets, source)) {
         offset = offset - overOffsets.start;
-        if (source == SCROLL_FROM_ANIMATION_SPRING || source == SCROLL_FROM_ANIMATION) {
-            OnScrollCallback(offset, source);
-            isRefreshInReactive_ = true;
-            if (!refreshCoordination_->OnScroll(overOffsets.start)) {
-                isRefreshInReactive_ = false;
-                coordinationMode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
-            }
-            coordinationMode = RefreshCoordinationMode::REFRESH_SCROLL;
-        }
         OnScrollCallback(offset, source);
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
@@ -208,14 +199,11 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
             refreshCoordination_->OnScrollStart();
         }
     }
-    if ((refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        (refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
         isRefreshInReactive_) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            refreshCoordination_->OnScrollEnd(GetVelocity());
-        } else {
-            isRefreshInReactive_ = false;
-            refreshCoordination_->OnScrollEnd(0.0f);
-        }
+        isRefreshInReactive_ = false;
+        refreshCoordination_->OnScrollEnd(0.0f);
     }
     if (refreshCoordination_ && refreshCoordination_->InCoordination() && isRefreshInReactive_) {
         if (!refreshCoordination_->OnScroll(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {

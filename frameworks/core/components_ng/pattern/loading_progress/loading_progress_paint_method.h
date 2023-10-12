@@ -28,8 +28,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t REFRESH_STATE_FOLLOW_HAND = static_cast<int32_t>(RefreshAnimationState::FOLLOW_HAND);
-const int32_t REFRESH_STATE_FOLLOW_TO_RESYCLE = static_cast<int32_t>(RefreshAnimationState::FOLLOW_TO_RECYCLE);
-const int32_t REFRESH_STATE_RESYCLE = static_cast<int32_t>(RefreshAnimationState::RECYCLE);
+const int32_t REFRESH_STATE_FOLLOW_TO_RECYCLE = static_cast<int32_t>(RefreshAnimationState::FOLLOW_TO_RECYCLE);
+const int32_t REFRESH_STATE_RECYCLE = static_cast<int32_t>(RefreshAnimationState::RECYCLE);
 const int32_t REFRESH_STATE_FADEAWAY = static_cast<int32_t>(RefreshAnimationState::FADEAWAY);
 }
 class ACE_EXPORT LoadingProgressPaintMethod : public NodePaintMethod {
@@ -76,15 +76,14 @@ public:
                 loadingProgressModifier_->ChangeRefreshFollowData(
                     paintProperty->GetRefreshFollowRatio().value_or(0.0f));
                 break;
-            case REFRESH_STATE_FOLLOW_TO_RESYCLE:
+            case REFRESH_STATE_FOLLOW_TO_RECYCLE:
                 loadingProgressModifier_->StartTransToRecycleAnimation();
                 break;
-            case REFRESH_STATE_RESYCLE:
+            case REFRESH_STATE_RECYCLE:
                 loadingProgressModifier_->StartRecycle();
                 break;
             case REFRESH_STATE_FADEAWAY:
-                loadingProgressModifier_->ChangeRefreshFollowData(
-                    paintProperty->GetRefreshFadeAwayRatio().value_or(0.0f));
+                loadingProgressModifier_->ChangeFadeAwayData(paintProperty->GetRefreshFadeAwayRatio().value_or(0.0f));
                 break;
             default:
                 break;
