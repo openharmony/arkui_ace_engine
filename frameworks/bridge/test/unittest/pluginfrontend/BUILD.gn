@@ -62,10 +62,4 @@ config("config_domnode_test") {
 group("unittest") {
   testonly = true
   deps = []
-  if (!ace_use_new_skia) {
-    deps += [
-      ":PluginFrontendDelegateTest",
-      ":PluginFrontendTest",
-    ]
-  }
 }

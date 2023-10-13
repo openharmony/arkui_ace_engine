@@ -22,8 +22,6 @@ build_component("transform") {
     "transform_component.cpp",
     "transform_element.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_transform.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_transform.cpp" ]
 }

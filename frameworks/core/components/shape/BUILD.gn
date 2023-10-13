@@ -16,8 +16,6 @@ import(
 
 build_component("shape") {
   sources = [
-    "flutter_render_shape.cpp",
-    "flutter_render_shape_container.cpp",
     "render_shape.cpp",
     "render_shape_container.cpp",
     "render_shape_container_creator.cpp",
@@ -26,12 +24,7 @@ build_component("shape") {
     "shape_container_component.cpp",
     "shape_container_element.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [
-      "flutter_render_shape.cpp",
-      "flutter_render_shape_container.cpp",
-    ]
-  }
+
   rosen_sources = [
     "rosen_render_shape.cpp",
     "rosen_render_shape_container.cpp",

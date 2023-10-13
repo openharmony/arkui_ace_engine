@@ -21,8 +21,6 @@ build_component("toggle") {
     "toggle_component.cpp",
     "toggle_element.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_toggle.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_toggle.cpp" ]
 }

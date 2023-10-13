@@ -16,8 +16,6 @@ import(
 
 build_component("picker") {
   sources = [
-    "flutter_render_picker_base.cpp",
-    "flutter_render_picker_column.cpp",
     "picker_animation.cpp",
     "picker_animation_controller.cpp",
     "picker_base_component.cpp",
@@ -41,11 +39,6 @@ build_component("picker") {
     "render_picker_value.cpp",
     "toss_animation_controller.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [
-      "flutter_render_picker_base.cpp",
-      "flutter_render_picker_column.cpp",
-    ]
-  }
+
   rosen_sources = [ "rosen_render_picker_base.cpp" ]
 }

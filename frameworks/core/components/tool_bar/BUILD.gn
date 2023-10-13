@@ -24,12 +24,7 @@ build_component("tool_bar") {
     "tool_bar_item_component.cpp",
     "tool_bar_item_element.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [
-      "flutter_render_tool_bar.cpp",
-      "flutter_render_tool_bar_item.cpp",
-    ]
-  }
+
   rosen_sources = [
     "rosen_render_tool_bar.cpp",
     "rosen_render_tool_bar_item.cpp",
