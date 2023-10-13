@@ -922,7 +922,7 @@ void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragE
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetCustomerOnDragEnd(std::move(onDragEnd));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
 
     AddDragFrameNodeToManager();
 }
