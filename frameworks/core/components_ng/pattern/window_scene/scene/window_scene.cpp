@@ -147,6 +147,7 @@ void WindowScene::BufferAvailableCallback()
             CHECK_NULL_VOID(context);
             auto rsNode = context->GetRSNode();
             CHECK_NULL_VOID(rsNode);
+            rsNode->MarkNodeGroup(true);
             auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
             rsNode->SetTransitionEffect(effect);
             Rosen::RSAnimationTimingProtocol protocol;
@@ -201,6 +202,15 @@ void WindowScene::OnActivation()
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+
+        if (self->session_ && self->session_->GetShowRecent() && self->startingNode_) {
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            host->AddChild(self->contentNode_, 0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            self->session_->GetSurfaceNode()->SetBufferAvailableCallback(self->callback_);
         }
     };
 
@@ -251,10 +261,6 @@ void WindowScene::OnForeground()
         host->RemoveChild(self->snapshotNode_);
         self->snapshotNode_.Reset();
         host->AddChild(self->contentNode_);
-        if (!self->session_->GetBufferAvailable() && !self->startingNode_) {
-            self->CreateStartingNode();
-            host->AddChild(self->startingNode_);
-        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
