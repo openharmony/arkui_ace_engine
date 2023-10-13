@@ -870,9 +870,13 @@ export struct SegmentButton {
             }
             this.zoomScaleArray.forEach((_, index) => {
               if (index === this.selectedIndexes[0]) {
-                this.zoomScaleArray[index] = 0.95
+                animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+                  this.zoomScaleArray[index] = 0.95
+                })
               } else {
-                this.zoomScaleArray[index] = 1
+                animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+                  this.zoomScaleArray[index] = 1
+                })
               }
             })
           })
