@@ -1114,11 +1114,12 @@ void FlexLayoutAlgorithm::PlaceChildren(
 FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
+    FlexAlign crossAxisAlign = (crossAxisAlign_ == FlexAlign::AUTO) ? FlexAlign::FLEX_START : crossAxisAlign_;
     if (!flexItemProperty || !flexItemProperty->GetAlignSelf().has_value() ||
         flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) == FlexAlign::AUTO) {
-        return crossAxisAlign_;
+        return crossAxisAlign;
     }
-    return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_);
+    return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign);
 }
 
 } // namespace OHOS::Ace::NG
