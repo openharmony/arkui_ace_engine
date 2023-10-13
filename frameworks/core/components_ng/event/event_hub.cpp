@@ -168,7 +168,7 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
             }
             break;
         }
-        case: DragFuncType::DRAG_END: {
+        case DragFuncType::DRAG_END: {
             if (customerOnDragEnd_ != nullptr) {
                 auto customerOnDragEnd = customerOnDragEnd_;
                 customerOnDragEnd(info);
