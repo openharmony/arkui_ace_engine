@@ -33,7 +33,7 @@ public:
         coordinationEvent_ = CreateCoordinationEvent();
     };
     ~RefreshCoordination() = default;
-    void OnScrollStart() const;
+    void OnScrollStart(bool isDrag) const;
     bool OnScroll(float offset) const;
     void OnScrollEnd(float speed) const;
     bool InCoordination()

@@ -50,7 +50,7 @@ public:
     void DrawCustomStyle(DrawingContext& context);
     void RefreshRecycle(DrawingContext& context, Color& color, float scale);
     void ChangeRefreshFollowData(float refreshFollowRatio);
-    void ChangeFadeAwayData(float fadeAwayRatio);
+    void ChangeSizeScaleData(float fadeAwayRatio);
     float CorrectNormalize(float originData);
 
     LoadingProgressOwner GetOwner()
@@ -105,11 +105,12 @@ private:
     RefPtr<AnimatablePropertyFloat> cometOpacity_;
     RefPtr<AnimatablePropertyFloat> cometSizeScale_;
     RefPtr<AnimatablePropertyFloat> cometTailLen_;
-    float sizeScale_;
+    RefPtr<AnimatablePropertyFloat> sizeScale_;
 
     LoadingProgressOwner loadingProgressOwner_;
     bool isLoading_ = false;
     bool isVisible_ = true;
+    float recycleSizeScale_ = 1.0f;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };
 } // namespace OHOS::Ace::NG
