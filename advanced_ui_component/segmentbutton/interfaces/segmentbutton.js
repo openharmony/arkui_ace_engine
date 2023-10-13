@@ -1596,7 +1596,13 @@ class SegmentButton extends ViewPU {
                     }
                 }
                 this.zoomScaleArray.forEach(((t, e) => {
-                        e === this.selectedIndexes[0] ? this.zoomScaleArray[e] = .95 : this.zoomScaleArray[e] = 1
+                        e === this.selectedIndexes[0] ? Context.animateTo({
+                        curve: curves.interpolatingSpring(10, 1, 410, 38)
+                    }, (() => {
+                        this.zoomScaleArray[e] = .95
+                    })) : Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, (() => {
+                        this.zoomScaleArray[e] = 1
+                    }))
                 }))
             }));
             PanGesture.onActionEnd((t => {
