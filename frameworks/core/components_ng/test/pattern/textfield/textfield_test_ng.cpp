@@ -7650,13 +7650,16 @@ HWTEST_F(TextFieldPatternTestNg, HandleClickEvent, TestSize.Level1)
     pattern_->HandleClickEvent(info);
 
     focusHub->currentFocus_ = true;
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
 
     focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     focusHub->focusCallbackEvents_->isFocusOnTouch_ = false;
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
 
     pattern_->isMousePressed_ = true;
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
     EXPECT_FALSE(pattern_->isMousePressed_);
 
@@ -7665,13 +7668,16 @@ HWTEST_F(TextFieldPatternTestNg, HandleClickEvent, TestSize.Level1)
     pattern_->frameRect_.SetWidth(100);
     layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     layoutProperty_->UpdateShowPasswordIcon(true);
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
     EXPECT_EQ(pattern_->caretUpdateType_, CaretUpdateType::ICON_PRESSED);
 
     layoutProperty_->UpdateShowPasswordIcon(false);
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
 
     info.SetLocalLocation(Offset(10, 90));
+    pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
 }
 
@@ -7702,21 +7708,35 @@ HWTEST_F(TextFieldPatternTestNg, HandleDoubleClickEvent, TestSize.Level1)
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
     GestureEvent info;
+    pattern_->HandleClickEvent(info);
+
     focusHub->currentFocus_ = true;
+    pattern_->hasClicked_ = false;
+    pattern_->HandleClickEvent(info);
     focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     focusHub->focusCallbackEvents_->isFocusOnTouch_ = false;
+    pattern_->hasClicked_ = false;
 
     // test gesture doubleClick
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
     pattern_->isUsingMouse_ = false;
-    pattern_->isDoubleClick_ = false;
-    pattern_->HandleDoubleClickEvent(info);
-    EXPECT_TRUE(pattern_->isDoubleClick_);
+    pattern_->HandleClickEvent(info);
+    EXPECT_FALSE(pattern_->hasClicked_);
 
     // test mouse doubleClick
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
     pattern_->isUsingMouse_ = true;
-    pattern_->isDoubleClick_ = false;
-    pattern_->HandleDoubleClickEvent(info);
-    EXPECT_TRUE(pattern_->isDoubleClick_);
+    pattern_->HandleClickEvent(info);
+    EXPECT_FALSE(pattern_->hasClicked_);
+
+    // test timeout > 300 ms
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
+    pattern_->lastClickTimeStamp_ = pattern_->lastClickTimeStamp_ - std::chrono::seconds(1);
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
 }
 
 } // namespace OHOS::Ace::NG

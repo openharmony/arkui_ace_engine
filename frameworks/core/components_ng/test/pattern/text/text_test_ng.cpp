@@ -4791,23 +4791,26 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
     info.localLocation_ = Offset(0, 0);
 
     // test CopyOptions is None
-    pattern->isDoubleClick_ = false;
     pattern->copyOption_ = CopyOptions::None;
-    pattern->HandleDoubleClickEvent(info);
-    EXPECT_FALSE(pattern->isDoubleClick_);
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(pattern->hasClicked_);
+    pattern->HandleClickEvent(info);
+    EXPECT_FALSE(pattern->hasClicked_);
 
     // test mouse doubleClick
-    pattern->isDoubleClick_ = false;
     pattern->isMousePressed_ = true;
     pattern->copyOption_ = CopyOptions::Local;
-    pattern->HandleDoubleClickEvent(info);
-    EXPECT_TRUE(pattern->isDoubleClick_);
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(pattern->hasClicked_);
+    pattern->HandleClickEvent(info);
+    EXPECT_FALSE(pattern->hasClicked_);
 
     // test gesture doubleClick
-    pattern->isDoubleClick_ = false;
     pattern->isMousePressed_ = false;
     pattern->copyOption_ = CopyOptions::Local;
-    pattern->HandleDoubleClickEvent(info);
-    EXPECT_TRUE(pattern->isDoubleClick_);
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(pattern->hasClicked_);
+    pattern->HandleClickEvent(info);
+    EXPECT_FALSE(pattern->hasClicked_);
 }
 } // namespace OHOS::Ace::NG

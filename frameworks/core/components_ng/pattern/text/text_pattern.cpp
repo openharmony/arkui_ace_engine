@@ -27,8 +27,6 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
-#include "core/components_ng/gestures/gesture_group.h"
-#include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
@@ -47,6 +45,8 @@ namespace {
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
+constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
+constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 }; // namespace
 
 void TextPattern::OnAttachToFrameNode()
@@ -447,6 +447,24 @@ void TextPattern::OnHandleTouchUp()
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
+    if (hasClicked_) {
+        hasClicked_ = false;
+        TimeStamp clickTimeStamp = info.GetTimeStamp();
+        std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout =
+            clickTimeStamp - lastClickTimeStamp_;
+        lastClickTimeStamp_ = info.GetTimeStamp();
+        if (timeout.count() < DOUBLECLICK_INTERVAL_MS) {
+            HandleDoubleClickEvent(info);
+            return;
+        }
+    }
+    HandleSingleClickEvent(info);
+}
+
+void TextPattern::HandleSingleClickEvent(GestureEvent& info)
+{
+    hasClicked_ = true;
+    lastClickTimeStamp_ = info.GetTimeStamp();
     if (textSelector_.IsValid()) {
         CloseSelectOverlay(true);
         ResetSelection();
@@ -509,24 +527,13 @@ void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(!clickEventInitialized_);
-    RefPtr<GestureGroup> gestureGroup = AceType::MakeRefPtr<GestureGroup>(GestureMode::Parallel);
-
-    auto doubleClickTapGesture = AceType::MakeRefPtr<NG::TapGesture>(2, 1);
-    doubleClickTapGesture->SetOnActionId([weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleDoubleClickEvent(info);
-    });
-    gestureGroup->AddGesture(doubleClickTapGesture);
-
-    auto singleClickTapGesture = AceType::MakeRefPtr<NG::TapGesture>(1, 1);
-    singleClickTapGesture->SetOnActionId([weak = WeakClaim(this)](GestureEvent& info) {
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleClickEvent(info);
-    });
-    gestureGroup->AddGesture(singleClickTapGesture);
-    gestureHub->AddGesture(gestureGroup);
+    };
+    auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickEvent(clickListener);
     clickEventInitialized_ = true;
 }
 
