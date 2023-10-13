@@ -2290,6 +2290,19 @@ bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
                     return false;
             }
         }
+        if (keyEvent.IsLetterKey()) {
+            if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
+                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
+                HandleOnSelectAll();
+            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
+                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
+                HandleOnCopy();
+            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
+                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
+                HandleOnPaste();
+            }
+            return true;
+        }
         auto visibilityCode = keyEvent.ConvertInputCodeToString();
         if (visibilityCode != std::string("")) {
             if ((keyEvent.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
