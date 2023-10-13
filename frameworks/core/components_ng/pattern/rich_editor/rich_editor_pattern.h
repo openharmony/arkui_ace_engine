@@ -335,6 +335,9 @@ private:
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
     bool OnKeyEvent(const KeyEvent& keyEvent);
+    bool HandleShiftPressedEvent(const KeyEvent& event);
+    bool HandleDirectionalKey(const KeyEvent& keyEvent);
+    void ParseAppendValue(KeyCode keyCode, std::string& appendElement);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
     void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);
