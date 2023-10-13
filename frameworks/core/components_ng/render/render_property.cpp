@@ -128,6 +128,7 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
         jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
         jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
+        jsonShadow->Put("fill", std::to_string(shadow.GetIsFilled()).c_str());
         json->Put("shadow", jsonShadow);
     }
 }
