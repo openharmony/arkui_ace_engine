@@ -1276,32 +1276,42 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
         LOGD("UIContent load theme");
 
-        auto resourceAdapter = ResourceAdapter::CreateV2();
-        resourceAdapter->Init(resourceInfo);
+        if (SystemProperties::GetResourceDecoupling()) {
+            auto resourceAdapter = ResourceAdapter::CreateV2();
+            resourceAdapter->Init(resourceInfo);
 
-        ThemeConstants::InitDeviceType();
-        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
-        pipelineContext->SetThemeManager(themeManager);
-        themeManager->SetColorScheme(colorScheme);
-        themeManager->LoadCustomTheme(assetManager);
-        themeManager->LoadResourceThemes();
+            ThemeConstants::InitDeviceType();
+            auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+            pipelineContext->SetThemeManager(themeManager);
+            themeManager->SetColorScheme(colorScheme);
+            themeManager->LoadCustomTheme(assetManager);
+            themeManager->LoadResourceThemes();
 
-        auto defaultBundleName = "";
-        auto defaultModuleName = "";
-        ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+            auto defaultBundleName = "";
+            auto defaultModuleName = "";
+            ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
 
-        if (context) {
-            auto bundleName = context->GetBundleName();
-            auto moduleName = context->GetHapModuleInfo()->name;
-            if (!bundleName.empty() && !moduleName.empty()) {
-                ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            if (context) {
+                auto bundleName = context->GetBundleName();
+                auto moduleName = context->GetHapModuleInfo()->name;
+                if (!bundleName.empty() && !moduleName.empty()) {
+                    ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+                }
+            } else if (abilityInfo) {
+                auto bundleName = abilityInfo->bundleName;
+                auto moduleName = abilityInfo->moduleName;
+                if (!bundleName.empty() && !moduleName.empty()) {
+                    ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+                }
             }
-        } else if (abilityInfo) {
-            auto bundleName = abilityInfo->bundleName;
-            auto moduleName = abilityInfo->moduleName;
-            if (!bundleName.empty() && !moduleName.empty()) {
-                ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
-            }
+        } else {
+            ThemeConstants::InitDeviceType();
+            auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+            pipelineContext->SetThemeManager(themeManager);
+            themeManager->InitResource(resourceInfo);
+            themeManager->SetColorScheme(colorScheme);
+            themeManager->LoadCustomTheme(assetManager);
+            themeManager->LoadResourceThemes();
         }
     };
 
@@ -1556,7 +1566,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
-    ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    }
     themeManager->LoadResourceThemes();
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
@@ -1691,34 +1703,44 @@ void AceContainer::UpdateResource()
     // Reload theme and resource
     CHECK_NULL_VOID(pipelineContext_);
 
-    auto resourceAdapter = ResourceAdapter::CreateV2();
-    resourceAdapter->Init(resourceInfo_);
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::CreateV2();
+        resourceAdapter->Init(resourceInfo_);
 
-    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
-    pipelineContext_->SetThemeManager(themeManager);
-    themeManager->SetColorScheme(colorScheme_);
-    themeManager->LoadCustomTheme(assetManager_);
-    themeManager->LoadResourceThemes();
+        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+        pipelineContext_->SetThemeManager(themeManager);
+        themeManager->SetColorScheme(colorScheme_);
+        themeManager->LoadCustomTheme(assetManager_);
+        themeManager->LoadResourceThemes();
 
-    ResourceManager::GetInstance().Reset();
-    auto context = runtimeContext_.lock();
-    auto abilityInfo = abilityInfo_.lock();
-    if (context) {
-        auto bundleName = context->GetBundleName();
-        auto moduleName = context->GetHapModuleInfo()->name;
-        if (!bundleName.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+        ResourceManager::GetInstance().Reset();
+        auto context = runtimeContext_.lock();
+        auto abilityInfo = abilityInfo_.lock();
+        if (context) {
+            auto bundleName = context->GetBundleName();
+            auto moduleName = context->GetHapModuleInfo()->name;
+            if (!bundleName.empty() && !moduleName.empty()) {
+                ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            }
+        } else if (abilityInfo) {
+            auto bundleName = abilityInfo->bundleName;
+            auto moduleName = abilityInfo->moduleName;
+            if (!bundleName.empty() && !moduleName.empty()) {
+                ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            }
         }
-    } else if (abilityInfo) {
-        auto bundleName = abilityInfo->bundleName;
-        auto moduleName = abilityInfo->moduleName;
-        if (!bundleName.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
-        }
+        auto defaultBundleName = "";
+        auto defaultModuleName = "";
+        ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+    } else {
+        ThemeConstants::InitDeviceType();
+        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+        pipelineContext_->SetThemeManager(themeManager);
+        themeManager->InitResource(resourceInfo_);
+        themeManager->SetColorScheme(colorScheme_);
+        themeManager->LoadCustomTheme(assetManager_);
+        themeManager->LoadResourceThemes();
     }
-    auto defaultBundleName = "";
-    auto defaultModuleName = "";
-    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
 
     auto cache = pipelineContext_->GetImageCache();
     if (cache) {

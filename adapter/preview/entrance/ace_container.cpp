@@ -16,6 +16,7 @@
 #include "adapter/preview/entrance/ace_container.h"
 
 #include <functional>
+
 #include "base/log/log_wrapper.h"
 
 #ifndef ENABLE_ROSEN_BACKEND
@@ -557,7 +558,9 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
         return;
     }
     themeManager->UpdateConfig(resConfig);
-    ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    }
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_, config = resConfig,
             weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
@@ -783,7 +786,9 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
         return;
     }
     themeManager->UpdateConfig(resConfig);
-    ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    }
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_,
             weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
@@ -871,23 +876,31 @@ void AceContainer::AttachView(
 
     ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
-    auto resourceAdapter = ResourceAdapter::Create();
-    resourceAdapter->Init(resourceInfo);
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
 
-    auto defaultBundleName = "";
-    auto defaultModuleName = "";
-    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
-    LOGI("Save default adapter");
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::Create();
+        resourceAdapter->Init(resourceInfo);
 
-    if (!bundleName_.empty() && !moduleName.empty()) {
-        LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName_.c_str(), moduleName_.c_str());
-        ResourceManager::GetInstance().AddResourceAdapter(bundleName_, moduleName, resourceAdapter);
+        auto defaultBundleName = "";
+        auto defaultModuleName = "";
+        ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+        LOGI("Save default adapter");
+
+        if (!bundleName_.empty() && !moduleName.empty()) {
+            LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName_.c_str(),
+                moduleName_.c_str());
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName_, moduleName, resourceAdapter);
+        }
+
+        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     }
-
-    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource, load theme map.
+        if (!SystemProperties::GetResourceDecoupling()) {
+            themeManager->InitResource(resourceInfo_);
+        }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
@@ -997,25 +1010,33 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
         cardFrontend->SetLoadCardCallBack(WeakPtr<PipelineBase>(pipelineContext_));
     }
 
-    auto resourceAdapter = ResourceAdapter::Create();
-    resourceAdapter->Init(resourceInfo_);
-
-    auto defaultBundleName = "";
-    auto defaultModuleName = "";
-    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
-    LOGI("Save default adapter");
-
-    if (!bundleName_.empty() && !moduleName_.empty()) {
-        LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName_.c_str(), moduleName_.c_str());
-        ResourceManager::GetInstance().AddResourceAdapter(bundleName_, moduleName_, resourceAdapter);
-    }
-
     ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
-    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::Create();
+        resourceAdapter->Init(resourceInfo_);
+
+        auto defaultBundleName = "";
+        auto defaultModuleName = "";
+        ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+        LOGI("Save default adapter");
+
+        if (!bundleName_.empty() && !moduleName_.empty()) {
+            LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName_.c_str(), moduleName_.c_str());
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName_, moduleName_, resourceAdapter);
+        }
+
+        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+    }
+
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource, load theme map.
+        if (!SystemProperties::GetResourceDecoupling()) {
+            themeManager->InitResource(resourceInfo_);
+        }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {

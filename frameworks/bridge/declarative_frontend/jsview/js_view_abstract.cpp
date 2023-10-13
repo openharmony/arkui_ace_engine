@@ -3441,11 +3441,23 @@ bool JSViewAbstract::ParseJsDimensionNG(
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -3458,7 +3470,7 @@ bool JSViewAbstract::ParseJsDimensionNG(
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result = resourceAdapter->GetDimensionByName(param->ToString());
+        result = resourceWrapper->GetDimensionByName(param->ToString());
         return true;
     }
 
@@ -3467,7 +3479,7 @@ bool JSViewAbstract::ParseJsDimensionNG(
         return false;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = resourceAdapter->GetString(resId->ToNumber<uint32_t>());
+        auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         LOGI("[ParseJsDimensionNG] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, moduleName: "
              "%{public}s, "
              "result: %{public}s",
@@ -3475,7 +3487,7 @@ bool JSViewAbstract::ParseJsDimensionNG(
         return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceAdapter->GetInt(resId->ToNumber<uint32_t>()));
+        auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
         LOGI("[ParseJsDimensionNG] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: "
              "%{public}s, "
              "result: %{public}s",
@@ -3485,7 +3497,7 @@ bool JSViewAbstract::ParseJsDimensionNG(
     }
 
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = resourceAdapter->GetDimension(resId->ToNumber<uint32_t>()); // float return true pixel value
+        result = resourceWrapper->GetDimension(resId->ToNumber<uint32_t>()); // float return true pixel value
         LOGI("[ParseJsDimensionNG] use resource adapter to get $r(FLOAT) by id, bundleName: %{public}s, moduleName: "
              "%{public}s, "
              "result: %{public}s",
@@ -3519,11 +3531,23 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -3537,7 +3561,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result = resourceAdapter->GetDimensionByName(param->ToString());
+        result = resourceWrapper->GetDimensionByName(param->ToString());
         return true;
     }
 
@@ -3546,7 +3570,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         return false;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = resourceAdapter->GetString(resId->ToNumber<uint32_t>());
+        auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
         LOGI("[ParseJsDimension] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, moduleName: "
              "%{public}s, "
@@ -3556,7 +3580,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         return true;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceAdapter->GetInt(resId->ToNumber<uint32_t>()));
+        auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
         LOGI("[ParseJsDimension] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: "
              "%{public}s, "
@@ -3565,7 +3589,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
             result.CalcValue().c_str());
         return true;
     }
-    result = resourceAdapter->GetDimension(resId->ToNumber<uint32_t>());
+    result = resourceWrapper->GetDimension(resId->ToNumber<uint32_t>());
     return true;
 }
 
@@ -3610,11 +3634,23 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
     auto resType = type->ToNumber<uint32_t>();
 
     auto resourceObject = GetResourceObject(jsObj);
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     if (resId == -1) {
         if (!IsGetResourceByName(jsObj)) {
@@ -3627,21 +3663,21 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
-            auto numberString = resourceAdapter->GetStringByName(param->ToString());
+            auto numberString = resourceWrapper->GetStringByName(param->ToString());
             return StringUtils::StringToDouble(numberString, result);
         }
         if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
-            result = resourceAdapter->GetIntByName(param->ToString());
+            result = resourceWrapper->GetIntByName(param->ToString());
             return true;
         }
         if (resType == static_cast<uint32_t>(ResourceType::FLOAT)) {
-            result = resourceAdapter->GetDoubleByName(param->ToString());
+            result = resourceWrapper->GetDoubleByName(param->ToString());
             return true;
         }
         return false;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto numberString = resourceAdapter->GetString(resId);
+        auto numberString = resourceWrapper->GetString(resId);
         LOGI("[ParseResourceToDouble] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, "
              "moduleName: %{public}s, "
              "result: %{public}s",
@@ -3649,7 +3685,7 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         return StringUtils::StringToDouble(numberString, result);
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        result = resourceAdapter->GetInt(resId);
+        result = resourceWrapper->GetInt(resId);
         LOGI("[ParseResourceToDouble] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, "
              "moduleName: %{public}s, "
              "result: %{public}f",
@@ -3657,7 +3693,7 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         return true;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = resourceAdapter->GetDouble(resId);
+        result = resourceWrapper->GetDouble(resId);
         LOGI("[ParseResourceToDouble] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, "
              "moduleName: %{public}s, "
              "result: %{public}f",
@@ -3703,11 +3739,23 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -3720,10 +3768,10 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result = resourceAdapter->GetIntByName(param->ToString());
+        result = resourceWrapper->GetIntByName(param->ToString());
         return true;
     }
-    result = resourceAdapter->GetInt(resId->ToNumber<uint32_t>());
+    result = resourceWrapper->GetInt(resId->ToNumber<uint32_t>());
     return true;
 }
 
@@ -3737,11 +3785,23 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -3754,7 +3814,7 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result = resourceAdapter->GetColorByName(param->ToString());
+        result = resourceWrapper->GetColorByName(param->ToString());
         return true;
     }
     JSRef<JSVal> type = jsObj->GetProperty("type");
@@ -3762,7 +3822,7 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         return false;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = resourceAdapter->GetString(resId->ToNumber<uint32_t>());
+        auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         LOGI("[ParseJsColorFromResource] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, "
              "moduleName: %{public}s, "
              "result: %{public}s",
@@ -3770,7 +3830,7 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         return Color::ParseColorString(value, result);
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = resourceAdapter->GetInt(resId->ToNumber<uint32_t>());
+        auto value = resourceWrapper->GetInt(resId->ToNumber<uint32_t>());
         LOGI("[ParseJsColorFromResource] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, "
              "moduleName: %{public}s, "
              "result: %{public}d",
@@ -3778,7 +3838,7 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         result = Color(ColorAlphaAdapt(value));
         return true;
     }
-    result = resourceAdapter->GetColor(resId->ToNumber<uint32_t>());
+    result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
     LOGI("[ParseJsColorFromResource] use resource adapter to get $(Color) by id, bundleName: %{public}s, moduleName: "
          "%{public}s, "
          "result: %{public}s",
@@ -3839,11 +3899,24 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
@@ -3855,10 +3928,10 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result.emplace_back(resourceAdapter->GetStringByName(param->ToString()));
+        result.emplace_back(resourceWrapper->GetStringByName(param->ToString()));
         return true;
     }
-    result.emplace_back(resourceAdapter->GetString(resId->ToNumber<uint32_t>()));
+    result.emplace_back(resourceWrapper->GetString(resId->ToNumber<uint32_t>()));
     return true;
 }
 
@@ -3895,11 +3968,23 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
     auto resIdNum = resourceObject->GetId();
@@ -3909,7 +3994,7 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         }
         auto param = params->GetValueAt(0);
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
-            auto originStr = resourceAdapter->GetStringByName(param->ToString());
+            auto originStr = resourceWrapper->GetStringByName(param->ToString());
             ReplaceHolder(originStr, params, 0);
             result = originStr;
             LOGI("use resource adapter to get $r(string) by name, bundleName: %{public}s, moduleName: %{public}s, "
@@ -3923,7 +4008,7 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
                 return false;
             }
             count = countJsVal->ToNumber<int>();
-            auto pluralStr = resourceAdapter->GetPluralStringByName(param->ToString(), count);
+            auto pluralStr = resourceWrapper->GetPluralStringByName(param->ToString(), count);
             ReplaceHolder(pluralStr, params, 2);
             result = pluralStr;
             LOGI("use resource adapter to get $r(PLURAL) by name, bundleName: %{public}s, moduleName: %{public}s, "
@@ -3935,7 +4020,7 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         return true;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto originStr = resourceAdapter->GetString(resId->ToNumber<uint32_t>());
+        auto originStr = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         ReplaceHolder(originStr, params, 0);
         result = originStr;
         LOGI("Get resource string %{public}s", result.c_str());
@@ -3947,17 +4032,17 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
             return false;
         }
         count = countJsVal->ToNumber<int>();
-        auto pluralStr = resourceAdapter->GetPluralString(resId->ToNumber<uint32_t>(), count);
+        auto pluralStr = resourceWrapper->GetPluralString(resId->ToNumber<uint32_t>(), count);
         ReplaceHolder(pluralStr, params, 1);
         result = pluralStr;
         LOGI("Get resource PLURAL %{public}s", result.c_str());
     } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = std::to_string(resourceAdapter->GetDouble(resId->ToNumber<uint32_t>()));
+        result = std::to_string(resourceWrapper->GetDouble(resId->ToNumber<uint32_t>()));
         LOGI("use resource adapter to get $r(FLOAT) by id, bundleName: %{public}s, moduleName: %{public}s, "
              "result: %{public}s",
             resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
     } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        result = std::to_string(resourceAdapter->GetInt(resId->ToNumber<uint32_t>()));
+        result = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
         LOGI("use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: %{public}s, "
              "result: %{public}s",
             resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
@@ -3982,11 +4067,24 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNull() && !type->IsNull() && type->IsNumber() && resId->IsNumber()) {
         auto resourceObject = GetResourceObject(jsObj);
-        auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
+        RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+        RefPtr<ThemeConstants> themeConstants = nullptr;
+        if (SystemProperties::GetResourceDecoupling()) {
+            LOGI("Resource decoupling");
+            resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+            if (!resourceAdapter) {
+                LOGW("resourceAdapter is nullptr");
+                return false;
+            }
+        } else {
+            themeConstants = GetThemeConstants(jsObj);
+            if (!themeConstants) {
+                LOGW("themeConstants is nullptr");
+                return false;
+            }
         }
+        auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+
         if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
             JSRef<JSVal> args = jsObj->GetProperty("params");
             if (!args->IsArray()) {
@@ -3999,7 +4097,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
                 LOGW("fileName is not String");
                 return false;
             }
-            result = resourceAdapter->GetRawfile(fileName->ToString());
+            result = resourceWrapper->GetRawfile(fileName->ToString());
             LOGI("use resource adapter to get RAWFILE by id, bundleName: %{public}s, moduleName: %{public}s, "
                  "result: %{public}s",
                 resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
@@ -4017,7 +4115,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
             if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
-                result = resourceAdapter->GetMediaPathByName(param->ToString());
+                result = resourceWrapper->GetMediaPathByName(param->ToString());
                 LOGI("use resource adapter to get RAWFILE by name, bundleName: %{public}s, moduleName: %{public}s, "
                      "result: %{public}s",
                     resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
@@ -4027,7 +4125,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             return false;
         }
         if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
-            result = resourceAdapter->GetMediaPath(resId->ToNumber<uint32_t>());
+            result = resourceWrapper->GetMediaPath(resId->ToNumber<uint32_t>());
             LOGI("use resource adapter to get MEDIA by id, bundleName: %{public}s, moduleName: %{public}s, "
                  "result: %{public}s",
                 resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
@@ -4067,11 +4165,23 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -4086,14 +4196,14 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::BOOLEAN)) {
-            result = resourceAdapter->GetBooleanByName(param->ToString());
+            result = resourceWrapper->GetBooleanByName(param->ToString());
             return true;
         }
         return false;
     }
 
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::BOOLEAN)) {
-        result = resourceAdapter->GetBoolean(resId->ToNumber<uint32_t>());
+        result = resourceWrapper->GetBoolean(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;
@@ -4150,11 +4260,23 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -4168,14 +4290,14 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
-            result = resourceAdapter->GetIntArrayByName(param->ToString());
+            result = resourceWrapper->GetIntArrayByName(param->ToString());
             return true;
         }
         return false;
     }
 
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
-        result = resourceAdapter->GetIntArray(resId->ToNumber<uint32_t>());
+        result = resourceWrapper->GetIntArray(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;
@@ -4222,11 +4344,23 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -4240,14 +4374,14 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
-            result = resourceAdapter->GetStringArrayByName(param->ToString());
+            result = resourceWrapper->GetStringArrayByName(param->ToString());
             return true;
         }
         return false;
     }
 
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
-        result = resourceAdapter->GetStringArray(resId->ToNumber<uint32_t>());
+        result = resourceWrapper->GetStringArray(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;
@@ -6148,12 +6282,24 @@ bool JSViewAbstract::ParseJsonDimension(
         return false;
     }
 
-    auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants();
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
-    result = resourceAdapter->GetDimension(resId->GetUInt());
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    result = resourceWrapper->GetDimension(resId->GetUInt());
     return true;
 }
 
@@ -6193,21 +6339,33 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
     CHECK_NULL_RETURN(resType && resType->IsNumber(), false);
     auto type = resType->GetUInt();
 
-    auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants();
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     if (type == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto numberString = resourceAdapter->GetString(id);
+        auto numberString = resourceWrapper->GetString(id);
         return StringUtils::StringToDouble(numberString, result);
     }
     if (type == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        result = resourceAdapter->GetInt(id);
+        result = resourceWrapper->GetInt(id);
         return true;
     }
     if (type == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = resourceAdapter->GetDouble(id);
+        result = resourceWrapper->GetDouble(id);
         return true;
     }
     return false;
@@ -6244,12 +6402,24 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         LOGE("invalid resource id");
         return false;
     }
-    auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
-    if (!resourceAdapter) {
-        LOGW("resourceAdapter is nullptr");
-        return false;
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return false;
+        }
+    } else {
+        themeConstants = GetThemeConstants();
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
     }
-    result = resourceAdapter->GetColor(resId->GetUInt());
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    result = resourceWrapper->GetColor(resId->GetUInt());
     return true;
 }
 
