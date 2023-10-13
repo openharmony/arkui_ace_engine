@@ -9650,7 +9650,8 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleDragStart001, TestSize.Level1)
      * @tc.steps: step2. call HandleDragStart.
      * @tc.expected: Related function runs ok.
      */
-    swiperPattern->HandleDragStart();
+    auto info = GestureEvent();
+    swiperPattern->HandleDragStart(info);
 }
 
 /**
