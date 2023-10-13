@@ -139,6 +139,7 @@ public:
     virtual float GetFormHeight() = 0;
     virtual void ReloadForm(const std::string& url) {};
     virtual void OnFormSurfaceChange(float width, float height) {}
+    virtual void SetFormBackgroundColor(const std::string& color) {};
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};

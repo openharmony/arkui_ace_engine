@@ -1747,6 +1747,31 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
     pipelineContext->OnSurfaceChanged(width, height);
 }
 
+void UIContentImpl::SetFormBackgroundColor(const std::string& color)
+{
+    LOGI("UIContentImpl: SetFormBackgroundColor color is %{public}s", color.c_str());
+    if (!Rosen::RSSystemProperties::GetUniRenderEnabled()) {
+        // cannot set transparent background effects in not-uniform-render mode
+        return;
+    }
+    Color bgColor;
+    if (!Color::ParseColorString(color, bgColor)) {
+        return;
+    }
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [container, bgColor]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetAppBgColor(bgColor);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void UIContentImpl::GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,
     std::vector<std::string>& assetBasePaths, std::string& resFolderName)
 {

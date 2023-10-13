@@ -46,7 +46,7 @@ FormRenderer::FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> 
     uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
 }
 
-void FormRenderer::InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f.", width_, height_);
     SetAllowUpdate(allowUpdate_);
@@ -55,6 +55,11 @@ void FormRenderer::InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
     uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
+
+    backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
+    if (!backgroundColor_.empty()) {
+        uiContent_->SetFormBackgroundColor(backgroundColor_);
+    }
 
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
         auto formRenderer = weak.lock();
@@ -106,7 +111,7 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
     }
     formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_, shared_from_this(), eventHandler_);
     ParseWant(want);
-    InitUIContent(formJsInfo);
+    InitUIContent(want, formJsInfo);
     SetRenderDelegate(proxy_);
     OnSurfaceCreate(formJsInfo);
 }
@@ -331,12 +336,12 @@ void FormRenderer::AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExec
         return;
     }
     ParseWant(want);
-    AttachUIContent(formJsInfo);
+    AttachUIContent(want, formJsInfo);
     SetRenderDelegate(proxy_);
     OnSurfaceReuse(formJsInfo);
 }
 
-void FormRenderer::AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     HILOG_INFO("AttachUIContent width = %{public}f , height = %{public}f.", width_, height_);
     SetAllowUpdate(allowUpdate_);
@@ -350,6 +355,11 @@ void FormRenderer::AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInf
         uiContent_->SetFormHeight(height_);
         uiContent_->OnFormSurfaceChange(width_, height_);
         rsSurfaceNode->SetBounds(0.0f, 0.0f, width_, height_);
+    }
+    auto backgroundColor = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
+    if (backgroundColor_ != backgroundColor) {
+        backgroundColor_ = backgroundColor;
+        uiContent_->SetFormBackgroundColor(backgroundColor_);
     }
     uiContent_->Foreground();
 }
