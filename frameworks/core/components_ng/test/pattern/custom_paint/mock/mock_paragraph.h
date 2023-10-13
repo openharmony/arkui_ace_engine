@@ -24,8 +24,8 @@
 #ifdef USE_GRAPHIC_TEXT_GINE
 #include "rosen_text/typography.h"
 #endif
-#include "txt/paragraph.h"
 #include "include/core/SkCanvas.h"
+#include "txt/paragraph.h"
 
 namespace OHOS::Ace::NG {
 
@@ -58,7 +58,7 @@ public:
 #ifndef USE_GRAPHIC_TEXT_GINE
     MOCK_METHOD1(GetWordBoundary, Range<size_t>(size_t offset));
 #else
-    MOCK_METHOD1(SetIndents, void(const std::vector<float> &indents));
+    MOCK_METHOD1(SetIndents, void(const std::vector<float>& indents));
     MOCK_METHOD1(GetWordBoundaryByIndex, Rosen::Boundary(size_t offset));
 #endif
 
@@ -75,19 +75,14 @@ public:
 #endif
 
 #ifndef USE_GRAPHIC_TEXT_GINE
-    MOCK_METHOD4(GetRectsForRange, std::vector<TextBox>(size_t start,
-      size_t end,
-      RectHeightStyle rect_height_style,
-      RectWidthStyle rect_width_style));
+    MOCK_METHOD4(GetRectsForRange, std::vector<TextBox>(size_t start, size_t end, RectHeightStyle rect_height_style,
+                                       RectWidthStyle rect_width_style));
 #else
-    MOCK_METHOD4(GetTextRectsByBoundary, std::vector<Rosen::TextRect>(size_t start,
-      size_t end,
-      Rosen::TextRectHeightStyle rect_height_style,
-      Rosen::TextRectWidthStyle rect_width_style));
+    MOCK_METHOD4(GetTextRectsByBoundary,
+        std::vector<Rosen::TextRect>(size_t start, size_t end, Rosen::TextRectHeightStyle rect_height_style,
+            Rosen::TextRectWidthStyle rect_width_style));
 #endif
-#ifdef NEW_SKIA
     MOCK_METHOD0(GetLineMetrics, std::vector<txt::LineMetrics>&());
-#endif
 };
 
 } // namespace OHOS::Ace::NG

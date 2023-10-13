@@ -86,7 +86,7 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
 
-    if (!settingData.entryNode) {
+    if (!settingData.entryNode.Upgrade()) {
         auto contentRow = CreateOptionsNode(dialogNode, calendarNode, dialogEvent, std::move(dialogCancelEvent));
         contentRow->MountToParent(contentColumn);
     }
@@ -401,7 +401,9 @@ RefPtr<FrameNode> CalendarDialogView::CreateConfirmNode(const RefPtr<FrameNode>&
     auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     SetDialogAcceptEvent(calendarNode, std::move(acceptEvent));
-    auto clickCallback = [calendarNode](const GestureEvent& /* info */) {
+    auto clickCallback = [weak = WeakPtr<FrameNode>(calendarNode)](const GestureEvent& /* info */) {
+        auto calendarNode = weak.Upgrade();
+        CHECK_NULL_VOID(calendarNode);
         auto calendarPattern = calendarNode->GetPattern<CalendarPattern>();
         CHECK_NULL_VOID(calendarPattern);
         auto str = calendarPattern->GetSelectDate();
@@ -490,7 +492,12 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     buttonCancelNode->MountToParent(contentRow);
     buttonConfirmNode->MountToParent(contentRow);
 
-    auto event = [dialogNode, pipelineContext](const GestureEvent& /* info */) {
+    auto event = [weakDialogNode = WeakPtr<FrameNode>(dialogNode),
+                 weakPipelineContext = WeakPtr<PipelineContext>(pipelineContext)](const GestureEvent& /* info */) {
+        auto dialogNode = weakDialogNode.Upgrade();
+        CHECK_NULL_VOID(dialogNode);
+        auto pipelineContext = weakPipelineContext.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
         auto overlayManager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CloseDialog(dialogNode);
@@ -530,8 +537,12 @@ void CalendarDialogView::SetCalendarPaintProperties(const CalendarSettingData& s
 void CalendarDialogView::InitOnRequestDataEvent(
     const RefPtr<FrameNode>& calendarDialogNode, const RefPtr<FrameNode>& calendarNode)
 {
-    auto callback = [calendarDialogNode, calendarNode](const std::string& info) {
+    auto callback = [calendarDialogNodeWeak = WeakPtr<FrameNode>(calendarDialogNode),
+                    calendarNodeWeak = WeakPtr<FrameNode>(calendarNode)](const std::string& info) {
+        auto calendarNode = calendarNodeWeak.Upgrade();
         CHECK_NULL_VOID(calendarNode);
+        auto calendarDialogNode = calendarDialogNodeWeak.Upgrade();
+        CHECK_NULL_VOID(calendarDialogNode);
         auto jsonInfo = JsonUtil::ParseJsonString(info);
         CalendarMonth currentMonth { .year = jsonInfo->GetInt("year"), .month = jsonInfo->GetInt("month") };
         UpdateCalendarMonthData(calendarDialogNode, calendarNode, currentMonth);
@@ -566,8 +577,9 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
     calendarPattern->SetSelectedDay(selectedDay);
     calendarNode->MarkModifyDone();
 
-    CHECK_NULL_VOID(settingData.entryNode);
-    auto eventHub = settingData.entryNode->GetEventHub<CalendarPickerEventHub>();
+    auto entryNode = settingData.entryNode.Upgrade();
+    CHECK_NULL_VOID(entryNode);
+    auto eventHub = entryNode->GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateOnChangeEvent(callbackInfo);
 }

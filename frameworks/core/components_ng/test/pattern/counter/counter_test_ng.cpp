@@ -41,7 +41,7 @@ const Color COLOR = Color::BLUE;
 constexpr double DEFAULT_BUTTON_OPACITY = 1.0;
 } // namespace
 
-class CounterPatternTestNg : public testing::Test {
+class CounterTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -49,23 +49,23 @@ public:
     void TearDown() override;
 };
 
-void CounterPatternTestNg::SetUpTestCase()
+void CounterTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
-void CounterPatternTestNg::TearDownTestCase()
+void CounterTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
-void CounterPatternTestNg::SetUp() {}
-void CounterPatternTestNg::TearDown() {}
+void CounterTestNg::SetUp() {}
+void CounterTestNg::TearDown() {}
 
 /**
  * @tc.name: CounterPatternTest001
  * @tc.desc: Test counter Create function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterPatternTestNg, CounterPatternTest001, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -87,7 +87,7 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest001, TestSize.Level1)
  * @tc.desc: Test counter SetOnInc and SetOnDec function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterPatternTestNg, CounterPatternTest002, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest002, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -110,7 +110,7 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest002, TestSize.Level1)
  * @tc.desc: Test counter SetHeight and SetWidth function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterPatternTestNg, CounterPatternTest003, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest003, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -136,7 +136,7 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest003, TestSize.Level1)
  * @tc.desc: Test counter SetControlWidth, SetStateChange and SetBackgroundColor function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterPatternTestNg, CounterPatternTest004, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest004, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -160,7 +160,7 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest004, TestSize.Level1)
  * @tc.desc: Test CounterNode AddChildToGroup function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterPatternTestNg, CounterPatternTest005, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest005, TestSize.Level1)
 {
     CounterModelNG counterModelNG;
     counterModelNG.Create();
@@ -180,7 +180,7 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest005, TestSize.Level1)
  * @tc.desc: Test CounterNode DeleteChildFromGroup function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterPatternTestNg, CounterPatternTest006, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest006, TestSize.Level1)
 {
     CounterModelNG counterModelNG;
     counterModelNG.Create();
@@ -202,7 +202,7 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest006, TestSize.Level1)
  * @tc.desc: Test counter SetEnableInc function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterPatternTestNg, CounterPatternTest007, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest007, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
@@ -235,7 +235,7 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest007, TestSize.Level1)
  * @tc.desc: Test counter SetEnableDec function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterPatternTestNg, CounterPatternTest008, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest008, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
@@ -268,7 +268,7 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest008, TestSize.Level1)
  * @tc.desc: Test counter Create function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterPatternTestNg, CounterPatternTest009, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest009, TestSize.Level1)
 {
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     CounterModelNG counterModelNG;
@@ -277,7 +277,7 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest009, TestSize.Level1)
     ASSERT_NE(counterNode, nullptr);
     /**
      * Create again,cover all branches in function Create
-    */
+     */
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     counterModelNG.Create();
 }
@@ -287,13 +287,13 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest009, TestSize.Level1)
  * @tc.desc: Test counter Create function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterPatternTestNg, CounterPatternTest010, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest010, TestSize.Level1)
 {
-    auto columnNode = CounterNode::GetOrCreateCounterNode(
-        "Column", 100, []() { return AceType::MakeRefPtr<CounterPattern>(); });
+    auto columnNode =
+        CounterNode::GetOrCreateCounterNode("Column", 100, []() { return AceType::MakeRefPtr<CounterPattern>(); });
     ASSERT_NE(columnNode, nullptr);
-    auto subNode = CounterNode::GetOrCreateCounterNode(
-        "Column", 101, []() { return AceType::MakeRefPtr<CounterPattern>(); });
+    auto subNode =
+        CounterNode::GetOrCreateCounterNode("Column", 101, []() { return AceType::MakeRefPtr<CounterPattern>(); });
     ASSERT_NE(subNode, nullptr);
     subNode->MountToParent(columnNode);
     CounterNode::GetOrCreateCounterNode("Counter", 101, []() { return AceType::MakeRefPtr<CounterPattern>(); });

@@ -55,7 +55,7 @@ ohos_fuzztest("AceResKeyParserFuzzTest") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
-    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
 
     # common
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",

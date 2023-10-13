@@ -255,11 +255,8 @@ bool RosenRenderSvgPolygon::GetPath(RSPath* out)
     }
     if (fillState_.IsEvenodd()) {
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-        out->setFillType(SkPath::FillType::kEvenOdd_FillType);
-#else
+
         out->setFillType(SkPathFillType::kEvenOdd);
-#endif
 #else
         out->SetFillStyle(RSPathFillType::EVENTODD);
 #endif
@@ -280,11 +277,7 @@ bool RosenRenderSvgPolygon::GetPathWithoutAnimate(SkPath* out)
     }
     out->addPoly(&skPoints[0], skPoints.size(), isClose_);
     if (fillState_.IsEvenodd()) {
-#ifndef NEW_SKIA
-        out->setFillType(SkPath::FillType::kEvenOdd_FillType);
-#else
         out->setFillType(SkPathFillType::kEvenOdd);
-#endif
     }
     return true;
 }

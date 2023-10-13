@@ -70,8 +70,11 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     Dimension themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
                                                                                   : theme->GetInsetTrackThickness();
+    auto thickness = sliderLayoutProperty->GetThickness().value_or(themeTrackThickness);
     trackThickness_ =
-        static_cast<float>(sliderLayoutProperty->GetThickness().value_or(themeTrackThickness).ConvertToPx());
+        static_cast<float>(thickness.Unit() == DimensionUnit::PERCENT
+                               ? thickness.ConvertToPxWithSize(direction == Axis::HORIZONTAL ? height : width)
+                               : thickness.ConvertToPx());
     // this scaleValue ensure that the size ratio of the block and trackThickness is consistent
     float scaleValue = trackThickness_ / static_cast<float>(themeTrackThickness.ConvertToPx());
     Dimension themeBlockSize =
@@ -130,13 +133,13 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
 
-    auto selfSize = layoutWrapper->GetGeometryNode()->GetContentSize();
+    auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
     auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto reverse = sliderLayoutProperty->GetReverseValue(false);
     auto mode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     Dimension hotBlockShadowWidth = mode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetHotBlockShadowWidth()
                                                                             : theme->GetInsetHotBlockShadowWidth();
-    auto length = axis == Axis::HORIZONTAL ? selfSize.Width() : selfSize.Height();
+    auto length = axis == Axis::HORIZONTAL ? contentRect.Width() : contentRect.Height();
     float BlockShadowWidth = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
     auto blockSize = axis == Axis::HORIZONTAL ? blockSize_.Width() : blockSize_.Height();
     auto borderBlank = std::max(trackThickness_, blockSize + BlockShadowWidth / HALF);
@@ -144,11 +147,11 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     borderBlank = (length - sliderLength) * HALF;
     auto selectOffset = borderBlank + pattern->GetValueRatio() * sliderLength;
 
-    CalculateBlockOffset(layoutWrapper, selfSize, selectOffset, axis, reverse);
+    CalculateBlockOffset(layoutWrapper, contentRect, selectOffset, axis, reverse);
 }
 
 void SliderLayoutAlgorithm::CalculateBlockOffset(
-    LayoutWrapper* layoutWrapper, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse)
+    LayoutWrapper* layoutWrapper, const RectF& contentRect, float selectOffset, Axis axis, bool reverse)
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
@@ -159,26 +162,28 @@ void SliderLayoutAlgorithm::CalculateBlockOffset(
     auto child = children.front();
     auto childSize_ = child->GetGeometryNode()->GetMarginFrameSize();
     OffsetF circleCenter;
-    if (pattern->GetAnimatableBlockCenter() == OffsetF()) {
+    auto animatableBlockCenter = pattern->GetAnimatableBlockCenter();
+    if (animatableBlockCenter.has_value()) {
+        circleCenter = animatableBlockCenter.value();
+    } else {
         if (!reverse) {
             if (axis == Axis::HORIZONTAL) {
                 circleCenter.SetX(selectOffset);
-                circleCenter.SetY(selfSize.Height() * HALF);
+                circleCenter.SetY(contentRect.Height() * HALF);
             } else {
-                circleCenter.SetX(selfSize.Width() * HALF);
+                circleCenter.SetX(contentRect.Width() * HALF);
                 circleCenter.SetY(selectOffset);
             }
         } else {
             if (axis == Axis::HORIZONTAL) {
-                circleCenter.SetX(selfSize.Width() - selectOffset);
-                circleCenter.SetY(selfSize.Height() * HALF);
+                circleCenter.SetX(contentRect.Width() - selectOffset);
+                circleCenter.SetY(contentRect.Height() * HALF);
             } else {
-                circleCenter.SetX(selfSize.Width() * HALF);
-                circleCenter.SetY(selfSize.Height() - selectOffset);
+                circleCenter.SetX(contentRect.Width() * HALF);
+                circleCenter.SetY(contentRect.Height() - selectOffset);
             }
         }
-    } else {
-        circleCenter = pattern->GetAnimatableBlockCenter();
+        circleCenter += OffsetF(contentRect.GetX(), contentRect.GetY());
     }
 
     OffsetF imageNodeOffset(

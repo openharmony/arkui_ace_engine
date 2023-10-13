@@ -17,9 +17,7 @@
 
 #include "include/core/SkBitmap.h"
 #include "include/core/SkImageInfo.h"
-#ifdef NEW_SKIA
 #include "include/core/SkSamplingOptions.h"
-#endif
 #ifndef PREVIEW
 #include "pixel_map.h"
 #include "image_source.h"

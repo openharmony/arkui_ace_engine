@@ -160,10 +160,8 @@ void RosenRenderPickerBase::PaintGradient(
     SkPoint points[2] = { beginPoint, endPoint };
 #else
     RSPen pen;
-    RSPoint beginPoint(
-        static_cast<RSScalar>(rect.Left()), static_cast<RSScalar>(rect.Top()));
-    RSPoint endPoint(
-        static_cast<RSScalar>(rect.Left()), static_cast<RSScalar>(rect.Bottom()));
+    RSPoint beginPoint(static_cast<RSScalar>(rect.Left()), static_cast<RSScalar>(rect.Top()));
+    RSPoint endPoint(static_cast<RSScalar>(rect.Left()), static_cast<RSScalar>(rect.Bottom()));
     std::vector<RSPoint> points = { beginPoint, endPoint };
 #endif
     auto backDecoration = theme->GetPopupDecoration(false);
@@ -179,22 +177,16 @@ void RosenRenderPickerBase::PaintGradient(
     SkColor colors[] = { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(), endColor.GetValue() };
     const float stopPositions[] = { 0.0f, gradientHeight / rect.Height(),
         (rect.Height() - gradientHeight) / rect.Height(), 1.0f };
-#ifdef USE_SYSTEM_SKIA
-    paint.setShader(
-        SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkShader::kClamp_TileMode));
-#else
-    paint.setShader(
-        SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kClamp));
-#endif
-    canvas->drawRect({rect.Left(), rect.Top(), rect.Right(), rect.Bottom()}, paint);
-#else // USE_ROSEN_DRAWING
-    std::vector<RSColorQuad> colors = { endColor.GetValue(), middleColor.GetValue(),
-        middleColor.GetValue(), endColor.GetValue() };
-    const std::vector<RSScalar> stopPositions = { 0.0,
-        static_cast<RSScalar>(gradientHeight / rect.Height()),
+
+    paint.setShader(SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kClamp));
+    canvas->drawRect({ rect.Left(), rect.Top(), rect.Right(), rect.Bottom() }, paint);
+#else  // USE_ROSEN_DRAWING
+    std::vector<RSColorQuad> colors = { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(),
+        endColor.GetValue() };
+    const std::vector<RSScalar> stopPositions = { 0.0, static_cast<RSScalar>(gradientHeight / rect.Height()),
         static_cast<RSScalar>((rect.Height() - gradientHeight) / rect.Height()), 1.0f };
-    pen.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
-        points.at(0), points.at(1), colors, stopPositions, RSTileMode::CLAMP));
+    pen.SetShaderEffect(
+        RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, stopPositions, RSTileMode::CLAMP));
     canvas->AttachPen(pen);
     canvas->DrawRect(RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()));
     canvas->DetachPen();
@@ -239,8 +231,7 @@ void RosenRenderPickerBase::PaintFocusOptionBorder(RSCanvas* canvas)
         pen.SetColor(FOCUS_BORDER_COLOR);
         pen.SetWidth(focusBorderThickness);
         pen.SetAntiAlias(true);
-        RSRoundRect rRect(
-            RSRect(0, 0, focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+        RSRoundRect rRect(RSRect(0, 0, focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
         rRect.Offset(focusOffsetX, focusOffsetY);
         canvas->AttachPen(pen);
         canvas->DrawRoundRect(rRect);

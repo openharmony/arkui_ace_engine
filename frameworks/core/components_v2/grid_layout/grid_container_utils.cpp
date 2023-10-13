@@ -52,7 +52,7 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& brea
     if (breakpoints.reference == BreakPointsReference::WindowSize) {
         windowWidth = GridSystemManager::GetInstance().GetScreenWidth(pipeline);
         if (mode == WindowMode::WINDOW_MODE_FLOATING) {
-            windowWidth -= static_cast<int32_t>(2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
+            windowWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
         }
     } else {
         windowWidth = size.Width();
@@ -77,7 +77,7 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(
         auto windowManager = pipeline->GetWindowManager();
         auto mode = windowManager->GetWindowMode();
         if (mode == WindowMode::WINDOW_MODE_FLOATING) {
-            windowWidth -= static_cast<int32_t>(2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
+            windowWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
         }
     } else {
         windowWidth = size.Width();

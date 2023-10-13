@@ -134,11 +134,7 @@ void FlutterRenderFocusAnimation::PaintGlow(SkCanvas* skCanvas, SkPaint& paint, 
     SkColor glowColor = SkColorSetARGB(MAX_ALPHA, red, green, blue);
     SkColor colors[ARRAY_LENGTH] = { boundaryColor, boundaryColor, glowColor, glowColor, boundaryColor, boundaryColor };
 
-#ifdef USE_SYSTEM_SKIA
-    paint.setShader(SkGradientShader::MakeLinear(points, colors, pos, ARRAY_LENGTH, SkShader::kClamp_TileMode));
-#else
     paint.setShader(SkGradientShader::MakeLinear(points, colors, pos, ARRAY_LENGTH, SkTileMode::kClamp));
-#endif
 
     skCanvas->drawRect(
         SkRect::MakeXYWH(0 - (maxHeight / MULTIPLE_FACTOR + padding), 0 - (maxHeight / MULTIPLE_FACTOR + padding),

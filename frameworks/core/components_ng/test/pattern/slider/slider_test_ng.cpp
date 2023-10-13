@@ -47,6 +47,7 @@
 
 using namespace testing;
 using namespace testing::ext;
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float VALUE = 50.0f;
@@ -93,6 +94,8 @@ constexpr Dimension BLOCK_SIZE_WIDTH = Dimension(300.0);
 constexpr Dimension BLOCK_SIZE_HEIGHT = Dimension(300.0);
 const SizeT<Dimension> BLOCK_SIZE(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
 const std::string SLIDER_MODEL_NG_BLOCK_IMAGE = "Default Image";
+const std::string SLIDER_TEST_BUNDLE_NAME = "com.test.slider";
+const std::string SLIDER_TEST_MODULE_NAME = "testModule";
 const PointF POINTF_START { 10.0f, 10.0f };
 const PointF POINTF_END { 20.0f, 20.0f };
 const PointF SELECT_START { 10.0f, 10.0f };
@@ -108,7 +111,7 @@ constexpr float HOT_BLOCK_SHADOW_WIDTH = 3.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr Dimension TRACK_BORDER_RADIUS = 5.0_px;
 } // namespace
-class SliderPatternTestNg : public testing::Test {
+class SliderTestNg : public testing::Test {
 public:
     void TearDown() override;
 
@@ -122,22 +125,22 @@ private:
     void MockParagraphFunction(RefPtr<MockParagraph>& paragraph, Testing::MockCanvas& canvas);
 };
 
-void SliderPatternTestNg::SetUpTestSuite()
+void SliderTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
 }
 
-void SliderPatternTestNg::TearDownTestSuite()
+void SliderTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
 }
 
-void SliderPatternTestNg::TearDown()
+void SliderTestNg::TearDown()
 {
     MockParagraph::TearDown();
 }
 
-void SliderPatternTestNg::SetSliderContentModifier(SliderContentModifier& sliderContentModifier)
+void SliderTestNg::SetSliderContentModifier(SliderContentModifier& sliderContentModifier)
 {
     sliderContentModifier.InitializeShapeProperty();
     sliderContentModifier.SetTrackThickness(SLIDER_CONTENT_MODIFIER_TRACK_THICKNESS);
@@ -154,7 +157,7 @@ void SliderPatternTestNg::SetSliderContentModifier(SliderContentModifier& slider
     sliderContentModifier.SetBlockSize(blockSize);
 }
 
-void SliderPatternTestNg::MockCanvasFunction(Testing::MockCanvas& canvas)
+void SliderTestNg::MockCanvasFunction(Testing::MockCanvas& canvas)
 {
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).WillRepeatedly(Return());
@@ -170,7 +173,7 @@ void SliderPatternTestNg::MockCanvasFunction(Testing::MockCanvas& canvas)
     EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
 }
 
-void SliderPatternTestNg::MockTipsCanvasFunction(Testing::MockCanvas& canvas)
+void SliderTestNg::MockTipsCanvasFunction(Testing::MockCanvas& canvas)
 {
     EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
@@ -182,7 +185,7 @@ void SliderPatternTestNg::MockTipsCanvasFunction(Testing::MockCanvas& canvas)
     EXPECT_CALL(canvas, ClipPath(_, _, _)).WillRepeatedly(Return());
 }
 
-void SliderPatternTestNg::MockParagraphFunction(RefPtr<MockParagraph>& paragraph, Testing::MockCanvas& canvas)
+void SliderTestNg::MockParagraphFunction(RefPtr<MockParagraph>& paragraph, Testing::MockCanvas& canvas)
 {
     EXPECT_CALL(*paragraph, Paint(An<RSCanvas&>(), _, _)).WillRepeatedly(Return());
     EXPECT_CALL(*paragraph, Layout(_)).WillRepeatedly(Return());
@@ -194,11 +197,11 @@ void SliderPatternTestNg::MockParagraphFunction(RefPtr<MockParagraph>& paragraph
 }
 
 /**
- * @tc.name: SliderPatternTestNg001
+ * @tc.name: SliderTestNg001
  * @tc.desc: Test Slider Create
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slider and get frameNode.
@@ -228,11 +231,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg002
+ * @tc.name: SliderTestNg002
  * @tc.desc: Test Slider Set Func
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg002, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slider and set the properties ,and then get frameNode.
@@ -271,11 +274,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg003
+ * @tc.name: SliderTestNg003
  * @tc.desc: Test slider pattern OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg003, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slider and get frameNode.
@@ -355,11 +358,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg004
+ * @tc.name: SliderTestNg004
  * @tc.desc: Test Slider OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg004, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -413,11 +416,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg004, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg005
+ * @tc.name: SliderTestNg005
  * @tc.desc: Test Slider HandleTouchEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and set theme.
@@ -465,11 +468,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg006
+ * @tc.name: SliderTestNg006
  * @tc.desc: Test Slider OnKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg006, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg006, TestSize.Level1)
 {
     SliderModelNG sliderModelNG;
     sliderModelNG.Create(VALUE, STEP, MIN, MAX);
@@ -519,11 +522,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg006, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg007
+ * @tc.name: SliderTestNg007
  * @tc.desc: Test Slider HandlingGestureEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg007, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg007, TestSize.Level1)
 {
     RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
@@ -574,11 +577,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg007, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg008
+ * @tc.name: SliderTestNg008
  * @tc.desc: Test Slider min max value steps error value
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg008, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and slider min value is greater than max value.
@@ -624,11 +627,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg008, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg009
+ * @tc.name: SliderTestNg009
  * @tc.desc: Test Slider ThackThickness error value
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg009, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg009, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -662,11 +665,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg009, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg010
+ * @tc.name: SliderTestNg010
  * @tc.desc: Test Slider HandleTouchEvent with hot area when sourceType is mouse
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg010, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and set theme.
@@ -710,11 +713,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg010, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg011
+ * @tc.name: SliderTestNg011
  * @tc.desc: Test Slider HandleTouchEvent with hot area when sourceType is touch
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg011, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and set theme.
@@ -774,11 +777,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg011, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTestNg012
+ * @tc.name: SliderTestNg012
  * @tc.desc: Test Slider mouse Event and wheel operation
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTestNg012, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderTestNg012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and set theme.
@@ -834,13 +837,12 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg012, TestSize.Level1)
     EXPECT_FALSE(sliderPattern->axisFlag_);
 }
 
-
 /**
  * @tc.name: SliderLayoutAlgorithm001
  * @tc.desc: Test SliderLayoutAlgorithm MeasureContent.
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderLayoutAlgorithm001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sliderframeNode and LayoutProperty.
@@ -914,7 +916,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm001, TestSize.Level1)
  * @tc.desc: Test SliderLayoutAlgorithm Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm002, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderLayoutAlgorithm002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create layoutWrapper and sliderLayoutAlgorithm.
@@ -967,7 +969,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm002, TestSize.Level1)
  * @tc.desc: Test SliderLayoutAlgorithm MeasureContent when trackThickness is greater than slider width or height.
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm003, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderLayoutAlgorithm003, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -1009,7 +1011,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm003, TestSize.Level1)
  * @tc.desc: TEST slider_model_ng.cpp
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderModelNgTest001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderModelNgTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slider and set the properties ,and then get frameNode.
@@ -1022,7 +1024,7 @@ HWTEST_F(SliderPatternTestNg, SliderModelNgTest001, TestSize.Level1)
     sliderModelNG.SetTrackBorderRadius(SLIDER_MODEL_NG_TRACK_BORDER_RADIUS);
     sliderModelNG.SetBlockSize(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
     sliderModelNG.SetBlockType(SliderModel::BlockStyleType::IMAGE);
-    sliderModelNG.SetBlockImage(SLIDER_MODEL_NG_BLOCK_IMAGE);
+    sliderModelNG.SetBlockImage(SLIDER_MODEL_NG_BLOCK_IMAGE, SLIDER_TEST_BUNDLE_NAME, SLIDER_TEST_MODULE_NAME);
     auto basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::INSET);
     sliderModelNG.SetBlockShape(basicShape);
     sliderModelNG.SetStepSize(SLIDER_MODEL_NG_STEP_SIZE);
@@ -1083,7 +1085,7 @@ HWTEST_F(SliderPatternTestNg, SliderModelNgTest001, TestSize.Level1)
  * @tc.desc: TEST slider_model_ng.cpp
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderModelNgTest002, TestSize.Level2)
+HWTEST_F(SliderTestNg, SliderModelNgTest002, TestSize.Level2)
 {
     /**
      * @tc.steps: step1. create slider.
@@ -1118,7 +1120,7 @@ HWTEST_F(SliderPatternTestNg, SliderModelNgTest002, TestSize.Level2)
  * direction = HORIZONTAL, blockType = DEFAULT, blockShape = CIRCLE, sliderMode = OUTSET
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
@@ -1177,7 +1179,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest001, TestSize.Level1)
  * direction = HORIZONTAL, blockType = SHAPE, blockShape = CIRCLE, sliderMode = OUTSET
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest002, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
@@ -1233,7 +1235,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest002, TestSize.Level1)
  * direction = FREE, blockType = SHAPE, blockShape = CIRCLE, sliderMode = OUTSET
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest003, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
@@ -1288,7 +1290,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest003, TestSize.Level1)
  * direction = HORIZONTAL, blockType = SHAPE, blockShape = CIRCLE, sliderMode = INSET
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest004, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
@@ -1348,7 +1350,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest004, TestSize.Level1)
  * direction = FREE, blockType = SHAPE, blockShape = CIRCLE, sliderMode = OUTSET
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest005, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
@@ -1401,7 +1403,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest005, TestSize.Level1)
  * direction = FREE, blockType = SHAPE, blockShape = ELLIPSE, sliderMode = OUTSET
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest006, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
@@ -1456,7 +1458,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest006, TestSize.Level1)
  * direction = FREE, blockType = SHAPE, blockShape = PATH, sliderMode = INSET
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest007, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
@@ -1511,7 +1513,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest007, TestSize.Level1)
  * direction = FREE, blockType = SHAPE, blockShape = RECT, sliderMode = OUTSET
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest008, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
@@ -1563,7 +1565,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest008, TestSize.Level1)
  * @tc.desc: TEST slider_content_modifier SetBlockShape with invalid circle
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest009, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sliderContentModifier.
@@ -1587,7 +1589,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest009, TestSize.Level1)
  * @tc.desc: TEST slider_content_modifier SetBlockShape with invalid ellipse
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest010, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sliderContentModifier.
@@ -1613,7 +1615,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest010, TestSize.Level1)
  * @tc.desc: TEST slider_content_modifier DrawBlockShape with invalid shape
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest011, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sliderContentModifier.
@@ -1641,7 +1643,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest011, TestSize.Level1)
  * @tc.desc: TEST slider_content_modifier DrawStep with invalid parameter
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest012, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sliderContentModifier.
@@ -1666,7 +1668,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest012, TestSize.Level1)
  * @tc.desc: Test slider_paint_property.h Update function
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPaintPropertyTest001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPaintPropertyTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -1714,7 +1716,7 @@ HWTEST_F(SliderPatternTestNg, SliderPaintPropertyTest001, TestSize.Level1)
  * @tc.desc: Test slider_layout_property.h ToJsonValue
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderLayoutPropertyTest001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderLayoutPropertyTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -1751,7 +1753,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutPropertyTest001, TestSize.Level1)
  * imageFrameNode_ == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -1798,7 +1800,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest001, TestSize.Level1)
  * imageFrameNode_ != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest002, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -1848,7 +1850,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest002, TestSize.Level1)
  * @tc.desc: Test slider pattern OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest003, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -1902,7 +1904,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest003, TestSize.Level1)
  * @tc.desc: Test slider pattern GetOutsetInnerFocusPaintRect function.
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest004, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -1968,7 +1970,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest004, TestSize.Level1)
  *           Calculate the value of borderBlank_ in the INSET/OUTSET scenario.
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slider and prepare environment.
@@ -2027,7 +2029,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
  * imageFrameNode_ != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest006, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -2098,7 +2100,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest006, TestSize.Level1)
  * imageFrameNode_ != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest007, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -2137,7 +2139,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest007, TestSize.Level1)
  * @tc.desc: Test SliderPattern GetInsetInnerFocusPaintRect
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest008, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slider and prepare environment.
@@ -2192,7 +2194,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest008, TestSize.Level1)
  * @tc.desc: Test slider_pattern onBlurInternal_ HandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest009, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -2242,7 +2244,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest009, TestSize.Level1)
  * @tc.desc: Test slider_pattern HandleHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest010, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -2308,7 +2310,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest010, TestSize.Level1)
  * @tc.desc: Test slider_pattern AtMousePanArea
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest011, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -2353,7 +2355,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest011, TestSize.Level1)
  * @tc.desc: Test slider_pattern InitPanEvent and event callback.
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest012, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -2401,7 +2403,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest012, TestSize.Level1)
  * @tc.desc: Test slider_pattern InitPanEvent and event callback.
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest013, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -2444,7 +2446,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest013, TestSize.Level1)
  * @tc.desc: Test slider_layout_algorithm Measure and Layout(Reverse=false)
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderLayoutAlgorithmTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -2502,7 +2504,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest001, TestSize.Level1)
  * @tc.desc: Test slider_layout_algorithm.cpp  Measure and Layout(Reverse=true)
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest002, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderLayoutAlgorithmTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -2544,8 +2546,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest002, TestSize.Level1)
     // pattern->GetAnimatableBlockCenter() != OffsetF()
     auto pattern = AceType::DynamicCast<SliderPattern>(host->GetPattern());
     SliderContentModifier::Parameters parameters;
-    pattern->sliderContentModifier_ =
-        AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    pattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
     pattern->sliderContentModifier_->blockCenterX_->Set(POINTF_CENTER.GetX());
     pattern->sliderContentModifier_->blockCenterY_->Set(POINTF_CENTER.GetY());
     sliderLayoutAlgorithm.Layout(AceType::RawPtr(layoutWrapper));
@@ -2566,7 +2567,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest002, TestSize.Level1)
  * @tc.desc: Test slider_layout_algorithm MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest003, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderLayoutAlgorithmTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -2625,7 +2626,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest003, TestSize.Level1)
  * @tc.desc: Test slider_layout_algorithm Layout without child node
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest004, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderLayoutAlgorithmTest004, TestSize.Level1)
 {
     auto sliderLayoutProperty = AceType::MakeRefPtr<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
@@ -2645,7 +2646,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest004, TestSize.Level1)
  * @tc.desc: Test slider_paint_method UpdateContentModifier
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPaintMethodTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and sliderPaintMethod.
@@ -2697,7 +2698,7 @@ HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest001, TestSize.Level1)
  * @tc.desc: Test slider_paint_method UpdateOverlayModifier
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest002, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPaintMethodTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and sliderPaintMethod.
@@ -2751,7 +2752,7 @@ HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest002, TestSize.Level1)
  * @tc.desc: Test slider_paint_method UpdateContentDirtyRect
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest003, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPaintMethodTest003, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
@@ -2799,7 +2800,7 @@ HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest003, TestSize.Level1)
  * @tc.desc: Test the HasRange and RangeInfo properties of Slider
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderAccessibilityPropertyTest001, TestSize.Level1)
 {
     SliderModelNG sliderModelNG;
     sliderModelNG.Create(VALUE, STEP, MIN, MAX);
@@ -2822,7 +2823,7 @@ HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest001, TestSize.Level
  * @tc.desc: Test the Text property of Slider
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest002, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderAccessibilityPropertyTest002, TestSize.Level1)
 {
     SliderModelNG sliderModelNG;
     sliderModelNG.Create(VALUE, STEP, MIN, MAX);
@@ -2842,7 +2843,7 @@ HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest002, TestSize.Level
  * @tc.desc: Test the IsScrollable and SupportAction properties of Slider
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest003, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderAccessibilityPropertyTest003, TestSize.Level1)
 {
     SliderModelNG sliderModelNG;
     sliderModelNG.Create(VALUE, STEP, MIN, MAX);
@@ -2852,7 +2853,7 @@ HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest003, TestSize.Level
     auto sliderAccessibilityProperty = frameNode->GetAccessibilityProperty<SliderAccessibilityProperty>();
     ASSERT_NE(sliderAccessibilityProperty, nullptr);
     EXPECT_TRUE(sliderAccessibilityProperty->IsScrollable());
-    
+
     sliderAccessibilityProperty->ResetSupportAction();
     std::unordered_set<AceAction> supportAceActions = sliderAccessibilityProperty->GetSupportAction();
     uint64_t actions = 0, exptectActions = 0;
@@ -2869,7 +2870,7 @@ HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest003, TestSize.Level
  * @tc.desc: Test DrawStep while not show step
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest013, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest013, TestSize.Level1)
 {
     SliderContentModifier::Parameters parameters;
     SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
@@ -2887,7 +2888,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest013, TestSize.Level1)
  * @tc.desc: Test JudgeNeedAnimate
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest014, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest014, TestSize.Level1)
 {
     SliderModelNG sliderModelNG;
     sliderModelNG.Create(VALUE, STEP, MIN, MAX);
@@ -2910,7 +2911,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest014, TestSize.Level1)
  * @tc.desc: Test SetSelectSize while need needAnimate
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest015, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest015, TestSize.Level1)
 {
     SliderContentModifier::Parameters parameters;
     SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
@@ -2926,7 +2927,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest015, TestSize.Level1)
  * @tc.desc: Test SetCircleCenter while needAnimate
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest016, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest016, TestSize.Level1)
 {
     SliderContentModifier::Parameters parameters;
     SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
@@ -2951,7 +2952,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest016, TestSize.Level1)
  * @tc.desc: Test DrawBlock while blockType is image
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest017, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest017, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create content modifier and set image block property.
@@ -2978,7 +2979,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest017, TestSize.Level1)
  * @tc.desc: Test StopSelectAnimation Function
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest018, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest018, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create content modifier and set property callback.
@@ -3044,7 +3045,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest018, TestSize.Level1)
  * @tc.desc: Test StopSelectAnimation Function
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderContentModifierTest019, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderContentModifierTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create content modifier and set property callback.
@@ -3117,7 +3118,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest019, TestSize.Level1)
  * @tc.desc: Test the Text property of Slider
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1)
 {
     SliderModelNG sliderModelNG;
     sliderModelNG.Create(VALUE, STEP, MIN, MAX);
@@ -3139,7 +3140,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1
  * @tc.desc: Slider Accessibility PerformAction test ScrollForward and ScrollBackward.
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, PerformActionTest001, TestSize.Level1)
+HWTEST_F(SliderTestNg, PerformActionTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create slider and initialize related properties.
@@ -3186,7 +3187,7 @@ HWTEST_F(SliderPatternTestNg, PerformActionTest001, TestSize.Level1)
  * @tc.desc: Test the distributed capability of Slider
  * @tc.type: FUNC
  */
-HWTEST_F(SliderPatternTestNg, SliderPatternDistributed001, TestSize.Level1)
+HWTEST_F(SliderTestNg, SliderPatternDistributed001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.

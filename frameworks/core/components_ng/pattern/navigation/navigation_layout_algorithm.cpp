@@ -467,15 +467,6 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         SetNavigationHeight(layoutWrapper, size);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-        navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    } else {
-        navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    }
 }
 
 void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

@@ -19,11 +19,11 @@
 
 #include "gtest/gtest.h"
 
-#define private public
-#define protected public
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#define private public
+#define protected public
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
@@ -124,6 +124,7 @@ HWTEST_F(AppBarTestNg, Test003, TestSize.Level1)
     auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
     SystemProperties::SetExtSurfaceEnabled(true);
     auto frameNode = AppBarView::Create(test);
+    AppBarView::BindContentCover(0);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetChildren().size(), 2);
     auto titleBar = frameNode->GetChildAtIndex(0);

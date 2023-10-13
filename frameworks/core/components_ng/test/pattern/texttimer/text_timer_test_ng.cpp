@@ -63,7 +63,7 @@ struct TestProperty {
     std::optional<std::vector<std::string>> fontFamily = std::nullopt;
 };
 
-class TextTimerPatternTestNg : public testing::Test {
+class TextTimerTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -72,17 +72,17 @@ protected:
     static RefPtr<FrameNode> CreateTextTimerParagraph(const TestProperty& testProperty);
 };
 
-void TextTimerPatternTestNg::SetUpTestCase()
+void TextTimerTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
 
-void TextTimerPatternTestNg::TearDownTestCase()
+void TextTimerTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
 
-RefPtr<FrameNode> TextTimerPatternTestNg::CreateTextTimerParagraph(const TestProperty& testProperty)
+RefPtr<FrameNode> TextTimerTestNg::CreateTextTimerParagraph(const TestProperty& testProperty)
 {
     TextTimerModelNG textTimerModel;
     textTimerModel.Create();
@@ -118,7 +118,7 @@ RefPtr<FrameNode> TextTimerPatternTestNg::CreateTextTimerParagraph(const TestPro
  * @tc.desc: Test all the properties of texttimer.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerPatternTestNg, TextTimerTest001, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize all properties of texttimer.
@@ -169,7 +169,7 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest001, TestSize.Level1)
  * @tc.desc: Test the entry function OnModifyDone of texttimer and related function.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerPatternTestNg, TextTimerTest002, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -263,7 +263,7 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest002, TestSize.Level1)
  * @tc.desc: Test event function of texttimer.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerPatternTestNg, TextTimerTest003, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create texttimer and set event.
@@ -301,7 +301,7 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest003, TestSize.Level1)
  * @tc.desc: Test IsScrollable of textTimerAccessibilityProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerPatternTestNg, TextTimerAccessibilityPropertyIsScrollable001, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerAccessibilityPropertyIsScrollable001, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);

@@ -233,7 +233,7 @@ private:
     SizeF GetContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump, float prevStartOffset, float prevEndOffset);
     void CheckScrollable();
-    bool IsOutOfBoundary(bool useCurrentDelta = true);
+    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     bool OnScrollCallback(float offset, int32_t source) override;
     void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;

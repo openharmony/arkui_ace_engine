@@ -22,6 +22,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
 #include "base/geometry/dimension.h"
@@ -38,6 +39,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -57,9 +59,7 @@
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 #undef private
 #undef protected
-#include "test/mock/core/common/mock_container.h"
 
-#include "core/components_ng/pattern/text/span_model_ng.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -130,6 +130,7 @@ const Color FOREGROUND_COLOR_VALUE = Color::FOREGROUND;
 const RectF CONTENT_RECT(3.0, 3.0, TEXT_WIDTH, TEXT_HEIGHT);
 constexpr int32_t ROOT_NODE_ID = 113;
 const std::string EMPTY_TEXT = "";
+const CopyOptions copyOption = CopyOptions::None;
 constexpr int32_t UNKNOWN_REASON = 1;
 constexpr float TEXT_RECT_SIZE_ZEOR = 0.0f;
 constexpr float TEXT_RECT_WIDTH = 10.0f;
@@ -143,14 +144,17 @@ const std::string TEXT_EQUALS_VALUE =
 
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+
 void onClickFunc(const BaseEventInfo* info) {};
+
 void onRemoteMessage() {};
-const CopyOptions copyOption = CopyOptions::None;
+
 DragDropBaseInfo OnDragStartFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)
 {
     DragDropBaseInfo temp;
     return temp;
-};
+}
+
 void OnDragDropFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {};
 
 void TestUpdateScenario(const RefPtr<TextPattern>& pattern)
@@ -200,7 +204,6 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void InitTextObject();
     RefPtr<SpanNode> CreateSpanNodeWithSetDefaultProperty(const std::string& content);
 
 protected:
@@ -225,15 +228,12 @@ void TextTestNg::TearDownTestSuite()
 void TextTestNg::SetUp()
 {
     MockParagraph::GetOrCreateMockParagraph();
-    InitTextObject();
 }
 
 void TextTestNg::TearDown()
 {
     MockParagraph::TearDown();
 }
-
-void TextTestNg::InitTextObject() {}
 
 RefPtr<SpanNode> TextTestNg::CreateSpanNodeWithSetDefaultProperty(const std::string& content)
 {
@@ -2735,6 +2735,7 @@ HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
     EXPECT_CALL(*paragraph, AddPlaceholder).Times(1);
     EXPECT_CALL(*paragraph, Build).Times(2);
     EXPECT_CALL(*paragraph, GetRectsForPlaceholders).Times(2);
+    EXPECT_CALL(*paragraph, PopStyle).Times(1);
 
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -2754,19 +2755,6 @@ HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
     auto imageSpanNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ASSERT_NE(imageSpanNode, nullptr);
-    pattern->AddChildSpanItem(imageSpanNode);
-    frameNode->AddChild(imageSpanNode);
-    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    TextStyle textStyle;
-    LayoutConstraintF contentConstraint;
-    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_TRUE(ret);
-    rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    frameNode->AddChild(nullptr);
-    pattern->AddChildSpanItem(nullptr);
-    rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
-    EXPECT_TRUE(ret);
 }
 
 /**
@@ -4148,6 +4136,7 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
      */
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
@@ -4802,26 +4791,23 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
     info.localLocation_ = Offset(0, 0);
 
     // test CopyOptions is None
+    pattern->isDoubleClick_ = false;
     pattern->copyOption_ = CopyOptions::None;
-    pattern->HandleClickEvent(info);
-    EXPECT_TRUE(pattern->hasClicked_);
-    pattern->HandleClickEvent(info);
-    EXPECT_FALSE(pattern->hasClicked_);
+    pattern->HandleDoubleClickEvent(info);
+    EXPECT_FALSE(pattern->isDoubleClick_);
 
     // test mouse doubleClick
+    pattern->isDoubleClick_ = false;
     pattern->isMousePressed_ = true;
     pattern->copyOption_ = CopyOptions::Local;
-    pattern->HandleClickEvent(info);
-    EXPECT_TRUE(pattern->hasClicked_);
-    pattern->HandleClickEvent(info);
-    EXPECT_FALSE(pattern->hasClicked_);
+    pattern->HandleDoubleClickEvent(info);
+    EXPECT_TRUE(pattern->isDoubleClick_);
 
     // test gesture doubleClick
+    pattern->isDoubleClick_ = false;
     pattern->isMousePressed_ = false;
     pattern->copyOption_ = CopyOptions::Local;
-    pattern->HandleClickEvent(info);
-    EXPECT_TRUE(pattern->hasClicked_);
-    pattern->HandleClickEvent(info);
-    EXPECT_FALSE(pattern->hasClicked_);
+    pattern->HandleDoubleClickEvent(info);
+    EXPECT_TRUE(pattern->isDoubleClick_);
 }
 } // namespace OHOS::Ace::NG

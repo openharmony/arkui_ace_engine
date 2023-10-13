@@ -66,7 +66,7 @@ ohos_unittest("RenderMarqueeTest") {
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/property_animation.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
-    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
 
     # base
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",

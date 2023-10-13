@@ -259,13 +259,25 @@ void PageUrlCheckerOhos::CheckPreload(const std::string& url)
 void PageUrlCheckerOhos::NotifyPageShow(const std::string& pageName)
 {
     LOGD("NotifyPageShow start pageName %{public}s", pageName.c_str());
-    std::string moduleName = moduleNameCallback_(pageName);
-    if (moduleName == "") {
-        LOGD("moduleName moduleNameCallback_ is null");
-        moduleName = abilityInfo_->moduleName;
+    std::string bundleName;
+    std::string moduleName;
+    if (pageName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+        moduleName = moduleNameCallback_(pageName);
+        if (moduleName == "") {
+            LOGD("moduleName moduleNameCallback_ is null");
+            moduleName = abilityInfo_->moduleName;
+        }
+        bundleName = abilityInfo_->bundleName;
+    } else {
+        size_t bundleEndPos = pageName.find('/');
+        bundleName = pageName.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
+        size_t moduleStartPos = bundleEndPos + 1;
+        size_t moduleEndPos = pageName.find('/', moduleStartPos);
+        moduleName = pageName.substr(moduleStartPos, moduleEndPos - moduleStartPos);
     }
+
     AppExecFwk::PageStateData pageStateData;
-    pageStateData.bundleName = abilityInfo_->bundleName;
+    pageStateData.bundleName = bundleName;
     pageStateData.moduleName = moduleName;
     pageStateData.abilityName = abilityInfo_->name;
     pageStateData.pageName = pageName;
@@ -279,13 +291,25 @@ void PageUrlCheckerOhos::NotifyPageShow(const std::string& pageName)
 void PageUrlCheckerOhos::NotifyPageHide(const std::string& pageName)
 {
     LOGD("NotifyPageHide start pageName %{public}s", pageName.c_str());
-    std::string moduleName = moduleNameCallback_(pageName);
-    if (moduleName == "") {
-        LOGD("moduleName moduleNameCallback_ is null");
-        moduleName = abilityInfo_->moduleName;
+    std::string bundleName;
+    std::string moduleName;
+    if (pageName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+        moduleName = moduleNameCallback_(pageName);
+        if (moduleName == "") {
+            LOGD("moduleName moduleNameCallback_ is null");
+            moduleName = abilityInfo_->moduleName;
+        }
+        bundleName = abilityInfo_->bundleName;
+    } else {
+        size_t bundleEndPos = pageName.find('/');
+        bundleName = pageName.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
+        size_t moduleStartPos = bundleEndPos + 1;
+        size_t moduleEndPos = pageName.find('/', moduleStartPos);
+        moduleName = pageName.substr(moduleStartPos, moduleEndPos - moduleStartPos);
     }
+    
     AppExecFwk::PageStateData pageStateData;
-    pageStateData.bundleName = abilityInfo_->bundleName;
+    pageStateData.bundleName = bundleName;
     pageStateData.moduleName = moduleName;
     pageStateData.abilityName = abilityInfo_->name;
     pageStateData.pageName = pageName;

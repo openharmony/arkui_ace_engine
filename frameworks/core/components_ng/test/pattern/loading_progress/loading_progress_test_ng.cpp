@@ -347,17 +347,17 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper3);
     /**
-     * test loadingState == REFRESH_STATE_FOLLOW_TO_RESYCLE
+     * test loadingState == REFRESH_STATE_FOLLOW_TO_RECYCLE
     */
     auto context = PipelineBase::GetCurrentContext();
     context->SetIsFormRender(true);
-    loadingProgressPaintProperty->UpdateRefreshAnimationState(REFRESH_STATE_FOLLOW_TO_RESYCLE);
+    loadingProgressPaintProperty->UpdateRefreshAnimationState(REFRESH_STATE_FOLLOW_TO_RECYCLE);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper3);
     /**
-     * test loadingState == REFRESH_STATE_RESYCLE
+     * test loadingState == REFRESH_STATE_RECYCLE
     */
-    loadingProgressPaintProperty->UpdateRefreshAnimationState(REFRESH_STATE_RESYCLE);
+    loadingProgressPaintProperty->UpdateRefreshAnimationState(REFRESH_STATE_RECYCLE);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper3);
 }

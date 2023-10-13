@@ -51,7 +51,6 @@ void DOMMarquee::CallSpecializedMethod(const std::string& method, const std::str
 {
     auto controller = marqueeChild_->GetController();
     if (!controller) {
-        LOGE("get controller failed");
         EventReport::SendComponentException(ComponentExcepType::MARQUEE_ERR);
         return;
     }
@@ -60,7 +59,7 @@ void DOMMarquee::CallSpecializedMethod(const std::string& method, const std::str
     } else if (method == DOM_MARQUEE_METHOD_STOP) {
         controller->Stop();
     } else {
-        LOGE("Method not support: %{private}s", method.c_str());
+        LOGW("Controller method is not support: %{private}s", method.c_str());
     }
 }
 

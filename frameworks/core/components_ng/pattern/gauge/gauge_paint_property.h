@@ -124,6 +124,33 @@ public:
 
     void ToJsonColor(std::unique_ptr<JsonValue>& json) const
     {
+        if (!propGaugeType_.has_value()) {
+            json->Put("colors", "");
+            return;
+        }
+
+        if (propGaugeType_.value() == GaugeType::TYPE_CIRCULAR_MONOCHROME) {
+            if (propGradientColors_.has_value()) {
+                json->Put("colors", propGradientColors_.value().at(0).at(0).first.ColorToString().c_str());
+            }
+            return;
+        }
+
+        if (propGaugeType_.value() == GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT) {
+            if (propGradientColors_.has_value()) {
+                auto jsonColor = JsonUtil::CreateArray(true);
+                auto colorStopArray = propGradientColors_.value().at(0);
+                for (size_t j = 0; j < colorStopArray.size(); j++) {
+                    auto jsonColorObject = JsonUtil::CreateArray(true);
+                    jsonColorObject->Put("0", colorStopArray[j].first.ColorToString().c_str());
+                    jsonColorObject->Put("1", std::to_string(colorStopArray[j].second.Value()).c_str());
+                    auto indexStr = std::to_string(j);
+                    jsonColor->Put(indexStr.c_str(), jsonColorObject);
+                }
+                json->Put("colors", jsonColor->ToString().c_str());
+            }
+            return;
+        }
         auto jsonGradientColors = JsonUtil::CreateArray(true);
         if (propGradientColors_.has_value() && propValues_.has_value() &&
             (propGradientColors_.value().size() == propValues_.value().size())) {
@@ -134,7 +161,7 @@ public:
                 for (size_t j = 0; j < colorStopArray.size(); j++) {
                     auto jsonColorObject = JsonUtil::CreateArray(true);
                     jsonColorObject->Put("0", colorStopArray[j].first.ColorToString().c_str());
-                    jsonColorObject->Put("1", colorStopArray[j].second.ToString().c_str());
+                    jsonColorObject->Put("1", std::to_string(colorStopArray[j].second.Value()).c_str());
                     auto indexStr = std::to_string(j);
                     jsonColor->Put(indexStr.c_str(), jsonColorObject);
                 }

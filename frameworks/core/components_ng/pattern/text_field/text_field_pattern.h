@@ -171,13 +171,13 @@ public:
         if (scrollBar) {
             paint->SetScrollBar(scrollBar);
             if (scrollBar->NeedPaint()) {
-                textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect(), scrollBar->GetBarRect());
+                textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect());
             }
         }
-        auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, paint);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, paint);
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, paint);
         auto geometryNode = host->GetGeometryNode();
         auto frameOffset = geometryNode->GetFrameOffset();
         auto frameSize = geometryNode->GetFrameSize();
@@ -1255,7 +1255,6 @@ private:
     RefPtr<CanvasImage> showPasswordCanvasImage_;
     RefPtr<CanvasImage> hidePasswordCanvasImage_;
 
-    RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -1392,9 +1391,8 @@ private:
     bool isTouchAtLeftOffset_ = true;
     bool isCustomFont_ = false;
     bool textRectWillChange_ = false;
-    bool hasClicked_ = false;
+    bool clickEventInitialized_ = false;
     bool isDoubleClick_ = false;
-    TimeStamp lastClickTimeStamp_;
 };
 } // namespace OHOS::Ace::NG
 

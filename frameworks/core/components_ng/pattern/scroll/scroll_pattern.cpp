@@ -161,7 +161,7 @@ void ScrollPattern::FireOnScrollStart()
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
-        scrollBar->PlayScrollBarStartAnimation();
+        scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
     auto host = GetHost();
@@ -278,7 +278,7 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
     return offset;
 }
 
-bool ScrollPattern::IsOutOfBoundary() const
+bool ScrollPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
     return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
 }

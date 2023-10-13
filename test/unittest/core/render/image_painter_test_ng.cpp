@@ -12,21 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "base/utils/utils.h"
 #define protected public
 #define private public
 #include "base/geometry/ng/point_t.h"
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/image_painter.h"
-#include "core/components_ng/render/adapter/svg_canvas_image.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/svg_canvas_image.h"
+#include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/image_painter.h"
+#include "core/components_ng/test/mock/render/mock_canvas_image.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #undef private
 #undef protected
@@ -38,25 +39,25 @@ namespace OHOS::Ace {
 namespace {
 Testing::TestingCanvas testingCanvas;
 
-const NG::OffsetF& OFFSETF {1, 1};
-const NG::SizeF& SIZE {10, 10};
+const NG::OffsetF& OFFSETF { 1, 1 };
+const NG::SizeF& SIZE { 10, 10 };
 
-const NG::OffsetF& OFFSETF1 {0, 0};
-const NG::SizeF& SIZE1 {0, 0};
+const NG::OffsetF& OFFSETF1 { 0, 0 };
+const NG::SizeF& SIZE1 { 0, 0 };
 
-const NG::RectF& CONTENTRECT {1, 1, 1, 1};
+const NG::RectF& CONTENTRECT { 1, 1, 1, 1 };
 
-NG::SizeF rawpicsize {1, 1};
-NG::SizeF dstsize {1, 1};
+NG::SizeF rawpicsize { 1, 1 };
+NG::SizeF dstsize { 1, 1 };
 
-NG::SizeF boxPaintSize_ {1, 1};
-NG::SizeF srcSize {1, 1};
+NG::SizeF boxPaintSize_ { 1, 1 };
+NG::SizeF srcSize { 1, 1 };
 
-NG::RectF srcRect_ {2, 1, 2, 1};
-NG::RectF dstRect_ {1, 1, 1, 1};
+NG::RectF srcRect_ { 2, 1, 2, 1 };
+NG::RectF dstRect_ { 1, 1, 1, 1 };
 
-NG::PointF pointF_ {10.0, 10.0};
-}
+NG::PointF pointF_ { 10.0, 10.0 };
+} // namespace
 
 class ImagePainterTestNg : public testing::Test {};
 
@@ -82,13 +83,9 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
     EXPECT_EQ(imagePainter.canvasImage_, nullptr);
 
     /**
-     * @tc.steps3: build a pixelMapImage object.
+     * @tc.steps3: build a cavans image object.
      */
-    void* voidPtr = static_cast<void*>(new char[0]);
-    auto ptr = PixelMap::CreatePixelMap(voidPtr);
-    NG::PixelMapImage pixelMapImage(ptr);
-
-    imagePainter.canvasImage_ = pixelMapImage.Create(ptr);
+    imagePainter.canvasImage_ = AceType::MakeRefPtr<NG::MockCanvasImage>();
     imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>();
 
     /**
@@ -97,7 +94,6 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
      */
     imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
     ASSERT_NE(imagePainter.canvasImage_, nullptr);
-
 
     imagePaintConfig.isSvg_ = true;
     imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>(imagePaintConfig);
@@ -146,10 +142,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawObscuration001, TestSize.Lev
     /**
      * @tc.steps2: build a pixelMapImage object.
      */
-    void* voidPtr = static_cast<void*>(new char[0]);
-    auto ptr = PixelMap::CreatePixelMap(voidPtr);
-    NG::PixelMapImage pixelMapImage(ptr);
-    imagePainter.canvasImage_ = pixelMapImage.Create(ptr);
+    imagePainter.canvasImage_ = AceType::MakeRefPtr<NG::MockCanvasImage>();
     imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>();
     ASSERT_NE(imagePainter.canvasImage_, nullptr);
     ASSERT_NE(imagePainter.canvasImage_->paintConfig_, nullptr);
@@ -195,14 +188,11 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawSVGImage2, TestSize.Level1)
     /**
      * @tc.steps3: build a pixelMapImage object.
      */
-    void* voidPtr = static_cast<void*>(new char[0]);
-    auto ptr = PixelMap::CreatePixelMap(voidPtr);
-    NG::PixelMapImage pixelMapImage(ptr);
-
+    imagePainter.canvasImage_ = AceType::MakeRefPtr<NG::MockCanvasImage>();
+    imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>();
     /**
      * @tc.steps4: Assign values to call parameters.
      */
-    imagePainter.canvasImage_ = pixelMapImage.Create(ptr);
     imagePaintConfig.flipHorizontally_ = true;
     imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>(imagePaintConfig);
 
@@ -240,14 +230,11 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawStaticImage3, TestSize.Level
     /**
      * @tc.steps3: build a pixelMapImage object.
      */
-    void* voidPtr = static_cast<void*>(new char[0]);
-    auto ptr = PixelMap::CreatePixelMap(voidPtr);
-    NG::PixelMapImage pixelMapImage(ptr);
-
+    imagePainter.canvasImage_ = AceType::MakeRefPtr<NG::MockCanvasImage>();
+    imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>();
     /**
      * @tc.steps4: Assign values to call parameters.
      */
-    imagePainter.canvasImage_ = pixelMapImage.Create(ptr);
     imagePaintConfig.renderMode_ = ImageRenderMode::TEMPLATE;
     imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>(imagePaintConfig);
 
@@ -311,11 +298,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImageWithRepeat5, TestSize.L
     /**
      * @tc.steps2 build a pixelMapImage object.
      */
-    void* voidPtr = static_cast<void*>(new char[0]);
-    auto ptr = PixelMap::CreatePixelMap(voidPtr);
-    NG::PixelMapImage pixelMapImage(ptr);
-
-    imagePainter.canvasImage_ = pixelMapImage.Create(ptr);
+    imagePainter.canvasImage_ = AceType::MakeRefPtr<NG::MockCanvasImage>();
     imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>();
 
     /**
@@ -392,7 +375,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageFit6, TestSize.Level1)
      * @tc.expected: expect testsize1.GetX() and testsize1.GetY() are 1.
      */
     imagePainter.ApplyImageFit(ImageFit::COVER, rawpicsize, dstsize, srcRect_, dstRect_);
-    auto testSize1= Alignment::GetAlignPosition(rawpicsize, srcRect_.GetSize(), Alignment::CENTER);
+    auto testSize1 = Alignment::GetAlignPosition(rawpicsize, srcRect_.GetSize(), Alignment::CENTER);
     EXPECT_EQ(testSize1.GetX(), 0);
     EXPECT_EQ(testSize1.GetY(), 0);
 
@@ -448,8 +431,8 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ImagePainter7, TestSize.Level1)
     NG::ImagePainter imagePainter(canvasImage);
     const NG::SizeF boxPaintSize_;
     const NG::SizeF imageRenderSize_;
-    BackgroundImagePosition backgroundImagePosition(BackgroundImagePositionType::PERCENT, 1,
-        BackgroundImagePositionType::PERCENT, 1);
+    BackgroundImagePosition backgroundImagePosition(
+        BackgroundImagePositionType::PERCENT, 1, BackgroundImagePositionType::PERCENT, 1);
     std::optional<BackgroundImagePosition> bgImgPositionOpt = backgroundImagePosition;
 
     /**
@@ -464,8 +447,8 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ImagePainter7, TestSize.Level1)
      * @tc.steps3: callback CalculateBgImagePosition when BackgroundImagePositionType::PX.
      * @tc.expected: expect offset.GetX() and offset.GetY() are 0.
      */
-    BackgroundImagePosition backgroundImagePosition1(BackgroundImagePositionType::PX, 1,
-        BackgroundImagePositionType::PX, 1);
+    BackgroundImagePosition backgroundImagePosition1(
+        BackgroundImagePositionType::PX, 1, BackgroundImagePositionType::PX, 1);
     std::optional<BackgroundImagePosition> bgImgPositionOpt1 = backgroundImagePosition1;
     auto offset1 = imagePainter.CalculateBgImagePosition(boxPaintSize_, imageRenderSize_, bgImgPositionOpt1);
     EXPECT_EQ(offset1.GetX(), 1);
@@ -475,8 +458,8 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ImagePainter7, TestSize.Level1)
      * @tc.steps3: callback CalculateBgImagePosition and reset bgImgPositionOpt.
      * @tc.expected: expect offset.GetX() and offset.GetY() are 0.
      */
-    BackgroundImagePosition backgroundImagePosition2(BackgroundImagePositionType::PX, 1,
-        BackgroundImagePositionType::PX, 1);
+    BackgroundImagePosition backgroundImagePosition2(
+        BackgroundImagePositionType::PX, 1, BackgroundImagePositionType::PX, 1);
     std::optional<BackgroundImagePosition> bgImgPositionOpt2 = backgroundImagePosition2;
     bgImgPositionOpt2.reset();
     auto offset2 = imagePainter.CalculateBgImagePosition(boxPaintSize_, imageRenderSize_, bgImgPositionOpt2);
@@ -494,8 +477,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize8, TestSize.
     /**
      * @tc.steps1: creat a bgImageSizeOpt std::optiona.
      */
-    BackgroundImageSize backgroundImageSize1(BackgroundImageSizeType::AUTO, 2,
-        BackgroundImageSizeType::AUTO, 2);
+    BackgroundImageSize backgroundImageSize1(BackgroundImageSizeType::AUTO, 2, BackgroundImageSizeType::AUTO, 2);
     std::optional<BackgroundImageSize> bgImageSizeOpt1 = backgroundImageSize1;
 
     /**
@@ -510,8 +492,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize8, TestSize.
      * @tc.steps3: callback CalculateBgImageSize when valueX_ is -1.
      * @tc.expected: expect sizeRet.Width() and sizeRet.Height() are -1.
      */
-    BackgroundImageSize backgroundImageSize2(BackgroundImageSizeType::LENGTH, -1,
-        BackgroundImageSizeType::LENGTH, -1);
+    BackgroundImageSize backgroundImageSize2(BackgroundImageSizeType::LENGTH, -1, BackgroundImageSizeType::LENGTH, -1);
     std::optional<BackgroundImageSize> bgImageSizeOpt2 = backgroundImageSize2;
     auto sizeRet1 = NG::ImagePainter::CalculateBgImageSize(boxPaintSize_, srcSize, bgImageSizeOpt2);
     EXPECT_EQ(sizeRet1.Width(), -1);
@@ -521,8 +502,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize8, TestSize.
      * @tc.steps4: callback CalculateBgImageSize when valueX_ is 1 and valueY is 11.
      * @tc.expected: expect sizeRet.Width() and sizeRet.Height() are 2.
      */
-    BackgroundImageSize backgroundImageSize3(BackgroundImageSizeType::LENGTH, 1,
-        BackgroundImageSizeType::LENGTH, -1);
+    BackgroundImageSize backgroundImageSize3(BackgroundImageSizeType::LENGTH, 1, BackgroundImageSizeType::LENGTH, -1);
     std::optional<BackgroundImageSize> bgImageSizeOpt3 = backgroundImageSize3;
     auto sizeRet2 = NG::ImagePainter::CalculateBgImageSize(boxPaintSize_, srcSize, bgImageSizeOpt3);
     EXPECT_EQ(sizeRet2.Width(), 1);
@@ -532,10 +512,9 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize8, TestSize.
      * @tc.steps5: callback CalculateBgImageSize when valueX_ is -1 and valueY is -1.
      * @tc.expected: expect sizeRet.Width() and sizeRet.Height() are -1.
      */
-    srcSize = {-1, -1};
-    boxPaintSize_ = {-1, -1};
-    BackgroundImageSize backgroundImageSize4(BackgroundImageSizeType::LENGTH, 1,
-        BackgroundImageSizeType::LENGTH, -1);
+    srcSize = { -1, -1 };
+    boxPaintSize_ = { -1, -1 };
+    BackgroundImageSize backgroundImageSize4(BackgroundImageSizeType::LENGTH, 1, BackgroundImageSizeType::LENGTH, -1);
     std::optional<BackgroundImageSize> bgImageSizeOpt4 = backgroundImageSize4;
     bgImageSizeOpt4.reset();
     auto sizeRet3 = NG::ImagePainter::CalculateBgImageSize(boxPaintSize_, srcSize, bgImageSizeOpt4);
@@ -553,14 +532,13 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgWidth9, TestSize.Leve
     /**
      * @tc.steps1: creat a backgroundImageSize object.
      */
-    BackgroundImageSize backgroundImageSize(BackgroundImageSizeType::AUTO, 2,
-        BackgroundImageSizeType::AUTO, 2);
+    BackgroundImageSize backgroundImageSize(BackgroundImageSizeType::AUTO, 2, BackgroundImageSizeType::AUTO, 2);
 
     /**
      * @tc.steps2: creat for loop change BackgroundImageSizeTypeX and callback CalculateBgImageSize.
      * @tc.expected: expect offset.GetX() and offset.GetY() are -1.
      */
-    for (int32_t index = 0; index <=4; index++) {
+    for (int32_t index = 0; index <= 4; index++) {
         backgroundImageSize.typeX_ = static_cast<BackgroundImageSizeType>(index);
         const std::optional<BackgroundImageSize>& bgImageSizeOpt = backgroundImageSize;
         NG::ImagePainter::CalculateBgImageSize(boxPaintSize_, srcSize, bgImageSizeOpt);
@@ -586,7 +564,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgWidth9, TestSize.Leve
      * @tc.steps3: creat for loop change BackgroundImageSizeTypeY and callback CalculateBgImageSize.
      * @tc.expected: expect offset.GetX() and offset.GetY() are -1.
      */
-    for (int32_t index = 0; index <=4; index++) {
+    for (int32_t index = 0; index <= 4; index++) {
         backgroundImageSize.typeY_ = static_cast<BackgroundImageSizeType>(index);
         const std::optional<BackgroundImageSize>& bgImageSizeOpt = backgroundImageSize;
         NG::ImagePainter::CalculateBgImageSize(boxPaintSize_, srcSize, bgImageSizeOpt);
@@ -620,9 +598,8 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize10, TestSize
      * @tc.steps1: creat a bgImageSizeOpt1 and callback CalculateBgImageSize.
      * @tc.expected: expect width1 is -2.
      */
-    srcSize = {2, 1};
-    BackgroundImageSize backgroundImageSize1(BackgroundImageSizeType::COVER, 1,
-            BackgroundImageSizeType::COVER, 1);
+    srcSize = { 2, 1 };
+    BackgroundImageSize backgroundImageSize1(BackgroundImageSizeType::COVER, 1, BackgroundImageSizeType::COVER, 1);
     const std::optional<BackgroundImageSize>& bgImageSizeOpt1 = backgroundImageSize1;
     NG::ImagePainter::CalculateBgImageSize(boxPaintSize_, srcSize, bgImageSizeOpt1);
     auto width1 = srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height());
@@ -632,9 +609,8 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize10, TestSize
      * @tc.steps2: creat a bgImageSizeOpt2 and callback CalculateBgImageSize.
      * @tc.expected: expect width1 is 1.
      */
-    srcSize = {2, 1};
-    BackgroundImageSize backgroundImageSize2(BackgroundImageSizeType::CONTAIN, 1,
-            BackgroundImageSizeType::CONTAIN, 1);
+    srcSize = { 2, 1 };
+    BackgroundImageSize backgroundImageSize2(BackgroundImageSizeType::CONTAIN, 1, BackgroundImageSizeType::CONTAIN, 1);
     const std::optional<BackgroundImageSize>& bgImageSizeOpt2 = backgroundImageSize2;
     NG::ImagePainter::CalculateBgImageSize(boxPaintSize_, srcSize, bgImageSizeOpt2);
     auto width2 = boxPaintSize_.Width();
@@ -653,14 +629,14 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageFit11, TestSize.Level1
      */
     RefPtr<NG::CanvasImage> canvasImage;
     NG::ImagePainter imagePainter(canvasImage);
-    rawpicsize = {10, 1};
+    rawpicsize = { 10, 1 };
 
     /**
      * @tc.steps2: callback ApplyImageFit when ImageFit::COVER.
      * @tc.expected: expect testsize1.GetX() is 4.5 and testsize1.GetY() is 0.
      */
     imagePainter.ApplyImageFit(ImageFit::COVER, rawpicsize, dstsize, srcRect_, dstRect_);
-    auto testSize1= Alignment::GetAlignPosition(rawpicsize, srcRect_.GetSize(), Alignment::CENTER);
+    auto testSize1 = Alignment::GetAlignPosition(rawpicsize, srcRect_.GetSize(), Alignment::CENTER);
     EXPECT_EQ(testSize1.GetX(), 4.5);
     EXPECT_EQ(testSize1.GetY(), 0);
 
@@ -695,7 +671,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageFit11, TestSize.Level1
      * @tc.steps6: callback ApplyImageFit when ImageFit::CONTAIN.
      * @tc.expected: expect testsize8.GetX() and testsize8.GetY() are 0.
      */
-    rawpicsize = {-1, -1};
+    rawpicsize = { -1, -1 };
     imagePainter.ApplyImageFit(ImageFit::CONTAIN, rawpicsize, dstsize, srcRect_, dstRect_);
     auto testSize5 = Alignment::GetAlignPosition(dstsize, dstRect_.GetSize(), Alignment::CENTER);
     EXPECT_EQ(testSize5.GetX(), 0);

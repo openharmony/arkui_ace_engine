@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,19 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
+#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PREVIEW_MOCK_PREVIEW_MOCK_PATTERN_H
+#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PREVIEW_MOCK_PREVIEW_MOCK_PATTERN_H
+
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ScrollBarPainter::PaintRectBar(RSCanvas& canvas, const RefPtr<ScrollBar>& scrollBar) {}
+class PreviewMockPattern : public TextPattern {
+public:
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+};
 } // namespace OHOS::Ace::NG
+
+#endif // FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PREVIEW_MOCK_PREVIEW_MOCK_PATTERN_H

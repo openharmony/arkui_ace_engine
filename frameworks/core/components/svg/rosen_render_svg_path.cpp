@@ -151,11 +151,7 @@ void RosenRenderSvgPath::GetPath(SkPath& out)
         }
     }
     if (fillState_.IsEvenodd()) {
-#ifndef NEW_SKIA
-        out.setFillType(SkPath::FillType::kEvenOdd_FillType);
-#else
         out.setFillType(SkPathFillType::kEvenOdd);
-#endif
     }
 }
 #else

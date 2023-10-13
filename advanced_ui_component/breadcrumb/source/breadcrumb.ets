@@ -54,9 +54,10 @@ export struct Breadcrumb {
   minFourthLevelLabelLength: number = 0; // the total min width of the fourth level labels.
   minLabelLengthWithoutFourthLevel: number = 0; // the total min width of the first, second, third level labels.
   separatorIconWidth: number = 20; // the separator icon length (12vp + left padding: 4vp + right padding: 4vp).
-  labelPadding: number = 16; // left padding: 8vp + right padding: 8vp
+  labelPadding: number = 16; // left padding: 8vp + right padding: 8vp.
   iconWidth: number = 24; // the icon width of label.
-  labelSpace: number = 4 // the space of icon and text in label.
+  labelSpace: number = 4; // the space of icon and text in label.
+  labelHeight: number = 40; // the height of visible label is always 40 vp.
 
   // when the info length changed, update all the data.
   onInfoChanged() {
@@ -84,12 +85,12 @@ export struct Breadcrumb {
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
                 constraint: ConstraintSizeOptions): SizeResult {
-    let sizeResult: SizeResult = { width: constraint.maxWidth as number, height: constraint.maxHeight as number }
+    let sizeResult: SizeResult = { width: selfLayoutInfo.width as number, height: selfLayoutInfo.height as number }
 
     if (!this.labels || this.labels.length <= 0) {
       return sizeResult;
     }
-    this.selfWidth = px2vp(constraint.maxWidth as number)
+    this.selfWidth = selfLayoutInfo.width as number;
     this.clearMenu();
     if (this.labels.length === 1) {
       this.measureWithOneLabel();
@@ -102,13 +103,14 @@ export struct Breadcrumb {
     }
 
     children.forEach((child, index) => {
-      let childWidth: number;
+      let childWidth: number = 0;
+      let childHeight: number = 0;
       if (index === 0) {
         childWidth = this.labelWidths[index]
       } else if (index === 2) {
         childWidth = this.hasMenu ? this.menuButtonWidth : 0
       } else if (index % 2 === 0) {
-        childWidth = this.labelWidths[index / 2 - 1]
+        childWidth = this.labelWidths[index / 2 - 1];
       } else {
         let arrowWidth = 0;
         if (index === 3) {
@@ -116,11 +118,12 @@ export struct Breadcrumb {
         } else {
           arrowWidth = this.labelWidths[(index - 3) / 2] === 0 ? 0 : this.separatorIconWidth;
         }
-        childWidth = arrowWidth
+        childWidth = arrowWidth;
       }
-      child.measure({minWidth: childWidth, maxWidth: childWidth});
+      childHeight = (childWidth === 0) ? 0 : this.labelHeight;
+      child.measure({minWidth: childWidth, maxWidth: childWidth, minHeight: childHeight, maxHeight: childHeight});
     })
-    return sizeResult
+    return sizeResult;
   }
 
   measureWithManyLabels() {
@@ -168,7 +171,7 @@ export struct Breadcrumb {
     this.labelWidths[0] = this.secondLevelLabelWidth;
 
     let totalWidth = this.firstLevelLabelWidth + this.secondLevelLabelWidth + this.separatorIconWidth;
-    let difference = totalWidth - this.selfWidth
+    let difference = totalWidth - this.selfWidth;
     let reducedLength = 0;
     if (difference > 0) {
       reducedLength = (this.secondLevelLabelWidth - difference) >= this.minLabelWidth[0] ?
@@ -554,42 +557,42 @@ export struct Breadcrumb {
               if (!this.onLabelClick) {
                 return;
               }
-              this.onLabelClick(this.labels.indexOf(item), event)
-              this.showMenu = !this.showMenu
+              this.onLabelClick(this.labels.indexOf(item), event);
+              this.showMenu = !this.showMenu;
             })
             .onDragStart((event: DragEvent, extraParams: string) => {
               if (!this.onLabelDragStart) {
                 return;
               }
-              return this.onLabelDragStart(this.labels.indexOf(item), event)
+              return this.onLabelDragStart(this.labels.indexOf(item), event);
             })
             .onDragEnter((event: DragEvent, extraParams: string) => {
               if (!this.onLabelDragEnter) {
                 return;
               }
-              this.onLabelDragEnter(this.labels.indexOf(item), event)
+              this.onLabelDragEnter(this.labels.indexOf(item), event);
             })
             .onDragLeave((event: DragEvent, extraParams: string) => {
               if (!this.onLabelDragLeave) {
                 return;
               }
-              this.onLabelDragLeave(this.labels.indexOf(item), event)
+              this.onLabelDragLeave(this.labels.indexOf(item), event);
             })
             .onDrop((event: DragEvent, extraParams: string) => {
               if (this.showMenu) {
-                this.showMenu = false
+                this.showMenu = false;
               }
 
               if (!this.onLabelDrop) {
                 return;
               }
-              this.onLabelDrop(this.labels.indexOf(item), event)
+              this.onLabelDrop(this.labels.indexOf(item), event);
             })
         })
       }
     }
     .onDragLeave((event: DragEvent, extraParams: string) => {
-      this.showMenu = false
+      this.showMenu = false;
     })
     .onDrop(() => {})
     .borderRadius($r('sys.float.ohos_id_corner_radius_card'))
@@ -629,7 +632,6 @@ export struct Breadcrumb {
         .type(ButtonType.Normal)
         .backgroundColor(this.bgColor)
         .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-        .height(40)
         .stateStyles({
           focused: this.focusStyles,
           normal: this.normalStyles
@@ -642,40 +644,39 @@ export struct Breadcrumb {
             return;
           }
           if (index === 1 && this.hasMenu) {
-
-            return
+            return;
           }
-          this.onLabelClick(index, event)
+          this.onLabelClick(index, event);
         })
         .onDragStart((event: DragEvent, extraParams: string) => {
           if (!this.onLabelDragStart) {
             return;
           }
-          return this.onLabelDragStart(index, event)
+          return this.onLabelDragStart(index, event);
         })
         .onDragEnter((event: DragEvent, extraParams: string) => {
           if (this.showMenu) {
-            this.showMenu = false
+            this.showMenu = false;
           }
           if (!this.onLabelDragEnter) {
             return;
           }
-          this.onLabelDragEnter(index, event)
+          this.onLabelDragEnter(index, event);
         })
         .onDragLeave((event: DragEvent, extraParams: string) => {
           if (!this.onLabelDragLeave) {
             return;
           }
-          this.onLabelDragLeave(index, event)
+          this.onLabelDragLeave(index, event);
         })
         .onDrop((event: DragEvent, extraParams: string) => {
           if (!this.onLabelDrop) {
             return;
           }
           if (index === this.labels.length - 1 && this.onLabelDragCancel) {
-            this.onLabelDragCancel(event)
+            this.onLabelDragCancel(event);
           } else {
-            this.onLabelDrop(index, event)
+            this.onLabelDrop(index, event);
           }
         })
 
@@ -698,7 +699,6 @@ export struct Breadcrumb {
             }
             .padding({left: 6, right: 6})
           }
-          .height(40)
           .clip(true)
           .type(ButtonType.Normal)
           .borderWidth(2)
@@ -710,9 +710,8 @@ export struct Breadcrumb {
           })
           .backgroundColor(this.bgColor)
           .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-          .height(40)
           .onClick(() => {
-            this.showMenu = !this.showMenu
+            this.showMenu = !this.showMenu;
           })
           .onDragEnter((event: DragEvent, extraParams: string) => {
             if (!this.showMenu && this.labels.indexOf(this.menuInfo[0]) === this.hiddenLabels[0]) {
@@ -720,10 +719,10 @@ export struct Breadcrumb {
             }
             this.timerId = setInterval(() => {
               if (!this.showMenu) {
-                this.showMenu = true
+                this.showMenu = true;
               }
-              clearInterval(this.timerId)
-            }, 1000)
+              clearInterval(this.timerId);
+            }, 1000);
           })
           .onDragLeave((event: DragEvent, extraParams: string) => {
             clearInterval(this.timerId)
@@ -731,7 +730,7 @@ export struct Breadcrumb {
           .onDrop(() => {})
           .onKeyEvent((event: KeyEvent) => {
             if (event.type === KeyType.Up && event.keyCode === 2050) {
-              focusControl.requestFocus('menu')
+              focusControl.requestFocus('menu');
             }
           })
           .bindPopup(this.showMenu, {
@@ -742,7 +741,7 @@ export struct Breadcrumb {
                 if (this.labels.indexOf(this.menuInfo[0]) != this.hiddenLabels[0]) {
                   this.menuInfo.reverse();
                 }
-                this.showMenu = false
+                this.showMenu = false;
               }
             }
           })
@@ -775,7 +774,6 @@ export struct Breadcrumb {
         }
         .backgroundColor(this.bgColor)
         .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-        .height(40)
         .onHover((isHover: boolean) => {
           this.hoverIndex = isHover ? index : -1;
         })
@@ -783,19 +781,19 @@ export struct Breadcrumb {
           if (!this.onLabelDragStart) {
             return;
           }
-          return this.onLabelDragStart(index, event)
+          return this.onLabelDragStart(index, event);
         })
         .onDragEnter((event: DragEvent, extraParams: string) => {
           if (!this.onLabelDragEnter) {
             return;
           }
-          this.onLabelDragEnter(index, event)
+          this.onLabelDragEnter(index, event);
         })
         .onDragLeave((event: DragEvent, extraParams: string) => {
           if (!this.onLabelDragLeave) {
             return;
           }
-          this.onLabelDragLeave(index, event)
+          this.onLabelDragLeave(index, event);
         })
         .onDrop((event: DragEvent, extraParams: string) => {
           if (!this.onLabelDrop) {
@@ -803,9 +801,9 @@ export struct Breadcrumb {
           }
 
           if (index === this.labels.length - 1 && this.onLabelDragCancel) {
-            this.onLabelDragCancel(event)
+            this.onLabelDragCancel(event);
           } else {
-            this.onLabelDrop(index, event)
+            this.onLabelDrop(index, event);
           }
         })
       }

@@ -174,6 +174,10 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
         return;
     }
 
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        return;
+    }
+
     NG::GaugeType type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
     std::vector<NG::ColorStopArray> colors;
     std::vector<float> weights;
@@ -363,6 +367,9 @@ void JSGauge::SetIndicator(const JSCallbackInfo& info)
 
     CalcDimension space;
     if (ParseJsDimensionVpNG(jsSpace, space, false)) {
+        if (space.IsNegative()) {
+            space = NG::INDICATOR_DISTANCE_TO_TOP;
+        }
         GaugeModel::GetInstance()->SetIndicatorSpace(space);
     }
 }

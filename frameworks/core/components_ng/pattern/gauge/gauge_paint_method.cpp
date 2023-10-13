@@ -322,6 +322,7 @@ void GaugePaintMethod::PaintMonochromeCircularShadow(RSCanvas& canvas, const Ren
     shadowPen.SetColor(color.GetValue());
     shadowPen.SetFilter(filter);
     shadowPen.SetWidth(data.thickness);
+    shadowPen.SetAlphaF(SHADOW_ALPHA);
 
     RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
                  data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
@@ -401,6 +402,7 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircularShadow(RSCanvas& canvas
     shadowPen.SetAntiAlias(true);
     shadowPen.SetWidth(data.thickness);
     shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    shadowPen.SetAlphaF(SHADOW_ALPHA);
     shadowPen.SetFilter(filter);
     shadowPen.SetShaderEffect(
         RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colors, pos,
@@ -536,6 +538,7 @@ void GaugePaintMethod::DrawSingleSegmentGradient(RSCanvas& canvas, const RenderR
         RSFilter filter;
         filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, info.shadowRadius));
         pen.SetFilter(filter);
+        pen.SetAlphaF(SHADOW_ALPHA);
     } else {
         NewDrawIndicator(canvas, paintProperty, data);
     }
@@ -676,49 +679,39 @@ void GaugePaintMethod::NewDrawIndicator(
         return;
     }
 
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<GaugeTheme>();
+
     Dimension indicatorToTop = paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP);
+    if (GreatNotEqual(indicatorToTop.ConvertToPx(), data.radius)) {
+        indicatorToTop = INDICATOR_DISTANCE_TO_TOP;
+    }
+
     float pathStartVertexX = data.center.GetX();
-    float pathStartVertexY = data.center.GetY() - data.radius + indicatorToTop.ConvertToPx();
+    float pathStartVertexY = data.center.GetY() - data.radius + indicatorToTop.ConvertToPx() -
+                             INDICATOR_BORDER_WIDTH_RATIO * data.radius / 2.0f;
     RSPath path;
-    path.MoveTo(pathStartVertexX - CALC_INDICATOR_POINT_TOP_LEFT * data.radius,
-                pathStartVertexY + CALC_INDICATOR_POINT_TOP_LEFT * data.radius);
-    path.LineTo(pathStartVertexX - CALC_INDICATOR_POINT_BOTTOM_LEFT_X * data.radius,
-                pathStartVertexY + CALC_INDICATOR_POINT_BOTTOM_LEFT_Y * data.radius);
-
-    path.QuadTo(pathStartVertexX - CALC_INDICATOR_CONTROL_POINT_LEFT_X * data.radius,
-                pathStartVertexY + CALC_INDICATOR_CONTROL_POINT_LEFT_Y * data.radius,
-                pathStartVertexX - CALC_INDICATOR_POINT_RIGHT_X * data.radius,
-                pathStartVertexY + CALC_INDICATOR_POINT_RIGHT_Y * data.radius);
-    path.LineTo(pathStartVertexX + CALC_INDICATOR_POINT_RIGHT_X * data.radius,
-                pathStartVertexY + CALC_INDICATOR_POINT_RIGHT_Y * data.radius);
-
-    path.QuadTo(pathStartVertexX + CALC_INDICATOR_CONTROL_POINT_LEFT_X * data.radius,
-                pathStartVertexY + CALC_INDICATOR_CONTROL_POINT_RIGHT_X * data.radius,
-                pathStartVertexX + CALC_INDICATOR_POINT_BOTTOM_LEFT_X * data.radius,
-                pathStartVertexY + CALC_INDICATOR_POINT_BOTTOM_LEFT_Y * data.radius);
-    path.LineTo(pathStartVertexX + CALC_INDICATOR_POINT_TOP_LEFT * data.radius,
-                pathStartVertexY + CALC_INDICATOR_POINT_TOP_LEFT * data.radius);
-    path.QuadTo(pathStartVertexX, pathStartVertexY + CALC_INDICATOR_CONTROL_POINT_RIGHT_Y * data.radius,
-                pathStartVertexX - CALC_INDICATOR_POINT_TOP_LEFT * data.radius,
-                pathStartVertexY + CALC_INDICATOR_POINT_TOP_LEFT * data.radius);
-
+    CreateDefaultTrianglePath(pathStartVertexX, pathStartVertexY, data.radius, path);
     canvas.Save();
     canvas.Rotate(data.startDegree + data.sweepDegree, data.center.GetX(), data.center.GetY());
+    RSPen pen;
+    pen.SetBlendMode(RSBlendMode::SRC_OVER);
+    pen.SetColor(theme->GetIndicatorBorderColor().GetValue());
+    pen.SetAntiAlias(true);
+    pen.SetWidth(INDICATOR_BORDER_WIDTH_RATIO_DOUBLE * data.radius);
+    pen.SetJoinStyle(RSPen::JoinStyle::ROUND_JOIN);
+    canvas.AttachPen(pen);
+    canvas.DrawPath(path);
+    canvas.DetachPen();
+
     RSBrush paint;
-    paint.SetColor(INDICATOR_COLOR.GetValue());
+    paint.SetAntiAlias(true);
+    paint.SetColor(theme->GetIndicatorColor().GetValue());
     paint.SetBlendMode(RSBlendMode::SRC_OVER);
     canvas.AttachBrush(paint);
     canvas.DrawPath(path);
     canvas.DetachBrush();
-
-    RSPen pen;
-    pen.SetBlendMode(RSBlendMode::SRC_OVER);
-    pen.SetColor(INDICATOR_BORDER_COLOR.GetValue());
-    pen.SetAntiAlias(true);
-    pen.SetWidth(INDICATOR_BORDER_WIDTH_RATIO * data.radius);
-    canvas.AttachPen(pen);
-    canvas.DrawPath(path);
-    canvas.DetachPen();
     canvas.Restore();
 }
 
@@ -732,6 +725,9 @@ void GaugePaintMethod::NewDrawImageIndicator(
     CHECK_NULL_VOID(gaugePattern);
     RefPtr<CanvasImage> indicatorIconCanvasImage = gaugePattern->GetIndicatorIconCanvasImage();
     Dimension indicatorToTop = paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP);
+    if (GreatNotEqual(indicatorToTop.ConvertToPx(), data.radius)) {
+        indicatorToTop = INDICATOR_DISTANCE_TO_TOP;
+    }
 
     CHECK_NULL_VOID(indicatorIconCanvasImage);
     auto&& config = indicatorIconCanvasImage->GetPaintConfig();
@@ -759,5 +755,45 @@ void GaugePaintMethod::CreateDefaultColor(std::vector<RSColorQuad>& colors, std:
         pos.emplace_back(space);
         space += 0.5f;
     }
+}
+
+void GaugePaintMethod::CreateDefaultTrianglePath(
+    float pathStartVertexX, float pathStartVertexY, float radius, RSPath& path) const
+{
+    auto width = radius * RADIUS_TO_DIAMETER * INDICATOR_WIDTH_RATIO;
+    auto height = radius * RADIUS_TO_DIAMETER * INDICATOR_HEIGHT_RATIO;
+    auto hypotenuse = std::sqrt((width * width) + (height * height));
+    if (NearZero(hypotenuse)) {
+        return;
+    }
+    auto cornerRadius = radius * RADIUS_TO_DIAMETER * INDICATOR_CORNER_RADIUS_RATIO;
+    auto bottomAngle = std::atan(height / (width / 2.0f));
+
+    auto tempTopHypotenuse = cornerRadius / (width / 2.0f) * height;
+    auto tempTopWidth = tempTopHypotenuse / hypotenuse * (width / 2.0f);
+    auto tempTopHeight = tempTopHypotenuse / hypotenuse * height;
+
+    auto tempBottomHypotenuse = cornerRadius / std::tan(bottomAngle / 2.0f);
+    auto tempBottomWidth = tempBottomHypotenuse / hypotenuse * (width / 2.0f);
+    auto tempBottomHeight = tempBottomHypotenuse / hypotenuse * height;
+
+    PointF topControlPoint = PointF(pathStartVertexX, pathStartVertexY);
+    PointF leftControlPoint = PointF(pathStartVertexX - width / 2.0f, pathStartVertexY + height);
+    PointF rightControlPoint = PointF(pathStartVertexX + width / 2.0f, pathStartVertexY + height);
+
+    PointF trianglePoint1 = topControlPoint + OffsetF(-tempTopWidth, tempTopHeight);
+    PointF trianglePoint2 = leftControlPoint + OffsetF(tempBottomWidth, -tempBottomHeight);
+    PointF trianglePoint3 = leftControlPoint + OffsetF(tempBottomHypotenuse, 0.0f);
+    PointF trianglePoint4 = rightControlPoint + OffsetF(-tempBottomHypotenuse, 0.0f);
+    PointF trianglePoint5 = rightControlPoint + OffsetF(-tempBottomWidth, -tempBottomHeight);
+    PointF trianglePoint6 = topControlPoint + OffsetF(tempTopWidth, tempTopHeight);
+
+    path.MoveTo(trianglePoint1.GetX(), trianglePoint1.GetY());
+    path.LineTo(trianglePoint2.GetX(), trianglePoint2.GetY());
+    path.QuadTo(leftControlPoint.GetX(), leftControlPoint.GetY(), trianglePoint3.GetX(), trianglePoint3.GetY());
+    path.LineTo(trianglePoint4.GetX(), trianglePoint4.GetY());
+    path.QuadTo(rightControlPoint.GetX(), rightControlPoint.GetY(), trianglePoint5.GetX(), trianglePoint5.GetY());
+    path.LineTo(trianglePoint6.GetX(), trianglePoint6.GetY());
+    path.QuadTo(topControlPoint.GetX(), topControlPoint.GetY(), trianglePoint1.GetX(), trianglePoint1.GetY());
 }
 } // namespace OHOS::Ace::NG

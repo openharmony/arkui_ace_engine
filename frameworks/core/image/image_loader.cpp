@@ -511,7 +511,6 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
 
-#if defined(FLUTTER_2_5) || defined(NEW_SKIA)
     size_t outputLen;
     SkBase64::Error error = SkBase64::Decode(base64Code.data(), base64Code.size(), nullptr, &outputLen);
     if (error != SkBase64::Error::kNoError) {
@@ -533,28 +532,6 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
     return resData;
-#else
-    SkBase64 base64Decoder;
-    SkBase64::Error error = base64Decoder.decode(base64Code.data(), base64Code.size());
-    if (error != SkBase64::kNoError) {
-        LOGE("error base64 image code!");
-        return nullptr;
-    }
-    auto base64Data = base64Decoder.getData();
-    const uint8_t* imageData = reinterpret_cast<uint8_t*>(base64Data);
-#ifndef USE_ROSEN_DRAWING
-    auto resData = SkData::MakeWithCopy(imageData, base64Decoder.getDataSize());
-#else
-    auto resData = std::make_shared<RSData>();
-    resData->BuildWithCopy(imageData, base64Decoder.getDataSize());
-#endif
-    // in SkBase64, the fData is not deleted after decoded.
-    if (base64Data != nullptr) {
-        delete[] base64Data;
-        base64Data = nullptr;
-    }
-    return resData;
-#endif
 }
 
 std::string_view Base64ImageLoader::GetBase64ImageCode(const std::string& uri)

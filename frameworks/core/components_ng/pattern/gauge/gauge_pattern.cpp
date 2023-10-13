@@ -111,13 +111,17 @@ void GaugePattern::InitLimitValueText(const int32_t valueTextId, const bool isMi
     std::ostringstream out;
     out << std::setiosflags(std::ios::fixed) << std::setprecision(0) << limitValue;
 
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<GaugeTheme>();
+
     auto limitValueTextProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(limitValueTextProperty);
     limitValueTextProperty->UpdateContent(out.str());
     limitValueTextProperty->UpdateTextColor(limitValueColor);
     limitValueTextProperty->UpdateMaxLines(1);
     limitValueTextProperty->UpdateAdaptMaxFontSize(LIMIT_VALUE_MAX_FONTSIZE);
-    limitValueTextProperty->UpdateAdaptMinFontSize(LIMIT_VALUE_MIN_FONTSIZE);
+    limitValueTextProperty->UpdateAdaptMinFontSize(theme->GetLimitValueMinFontSize());
     limitValueTextProperty->UpdateFontWeight(FontWeight::MEDIUM);
     limitValueTextProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     auto textAlign = isMin ? TextAlign::LEFT : TextAlign::RIGHT;

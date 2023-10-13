@@ -68,6 +68,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
     JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
+    JSClass<JSToggle>::StaticMethod("hoverEffect", &JSToggle::JsHoverEffect);
 
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -412,4 +413,10 @@ void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)
     ToggleModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
+void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        ToggleModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
+    }
+}
 } // namespace OHOS::Ace::Framework

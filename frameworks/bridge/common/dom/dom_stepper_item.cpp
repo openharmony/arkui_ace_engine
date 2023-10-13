@@ -86,7 +86,6 @@ void DOMStepperItem::InitializeStyle()
 {
     auto theme = GetTheme<StepperTheme>();
     if (!theme) {
-        LOGE("Stepper theme is null");
         return;
     }
     textStyle_ = theme->GetTextStyle();
@@ -198,7 +197,6 @@ RefPtr<Component> DOMStepperItem::CompositeSpecializedComponent(const std::vecto
 void DOMStepperItem::ResetInitializedStyle()
 {
     if (!stepperItemComponent_) {
-        LOGE("stepper item is null, reset style failed.");
         return;
     }
     auto theme = GetTheme<FocusAnimationTheme>();

@@ -259,13 +259,8 @@ void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* pai
     canvas.ClipPath(path_, RSClipOp::DIFFERENCE, true);
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.Restore();
-#ifdef NEW_SKIA
     canvas.ClipPath(path_, RSClipOp::INTERSECT, true);
     canvas.DrawPath(path_);
-#else
-    canvas.DrawPath(path_);
-    canvas.ClipPath(path_, RSClipOp::INTERSECT, true);
-#endif
 }
 
 void BubblePaintMethod::BuildCompletePath(RSPath& path)

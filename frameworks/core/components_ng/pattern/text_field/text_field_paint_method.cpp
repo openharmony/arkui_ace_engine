@@ -188,16 +188,10 @@ void TextFieldPaintMethod::UpdateScrollBar()
         return;
     }
     OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
-    OffsetF bgOffset(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top());
-    textFieldOverlayModifier_->StartHoverAnimation(
-        SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
-        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()), fgOffset, bgOffset,
-        scrollBar->GetHoverAnimationType());
-    textFieldOverlayModifier_->SetOffset(fgOffset, bgOffset);
+    textFieldOverlayModifier_->StartBarAnimation(scrollBar->GetHoverAnimationType(),
+        scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    textFieldOverlayModifier_->SetFgColor(scrollBar->GetForegroundColor());
-    textFieldOverlayModifier_->SetBgColor(scrollBar->GetBackgroundColor());
-    textFieldOverlayModifier_->StartOpacityAnimation(scrollBar->GetOpacityAnimationType());
+    textFieldOverlayModifier_->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

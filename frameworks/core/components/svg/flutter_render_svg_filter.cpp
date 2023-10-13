@@ -15,13 +15,13 @@
 
 #include "frameworks/core/components/svg/flutter_render_svg_filter.h"
 
+#include "include/effects/SkColorFilterImageFilter.h"
+#include "include/effects/SkColorMatrix.h"
+
 #include "frameworks/core/components/svg/flutter_render_svg_fe_colormatrix.h"
 #include "frameworks/core/components/svg/flutter_render_svg_fe_composite.h"
 #include "frameworks/core/components/svg/flutter_render_svg_fe_gaussianblur.h"
 #include "frameworks/core/components/svg/flutter_render_svg_fe_offset.h"
-
-#include "include/effects/SkColorFilterImageFilter.h"
-#include "include/effects/SkColorMatrix.h"
 
 namespace OHOS::Ace {
 
@@ -110,11 +110,8 @@ sk_sp<SkImageFilter> FlutterRenderSvgFilter::MakeImageFilter(const FeInType& in,
         case FeInType::SOURCE_ALPHA:
             SkColorMatrix m;
             m.setScale(0, 0, 0, 1.0f);
-#ifdef USE_SYSTEM_SKIA
-            return SkColorFilterImageFilter::Make(SkColorFilter::MakeMatrixFilterRowMajor255(m.fMat), nullptr);
-#else
+
             return SkColorFilterImageFilter::Make(SkColorFilters::Matrix(m), nullptr);
-#endif
         case FeInType::BACKGROUND_IMAGE:
             break;
         case FeInType::BACKGROUND_ALPHA:
@@ -135,17 +132,9 @@ void FlutterRenderSvgFilter::ConverImageFilterColor(
     sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& src, const ColorInterpolationType& dst)
 {
     if (dst == ColorInterpolationType::LINEAR_RGB && src == ColorInterpolationType::SRGB) {
-#ifdef USE_SYSTEM_SKIA
-        imageFilter = SkColorFilterImageFilter::Make(SkColorFilter::MakeSRGBToLinearGamma(), imageFilter);
-#else
         imageFilter = SkColorFilterImageFilter::Make(SkColorFilters::SRGBToLinearGamma(), imageFilter);
-#endif
     } else if (dst == ColorInterpolationType::SRGB && src == ColorInterpolationType::LINEAR_RGB) {
-#ifdef USE_SYSTEM_SKIA
-        imageFilter = SkColorFilterImageFilter::Make(SkColorFilter::MakeLinearToSRGBGamma(), imageFilter);
-#else
         imageFilter = SkColorFilterImageFilter::Make(SkColorFilters::LinearToSRGBGamma(), imageFilter);
-#endif
     }
 }
 

@@ -157,9 +157,11 @@ public:
 
     RefPtr<FrameNode> GetColumn(const int32_t& tag) const
     {
-        auto iter = std::find_if(datePickerColumns_.begin(), datePickerColumns_.end(),
-            [&tag](const RefPtr<FrameNode>& column) { return column->GetId() == tag; });
-        return (iter == datePickerColumns_.end()) ? nullptr : *iter;
+        auto iter = std::find_if(datePickerColumns_.begin(), datePickerColumns_.end(), [&tag](const auto& c) {
+                auto column = c.Upgrade();
+                return column && column->GetId() == tag;
+            });
+        return (iter == datePickerColumns_.end()) ? nullptr : (*iter).Upgrade();
     }
 
     void SetColumn(const RefPtr<FrameNode>& value)
@@ -263,7 +265,7 @@ public:
     {
         if (index >= GetOptionCount(frmeNode)) {
             LOGE("index out of range.");
-            return nullptr;
+            return {};
         }
         return options_[frmeNode][index];
     }
@@ -273,7 +275,7 @@ public:
         return options_[frmeNode];
     }
 
-    const std::map<RefPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
+    const std::map<WeakPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
     {
         return options_;
     }
@@ -581,9 +583,9 @@ private:
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
-    std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
+    std::map<WeakPtr<FrameNode>, std::vector<std::string>> options_;
     uint32_t showCount_ = 0;
-    std::vector<RefPtr<FrameNode>> datePickerColumns_;
+    std::vector<WeakPtr<FrameNode>> datePickerColumns_;
     bool lunar_ = false;
     bool showMonthDays_ = false;
     bool showTime_ = false;
@@ -622,8 +624,8 @@ private:
     static std::vector<std::string> lunarMonths_; // lunar month from 1 to 24, count is 24
     static std::vector<std::string> lunarDays_;   // lunar day from 1 to 30, count is 30
     static std::vector<std::string> tagOrder_;    // year month day tag order
-    RefPtr<FrameNode> contentRowNode_;
-    RefPtr<FrameNode> buttonTitleNode_;
+    WeakPtr<FrameNode> contentRowNode_;
+    WeakPtr<FrameNode> buttonTitleNode_;
     bool isPicker_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };

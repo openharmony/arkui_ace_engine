@@ -35,7 +35,12 @@ constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
 constexpr int32_t LONG_PRESS_DELAY = 300;
 } // namespace
 
-void SwiperIndicatorPattern::OnAttachToFrameNode() {}
+void SwiperIndicatorPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
+}
 
 void SwiperIndicatorPattern::OnModifyDone()
 {

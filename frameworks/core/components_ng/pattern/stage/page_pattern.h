@@ -25,10 +25,8 @@
 #include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
-#include "core/components_ng/pattern/stage/page_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/page_transition_effect.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -144,21 +142,11 @@ public:
         isRenderDone_ = true;
     }
 
-    void AddDelaytLayoutNode(const WeakPtr<FrameNode>& node);
-
-    bool GetPageShowState()
-    {
-        return isOnShow_;
-    }
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
-
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
-    void FlushDelayLayoutNodes();
 
     bool AvoidKeyboard() const override;
     bool AvoidTop() const override
@@ -176,7 +164,6 @@ private:
     std::function<void()> firstBuildCallback_;
     std::shared_ptr<std::function<void()>> pageTransitionFinish_;
     std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
-    std::list<WeakPtr<FrameNode>> delayLayoutNodes_;
 
     bool isOnShow_ = false;
     bool isFirstLoad_ = true;

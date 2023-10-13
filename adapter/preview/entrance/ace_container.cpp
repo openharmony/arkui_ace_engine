@@ -215,7 +215,7 @@ void AceContainer::RunNativeEngineLoop()
     taskExecutor_->PostTask([this]() { RunNativeEngineLoop(); }, TaskExecutor::TaskType::PLATFORM);
 }
 
-void AceContainer::InitializeStageAppConfig(const std::string& assetPath, const std::string& bundleName,
+void AceContainer::InitializeAppConfig(const std::string& assetPath, const std::string& bundleName,
     const std::string& moduleName, const std::string& compileMode)
 {
     bool isBundle = (compileMode != "esmodule");

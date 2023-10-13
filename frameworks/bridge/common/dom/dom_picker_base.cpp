@@ -84,17 +84,14 @@ void DOMPickerBase::HandleClickCallback() const
 void DOMPickerBase::ShowDialog() const
 {
     if (!basePickerChild_) {
-        LOGW("not implementation now.");
         return;
     }
     auto context = GetPipelineContext().Upgrade();
     if (!context) {
-        LOGE("Pipeline context not found error!");
         return;
     }
     auto pageStack = context->GetLastStack();
     if (!pageStack) {
-        LOGE("Page stack not found error!");
         return;
     }
     basePickerChild_->ShowDialog(pageStack);
@@ -156,7 +153,7 @@ bool DOMPickerBase::GetPickerDateTime(const std::string& strDate, PickerDateTime
         outTime.SetHour(StringUtils::StringToInt(strValues[3]));
         outTime.SetMinute(StringUtils::StringToInt(strValues[4]));
     } else {
-        LOGE("input date time is invalidate.");
+        LOGD("input date time is invalidate.");
         return false;
     }
     outDateTime.SetDate(outDate);
@@ -168,7 +165,6 @@ bool DOMPickerBase::SetSpecializedAttr(const std::pair<std::string, std::string>
 {
     if (attr.first == DOM_VALUE) {
         if (!hasValue_) {
-            LOGE("picker view has no attribute of value.");
             return false;
         }
         std::string strValue = attr.second;
@@ -455,13 +451,11 @@ bool DOMPickerBase::SetTextStyleOperators(const std::pair<std::string, std::stri
 void DOMPickerBase::CallSpecializedMethod(const std::string& method, const std::string& args)
 {
     if (!basePickerChild_) {
-        LOGW("not implementation now.");
         return;
     }
     if (method == DOM_ROTATION) {
         auto controller = basePickerChild_->GetRotationController();
         if (controller) {
-            LOGD("Rotation focus picker view");
             controller->RequestRotation(true);
         }
     }
@@ -564,7 +558,6 @@ bool DOMPickerBase::CreatePicker()
         return true;
     }
 
-    LOGE("unsupported type: %{private}s.", type_.c_str());
     return false;
 }
 
@@ -595,8 +588,6 @@ bool DOMPickerBase::SetStart(const std::string& value)
         auto date = DEFAULT_PICKER_DATE;
         if (GetPickerDate(value, date)) {
             picker->SetStartDate(date);
-        } else {
-            LOGE("the value of picker date is invalid.");
         }
 
         return true;
@@ -613,8 +604,6 @@ bool DOMPickerBase::SetEnd(const std::string& value)
         auto date = DEFAULT_PICKER_DATE;
         if (GetPickerDate(value, date)) {
             picker->SetEndDate(date);
-        } else {
-            LOGE("input value of picker date is invalid.");
         }
 
         return true;
@@ -661,8 +650,6 @@ bool DOMPickerBase::SetDateTimeSelected(const std::string& value)
         auto date = DEFAULT_PICKER_DATE;
         if (GetPickerDate(value, date)) {
             picker->SetSelectedDate(date);
-        } else {
-            LOGE("input value of picker date is invalid.");
         }
 
         return true;
@@ -674,8 +661,6 @@ bool DOMPickerBase::SetDateTimeSelected(const std::string& value)
         auto time = DEFAULT_PICKER_TIME;
         if (GetPickerTime(value, time)) {
             picker->SetSelectedTime(time);
-        } else {
-            LOGE("input value of picker time is invalid.");
         }
         return true;
     }
@@ -686,8 +671,6 @@ bool DOMPickerBase::SetDateTimeSelected(const std::string& value)
         auto dateTime = PickerDateTime::Current();
         if (GetPickerDateTime(value, dateTime)) {
             picker->SetSelectedDateTime(dateTime);
-        } else {
-            LOGE("input value of picker date time is invalid.");
         }
 
         return true;
@@ -758,8 +741,6 @@ bool DOMPickerBase::SetHour24(const std::string& value)
             picker->SetHour24(true);
         } else if (value == "12") {
             picker->SetHour24(false);
-        } else {
-            LOGE("value of hour24 is invalid.");
         }
         return true;
     }
@@ -779,8 +760,6 @@ bool DOMPickerBase::SetShowLunar(const std::string& value)
             picker->SetShowLunar(true);
         } else if (value == FALSE) {
             picker->SetShowLunar(false);
-        } else {
-            LOGE("value of show lunar is invalid.");
         }
         return true;
     }
@@ -792,8 +771,6 @@ bool DOMPickerBase::SetShowLunar(const std::string& value)
             picker->SetShowLunar(true);
         } else if (value == FALSE) {
             picker->SetShowLunar(false);
-        } else {
-            LOGE("value of show lunar is invalid.");
         }
         return true;
     }
@@ -813,8 +790,6 @@ bool DOMPickerBase::SetLunar(const std::string& value)
             picker->SetHasLunar(true);
         } else if (value == FALSE) {
             picker->SetHasLunar(false);
-        } else {
-            LOGE("value of lunar is invalid.");
         }
         return true;
     }
@@ -826,8 +801,6 @@ bool DOMPickerBase::SetLunar(const std::string& value)
             picker->SetHasLunar(true);
         } else if (value == FALSE) {
             picker->SetHasLunar(false);
-        } else {
-            LOGE("value of lunar is invalid.");
         }
         return true;
     }
@@ -867,8 +840,6 @@ bool DOMPickerBase::SetVibrate(const std::string& value)
             basePickerChild_->SetNeedVibrate(true);
         } else if (value == FALSE) {
             basePickerChild_->SetNeedVibrate(false);
-        } else {
-            LOGE("value of lunar is invalid.");
         }
         return true;
     }

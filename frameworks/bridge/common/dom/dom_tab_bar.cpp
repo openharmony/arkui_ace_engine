@@ -100,11 +100,9 @@ bool DOMTabBar::SetSpecializedStyle(const std::pair<std::string, std::string>& s
 void DOMTabBar::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
     if (!child) {
-        LOGE("Child is nullptr, add node failed, slot:%{public}d.", slot);
         return;
     }
     if (tabBarChild_) {
-        LOGD("DOMTabBar Add Child in slot(=%{public}d)", slot);
         tabBarChild_->InsertChild(slot, child->GetRootComponent());
     }
 }
@@ -126,13 +124,11 @@ void DOMTabBar::UpdateIndex(uint32_t currentIndex)
 void DOMTabBar::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
     if (!parentNode) {
-        LOGE("parentNode is nullptr, mount node failed");
         return;
     }
     if (parentNode->GetTag() == DOM_NODE_TAG_TABS) {
         const auto& parentNodeTmp = AceType::DynamicCast<DOMTabs>(parentNode);
         if (!parentNodeTmp) {
-            LOGE("DynamicCast DOMTabs failed");
             return;
         }
         lastIndex_ = parentNodeTmp->GetTabIndex();
@@ -147,7 +143,6 @@ void DOMTabBar::OnMounted(const RefPtr<DOMNode>& parentNode)
 void DOMTabBar::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 {
     if (!child) {
-        LOGE("Child is nullptr, remove node failed.");
         return;
     }
     if (tabBarChild_) {
@@ -159,7 +154,6 @@ void DOMTabBar::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 void DOMTabBar::ResetInitializedStyle()
 {
     if (!boxComponent_) {
-        LOGE("BoxComponent is null, reset style failed.");
         return;
     }
     RefPtr<TabTheme> theme = GetTheme<TabTheme>();
@@ -200,7 +194,6 @@ void DOMTabBar::PrepareChangeListener()
     auto changeCallback = [weak](uint32_t currentIndex) {
         auto tabBarNode = weak.Upgrade();
         if (!tabBarNode) {
-            LOGE("get dom node failed!");
             return;
         }
         tabBarNode->UpdateIndex(currentIndex);

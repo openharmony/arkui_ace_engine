@@ -21,8 +21,9 @@
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> RefreshCoordination::FindRefreshNode() const
 {
-    CHECK_NULL_RETURN(scrollableNode_, nullptr);
-    auto parent = scrollableNode_->GetParent();
+    auto scrollableNode = scrollableNode_.Upgrade();
+    CHECK_NULL_RETURN(scrollableNode, nullptr);
+    auto parent = scrollableNode->GetParent();
     while (parent) {
         if (InstanceOf<FrameNode>(parent)) {
             auto parentFrameNode = DynamicCast<FrameNode>(parent);
@@ -43,8 +44,9 @@ RefPtr<ScrollableCoordinationEvent> RefreshCoordination::CreateCoordinationEvent
     if (coordinationEvent_) {
         return coordinationEvent_;
     }
-    CHECK_NULL_RETURN(refreshNode_, nullptr);
-    auto refreshPattern = DynamicCast<RefreshPattern>(refreshNode_->GetPattern());
+    auto refreshNode = refreshNode_.Upgrade();
+    CHECK_NULL_RETURN(refreshNode, nullptr);
+    auto refreshPattern = DynamicCast<RefreshPattern>(refreshNode->GetPattern());
     CHECK_NULL_RETURN(refreshPattern, nullptr);
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
     refreshPattern->InitCoordinationEvent(coordinationEvent);
@@ -75,5 +77,14 @@ void RefreshCoordination::OnScrollEnd(float speed) const
     if (onScrollEnd) {
         onScrollEnd(speed);
     }
+}
+
+bool RefreshCoordination::IsRefreshInScroll() const
+{
+    auto refreshNode = refreshNode_.Upgrade();
+    CHECK_NULL_RETURN(refreshNode, false);
+    auto pattern = refreshNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return GreatNotEqual(pattern->GetScrollOffsetValue().GetY(), 0.0);
 }
 } // namespace OHOS::Ace::NG

@@ -35,7 +35,6 @@ void DOMSvgText::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
     auto declaration = AceType::DynamicCast<SvgTextDeclaration>(declaration_);
     if (!declaration) {
-        LOGE("declaration is null");
         return;
     }
     // inherit presentation attributes

@@ -19,11 +19,7 @@
 #include "core/components/common/properties/edge.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 
-#ifndef NEW_SKIA
-#define SkPathkCCWDirection SkPath::Direction::kCCW_Direction
-#else
 #define SkPathkCCWDirection SkPathDirection::kCCW
-#endif
 
 namespace OHOS::Ace {
 
@@ -101,8 +97,7 @@ void FlutterRenderTip::PaintTopTip(SkCanvas* skCanvas, SkPaint paint, const Offs
     path_.lineTo(globalArrowPosition.GetX() + (childHalfWidth - NormalizeToPx(border_.BottomRightRadius().GetX())),
         globalArrowPosition.GetY() - bubbleSpacing);
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
-        globalArrowPosition.GetX() + childHalfWidth,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection, globalArrowPosition.GetX() + childHalfWidth,
         globalArrowPosition.GetY() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetY()));
     path_.lineTo(globalArrowPosition.GetX() + childHalfWidth,
         globalArrowPosition.GetY() - bubbleSpacing - (childHeight - NormalizeToPx(border_.TopRightRadius().GetY())));
@@ -159,16 +154,15 @@ void FlutterRenderTip::PaintLeftTip(SkCanvas* skCanvas, SkPaint paint, const Off
         globalArrowPosition.GetY() - NormalizeToPx(16.0_vp) + arrowOffset);
     path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing,
         globalArrowPosition.GetY() - (childHalfHeight - NormalizeToPx(border_.TopRightRadius().GetY())));
-    path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
+    path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
+        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         globalArrowPosition.GetX() - bubbleSpacing - NormalizeToPx(border_.TopRightRadius().GetX()),
         globalArrowPosition.GetY() - childHalfHeight);
     path_.lineTo(
         globalArrowPosition.GetX() - bubbleSpacing - (childWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
         globalArrowPosition.GetY() - childHalfHeight);
     path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
-        globalArrowPosition.GetX() - bubbleSpacing - childWidth,
+        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection, globalArrowPosition.GetX() - bubbleSpacing - childWidth,
         globalArrowPosition.GetY() - childHalfHeight + NormalizeToPx(border_.TopLeftRadius().GetY()));
     path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing - childWidth,
         globalArrowPosition.GetY() + (childHalfHeight - NormalizeToPx(border_.BottomLeftRadius().GetY())));
@@ -179,8 +173,7 @@ void FlutterRenderTip::PaintLeftTip(SkCanvas* skCanvas, SkPaint paint, const Off
     path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetX()),
         globalArrowPosition.GetY() + childHalfHeight);
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
-        globalArrowPosition.GetX() - bubbleSpacing,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection, globalArrowPosition.GetX() - bubbleSpacing,
         globalArrowPosition.GetY() + (childHalfHeight - NormalizeToPx(border_.BottomRightRadius().GetY())));
     path_.lineTo(globalArrowPosition.GetX() - NormalizeToPx(8.0_vp),
         globalArrowPosition.GetY() + NormalizeToPx(16.0_vp) + arrowOffset);
@@ -189,8 +182,8 @@ void FlutterRenderTip::PaintLeftTip(SkCanvas* skCanvas, SkPaint paint, const Off
         globalArrowPosition.GetX() - NormalizeToPx(3.0_vp),
         globalArrowPosition.GetY() + NormalizeToPx(3.2_vp) + arrowOffset);
     path_.quadTo(globalArrowPosition.GetX() + NormalizeToPx(0.1_vp),
-        globalArrowPosition.GetY() + NormalizeToPx(1.3_vp) + arrowOffset,
-        globalArrowPosition.GetX(), globalArrowPosition.GetY() + arrowOffset);
+        globalArrowPosition.GetY() + NormalizeToPx(1.3_vp) + arrowOffset, globalArrowPosition.GetX(),
+        globalArrowPosition.GetY() + arrowOffset);
     path_.close();
     skCanvas->drawPath(path_, paint);
     skCanvas->clipPath(path_, SkClipOp::kIntersect);

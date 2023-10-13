@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "core/components/text_clock/flutter_render_text_clock.h"
-#endif
 #include "core/components/text_clock/rosen_render_text_clock.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderTextClock::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderTextClock>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

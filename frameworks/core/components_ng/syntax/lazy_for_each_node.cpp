@@ -189,7 +189,6 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
             MarkNeedSyncRenderTree();
             children_.clear();
             child.second->SetParent(WeakClaim(this));
-            child.second->SetHostPageId(GetPageId());
             if (IsOnMainTree()) {
                 child.second->AttachToMainTree();
             }

@@ -222,7 +222,6 @@ void DOMNode::CallMethod(const std::string& method, const std::string& args)
     if (method == COMMON_METHOD_FOCUS) {
         LOGD("CallMethod: node tag: %{public}s call focus method.", tag_.c_str());
         if (!focusableEventComponent_) {
-            LOGE("CallMethod: call focus method failed, focusableEventComponent is null");
             return;
         }
 
@@ -238,7 +237,7 @@ void DOMNode::CallMethod(const std::string& method, const std::string& args)
     } else if (method == DOM_LIST_METHOD_SCROLL_BY) {
         std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
         if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != 1) {
-            LOGE("parse args error");
+            LOGW("Dom Node parse args error");
             return;
         }
         std::unique_ptr<JsonValue> scrollByPara = argsValue->GetArrayItem(0);
@@ -305,7 +304,6 @@ bool DOMNode::ParseTransitionNameStyle(const std::string& transitionName)
     std::vector<std::string> transitions;
     StringUtils::StringSplitter(transitionName, ' ', transitions);
     if (transitions.size() != TRANSITION_NAME_LENGTH) {
-        LOGE("transition length is invalid");
         return false;
     }
     transitionPropertyName_ = transitions[0];
@@ -482,7 +480,6 @@ void DOMNode::MarkNeedUpdate()
 {
     auto pipelineContext = pipelineContext_.Upgrade();
     if (!pipelineContext) {
-        LOGE("pipelineContext_ is nullptr");
         return;
     }
     rootComponent_->MarkNeedUpdate();
@@ -591,7 +588,6 @@ void DOMNode::UpdatePseudoStyleByStatus(int32_t status, bool isBackendChange)
     if (isBackendChange) {
         auto pipelineContext = pipelineContext_.Upgrade();
         if (!pipelineContext) {
-            LOGE("pipelineContext_ is nullptr");
             return;
         }
         if (GetTag() != DOM_NODE_TAG_SPAN) {
@@ -846,7 +842,6 @@ const RefPtr<PageTransitionComponent>& DOMNode::BuildTransitionComponent()
 std::string DOMNode::GetTransformType(const std::unique_ptr<JsonValue>& transformJson)
 {
     if (transformJson->IsNull()) {
-        LOGE("transformJson is null");
         return "";
     }
     return transformJson->GetKey();
@@ -855,7 +850,6 @@ std::string DOMNode::GetTransformType(const std::unique_ptr<JsonValue>& transfor
 std::string DOMNode::GetTransformTypeValue(const std::unique_ptr<JsonValue>& transformJson)
 {
     if (transformJson->IsNull()) {
-        LOGE("transformJson is null");
         return "";
     }
     std::string jsonValue = transformJson->GetString();
@@ -1771,7 +1765,6 @@ void DOMNode::PrepareTouchEvent(EventMarker& eventMarker, uint32_t type)
     eventMarker.SetPreFunction([weak, type]() {
         auto domNode = weak.Upgrade();
         if (!domNode) {
-            LOGE("get dom node failed!");
             return;
         }
         domNode->OnActive(type != EventType::TOUCH_UP && type != EventType::TOUCH_CANCEL);
@@ -1796,7 +1789,6 @@ void DOMNode::PrepareMouseHoverEvent()
     mouseEvent.mouseHover.eventMarker.SetPreFunction([weak]() {
         auto domNode = weak.Upgrade();
         if (!domNode) {
-            LOGE("get dom node failed!");
             return;
         }
         domNode->OnHover(true);
@@ -1810,7 +1802,6 @@ void DOMNode::PrepareMouseHoverEvent()
     mouseEvent.mouseHoverExit.eventMarker.SetPreFunction([weak]() {
         auto domNode = weak.Upgrade();
         if (!domNode) {
-            LOGE("get dom node failed!");
             return;
         }
         domNode->OnHover(false);
@@ -1837,7 +1828,6 @@ void DOMNode::PrepareFocusableEventId()
     focusEvent.focus.eventMarker.SetPreFunction([weak]() {
         auto domNode = weak.Upgrade();
         if (!domNode) {
-            LOGE("get dom node failed!");
             return;
         }
         domNode->OnFocus(true);
@@ -1852,7 +1842,6 @@ void DOMNode::PrepareFocusableEventId()
     focusEvent.blur.eventMarker.SetPreFunction([weak]() {
         auto domNode = weak.Upgrade();
         if (!domNode) {
-            LOGE("get dom node failed!");
             return;
         }
         domNode->OnFocus(false);
@@ -2215,7 +2204,6 @@ Color DOMNode::ParseColor(const std::string& value, uint32_t maskAlpha) const
 {
     auto themeConstants = GetThemeConstants();
     if (!themeConstants) {
-        LOGW("themeConstants is null, return Transparent color.");
         return Color::TRANSPARENT;
     }
     auto&& noRefFunc = [&value, maskAlpha = maskAlpha]() { return Color::FromString(value, maskAlpha); };
@@ -2227,7 +2215,6 @@ double DOMNode::ParseDouble(const std::string& value) const
 {
     auto themeConstants = GetThemeConstants();
     if (!themeConstants) {
-        LOGW("themeConstants is null, return 0.");
         return 0.0;
     }
     auto&& noRefFunc = [&value]() { return StringUtils::StringToDouble(value); };
@@ -2239,7 +2226,6 @@ CalcDimension DOMNode::ParseDimension(const std::string& value) const
 {
     auto themeConstants = GetThemeConstants();
     if (!themeConstants) {
-        LOGW("themeConstants is null, return 0 dimension.");
         return Dimension();
     }
     auto&& noRefFunc = [&value]() { return StringUtils::StringToDimension(value); };
@@ -2255,7 +2241,6 @@ Dimension DOMNode::ParseLineHeight(const std::string& value) const
 {
     auto themeConstants = GetThemeConstants();
     if (!themeConstants) {
-        LOGW("themeConstants is null, return 0 line height.");
         return Dimension();
     }
     const auto& parseResult = ThemeUtils::ParseThemeIdReference(value, GetThemeConstants());
@@ -2278,7 +2263,6 @@ std::vector<std::string> DOMNode::ParseFontFamilies(const std::string& value) co
 
     auto themeConstants = GetThemeConstants();
     if (!themeConstants) {
-        LOGW("themeConstants is null, return empty font families.");
         return fontFamilies;
     }
     auto&& idRefFunc = [constants = themeConstants](uint32_t refId) { return constants->GetString(refId); };
@@ -2331,7 +2315,6 @@ void DOMNode::CreateDeclaration(const std::string& tag)
 {
     declaration_ = DeclarationCreatorManager::GetInstance().CreateDeclaration(tag);
     if (!declaration_) {
-        LOGE("node %{public}s doesn't support", tag.c_str());
         return;
     }
     declaration_->SetCachePseudoClassStyle(

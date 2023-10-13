@@ -32,11 +32,13 @@ public:
     float GetConstrainStrokeWidth() const;
     float GetDividerLength() const;
     bool GetVertical() const;
+    bool GetStrokeWidthLimitation() const;
 
 private:
     float constrainStrokeWidth_ = 0;
     float dividerLength_ = 0;
     bool vertical_ = false;
+    bool strokeWidthLimitation_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(DividerLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

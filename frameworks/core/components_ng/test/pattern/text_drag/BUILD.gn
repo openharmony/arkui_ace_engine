@@ -14,15 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_drag_test_ng") {
+  type = "new"
   flutter_skia = true
-  sources = [
-    # text
-    "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
-
-    # self
-    "$ace_root/frameworks/core/components_ng/pattern/text_drag/text_drag_overlay_modifier.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/text_drag/text_drag_paint_method.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/text_drag/text_drag_pattern.cpp",
-    "text_drag_test_ng.cpp",
-  ]
+  sources = [ "text_drag_test_ng.cpp" ]
 }

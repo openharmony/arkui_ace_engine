@@ -111,7 +111,6 @@ void DOMRefresh::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 
 bool DOMRefresh::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
-    LOGD("DOMRefresh start add event");
     if (event == DOM_REFRESH) {
         LOGD("DOMRefresh Add refresh Event");
         refreshEventId_ = EventMarker(GetNodeIdForEvent(), event, pageId);

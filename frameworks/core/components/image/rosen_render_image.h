@@ -17,11 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_ROSEN_RENDER_IMAGE_H
 
 #ifndef USE_ROSEN_DRAWING
-#ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
-#else
-#include "experimental/svg/model/SkSVGDOM.h"
-#endif
+
 #endif
 
 #include "core/components/image/render_image.h"
@@ -101,7 +98,7 @@ protected:
 #ifndef USE_ROSEN_DRAWING
     void* GetSkImage() override
     {
-        return reinterpret_cast<void *>(&image_);
+        return reinterpret_cast<void*>(&image_);
     }
 
     RefPtr<PixelMap> GetPixmapFromSkImage() override;
@@ -109,7 +106,7 @@ protected:
 #else
     void* GetDrawingImage() override
     {
-        return reinterpret_cast<void *>(&image_);
+        return reinterpret_cast<void*>(&image_);
     }
     RefPtr<PixelMap> GetPixmapFromDrawingImage() override;
 #endif
@@ -167,9 +164,7 @@ private:
 
     RefPtr<ImageObject> imageObj_;
 #ifndef USE_ROSEN_DRAWING
-#ifdef NEW_SKIA
     SkSamplingOptions options_;
-#endif
 #else
     RSSamplingOptions options_;
 #endif

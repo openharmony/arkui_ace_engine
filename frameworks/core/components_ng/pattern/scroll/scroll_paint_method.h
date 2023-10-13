@@ -54,7 +54,6 @@ public:
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    void PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
     void PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
 
     WeakPtr<ScrollBar> scrollBar_;

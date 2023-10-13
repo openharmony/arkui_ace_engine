@@ -69,9 +69,7 @@ public:
                 onCompleteContinuationCallBack,
                 onRemoteTerminatedCallBack, onSaveDataCallBack,
                 onRestoreDataCallBack, externalEventCallback)
-    {
-        LOGI("FormFrontendDelegateDeclarative constructor");
-    }
+    {}
 
     ~FormFrontendDelegateDeclarative() override;
 
@@ -89,9 +87,7 @@ public:
     }
     void LoadResourceConfiguration(std::map<std::string, std::string>& mediaResourceFileMap,
                                     std::unique_ptr<JsonValue>& currentResourceData) override
-    {
-        LOGI("FormFrontendDelegateDeclarative LoadResourceConfiguration");
-    }
+    {}
     void UpdatePageData(const std::string& dataList)
     {
         std::lock_guard<std::mutex> lock(mutex_);

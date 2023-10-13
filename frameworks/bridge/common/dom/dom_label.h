@@ -37,7 +37,6 @@ public:
     {
         auto labelTarget = AceType::DynamicCast<LabelTarget>(node->GetBoxComponent()->GetChild());
         if (!labelTarget) {
-            LOGE("node component type is not label target");
             return;
         }
         trigger_ = labelTarget->GetTrigger();

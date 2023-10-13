@@ -290,7 +290,6 @@ protected:
     void InitSelection(const Offset& pos);
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
-    void HandleSingleClickEvent(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     bool IsDraggable(const Offset& localOffset);
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -356,9 +355,7 @@ private:
     bool isMousePressed_ = false;
     bool isCustomFont_ = false;
     bool blockPress_ = false;
-    bool hasClicked_ = false;
     bool isDoubleClick_ = false;
-    TimeStamp lastClickTimeStamp_;
 
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;

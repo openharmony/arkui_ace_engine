@@ -107,7 +107,6 @@ bool DOMTabs::AddSpecializedEvent(int32_t pageId, const std::string& event)
 void DOMTabs::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
     if (!child) {
-        LOGE("Child is nullptr, add node failed, slot:%{public}d.", slot);
         return;
     }
     flexChild_->InsertChild(slot, child->GetRootComponent());
@@ -116,7 +115,6 @@ void DOMTabs::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 void DOMTabs::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 {
     if (!child) {
-        LOGE("Child is nullptr, remove node failed.");
         return;
     }
     flexChild_->RemoveChild(child->GetRootComponent());

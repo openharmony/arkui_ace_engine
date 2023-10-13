@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -47,11 +48,21 @@ public:
     void OldRunMeasureAndLayout(const RefPtr<FrameNode>& frameNode,
         float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
+    void MockGetPaintRectWithTransform(const RefPtr<FrameNode>& frameNode, RectF paintRect = RectF());
 
     testing::AssertionResult IsEqualOffset(Offset offset, Offset expectOffset);
     testing::AssertionResult IsEqualOverScrollOffset(OverScrollOffset offset, OverScrollOffset expectOffset);
     testing::AssertionResult IsEqualRect(Rect rect, Rect expectRect);
     testing::AssertionResult IsEqualRect(RectF rect, RectF expectRect);
+
+    template<typename T>
+    testing::AssertionResult IsEqual(const T& actual, const T& expected)
+    {
+        if (!NearEqual(actual, expected)) {
+            return testing::AssertionFailure() << "Actual: " << actual << " != expected: " << expected;
+        }
+        return testing::AssertionSuccess();
+    }
 
     RefPtr<FrameNode> GetChildFrameNode(const RefPtr<FrameNode>& frameNode, int32_t index)
     {

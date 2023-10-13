@@ -37,21 +37,21 @@ frameworks/core/common/  @yan-shuifeng @sunfei2021
 frameworks/core/components_ng/pattern/ability_component/  @lushi1202
 frameworks/core/components_ng/pattern/action_sheet/  @cheng-feiwang
 frameworks/core/components_ng/pattern/animator/  @hehongyang9
-frameworks/core/components_ng/pattern/app_bar/  @cc520bf
+frameworks/core/components_ng/pattern/app_bar/  @catpoison
 frameworks/core/components_ng/pattern/badge/  @nickyjd
 frameworks/core/components_ng/pattern/blank/  @xiexiyun
 frameworks/core/components_ng/pattern/bubble/  @cheng-feiwang
 frameworks/core/components_ng/pattern/button/  @zhang-xiao150
 frameworks/core/components_ng/pattern/calendar/  @techbuilding
-frameworks/core/components_ng/pattern/canvas_context/  @zhangbingce
-frameworks/core/components_ng/pattern/canvas_renderer/  @zhangbingce
+frameworks/core/components_ng/pattern/canvas_context/  @keerecles
+frameworks/core/components_ng/pattern/canvas_renderer/  @keerecles
 frameworks/core/components_ng/pattern/checkbox/  @zhang-xiao150
 frameworks/core/components_ng/pattern/checkboxgroup/  @zhang-xiao150
 frameworks/core/components_ng/pattern/common_view/  @yangfan229
-frameworks/core/components_ng/pattern/container_modal/  @cc520bf
+frameworks/core/components_ng/pattern/container_modal/  @catpoison
 frameworks/core/components_ng/pattern/counter/  @zhang-xiao150
 frameworks/core/components_ng/pattern/custom/  @yan-shuifeng
-frameworks/core/components_ng/pattern/custom_paint/  @zhangbingce
+frameworks/core/components_ng/pattern/custom_paint/  @keerecles
 frameworks/core/components_ng/pattern/data_panel/  @xzken
 frameworks/core/components_ng/pattern/dialog/  @cheng-feiwang
 frameworks/core/components_ng/pattern/divider/  @zhang-xiao150
@@ -83,7 +83,7 @@ frameworks/core/components_ng/pattern/overlay/  @yangfan229
 frameworks/core/components_ng/pattern/panel/  @zhou-chaobo
 frameworks/core/components_ng/pattern/patternlock/  @cheng-feiwang
 frameworks/core/components_ng/pattern/picker/  @cheng-feiwang
-frameworks/core/components_ng/pattern/plugin/  @wangchensu1
+frameworks/core/components_ng/pattern/plugin/  @wangchensu1 @keerecles @ZhangYu-Home
 frameworks/core/components_ng/pattern/preview_mock/  @laigerendaqiu
 frameworks/core/components_ng/pattern/progress/  @cheng-feiwang
 frameworks/core/components_ng/pattern/qrcode/  @techbuilding
@@ -93,7 +93,7 @@ frameworks/core/components_ng/pattern/recycle_view/  @guozejun
 frameworks/core/components_ng/pattern/refresh/  @aryawang
 frameworks/core/components_ng/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
-frameworks/core/components_ng/pattern/rendering_context/  @zhangbingce
+frameworks/core/components_ng/pattern/rendering_context/  @keerecles
 frameworks/core/components_ng/pattern/rich_editor/  @jyj-0306
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
@@ -121,7 +121,7 @@ frameworks/core/components_ng/pattern/texttimer/  @lijuan124
 frameworks/core/components_ng/pattern/time_picker/  @cheng-feiwang
 frameworks/core/components_ng/pattern/toast/  @cheng-feiwang
 frameworks/core/components_ng/pattern/toggle/  @zhang-xiao150
-frameworks/core/components_ng/pattern/ui_extension/  @lushi1202
+frameworks/core/components_ng/pattern/ui_extension/  @lushi1202 @keerecles @ZhangYu-Home
 frameworks/core/components_ng/pattern/video/  @xzken
 frameworks/core/components_ng/pattern/view_context/  @hehongyang9
 frameworks/core/components_ng/pattern/waterflow/  @zcdqs
@@ -142,11 +142,11 @@ frameworks/core/components/checkable/  @zhang-xiao150
 frameworks/core/components/clip/  @cc520bf
 frameworks/core/components/clock/  @zhoutianer
 frameworks/core/components/common/  @yan-shuifeng
-frameworks/core/components/container_modal/  @cc520bf
+frameworks/core/components/container_modal/  @catpoison
 frameworks/core/components/counter/  @zhang-xiao150
 frameworks/core/components/coverage/  @
 frameworks/core/components/custom_dialog/  @cheng-feiwang
-frameworks/core/components/custom_paint/  @zhangbingce
+frameworks/core/components/custom_paint/  @keerecles
 frameworks/core/components/data_panel/  @xzken
 frameworks/core/components/declaration/  @cc520bf
 frameworks/core/components/dialog/  @cheng-feiwang
@@ -320,15 +320,15 @@ frameworks/core/components_ng/test/pattern/blank/  @xiexiyun
 frameworks/core/components_ng/test/pattern/bubble/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/button/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/calendar/  @techbuilding
-frameworks/core/components_ng/test/pattern/canvas_context/  @zhangbingce
-frameworks/core/components_ng/test/pattern/canvas_renderer/  @zhangbingce
+frameworks/core/components_ng/test/pattern/canvas_context/  @keerecles
+frameworks/core/components_ng/test/pattern/canvas_renderer/  @keerecles
 frameworks/core/components_ng/test/pattern/checkbox/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/checkboxgroup/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/common_view/  @yangfan229
 frameworks/core/components_ng/test/pattern/container_modal/  @suiwuyue
 frameworks/core/components_ng/test/pattern/counter/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/custom/  @yan-shuifeng
-frameworks/core/components_ng/test/pattern/custom_paint/  @zhangbingce
+frameworks/core/components_ng/test/pattern/custom_paint/  @keerecles
 frameworks/core/components_ng/test/pattern/data_panel/  @jinweiliu
 frameworks/core/components_ng/test/pattern/dialog/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/divider/  @zhang-xiao150
@@ -370,7 +370,7 @@ frameworks/core/components_ng/test/pattern/recycle_view/  @guozejun
 frameworks/core/components_ng/test/pattern/refresh/  @suiwuyue
 frameworks/core/components_ng/test/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/test/pattern/remote_window/  @liuchao92
-frameworks/core/components_ng/test/pattern/rendering_context/  @zhangbingce
+frameworks/core/components_ng/test/pattern/rendering_context/  @keerecles
 frameworks/core/components_ng/test/pattern/rich_editor/  @jyj-0306
 frameworks/core/components_ng/test/pattern/root/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/scroll/  @suiwuyue

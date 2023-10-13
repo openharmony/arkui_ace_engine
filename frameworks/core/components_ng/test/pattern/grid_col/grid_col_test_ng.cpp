@@ -29,7 +29,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-class GridColPatternTestNg : public testing::Test {
+class GridColTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -38,12 +38,12 @@ protected:
     static RefPtr<FrameNode> CreateDividerNode(TestProperty& testProperty);
 };
 
-void GridColPatternTestNg::SetUpTestCase()
+void GridColTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
 
-void GridColPatternTestNg::TearDownTestCase()
+void GridColTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
@@ -53,11 +53,11 @@ void GridColPatternTestNg::TearDownTestCase()
  * @tc.desc: Test the default values of GridCol's properties.
  * @tc.type: FUNC
  */
-HWTEST_F(GridColPatternTestNg, GridColDefault001, TestSize.Level1)
+HWTEST_F(GridColTestNg, GridColDefault001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create gridCol and Set properties.
-    */
+     */
     GridColModelNG gridColModelNG;
     gridColModelNG.Create();
     auto testVal = AceType::MakeRefPtr<V2::GridContainerSize>(7);
@@ -68,7 +68,7 @@ HWTEST_F(GridColPatternTestNg, GridColDefault001, TestSize.Level1)
     /**
      * @tc.steps: step2. Get frameNode, layoutProperty.
      * @tc.expected: step2. Verify properties is correct.
-    */
+     */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<GridColLayoutProperty>();
@@ -90,11 +90,11 @@ HWTEST_F(GridColPatternTestNg, GridColDefault001, TestSize.Level1)
  * @tc.desc: Test GetPropValue function.
  * @tc.type: FUNC
  */
-HWTEST_F(GridColPatternTestNg, GridColDefault002, TestSize.Level1)
+HWTEST_F(GridColTestNg, GridColDefault002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create gridCol and get frameNode, layoutProperty.
-    */
+     */
     GridColModelNG gridColModelNG;
     gridColModelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -104,7 +104,7 @@ HWTEST_F(GridColPatternTestNg, GridColDefault002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Verify GetPropValue func.
-    */
+     */
     int32_t propValue;
     const V2::GridContainerSize prop = V2::GridContainerSize(7);
     propValue = layoutProperty->GetPropValue(prop, V2::GridSizeType::XS);

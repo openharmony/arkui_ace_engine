@@ -35,6 +35,8 @@ public:
     std::vector<Rosen::Rect> GetHotAreas();
     sptr<Rosen::Session> GetSession();
 
+    static int32_t CalculateTranslateDegree(int32_t hostId);
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

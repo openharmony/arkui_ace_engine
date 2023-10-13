@@ -754,7 +754,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         LOGW("HandleOnDragStart: UDMF GetSummary failed, ret %{public}d", ret);
     }
     dragDropManager->SetSummaryMap(summary);
-    dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
     std::shared_ptr<Media::PixelMap> pixelMap;
     if (g_getPixelMapSucc) {
         pixelMap = g_pixelMap->GetPixelMapSharedPtr();
@@ -797,6 +796,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         LOGE("InteractionManager: drag start error");
         return;
     }
+    dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     eventManager->DoMouseActionRelease();
@@ -1117,6 +1117,9 @@ OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& cont
                 break;
             case DragResult::DRAG_FAIL:
                 result = DragRet::DRAG_FAIL;
+                break;
+            case DragResult::DRAG_CANCEL:
+                result = DragRet::DRAG_CANCEL;
                 break;
             default:
                 break;

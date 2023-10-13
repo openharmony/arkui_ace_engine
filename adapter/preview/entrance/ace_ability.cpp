@@ -253,7 +253,7 @@ void AceAbility::InitEnv()
         LOGI("Set MinPlatformVersion to %{public}d", compatibleVersion_);
         pipelineContext->SetMinPlatformVersion(compatibleVersion_);
     }
-    container->InitializeStageAppConfig(runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
+    container->InitializeAppConfig(runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
@@ -326,6 +326,7 @@ void AceAbility::InitializeAppInfo()
         CHECK_NULL_VOID(faContext);
         auto appInfo = faContext->GetAppInfo();
         CHECK_NULL_VOID(appInfo);
+        bundleName_ = appInfo->GetBundleName();
         compatibleVersion_ = appInfo->GetMinAPIVersion();
         auto targetVersion = appInfo->GetTargetAPIVersion();
         auto releaseType = appInfo->GetApiReleaseType();

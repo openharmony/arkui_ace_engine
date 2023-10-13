@@ -34,8 +34,9 @@ constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.pr
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 
 FormRenderer::FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
-    const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
-    : context_(context), runtime_(runtime)
+    const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime,
+    std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler)
+    : context_(context), runtime_(runtime), eventHandler_(eventHandler)
 {
     HILOG_INFO("FormRenderer %{public}p created.", this);
     if (!context_ || !runtime_) {
@@ -53,8 +54,7 @@ void FormRenderer::InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     uiContent_->SetFormHeight(height_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
-    NativeValue* storage = nullptr;
-    uiContent_->Initialize(nullptr, formJsInfo.formSrc, storage);
+    uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
 
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
         auto formRenderer = weak.lock();
@@ -104,7 +104,7 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
         HILOG_ERROR("uiContent is null!");
         return;
     }
-    formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_, shared_from_this());
+    formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_, shared_from_this(), eventHandler_);
     ParseWant(want);
     InitUIContent(formJsInfo);
     SetRenderDelegate(proxy_);
@@ -271,7 +271,7 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
 
     if (renderDelegateDeathRecipient_ == nullptr) {
         renderDelegateDeathRecipient_ = new FormRenderDelegateRecipient(
-            [eventHandler = std::weak_ptr<EventHandler>(EventHandler::Current()), renderer = weak_from_this()]() {
+            [eventHandler = eventHandler_, renderer = weak_from_this()]() {
                 auto handler = eventHandler.lock();
                 if (!handler) {
                     HILOG_ERROR("eventHandler is nullptr");

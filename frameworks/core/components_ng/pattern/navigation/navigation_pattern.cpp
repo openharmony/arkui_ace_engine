@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
@@ -459,6 +460,16 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                         hostNode->SetBackButtonVisible(curTopNavDestination, true);
                     }
                     pattern->UpdateContextRect(curTopNavDestination, hostNode);
+                    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+                    CHECK_NULL_VOID(navBarNode);
+                    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+                    CHECK_NULL_VOID(navBarLayoutProperty);
+                    if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
+                        (pattern->GetNavigationMode() == NavigationMode::STACK && hostNode->GetNeedSetInvisible())) {
+                        navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+                    } else {
+                        navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+                    }
                 },
                 TaskExecutor::TaskType::UI);
         }

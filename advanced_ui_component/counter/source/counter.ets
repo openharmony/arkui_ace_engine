@@ -30,8 +30,8 @@ enum FocusText {
 export class CommonOptions {
   focusable?: boolean;
   step?: number;
-  onHoverIncrease?: (isHover?: boolean) => void;
-  onHoverDecrease?: (isHover?: boolean) => void;
+  onHoverIncrease?: (isHover: boolean) => void;
+  onHoverDecrease?: (isHover: boolean) => void;
 }
 
 export class InlineStyleOptions extends CommonOptions {
@@ -227,8 +227,8 @@ export struct CounterComponent {
   private maxYear: number = CounterConstant.COUNTER_MAX_YEAR;
   private minYear: number = CounterConstant.COUNTER_MIN_YEAR;
   private numberStrList: Array<string> = [ '00', '01', '02', '03', '04', '05', '06', '07', '08', '09'];
-  private onHoverIncrease?: (isHover?: boolean) => void;
-  private onHoverDecrease?: (isHover?: boolean) => void;
+  private onHoverIncrease?: (isHover: boolean) => void;
+  private onHoverDecrease?: (isHover: boolean) => void;
   private onFocusIncrease?: () => void;
   private onFocusDecrease?: () => void;
   private onBlurIncrease?: () => void;

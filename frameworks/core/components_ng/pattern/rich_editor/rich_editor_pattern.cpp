@@ -233,16 +233,24 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     std::function<ImageSourceInfo()> createSourceInfoFunc = CreateImageSourceInfo(options);
     imageLayoutProperty->UpdateImageSourceInfo(createSourceInfoFunc());
     if (options.imageAttribute.has_value()) {
-        if (options.imageAttribute.value().size.has_value()) {
+        auto imgAttr = options.imageAttribute.value();
+        if (imgAttr.size.has_value()) {
             imageLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(options.imageAttribute.value().size.value().width),
-                    CalcLength(options.imageAttribute.value().size.value().height)));
+                CalcSize(CalcLength(imgAttr.size.value().width), CalcLength(imgAttr.size.value().height)));
         }
-        if (options.imageAttribute.value().verticalAlign.has_value()) {
-            imageLayoutProperty->UpdateVerticalAlign(options.imageAttribute.value().verticalAlign.value());
+        if (imgAttr.verticalAlign.has_value()) {
+            imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
         }
-        if (options.imageAttribute.value().objectFit.has_value()) {
-            imageLayoutProperty->UpdateImageFit(options.imageAttribute.value().objectFit.value());
+        if (imgAttr.objectFit.has_value()) {
+            imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
+        }
+        if (imgAttr.marginProp.has_value()) {
+            imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
+        }
+        if (imgAttr.borderRadius.has_value()) {
+            auto imageRenderCtx = imageNode->GetRenderContext();
+            imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
+            imageRenderCtx->SetClipToBounds(true);
         }
     }
     if (isPaste) {
@@ -732,10 +740,10 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& s
     auto caretOffset = startOffset + textPaintOffset - rootOffset;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, caretOffset);
-    const auto& contentSize = geometryNode->GetContent()->GetRect().GetSize();
+    auto frameSize = geometryNode->GetFrameRect().GetSize();
     CHECK_NULL_RETURN(overlayMod_, caretOffset);
     float caretWidth = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretWidth();
-    caretOffset.SetX(std::clamp(caretOffset.GetX(), 0.0f, static_cast<float>(contentSize.Width()) - caretWidth));
+    caretOffset.SetX(std::clamp(caretOffset.GetX(), 0.0f, static_cast<float>(frameSize.Width()) - caretWidth));
     return caretOffset;
 }
 
@@ -818,7 +826,7 @@ bool RichEditorPattern::HasSameTypingStyle(const RefPtr<SpanNode>& spanNode)
     }
 }
 
-void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpanAttribute imageStyle)
+void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -833,6 +841,15 @@ void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpan
     if (updateSpanStyle_.updateImageVerticalAlign.has_value()) {
         imageLayoutProperty->UpdateVerticalAlign(imageStyle.verticalAlign.value());
     }
+    if (updateSpanStyle_.borderRadius.has_value()) {
+        auto imageRenderCtx = imageNode->GetRenderContext();
+        imageRenderCtx->UpdateBorderRadius(imageStyle.borderRadius.value());
+        imageRenderCtx->SetClipToBounds(true);
+    }
+    if (updateSpanStyle_.marginProp.has_value()) {
+        imageLayoutProperty->UpdateMargin(imageStyle.marginProp.value());
+    }
+
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2431,10 +2448,9 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     CalcInsertValueObj(spanInfo);
     auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanInfo.GetSpanIndex() - 1));
     if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG && spanInfo.GetOffsetInSpan() == 0 &&
-        selectEnd == selectStart + 1) {
+        selectEnd == selectStart + 1 && BetweenSelectedPosition(info.GetGlobalLocation())) {
         FireOnSelect(selectStart, selectEnd);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        StopTwinkling();
         return;
     }
     if (textSelector_.IsValid()) {
@@ -3239,10 +3255,25 @@ bool RichEditorPattern::IsDisabled() const
 void RichEditorPattern::InitSelection(const Offset& pos)
 {
     int32_t currentPosition = paragraphs_.GetIndex(pos);
+    currentPosition = std::min(currentPosition, GetTextContentLength());
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
+    if (selectedRects.size() == 0 && !spans_.empty()) {
+        auto it = std::find_if(spans_.begin(), spans_.end(),
+            [caretPosition = currentPosition](const RefPtr<SpanItem>& spanItem) {
+                return (spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length()) <=
+                           caretPosition) &&
+                       (caretPosition < spanItem->position);
+            });
+        auto spanIndex = std::distance(spans_.begin(), it);
+        auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanIndex - 1));
+        if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG) {
+            textSelector_.Update(currentPosition - 1, currentPosition);
+            return;
+        }
+    }
     bool selectedSingle =
         selectedRects.size() == 1 && (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top());
     bool selectedLast = selectedRects.size() == 0 && currentPosition == GetTextContentLength();

@@ -76,7 +76,7 @@ private:
     static bool OnKeyEvent(const KeyEvent& event);
     static void UpdateButtonConfirmLayoutProperty(const RefPtr<FrameNode>& buttonConfirmNode,
         RefPtr<PickerTheme> pickerTheme);
-    static RefPtr<FrameNode> dialogNode_;
+    static WeakPtr<FrameNode> dialogNode_;
 };
 } // namespace OHOS::Ace::NG
 
