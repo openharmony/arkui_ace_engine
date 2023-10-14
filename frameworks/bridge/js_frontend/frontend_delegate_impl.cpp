@@ -923,8 +923,8 @@ Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-
-void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void FrontendDelegateImpl::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& /* showMode */)
 {
     LOGD("FrontendDelegateImpl ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);

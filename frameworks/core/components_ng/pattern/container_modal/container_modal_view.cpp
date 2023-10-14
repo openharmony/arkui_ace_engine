@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/image/pixel_map.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -192,6 +193,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
             if (windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
                 LOGI("container window start move.");
                 windowManager->WindowStartMove();
+                SubwindowManager::GetInstance()->ClearToastInSubwindow();
             }
         };
         auto panEvent = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);

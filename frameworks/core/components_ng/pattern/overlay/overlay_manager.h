@@ -34,6 +34,8 @@
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace {
@@ -106,7 +108,9 @@ public:
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
+    void ClearToast();
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft,
+        const ToastShowMode& showMode = ToastShowMode::DEFAULT);
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
