@@ -42,7 +42,7 @@ RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogPrope
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     if (settingData.rangeVector.empty() && settingData.options.empty()) {
-        LOGI("Dialog input parameter range vector is empty, not display dialog.");
+        TAG_LOGI(AceLogTag::ACE_TEXT_PICKER, "Dialog input parameter range vector is empty, not display dialog.");
         return nullptr;
     }
     if (settingData.options.empty()) {

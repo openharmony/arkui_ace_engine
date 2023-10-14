@@ -122,6 +122,8 @@ enum class AceLogTag : uint8_t {
     ACE_GAUGE,
     ACE_HYPERLINK,
     ACE_ANIMATION,
+    ACE_DATE_PICKER,
+    ACE_TEXT_PICKER,
 };
 
 enum class LogDomain : uint32_t {

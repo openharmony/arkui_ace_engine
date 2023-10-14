@@ -53,13 +53,11 @@ bool TextPickerTossAnimationController::Play()
 {
     auto timeDiff = timeEnd_ - timeStart_;
     if (timeDiff < MIN_TIME) {
-        LOGW("toss time[%{public}lf] too small.", timeDiff);
         return false;
     }
 
     double speed = (yEnd_ - yStart_) / timeDiff;
     if (NearZero(speed)) {
-        LOGW("toss speed is zero");
         return false;
     }
 
@@ -67,11 +65,9 @@ bool TextPickerTossAnimationController::Play()
     double time = zeroSpeed / speed;
     time = std::log(time) / std::log(DRAG);
     if (time < MIN_DURATION) {
-        LOGW("toss time[%{public}lf] to small.", time);
         return false;
     }
 
-    LOGD("toss play speed: %{public}lf, time: %{public}lf", speed, time);
     speed_ = speed;
     int nTime = static_cast<int>(time);
     auto weak = AceType::WeakClaim(this);
@@ -100,7 +96,6 @@ double TextPickerTossAnimationController::GetCurrentTime() const
     struct timeval tv = { 0 };
     int result = gettimeofday(&tv, nullptr);
     if (result != 0) {
-        LOGE("toss gettimeofday failed.");
         return 0.0;
     }
 

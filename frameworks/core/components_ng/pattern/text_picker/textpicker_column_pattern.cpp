@@ -464,7 +464,6 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         CHECK_NULL_VOID(linearLayoutNode);
         auto children = linearLayoutNode->GetChildren();
         if (children.size() != MIXTURE_CHILD_COUNT) {
-            LOGE("children number is wrong.");
             continue;
         }
         auto iconNode = DynamicCast<FrameNode>(linearLayoutNode->GetFirstChild());
@@ -685,7 +684,6 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(
     const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index, uint32_t showCount, bool isDown, double scale)
 {
     if (index >= animationProperties_.size()) {
-        LOGE("Animation Properties vactor is break.");
         return;
     }
     if ((!index && isDown) || ((index == (showCount - 1)) && !isDown)) {
@@ -738,7 +736,6 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
         } else if (columnkind_ == MIXTURE) {
             auto children = rangeNode->GetChildren();
             if (children.size() != MIXTURE_CHILD_COUNT) {
-                LOGE("children number is wrong.");
                 continue;
             }
             auto textNode = DynamicCast<FrameNode>(rangeNode->GetLastChild());
@@ -765,7 +762,6 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 {
     CHECK_NULL_VOID(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
-        LOGI("Pan event start");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(event);
@@ -776,7 +772,6 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -785,7 +780,6 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
@@ -891,8 +885,6 @@ void TextPickerColumnPattern::CreateAnimation()
         auto column = weak.Upgrade();
         if (column) {
             column->HandleCurveStopped();
-        } else {
-            LOGE("timepicker column is null.");
         }
     });
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);

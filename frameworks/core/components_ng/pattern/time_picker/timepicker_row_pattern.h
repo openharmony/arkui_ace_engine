@@ -150,7 +150,6 @@ public:
     std::string GetOptionValue(const RefPtr<FrameNode>& frmeNode, uint32_t index)
     {
         if (index >= GetOptionCount(frmeNode)) {
-            LOGE("index out of range.");
             return nullptr;
         }
         return options_[frmeNode][index];

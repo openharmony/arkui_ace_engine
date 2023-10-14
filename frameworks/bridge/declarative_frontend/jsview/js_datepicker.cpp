@@ -45,7 +45,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
-}
+} // namespace
 
 std::unique_ptr<DatePickerModel> DatePickerModel::datePickerInstance_ = nullptr;
 std::unique_ptr<DatePickerDialogModel> DatePickerDialogModel::datePickerDialogInstance_ = nullptr;
@@ -140,7 +140,6 @@ JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventIn
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo.GetSelectedStr());
     if (!argsPtr) {
-        LOGW("selectedStr is not exist.");
         return JSRef<JSVal>::Cast(obj);
     }
     std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
@@ -148,7 +147,6 @@ JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventIn
         const std::string key = *iter;
         const auto value = argsPtr->GetValue(key);
         if (!value || value->ToString().empty()) {
-            LOGI("key[%{public}s] is not exist.", key.c_str());
             continue;
         }
         obj->SetProperty<int32_t>(key.c_str(), value->GetInt());
@@ -161,7 +159,6 @@ JSRef<JSVal> DatePickerDateChangeEventToJSValue(const DatePickerChangeEvent& eve
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo.GetSelectedStr());
     if (!argsPtr) {
-        LOGW("selectedStr is not exist.");
         return JSRef<JSVal>::Cast(obj);
     }
     std::tm dateTime = { 0 };
@@ -236,7 +233,6 @@ void JSDatePicker::Create(const JSCallbackInfo& info)
             break;
         }
         default: {
-            LOGE("Undefined date picker type.");
             break;
         }
     }
@@ -298,7 +294,6 @@ void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTex
         CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             textStyle.fontSize = Dimension(-1);
-            LOGW("Parse to dimension FP failed.");
         } else {
             textStyle.fontSize = size;
         }
@@ -324,7 +319,6 @@ void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTex
     if (fontStyle->IsNumber()) {
         auto style = fontStyle->ToNumber<int32_t>();
         if (style < 0 || style > 1) {
-            LOGE("Text fontStyle(%d) is invalid value", style);
             return;
         }
         textStyle.fontStyle = static_cast<FontStyle>(style);
@@ -334,14 +328,9 @@ void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTex
 void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("datePicker Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-    } else {
+    if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
@@ -350,14 +339,9 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("datePicker Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-    } else {
+    if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
@@ -366,14 +350,9 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
 void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("datePicker Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-    } else {
+    if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
@@ -381,8 +360,7 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
 
 void JSDatePicker::OnChange(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGI("info not function");
+    if (!info[0]->IsFunction()) {
         return;
     }
 
@@ -399,8 +377,7 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
 
 void JSDatePicker::OnDateChange(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGI("info not function");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
@@ -416,8 +393,7 @@ void JSDatePicker::OnDateChange(const JSCallbackInfo& info)
 
 void JSTimePicker::OnChange(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGI("info not function");
+    if (!info[0]->IsFunction()) {
         return;
     }
 
@@ -437,12 +413,10 @@ void JSDatePicker::PickerBackgroundColor(const JSCallbackInfo& info)
     JSViewAbstract::JsBackgroundColor(info);
 
     if (info.Length() < 1) {
-        LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        LOGI("the info[0] is null");
         return;
     }
     DatePickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
@@ -516,7 +490,6 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
         auto selectedStr = eventInfo->GetSelectedStr();
         auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
         if (!sourceJson || sourceJson->IsNull()) {
-            LOGE("invalid selected date value.");
             return;
         }
 
@@ -603,10 +576,7 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
 void JSDatePicker::SetDefaultAttributes()
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("datePicker Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     auto selectedStyle = theme->GetOptionStyle(true, false);
     textStyle.textColor = selectedStyle.GetTextColor();
@@ -630,10 +600,7 @@ void JSDatePicker::SetDefaultAttributes()
 void JSDatePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("timePicker Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     DatePickerModel::GetInstance()->CreateTimePicker(theme);
     auto selectedTime = paramObj->GetProperty("selected");
     if (selectedTime->IsObject()) {
@@ -660,18 +627,13 @@ void JSDatePickerDialog::JSBind(BindingTarget globalObj)
 void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
-    if (!scopedDelegate) {
-        // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
-        return;
-    }
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("DatePicker Show dialog error, info is non-valid");
+    CHECK_NULL_VOID(scopedDelegate);
+    if (!info[0]->IsObject()) {
         return;
     }
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    
+
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     DatePickerType pickerType = DatePickerType::DATE;
     auto type = paramObject->GetProperty("type");
@@ -718,7 +680,7 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     if (!onDateChange->IsUndefined() && onDateChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDateChange));
         dateChangeEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc)](
-                          const std::string& info) {
+                              const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("DatePickerDialog.onDateChange");
             auto selectedJson = JsonUtil::ParseJsonString(info);
@@ -756,7 +718,7 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     if (!onDateAccept->IsUndefined() && onDateAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDateAccept));
         dateAcceptEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc)](
-                          const std::string& info) {
+                              const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("DatePickerDialog.onDateAccept");
             auto selectedJson = JsonUtil::ParseJsonString(info);
@@ -866,9 +828,9 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         pickerDialog.maskRect = maskRect;
     }
 
-    DatePickerDialogModel::GetInstance()->SetDatePickerDialogShow(
-        pickerDialog, settingData, std::move(cancelEvent), std::move(acceptEvent), std::move(changeEvent),
-        std::move(dateAcceptEvent), std::move(dateChangeEvent), pickerType);
+    DatePickerDialogModel::GetInstance()->SetDatePickerDialogShow(pickerDialog, settingData, std::move(cancelEvent),
+        std::move(acceptEvent), std::move(changeEvent), std::move(dateAcceptEvent), std::move(dateChangeEvent),
+        pickerType);
 }
 
 void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
@@ -902,18 +864,9 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
     auto parseSelectedDate = ParseDate(selectedDate);
-    auto startDays = parseStartDate.ToDays();
-    auto endDays = parseEndDate.ToDays();
-    auto selectedDays = parseSelectedDate.ToDays();
-    if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
-        LOGE("date error");
-    }
 
     auto theme = GetTheme<DialogTheme>();
-    if (!theme) {
-        LOGE("DialogTheme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
 
     ButtonInfo buttonInfo;
     DialogProperties properties;
@@ -963,14 +916,9 @@ void JSDatePickerDialog::CreateDatePicker(RefPtr<Component>& component, const JS
     auto parseSelectedDate = ParseDate(selectedDate);
     auto startDays = parseStartDate.ToDays();
     auto endDays = parseEndDate.ToDays();
-    auto selectedDays = parseSelectedDate.ToDays();
     if (startDays > endDays) {
-        LOGW("startDate and endDate error");
         parseStartDate.SetYear(0);
         parseEndDate.SetYear(0);
-    }
-    if (selectedDays < startDays || selectedDays > endDays) {
-        LOGW("selectedDate error");
     }
     if (startDate->IsObject()) {
         datePicker->SetStartDate(parseStartDate);
@@ -1092,12 +1040,10 @@ void JSTimePicker::PickerBackgroundColor(const JSCallbackInfo& info)
     JSViewAbstract::JsBackgroundColor(info);
 
     if (info.Length() < 1) {
-        LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        LOGI("the info[0] is null");
         return;
     }
     TimePickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
@@ -1106,14 +1052,9 @@ void JSTimePicker::PickerBackgroundColor(const JSCallbackInfo& info)
 void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("timePicker Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-    } else {
+    if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
     TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
@@ -1122,14 +1063,9 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("timePicker Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-    } else {
+    if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
@@ -1138,14 +1074,9 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
 void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("timePicker Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-    } else {
+    if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
@@ -1155,10 +1086,7 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
 {
     auto selectedTime = paramObj->GetProperty("selected");
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("timePicker Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     auto componentsValue = paramObj->GetProperty("displayedComponent");
     bool showSecond = false;
     if (componentsValue->IsNumber()) {
@@ -1185,10 +1113,7 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
 void JSTimePicker::SetDefaultAttributes()
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("timePicker Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     auto selectedStyle = theme->GetOptionStyle(true, false);
     textStyle.textColor = selectedStyle.GetTextColor();
@@ -1257,13 +1182,8 @@ void JSTimePickerDialog::JSBind(BindingTarget globalObj)
 void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
-    if (!scopedDelegate) {
-        // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
-        return;
-    }
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("DatePicker Show dialog error, info is non-valid");
+    CHECK_NULL_VOID(scopedDelegate);
+    if (!info[0]->IsObject()) {
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -1374,10 +1294,7 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     }
 
     auto theme = JSAlertDialog::GetTheme<DialogTheme>();
-    if (!theme) {
-        LOGE("DialogTheme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
 
     auto selectedTime = paramObj->GetProperty("selected");
     auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
