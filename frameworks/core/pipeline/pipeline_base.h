@@ -910,6 +910,16 @@ public:
         return false;
     }
 
+    void SetHalfLeading(bool halfLeading)
+    {
+        halfLeading_ = halfLeading;
+    }
+
+    bool GetHalfLeading() const
+    {
+        return halfLeading_;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1040,6 +1050,7 @@ private:
     std::function<void(void)> gsVsyncCallback_;
     bool enableImplicitAnimation_ = true;
     bool isReloading_ = false;
+    bool halfLeading_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

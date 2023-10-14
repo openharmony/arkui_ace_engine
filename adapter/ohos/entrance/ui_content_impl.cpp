@@ -1245,6 +1245,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     auto pipeline = container->GetPipelineContext();
+    // Use metadata to control the center-alignment of text at line height.
+    bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
+        [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
+    pipeline->SetHalfLeading(halfLeading);
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
