@@ -44,21 +44,27 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
             currentSourceInfo = ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo(""));
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
-                LOGE("Rating load foreground image failed");
+                TAG_LOGW(AceLogTag::ACE_RATING,
+                    "Rating load foreground image failed, the sourceInfo is %{public}s",
+                    sourceInfo.ToString().c_str());
             }
             break;
         case 0b010:
             currentSourceInfo = ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo(""));
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
-                LOGE("Rating load secondary image failed");
+                TAG_LOGW(AceLogTag::ACE_RATING,
+                    "Rating load secondary image failed, the sourceInfo is %{public}s",
+                    sourceInfo.ToString().c_str());
             }
             break;
         case 0b100:
             currentSourceInfo = ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
-                LOGE("Rating load background image failed");
+                TAG_LOGW(AceLogTag::ACE_RATING,
+                    "Rating load background image failed, the sourceInfo is %{public}s",
+                    sourceInfo.ToString().c_str());
             }
             break;
         default:
@@ -123,7 +129,6 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
     }
     // only when foreground, secondary and background image are all loaded successfully, mark dirty to update rendering.
     if (imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
-        LOGD("Rating foreground, secondary and background image are loaded successfully.");
         MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -134,7 +139,6 @@ void RatingPattern::OnImageDataReady(int32_t imageFlag)
 
     // 3 images are ready, invoke to update layout to calculate single star size.
     if (imageReadyStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
-        LOGD("Rating foreground, secondary and background image are ready.");
         MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
 }
@@ -182,15 +186,12 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     }
     // when frameNode mark dirty to update rendering, only when 3 images are all loaded successfully and
     // JudgeImageSourceInfo is true, pattern will update ratingModifier's CanvasImage.
-    if (ratingModifier_->JudgeImageSourceInfo(
-        foregroundImageLoadingCtx_->GetSourceInfo(),
-            secondaryImageLoadingCtx_->GetSourceInfo(),
-            backgroundImageLoadingCtx_->GetSourceInfo(), foregroundConfig_) &&
+    if (ratingModifier_->JudgeImageSourceInfo(foregroundImageLoadingCtx_->GetSourceInfo(),
+            secondaryImageLoadingCtx_->GetSourceInfo(), backgroundImageLoadingCtx_->GetSourceInfo(),
+            foregroundConfig_) &&
         imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
-        ratingModifier_->UpdateImageSourceInfo(
-            foregroundImageLoadingCtx_->GetSourceInfo(),
-            secondaryImageLoadingCtx_->GetSourceInfo(),
-            backgroundImageLoadingCtx_->GetSourceInfo());
+        ratingModifier_->UpdateImageSourceInfo(foregroundImageLoadingCtx_->GetSourceInfo(),
+            secondaryImageLoadingCtx_->GetSourceInfo(), backgroundImageLoadingCtx_->GetSourceInfo());
         ratingModifier_->UpdateCanvasImage(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_,
             foregroundConfig_, secondaryConfig_, backgroundConfig_);
     }
@@ -266,8 +267,7 @@ void RatingPattern::ConstrainsRatingScore()
 
     // steps max is stars, if steps > stars, assign the value defined in theme.
     if (ratingRenderProperty->HasStepSize()) {
-        if (GreatNotEqual(
-            ratingRenderProperty->GetStepSizeValue(
+        if (GreatNotEqual(ratingRenderProperty->GetStepSizeValue(
                               GetStepSizeFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE)),
                 ratingLayoutProperty->GetStarsValue(
                     GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)))) {
@@ -365,7 +365,7 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(!(IsIndicator() || panEvent_));
 
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) { LOGD("Pan event start"); };
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -380,7 +380,7 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragEnd();
     };
 
-    auto actionCancelTask = [weak = WeakClaim(this)]() { LOGD("Pan event cancel"); };
+    auto actionCancelTask = [weak = WeakClaim(this)]() {};
 
     PanDirection panDirection;
     panDirection.type = PanDirection::HORIZONTAL;
@@ -445,7 +445,6 @@ void RatingPattern::HandleClick(const GestureEvent& info)
     CHECK_NULL_VOID(!IsIndicator());
     auto eventPointX = info.GetLocalLocation().GetX();
     if (Negative(eventPointX)) {
-        LOGW("eventPointX cannot be less than zero when handling click event");
         return;
     }
     RecalculatedRatingScoreBasedOnEventPoint(eventPointX, false);
