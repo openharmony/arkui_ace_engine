@@ -86,6 +86,11 @@ void ListPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (!listDragStatusListener_.has_value()) {
+        InitNotifyDragEvent();
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     SetAccessibilityAction();
 }
 
@@ -1721,6 +1726,50 @@ bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
     }
     return false;
 }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+void ListPattern::InitNotifyDragEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!listDragStatusListener_.has_value()) {
+        listDragStatusListener_ = AceType::MakeRefPtr<ListDragStatusListener>();
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->RegisterDragStatusListener(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
+}
+
+void ListPattern::HandleOnDragStatusCallback(
+    const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    if (!listDragStatusListener_.has_value()) {
+        return;
+    }
+    auto listDragStatusListener = listDragStatusListener_.value();
+    switch (dragEventType) {
+        case DragEventType::START:
+            listDragStatusListener->OnDragStarted(notifyDragEvent);
+            break;
+        case DragEventType::ENTER:
+            listDragStatusListener->OnDragEntered(notifyDragEvent);
+            break;
+        case DragEventType::MOVE:
+            listDragStatusListener->OnDragMoved(notifyDragEvent);
+            break;
+        case DragEventType::LEAVE:
+            listDragStatusListener->OnDragLeaved(notifyDragEvent);
+            break;
+        case DragEventType::DROP:
+            listDragStatusListener->OnDragEnded(notifyDragEvent);
+            break;
+        default:
+            break;
+    }
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 
 void ListPattern::RefreshLanesItemRange()
 {
