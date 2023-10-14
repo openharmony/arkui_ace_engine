@@ -6143,6 +6143,8 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
     type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(type));
+    bool isFilled = argsPtrItem->GetBool("fill", false);
+    shadow.SetIsFilled(isFilled);
     return true;
 }
 
