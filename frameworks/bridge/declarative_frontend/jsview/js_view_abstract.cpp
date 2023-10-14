@@ -105,6 +105,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
@@ -513,6 +514,12 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedAsymmetricTransition(
     return nullptr;
 }
 
+int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
+{
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+}
+
 using ChainedTransitionEffectCreator = RefPtr<NG::ChainedTransitionEffect> (*)(
     const JSRef<JSVal>&, const JSExecutionContext&);
 
@@ -554,9 +561,26 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
         return nullptr;
     }
     if (propAnimationOption->IsObject()) {
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto animationOptionArgs = JsonUtil::ParseJsonString(propAnimationOption->ToString());
-        auto animationOptionResult =
-            std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(animationOptionArgs, nullptr));
+        auto animationOptionResult = std::make_shared<AnimationOption>(
+            JSViewContext::CreateAnimation(animationOptionArgs, nullptr, pipelineContext->IsFormRender()));
+        // The maximum of the form-animation-playback duration value is 1000 ms.
+        if (pipelineContext->IsFormRender() && pipelineContext->IsFormAnimation()) {
+            auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
+            // If the duration exceeds 1000ms, init it to 0 ms.
+            if (formAnimationTimeInterval > DEFAULT_DURATION) {
+                animationOptionResult->SetDuration(0);
+            } else if (animationOptionResult->GetDuration() > (DEFAULT_DURATION - formAnimationTimeInterval)) {
+                // If remaining time is less than 1000ms, check for update duration.
+                animationOptionResult->SetDuration(DEFAULT_DURATION - formAnimationTimeInterval);
+                LOGW("[Form animation]  Form Transition SetDuration: %{public}lld ms",
+                    static_cast<long long>(DEFAULT_DURATION - formAnimationTimeInterval));
+            }
+        }
         auto animationOptionObj = JSRef<JSObject>::Cast(propAnimationOption);
         JSRef<JSVal> onFinish = animationOptionObj->GetProperty("onFinish");
         if (onFinish->IsFunction()) {
