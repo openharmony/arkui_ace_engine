@@ -1137,14 +1137,8 @@ void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
     }
 }
 
-OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset()
+OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_RETURN(menuTheme, OffsetF(0.0f, 0.0f));
-    auto beforeAnimationScale = menuTheme->GetPreviewBeforeAnimationScale();
-    auto afterAnimationScale = menuTheme->GetPreviewAfterAnimationScale();
     auto beforeScalePreviewOffset = OffsetF((previewSize_ * ((1.0f - beforeAnimationScale) / 2)).Width(),
         (previewSize_ * ((1.0f - beforeAnimationScale) / 2)).Height());
     auto afterScalePreviewOffset = OffsetF((previewSize_ * ((afterAnimationScale - 1.0f) / 2)).Width(),
@@ -1215,8 +1209,18 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
         SetMenuPlacementForAnimation(layoutWrapper);
-        auto menuOriginOffset = menuPosition - (previewOffset_ - previewOriginOffset_) + FixMenuOriginOffset();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        auto beforeAnimationScale = menuTheme->GetPreviewBeforeAnimationScale();
+        auto afterAnimationScale = menuTheme->GetPreviewAfterAnimationScale();
+        auto menuOriginOffset = menuPosition - (previewOffset_ - previewOriginOffset_) +
+                                FixMenuOriginOffset(beforeAnimationScale, afterAnimationScale);
         menuPattern->SetOriginOffset(menuOriginOffset);
+        auto menuEndOffset =
+            menuPosition - (previewOffset_ - previewOriginOffset_) + FixMenuOriginOffset(1.0f, afterAnimationScale);
+        menuPattern->SetEndOffset(menuEndOffset);
         arrowPosition_ = GetArrowPositionWithPlacement(size);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
             LayoutArrow(layoutWrapper);

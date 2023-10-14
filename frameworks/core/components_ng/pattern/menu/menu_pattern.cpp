@@ -128,6 +128,22 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<Men
         label->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
+
+void ShowMenuOpacityAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(menuTheme);
+    CHECK_NULL_VOID(renderContext);
+
+    renderContext->UpdateOpacity(0.0);
+    AnimationOption option = AnimationOption();
+    option.SetCurve(Curves::FRICTION);
+    option.SetDuration(menuTheme->GetContextMenuAppearDuration());
+    AnimationUtils::Animate(option, [renderContext]() {
+        if (renderContext) {
+            renderContext->UpdateOpacity(1.0);
+        }
+    });
+}
 } // namespace
 
 void MenuPattern::OnAttachToFrameNode()
@@ -703,22 +719,25 @@ void MenuPattern::ShowPreviewMenuAnimation()
         auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
 
         renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
-        renderContext->UpdateOpacity(0.0);
 
         previewRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
         renderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(originPosition_.GetX()), Dimension(originPosition_.GetY())));
+            OffsetT<Dimension>(Dimension(originOffset_.GetX()), Dimension(originOffset_.GetY())));
+
+        ShowMenuOpacityAnimation(menuTheme, renderContext);
 
         AnimationOption scaleOption = AnimationOption();
         auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
         scaleOption.SetCurve(motion);
         AnimationUtils::Animate(scaleOption, [renderContext, menuPosition, previewRenderContext, previewPosition]() {
             if (renderContext) {
-                renderContext->UpdateOpacity(1.0);
                 renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
                 renderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+            }
+            
+            if (previewRenderContext) {
                 previewRenderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
             }

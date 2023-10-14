@@ -166,7 +166,7 @@ void ShowContextMenuDisappearAnimation(AnimationOption& option, const RefPtr<Men
     CHECK_NULL_VOID(menuRenderContext);
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto menuPosition = menuPattern->GetOriginOffset();
+    auto menuPosition = menuPattern->GetEndOffset();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -196,6 +196,7 @@ void ShowContextMenuDisappearAnimation(AnimationOption& option, const RefPtr<Men
     });
 
     option.SetDuration(disappearDuration);
+    option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(
         option,
         [menuRenderContext]() {
