@@ -70,6 +70,12 @@ void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, c
 std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
     const PropertyCallback& callback, const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
+    if (callback) {
+        callback();
+    }
+    if (finishCallback) {
+        finishCallback();
+    }
     return std::make_shared<AnimationUtils::Animation>();
 }
 
