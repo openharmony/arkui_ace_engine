@@ -35,6 +35,7 @@ public:
     static JSRef<JSVal> CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue);
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
+    static void JsClip(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void SetCopyOptions(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
