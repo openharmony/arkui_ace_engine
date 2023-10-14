@@ -21,8 +21,6 @@ build_component("text") {
     "text_component.cpp",
     "text_component_v2.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_text.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_text.cpp" ]
 }

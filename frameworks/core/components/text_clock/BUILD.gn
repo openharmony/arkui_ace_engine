@@ -21,7 +21,4 @@ build_component("text_clock") {
     "rosen_render_text_clock.cpp",
     "text_clock_component.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_text_clock.cpp" ]
-  }
 }

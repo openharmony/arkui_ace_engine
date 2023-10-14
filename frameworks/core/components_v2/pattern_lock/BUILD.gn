@@ -20,8 +20,6 @@ build_component("pattern_lock") {
     "render_pattern_lock.cpp",
     "render_pattern_lock_creator.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_pattern_lock.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_pattern_lock.cpp" ]
 }

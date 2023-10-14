@@ -17,12 +17,9 @@ import(
 build_component("chart") {
   sources = [
     "chart_component.cpp",
-    "flutter_render_chart.cpp",
     "render_chart.cpp",
     "render_chart_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_chart.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_chart.cpp" ]
 }

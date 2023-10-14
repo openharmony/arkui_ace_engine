@@ -21,8 +21,6 @@ build_component("swiper") {
     "swiper_component.cpp",
     "swiper_element.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_swiper.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_swiper.cpp" ]
 }

@@ -16,13 +16,10 @@ import(
 
 build_component("focus_animation") {
   sources = [
-    "flutter_render_focus_animation.cpp",
     "focus_animation_component.cpp",
     "render_focus_animation.cpp",
     "render_focus_animation_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_focus_animation.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_focus_animation.cpp" ]
 }

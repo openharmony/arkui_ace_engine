@@ -25,11 +25,15 @@ ohos_unittest("flutter_test") {
     "$ace_root/frameworks/core/components/plugin/file_asset_provider.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/unittest/core/common/flutter/flutter_test.cpp",
+    "$flutter_root/engine/flutter/shell/common/thread_host.cc",
+    "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
+    "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   deps = [
+    "$ace_flutter_engine_root:flutter_engine_common_ohos",
     "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
@@ -39,12 +43,4 @@ ohos_unittest("flutter_test") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-  if (ace_use_new_skia) {
-    sources += [
-      "$flutter_root/engine/flutter/shell/common/thread_host.cc",
-      "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
-      "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-    ]
-    deps += [ "$ace_flutter_engine_root:flutter_engine_common_ohos" ]
-  }
 }

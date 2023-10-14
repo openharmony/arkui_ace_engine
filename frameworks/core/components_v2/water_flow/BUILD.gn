@@ -26,8 +26,6 @@ build_component("water_flow_v2") {
     "water_flow_position_controller.cpp",
     "water_flow_scroll_controller.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_water_flow.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_water_flow.cpp" ]
 }

@@ -16,14 +16,11 @@ import(
 
 build_component("root") {
   sources = [
-    "flutter_render_root.cpp",
     "render_root.cpp",
     "render_root_creator.cpp",
     "root_component.cpp",
     "root_element.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_root.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_root.cpp" ]
 }

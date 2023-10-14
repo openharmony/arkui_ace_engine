@@ -16,7 +16,6 @@ import(
 
 build_component("grid_layout") {
   sources = [
-    "flutter_render_grid_layout.cpp",
     "grid_layout_component.cpp",
     "grid_layout_element.cpp",
     "grid_layout_item_component.cpp",
@@ -25,9 +24,7 @@ build_component("grid_layout") {
     "render_grid_layout_creator.cpp",
     "render_grid_layout_item.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_grid_layout.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_grid_layout.cpp" ]
   cflags = [
     "-Wall",
