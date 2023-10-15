@@ -996,7 +996,6 @@ void Scrollable::ProcessScrollMotionStop()
         scrollPause_ = false;
         HandleOverScroll(currentVelocity_);
     } else {
-        currentVelocity_ = 0.0;
         if (isDragUpdateStop_) {
             return;
         }
@@ -1012,6 +1011,7 @@ void Scrollable::ProcessScrollMotionStop()
         if (scrollEnd_) {
             scrollEnd_();
         }
+        currentVelocity_ = 0.0;
 #if !defined(PREVIEW)
         LayoutInspector::SupportInspector();
 #endif

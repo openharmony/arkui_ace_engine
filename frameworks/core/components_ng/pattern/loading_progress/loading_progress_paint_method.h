@@ -26,12 +26,6 @@
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const int32_t REFRESH_STATE_FOLLOW_HAND = static_cast<int32_t>(RefreshAnimationState::FOLLOW_HAND);
-const int32_t REFRESH_STATE_FOLLOW_TO_RECYCLE = static_cast<int32_t>(RefreshAnimationState::FOLLOW_TO_RECYCLE);
-const int32_t REFRESH_STATE_RECYCLE = static_cast<int32_t>(RefreshAnimationState::RECYCLE);
-const int32_t REFRESH_STATE_FADEAWAY = static_cast<int32_t>(RefreshAnimationState::FADEAWAY);
-}
 class ACE_EXPORT LoadingProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(LoadingProgressPaintMethod, NodePaintMethod)
 public:
@@ -66,24 +60,22 @@ public:
         color_ = paintProperty->GetColor().value_or(progressTheme->GetLoadingColor());
         loadingProgressModifier_->SetColor(LinearColor(color_));
         if (loadingProgressModifier_->GetOwner() == LoadingProgressOwner::SELF) {
+            loadingProgressModifier_->ChangeSizeScaleData(1.0f);
             loadingProgressModifier_->StartRecycle();
             return;
         }
-        auto loadingState =
-            paintProperty->GetRefreshAnimationState().value_or(static_cast<int32_t>(RefreshAnimationState::UNKNOWN));
+        auto loadingState = paintProperty->GetRefreshAnimationState().value_or(RefreshAnimationState::FOLLOW_HAND);
         switch (loadingState) {
-            case REFRESH_STATE_FOLLOW_HAND:
+            case RefreshAnimationState::FOLLOW_HAND:
                 loadingProgressModifier_->ChangeRefreshFollowData(
-                    paintProperty->GetRefreshFollowRatio().value_or(0.0f));
+                    paintProperty->GetRefreshSizeScaleRatio().value_or(1.0f));
                 break;
-            case REFRESH_STATE_FOLLOW_TO_RECYCLE:
+            case RefreshAnimationState::FOLLOW_TO_RECYCLE:
                 loadingProgressModifier_->StartTransToRecycleAnimation();
                 break;
-            case REFRESH_STATE_RECYCLE:
+            case RefreshAnimationState::RECYCLE:
+                loadingProgressModifier_->ChangeSizeScaleData(paintProperty->GetRefreshSizeScaleRatio().value_or(1.0f));
                 loadingProgressModifier_->StartRecycle();
-                break;
-            case REFRESH_STATE_FADEAWAY:
-                loadingProgressModifier_->ChangeFadeAwayData(paintProperty->GetRefreshFadeAwayRatio().value_or(0.0f));
                 break;
             default:
                 break;

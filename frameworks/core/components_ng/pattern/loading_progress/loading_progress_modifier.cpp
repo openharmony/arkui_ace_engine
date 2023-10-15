@@ -79,6 +79,7 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       cometOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_OPACITY_SCALE)),
       cometSizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_SIZE_SCALE)),
       cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TOTAL_TAIL_LENGTH)),
+      sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)),
       loadingProgressOwner_(loadingProgressOwner)
 {
     AttachProperty(enableLoading_);
@@ -100,18 +101,18 @@ void LoadingProgressModifier::onDraw(DrawingContext& context)
     float date = date_->Get();
     auto diameter = std::min(contentSize_->Get().Width(), contentSize_->Get().Height());
     RingParam ringParam;
-    ringParam.strokeWidth = LoadingProgressUtill::GetRingStrokeWidth(diameter) * sizeScale_;
-    ringParam.radius = LoadingProgressUtill::GetRingRadius(diameter) * sizeScale_;
+    ringParam.strokeWidth = LoadingProgressUtill::GetRingStrokeWidth(diameter) * sizeScale_->Get();
+    ringParam.radius = LoadingProgressUtill::GetRingRadius(diameter) * sizeScale_->Get();
     ringParam.movement =
-        (ringParam.radius * DOUBLE + ringParam.strokeWidth) * centerDeviation_->Get() * sizeScale_;
+        (ringParam.radius * DOUBLE + ringParam.strokeWidth) * centerDeviation_->Get() * sizeScale_->Get();
 
     CometParam cometParam;
-    cometParam.radius = LoadingProgressUtill::GetCometRadius(diameter) * sizeScale_;
+    cometParam.radius = LoadingProgressUtill::GetCometRadius(diameter) * sizeScale_->Get();
     cometParam.alphaScale = cometOpacity_->Get();
     cometParam.sizeScale = cometSizeScale_->Get();
     cometParam.pointCount = GetCometNumber();
 
-    auto orbitRadius = LoadingProgressUtill::GetOrbitRadius(diameter) * sizeScale_;
+    auto orbitRadius = LoadingProgressUtill::GetOrbitRadius(diameter) * sizeScale_->Get();
     if (date > COUNT) {
         DrawRing(context, ringParam);
         DrawOrbit(context, cometParam, orbitRadius, date);
@@ -360,7 +361,7 @@ void LoadingProgressModifier::StartRecycle()
     if (isLoading_) {
         return;
     }
-    sizeScale_ = 1.0f;
+    sizeScale_->Set(1.0f);
     if (date_) {
         isLoading_ = true;
         date_->Set(0.0f);
@@ -392,6 +393,7 @@ void LoadingProgressModifier::StartRecycle()
 
 void LoadingProgressModifier::StartTransToRecycleAnimation()
 {
+    sizeScale_->Set(1.0f);
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.6f, 0.2f, 1.0f, 1.0f);
     AnimationOption option;
     option.SetDuration(TRANS_DURATION);
@@ -426,7 +428,7 @@ void LoadingProgressModifier::StartTransToRecycleAnimation()
 void LoadingProgressModifier::ChangeRefreshFollowData(float refreshFollowRatio)
 {
     auto ratio = CorrectNormalize(refreshFollowRatio);
-    sizeScale_ = BASE_SCALE + (1.0 - BASE_SCALE) * ratio;
+    sizeScale_->Set(BASE_SCALE + (1.0 - BASE_SCALE) * ratio);
     if (isLoading_) {
         CloseAnimation(FOLLOW_START, COMET_TAIL_ANGLE, 1.0f, 1.0f);
     }
@@ -437,10 +439,10 @@ void LoadingProgressModifier::ChangeRefreshFollowData(float refreshFollowRatio)
     cometSizeScale_->Set(1.0f);
 }
 
-void LoadingProgressModifier::ChangeFadeAwayData(float refreshFadeAwayRatio)
+void LoadingProgressModifier::ChangeSizeScaleData(float refreshFadeAwayRatio)
 {
     auto ratio = CorrectNormalize(refreshFadeAwayRatio);
-    sizeScale_ = BASE_SCALE + (1.0 - BASE_SCALE) * ratio;
+    sizeScale_->Set(BASE_SCALE + (1.0 - BASE_SCALE) * ratio);
 }
 
 void LoadingProgressModifier::CloseAnimation(float date, float cometLen, float cometOpacity, float cometScale)

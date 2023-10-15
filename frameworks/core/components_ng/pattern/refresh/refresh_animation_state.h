@@ -24,11 +24,9 @@
 
 namespace OHOS::Ace::NG {
 enum class RefreshAnimationState : int32_t {
-    UNKNOWN = 0,
     FOLLOW_HAND = 1,
     FOLLOW_TO_RECYCLE = 2,
     RECYCLE = 3,
-    FADEAWAY = 4,
 };
 } // namespace OHOS::Ace::NG
 

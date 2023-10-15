@@ -53,12 +53,12 @@ RefPtr<ScrollableCoordinationEvent> RefreshCoordination::CreateCoordinationEvent
     return coordinationEvent;
 }
 
-void RefreshCoordination::OnScrollStart() const
+void RefreshCoordination::OnScrollStart(bool isDrag) const
 {
     CHECK_NULL_VOID(coordinationEvent_);
     auto onScrollStart = coordinationEvent_->GetOnScrollStartEvent();
     if (onScrollStart) {
-        onScrollStart();
+        onScrollStart(isDrag);
     }
 }
 

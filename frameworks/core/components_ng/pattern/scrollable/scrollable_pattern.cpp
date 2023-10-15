@@ -187,7 +187,7 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         OnScrollCallback(offset, source);
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart();
+            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE);
         }
     }
 
@@ -196,7 +196,7 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         (source == SCROLL_FROM_UPDATE) && !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart();
+            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE);
         }
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
