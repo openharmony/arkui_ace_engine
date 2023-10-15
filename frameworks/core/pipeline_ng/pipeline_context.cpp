@@ -883,23 +883,27 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             positionY = static_cast<float>(manager->GetClickPosition().GetY());
         }
         SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
-        float offsetFix = (rootSize.Height() - positionY) > 100.0
-                              ? keyboardHeight - (rootSize.Height() - positionY) / 2.0
+        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+        float positionYWithOffset = positionY - keyboardOffset;
+        float offsetFix = (rootSize.Height() - positionYWithOffset) > 100.0f
+                              ? keyboardHeight - (rootSize.Height() - positionYWithOffset) / 2.0f
                               : keyboardHeight;
         LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f, "
              "keyboardHeight %{public}f",
             positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
         if (NearZero(keyboardHeight)) {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
-        } else if (LessOrEqual(rootSize.Height() - positionY - height, height) &&
-                   LessOrEqual(rootSize.Height() - positionY, keyboardHeight)) {
+        } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
+                   LessOrEqual(rootSize.Height() - positionYWithOffset, keyboardHeight)) {
             safeAreaManager_->UpdateKeyboardOffset(-keyboardHeight);
-        } else if (positionY + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
+        } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
             safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
-        } else if ((positionY + height > rootSize.Height() - keyboardHeight &&
-                       positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
+        } else if ((positionYWithOffset + height > rootSize.Height() - keyboardHeight &&
+                       positionYWithOffset < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
                    NearZero(rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
             safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
+        } else {
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
         SyncSafeArea(true);
         // layout immediately
