@@ -376,7 +376,7 @@ private:
     float GetOffsetWithLimit(float position, float offset) const;
     void LimitMouseEndOffset();
 
-    void ProcessAssociatedScroll(double offset, int32_t source);
+    bool ProcessAssociatedScroll(double offset, int32_t source);
 
     /******************************************************************************
      * NestableScrollContainer implementations
