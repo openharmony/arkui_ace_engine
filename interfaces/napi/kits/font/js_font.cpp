@@ -52,17 +52,12 @@ static bool ParseFamilyName(napi_env env, napi_value familyNameNApi, std::string
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, familyNameNApi, recv)) {
-            LOGE("can not parse resource info from input params.");
-            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
         if (!ParseString(recv, familyName)) {
-            LOGE("can not get message from resource manager.");
-            NapiThrow(env, "Can not get familyName from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
     } else {
-        LOGE("The parameter type of familyName is incorrect.");
         return false;
     }
     return true;
@@ -80,18 +75,15 @@ static bool ParseFamilySrc(napi_env env, napi_value familySrcNApi, std::string& 
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, familySrcNApi, recv)) {
-            LOGE("can not parse resource info from input params.");
             NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
 
         if (!ParseString(recv, familySrc)) {
-            LOGE("can not get familySrc from resource manager.");
             NapiThrow(env, "Can not get familySrc from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
     } else {
-        LOGE("The parameter type of familySrc is incorrect.");
         return false;
     }
     return true;
@@ -110,11 +102,9 @@ static bool ParseFamilyNameOrSrc(
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, familyNameOrSrcNApi, recv)) {
-            LOGE("can not parse resource info from input params.");
             return false;
         }
         if (!ParseString(recv, familyNameOrSrc)) {
-            LOGE("can not get family name or src from resource manager.");
             return false;
         }
     } else {
@@ -162,7 +152,7 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
 
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
-        LOGE("can not get delegate.");
+        TAG_LOGW(AceLogTag::ACE_FONT, "can not get delegate.");
         return nullptr;
     }
     delegate->RegisterFont(familyName, familySrc);
