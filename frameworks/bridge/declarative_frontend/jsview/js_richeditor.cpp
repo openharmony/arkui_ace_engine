@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_v2/inspector/utils.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
@@ -965,6 +966,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("updateSpanStyle", &JSRichEditorController::UpdateSpanStyle);
     JSClass<JSRichEditorController>::CustomMethod(
         "updateParagraphStyle", &JSRichEditorController::UpdateParagraphStyle);
+    JSClass<JSRichEditorController>::CustomMethod("getTypingStyle", &JSRichEditorController::GetTypingStyle);
     JSClass<JSRichEditorController>::CustomMethod("setTypingStyle", &JSRichEditorController::SetTypingStyle);
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
     JSClass<JSRichEditorController>::CustomMethod("getParagraphs", &JSRichEditorController::GetParagraphsInfo);
@@ -1146,6 +1148,50 @@ void JSRichEditorController::UpdateParagraphStyle(const JSCallbackInfo& info)
     if (controller) {
         controller->UpdateParagraphStyle(start, end, style);
     }
+}
+
+JSRef<JSObject> JSRichEditorController::CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle)
+{
+    auto tyingStyleObj = JSRef<JSObject>::New();
+    TextStyle textStyle;
+    if (typingStyle.updateFontFamily.has_value()) {
+        std::string family = V2::ConvertFontFamily(typingStyle.updateFontFamily.value());
+        tyingStyleObj->SetProperty<std::string>("fontFamily", family);
+    }
+    if (typingStyle.updateFontSize.has_value()) {
+        tyingStyleObj->SetProperty<double>("fontSize", typingStyle.updateFontSize.value().ConvertToVp());
+    }
+    if (typingStyle.updateTextColor.has_value()) {
+        tyingStyleObj->SetProperty<std::string>("fontColor", typingStyle.updateTextColor.value().ColorToString());
+    }
+    if (typingStyle.updateItalicFontStyle.has_value()) {
+        tyingStyleObj->SetProperty<int32_t>(
+            "fontStyle", static_cast<int32_t>(typingStyle.updateItalicFontStyle.value()));
+    }
+    if (typingStyle.updateFontWeight.has_value()) {
+        tyingStyleObj->SetProperty<int32_t>("fontWeight", static_cast<int32_t>(typingStyle.updateFontWeight.value()));
+    }
+
+    JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
+    if (typingStyle.updateTextDecoration.has_value()) {
+        decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(typingStyle.updateTextDecoration.value()));
+    }
+    if (typingStyle.updateTextDecorationColor.has_value()) {
+        decorationObj->SetProperty<std::string>(
+            "color", typingStyle.updateTextDecorationColor.value().ColorToString());
+    }
+    if (typingStyle.updateTextDecoration.has_value() || typingStyle.updateTextDecorationColor.has_value()) {
+        tyingStyleObj->SetPropertyObject("decoration", decorationObj);
+    }
+    return tyingStyleObj;
+}
+
+void JSRichEditorController::GetTypingStyle(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    auto style = CreateTypingStyleResult(typingStyle_);
+    info.SetReturnValue(JSRef<JSVal>::Cast(style));
 }
 
 void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
