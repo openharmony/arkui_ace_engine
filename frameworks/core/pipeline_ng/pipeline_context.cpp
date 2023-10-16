@@ -808,6 +808,16 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
     }
 }
 
+void PipelineContext::SetEnableKeyBoardAvoidMode(bool value)
+{
+    safeAreaManager_->SetKeyBoardAvoidMode(value);
+}
+
+bool PipelineContext::IsEnableKeyBoardAvoidMode()
+{
+    return safeAreaManager_->KeyboardSafeAreaEnabled();
+}
+
 void PipelineContext::SetIgnoreViewSafeArea(bool value)
 {
     if (safeAreaManager_->SetIgnoreSafeArea(value)) {

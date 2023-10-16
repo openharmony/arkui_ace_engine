@@ -764,6 +764,12 @@ public:
 
     virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
 
+    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+
+    virtual bool IsEnableKeyBoardAvoidMode() {
+        return false;
+    }
+
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;

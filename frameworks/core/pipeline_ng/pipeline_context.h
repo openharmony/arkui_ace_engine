@@ -207,6 +207,8 @@ public:
 
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
+    void SetEnableKeyBoardAvoidMode(bool value) override;
+    bool IsEnableKeyBoardAvoidMode() override;
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
     {
         return safeAreaManager_;
