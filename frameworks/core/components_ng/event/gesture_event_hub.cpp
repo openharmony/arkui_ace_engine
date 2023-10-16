@@ -21,6 +21,8 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
+#include "core/common/interaction/interaction_data.h"
+#include "core/common/interaction/interaction_interface.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
@@ -606,16 +608,16 @@ std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEve
         int32_t width = pixelMap->GetWidth();
         int32_t height = pixelMap->GetHeight();
         auto pixelMapOffset = gestureHub->GetPixelMapOffset(info, SizeF(width, height), scale);
-        Msdp::DeviceStatus::ShadowInfo shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
-        int ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateShadowPic(shadowInfo);
+        ShadowInfoCore shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
+        int ret = InteractionInterface::GetInstance()->UpdateShadowPic(shadowInfo);
         if (ret != 0) {
-            LOGE("InteractionManager: UpdateShadowPic error");
+            LOGE("InteractionInterface: UpdateShadowPic error");
             return;
         }
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("In setThumbnailPixelMap callback, set DragWindowVisible true.");
         }
-        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         dragDropManager->SetIsDragWindowShow(true);
     };
     return callback;
@@ -786,14 +788,13 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
-    Msdp::DeviceStatus::ShadowInfo shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
-    DragData dragData { shadowInfo, {}, udKey, dragDropInfo.extraInfo, arkExtraInfoJson->ToString(),
+    ShadowInfoCore shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
+    DragDataCore dragData { shadowInfo, {}, udKey, dragDropInfo.extraInfo, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), true };
-    ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
-        dragData, GetDragCallback(pipeline, eventHub));
+    ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
-        LOGE("InteractionManager: drag start error");
+        LOGE("InteractionInterface: drag start error");
         return;
     }
     dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
@@ -807,13 +808,13 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
         overlayManager->RemovePixelMap();
         pipeline->FlushPipelineImmediately();
-        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON &&
                (dragDropInfo.pixelMap || dragDropInfo.customNode)) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("Drag window start for Mouse with custom pixelMap, set DragWindowVisible true.");
         }
-        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         dragDropManager->SetIsDragWindowShow(true);
     }
     dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
@@ -1094,9 +1095,9 @@ int32_t GestureEventHub::SetDragData(const RefPtr<UnifiedData>& unifiedData, std
     }
     return ret;
 }
-OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)
+OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)
 {
-    auto ret = [](const DragNotifyMsg& notifyMessage) {};
+    auto ret = [](const DragNotifyMsgCore& notifyMessage) {};
     auto eventHub = hub.Upgrade();
     CHECK_NULL_RETURN(eventHub, ret);
     auto pipeline = AceType::DynamicCast<PipelineContext>(context);
@@ -1108,17 +1109,17 @@ OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& cont
     auto eventManager = pipeline->GetEventManager();
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto callback = [id = Container::CurrentId(), eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
-                        const DragNotifyMsg& notifyMessage) {
+                        const DragNotifyMsgCore& notifyMessage) {
         ContainerScope scope(id);
         DragRet result = DragRet::DRAG_FAIL;
         switch (notifyMessage.result) {
-            case DragResult::DRAG_SUCCESS:
+            case DragRet::DRAG_SUCCESS:
                 result = DragRet::DRAG_SUCCESS;
                 break;
-            case DragResult::DRAG_FAIL:
+            case DragRet::DRAG_FAIL:
                 result = DragRet::DRAG_FAIL;
                 break;
-            case DragResult::DRAG_CANCEL:
+            case DragRet::DRAG_CANCEL:
                 result = DragRet::DRAG_CANCEL;
                 break;
             default:

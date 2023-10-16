@@ -28,6 +28,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
@@ -65,10 +66,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
-
-#ifdef ENABLE_DRAG_FRAMEWORK
-#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
-#endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2439,7 +2436,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     scaleOption.SetOnFinishEvent([this, id = Container::CurrentId()] {
         ContainerScope scope(id);
         LOGD("Drag window start with default pixelMap");
-        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
