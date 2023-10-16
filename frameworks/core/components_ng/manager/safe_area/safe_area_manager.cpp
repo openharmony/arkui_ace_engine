@@ -82,6 +82,16 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
     return true;
 }
 
+bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
+{
+    if (keyboardSafeAreaEnabled_ == value) {
+        return false;
+    }
+    keyboardSafeAreaEnabled_ = value;
+    LOGD("setKeyBoardAvoidMode %{public}d", value);
+    return true;
+}
+
 SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 {
     if (ignoreSafeArea_ || !isFullScreen_) {

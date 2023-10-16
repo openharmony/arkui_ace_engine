@@ -20,6 +20,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
 // SafeAreaManager stores layout information to apply SafeArea correctly.
@@ -77,6 +78,7 @@ public:
 
     bool SetIsFullScreen(bool value);
     bool SetIgnoreSafeArea(bool value);
+    bool SetKeyBoardAvoidMode(bool value);
 
 private:
     // app window is full screen 
