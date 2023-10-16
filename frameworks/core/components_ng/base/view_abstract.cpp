@@ -883,7 +883,7 @@ void ViewAbstract::SetOnDragEnter(
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragEnter(std::move(onDragEnter));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(onDragEnter));
 
     AddDragFrameNodeToManager();
 }
@@ -893,7 +893,7 @@ void ViewAbstract::SetOnDragLeave(
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragLeave(std::move(onDragLeave));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(onDragLeave));
 
     AddDragFrameNodeToManager();
 }
@@ -903,7 +903,7 @@ void ViewAbstract::SetOnDragMove(
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragMove(std::move(onDragMove));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(onDragMove));
 
     AddDragFrameNodeToManager();
 }
@@ -912,7 +912,7 @@ void ViewAbstract::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEven
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDrop(std::move(onDrop));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(onDrop));
 
     AddDragFrameNodeToManager();
 }
@@ -921,7 +921,7 @@ void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragE
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragEnd(std::move(onDragEnd));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
 
     AddDragFrameNodeToManager();
 }

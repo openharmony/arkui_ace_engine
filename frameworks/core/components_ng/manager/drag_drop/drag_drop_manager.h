@@ -186,6 +186,8 @@ private:
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
     void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
+    void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
+        RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;

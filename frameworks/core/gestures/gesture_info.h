@@ -264,6 +264,7 @@ private:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 enum class DragRet {
+    DRAG_DEFAULT = -1,
     DRAG_SUCCESS = 0,
     DRAG_FAIL,
     DRAG_CANCEL,
@@ -413,7 +414,7 @@ private:
     RefPtr<UnifiedData> unifiedData_;
     std::map<std::string, int64_t> summary_;
     std::string udKey_ = "";
-    DragRet dragRet_;
+    DragRet dragRet_ = DragRet::DRAG_DEFAULT;
     Rect previewRect_;
     bool useCustomAnimation_ = false;
     bool isGetDataSuccess_ = false;
