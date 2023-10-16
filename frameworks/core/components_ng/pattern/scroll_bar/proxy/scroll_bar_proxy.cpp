@@ -48,7 +48,7 @@ float GetScrollOffset(RefPtr<Pattern> pattern)
 void ScrollBarProxy::RegisterScrollableNode(const ScrollableNodeInfo& scrollableNode)
 {
     if (std::find(scrollableNodes_.begin(), scrollableNodes_.end(), scrollableNode) != scrollableNodes_.end()) {
-        LOGE("scrollable node is already exist.");
+        TAG_LOGW(AceLogTag::ACE_OUTER_SCROLL_BAR, "scrollable node is already exist.");
         return;
     }
     scrollableNodes_.emplace_back(scrollableNode);
@@ -57,7 +57,7 @@ void ScrollBarProxy::RegisterScrollableNode(const ScrollableNodeInfo& scrollable
 void ScrollBarProxy::RegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar)
 {
     if (std::find(scrollBars_.begin(), scrollBars_.end(), scrollBar) != scrollBars_.end()) {
-        LOGE("scroll bar is already exist.");
+        TAG_LOGW(AceLogTag::ACE_OUTER_SCROLL_BAR, "scroll bar is already exist.");
         return;
     }
     scrollBars_.emplace_back(scrollBar);
@@ -92,7 +92,7 @@ void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBa
         }
         auto scrollable = node.scrollableNode.Upgrade();
         if (!scrollable || !CheckScrollable(scrollable)) {
-            LOGE("Node is not scrollable node.");
+            TAG_LOGW(AceLogTag::ACE_OUTER_SCROLL_BAR, "Node is not scrollable node.");
             continue;
         }
         float value = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, distance);
@@ -124,7 +124,7 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<Pattern>& weakScrollableNode)
 {
     auto scrollable = weakScrollableNode.Upgrade();
     if (!scrollable || !CheckScrollable(scrollable)) {
-        LOGE("Node is not scrollable node.");
+        TAG_LOGW(AceLogTag::ACE_OUTER_SCROLL_BAR, "Node is not scrollable node.");
         return;
     }
 
@@ -176,14 +176,14 @@ bool ScrollBarProxy::NotifySnapScroll(float delta, float velocity, float control
         auto scrollable = node.scrollableNode.Upgrade();
         if (!scrollable || !CheckScrollable(scrollable) || !node.calePredictSnapOffsetCallback ||
             !node.startScrollSnapMotionCallback) {
-            LOGD("Node is not a scrollable or snap node.");
+            TAG_LOGD(AceLogTag::ACE_OUTER_SCROLL_BAR, "Node is not a scrollable or snap node.");
             continue;
         }
         auto patternOffset = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, delta);
         auto predictSnapOffset = node.calePredictSnapOffsetCallback(patternOffset);
         // If snap scrolling, predictSnapOffset will has a value.
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
-            LOGD("ScrollBarProxy::NotifySnapScroll predictSnapOffset:%{public}f", predictSnapOffset.value());
+            TAG_LOGD(AceLogTag::ACE_OUTER_SCROLL_BAR, "ScrollBarProxy::NotifySnapScroll predictSnapOffset:%{public}f", predictSnapOffset.value());
             node.startScrollSnapMotionCallback(predictSnapOffset.value(), velocity);
             // Outer scrollBar can only control one snap scrollable component.
             return true;
@@ -197,7 +197,7 @@ float ScrollBarProxy::CalcPatternOffset(float scrollableDistance, float controlD
     if (!NearZero(controlDistance)) {
         return delta * scrollableDistance / controlDistance;
     } else {
-        LOGD("scroll bar scrollable distance is zero");
+        TAG_LOGD(AceLogTag::ACE_OUTER_SCROLL_BAR, "scroll bar scrollable distance is zero");
         return 0.0f;
     }
 }

@@ -95,7 +95,7 @@ void JSScroller::Destructor(JSScroller* scroller)
 void JSScroller::ScrollTo(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        LOGW("Invalid params");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "Scroll to with Invalid params");
         return;
     }
 
@@ -107,7 +107,7 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     if (!std::regex_match(xOffsetStr->ToString(), DIMENSION_REGEX) ||
         !std::regex_match(yOffsetStr->ToString(), DIMENSION_REGEX) || !ConvertFromJSValue(xOffsetStr, xOffset) ||
         !ConvertFromJSValue(yOffsetStr, yOffset)) {
-        LOGW("Failed to parse param 'xOffset' or 'yOffset'");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "Failed to parse param 'xOffset' or 'yOffset'");
         return;
     }
 
@@ -118,7 +118,7 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     if (animationValue->IsObject()) {
         auto animationObj = JSRef<JSObject>::Cast(animationValue);
         if (!ConvertFromJSValue(animationObj->GetProperty("duration"), duration) || NonPositive(duration)) {
-            LOGW("Failed to parse param 'duration' or it is not a positive number, set it as the default value");
+            TAG_LOGW(AceLogTag::ACE_SCROLL, "Failed to parse param 'duration' or it is not a positive number, set it as the default value");
             duration = DEFAULT_DURATION;
         }
 
@@ -129,13 +129,13 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
 
     if (GreatNotEqual(duration, 0.0)) {
-        LOGD("ScrollTo(%lf, %lf, %lf)", xOffset.Value(), yOffset.Value(), duration);
+        TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollTo(%lf, %lf, %lf)", xOffset.Value(), yOffset.Value(), duration);
     } else {
-        LOGD("ScrollTo(%lf, %lf)", xOffset.Value(), yOffset.Value());
+        TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollTo(%lf, %lf)", xOffset.Value(), yOffset.Value());
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        LOGE("controller_ is nullptr");
+        TAG_LOGE(AceLogTag::ACE_SCROLL, "controller_ is nullptr");
         return;
     }
     auto direction = scrollController->GetScrollDirection();
@@ -164,15 +164,15 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
 {
     AlignDeclaration::Edge edge = AlignDeclaration::Edge::AUTO;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], EDGE_TABLE, edge)) {
-        LOGW("Invalid params");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollEdge with Invalid params");
         return;
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        LOGE("controller_ is nullptr");
+        TAG_LOGE(AceLogTag::ACE_SCROLL, "ScrollEdge controller_ is nullptr");
         return;
     }
-    LOGD("ScrollEdge(%{public}d)", static_cast<int32_t>(edge));
+    TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollEdge(%{public}d)", static_cast<int32_t>(edge));
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
     scrollController->ScrollToEdge(edgeType, true);
 }
@@ -183,12 +183,12 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
     bool smooth = false;
     ScrollAlign align = ScrollAlign::NONE;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], index) || index < 0) {
-        LOGW("Invalid params");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollToIndex Invalid params");
         return;
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        LOGE("controller_ is nullptr");
+        TAG_LOGE(AceLogTag::ACE_SCROLL, "ScrollToIndex controller_ is nullptr");
         return;
     }
     // 2：parameters count, 1: parameter index
@@ -197,7 +197,7 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
     }
     // 3：parameters count, 2: parameter index
     if (args.Length() == 3 && !ConvertFromJSValue(args[2], ALIGN_TABLE, align)) {
-        LOGE("Invalid align params");
+        TAG_LOGE(AceLogTag::ACE_SCROLL, "ScrollToIndex Invalid align params");
     }
     scrollController->JumpTo(index, smooth, align, SCROLL_FROM_JUMP);
 }
@@ -205,14 +205,14 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
 void JSScroller::ScrollPage(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        LOGW("Invalid params");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollPage Invalid params");
         return;
     }
 
     auto obj = JSRef<JSObject>::Cast(args[0]);
     bool next = true;
     if (!ConvertFromJSValue(obj->GetProperty("next"), next)) {
-        LOGW("Failed to parse param 'next'");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollPage Failed to parse param 'next'");
         return;
     }
 
@@ -220,19 +220,19 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
     ConvertFromJSValue(obj->GetProperty("direction"), DIRECTION_TABLE, direction);
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        LOGE("controller_ is nullptr");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollPage controller_ is nullptr");
         return;
     }
-    LOGD("ScrollPage(%{public}s, %{public}d)", next ? "true" : "false", static_cast<int32_t>(direction));
+    TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollPage(%{public}s, %{public}d)", next ? "true" : "false", static_cast<int32_t>(direction));
     scrollController->ScrollPage(!next, true);
 }
 
 void JSScroller::CurrentOffset(const JSCallbackInfo& args)
 {
-    LOGD("CurrentOffset()");
+    TAG_LOGD(AceLogTag::ACE_SCROLL, "CurrentOffset()");
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        LOGE("controller_ is nullptr");
+        TAG_LOGE(AceLogTag::ACE_SCROLL, "CurrentOffset controller_ is nullptr");
         return;
     }
     auto retObj = JSRef<JSObject>::New();
@@ -245,7 +245,7 @@ void JSScroller::CurrentOffset(const JSCallbackInfo& args)
 void JSScroller::ScrollBy(const JSCallbackInfo& args)
 {
     if (args.Length() < 2) {
-        LOGW("Invalid params");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollBy Invalid params");
         return;
     }
 
@@ -253,7 +253,7 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
     Dimension yOffset;
     if (!ConvertFromJSValue(args[0], xOffset) ||
         !ConvertFromJSValue(args[1], yOffset)) {
-        LOGW("Failed to parse param");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollBy Failed to parse param");
         return;
     }
 
@@ -285,7 +285,7 @@ void JSScroller::IsAtEnd(const JSCallbackInfo& args)
 {
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        LOGE("controller_ is nullptr");
+        TAG_LOGE(AceLogTag::ACE_SCROLL, "controller_ is nullptr");
         return;
     }
     bool isAtEnd = scrollController->IsAtEnd();

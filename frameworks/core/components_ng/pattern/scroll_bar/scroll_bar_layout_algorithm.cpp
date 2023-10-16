@@ -119,7 +119,7 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!NearZero(controlDistance)) {
         currentOffset = scrollOffset * scrollableDistance_ / controlDistance;
     } else {
-        LOGW("scroll bar scrollable distance is zero");
+        TAG_LOGW(AceLogTag::ACE_OUTER_SCROLL_BAR, "scroll bar scrollable distance is zero");
     }
     currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
     if (scrollableDistance_ > 0.0f) {

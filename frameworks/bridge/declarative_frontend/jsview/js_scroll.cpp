@@ -58,7 +58,7 @@ const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, A
 bool ParseJsDimensionArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result)
 {
     if (!jsValue->IsArray()) {
-        LOGE("args is not array orobject!");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "args is not array orobject!");
         return false;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
@@ -82,7 +82,7 @@ bool CheckSnapPaginations(std::vector<Dimension> snapPaginations)
     auto unit = (*snapPaginations.begin()).Unit();
     for (auto iter = snapPaginations.begin() + 1; iter < snapPaginations.end(); ++iter) {
         if (Negative((*iter).Value()) || (*iter).Unit() != unit || LessOrEqual((*iter).Value(), preValue)) {
-            LOGE("Invalid snapPagination");
+            TAG_LOGW(AceLogTag::ACE_SCROLL, "Invalid snapPagination");
             return false;
         }
         preValue = (*iter).Value();
@@ -119,7 +119,7 @@ void JSScroll::Create(const JSCallbackInfo& info)
 void JSScroll::SetScrollable(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(AXIS.size())) {
-        LOGE("value is not valid: %{public}d", value);
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "value is not valid: %{public}d", value);
         return;
     }
     ScrollModel::GetInstance()->SetAxis(AXIS[value]);
@@ -140,12 +140,12 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
             auto params = ConvertToJSValues(dx, dy);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
-                LOGE("Error calling onScrollBegin, result is empty.");
+                TAG_LOGE(AceLogTag::ACE_SCROLL, "Error calling onScrollBegin, result is empty.");
                 return scrollInfo;
             }
 
             if (!result->IsObject()) {
-                LOGE("Error calling onScrollBegin, result is not object.");
+                TAG_LOGE(AceLogTag::ACE_SCROLL, "Error calling onScrollBegin, result is not object.");
                 return scrollInfo;
             }
 
@@ -175,12 +175,12 @@ void JSScroll::OnScrollFrameBeginCallback(const JSCallbackInfo& args)
             auto params = ConvertToJSValues(offset, state);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
-                LOGE("Error calling onScrollBegin, result is empty.");
+                TAG_LOGW(AceLogTag::ACE_SCROLL, "Error calling onScrollBegin, result is empty.");
                 return scrollRes;
             }
 
             if (!result->IsObject()) {
-                LOGE("Error calling onScrollBegin, result is not object.");
+                TAG_LOGW(AceLogTag::ACE_SCROLL, "Error calling onScrollBegin, result is not object.");
                 return scrollRes;
             }
 
@@ -297,7 +297,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
 void JSScroll::SetScrollBar(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("args is invalid");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "set scrollBar with args is invalid");
         return;
     }
     int32_t displayMode;
@@ -315,7 +315,7 @@ void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
     CHECK_NULL_VOID(theme);
     CalcDimension scrollBarWidth;
     if (args.Length() < 1) {
-        LOGE("args is invalid");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "set scrollBarWidth with args is invalid");
         return;
     }
     if (!ParseJsDimensionVp(args[0], scrollBarWidth) || args[0]->IsNull() || args[0]->IsUndefined() ||
@@ -343,7 +343,7 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("args is invalid");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "set edge effect args is invalid");
         return;
     }
     int32_t edgeEffect;
@@ -374,7 +374,7 @@ void JSScroll::SetNestedScroll(const JSCallbackInfo& args)
     };
     if (args.Length() < 1 || !args[0]->IsObject()) {
         ScrollModel::GetInstance()->SetNestedScroll(nestedOpt);
-        LOGW("Invalid params");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "set nested scroll with Invalid params");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -382,14 +382,14 @@ void JSScroll::SetNestedScroll(const JSCallbackInfo& args)
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
     if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
         froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        LOGW("ScrollFroward params invalid");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollFroward params invalid");
         froward = 0;
     }
     int32_t backward = 0;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
     if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
         backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        LOGW("ScrollFroward params invalid");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "scrollBackward params invalid");
         backward = 0;
     }
     nestedOpt.forward = static_cast<NestedScrollMode>(froward);
@@ -402,7 +402,7 @@ void JSScroll::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
     if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
-        LOGW("Friction params invalid,can not convert to double");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "Friction params invalid,can not convert to double");
         friction = -1.0;
     }
     ScrollModel::GetInstance()->SetFriction(friction);
@@ -411,7 +411,7 @@ void JSScroll::SetFriction(const JSCallbackInfo& info)
 void JSScroll::SetScrollSnap(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        LOGW("Invalid params");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "set scroll snap with Invalid params");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
