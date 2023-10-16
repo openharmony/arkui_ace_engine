@@ -183,7 +183,8 @@ bool ScrollBarProxy::NotifySnapScroll(float delta, float velocity, float control
         auto predictSnapOffset = node.calePredictSnapOffsetCallback(patternOffset);
         // If snap scrolling, predictSnapOffset will has a value.
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
-            TAG_LOGD(AceLogTag::ACE_OUTER_SCROLL_BAR, "ScrollBarProxy::NotifySnapScroll predictSnapOffset:%{public}f", predictSnapOffset.value());
+            TAG_LOGD(AceLogTag::ACE_OUTER_SCROLL_BAR, "ScrollBarProxy::NotifySnapScroll predictSnapOffset:%{public}f",
+                predictSnapOffset.value());
             node.startScrollSnapMotionCallback(predictSnapOffset.value(), velocity);
             // Outer scrollBar can only control one snap scrollable component.
             return true;

@@ -144,8 +144,8 @@ void ScrollBarOverlayModifier::SetCrossModeOffset(const Offset& offset)
 void ScrollBarOverlayModifier::StartBarAnimation(HoverAnimationType hoverAnimationType,
     OpacityAnimationType opacityAnimationType, bool needAdaptAnimation, const Rect& fgRect)
 {
-    TAG_LOGD(AceLogTag::ACE_INNER_SCROLL_BAR, "startBarAnimation hoverAnimationType:%{public}d, opacityAnimationType:%{public}d, "
-         "needAdaptAnimation:%{public}u, fgRect:%{public}s",
+    TAG_LOGD(AceLogTag::ACE_INNER_SCROLL_BAR, "startBarAnimation hoverAnimationType:%{public}d, "
+         "opacityAnimationType:%{public}d, needAdaptAnimation:%{public}u, fgRect:%{public}s",
         hoverAnimationType, opacityAnimationType, needAdaptAnimation, fgRect.ToString().c_str());
     CHECK_NULL_VOID(barX_);
     CHECK_NULL_VOID(barY_);

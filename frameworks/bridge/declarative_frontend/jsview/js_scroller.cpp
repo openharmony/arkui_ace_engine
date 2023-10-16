@@ -118,7 +118,8 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     if (animationValue->IsObject()) {
         auto animationObj = JSRef<JSObject>::Cast(animationValue);
         if (!ConvertFromJSValue(animationObj->GetProperty("duration"), duration) || NonPositive(duration)) {
-            TAG_LOGW(AceLogTag::ACE_SCROLL, "Failed to parse param 'duration' or it is not a positive number, set it as the default value");
+            TAG_LOGW(AceLogTag::ACE_SCROLL, "Failed to parse param 'duration' or it is not a positive number, "
+                "set it as the default value");
             duration = DEFAULT_DURATION;
         }
 
@@ -223,7 +224,8 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
         TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollPage controller_ is nullptr");
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollPage(%{public}s, %{public}d)", next ? "true" : "false", static_cast<int32_t>(direction));
+    TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollPage(%{public}s, %{public}d)", next ? "true" : "false",
+        static_cast<int32_t>(direction));
     scrollController->ScrollPage(!next, true);
 }
 
