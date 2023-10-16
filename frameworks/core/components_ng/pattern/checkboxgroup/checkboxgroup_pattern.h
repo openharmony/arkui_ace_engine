@@ -119,6 +119,16 @@ public:
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
+    void SetUpdateFlag(bool updateFlag)
+    {
+        updateFlag_ = updateFlag;
+    }
+
+    void SetSkipFlag(bool skipFlag)
+    {
+        skipFlag_ = skipFlag;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
@@ -172,7 +182,8 @@ private:
     RefPtr<CheckBoxGroupModifier> checkBoxGroupModifier_;
     bool isHover_ = false;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
-    bool isClick_ = false;
+    bool updateFlag_ = false;
+    bool skipFlag_ = false;
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
