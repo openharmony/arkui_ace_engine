@@ -59,6 +59,41 @@ constexpr float DEFAULT_IMAGE_SIZE = 57.0f;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 
 const std::wstring lineSeparator = L"\n";
+const std::wstring NUM_SYMBOL = L")!@#$%^&*(";
+const std::unordered_map<KeyCode, wchar_t> KEYBOARD_SYMBOL = {
+    { KeyCode::KEY_GRAVE, L'`' },
+    { KeyCode::KEY_MINUS, L'-' },
+    { KeyCode::KEY_EQUALS, L'=' },
+    { KeyCode::KEY_LEFT_BRACKET, L'[' },
+    { KeyCode::KEY_RIGHT_BRACKET, L']' },
+    { KeyCode::KEY_BACKSLASH, L'\\' },
+    { KeyCode::KEY_SEMICOLON, L';' },
+    { KeyCode::KEY_APOSTROPHE, L'\'' },
+    { KeyCode::KEY_COMMA, L',' },
+    { KeyCode::KEY_PERIOD, L'.' },
+    { KeyCode::KEY_SLASH, L'/' },
+    { KeyCode::KEY_SPACE, L' ' },
+    { KeyCode::KEY_NUMPAD_DIVIDE, L'/' },
+    { KeyCode::KEY_NUMPAD_MULTIPLY, L'*' },
+    { KeyCode::KEY_NUMPAD_SUBTRACT, L'-' },
+    { KeyCode::KEY_NUMPAD_ADD, L'+' },
+    { KeyCode::KEY_NUMPAD_DOT, L'.' },
+    { KeyCode::KEY_NUMPAD_COMMA, L',' },
+    { KeyCode::KEY_NUMPAD_EQUALS, L'=' },
+};
+static const std::unordered_map<KeyCode, wchar_t> SHIFT_KEYBOARD_SYMBOL = {
+    { KeyCode::KEY_GRAVE, L'~' },
+    { KeyCode::KEY_MINUS, L'_' },
+    { KeyCode::KEY_EQUALS, L'+' },
+    { KeyCode::KEY_LEFT_BRACKET, L'{' },
+    { KeyCode::KEY_RIGHT_BRACKET, L'}' },
+    { KeyCode::KEY_BACKSLASH, L'|' },
+    { KeyCode::KEY_SEMICOLON, L':' },
+    { KeyCode::KEY_APOSTROPHE, L'\"' },
+    { KeyCode::KEY_COMMA, L'<' },
+    { KeyCode::KEY_PERIOD, L'>' },
+    { KeyCode::KEY_SLASH, L'?' },
+};
 } // namespace
 RichEditorPattern::RichEditorPattern() {}
 
@@ -2255,6 +2290,19 @@ bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
         if (keyEvent.code == KeyCode::KEY_TAB) {
             return false;
         }
+        std::string appendElement;
+        if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
+            keyEvent.code == KeyCode::KEY_DPAD_CENTER) {
+            InsertValue("\n");
+            return true;
+        } else if (HandleShiftPressedEvent(keyEvent)) {
+            return true;
+        } else if (keyEvent.IsDirectionalKey()) {
+            HandleDirectionalKey(keyEvent);
+            return true;
+        } else if (keyEvent.IsNumberKey() && !keyEvent.IsCombinationKey()) {
+            appendElement = keyEvent.ConvertCodeToString();
+        }
         if (keyEvent.code == KeyCode::KEY_DEL) {
 #if defined(PREVIEW)
             DeleteForward(1);
@@ -2271,42 +2319,44 @@ bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
 #endif
             return true;
         }
-        if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
-            keyEvent.code == KeyCode::KEY_DPAD_CENTER) {
-            InsertValue("\n");
+        ParseAppendValue(keyEvent.code, appendElement);
+        if (!appendElement.empty()) {
+            InsertValue(appendElement);
             return true;
         }
-        if (keyEvent.IsDirectionalKey()) {
-            switch (keyEvent.code) {
-                case KeyCode::KEY_DPAD_UP:
-                    return CursorMoveUp();
-                case KeyCode::KEY_DPAD_DOWN:
-                    return CursorMoveDown();
-                case KeyCode::KEY_DPAD_LEFT:
-                    return CursorMoveLeft();
-                case KeyCode::KEY_DPAD_RIGHT:
-                    return CursorMoveRight();
-                default:
-                    return false;
-            }
+    }
+    return true;
+}
+
+bool RichEditorPattern::HandleShiftPressedEvent(const KeyEvent& event)
+{
+    const static size_t maxKeySizes = 2;
+    wchar_t keyChar;
+
+    auto iterCode = KEYBOARD_SYMBOL.find(event.code);
+    if (event.pressedCodes.size() == 1 && iterCode != KEYBOARD_SYMBOL.end()) {
+        if (iterCode != KEYBOARD_SYMBOL.end()) {
+            keyChar = iterCode->second;
+        } else {
+            return false;
         }
-        if (keyEvent.IsLetterKey()) {
-            if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
+        if (event.IsLetterKey()) {
+            if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
+                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
                 HandleOnSelectAll();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
+            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
+                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
                 HandleOnCopy();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
+            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
+                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
                 HandleOnPaste();
             }
             return true;
         }
-        auto visibilityCode = keyEvent.ConvertInputCodeToString();
+        auto visibilityCode = event.ConvertInputCodeToString();
         if (visibilityCode != std::string("")) {
-            if ((keyEvent.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
-                    keyEvent.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT) &&
+            if ((event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
+                    event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT) &&
                 visibilityCode.length() > 1) {
                 InsertValue(visibilityCode.substr(1, 1));
             } else {
@@ -2314,9 +2364,52 @@ bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
             }
             return true;
         }
+    } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
+                                                               event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
+        iterCode = SHIFT_KEYBOARD_SYMBOL.find(event.code);
+        if (iterCode != SHIFT_KEYBOARD_SYMBOL.end()) {
+            keyChar = iterCode->second;
+        } else if (KeyCode::KEY_A <= event.code && event.code <= KeyCode::KEY_Z) {
+            keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_A) + UPPER_CASE_A;
+        } else if (KeyCode::KEY_0 <= event.code && event.code <= KeyCode::KEY_9) {
+            keyChar = NUM_SYMBOL[static_cast<int32_t>(event.code) - static_cast<int32_t>(KeyCode::KEY_0)];
+        } else {
+            return false;
+        }
+    } else {
         return false;
     }
+    std::wstring appendElement(1, keyChar);
+    InsertValue(StringUtils::ToString(appendElement));
     return true;
+}
+
+bool RichEditorPattern::HandleDirectionalKey(const KeyEvent& keyEvent)
+{
+    switch (keyEvent.code) {
+        case KeyCode::KEY_DPAD_UP:
+            return CursorMoveUp();
+        case KeyCode::KEY_DPAD_DOWN:
+            return CursorMoveDown();
+        case KeyCode::KEY_DPAD_LEFT:
+            return CursorMoveLeft();
+        case KeyCode::KEY_DPAD_RIGHT:
+            return CursorMoveRight();
+        default:
+            return false;
+    }
+    return false;
+}
+
+void RichEditorPattern::ParseAppendValue(KeyCode keyCode, std::string& appendElement)
+{
+    switch (keyCode) {
+        case KeyCode::KEY_SPACE:
+            appendElement = " ";
+            break;
+        default:
+            break;
+    }
 }
 
 void RichEditorPattern::MoveCaretAfterTextChange()
