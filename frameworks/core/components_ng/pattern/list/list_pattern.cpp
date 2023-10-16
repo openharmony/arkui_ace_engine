@@ -15,7 +15,10 @@
 
 #include "core/components_ng/pattern/list/list_pattern.h"
 
+#include <string>
+
 #include "base/geometry/axis.h"
+#include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -546,7 +549,7 @@ bool ListPattern::IsAtTop() const
     if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
         float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
         return (startIndex_ == 0) && GreatOrEqual(startMainPos_ - currentDelta_ + GetChainDelta(0),
-            contentMainSize_ / 2.0f - startItemHeight / 2.0f);
+                                         contentMainSize_ / 2.0f - startItemHeight / 2.0f);
     }
 
     return (startIndex_ == 0) && NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0));
@@ -557,7 +560,7 @@ bool ListPattern::IsAtBottom() const
     if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
         float endItemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
         return (endIndex_ == maxListItemIndex_) && LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_),
-            contentMainSize_ / 2.0f + endItemHeight / 2.0f);
+                                                       contentMainSize_ / 2.0f + endItemHeight / 2.0f);
     }
 
     return endIndex_ == maxListItemIndex_ &&
@@ -1313,7 +1316,7 @@ void ListPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(layoutPriority);
     auto paddingOffset = layoutPriority->CreatePaddingAndBorder().Offset();
     Offset viewOffset = { paddingOffset.GetX(), paddingOffset.GetY() };
-    const auto& geometryNode =  host->GetGeometryNode();
+    const auto& geometryNode = host->GetGeometryNode();
     auto frameSize = geometryNode->GetFrameSize();
     Size size(frameSize.Width(), frameSize.Height());
     UpdateScrollBarRegion(currentOffset, estimatedHeight, size, Offset(0.0f, 0.0f));
@@ -1751,5 +1754,80 @@ std::string ListPattern::ProvideRestoreInfo()
 void ListPattern::OnRestoreInfo(const std::string& restoreInfo)
 {
     jumpIndex_ = StringUtils::StringToInt(restoreInfo);
+}
+
+void ListPattern::DumpAdvanceInfo()
+{
+    DumpLog::GetInstance().AddDesc("maxListItemIndex:" + std::to_string(maxListItemIndex_));
+    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(startIndex_));
+    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(endIndex_));
+    DumpLog::GetInstance().AddDesc("centerIndex:" + std::to_string(centerIndex_));
+    DumpLog::GetInstance().AddDesc("startMainPos:" + std::to_string(startMainPos_));
+    DumpLog::GetInstance().AddDesc("endMainPos_:" + std::to_string(endMainPos_));
+    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(currentOffset_));
+    DumpLog::GetInstance().AddDesc("contentMainSize:" + std::to_string(contentMainSize_));
+    DumpLog::GetInstance().AddDesc("contentStartOffset:" + std::to_string(contentStartOffset_));
+    DumpLog::GetInstance().AddDesc("contentEndOffset:" + std::to_string(contentEndOffset_));
+    DumpLog::GetInstance().AddDesc("currentDelta:" + std::to_string(currentDelta_));
+    crossMatchChild_ ? DumpLog::GetInstance().AddDesc("crossMatchChild:true")
+                     : DumpLog::GetInstance().AddDesc("crossMatchChild:false");
+    smooth_ ? DumpLog::GetInstance().AddDesc("smooth:true") : DumpLog::GetInstance().AddDesc("smooth:false");
+    if (jumpIndex_.has_value()) {
+        DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(jumpIndex_.value()));
+    } else {
+        DumpLog::GetInstance().AddDesc("jumpIndex:null");
+    }
+    if (jumpIndexInGroup_.has_value()) {
+        DumpLog::GetInstance().AddDesc("jumpIndexInGroup:" + std::to_string(jumpIndexInGroup_.value()));
+    } else {
+        DumpLog::GetInstance().AddDesc("jumpIndexInGroup:null");
+    }
+    if (targetIndex_.has_value()) {
+        DumpLog::GetInstance().AddDesc("targetIndex:" + std::to_string(targetIndex_.value()));
+    } else {
+        DumpLog::GetInstance().AddDesc("targetIndex:null");
+    }
+    if (predictSnapOffset_.has_value()) {
+        DumpLog::GetInstance().AddDesc("predictSnapOffset:" + std::to_string(predictSnapOffset_.value()));
+    } else {
+        DumpLog::GetInstance().AddDesc("predictSnapOffset:null");
+    }
+    if (predictSnapEndPos_.has_value()) {
+        DumpLog::GetInstance().AddDesc("predictSnapEndPos:" + std::to_string(predictSnapEndPos_.value()));
+    } else {
+        DumpLog::GetInstance().AddDesc("predictSnapEndPos:null");
+    }
+    // DumpLog::GetInstance().AddDesc("scrollAlign:%{public}d", scrollAlign_);
+    scrollable_ ? DumpLog::GetInstance().AddDesc("scrollable:true")
+                : DumpLog::GetInstance().AddDesc("scrollable:false");
+    paintStateFlag_ ? DumpLog::GetInstance().AddDesc("paintStateFlag:true")
+                    : DumpLog::GetInstance().AddDesc("paintStateFlag:false");
+    isFramePaintStateValid_ ? DumpLog::GetInstance().AddDesc("isFramePaintStateValid:true")
+                            : DumpLog::GetInstance().AddDesc("isFramePaintStateValid:false");
+    for (auto item : itemPosition_) {
+        DumpLog::GetInstance().AddDesc("------------------------------------------");
+        DumpLog::GetInstance().AddDesc("itemPosition.first:" + std::to_string(item.first));
+        DumpLog::GetInstance().AddDesc("startPos:" + std::to_string(item.second.startPos));
+        DumpLog::GetInstance().AddDesc("endPos:" + std::to_string(item.second.endPos));
+        DumpLog::GetInstance().AddDesc("isGroup:" + std::to_string(item.second.isGroup));
+    }
+    DumpLog::GetInstance().AddDesc("------------------------------------------");
+    scrollStop_ ? DumpLog::GetInstance().AddDesc("scrollStop:true")
+                : DumpLog::GetInstance().AddDesc("scrollStop:false");
+    for (auto item : lanesItemRange_) {
+        DumpLog::GetInstance().AddDesc("------------------------------------------");
+        DumpLog::GetInstance().AddDesc("lanesItemRange.first:" + std::to_string(item.first));
+        DumpLog::GetInstance().AddDesc("lanesItemRange.second:" + std::to_string(item.second));
+    }
+    DumpLog::GetInstance().AddDesc("------------------------------------------");
+    DumpLog::GetInstance().AddDesc("lanes:" + std::to_string(lanes_));
+    DumpLog::GetInstance().AddDesc("laneGutter:" + std::to_string(laneGutter_));
+    dragFromSpring_ ? DumpLog::GetInstance().AddDesc("dragFromSpring:true")
+                    : DumpLog::GetInstance().AddDesc("dragFromSpring:false");
+    isScrollEnd_ ? DumpLog::GetInstance().AddDesc("isScrollEnd:true")
+                 : DumpLog::GetInstance().AddDesc("isScrollEnd:false");
+    IsAtTop() ? DumpLog::GetInstance().AddDesc("IsAtTop:true") : DumpLog::GetInstance().AddDesc("IsAtTop:false");
+    IsAtBottom() ? DumpLog::GetInstance().AddDesc("IsAtBottom:true")
+                 : DumpLog::GetInstance().AddDesc("IsAtBottom:false");
 }
 } // namespace OHOS::Ace::NG

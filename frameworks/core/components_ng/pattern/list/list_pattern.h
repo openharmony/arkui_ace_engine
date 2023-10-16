@@ -172,7 +172,6 @@ public:
     void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
     void OnAnimateStop() override;
-
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -209,6 +208,7 @@ public:
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    void DumpAdvanceInfo() override;
 
 private:
     void OnScrollEndCallback() override;
@@ -261,7 +261,6 @@ private:
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
-
     RefPtr<ListContentModifier> listContentModifier_;
 
     RefPtr<ListPositionController> positionController_;
