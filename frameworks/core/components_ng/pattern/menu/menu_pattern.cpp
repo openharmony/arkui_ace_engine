@@ -163,7 +163,11 @@ void MenuPattern::OnModifyDone()
     SetAccessibilityAction();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
-        auto hub = host->GetEventHub<EventHub>();
+        auto node = host->GetChildren().front();
+        CHECK_NULL_VOID(node);
+        auto scroll = AceType::DynamicCast<FrameNode>(node);
+        CHECK_NULL_VOID(scroll);
+        auto hub = scroll->GetEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -856,6 +860,7 @@ void MenuPattern::OnColorConfigurationUpdate()
 
 void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    CHECK_NULL_VOID(gestureHub);
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -867,15 +872,40 @@ void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             static_cast<float>(std::sqrt(offsetPerSecondX * offsetPerSecondX + offsetPerSecondY * offsetPerSecondY));
         pattern->HandleDragEnd(offsetX, offsetY, velocity);
     };
+    auto actionScrollEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto offsetX = static_cast<float>(info.GetOffsetX());
+        auto offsetY = static_cast<float>(info.GetOffsetY());
+        auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
+        auto offsetPerSecondY = info.GetVelocity().GetOffsetPerSecond().GetY();
+        auto velocity =
+            static_cast<float>(std::sqrt(offsetPerSecondX * offsetPerSecondX + offsetPerSecondY * offsetPerSecondY));
+        pattern->HandleScrollDragEnd(offsetX, offsetY, velocity);
+    };
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
     gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    gestureHub->AddPreviewMenuHandleDragEnd(std::move(actionScrollEndTask));
 }
 
 void MenuPattern::HandleDragEnd(float offsetX, float offsetY, float velocity)
 {
     if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || LessOrEqual(offsetY, 0.0f)) &&
+        LessOrEqual(velocity, PAN_MAX_VELOCITY)) {
+        return;
+    }
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->HideMenu();
+}
+
+void MenuPattern::HandleScrollDragEnd(float offsetX, float offsetY, float velocity)
+{
+    if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || !NearZero(offsetY)) &&
         LessOrEqual(velocity, PAN_MAX_VELOCITY)) {
         return;
     }
