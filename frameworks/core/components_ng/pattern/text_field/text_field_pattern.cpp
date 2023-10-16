@@ -2318,7 +2318,9 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     LOGI("TextFieldPattern::HandleDoubleClickEvent");
     isDoubleClick_ = true;
-    StopTwinkling();
+    if (!GetEditingValue().text.empty()) {
+        StopTwinkling();
+    }
     if (!IsUsingMouse()) {
         caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
         isSingleHandle_ = false;
