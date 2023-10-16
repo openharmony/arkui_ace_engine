@@ -30,7 +30,6 @@
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
-
 class ResourceManager : public AceType {
     DECLARE_ACE_TYPE(ResourceManager, AceType);
 

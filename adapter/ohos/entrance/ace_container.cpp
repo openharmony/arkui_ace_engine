@@ -1274,7 +1274,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
                                     colorScheme = colorScheme_, resourceInfo = resourceInfo_,
                                     context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock()]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
-        LOGD("UIContent load theme");
+        LOGD("UIContent load theme, Resource decoupling: %{public}d", SystemProperties::GetResourceDecoupling());
 
         if (SystemProperties::GetResourceDecoupling()) {
             auto resourceAdapter = ResourceAdapter::CreateV2();

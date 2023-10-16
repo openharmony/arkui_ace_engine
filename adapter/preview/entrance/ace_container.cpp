@@ -888,8 +888,6 @@ void AceContainer::AttachView(
         LOGI("Save default adapter");
 
         if (!bundleName_.empty() && !moduleName.empty()) {
-            LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName_.c_str(),
-                moduleName_.c_str());
             ResourceManager::GetInstance().AddResourceAdapter(bundleName_, moduleName, resourceAdapter);
         }
 
@@ -1021,10 +1019,8 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
         auto defaultBundleName = "";
         auto defaultModuleName = "";
         ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
-        LOGI("Save default adapter");
 
         if (!bundleName_.empty() && !moduleName_.empty()) {
-            LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName_.c_str(), moduleName_.c_str());
             ResourceManager::GetInstance().AddResourceAdapter(bundleName_, moduleName_, resourceAdapter);
         }
 

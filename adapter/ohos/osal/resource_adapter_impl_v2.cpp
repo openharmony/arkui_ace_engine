@@ -28,7 +28,6 @@
 #include "core/components/theme/theme_attributes.h"
 namespace OHOS::Ace {
 namespace {
-
 constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
 
 void CheckThemeId(int32_t& themeId)
@@ -119,7 +118,6 @@ DimensionUnit ParseDimensionUnit(const std::string& unit)
         return DimensionUnit::VP;
     }
 };
-
 } // namespace
 
 RefPtr<ResourceAdapter> ResourceAdapter::CreateV2()
@@ -692,5 +690,4 @@ uint32_t ResourceAdapterImplV2::GetResourceLimitKeys() const
     CHECK_NULL_RETURN(manager, 0);
     return manager->GetResourceLimitKeys();
 }
-
 } // namespace OHOS::Ace

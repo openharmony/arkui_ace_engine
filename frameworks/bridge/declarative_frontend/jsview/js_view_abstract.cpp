@@ -1025,20 +1025,16 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
     std::vector<ResourceObjectParams> resObjParamsList;
     auto size = static_cast<int32_t>(params->Length());
-    LOGI("Parse params in JSObject");
     for (int32_t i = 0; i < size; i++) {
         auto item = params->GetValueAt(i);
         ResourceObjectParams resObjParams { .value = item->ToString().c_str() };
         if (item->IsString()) {
             resObjParams.type = ResourceObjectParamType::STRING;
-            LOGI("params %{public}d: string %{public}s", i, item->ToString().c_str());
         } else if (item->IsNumber()) {
             if (std::regex_match(item->ToString(), FLOAT_PATTERN)) {
                 resObjParams.type = ResourceObjectParamType::FLOAT;
-                LOGI("params %{public}d: float %{public}s", i, item->ToString().c_str());
             } else {
                 resObjParams.type = ResourceObjectParamType::INT;
-                LOGI("params %{public}d: int %{public}s", i, item->ToString().c_str());
             }
         }
         resObjParamsList.push_back(resObjParams);
@@ -3444,7 +3440,6 @@ bool JSViewAbstract::ParseJsDimensionNG(
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -3480,29 +3475,16 @@ bool JSViewAbstract::ParseJsDimensionNG(
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
-        LOGI("[ParseJsDimensionNG] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, moduleName: "
-             "%{public}s, "
-             "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), value.c_str());
         return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
-        LOGI("[ParseJsDimensionNG] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: "
-             "%{public}s, "
-             "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), value.c_str());
         StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
         return true;
     }
 
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
         result = resourceWrapper->GetDimension(resId->ToNumber<uint32_t>()); // float return true pixel value
-        LOGI("[ParseJsDimensionNG] use resource adapter to get $r(FLOAT) by id, bundleName: %{public}s, moduleName: "
-             "%{public}s, "
-             "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(),
-            result.CalcValue().c_str());
         return true;
     }
 
@@ -3534,7 +3516,6 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -3572,21 +3553,11 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
-        LOGI("[ParseJsDimension] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, moduleName: "
-             "%{public}s, "
-             "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(),
-            result.CalcValue().c_str());
         return true;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
-        LOGI("[ParseJsDimension] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: "
-             "%{public}s, "
-             "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(),
-            result.CalcValue().c_str());
         return true;
     }
     result = resourceWrapper->GetDimension(resId->ToNumber<uint32_t>());
@@ -3637,7 +3608,6 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -3678,26 +3648,14 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto numberString = resourceWrapper->GetString(resId);
-        LOGI("[ParseResourceToDouble] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, "
-             "moduleName: %{public}s, "
-             "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), numberString.c_str());
         return StringUtils::StringToDouble(numberString, result);
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         result = resourceWrapper->GetInt(resId);
-        LOGI("[ParseResourceToDouble] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, "
-             "moduleName: %{public}s, "
-             "result: %{public}f",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result);
         return true;
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
         result = resourceWrapper->GetDouble(resId);
-        LOGI("[ParseResourceToDouble] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, "
-             "moduleName: %{public}s, "
-             "result: %{public}f",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result);
         return true;
     }
     return false;
@@ -3742,7 +3700,6 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -3788,7 +3745,6 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -3823,27 +3779,14 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
-        LOGI("[ParseJsColorFromResource] use resource adapter to get $r(STRING) by id, bundleName: %{public}s, "
-             "moduleName: %{public}s, "
-             "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), value.c_str());
         return Color::ParseColorString(value, result);
     }
     if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = resourceWrapper->GetInt(resId->ToNumber<uint32_t>());
-        LOGI("[ParseJsColorFromResource] use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, "
-             "moduleName: %{public}s, "
-             "result: %{public}d",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), value);
         result = Color(ColorAlphaAdapt(value));
         return true;
     }
     result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
-    LOGI("[ParseJsColorFromResource] use resource adapter to get $(Color) by id, bundleName: %{public}s, moduleName: "
-         "%{public}s, "
-         "result: %{public}s",
-        resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(),
-        result.ColorToString().c_str());
     return true;
 }
 
@@ -3902,7 +3845,6 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -3971,7 +3913,6 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -3997,9 +3938,6 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
             auto originStr = resourceWrapper->GetStringByName(param->ToString());
             ReplaceHolder(originStr, params, 0);
             result = originStr;
-            LOGI("use resource adapter to get $r(string) by name, bundleName: %{public}s, moduleName: %{public}s, "
-                 "result: %{public}s",
-                resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
         } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::PLURAL)) {
             auto countJsVal = params->GetValueAt(1);
             int count = 0;
@@ -4011,9 +3949,6 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
             auto pluralStr = resourceWrapper->GetPluralStringByName(param->ToString(), count);
             ReplaceHolder(pluralStr, params, 2);
             result = pluralStr;
-            LOGI("use resource adapter to get $r(PLURAL) by name, bundleName: %{public}s, moduleName: %{public}s, "
-                 "result: %{public}s",
-                resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
         } else {
             return false;
         }
@@ -4038,14 +3973,8 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         LOGI("Get resource PLURAL %{public}s", result.c_str());
     } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
         result = std::to_string(resourceWrapper->GetDouble(resId->ToNumber<uint32_t>()));
-        LOGI("use resource adapter to get $r(FLOAT) by id, bundleName: %{public}s, moduleName: %{public}s, "
-             "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
     } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         result = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
-        LOGI("use resource adapter to get $r(INTEGER) by id, bundleName: %{public}s, moduleName: %{public}s, "
-             "result: %{public}s",
-            resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
     } else {
         return false;
     }
@@ -4070,7 +3999,6 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         RefPtr<ResourceAdapter> resourceAdapter = nullptr;
         RefPtr<ThemeConstants> themeConstants = nullptr;
         if (SystemProperties::GetResourceDecoupling()) {
-            LOGI("Resource decoupling");
             resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
             if (!resourceAdapter) {
                 LOGW("resourceAdapter is nullptr");
@@ -4098,9 +4026,6 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
                 return false;
             }
             result = resourceWrapper->GetRawfile(fileName->ToString());
-            LOGI("use resource adapter to get RAWFILE by id, bundleName: %{public}s, moduleName: %{public}s, "
-                 "result: %{public}s",
-                resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
             return true;
         }
         auto resIdNum = resId->ToNumber<int32_t>();
@@ -4116,9 +4041,6 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             auto param = params->GetValueAt(0);
             if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
                 result = resourceWrapper->GetMediaPathByName(param->ToString());
-                LOGI("use resource adapter to get RAWFILE by name, bundleName: %{public}s, moduleName: %{public}s, "
-                     "result: %{public}s",
-                    resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
                 return true;
             }
             LOGE("JSImage::Create ParseJsMedia type is wrong");
@@ -4126,9 +4048,6 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         }
         if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
             result = resourceWrapper->GetMediaPath(resId->ToNumber<uint32_t>());
-            LOGI("use resource adapter to get MEDIA by id, bundleName: %{public}s, moduleName: %{public}s, "
-                 "result: %{public}s",
-                resourceObject->GetBundleName().c_str(), resourceObject->GetModuleName().c_str(), result.c_str());
             return true;
         }
         LOGE("JSImage::Create ParseJsMedia type is wrong");
@@ -4168,7 +4087,6 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -4263,7 +4181,6 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -4347,7 +4264,6 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -6285,7 +6201,6 @@ bool JSViewAbstract::ParseJsonDimension(
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -6342,7 +6257,6 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");
@@ -6405,7 +6319,6 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        LOGI("Resource decoupling");
         resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
         if (!resourceAdapter) {
             LOGW("resourceAdapter is nullptr");

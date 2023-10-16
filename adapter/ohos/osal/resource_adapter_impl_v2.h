@@ -25,7 +25,6 @@
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
-
 class ResourceAdapterImplV2 : public ResourceAdapter {
     DECLARE_ACE_TYPE(ResourceAdapterImplV2, ResourceAdapter);
 

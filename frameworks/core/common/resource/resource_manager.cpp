@@ -26,7 +26,7 @@ namespace OHOS::Ace {
 namespace {
 const std::string DEFAULT_BUNDLE_NAME = "";
 const std::string DEFAULT_MODULE_NAME = "";
-}
+} // namespace
 
 ResourceManager& ResourceManager::GetInstance()
 {
@@ -41,15 +41,12 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(RefPtr<Resou
 
     auto isResourceAdapterRecord = IsResourceAdapterRecord(bundleName, moduleName);
     if (!isResourceAdapterRecord) {
-        LOGI("create new resource adapter, bundleName: %{public}s, moduleName: %{public}s", bundleName.c_str(), moduleName.c_str());
         auto resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName);
         if (resourceAdapter == nullptr) {
-            LOGW("resourceAdapter is null of bundleName: %{public}s, moduleName: %{public}s!, use default", bundleName.c_str(), moduleName.c_str());
             return GetResourceAdapter(DEFAULT_BUNDLE_NAME, DEFAULT_MODULE_NAME);
         }
         AddResourceAdapter(bundleName, moduleName, resourceAdapter);
     }
     return GetResourceAdapter(bundleName, moduleName);
 }
-
 } // namespace OHOS::Ace
