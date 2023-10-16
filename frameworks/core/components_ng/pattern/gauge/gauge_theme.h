@@ -19,6 +19,7 @@
 #include "base/i18n/localization.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -81,7 +82,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-
+            theme->trackThickness_ = themeConstants->GetDimension(THEME_PROGRERSS_THICKNESS);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -123,6 +124,11 @@ public:
         return limitValueMinFontSize_;
     }
 
+    const Dimension& GetTrackThickness() const
+    {
+        return trackThickness_;
+    }
+
 protected:
     GaugeTheme() = default;
 
@@ -130,6 +136,7 @@ private:
     Color indicatorColor_;
     Color indicatorBorderColor_;
     Dimension limitValueMinFontSize_;
+    Dimension trackThickness_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GAUGE_GAUGE_THEME_H

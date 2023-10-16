@@ -234,7 +234,7 @@ void GaugePaintMethod::NewPaint(RSCanvas& canvas, PaintWrapper* paintWrapper) co
     data.contentSize = paddingSize;
     data.radius = radius;
     data.center = Offset(offset.GetX() + left + radius, offset.GetY() + top + radius);
-    auto theme = pipelineContext->GetTheme<ProgressTheme>();
+    auto theme = pipelineContext->GetTheme<GaugeTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
     CalculateStartAndSweepDegree(paintProperty, data);
     switch (paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT)) {
@@ -610,6 +610,8 @@ void GaugePaintMethod::DrawHighLight(RSCanvas& canvas, const RenderRingInfo& dat
                     data.center.GetY() + radius * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
                     (data.thickness * PERCENT_HALF + space));
 
+    canvas.ClipPath(path2, RSClipOp::DIFFERENCE, true);
+
     RSPath path3;
     path3.Op(path2, path1, RSPathOp::DIFFERENCE);
 
@@ -635,13 +637,8 @@ void GaugePaintMethod::DrawHighLight(RSCanvas& canvas, const RenderRingInfo& dat
 
     RSPath path5;
     path5.Op(path3, path4, RSPathOp::DIFFERENCE);
-    canvas.ClipPath(path5, RSClipOp::DIFFERENCE, true);
 
-    RSPath path6;
-    path6.AddCircle(data.center.GetX() + radius * std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
-                    data.center.GetY() + radius * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
-                    data.thickness * PERCENT_HALF);
-    canvas.ClipPath(path6, RSClipOp::DIFFERENCE, true);
+    canvas.ClipPath(path5, RSClipOp::DIFFERENCE, true);
 }
 
 float GaugePaintMethod::GetOffsetDegree(const RenderRingInfo& data, const float oppositeSide) const
@@ -762,7 +759,7 @@ void GaugePaintMethod::CreateDefaultTrianglePath(
 {
     auto width = radius * RADIUS_TO_DIAMETER * INDICATOR_WIDTH_RATIO;
     auto height = radius * RADIUS_TO_DIAMETER * INDICATOR_HEIGHT_RATIO;
-    auto hypotenuse = std::sqrt((width * width) + (height * height));
+    auto hypotenuse = std::sqrt(((width / 2.0f) * (width / 2.0f)) + (height * height));
     if (NearZero(hypotenuse)) {
         return;
     }
