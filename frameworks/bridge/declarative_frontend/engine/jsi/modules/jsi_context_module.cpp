@@ -43,7 +43,9 @@ std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRu
 
 void JsiContextModule::InitContextModule(const std::shared_ptr<JsRuntime>& runtime, std::shared_ptr<JsValue> moduleObj)
 {
+#ifndef PREVIEW
     moduleObj->SetProperty(runtime, "getContext", runtime->NewFunction(JsiContextModule::GetContext));
+#endif
 }
 
 void JsiContextModule::AddContext(int32_t key, const std::shared_ptr<JsValue>& value)
