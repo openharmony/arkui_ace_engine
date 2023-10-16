@@ -424,9 +424,11 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     if (isDragCancel_) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragDropManager is dragCancel, finish drag.");
+            LOGI("DragDropManager windowId is %{public}d.", container->GetWindowId());
         }
         InteractionManager::GetInstance()->SetDragWindowVisible(false);
-        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_CANCEL, false);
+        DragDropResult dropResult { DragResult::DRAG_CANCEL, false, container->GetWindowId() };
+        InteractionManager::GetInstance()->StopDrag(dropResult);
         summaryMap_.clear();
         ClearVelocityInfo();
         return;
@@ -449,8 +451,10 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     if (!dragFrameNode) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGW("DragDropManager onDragEnd, not find drop target, stop drag.");
+            LOGI("DragDropManager windowId is %{public}d.", container->GetWindowId());
         }
-        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, isMouseDragged_);
+        DragDropResult dropResult { DragResult::DRAG_FAIL, isMouseDragged_, container->GetWindowId() };
+        InteractionManager::GetInstance()->StopDrag(dropResult);
         summaryMap_.clear();
         return;
     }
@@ -468,15 +472,18 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("DragDropManager finish drop, start do drop animation. UseCustomAnimation is %{public}d.",
             event->IsUseCustomAnimation());
+        LOGI("DragDropManager windowId is %{public}d.", container->GetWindowId());
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dragResult = TranslateDragResult(event->GetResult());
     auto useCustomAnimation = event->IsUseCustomAnimation();
-    pipeline->SetDragCleanTask([dragResult, useCustomAnimation, isMouseDragged = isMouseDragged_]() {
+    auto windowId = container->GetWindowId();
+    pipeline->SetDragCleanTask([dragResult, useCustomAnimation, isMouseDragged = isMouseDragged_, windowId]() {
         InteractionManager::GetInstance()->SetDragWindowVisible(
             isMouseDragged ? !isMouseDragged : !useCustomAnimation);
-        InteractionManager::GetInstance()->StopDrag(dragResult, isMouseDragged ? isMouseDragged : useCustomAnimation);
+            DragDropResult dropResult { dragResult, isMouseDragged ? isMouseDragged : useCustomAnimation, windowId };
+        InteractionManager::GetInstance()->StopDrag(dropResult);
     });
     dragFrameNode->MarkDirtyNode();
     summaryMap_.clear();
