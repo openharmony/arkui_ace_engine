@@ -55,6 +55,7 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
     LOGD("OnWindowUnfocused refresh window");
     if (SubwindowManager::GetInstance()->GetCurrentWindow() &&
         SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown()) {
+        SetIsFocus(false);
         return;
     }
     ContainerModalPattern::OnWindowUnfocused();
