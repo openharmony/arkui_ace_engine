@@ -52,6 +52,7 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(textLineStyle, TextAlign, SetTextAlign);
         UPDATE_TEXT_STYLE(textLineStyle, MaxLines, SetMaxLines);
         UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
+        UPDATE_TEXT_STYLE(textLineStyle, WordBreak, SetWordBreak);
     }
     return textStyle;
 }
