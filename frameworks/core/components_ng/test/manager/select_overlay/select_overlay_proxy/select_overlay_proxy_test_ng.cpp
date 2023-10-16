@@ -18,6 +18,8 @@
 #define protected public
 #include "gtest/gtest.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -30,6 +32,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/common/container.h"
 
 using namespace testing;
 using namespace testing::ext; 
@@ -49,12 +52,15 @@ public:
 
 void SelectOverlayProxyTestNg::SetUpTestCase()
 {
+    MockContainer::SetUp();
     MockPipelineBase::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void SelectOverlayProxyTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
