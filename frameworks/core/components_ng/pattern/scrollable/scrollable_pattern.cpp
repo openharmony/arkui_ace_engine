@@ -192,10 +192,10 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
             refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE);
         }
     }
-
     if (IsAtTop() &&
         (Positive(offset) || (Negative(offset) && refreshCoordination_ && refreshCoordination_->IsRefreshInScroll())) &&
-        (source == SCROLL_FROM_UPDATE) && !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
+        (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION) && !isRefreshInReactive_ &&
+        (axis_ == Axis::VERTICAL)) {
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
             refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE);
