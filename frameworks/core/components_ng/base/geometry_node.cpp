@@ -29,6 +29,7 @@ void GeometryNode::Reset()
     padding_.reset();
     content_.reset();
     parentGlobalOffset_.Reset();
+    parentAbsoluteOffset_.Reset();
     parentLayoutConstraint_.reset();
     previousState_.reset();
 }
@@ -49,6 +50,7 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     node->parentGlobalOffset_ = parentGlobalOffset_;
     node->parentLayoutConstraint_ = parentLayoutConstraint_;
     node->previousState_ = previousState_ ? std::make_unique<RectF>(*previousState_) : nullptr;
+    node->parentAbsoluteOffset_ = parentAbsoluteOffset_;
     return node;
 }
 

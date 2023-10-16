@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NEW_SKIA
-#include "flutter_render_clock.h"
-#endif
+
 #include "rosen_render_clock.h"
 
 namespace OHOS::Ace {
@@ -27,11 +25,7 @@ RefPtr<RenderNode> RenderClock::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderClock>();
-#else
         return nullptr;
-#endif
     }
 }
 
@@ -44,11 +38,7 @@ RefPtr<RenderNode> RenderClockHand::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderClockHand>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

@@ -16,8 +16,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/preview_mock/preview_mock_model.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/preview_mock/preview_mock_pattern.h"
 
 namespace OHOS::Ace::NG {
 void PreviewMockModelNG::Create(const std::string& content)
@@ -29,7 +29,7 @@ void PreviewMockModelNG::Create(const std::string& content)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(content, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        FrameNode::GetOrCreateFrameNode(content, nodeId, []() { return AceType::MakeRefPtr<PreviewMockPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, presentationText);

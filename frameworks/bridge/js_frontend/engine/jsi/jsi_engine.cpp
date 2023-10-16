@@ -963,7 +963,7 @@ void ShowToast(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& 
     LOGD("ShowToast message = %{private}s duration = %{public}d bottom = %{private}s", message.c_str(), duration,
         bottom.c_str());
 
-    GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom);
+    GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT);
 }
 
 std::vector<ButtonInfo> ParseDialogButtons(

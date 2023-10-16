@@ -21,10 +21,8 @@
 #include "rosen_text/typography.h"
 #endif
 
-#ifdef NEW_SKIA
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSamplingOptions.h"
-#endif
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
@@ -166,19 +164,11 @@ void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width,
     CHECK_NULL_VOID(skImage);
     SkPaint paint;
     sk_sp<SkColorSpace> colorSpace = skImage->refColorSpace();
-#ifdef USE_SYSTEM_SKIA
-    paint.setColor4f(paint.getColor4f(), colorSpace.get());
-#else
     paint.setColor(paint.getColor4f(), colorSpace.get());
-#endif
     auto skSrcRect = SkRect::MakeXYWH(0, 0, skImage->width(), skImage->height());
     auto skDstRect = SkRect::MakeXYWH(0, 0, width, height);
-#ifndef NEW_SKIA
-    canvas->drawImageRect(skImage, skSrcRect, skDstRect, &paint);
-#else
     canvas->drawImageRect(
         skImage, skSrcRect, skDstRect, SkSamplingOptions(), &paint, SkCanvas::kFast_SrcRectConstraint);
-#endif
 }
 #else
 void DrawDrawingImage(RSCanvas* canvas, const std::shared_ptr<RSImage>& drawingImage, int32_t width, int32_t height)

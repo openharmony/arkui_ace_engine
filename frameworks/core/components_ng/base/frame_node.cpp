@@ -48,10 +48,8 @@
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
-#if defined(PREVIEW)
 constexpr int32_t SUBSTR_LENGTH = 3;
 const char DIMENSION_UNIT_VP[] = "vp";
-#endif
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -387,19 +385,7 @@ void FrameNode::InitializePatternAndContext()
     }
 }
 
-void FrameNode::DumpOverlayInfo()
-{
-    if (!layoutProperty_->IsOverlayNode()) {
-        return;
-    }
-    DumpLog::GetInstance().AddDesc(std::string("IsOverlayNode: ").append(std::string("true")));
-    Dimension offsetX, offsetY;
-    layoutProperty_->GetOverlayOffset(offsetX, offsetY);
-    DumpLog::GetInstance().AddDesc(
-        std::string("OverlayOffset: ").append(offsetX.ToString()).append(std::string(", ")).append(offsetY.ToString()));
-}
-
-void FrameNode::DumpInfo()
+void FrameNode::DumpCommonInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
     DumpLog::GetInstance().AddDesc(
@@ -441,8 +427,37 @@ void FrameNode::DumpInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
     DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
+}
+
+void FrameNode::DumpOverlayInfo()
+{
+    if (!layoutProperty_->IsOverlayNode()) {
+        return;
+    }
+    DumpLog::GetInstance().AddDesc(std::string("IsOverlayNode: ").append(std::string("true")));
+    Dimension offsetX, offsetY;
+    layoutProperty_->GetOverlayOffset(offsetX, offsetY);
+    DumpLog::GetInstance().AddDesc(
+        std::string("OverlayOffset: ").append(offsetX.ToString()).append(std::string(", ")).append(offsetY.ToString()));
+}
+
+void FrameNode::DumpInfo()
+{
+    DumpCommonInfo();
     if (pattern_) {
         pattern_->DumpInfo();
+    }
+    if (renderContext_) {
+        renderContext_->DumpInfo();
+    }
+}
+
+void FrameNode::DumpAdvanceInfo()
+{
+    DumpCommonInfo();
+    if (pattern_) {
+        pattern_->DumpInfo();
+        pattern_->DumpAdvanceInfo();
     }
     if (renderContext_) {
         renderContext_->DumpInfo();
@@ -517,7 +532,6 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-#if defined(PREVIEW)
     bool hasIdealWidth = false;
     bool hasIdealHeight = false;
     if (layoutProperty_ && layoutProperty_->GetCalcLayoutConstraint()) {
@@ -546,7 +560,6 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
             jsonSize->Put("height", heightStr);
         }
     }
-#endif
 }
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -794,6 +807,7 @@ void FrameNode::TriggerOnAreaChangeCallback()
     if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         auto currParentOffsetToWindow = GetOffsetRelativeToWindow() - currFrameRect.GetOffset();
+        currFrameRect.SetOffset(geometryNode_->GetPixelGridRoundOffsetForArea());
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             eventHub_->FireOnAreaChanged(
                 *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
@@ -1530,8 +1544,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (!child) {
             continue;
         }
-        auto childHitResult = child->TouchTest(globalPoint, localPoint, subRevertPoint, touchRestrict,
-            newComingTargets, touchId);
+        auto childHitResult =
+            child->TouchTest(globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
@@ -2377,6 +2391,8 @@ void FrameNode::Layout()
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
         geometryNode_->GetFrameOffset().ToString().c_str());
     SyncGeometryNode();
+
+    UpdateParentAbsoluteOffset();
 }
 
 void FrameNode::SyncGeometryNode()
@@ -2415,7 +2431,7 @@ void FrameNode::SyncGeometryNode()
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         isLayoutComplete_ = true;
-        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
+        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true);
     }
 
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
@@ -2438,7 +2454,7 @@ void FrameNode::SyncGeometryNode()
     }
 
     // update border.
-    if (layoutProperty_->GetBorderWidthProperty() && !renderContext_->HasBorderImage()) {
+    if (layoutProperty_->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderColor()) {
             BorderColorProperty borderColorProperty;
             borderColorProperty.SetColor(Color::BLACK);
@@ -2485,6 +2501,18 @@ void FrameNode::SyncGeometryNode()
     AdjustGridOffset();
 
     layoutAlgorithm_.Reset();
+}
+
+void FrameNode::UpdateParentAbsoluteOffset()
+{
+    const auto& children = GetChildren();
+    for (const auto& child : children) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(frameNode);
+        auto childNode = frameNode->GetGeometryNode();
+        CHECK_NULL_VOID(childNode);
+        childNode->SetParentAbsoluteOffset(geometryNode_->GetParentAbsoluteOffset() + GetOffsetRelativeToWindow());
+    }
 }
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)

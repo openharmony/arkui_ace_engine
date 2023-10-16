@@ -58,6 +58,7 @@ public:
         switchModifier_->SetTouchHoverAnimationType(touchHoverType_);
         switchModifier_->SetDragOffsetX(dragOffsetX_);
         switchModifier_->SetIsDragEvent(isDragEvent_);
+        switchModifier_->SetShowHoverEffect(showHoverEffect_);
         switchModifier_->UpdateAnimatableProperty();
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -117,6 +118,11 @@ public:
         isDragEvent_ = isDragEvent;
     }
 
+    void SetShowHoverEffect(bool showHoverEffect)
+    {
+        showHoverEffect_ = showHoverEffect;
+    }
+
 private:
     float dragOffsetX_ = 0.0f;
     float hoverPercent_ = 0.0f;
@@ -126,6 +132,7 @@ private:
     Color clickEffectColor_ = Color::WHITE;
     Color hoverColor_ = Color::WHITE;
     Dimension hoverRadius_ = 8.0_vp;
+    bool showHoverEffect_ = true;
 
     bool isHover_ = false;
     OffsetF hotZoneOffset_;

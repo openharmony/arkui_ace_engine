@@ -472,10 +472,6 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
 
 #ifndef USE_ROSEN_DRAWING
 /* TODO.lx flutter对应实现中定义了该函数，去除flutter后，找不到对应实现，先这么改，后面实现在rosen中 */
-#ifndef NEW_SKIA
-SkColorType ConvertToSkColorType(PixelFormat pixelFormat);
-SkAlphaType ConvertToSkAlphaType(AlphaType alphaType);
-#else
 SkColorType ConvertToSkColorType(PixelFormat pixelFormat)
 {
     SkColorType colorType = kUnknown_SkColorType;
@@ -529,7 +525,6 @@ SkAlphaType ConvertToSkAlphaType(AlphaType alphaType)
     }
     return skAlphaType;
 }
-#endif
 #else // USE_ROSEN_DRAWING
 RSColorType ConvertToColorType(PixelFormat pixelFormat)
 {

@@ -29,6 +29,7 @@
 namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
     IDLE,
+    ABOUT_TO_PREVIEW,
     DRAGGING
 };
 
@@ -161,6 +162,11 @@ public:
         return dragDropState_ == DragDropMgrState::DRAGGING;
     }
 
+    bool IsAboutToPreview()
+    {
+        return dragDropState_ == DragDropMgrState::ABOUT_TO_PREVIEW;
+    }
+
     void ResetDragging(DragDropMgrState dragDropMgrState = DragDropMgrState::IDLE)
     {
         dragDropState_ = dragDropMgrState;
@@ -180,6 +186,8 @@ private:
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
     void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
+    void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
+        RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;

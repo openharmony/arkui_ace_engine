@@ -16,12 +16,9 @@ import(
 
 build_component("shadow") {
   sources = [
-    "flutter_render_shadow.cpp",
     "render_shadow.cpp",
     "render_shadow_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_shadow.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_shadow.cpp" ]
 }

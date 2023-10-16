@@ -26,16 +26,6 @@ build_component("track") {
     "track_component.cpp",
   ]
 
-  if (!ace_use_new_skia) {
-    sources += [
-      "flutter_render_arc_track.cpp",
-      "flutter_render_capsule_track.cpp",
-      "flutter_render_circular_track.cpp",
-      "flutter_render_linear_track.cpp",
-      "flutter_render_moon_track.cpp",
-      "flutter_render_scale_ring_track.cpp",
-    ]
-  }
   rosen_sources = [
     "rosen_render_arc_track.cpp",
     "rosen_render_capsule_track.cpp",

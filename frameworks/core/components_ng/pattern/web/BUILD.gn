@@ -55,6 +55,7 @@ build_component_ng("web_pattern_ng") {
       "ability_base:configuration",
       "ability_runtime:app_manager",
       "ability_runtime:appkit_native",
+      "app_file_service:fileuri_native",
       "c_utils:utils",
       "graphic_2d:librender_service_client",
       "init:libbegetutil",

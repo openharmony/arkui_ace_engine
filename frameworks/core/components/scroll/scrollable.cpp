@@ -636,7 +636,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             FrameReport::GetInstance().EndListFling();
         }
 #endif
-    } else if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
+    } else if (!Container::IsCurrentUseNewPipeline() && outBoundaryCallback_ && outBoundaryCallback_() &&
+               scrollOverCallback_) {
         ResetContinueDragCount();
         ProcessScrollOverCallback(correctVelocity);
     } else if (canOverScroll_) {
@@ -995,7 +996,6 @@ void Scrollable::ProcessScrollMotionStop()
         scrollPause_ = false;
         HandleOverScroll(currentVelocity_);
     } else {
-        currentVelocity_ = 0.0;
         if (isDragUpdateStop_) {
             return;
         }
@@ -1011,6 +1011,7 @@ void Scrollable::ProcessScrollMotionStop()
         if (scrollEnd_) {
             scrollEnd_();
         }
+        currentVelocity_ = 0.0;
 #if !defined(PREVIEW)
         LayoutInspector::SupportInspector();
 #endif
@@ -1066,7 +1067,7 @@ void Scrollable::ProcessScrollMotion(double position)
 
     // spring effect special process
     if ((IsSnapStopped() && canOverScroll_) || needScrollSnapChange_ ||
-        ((outBoundaryCallback_ && outBoundaryCallback_()))) {
+        (!Container::IsCurrentUseNewPipeline() && outBoundaryCallback_ && outBoundaryCallback_())) {
         scrollPause_ = true;
         controller_->Stop();
     }

@@ -20,8 +20,6 @@ build_component("texttimer") {
     "render_texttimer_creator.cpp",
     "texttimer_component.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_texttimer.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_texttimer.cpp" ]
 }

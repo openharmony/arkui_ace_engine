@@ -77,6 +77,7 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
+#include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
@@ -143,7 +144,6 @@
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "bridge/declarative_frontend/jsview/js_text_clock.h"
-#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
@@ -559,6 +559,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PasteButton", JSPasteButton::JSBind },
     { "Particle", JSParticle::JSBind },
     { "SaveButton", JSSaveButton::JSBind },
+    { "__KeyboardAvoid__", JSKeyboardAvoid::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
@@ -637,15 +638,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "Search", JSSearch::JSBind },
     { "Select", JSSelect::JSBind },
-    { "SearchController", JSTextEditableController::JSBind },
+    { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
     { "PatternLock", JSPatternLock::JSBind },
     { "PatternLockController", JSPatternLockController::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
-    { "TextAreaController", JSTextEditableController::JSBind },
-    { "TextInputController", JSTextEditableController::JSBind },
+    { "TextAreaController", JSTextAreaController::JSBind },
+    { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
     { "Checkbox", JSCheckbox::JSBind },
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
@@ -704,7 +705,9 @@ void RegisterAllModule(BindingTarget globalObj)
 #ifdef VIDEO_SUPPORTED
     JSVideoController::JSBind(globalObj);
 #endif
-    JSTextEditableController::JSBind(globalObj);
+    JSTextInputController::JSBind(globalObj);
+    JSTextAreaController::JSBind(globalObj);
+    JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
@@ -793,10 +796,14 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSColumn::JSBind(globalObj);
     } else if ((*func).first == "TextTimer") {
         JSTextTimerController::JSBind(globalObj);
-    } else if ((*func).first == "TextInput" || (*func).first == "TextArea" || (*func).first == "Search") {
-        JSTextEditableController::JSBind(globalObj);
+    } else if ((*func).first == "TextInput") {
+        JSTextInputController::JSBind(globalObj);
     } else if ((*func).first == "TextClock") {
         JSTextClockController::JSBind(globalObj);
+    } else if ((*func).first == "TextArea") {
+        JSTextAreaController::JSBind(globalObj);
+    } else if ((*func).first == "Search") {
+        JSSearchController::JSBind(globalObj);
     } else if ((*func).first == "Web") {
 #ifdef WEB_SUPPORTED
         JSWebController::JSBind(globalObj);

@@ -50,6 +50,8 @@ public:
         const RefPtr<UnifiedData>& unifiedData, const std::string& url, const std::string& description) = 0;
     virtual void GetLinkRecord(
         const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) = 0;
+    virtual bool GetFileUriRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) = 0;
+    virtual bool AddFileUriRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) = 0;
     virtual void AddHtmlRecord(
         const RefPtr<UnifiedData>& unifiedData, const std::string& htmlContent, const std::string& plainContent) = 0;
     virtual void GetHtmlRecord(

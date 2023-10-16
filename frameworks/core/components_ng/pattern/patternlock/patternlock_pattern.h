@@ -120,6 +120,8 @@ private:
 
     bool CheckChoosePoint(int32_t x, int32_t y) const;
     bool CheckInHotSpot(const OffsetF& offset, int32_t x, int32_t y);
+    void UpdateDotConnectEvent();
+    void AddPassPointToChoosePoint(int32_t lastCode, int32_t nowCode, std::vector<PatternLockCell> passPointVec);
     bool AddChoosePoint(const OffsetF& offset, int32_t x, int32_t y);
     void AddPassPoint(int32_t x, int32_t y);
     void HandleReset();

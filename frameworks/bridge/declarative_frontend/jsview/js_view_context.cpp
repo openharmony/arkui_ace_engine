@@ -60,6 +60,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 
 void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     JSRef<JSFunc> jsAnimateToFunc, std::function<void()>& onFinishEvent)
@@ -132,6 +133,12 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     pipelineContext->FlushBuild();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
     pipelineContext->CloseImplicitAnimation();
+}
+
+int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
+{
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
 }
 
 } // namespace
@@ -250,8 +257,9 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
-    if (!pipelineContextBase->GetEnableImplicitAnimation() && pipelineContextBase->IsFormRender()) {
-        LOGW("Form need enable implicit animation in finish callback.");
+    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+        GetFormAnimationTimeInterval(pipelineContextBase) > DEFAULT_DURATION) {
+        LOGW("[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
         return;
     }
     if (info[0]->IsNull() || !info[0]->IsObject()) {
@@ -278,6 +286,13 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     }
 
     option = CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContextBase->IsFormRender());
+    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+        option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
+        option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
+        LOGW("[Form animation]  Form animation SetDuration: %{public}lld ms",
+            static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase)));
+    }
+
     option.SetOnFinishEvent(onFinishEvent);
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
@@ -313,8 +328,9 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (!pipelineContext->GetEnableImplicitAnimation() && pipelineContext->IsFormRender()) {
-        LOGW("Form need enable implicit animation in finish callback.");
+    if (pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRender() &&
+        GetFormAnimationTimeInterval(pipelineContext) > DEFAULT_DURATION) {
+        LOGW("[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
         return;
     }
 
@@ -339,6 +355,12 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 
     AnimationOption option =
         CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContext->IsFormRender());
+    if (pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRender() &&
+        option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext))) {
+        option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
+        LOGW("[Form animation]  Form animation SetDuration: %{public}lld ms",
+            static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext)));
+    }
     if (SystemProperties::GetRosenBackendEnabled()) {
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
         LOGD("RSAnimationInfo: Begin JSAnimateTo, usingSharedRuntime: %{public}d", usingSharedRuntime);

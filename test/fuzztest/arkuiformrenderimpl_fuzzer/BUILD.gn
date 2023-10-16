@@ -46,6 +46,7 @@ ohos_fuzztest("ArkuiFormRenderImplFuzzTest") {
     "ability_base:want",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "form_fwk:form_manager",
     "hilog:libhilog",
     "input:libmmi-client",

@@ -37,7 +37,6 @@ void DOMToggle::ResetInitializedStyle()
 {
     toggleTheme_ = GetTheme<ToggleTheme>();
     if (!toggleTheme_) {
-        LOGE("toggleTheme is null");
         return;
     }
     paddingChild_->SetPadding(toggleTheme_->GetPadding());

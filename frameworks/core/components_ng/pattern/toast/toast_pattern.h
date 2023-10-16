@@ -61,6 +61,14 @@ public:
         textNode_ = textNode;
     }
 
+    bool IsDefaultToast() const
+    {
+        auto layoutProp = GetLayoutProperty<ToastLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProp, false);
+        auto showMode = layoutProp->GetShowModeValue(ToastShowMode::DEFAULT);
+        return showMode == ToastShowMode::DEFAULT;
+    }
+
 private:
     void BeforeCreateLayoutWrapper() override;
     void UpdateToastSize(const RefPtr<FrameNode>& toast);

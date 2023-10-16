@@ -15,22 +15,14 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_offset.h"
 
-#ifndef NEW_SKIA
-#include "include/effects/SkOffsetImageFilter.h"
-#else
 #include "include/effects/SkImageFilters.h"
-#endif
 
 namespace OHOS::Ace {
 
 #ifndef USE_ROSEN_DRAWING
 void RosenRenderSvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const
 {
-#ifndef NEW_SKIA
-    imageFilter = SkOffsetImageFilter::Make(dx_, dy_, imageFilter);
-#else
     imageFilter = SkImageFilters::Offset(dx_, dy_, imageFilter);
-#endif
 }
 #else
 void RosenRenderSvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter) const

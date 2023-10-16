@@ -73,6 +73,13 @@ var FontWeight;
   FontWeight["Bolder"] = "bolder";
 })(FontWeight || (FontWeight = {}));
 
+var WordBreak;
+(function (WordBreak) {
+  WordBreak[WordBreak["NORMAL"] = 0] = "normal";
+  WordBreak[WordBreak["BREAK_ALL"] = 1] = "break-all";
+  WordBreak[WordBreak["BREAK_WORD"] = 2] = "break-word";
+})(WordBreak || (WordBreak = {}))
+
 var Curve;
 (function (Curve) {
   Curve["Linear"] = "linear";
@@ -1871,3 +1878,9 @@ var ParticleUpdater;
   ParticleUpdater[ParticleUpdater["RANDOM"] = 1] = "RANDOM";
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
+
+var SwiperNestedScrollMode;
+(function (SwiperNestedScrollMode) {
+  SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_ONLY"] = 0] = "SELF_ONLY";
+  SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
+})(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));

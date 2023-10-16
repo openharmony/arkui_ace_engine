@@ -226,7 +226,7 @@ void UITaskScheduler::FlushTask() {}
 
 UITaskScheduler::~UITaskScheduler() = default;
 
-void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty, bool checkPage) {}
+void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 
@@ -310,6 +310,11 @@ void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
+void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
+bool PipelineContext::IsEnableKeyBoardAvoidMode()
+{
+    return false;
+}
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
 
@@ -324,11 +329,6 @@ void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 
 void PipelineContext::SetWindowSceneConsumed(bool isConsumed) {}
-
-int32_t PipelineContext::GetCurrentPageId()
-{
-    return -1;
-}
 } // namespace OHOS::Ace::NG
 
 // pipeline base

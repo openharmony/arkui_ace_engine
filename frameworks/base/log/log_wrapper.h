@@ -78,6 +78,8 @@ enum class AceLogTag : uint8_t {
     ACE_FORM,
     ACE_DRAG,
     ACE_VIDEO,
+    ACE_FONT,
+    ACE_TEXTINPUT,
 };
 
 enum class LogDomain : uint32_t {

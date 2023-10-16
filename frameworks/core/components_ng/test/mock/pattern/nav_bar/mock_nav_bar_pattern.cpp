@@ -47,8 +47,9 @@ void NavBarPattern::ResetAssociatedScroll()
 {
 }
 
-void NavBarPattern::UpdateAssociatedScrollOffset(float offset)
+bool NavBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node)
 {
+    return true;
 }
 
 bool NavBarPattern::IsTitleModeFree()

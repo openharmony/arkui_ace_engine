@@ -18,12 +18,9 @@ build_component("arc") {
   sources = [
     "arc_component.cpp",
     "arc_element.cpp",
-    "flutter_render_arc.cpp",
     "render_arc.cpp",
     "render_arc_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_arc.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_arc.cpp" ]
 }

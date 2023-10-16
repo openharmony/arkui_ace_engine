@@ -315,4 +315,12 @@ void SwiperModelNG::SetHoverShow(bool hoverShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, HoverShow, hoverShow);
 }
 
+void SwiperModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
 } // namespace OHOS::Ace::NG

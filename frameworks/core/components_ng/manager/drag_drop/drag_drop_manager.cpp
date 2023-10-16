@@ -211,8 +211,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             if (!eventHub) {
                 continue;
             }
-            if ((findDrop && (eventHub->HasOnDrop() || eventHub->HasOnItemDrop()))
-                || (!findDrop && (eventHub->HasOnDrop() || eventHub->HasOnItemDrop()))) {
+            if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasCustomerOnDrop()) {
                 return parentFrameNode;
             }
             if (SystemProperties::GetDebugEnabled()) {
@@ -301,11 +300,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        if (recordSize_ > 1) {
-            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
-        } else {
-            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
-        }
+        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
         return;
     }
     for (const auto& it : summaryMap_) {
@@ -376,8 +371,7 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
 
 #ifdef ENABLE_DRAG_FRAMEWORK
         if (!isMouseDragged_ || isDragWindowShow_) {
-            InteractionManager::GetInstance()->UpdateDragStyle(
-                recordSize_ > 1 ? DragCursorStyle::MOVE : DragCursorStyle::DEFAULT);
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
         }
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
@@ -466,7 +460,8 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     UpdateDragEvent(event, point);
-    eventHub->FireOnDrop(event, extraParams);
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
+    eventHub->HandleInternalOnDrop(event, extraParams);
     ClearVelocityInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     SetIsDragged(false);
@@ -507,14 +502,6 @@ void DragDropManager::RequireSummary()
     }
     previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_ = summary;
-    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
-    ret = UdmfClient::GetInstance()->GetData(udData, udKey);
-    if (ret != 0) {
-        LOGW("OnDragStart: UDMF GetData failed: %{public}d", ret);
-        return;
-    }
-    CHECK_NULL_VOID(udData);
-    ResetRecordSize(udData->GetSize());
 }
 
 void DragDropManager::ResetRecordSize(uint32_t recordSize)
@@ -573,6 +560,35 @@ void DragDropManager::onDragCancel()
     draggedFrameNode_ = nullptr;
 }
 
+void DragDropManager::FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
+    RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
+{
+    switch (type) {
+        case DragEventType::ENTER: {
+            eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_ENTER, event, extraParams);
+            eventHub->FireOnDragEnter(event, extraParams);
+            break;
+        }
+        case DragEventType::MOVE: {
+            eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_MOVE, event, extraParams);
+            eventHub->FireOnDragMove(event, extraParams);
+            break;
+        }
+        case DragEventType::LEAVE: {
+            eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, event, extraParams);
+            eventHub->FireOnDragLeave(event, extraParams);
+            break;
+        }
+        case DragEventType::DROP: {
+            eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
+            eventHub->HandleInternalOnDrop(event, extraParams);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void DragDropManager::FireOnDragEvent(
     const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo)
 {
@@ -589,25 +605,11 @@ void DragDropManager::FireOnDragEvent(
     event->SetScreenY((double)point.GetScreenY());
     event->SetVelocity(velocityTracker_.GetVelocity());
 #ifdef ENABLE_DRAG_FRAMEWORK
+    event->SetSummary(summaryMap_);
     event->SetPreviewRect(GetDragWindowRect(point));
 #endif // ENABLE_DRAG_FRAMEWORK
 
-    switch (type) {
-        case DragEventType::ENTER:
-            eventHub->FireOnDragEnter(event, extraParams);
-            break;
-        case DragEventType::MOVE:
-            eventHub->FireOnDragMove(event, extraParams);
-            break;
-        case DragEventType::LEAVE:
-            eventHub->FireOnDragLeave(event, extraParams);
-            break;
-        case DragEventType::DROP:
-            eventHub->FireOnDrop(event, extraParams);
-            break;
-        default:
-            break;
-    }
+    FireOnDragEventWithDragType(eventHub, type, event, extraParams);
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (isMouseDragged_ && !isDragWindowShow_) {
@@ -958,6 +960,7 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     }
     auto unifiedData = udData;
     event->SetData(unifiedData);
+    event->SetSummary(summaryMap_);
     int x = -1;
     int y = -1;
     int width = -1;

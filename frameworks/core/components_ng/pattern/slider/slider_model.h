@@ -63,7 +63,8 @@ public:
     virtual void SetTrackBorderRadius(const Dimension& value) = 0;
     virtual void SetBlockSize(const Dimension& width, const Dimension& height) = 0;
     virtual void SetBlockType(BlockStyleType value) = 0;
-    virtual void SetBlockImage(const std::string& value) = 0;
+    virtual void SetBlockImage(
+        const std::string& value, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetBlockShape(const RefPtr<BasicShape>& value) = 0;
     virtual void SetStepSize(const Dimension& value) = 0;
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;

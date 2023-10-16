@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,9 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/effects/Sk1DPathEffect.h"
-#ifndef NEW_SKIA
-#include "include/effects/SkBlurImageFilter.h"
-#else
-#include "include/effects/SkImageFilters.h"
-#endif
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
+#include "include/effects/SkImageFilters.h"
 #include "include/utils/SkShadowUtils.h"
 
 #include "core/components/common/painter/border_image_painter.h"
@@ -211,7 +207,6 @@ protected:
 };
 
 class LinearGradientShader final : public GradientShader {
-
 public:
     LinearGradientShader(const Gradient& gradient, const SkPoint& firstPoint, const SkPoint& secondPoint)
         : GradientShader(gradient), firstPoint_(firstPoint), secondPoint_(secondPoint)
@@ -232,17 +227,10 @@ public:
         std::vector<SkColor> colors;
         ToSkColors(pos, colors);
         SkPoint pts[2] = { firstPoint_, secondPoint_ };
-#ifdef USE_SYSTEM_SKIA
-        SkShader::TileMode tileMode = SkShader::kClamp_TileMode;
-#else
+
         SkTileMode tileMode = SkTileMode::kClamp;
-#endif
         if (isRepeat_) {
-#ifdef USE_SYSTEM_SKIA
-            tileMode = SkShader::kRepeat_TileMode;
-#else
             tileMode = SkTileMode::kRepeat;
-#endif
         }
         return SkGradientShader::MakeLinear(pts, &colors[0], &pos[0], colors.size(), tileMode);
     }
@@ -399,18 +387,11 @@ public:
             AdjustRadius(startOffset, endOffset);
         }
 
-#ifdef USE_SYSTEM_SKIA
-        SkShader::TileMode tileMode = SkShader::kClamp_TileMode;
-#else
         SkTileMode tileMode = SkTileMode::kClamp;
-#endif
         if (isRepeat_) {
             ClampNegativeOffsets();
-#ifdef USE_SYSTEM_SKIA
-            tileMode = SkShader::kRepeat_TileMode;
-#else
+
             tileMode = SkTileMode::kRepeat;
-#endif
         }
         std::vector<SkScalar> pos;
         std::vector<SkColor> colors;
@@ -509,7 +490,7 @@ private:
             RadialShapeType shape = RadialShapeType::ELLIPSE;
             if ((radialGradient.radialShape && radialGradient.radialShape.value() == RadialShapeType::CIRCLE) ||
                 (!radialGradient.radialShape && !radialGradient.radialSizeType && radialGradient.radialHorizontalSize &&
-                !radialGradient.radialVerticalSize)) {
+                    !radialGradient.radialVerticalSize)) {
                 shape = RadialShapeType::CIRCLE;
             }
             auto sizeType =
@@ -627,17 +608,10 @@ public:
         std::vector<SkScalar> pos;
         std::vector<SkColor> colors;
         ToSkColors(pos, colors);
-#ifdef USE_SYSTEM_SKIA
-        SkShader::TileMode tileMode = SkShader::kClamp_TileMode;
-#else
+
         SkTileMode tileMode = SkTileMode::kClamp;
-#endif
         if (isRepeat_) {
-#ifdef USE_SYSTEM_SKIA
-            tileMode = SkShader::kRepeat_TileMode;
-#else
             tileMode = SkTileMode::kRepeat;
-#endif
         }
         return SkGradientShader::MakeSweep(
             center_.fX, center_.fY, &colors[0], &pos[0], colors.size(), tileMode, startAngle_, endAngle_, 0, &matrix);
@@ -755,8 +729,8 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
     }
 }
 
-void FlutterDecorationPainter::PaintBorderImage(SkPaint& paint, const Offset& offset, SkCanvas* canvas,
-    const sk_sp<SkImage>& image)
+void FlutterDecorationPainter::PaintBorderImage(
+    SkPaint& paint, const Offset& offset, SkCanvas* canvas, const sk_sp<SkImage>& image)
 {
     paint.setAntiAlias(true);
     if (decoration_->GetHasBorderImageSource()) {
@@ -780,18 +754,13 @@ void FlutterDecorationPainter::PaintBorderImage(SkPaint& paint, const Offset& of
             return;
         }
         canvas->save();
-#ifndef NEW_SKIA
-        SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()),
-            SkDoubleToMScalar(paintSize_.Height()));
-#else
-        SkSize skPaintSize = SkSize::Make(paintSize_.Width(),
-            paintSize_.Height());
-#endif
+
+        SkSize skPaintSize = SkSize::Make(paintSize_.Width(), paintSize_.Height());
         auto shader = CreateGradientShader(gradient, skPaintSize);
         paint.setShader(std::move(shader));
 
-        auto imageInfo = SkImageInfo::Make(paintSize_.Width(), paintSize_.Height(),
-            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+        auto imageInfo = SkImageInfo::Make(paintSize_.Width(), paintSize_.Height(), SkColorType::kRGBA_8888_SkColorType,
+            SkAlphaType::kOpaque_SkAlphaType);
         SkBitmap skBitmap_;
         skBitmap_.allocPixels(imageInfo);
         std::unique_ptr<SkCanvas> skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
@@ -805,8 +774,8 @@ void FlutterDecorationPainter::PaintBorderImage(SkPaint& paint, const Offset& of
     }
 }
 
-void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* canvas,
-    RenderContext& context, const sk_sp<SkImage>& image, bool paintBorder)
+void FlutterDecorationPainter::PaintDecoration(
+    const Offset& offset, SkCanvas* canvas, RenderContext& context, const sk_sp<SkImage>& image, bool paintBorder)
 {
     if (!canvas) {
         LOGE("PaintDecoration failed, canvas is null.");
@@ -841,8 +810,8 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
     }
 }
 
-void FlutterDecorationPainter::PaintGrayScale(const flutter::RRect& outerRRect, SkCanvas* canvas,
-    const Dimension& grayscale, const Color& color)
+void FlutterDecorationPainter::PaintGrayScale(
+    const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& grayscale, const Color& color)
 {
     double scale = grayscale.Value();
     if (GreatNotEqual(scale, 0.0)) {
@@ -856,20 +825,16 @@ void FlutterDecorationPainter::PaintGrayScale(const flutter::RRect& outerRRect, 
             matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
             matrix[2] = matrix[7] = matrix[12] = 0.0722f * scale;
             matrix[18] = 1.0f * scale;
-#ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
-#else
+
             paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 
-void FlutterDecorationPainter::PaintBrightness(const flutter::RRect& outerRRect, SkCanvas* canvas,
-    const Dimension& brightness, const Color& color)
+void FlutterDecorationPainter::PaintBrightness(
+    const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& brightness, const Color& color)
 {
     double bright = brightness.Value();
     // brightness range (0, 2), 1 is normal brightness
@@ -887,19 +852,16 @@ void FlutterDecorationPainter::PaintBrightness(const flutter::RRect& outerRRect,
         bright--;
         matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
         matrix[4] = matrix[9] = matrix[14] = bright;
-#ifdef USE_SYSTEM_SKIA
-        auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-        paint.setColorFilter(filter);
-#else
+
         paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
+
         SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
         canvas->saveLayer(slr);
     }
 }
 
-void FlutterDecorationPainter::PaintContrast(const flutter::RRect& outerRRect, SkCanvas* canvas,
-    const Dimension& contrast, const Color& color)
+void FlutterDecorationPainter::PaintContrast(
+    const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& contrast, const Color& color)
 {
     double contrasts = contrast.Value();
     // skip painting if contrast is normal
@@ -915,19 +877,15 @@ void FlutterDecorationPainter::PaintContrast(const flutter::RRect& outerRRect, S
         matrix[0] = matrix[6] = matrix[12] = contrasts;
         matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts) / 255;
         matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-        auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-        paint.setColorFilter(filter);
-#else
+
         paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
         SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
         canvas->saveLayer(slr);
     }
 }
 
-void FlutterDecorationPainter::PaintColorBlend(const flutter::RRect& outerRRect, SkCanvas* canvas,
-    const Color& colorBlend, const Color& color)
+void FlutterDecorationPainter::PaintColorBlend(
+    const flutter::RRect& outerRRect, SkCanvas* canvas, const Color& colorBlend, const Color& color)
 {
     if (colorBlend.GetValue() != COLOR_MASK) {
         if (canvas) {
@@ -935,23 +893,18 @@ void FlutterDecorationPainter::PaintColorBlend(const flutter::RRect& outerRRect,
             canvas->clipRRect(outerRRect.sk_rrect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
-            paint.setColorFilter(SkColorFilter::MakeModeFilter(
-                SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
-                SkBlendMode::kPlus));
-#else
+
             paint.setColorFilter(SkColorFilters::Blend(
                 SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
                 SkBlendMode::kPlus));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 
-void FlutterDecorationPainter::PaintSaturate(const flutter::RRect& outerRRect, SkCanvas* canvas,
-    const Dimension& saturate, const Color& color)
+void FlutterDecorationPainter::PaintSaturate(
+    const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& saturate, const Color& color)
 {
     double saturates = saturate.Value();
     if (!NearEqual(saturates, 1.0) && GreatOrEqual(saturates, 0.0)) {
@@ -968,20 +921,16 @@ void FlutterDecorationPainter::PaintSaturate(const flutter::RRect& outerRRect, S
             matrix[6] = 0.6094f * (1 - saturates) + saturates;
             matrix[12] = 0.0820f * (1 - saturates) + saturates;
             matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
-#else
+
             paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 
-void FlutterDecorationPainter::PaintSepia(const flutter::RRect& outerRRect, SkCanvas* canvas,
-    const Dimension& sepia, const Color& color)
+void FlutterDecorationPainter::PaintSepia(
+    const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& sepia, const Color& color)
 {
     double sepias = sepia.Value();
     if (sepias > 1.0) {
@@ -1006,20 +955,16 @@ void FlutterDecorationPainter::PaintSepia(const flutter::RRect& outerRRect, SkCa
             matrix[11] = 0.534f * sepias;
             matrix[12] = 0.131f * sepias;
             matrix[18] = 1.0f * sepias;
-#ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
-#else
+
             paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 
-void FlutterDecorationPainter::PaintInvert(const flutter::RRect& outerRRect, SkCanvas* canvas,
-    const Dimension& invert, const Color& color)
+void FlutterDecorationPainter::PaintInvert(
+    const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& invert, const Color& color)
 {
     double inverts = invert.Value();
     // normal invert = 0, no effect
@@ -1039,20 +984,16 @@ void FlutterDecorationPainter::PaintInvert(const flutter::RRect& outerRRect, SkC
             matrix[18] = 1.0f;
             // inverts = 0.5 -> RGB = (0.5, 0.5, 0.5) -> image completely gray
             matrix[4] = matrix[9] = matrix[14] = inverts;
-#ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
-#else
+
             paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
     }
 }
 
-void FlutterDecorationPainter::PaintHueRotate(const flutter::RRect& outerRRect, SkCanvas* canvas,
-    const float& hueRotate, const Color& color)
+void FlutterDecorationPainter::PaintHueRotate(
+    const flutter::RRect& outerRRect, SkCanvas* canvas, const float& hueRotate, const Color& color)
 {
     float hueRotates = hueRotate;
     if (GreatNotEqual(hueRotates, 0.0)) {
@@ -1089,12 +1030,8 @@ void FlutterDecorationPainter::PaintHueRotate(const flutter::RRect& outerRRect, 
                 default:
                     break;
             }
-#ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
-#else
+
             paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
@@ -1111,16 +1048,10 @@ void FlutterDecorationPainter::PaintBlur(
             canvas->clipRRect(outerRRect.sk_rrect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
-            paint.setColorFilter(SkColorFilter::MakeModeFilter(color.GetValue(), SkBlendMode::kDstOver));
-#else
+
             paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
-#endif
-#ifndef NEW_SKIA
-            paint.setImageFilter(SkBlurImageFilter::Make(radius, radius, nullptr));
-#else
+
             paint.setImageFilter(SkImageFilters::Blur(radius, radius, nullptr));
-#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
@@ -1210,12 +1141,9 @@ flutter::RRect FlutterDecorationPainter::GetOuterRRect(const Offset& offset, con
     float bottomLeftRadiusX = NormalizeToPx(border.BottomLeftRadius().GetX());
     float bottomLeftRadiusY = NormalizeToPx(border.BottomLeftRadius().GetY());
     SkRect outerRect = SkRect::MakeXYWH(offset.GetX(), offset.GetY(), paintSize_.Width(), paintSize_.Height());
-    const SkVector outerRadii[] = {
-        SkVector::Make(topLeftRadiusX, topLeftRadiusY),
-        SkVector::Make(topRightRadiusX, topRightRadiusY),
-        SkVector::Make(bottomRightRadiusX, bottomRightRadiusY),
-        SkVector::Make(bottomLeftRadiusX, bottomLeftRadiusY)
-    };
+    const SkVector outerRadii[] = { SkVector::Make(topLeftRadiusX, topLeftRadiusY),
+        SkVector::Make(topRightRadiusX, topRightRadiusY), SkVector::Make(bottomRightRadiusX, bottomRightRadiusY),
+        SkVector::Make(bottomLeftRadiusX, bottomLeftRadiusY) };
     rrect.sk_rrect.setRectRadii(outerRect, outerRadii);
     return rrect;
 }
@@ -1240,12 +1168,10 @@ flutter::RRect FlutterDecorationPainter::GetInnerRRect(const Offset& offset, con
     float blX = NormalizeToPx(border.BottomLeftRadius().GetX());
     float blY = NormalizeToPx(border.BottomLeftRadius().GetY());
     SkRect innerRect = SkRect::MakeXYWH(x + leftW, y + topW, w - rightW - leftW, h - bottomW - topW);
-    const SkVector innerRadii[] = {
-        SkVector::Make(std::max(0.0f, tlX - leftW), std::max(0.0f, tlY - topW)),
+    const SkVector innerRadii[] = { SkVector::Make(std::max(0.0f, tlX - leftW), std::max(0.0f, tlY - topW)),
         SkVector::Make(std::max(0.0f, trX - rightW), std::max(0.0f, trY - topW)),
         SkVector::Make(std::max(0.0f, brX - rightW), std::max(0.0f, brY - bottomW)),
-        SkVector::Make(std::max(0.0f, blX - leftW), std::max(0.0f, blY - bottomW))
-    };
+        SkVector::Make(std::max(0.0f, blX - leftW), std::max(0.0f, blY - bottomW)) };
     rrect.sk_rrect.setRectRadii(innerRect, innerRadii);
     return rrect;
 }
@@ -1261,12 +1187,9 @@ flutter::RRect FlutterDecorationPainter::GetClipRRect(const Offset& offset, cons
     float topLeftRadiusY = NormalizeToPx(border.TopLeftRadius().GetY());
     float topRightRadiusX = NormalizeToPx(border.TopRightRadius().GetX());
     float topRightRadiusY = NormalizeToPx(border.TopRightRadius().GetY());
-    const SkVector outerRadii[] = {
-        SkVector::Make(topLeftRadiusX, topLeftRadiusY),
-        SkVector::Make(topRightRadiusX, topRightRadiusY),
-        SkVector::Make(bottomRightRadiusX, bottomRightRadiusY),
-        SkVector::Make(bottomLeftRadiusX, bottomLeftRadiusY)
-    };
+    const SkVector outerRadii[] = { SkVector::Make(topLeftRadiusX, topLeftRadiusY),
+        SkVector::Make(topRightRadiusX, topRightRadiusY), SkVector::Make(bottomRightRadiusX, bottomRightRadiusY),
+        SkVector::Make(bottomLeftRadiusX, bottomLeftRadiusY) };
     float leftW = NormalizeToPx(border.Left().GetWidth());
     float topW = NormalizeToPx(border.Top().GetWidth());
     float rightW = NormalizeToPx(border.Right().GetWidth());
@@ -1281,14 +1204,12 @@ flutter::RRect FlutterDecorationPainter::GetClipRRect(const Offset& offset, cons
 
 bool FlutterDecorationPainter::CanUseFillStyle(const Border& border, SkPaint& paint)
 {
-    if (border.Top().GetBorderStyle() != BorderStyle::SOLID ||
-        border.Right().GetBorderStyle() != BorderStyle::SOLID ||
+    if (border.Top().GetBorderStyle() != BorderStyle::SOLID || border.Right().GetBorderStyle() != BorderStyle::SOLID ||
         border.Bottom().GetBorderStyle() != BorderStyle::SOLID ||
         border.Left().GetBorderStyle() != BorderStyle::SOLID) {
         return false;
     }
-    if (border.Left().GetColor() != border.Top().GetColor() ||
-        border.Left().GetColor() != border.Right().GetColor() ||
+    if (border.Left().GetColor() != border.Top().GetColor() || border.Left().GetColor() != border.Right().GetColor() ||
         border.Left().GetColor() != border.Bottom().GetColor()) {
         return false;
     }
@@ -1304,13 +1225,11 @@ bool FlutterDecorationPainter::CanUsePathRRect(const Border& border, SkPaint& pa
         border.Left().GetBorderStyle() != border.Bottom().GetBorderStyle()) {
         return false;
     }
-    if (border.Left().GetWidth() != border.Top().GetWidth() ||
-        border.Left().GetWidth() != border.Right().GetWidth() ||
+    if (border.Left().GetWidth() != border.Top().GetWidth() || border.Left().GetWidth() != border.Right().GetWidth() ||
         border.Left().GetWidth() != border.Bottom().GetWidth()) {
         return false;
     }
-    if (border.Left().GetColor() != border.Top().GetColor() ||
-        border.Left().GetColor() != border.Right().GetColor() ||
+    if (border.Left().GetColor() != border.Top().GetColor() || border.Left().GetColor() != border.Right().GetColor() ||
         border.Left().GetColor() != border.Bottom().GetColor()) {
         return false;
     }
@@ -1325,13 +1244,12 @@ bool FlutterDecorationPainter::CanUseFourLine(const Border& border)
         border.Left().GetBorderStyle() != border.Bottom().GetBorderStyle()) {
         return false;
     }
-    if (border.Left().GetColor() != border.Top().GetColor() ||
-        border.Left().GetColor() != border.Right().GetColor() ||
+    if (border.Left().GetColor() != border.Top().GetColor() || border.Left().GetColor() != border.Right().GetColor() ||
         border.Left().GetColor() != border.Bottom().GetColor()) {
         return false;
     }
-    if (border.TopLeftRadius().IsValid() || border.TopRightRadius().IsValid() ||
-        border.BottomLeftRadius().IsValid() || border.BottomRightRadius().IsValid()) {
+    if (border.TopLeftRadius().IsValid() || border.TopRightRadius().IsValid() || border.BottomLeftRadius().IsValid() ||
+        border.BottomRightRadius().IsValid()) {
         return false;
     }
     return true;
@@ -1342,8 +1260,7 @@ bool FlutterDecorationPainter::CanUseInnerRRect(const Border& border)
     if (!border.HasValue()) {
         return false;
     }
-    if (border.Top().GetBorderStyle() != BorderStyle::SOLID ||
-        border.Right().GetBorderStyle() != BorderStyle::SOLID ||
+    if (border.Top().GetBorderStyle() != BorderStyle::SOLID || border.Right().GetBorderStyle() != BorderStyle::SOLID ||
         border.Bottom().GetBorderStyle() != BorderStyle::SOLID ||
         border.Left().GetBorderStyle() != BorderStyle::SOLID) {
         return false;
@@ -1398,8 +1315,8 @@ flutter::RRect FlutterDecorationPainter::GetBoxRRect(
     return rrect;
 }
 
-void FlutterDecorationPainter::SetBorderStyle(const BorderEdge& borderEdge, SkPaint& paint,
-    bool useDefaultColor, double spaceBetweenDot, double borderLength)
+void FlutterDecorationPainter::SetBorderStyle(
+    const BorderEdge& borderEdge, SkPaint& paint, bool useDefaultColor, double spaceBetweenDot, double borderLength)
 {
     if (borderEdge.HasValue()) {
         double width = NormalizeToPx(borderEdge.GetWidth());
@@ -1423,12 +1340,12 @@ void FlutterDecorationPainter::SetBorderStyle(const BorderEdge& borderEdge, SkPa
                 double leftLen = fmod((count - DASHED_LINE_LENGTH), (DASHED_LINE_LENGTH + 1));
                 if (leftLen > DASHED_LINE_LENGTH - 1) {
                     delLen = (DASHED_LINE_LENGTH + 1 - leftLen) * width /
-                        (int32_t)((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1) + 2);
+                             (int32_t)((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1) + 2);
                 } else {
                     addLen = leftLen * width / (int32_t)((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1));
                 }
             }
-            const float intervals[] = { width * DASHED_LINE_LENGTH - delLen, width  + addLen };
+            const float intervals[] = { width * DASHED_LINE_LENGTH - delLen, width + addLen };
             paint.setPathEffect(SkDashPathEffect::Make(intervals, SK_ARRAY_COUNT(intervals), 0.0));
         } else {
             paint.setPathEffect(nullptr);
@@ -1479,7 +1396,8 @@ void FlutterDecorationPainter::PaintBorder(const Offset& offset, SkCanvas* canva
     }
 }
 
-void FlutterDecorationPainter::PaintBorderWithPath(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint)
+void FlutterDecorationPainter::PaintBorderWithPath(
+    const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint)
 {
     float offsetX = offset.GetX();
     float offsetY = offset.GetY();
@@ -1567,8 +1485,7 @@ void FlutterDecorationPainter::PaintBorderWithPath(const Offset& offset, const B
         rightBorder.arcTo(rectStart, RIGHT_START, SWEEP_ANGLE, false);
         rightBorder.arcTo(rectEnd, RIGHT_END, SWEEP_ANGLE + 0.5f, false);
         if (NearZero(brX) && !NearZero(bottomW)) {
-            rightBorder.lineTo(offsetX + width - rightW / 2.0f,
-                               offsetY + height);
+            rightBorder.lineTo(offsetX + width - rightW / 2.0f, offsetY + height);
             SkPath rightClipPath;
             rightClipPath.moveTo(offsetX + width + rightW, offsetY + height + bottomW);
             rightClipPath.lineTo(offsetX + width - rightW * EXTEND, offsetY + height - bottomW * EXTEND);
@@ -1594,8 +1511,7 @@ void FlutterDecorationPainter::PaintBorderWithPath(const Offset& offset, const B
             canvas->save();
         }
         if (NearZero(brX) && !NearZero(rightW)) {
-            bottomBorder.moveTo(offsetX + width,
-                                offsetY + height - bottomW / 2.0f);
+            bottomBorder.moveTo(offsetX + width, offsetY + height - bottomW / 2.0f);
             bottomBorder.lineTo(x + w - brX * 2.0f, y + h - brY * 2.0f);
             SkPath bottomClipPath;
             bottomClipPath.moveTo(offsetX + width + rightW, offsetY + height + bottomW);
@@ -1660,8 +1576,8 @@ void FlutterDecorationPainter::PaintBorderWithPath(const Offset& offset, const B
     }
 }
 
-void FlutterDecorationPainter::PaintBorderWithLine(const Offset& offset,
-    const Border& border, SkCanvas* canvas, SkPaint& paint)
+void FlutterDecorationPainter::PaintBorderWithLine(
+    const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint)
 {
     double addLen = 0.5;
     if (border.Left().GetBorderStyle() != BorderStyle::DOTTED) {
@@ -1846,11 +1762,8 @@ bool FlutterDecorationPainter::GetGradientPaint(SkPaint& paint)
     if (NearZero(paintSize_.Width()) || NearZero(paintSize_.Height()) || !gradient.IsValid()) {
         return false;
     }
-#ifndef NEW_SKIA
-    SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()), SkDoubleToMScalar(paintSize_.Height()));
-#else
+
     SkSize skPaintSize = SkSize::Make(paintSize_.Width(), paintSize_.Height());
-#endif
     auto shader = CreateGradientShader(gradient, skPaintSize);
     paint.setShader(std::move(shader));
     return true;
@@ -1866,27 +1779,13 @@ void FlutterDecorationPainter::PaintGradient(const Offset& offset, SkCanvas* can
         return;
     }
 
-#ifndef NEW_SKIA
-    SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()), SkDoubleToMScalar(paintSize_.Height()));
-#else
     SkSize skPaintSize = SkSize::Make(paintSize_.Width(), paintSize_.Height());
-#endif
     SkAutoCanvasRestore restore(canvas, true);
     auto shader = CreateGradientShader(gradient, skPaintSize);
     paint.setShader(std::move(shader));
-#ifndef NEW_SKIA
-    canvas->translate(SkDoubleToMScalar(offset.GetX() + NormalizeToPx(margin_.Left())),
-        SkDoubleToMScalar(offset.GetY() + NormalizeToPx(margin_.Top())));
-    canvas->drawRect(
-        SkRect::MakeXYWH(0.0f, 0.0f, SkDoubleToMScalar(paintSize_.Width()), SkDoubleToMScalar(paintSize_.Height())),
-        paint);
-#else
-    canvas->translate(offset.GetX() + NormalizeToPx(margin_.Left()),
-        offset.GetY() + NormalizeToPx(margin_.Top()));
-    canvas->drawRect(
-        SkRect::MakeXYWH(0.0f, 0.0f, paintSize_.Width(), paintSize_.Height()),
-        paint);
-#endif
+
+    canvas->translate(offset.GetX() + NormalizeToPx(margin_.Left()), offset.GetY() + NormalizeToPx(margin_.Top()));
+    canvas->drawRect(SkRect::MakeXYWH(0.0f, 0.0f, paintSize_.Width(), paintSize_.Height()), paint);
     // reset shader;
     paint.setShader(nullptr);
 }

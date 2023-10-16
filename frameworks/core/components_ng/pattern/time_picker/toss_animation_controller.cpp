@@ -174,6 +174,9 @@ double TimePickerTossAnimationController::GetCurrentTime() const
 
 void TimePickerTossAnimationController::CreatePropertyCallback()
 {
+    if (property_) {
+        return;
+    }
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
     auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());

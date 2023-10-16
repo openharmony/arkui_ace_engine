@@ -103,7 +103,6 @@ void WindowPattern::OnAttachToFrameNode()
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
-
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
@@ -116,8 +115,7 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
 
     auto state = session_->GetSessionState();
-    auto bundleName = session_->GetSessionInfo().bundleName_;
-    LOGI("Session state: %{public}u, bundle name: %{public}s", state, bundleName.c_str());
+    LOGI("Session state: %{public}u, bundle name: %{public}s", state, session_->GetSessionInfo().bundleName_.c_str());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         if (!HasStartingPage()) {
             return;
@@ -132,9 +130,15 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
-    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetBufferAvailable() && session_->GetShowRecent()) {
+    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence()->IsSnapshotExisted()) {
         CreateSnapshotNode();
         host->AddChild(snapshotNode_);
+        return;
+    }
+
+    if (session_->GetShowRecent()) {
+        CreateStartingNode();
+        host->AddChild(startingNode_);
         return;
     }
 
@@ -188,8 +192,6 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     } else {
         snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-        CHECK_NULL_VOID(session_);
-        CHECK_NULL_VOID(session_->GetScenePersistence());
         ImageSourceInfo sourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -278,7 +280,7 @@ void WindowPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
-int32_t CalculateTranslateDegree(int32_t hostId)
+int32_t WindowPattern::CalculateTranslateDegree(int32_t hostId)
 {
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
@@ -312,7 +314,7 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
-    auto udegree = CalculateTranslateDegree(host->GetId());
+    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
     SetWindowSceneConsumed(pointerEvent->GetPointerAction());
     DispatchPointerEvent(pointerEvent);

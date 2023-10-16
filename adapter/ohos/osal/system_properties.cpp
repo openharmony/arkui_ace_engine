@@ -207,6 +207,8 @@ bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;
+int32_t SystemProperties::devicePhysicalWidth_ = 0;
+int32_t SystemProperties::devicePhysicalHeight_ = 0;
 ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
 ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
 ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };

@@ -60,7 +60,7 @@ public:
     void GetInstance();
     static RefPtr<FrameNode> CreateCustomNode();
 
-    void CreateRefresh(const std::function<void(RefreshModelNG)>& callback = nullptr);
+    void Create(const std::function<void(RefreshModelNG)>& callback = nullptr);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<RefreshPattern> pattern_;
@@ -87,6 +87,7 @@ void RefreshTestNg::SetUp() {}
 
 void RefreshTestNg::TearDown()
 {
+    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -106,15 +107,15 @@ void RefreshTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<RefreshAccessibilityProperty>();
 }
 
-void RefreshTestNg::CreateRefresh(const std::function<void(RefreshModelNG)>& callback)
+void RefreshTestNg::Create(const std::function<void(RefreshModelNG)>& callback)
 {
-    RefreshModelNG modelNG;
-    modelNG.Create();
-    modelNG.SetTextStyle(TextStyle());
+    RefreshModelNG model;
+    model.Create();
+    model.SetTextStyle(TextStyle());
     if (callback) {
-        callback(modelNG);
+        callback(model);
     }
-    modelNG.Pop();
+    model.Pop();
     GetInstance();
     RunMeasureAndLayout(frameNode_);
 }
@@ -139,9 +140,9 @@ HWTEST_F(RefreshTestNg, Drag001, TestSize.Level1)
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
     auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    CreateRefresh([onRefreshing, onStateChange](RefreshModelNG modelNG) {
-        modelNG.SetOnRefreshing(std::move(onRefreshing));
-        modelNG.SetOnStateChange(std::move(onStateChange));
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnRefreshing(std::move(onRefreshing));
+        model.SetOnStateChange(std::move(onStateChange));
     });
     const float radio = DEFAULT_FRICTION_RATIO * PERCENT;
     const float lessThanOffset = DEFAULT_INDICATOR_OFFSET / radio;
@@ -208,7 +209,7 @@ HWTEST_F(RefreshTestNg, Drag001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, Drag002, TestSize.Level1)
 {
-    CreateRefresh([](RefreshModelNG modelNG) { modelNG.SetCustomBuilder(CreateCustomNode()); });
+    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
     const float radio = DEFAULT_FRICTION_RATIO * PERCENT;
     const float lessThanOffset = DEFAULT_INDICATOR_OFFSET / radio;
     const float greaterThanOffset = 1 / radio;
@@ -274,7 +275,7 @@ HWTEST_F(RefreshTestNg, Drag002, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, Drag003, TestSize.Level1)
 {
-    CreateRefresh();
+    Create();
     pattern_->HandleDragStart();
 
     /**
@@ -304,14 +305,14 @@ HWTEST_F(RefreshTestNg, Drag003, TestSize.Level1)
 }
 
 /**
- * @tc.name: Pattern001
+ * @tc.name: AddCustomBuilderNode001
  * @tc.desc: Test AddCustomBuilderNode
  * @tc.type: FUNC
  */
-HWTEST_F(RefreshTestNg, Pattern001, TestSize.Level1)
+HWTEST_F(RefreshTestNg, AddCustomBuilderNode001, TestSize.Level1)
 {
     auto builder = CreateCustomNode();
-    CreateRefresh([&builder](RefreshModelNG modelNG) { modelNG.SetCustomBuilder(builder); });
+    Create([&builder](RefreshModelNG model) { model.SetCustomBuilder(builder); });
 
     /**
      * @tc.steps: step1. Add same custom node
@@ -336,7 +337,7 @@ HWTEST_F(RefreshTestNg, Pattern001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, AttrRefreshing001, TestSize.Level1)
 {
-    CreateRefresh([](RefreshModelNG modelNG) { modelNG.SetCustomBuilder(CreateCustomNode()); });
+    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
 
     /**
      * @tc.steps: step1. IsRefreshing: true -> false
@@ -362,7 +363,7 @@ HWTEST_F(RefreshTestNg, AttrRefreshing001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, AttrRefreshing002, TestSize.Level1)
 {
-    CreateRefresh();
+    Create();
 
     /**
      * @tc.steps: step1. IsRefreshing: true -> false
@@ -382,18 +383,18 @@ HWTEST_F(RefreshTestNg, AttrRefreshing002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RefreshTest005
+ * @tc.name: RefreshModelNG001
  * @tc.desc: Test RefreshModelNG will pop according to different child node.
  * @tc.type: FUNC
  */
-HWTEST_F(RefreshTestNg, RefreshTest005, TestSize.Level1)
+HWTEST_F(RefreshTestNg, RefreshModelNG001, TestSize.Level1)
 {
    /**
      * @tc.steps: step1. refreshNode->TotalChildCount() < 2.
      * @tc.expected: would add Text child
      */
-    CreateRefresh([](RefreshModelNG modelNG) {
-        modelNG.SetIsShowLastTime(true);
+    Create([](RefreshModelNG model) {
+        model.SetIsShowLastTime(true);
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto paintProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
         paintProperty->UpdateTimeText(TIME_TEXT);
@@ -408,8 +409,8 @@ HWTEST_F(RefreshTestNg, RefreshTest005, TestSize.Level1)
      * @tc.steps: step2. refreshNode->TotalChildCount() < 2 and SetIsShowLastTime(false).
      * @tc.expected: would add Text child, but child TimeText is std::nullopt
      */
-    CreateRefresh([](RefreshModelNG modelNG) {
-        modelNG.SetIsShowLastTime(false);
+    Create([](RefreshModelNG model) {
+        model.SetIsShowLastTime(false);
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto paintProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
         paintProperty->UpdateTimeText(TIME_TEXT);
@@ -424,7 +425,7 @@ HWTEST_F(RefreshTestNg, RefreshTest005, TestSize.Level1)
      * @tc.steps: step3. refreshNode->TotalChildCount() >= 2.
      * @tc.expected: Would not add text child.
      */
-    CreateRefresh([](RefreshModelNG modelNG) {
+    Create([](RefreshModelNG model) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
         auto loadingProgressChild =
@@ -440,9 +441,9 @@ HWTEST_F(RefreshTestNg, RefreshTest005, TestSize.Level1)
      * @tc.steps: step4. GetIsCustomBuilderExistValue() == true
      * @tc.expected: Would not add text child.
      */
-    CreateRefresh([](RefreshModelNG modelNG) {
-        modelNG.SetIsShowLastTime(false);
-        modelNG.SetCustomBuilder(CreateCustomNode());
+    Create([](RefreshModelNG model) {
+        model.SetIsShowLastTime(false);
+        model.SetCustomBuilder(CreateCustomNode());
     });
     EXPECT_LT(frameNode_->TotalChildCount(), 2);
     EXPECT_EQ(paintProperty_->GetLastTimeText(), std::nullopt);
@@ -450,13 +451,13 @@ HWTEST_F(RefreshTestNg, RefreshTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: RefreshAccessibility001
+ * @tc.name: AccessibilityProperty001
  * @tc.desc: Test IsScrollable and SetSpecificSupportAction.
  * @tc.type: FUNC
  */
-HWTEST_F(RefreshTestNg, RefreshAccessibility001, TestSize.Level1)
+HWTEST_F(RefreshTestNg, AccessibilityProperty001, TestSize.Level1)
 {
-    CreateRefresh();
+    Create();
 
     /**
      * @tc.steps: step1. When IsScrollable() == true
@@ -485,7 +486,7 @@ HWTEST_F(RefreshTestNg, RefreshAccessibility001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, PerformActionTest001, TestSize.Level1)
 {
-    CreateRefresh(); // trigger SetAccessibilityAction()
+    Create(); // trigger SetAccessibilityAction()
 
     /**
      * @tc.steps: step1. pattern->IsRefreshing() == false
@@ -509,7 +510,7 @@ HWTEST_F(RefreshTestNg, PerformActionTest001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, OnKeyEvent001, TestSize.Level1)
 {
-    CreateRefresh();
+    Create();
 
     /**
      * @tc.steps: step1. KeyCode::KEY_UNKNOWN
@@ -536,8 +537,8 @@ HWTEST_F(RefreshTestNg, OnKeyEvent002, TestSize.Level1)
 {
     bool isTrigger = false;
     auto onRefreshing = [&isTrigger]() { isTrigger = true; };
-    CreateRefresh([onRefreshing](RefreshModelNG modelNG) {
-        modelNG.SetOnRefreshing(std::move(onRefreshing));
+    Create([onRefreshing](RefreshModelNG model) {
+        model.SetOnRefreshing(std::move(onRefreshing));
     });
 
     /**
@@ -559,5 +560,273 @@ HWTEST_F(RefreshTestNg, OnKeyEvent002, TestSize.Level1)
         0, TimeStamp(std::chrono::milliseconds(0)), 0, 0, SourceType::KEYBOARD
     )));
     EXPECT_FALSE(isTrigger);
+}
+
+/**
+ * @tc.name: UpdateRefreshDraw001
+ * @tc.desc: Test UpdateRefreshDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, UpdateRefreshDraw001, TestSize.Level1)
+{
+    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
+    pattern_->UpdateRefreshDraw();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    pattern_->updatePerFrame_ = true;
+    pattern_->UpdateRefreshDraw();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    pattern_->updatePerFrame_ = true;
+    pattern_->isRefreshing_ = true;
+    pattern_->scrollOffset_ = OffsetF(0, TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1);
+    pattern_->UpdateRefreshDraw();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    pattern_->updatePerFrame_ = true;
+    pattern_->isRefreshing_ = false;
+    pattern_->scrollOffset_ = OffsetF(0, TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1);
+    pattern_->UpdateRefreshDraw();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+
+    pattern_->updatePerFrame_ = true;
+    pattern_->scrollOffset_ = OffsetF(0, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
+    pattern_->UpdateRefreshDraw();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
+}
+
+/**
+ * @tc.name: VersionElevenDrag001
+ * @tc.desc: Test Drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, VersionElevenDrag001, TestSize.Level1)
+{
+    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnRefreshing(std::move(onRefreshing));
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+    const float radio = DEFAULT_FRICTION_RATIO * PERCENT;
+    const float lessThanOffset = DEFAULT_INDICATOR_OFFSET / radio;
+    const float greaterThanOffset = 1 / radio;
+    const float greaterThanRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx() / radio - lessThanOffset;
+
+    /**
+     * @tc.steps: step1. HandleDrag to refresh, and set IsRefreshing to false by front end
+     * @tc.expected: RefreshStatus would change width action
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
+    pattern_->HandleDragUpdate(lessThanOffset);
+    EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
+    pattern_->HandleDragUpdate(greaterThanOffset);
+    EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
+    pattern_->HandleDragUpdate(greaterThanRefreshDistance);
+    EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
+    float speed = 1200.f;
+    pattern_->HandleDragEnd(speed);
+    EXPECT_EQ(refreshStatus, RefreshStatus::REFRESH);
+    EXPECT_TRUE(isRefreshTrigger);
+    // The front end set isRefreshing to false
+    paintProperty_->UpdateIsRefreshing(false);
+    // isRefreshing changed by front end, will trigger OnModifyDone
+    pattern_->OnModifyDone();
+    EXPECT_EQ(refreshStatus, RefreshStatus::DONE);
+    pattern_->OnExitAnimationFinish(); // by OnModifyDone
+    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step2. HandleDrag distance < triggerRefreshDistance
+     * @tc.expected: would not trigger refresh
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
+    pattern_->HandleDragUpdate(lessThanOffset);
+    pattern_->HandleDragUpdate(greaterThanOffset);
+    EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
+    pattern_->HandleDragEnd(speed);
+    pattern_->OnExitAnimationFinish();
+    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step3. HandleDrag to cancel
+     * @tc.expected: RefreshStatus would change width action
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
+    pattern_->HandleDragUpdate(lessThanOffset);
+    EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
+    pattern_->HandleDragUpdate(greaterThanOffset);
+    EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
+    pattern_->HandleDragUpdate(greaterThanRefreshDistance);
+    EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
+    pattern_->HandleDragCancel();
+    pattern_->OnExitAnimationFinish();
+    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: VersionElevenDrag002
+ * @tc.desc: Test Drag with customBuilder_
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, VersionElevenDrag002, TestSize.Level1)
+{
+    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
+    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
+    const float radio = DEFAULT_FRICTION_RATIO * PERCENT;
+    const float lessThanOffset = DEFAULT_INDICATOR_OFFSET / radio;
+    const float greaterThanOffset = 1 / radio;
+    const float greaterThanRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx() / radio - lessThanOffset;
+
+    /**
+     * @tc.steps: step1. HandleDrag to refresh, and set IsRefreshing to false by front end
+     * @tc.expected: RefreshStatus would change width action
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    pattern_->HandleDragUpdate(lessThanOffset);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    pattern_->HandleDragUpdate(greaterThanOffset);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    pattern_->HandleDragUpdate(greaterThanRefreshDistance + CUSTOM_NODE_HEIGHT / radio);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
+    float speed = 0.f;
+    pattern_->HandleDragEnd(speed);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+    // The front end set isRefreshing to false
+    paintProperty_->UpdateIsRefreshing(false);
+    // isRefreshing changed by front end, will trigger OnModifyDone
+    pattern_->OnModifyDone();
+    // the mock AnimationUtils::Animate will trigger finishCallback
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
+    pattern_->OnExitAnimationFinish(); // by OnModifyDone
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step2. HandleDrag distance < triggerRefreshDistance
+     * @tc.expected: would not trigger refresh
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    pattern_->HandleDragUpdate(lessThanOffset);
+    pattern_->HandleDragUpdate(greaterThanOffset);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    pattern_->HandleDragEnd(speed);
+    pattern_->OnExitAnimationFinish();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step3. HandleDragStart ->  HandleDragUpdate -> HandleDragCancel
+     * @tc.expected: RefreshStatus would change width action
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    pattern_->HandleDragUpdate(lessThanOffset);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    pattern_->HandleDragUpdate(greaterThanOffset);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    pattern_->HandleDragUpdate(greaterThanRefreshDistance + CUSTOM_NODE_HEIGHT / radio);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
+    pattern_->HandleDragCancel();
+    pattern_->OnExitAnimationFinish();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: VersionElevenDrag003
+ * @tc.desc: Test Drag in other conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, VersionElevenDrag003, TestSize.Level1)
+{
+    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
+    Create();
+    pattern_->HandleDragStart();
+
+    /**
+     * @tc.steps: step1. delat is 0
+     * @tc.expected: return
+     */
+    pattern_->HandleDragUpdate(0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step2. drag to refresh
+     * @tc.expected: refreshStatus_ is REFRESH
+     */
+    pattern_->HandleDragUpdate(155.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
+    float speed = 1200.f;
+    pattern_->HandleDragEnd(speed);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+
+    /**
+     * @tc.steps: step2. When isRefreshing_ == true, HandleDragStart and HandleDragUpdate
+     * @tc.expected: return
+     */
+    pattern_->HandleDragStart();
+    pattern_->HandleDragUpdate(10.f);
+    pattern_->HandleDragEnd(speed);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+}
+
+/**
+ * @tc.name: VersionElevenAttrRefreshing001
+ * @tc.desc: Test attr refreshing with custom node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, VersionElevenAttrRefreshing001, TestSize.Level1)
+{
+    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
+    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
+
+    /**
+     * @tc.steps: step1. IsRefreshing: true -> false
+     * @tc.expected: refreshStatus_ == INACTIVE
+     */
+    paintProperty_->UpdateIsRefreshing(false);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step2. IsRefreshing: false -> true
+     * @tc.expected: refreshStatus_ == REFRESH
+     */
+    paintProperty_->UpdateIsRefreshing(true);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+}
+
+/**
+ * @tc.name: VersionElevenAttrRefreshing002
+ * @tc.desc: Test attr refreshing
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, VersionElevenAttrRefreshing002, TestSize.Level1)
+{
+    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
+    Create();
+
+    /**
+     * @tc.steps: step1. IsRefreshing: true -> false
+     * @tc.expected: refreshStatus_ == INACTIVE
+     */
+    paintProperty_->UpdateIsRefreshing(false);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step2. IsRefreshing: false -> true
+     * @tc.expected: refreshStatus_ == REFRESH
+     */
+    paintProperty_->UpdateIsRefreshing(true);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
 }
 } // namespace OHOS::Ace::NG

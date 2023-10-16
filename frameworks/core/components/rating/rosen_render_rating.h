@@ -17,9 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RATING_ROSEN_RENDER_RATING_H
 
 #include "core/components/rating/render_rating.h"
-#ifndef NEW_SKIA
-#include "core/pipeline/base/scoped_canvas_state.h"
-#endif
 
 namespace OHOS::Ace {
 
@@ -33,8 +30,7 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
     void PaintFocus(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) override;
     void PaintFocusForTABLET(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
-    void PaintPress(
-        const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
+    void PaintPress(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
 #ifndef USE_ROSEN_DRAWING
     void PaintRatingBar(RenderContext& context, SkCanvas* canvas);
     void PaintImageArea(RenderContext& context, const RefPtr<RenderImage>& renderImage, SkCanvas* canvas,

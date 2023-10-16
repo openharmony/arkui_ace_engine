@@ -16,17 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 
-#ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
-#else
-#include "experimental/svg/model/SkSVGDOM.h"
-#endif
+
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph.h"
 #else
 #include "rosen_text/text_style.h"
 #include "rosen_text/typography.h"
-#include "rosen_text/text_style.h"
 #endif
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
@@ -35,15 +31,12 @@
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
-#include "core/image/image_source_info.h"
 #include "core/image/image_object.h"
 #include "core/image/image_provider.h"
-#ifndef NEW_SKIA
-#include "core/pipeline/base/scoped_canvas_state.h"
-#endif
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
-using setColorFunc = std::function<void (const std::string&)>;
+using setColorFunc = std::function<void(const std::string&)>;
 class RosenRenderOffscreenCanvas : public RenderOffscreenCanvas {
     DECLARE_ACE_TYPE(RosenRenderOffscreenCanvas, RenderOffscreenCanvas);
 
@@ -94,15 +87,16 @@ public:
     void ResetTransform() override;
     void SetFillRuleForPath(const CanvasFillRule& rule) override;
     void SetFillRuleForPath2D(const CanvasFillRule& rule) override;
+
 private:
     void InitImagePaint();
     void InitCachePaint();
     bool antiAlias_ = true;
 #ifndef USE_ROSEN_DRAWING
     SkPaint GetStrokePaint();
-#ifdef NEW_SKIA
+
     SkSamplingOptions options_;
-#endif
+
 #else
     RSPen GetStrokePaint();
     RSSamplingOptions options_;

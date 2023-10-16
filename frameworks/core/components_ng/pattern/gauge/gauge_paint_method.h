@@ -83,6 +83,7 @@ private:
     float GetOffsetDegree(const RenderRingInfo& data, const float oppositeSide) const;
     float GetValueRatio(const RefPtr<GaugePaintProperty>& paintProperty) const;
     void CreateDefaultColor(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
+    void CreateDefaultTrianglePath(float pathStartVertexX, float pathStartVertexY, float radius, RSPath& path) const;
     WeakPtr<Pattern> pattern_;
 };
 

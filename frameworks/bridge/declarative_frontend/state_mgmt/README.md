@@ -167,10 +167,6 @@ For the purpose of logging the following commands are accepted as input:
 
 The application must be running and visible in order to receive commands. The `hidumper` service delivers the commands through the `WindowManagerService`. and the window ID is used to target a specific application.
 
-NG pipeline MUST be configured for your application. This can be made for example by changing following.
-For API10...\OpenHarmony\Sdk\10\ets\build-tools\ets-loader\main.js and change const partialUpdateConfig = {
-  partialUpdateMode: true, // from false
-
 ```bash
 #! /bin/bash
 hdc shell "param set persist.ace.debug.enabled 0" (needs to be done once)
@@ -181,6 +177,18 @@ hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -dumpAll'"
 hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -viewHierarchy'"
 ```
 
+### Important for Profiler and JSDump
+PartialUpdateMode MUST be configured for your application. This can be made for example by changing following.
+For API10...\OpenHarmony\Sdk\10\ets\build-tools\ets-loader\main.js and change const partialUpdateConfig = {
+  partialUpdateMode: true, // from false
+
+RK3568 /etc/acenewpipe.config must have application name under EANBLED to use newpipeline.
+Example content of acenewpipe.config
+
+```bash
+ENABLED
+com.example.myapplication
+```
 ### Usefull examples
 
 All the following commands concern a hypothetical window with ID 11 and view with ID 42. Note that -viewId is optional.

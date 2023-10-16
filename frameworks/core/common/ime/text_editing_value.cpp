@@ -84,7 +84,7 @@ void TextEditingValue::MoveRight()
 {
     auto utf16Text = StringUtils::Str8ToStr16(text);
     if (utf16Text.length() < 1) {
-        LOGI("utf16Text length = 0");
+        TAG_LOGD(AceLogTag::ACE_TEXTINPUT, "utf16Text length = 0");
         return;
     }
     if (static_cast<size_t>(selection.extentOffset) >= utf16Text.length() - 1) {
@@ -146,7 +146,8 @@ void TextEditingValue::SelectionAwareTextManipulation(const TextManipulation& ma
     int32_t start = selection.GetStart();
     int32_t end = selection.GetEnd();
     if (static_cast<size_t>(end) > wideText.length() || start > end) {
-        LOGD("Illegal selection for manipulate: start %{public}d, end %{public}d", start, end);
+        TAG_LOGD(AceLogTag::ACE_TEXTINPUT,
+            "Illegal selection for manipulate: start %{public}d, end %{public}d", start, end);
         return;
     }
 
@@ -188,7 +189,7 @@ std::string TextEditingValue::GetBeforeSelection() const
     auto wideText = GetWideText();
     int32_t start = selection.GetStart();
     if (static_cast<size_t>(start) > wideText.length()) {
-        LOGD("Illegal selection for GetBeforeSelection: start %{public}d", start);
+        TAG_LOGD(AceLogTag::ACE_TEXTINPUT, "Illegal selection for GetBeforeSelection: start %{public}d", start);
         return "";
     }
 
@@ -206,7 +207,8 @@ std::string TextEditingValue::GetSelectedText() const
     int32_t start = selection.GetStart();
     int32_t end = selection.GetEnd();
     if (static_cast<size_t>(end) > wideText.length() || start > end) {
-        LOGD("Illegal selection for GetSelectedText: start %{public}d, end %{public}d", start, end);
+        TAG_LOGD(AceLogTag::ACE_TEXTINPUT,
+            "Illegal selection for GetSelectedText: start %{public}d, end %{public}d", start, end);
         return "";
     }
 
@@ -246,7 +248,8 @@ std::string TextEditingValue::GetAfterSelection() const
     auto wideText = GetWideText();
     int32_t end = selection.GetEnd();
     if (static_cast<size_t>(end) > wideText.length()) {
-        LOGD("Illegal selection for GetAfterSelection: start %{public}d", end);
+        TAG_LOGD(AceLogTag::ACE_TEXTINPUT,
+            "Illegal selection for GetAfterSelection: start %{public}d", end);
         return "";
     }
 

@@ -805,6 +805,16 @@ float FlexLayoutAlgorithm::MainAxisMinValue(LayoutWrapper* layoutWrapper)
     return IsHorizontal(direction_) ? layoutConstraint->minSize.Width() : layoutConstraint->minSize.Height();
 }
 
+bool FlexLayoutAlgorithm::MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper)
+{
+    const auto& margin = layoutWrapper->GetGeometryNode()->GetMargin();
+    CHECK_NULL_RETURN(margin, false);
+    if (IsHorizontal(direction_)) {
+        return LessNotEqual(margin->left.value_or(0.0f) + margin->right.value_or(0.0f), 0.0f);
+    }
+    return LessNotEqual(margin->top.value_or(0.0f) + margin->bottom.value_or(0.0f), 0.0f);
+}
+
 void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
@@ -834,14 +844,16 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                      : layoutConstraint->maxSize.Height()) &&
         NearEqual(mainAxisSize_, -1.0f);
     if (NearEqual(mainAxisSize_, -1.0f)) {
+        auto marginOnMainAxisNegative = MarginOnMainAxisNegative(layoutWrapper);
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             mainAxisSize_ = direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
                                 ? layoutConstraint->maxSize.Width()
                                 : layoutConstraint->maxSize.Height();
-        } else if (isLinearLayoutFeature_ && IsHorizontal(direction_) && !NearZero(layoutConstraint->minSize.Width())) {
+        } else if (isLinearLayoutFeature_ && IsHorizontal(direction_) && !NearZero(layoutConstraint->minSize.Width()) &&
+                   !marginOnMainAxisNegative) {
             mainAxisSize_ = layoutConstraint->minSize.Width();
         } else if (isLinearLayoutFeature_ && !IsHorizontal(direction_) &&
-                   !NearZero(layoutConstraint->minSize.Height())) {
+                   !NearZero(layoutConstraint->minSize.Height()) && !marginOnMainAxisNegative) {
             mainAxisSize_ = layoutConstraint->minSize.Height();
         } else {
             mainAxisSize_ =
@@ -1102,11 +1114,12 @@ void FlexLayoutAlgorithm::PlaceChildren(
 FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
+    FlexAlign crossAxisAlign = (crossAxisAlign_ == FlexAlign::AUTO) ? FlexAlign::FLEX_START : crossAxisAlign_;
     if (!flexItemProperty || !flexItemProperty->GetAlignSelf().has_value() ||
         flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) == FlexAlign::AUTO) {
-        return crossAxisAlign_;
+        return crossAxisAlign;
     }
-    return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_);
+    return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign);
 }
 
 } // namespace OHOS::Ace::NG

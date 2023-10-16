@@ -233,7 +233,7 @@ bool ToggleModelNG::IsToggle()
     return false;
 }
 
-void ToggleModelNG::SetPadding(const NG::PaddingPropertyF& /*args*/, const NG::PaddingProperty& newArgs) 
+void ToggleModelNG::SetPadding(const NG::PaddingPropertyF& /*args*/, const NG::PaddingProperty& newArgs)
 {
     NG::ViewAbstract::SetPadding(newArgs);
 }
@@ -310,5 +310,19 @@ void ToggleModelNG::SetResponseRegion(const std::vector<DimensionRect>& response
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIsUserSetResponseRegion(true);
+}
+
+void ToggleModelNG::SetHoverEffect(HoverEffectType hoverEffect)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    if (pattern) {
+        pattern->SetShowHoverEffect(hoverEffect != HoverEffectType::NONE);
+    }
+    if (hoverEffect == HoverEffectType::BOARD) {
+        return;
+    }
+    NG::ViewAbstract::SetHoverEffect(hoverEffect);
 }
 } // namespace OHOS::Ace::NG

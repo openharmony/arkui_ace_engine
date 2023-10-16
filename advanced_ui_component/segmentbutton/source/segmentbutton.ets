@@ -106,7 +106,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
     if (this.length + items.length > MAX_ITEM_COUNT) {
       throw new RangeError("Exceeded the maximum number of elements (5).")
     }
-    this.changeStartIndex = this.length - 1
+    this.changeStartIndex = this.length
     this.deleteCount = 0
     this.addLength = items.length
     return super.push(...items.map(element => new SegmentButtonItemOptions(element)))
@@ -303,7 +303,6 @@ struct MultiSelectItemArray {
             .width(this.buttonItemsSize[index].width)
             .height(this.buttonItemsSize[index].height)
             .backgroundColor(this.multiColor[index])
-            .scale({ x: this.zoomScaleArray[index], y: this.zoomScaleArray[index] })
             .borderRadius(this.buttonBorderRadius[index])
         }
       })
@@ -397,7 +396,7 @@ struct SegmentButtonItemArrayComponent {
 
   changeSelectedIndexes(buttonsLength: number) {
     if (!this.options.multiply) {
-      // Multi-select
+      // Single-select
       if (this.selectedIndexes[0] === void 0) {
         return
       }
@@ -418,7 +417,7 @@ struct SegmentButtonItemArrayComponent {
         this.selectedIndexes[0] = buttonsLength - 1
       }
     } else {
-      // Single-select
+      // Multi-select
       let saveIndexes = this.selectedIndexes
       for (let i = 0; i < this.optionsArray.deleteCount; i++) {
         let deleteIndex = saveIndexes.indexOf(this.optionsArray.changeStartIndex)
@@ -558,7 +557,8 @@ struct SegmentButtonItemArrayComponent {
                 })
             }
             .borderRadius(this.buttonBorderRadius[index])
-            .scale({ x: this.zoomScaleArray[index], y: this.zoomScaleArray[index] })
+            .scale({ x: this.options.type === 'capsule' && this.options.multiply ? 1 : this.zoomScaleArray[index],
+              y: this.options.type === 'capsule' && this.options.multiply ? 1 : this.zoomScaleArray[index] })
             .layoutWeight(1)
             .onAreaChange((_, newValue) => {
               this.buttonItemsSize[index] = { width: newValue.width, height: this.buttonItemsSize[index].height }
@@ -583,30 +583,28 @@ struct SegmentButtonItemArrayComponent {
             })
             .onHover((isHover: boolean) => {
               if (isHover) {
-                this.hoverColorArray[index].hoverColor = ($r("sys.color.ohos_id_color_hover"))
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  this.zoomScaleArray[index] = 1.05
+                  this.hoverColorArray[index].hoverColor = ($r("sys.color.ohos_id_color_hover"))
                 })
               } else {
-                this.hoverColorArray[index].hoverColor = Color.Transparent
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  this.zoomScaleArray[index] = 1
+                  this.hoverColorArray[index].hoverColor = Color.Transparent
                 })
               }
             })
             .onMouse((event: MouseEvent) => {
               switch (event.action) {
                 case MouseAction.Press:
-                  animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                    this.zoomScaleArray[index] = 1
+                  animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
+                    this.zoomScaleArray[index] = 0.95
                   })
                   animateTo({ duration: 100, curve: Curve.Sharp }, () => {
                     this.pressArray[index] = true
                   })
                   break;
                 case MouseAction.Release:
-                  animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                    this.zoomScaleArray[index] = 1.05
+                  animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
+                    this.zoomScaleArray[index] = 1
                   })
                   animateTo({ duration: 100, curve: Curve.Sharp }, () => {
                     this.pressArray[index] = false
@@ -758,7 +756,7 @@ export struct SegmentButton {
           // Move to previous
           this.focusIndex = this.focusIndex - 1
         }
-        if (event.keyCode === KeyCode.KEYCODE_SPACE) {
+        if (event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_NUMPAD_ENTER) {
           if (this.options.multiply) {
             if (this.selectedIndexes.indexOf(this.focusIndex) === -1) {
               // Select
@@ -827,6 +825,10 @@ export struct SegmentButton {
           }),
         PanGesture()
           .onActionStart((event: GestureEvent) => {
+            if (this.options.type === 'capsule' && this.options.multiply) {
+              // Non drag gesture in multi-select mode
+              return
+            }
             let fingerInfo = event.fingerList.find(value => {
               return value !== null
             })
@@ -866,8 +868,36 @@ export struct SegmentButton {
                 break
               }
             }
+            this.zoomScaleArray.forEach((_, index) => {
+              if (index === this.selectedIndexes[0]) {
+                animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+                  this.zoomScaleArray[index] = 0.95
+                })
+              } else {
+                animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+                  this.zoomScaleArray[index] = 1
+                })
+              }
+            })
           })
-          .onActionEnd((_: GestureEvent) => {
+          .onActionEnd((event: GestureEvent) => {
+            if (this.options.type === 'capsule' && this.options.multiply) {
+              // Non drag gesture in multi-select mode
+              return
+            }
+            if (event.source === SourceType.Mouse) {
+              let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY
+              this.doSelectedChangeAnimate = true
+              if (offset > 0 && this.selectedIndexes[0] > 0) {
+                this.selectedIndexes[0] -= 1
+              } else if (offset < 0 && this.selectedIndexes[0] < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
+                this.selectedIndexes[0] += 1
+              }
+              this.doSelectedChangeAnimate = false
+            }
+            animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+              this.zoomScaleArray[this.selectedIndexes[0]] = 1
+            })
             this.isCurrentPositionSelected = false
           })
       )

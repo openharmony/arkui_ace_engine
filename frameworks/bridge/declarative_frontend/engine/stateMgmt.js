@@ -5175,7 +5175,9 @@ class ViewPU extends NativeViewPartialUpdate {
     aboutToReuseInternal() {
         this.runReuse_ = true;
         stateMgmtTrace.scopedTrace(() => {
-            this.aboutToReuse(this === null || this === void 0 ? void 0 : this.paramsGenerator_());
+            if (this.paramsGenerator_ && typeof this.paramsGenerator_ == "function") {
+                this.aboutToReuse(this.paramsGenerator_());
+            }
         }, "aboutToReuse", this.constructor.name);
         this.updateDirtyElements();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {

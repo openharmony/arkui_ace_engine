@@ -136,7 +136,9 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 
     auto isDraggedDown = navBarPattern_ ? navBarPattern_->GetDraggedDown() : false;
 
-    ProcessAssociatedScroll(offset, source);
+    if (!ProcessAssociatedScroll(offset, source)) {
+        return false;
+    }
 
     if ((isAtTop || isDraggedDown) && (source == SCROLL_FROM_UPDATE) && !isReactInParentMovement_ &&
         (axis_ == Axis::VERTICAL)) {
@@ -181,41 +183,29 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         CreateRefreshCoordination();
     }
     auto overOffsets = GetOverScrollOffset(offset);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !isAtTop && Positive(offset) &&
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !IsAtTop() && Positive(offset) &&
         NeedSplitScroll(overOffsets, source)) {
         offset = offset - overOffsets.start;
-        if (source == SCROLL_FROM_ANIMATION_SPRING || source == SCROLL_FROM_ANIMATION) {
-            OnScrollCallback(offset, source);
-            isRefreshInReactive_ = true;
-            if (!refreshCoordination_->OnScroll(overOffsets.start)) {
-                isRefreshInReactive_ = false;
-                coordinationMode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
-            }
-            coordinationMode = RefreshCoordinationMode::REFRESH_SCROLL;
-        }
         OnScrollCallback(offset, source);
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart();
+            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE);
         }
     }
-
     if (IsAtTop() &&
         (Positive(offset) || (Negative(offset) && refreshCoordination_ && refreshCoordination_->IsRefreshInScroll())) &&
-        (source == SCROLL_FROM_UPDATE) && !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
+        (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION) && !isRefreshInReactive_ &&
+        (axis_ == Axis::VERTICAL)) {
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart();
+            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE);
         }
     }
-    if ((refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        (refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
         isRefreshInReactive_) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            refreshCoordination_->OnScrollEnd(GetVelocity());
-        } else {
-            isRefreshInReactive_ = false;
-            refreshCoordination_->OnScrollEnd(0.0f);
-        }
+        isRefreshInReactive_ = false;
+        refreshCoordination_->OnScrollEnd(0.0f);
     }
     if (refreshCoordination_ && refreshCoordination_->InCoordination() && isRefreshInReactive_) {
         if (!refreshCoordination_->OnScroll(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
@@ -562,6 +552,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
             }
         }
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
+        scrollBar_->SetIsOutOfBoundary(IsOutOfBoundary());
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
     }
@@ -620,7 +611,7 @@ void ScrollablePattern::CreateScrollBarOverlayModifier()
     CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedPaint());
     CHECK_NULL_VOID(!scrollBarOverlayModifier_);
     scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
-    scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect(), scrollBar_->GetBarRect());
+    scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect());
 }
 
 void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)
@@ -644,27 +635,6 @@ void ScrollablePattern::SetFriction(double friction)
     CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
     scrollable->SetUnstaticFriction(friction_);
-}
-
-RefPtr<NestableScrollContainer> ScrollablePattern::SearchParent()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
-        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-        if (!frameNode) {
-            continue;
-        }
-        auto pattern = frameNode->GetPattern<NestableScrollContainer>();
-        if (!pattern) {
-            continue;
-        }
-        if (pattern->GetAxis() != GetAxis()) {
-            continue;
-        }
-        return pattern;
-    }
-    return nullptr;
 }
 
 void ScrollablePattern::GetParentNavigation()
@@ -1180,7 +1150,7 @@ void ScrollablePattern::LimitMouseEndOffset()
     }
 }
 
-void ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)
+bool ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)
 {
     if (navBarPattern_) {
         if (source == SCROLL_FROM_START) {
@@ -1188,10 +1158,12 @@ void ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)
         } else if ((source == SCROLL_FROM_UPDATE) || (source == SCROLL_FROM_ANIMATION) ||
                    (source == SCROLL_FROM_ANIMATION_SPRING)) {
             if (IsAtTop()) {
-                navBarPattern_->UpdateAssociatedScrollOffset(offset);
+                auto host = GetHost();
+                return navBarPattern_->UpdateAssociatedScrollOffset(offset, host);
             }
         }
     }
+    return true;
 }
 
 bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
@@ -1264,7 +1236,7 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
     auto result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL);
     offset = result.remain;
     if (NearZero(offset)) {
-        SetCanOverScroll(false);
+        SetCanOverScroll(!InstanceOf<ScrollablePattern>(parent));
         return { 0, false };
     }
     float allOffset = offset;
@@ -1317,13 +1289,14 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
     offset -= overOffset;
     auto result = parent->HandleScroll(overOffset + remainOffset, source, NestedState::CHILD_SCROLL);
     if (NearZero(result.remain)) {
-        SetCanOverScroll(false);
+        SetCanOverScroll(!InstanceOf<ScrollablePattern>(parent));
         return { 0, false };
     }
     if (state == NestedState::CHILD_SCROLL) {
         SetCanOverScroll(false);
         return result;
     }
+    // triggering overScroll, parent always handle it first
     auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL);
     offset += std::abs(overOffset) < std::abs(result.remain) ? overOffset : overRes.remain;
     SetCanOverScroll((!NearZero(overOffset) || NearZero(offset)) && overRes.reachEdge);
@@ -1427,6 +1400,7 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
     auto parent = parent_.Upgrade();
     if (!parent || !nestedScroll_.NeedParent()) {
         if (GetEdgeEffect() == EdgeEffect::SPRING) {
+            // trigger onScrollEnd later, when spring animation finishes
             ProcessSpringEffect(velocity);
             return true;
         }
@@ -1435,7 +1409,8 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
     }
     // parent handle over scroll first
     if ((velocity < 0 && (nestedScroll_.forward == NestedScrollMode::SELF_FIRST)) ||
-        (velocity > 0 && (nestedScroll_.backward == NestedScrollMode::SELF_FIRST))) {
+        (velocity > 0 && (nestedScroll_.backward == NestedScrollMode::SELF_FIRST)) ||
+        !InstanceOf<ScrollablePattern>(parent)) {
         if (parent->HandleScrollVelocity(velocity)) {
             OnScrollEnd();
             return true;

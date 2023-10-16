@@ -36,8 +36,8 @@ constexpr double FRICTION = 0.6;
 #else
 constexpr double FRICTION = 0.9;
 #endif
-class ScrollablePattern : public Pattern, NestableScrollContainer {
-    DECLARE_ACE_TYPE(ScrollablePattern, Pattern, NestableScrollContainer);
+class ScrollablePattern : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
     bool IsAtomicNode() const override
@@ -62,6 +62,12 @@ public:
     {
         return IsAtTop() || IsAtBottom();
     }
+
+    virtual bool IsOutOfBoundary(bool useCurrentDelta = true)
+    {
+        return false;
+    }
+
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
     {
@@ -180,7 +186,6 @@ public:
     }
 
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
-    RefPtr<NestableScrollContainer> SearchParent();
     void GetParentNavigation();
 
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
@@ -275,14 +280,13 @@ public:
     void SetScrollSource(int32_t scrollSource)
     {
         if (scrollSource == SCROLL_FROM_JUMP) {
-            if (scrollBar_ && scrollBarOverlayModifier_) {
+            if (scrollBar_ && scrollBar_->IsScrollable() && scrollBarOverlayModifier_) {
                 scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
                 scrollBar_->ScheduleDisappearDelayTask();
             }
             StopScrollBarAnimatorByProxy();
             StartScrollBarAnimatorByProxy();
         }
-
         scrollSource_ = scrollSource;
     }
 
@@ -372,7 +376,7 @@ private:
     float GetOffsetWithLimit(float position, float offset) const;
     void LimitMouseEndOffset();
 
-    void ProcessAssociatedScroll(double offset, int32_t source);
+    bool ProcessAssociatedScroll(double offset, int32_t source);
 
     /******************************************************************************
      * NestableScrollContainer implementations

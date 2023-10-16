@@ -16,7 +16,6 @@ import(
 
 build_component("grid") {
   sources = [
-    "flutter_render_grid.cpp",
     "grid_component.cpp",
     "grid_controller.cpp",
     "grid_element.cpp",
@@ -25,8 +24,6 @@ build_component("grid") {
     "render_grid_creator.cpp",
     "render_grid_item.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_grid.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_grid.cpp" ]
 }

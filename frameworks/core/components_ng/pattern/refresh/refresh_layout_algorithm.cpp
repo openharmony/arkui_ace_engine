@@ -33,7 +33,10 @@ RefreshLayoutAlgorithm::RefreshLayoutAlgorithm() = default;
 
 void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
     int32_t index = 0;
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -43,8 +46,9 @@ void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         if (HasCustomBuilderIndex() && index == customBuilderIndex_.value_or(0)) {
             auto builderLayoutConstraint = layoutConstraint;
+            auto customBaseHeight = layoutProperty->GetBuilderMeasureBaseHeight().value_or(0.0f);
             builderLayoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(
-                CalculateBuilderSize(child, builderLayoutConstraint));
+                CalculateBuilderSize(child, builderLayoutConstraint, customBaseHeight));
             child->Measure(builderLayoutConstraint);
             ++index;
             continue;
@@ -56,7 +60,7 @@ void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 }
 
 OptionalSizeF RefreshLayoutAlgorithm::CalculateBuilderSize(
-    RefPtr<LayoutWrapper> childLayoutWrapper, LayoutConstraintF& constraint)
+    RefPtr<LayoutWrapper> childLayoutWrapper, LayoutConstraintF& constraint, float customBaseHeight)
 {
     OptionalSizeF defaultSize;
     CHECK_NULL_RETURN(childLayoutWrapper, defaultSize);
@@ -67,11 +71,11 @@ OptionalSizeF RefreshLayoutAlgorithm::CalculateBuilderSize(
     if (!calcLayoutConstraint) {
         return defaultSize;
     }
-    std::optional<float> reSetHeight = scrollOffset_;
+    std::optional<float> reSetHeight = customBaseHeight;
     if (calcLayoutConstraint->selfIdealSize.has_value() &&
         calcLayoutConstraint->selfIdealSize.value().Height().has_value()) {
         reSetHeight = ConvertToPx(
-            calcLayoutConstraint->selfIdealSize.value().Height().value(), constraint.scaleProperty, scrollOffset_)
+            calcLayoutConstraint->selfIdealSize.value().Height().value(), constraint.scaleProperty, customBaseHeight)
                           .value_or(-1.0f);
     }
     if (calcLayoutConstraint->selfIdealSize.has_value()) {
@@ -97,20 +101,20 @@ void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 // Called to perform layout render node and child.
 void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
     // update child position.
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     auto align = Alignment::TOP_LEFT;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    if (layoutProperty->GetPositionProperty()) {
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
-    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<RefreshPattern>();
@@ -140,18 +144,14 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                 auto geometryNode = builderChild->GetGeometryNode();
                 CHECK_NULL_VOID(geometryNode);
                 auto builderHeight = geometryNode->GetMarginFrameSize().Height();
+                auto customBaseHeight = layoutProperty->GetBuilderMeasureBaseHeight().value_or(0.0f);
                 alignChild = Alignment::TOP_CENTER;
                 if (index == customBuilderIndex_.value_or(0)) {
-                    auto builderOffset = 0.0f;
-                    if (!NearEqual(builderHeight, scrollOffset_)) {
-                        builderOffset = scrollOffset_ - builderHeight;
-                    }
+                    auto builderOffset =
+                        NearEqual(builderHeight, customBaseHeight) ? 0.0f : (customBaseHeight - builderHeight);
                     paddingOffsetChild += OffsetF(0.0f, builderOffset);
                 } else {
-                    auto scrollOffset = builderHeight;
-                    if (!NearEqual(builderHeight, scrollOffset_)) {
-                        scrollOffset = scrollOffset_;
-                    }
+                    auto scrollOffset = NearEqual(builderHeight, customBaseHeight) ? builderHeight : customBaseHeight;
                     paddingOffsetChild += OffsetF(0.0f, scrollOffset);
                 }
                 auto translate =
@@ -188,4 +188,3 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 }
 
 } // namespace OHOS::Ace::NG
-

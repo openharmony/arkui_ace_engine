@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,9 +35,9 @@ public:
     ScrollBarPattern() = default;
     ~ScrollBarPattern() override
     {
-        scrollEndAnimator_ = nullptr;
         scrollBarProxy_ = nullptr;
         scrollableEvent_ = nullptr;
+        disappearAnimation_ = nullptr;
     }
 
     bool IsAtomicNode() const override
@@ -120,8 +121,8 @@ public:
     bool UpdateCurrentOffset(float offset, int32_t source);
 
     // disappear Animator
-    void StartAnimator();
-    void StopAnimator();
+    void StartDisappearAnimator();
+    void StopDisappearAnimator();
     void SetOpacity(uint8_t value);
     void SendAccessibilityEvent(AccessibilityEventType eventType);
 
@@ -140,6 +141,11 @@ public:
         childRect_ = rect;
     }
 
+    void SetDisappearAnimation(const std::shared_ptr<AnimationUtils::Animation>& disappearAnimation)
+    {
+        disappearAnimation_ = disappearAnimation;
+    }
+
     void OnCollectTouchTarget(const OffsetF& coordinateOffset,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
 
@@ -156,7 +162,6 @@ private:
     void ProcessFrictionMotion(double value);
     void ProcessFrictionMotionStop();
 
-    RefPtr<Animator> scrollEndAnimator_;
     RefPtr<ScrollBarProxy> scrollBarProxy_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     Axis axis_ = Axis::VERTICAL;
@@ -177,6 +182,8 @@ private:
     ScrollEndCallback scrollEndCallback_;
     RectF childRect_;
     uint8_t opacity_ = UINT8_MAX;
+    CancelableCallback<void()> disapplearDelayTask_;
+    std::shared_ptr<AnimationUtils::Animation> disappearAnimation_;
 };
 
 } // namespace OHOS::Ace::NG

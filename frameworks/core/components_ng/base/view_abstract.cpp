@@ -35,7 +35,6 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/image/image_source_info.h"
@@ -884,7 +883,7 @@ void ViewAbstract::SetOnDragEnter(
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragEnter(std::move(onDragEnter));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(onDragEnter));
 
     AddDragFrameNodeToManager();
 }
@@ -894,7 +893,7 @@ void ViewAbstract::SetOnDragLeave(
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragLeave(std::move(onDragLeave));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(onDragLeave));
 
     AddDragFrameNodeToManager();
 }
@@ -904,7 +903,7 @@ void ViewAbstract::SetOnDragMove(
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragMove(std::move(onDragMove));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(onDragMove));
 
     AddDragFrameNodeToManager();
 }
@@ -913,7 +912,7 @@ void ViewAbstract::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEven
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDrop(std::move(onDrop));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(onDrop));
 
     AddDragFrameNodeToManager();
 }
@@ -922,7 +921,7 @@ void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragE
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragEnd(std::move(onDragEnd));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
 
     AddDragFrameNodeToManager();
 }
@@ -995,7 +994,13 @@ void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(Offset, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateOffset(value);
+        target->SyncGeometryProperties(AceType::RawPtr(frameNode->GetGeometryNode()), true);
+    }
 }
 
 void ViewAbstract::MarkAnchor(const OffsetT<Dimension>& value)
@@ -1530,17 +1535,6 @@ void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderImage, borderImage);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline && pipeline->GetMinPlatformVersion() >= 11) {
-        BorderWidthProperty borderWidth;
-        borderWidth.leftDimen = borderImage->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageWidth();
-        borderWidth.rightDimen = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT).GetBorderImageWidth();
-        borderWidth.topDimen = borderImage->GetBorderImageEdge(BorderImageDirection::TOP).GetBorderImageWidth();
-        borderWidth.bottomDimen = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM).GetBorderImageWidth();
-
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
-    }
 }
 
 void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)

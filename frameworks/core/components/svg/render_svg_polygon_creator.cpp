@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_svg_polygon.h"
-#endif
 #include "rosen_render_svg_polygon.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderSvgPolygon::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderSvgPolygon>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

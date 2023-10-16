@@ -187,7 +187,7 @@ public:
 
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
-    void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty, bool checkPage = true);
+    void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
@@ -207,6 +207,8 @@ public:
 
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
+    void SetEnableKeyBoardAvoidMode(bool value) override;
+    bool IsEnableKeyBoardAvoidMode() override;
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
     {
         return safeAreaManager_;
@@ -403,8 +405,6 @@ public:
     {
         dragCleanTask_ = std::move(task);
     }
-
-    int32_t GetCurrentPageId();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

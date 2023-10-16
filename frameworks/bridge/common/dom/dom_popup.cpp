@@ -103,8 +103,6 @@ bool DOMPopup::SetSpecializedAttr(const std::pair<std::string, std::string>& att
         auto valueIt = BinarySearchFindIndex(placeMap, ArraySize(placeMap), attr.second.c_str());
         if (valueIt != -1) {
             popupChild_->GetPopupParam()->SetPlacement(placeMap[valueIt].value);
-        } else {
-            LOGW("illegal placement value");
         }
         return true;
     } else if (attr.first == DOM_ARROW_OFFSET) {
@@ -142,7 +140,6 @@ bool DOMPopup::SetSpecializedStyle(const std::pair<std::string, std::string>& st
         popupChild_->GetPopupParam()->SetBackgroundColor(backgroundColor_);
         return false;
     } else {
-        LOGW("DOMPopup unsupported style");
         return false;
     }
 }
@@ -154,7 +151,6 @@ bool DOMPopup::AddSpecializedEvent(int32_t pageId, const std::string& event)
         popupChild_->GetPopupParam()->SetOnVisibilityChange(visibilityChangeEventId_);
         return true;
     } else {
-        LOGW("event type not supported");
         return false;
     }
 }

@@ -18,7 +18,7 @@
 
 namespace OHOS::Ace::Framework {
 JSStateMgmtProfiler::JSStateMgmtProfiler(std::string profilerPackage) : profilerPackage_(std::move(profilerPackage))
-{   
+{
 }
 
 void JSStateMgmtProfiler::JSBind(BindingTarget globalObj)

@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_text_span.h"
-#endif
 #include "rosen_render_text_span.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderTextSpan::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderTextSpan>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

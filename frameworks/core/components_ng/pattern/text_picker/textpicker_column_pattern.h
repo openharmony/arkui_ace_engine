@@ -54,7 +54,7 @@ class EventParam : public virtual AceType {
     DECLARE_ACE_TYPE(EventParam, AceType)
 
 public:
-    RefPtr<FrameNode> instance;
+    WeakPtr<FrameNode> instance;
     int32_t itemIndex;
     int32_t itemTotalCounts;
 };
