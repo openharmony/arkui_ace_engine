@@ -136,7 +136,9 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 
     auto isDraggedDown = navBarPattern_ ? navBarPattern_->GetDraggedDown() : false;
 
-    ProcessAssociatedScroll(offset, source);
+    if (!ProcessAssociatedScroll(offset, source)) {
+        return false;
+    }
 
     if ((isAtTop || isDraggedDown) && (source == SCROLL_FROM_UPDATE) && !isReactInParentMovement_ &&
         (axis_ == Axis::VERTICAL)) {
@@ -1148,7 +1150,7 @@ void ScrollablePattern::LimitMouseEndOffset()
     }
 }
 
-void ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)
+bool ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)
 {
     if (navBarPattern_) {
         if (source == SCROLL_FROM_START) {
@@ -1156,10 +1158,12 @@ void ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)
         } else if ((source == SCROLL_FROM_UPDATE) || (source == SCROLL_FROM_ANIMATION) ||
                    (source == SCROLL_FROM_ANIMATION_SPRING)) {
             if (IsAtTop()) {
-                navBarPattern_->UpdateAssociatedScrollOffset(offset);
+                auto host = GetHost();
+                return navBarPattern_->UpdateAssociatedScrollOffset(offset, host);
             }
         }
     }
+    return true;
 }
 
 bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
