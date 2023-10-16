@@ -229,13 +229,11 @@ void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE);
     }
 
-    if (stateEffect.has_value()) {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
-        CHECK_NULL_VOID(buttonEventHub);
-        buttonEventHub->SetStateEffect(stateEffect.value());
-    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    buttonEventHub->SetStateEffect(stateEffect.value_or(true));
 }
 
 void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label)
