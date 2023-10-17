@@ -33,9 +33,11 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(*info_) || (!info_->firstHandle.isShow && !info_->secondHandle.isShow)) {
+    if (!CheckInShowArea(*info_)) {
         menu->SetActive(false);
         return;
+    } else if (!info_->firstHandle.isShow && !info_->secondHandle.isShow) {
+        menu->SetActive(false);
     } else {
         menu->SetActive(true);
     }
