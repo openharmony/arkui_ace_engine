@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,8 +38,10 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     event.SetTimeStamp(lastPoint.time);
     event.SetPointerEvent(lastPoint.pointerEvent);
     TouchLocationInfo changedInfo("onTouch", lastPoint.id);
-    auto localX = static_cast<float>(lastPoint.x - coordinateOffset_.GetX());
-    auto localY = static_cast<float>(lastPoint.y - coordinateOffset_.GetY());
+    PointF lastLocalPoint(lastPoint.x, lastPoint.y);
+    NGGestureRecognizer::Transform(lastLocalPoint, GetNodeId());
+    auto localX = static_cast<float>(lastLocalPoint.GetX());
+    auto localY = static_cast<float>(lastLocalPoint.GetY());
     changedInfo.SetLocalLocation(Offset(localX, localY));
     changedInfo.SetGlobalLocation(Offset(lastPoint.x, lastPoint.y));
     changedInfo.SetScreenLocation(Offset(lastPoint.screenX, lastPoint.screenY));
@@ -60,8 +63,10 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         float globalY = item.y;
         float screenX = item.screenX;
         float screenY = item.screenY;
-        auto localX = static_cast<float>(item.x - coordinateOffset_.GetX());
-        auto localY = static_cast<float>(item.y - coordinateOffset_.GetY());
+        PointF localPoint(globalX, globalY);
+        NGGestureRecognizer::Transform(localPoint, GetNodeId());
+        auto localX = static_cast<float>(localPoint.GetX());
+        auto localY = static_cast<float>(localPoint.GetY());
         TouchLocationInfo info("onTouch", item.id);
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
@@ -84,8 +89,10 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         float globalY = item.y;
         float screenX = item.screenX;
         float screenY = item.screenY;
-        auto localX = static_cast<float>(item.x - coordinateOffset_.GetX());
-        auto localY = static_cast<float>(item.y - coordinateOffset_.GetY());
+        PointF localPoint(globalX, globalY);
+        NGGestureRecognizer::Transform(localPoint, GetNodeId());
+        auto localX = static_cast<float>(localPoint.GetX());
+        auto localY = static_cast<float>(localPoint.GetY());
         TouchLocationInfo historyInfo("onTouch", item.id);
         historyInfo.SetTimeStamp(item.time);
         historyInfo.SetGlobalLocation(Offset(globalX, globalY));

@@ -1422,7 +1422,7 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
     return rect;
 }
 
-void RosenRenderContext::GetPointWithRevert(PointF& point)
+Matrix4 RosenRenderContext::GetRevertMatrix()
 {
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
@@ -1441,7 +1441,20 @@ void RosenRenderContext::GetPointWithRevert(PointF& point)
                     Matrix4::CreateScale(scale[0], scale[1], 1) *
                     Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
 
-    auto invertMat = Matrix4::Invert(translateMat * rotationMat * scaleMat);
+    return Matrix4::Invert(translateMat * rotationMat * scaleMat);
+}
+
+Matrix4 RosenRenderContext::GetLocalTransformMatrix()
+{
+    auto invertMat = GetRevertMatrix();
+    RectF rect = GetPaintRectWithoutTransform();
+    auto transformMat = Matrix4::CreateTranslate(-rect.GetOffset().GetX(), -rect.GetOffset().GetY(), 0) * invertMat;
+    return transformMat;
+}
+
+void RosenRenderContext::GetPointWithRevert(PointF& point)
+{
+    auto invertMat = GetRevertMatrix();
     Point tmp(point.GetX(), point.GetY());
     auto invertPoint = invertMat * tmp;
     point.SetX(invertPoint.GetX());
