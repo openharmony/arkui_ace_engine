@@ -404,6 +404,12 @@ public:
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
+    bool UpdateRootComponent() override;
+    static void SetEntryObject(const panda::Global<panda::ObjectRef>& obj)
+    {
+        obj_ = obj;
+    }
+
 private:
     bool CallAppFunc(const std::string& appFuncName);
 
@@ -441,6 +447,7 @@ private:
     std::string pluginModuleName_;
     static std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
     bool isFirstCallShow_ = true;
+    static panda::Global<panda::ObjectRef> obj_;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

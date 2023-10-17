@@ -55,9 +55,7 @@ void AceForwardCompatibility::Init(const std::string& bundleName, const uint32_t
     isForceOldPipeline_ = true;
 #endif
 
-    isNewPipeline_ = !isForceOldPipeline_
-                     && (apiCompatibleVersion >= ARKUI_NEW_PIPELINE_MIN_VERSION)
-                     && !deprecated;
+    isNewPipeline_ = (apiCompatibleVersion >= ARKUI_NEW_PIPELINE_MIN_VERSION) && !deprecated;
     isInited_ = true;
     LOGI("AceForwardCompatibility [%{public}s] force:%{public}d newpipe:%{public}d",
          bundleName.c_str(), isForceOldPipeline_, isNewPipeline_);
@@ -78,10 +76,15 @@ bool AceForwardCompatibility::IsForceOldPipeline()
 bool AceForwardCompatibility::IsNewPipeline()
 {
     if (isInited_) {
-        return isNewPipeline_;
+        return isNewPipeline_ && !isForceOldPipeline_;
     }
     isNewAppspawn_ = !IsForceOldPipeline();
     return !IsForceOldPipeline();
+}
+
+bool AceForwardCompatibility::IsUseNG()
+{
+    return isNewPipeline_;
 }
 
 const char* AceForwardCompatibility::GetAceLibName()
@@ -98,7 +101,7 @@ const char* AceForwardCompatibility::GetAceLibName()
 
 bool AceForwardCompatibility::PipelineChanged()
 {
-    return isNewPipeline_ != isNewAppspawn_;
+    return (isNewPipeline_ && !isForceOldPipeline_) != isNewAppspawn_;
 }
 } // namespace Ace
 } // namespace OHOS
