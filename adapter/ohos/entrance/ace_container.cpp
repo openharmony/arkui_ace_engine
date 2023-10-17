@@ -617,6 +617,12 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess]() {
+                if (event.type != TouchType::MOVE) {
+                    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Process in ace_container: "
+                        "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
+                        "type=%{public}d timeStamp=%{public}lld", event.pointerEvent->GetId(),
+                        event.x, event.y, (int)event.type, event.time.time_since_epoch().count());
+                }
                 context->OnTouchEvent(event);
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
@@ -655,7 +661,12 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() { result = context->OnKeyEvent(event); }, TaskExecutor::TaskType::UI);
+            [context, event, &result]() {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Process KeyEvent in ace_container, eventInfo:"
+                    "code:%{public}d, action%{public}d", event.code, event.action);
+                result = context->OnKeyEvent(event);
+            },
+            TaskExecutor::TaskType::UI);
         return result;
     };
     aceView_->RegisterKeyEventCallback(keyEventCallback);
