@@ -949,13 +949,19 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
 
 void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
 {
+    RangeOptions options;
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
+
+    if (args.Length() < 1) {
+        controller->DeleteSpans(options);
+        return;
+    }
+
     if (!args[0]->IsObject() || !controller) {
         return;
     }
     JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[0]);
-    RangeOptions options;
     JSRef<JSVal> startVal = spanObject->GetProperty("start");
     int32_t start = 0;
     if (!startVal->IsNull() && JSContainerBase::ParseJsInt32(startVal, start)) {
