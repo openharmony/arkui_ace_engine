@@ -48,13 +48,12 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
 
     auto taskExecutor = Container::CurrentTaskExecutor();
     taskExecutor->PostTask(
-        [weakRoot = rootNodeWeak_, weakNode = AceType::WeakClaim(AceType::RawPtr(selectOverlayNode)), animation,
+        [weakRoot = rootNodeWeak_, overlayNode = selectOverlayNode, animation,
             isUsingMouse = infoPtr->isUsingMouse, weak = WeakClaim(this), weakCaller = infoPtr->callerFrameNode] {
             auto selectOverlayManager = weak.Upgrade();
             CHECK_NULL_VOID(selectOverlayManager);
-            auto selectOverlayNode = weakNode.Upgrade();
-            CHECK_NULL_VOID(selectOverlayNode);
-            if (weakNode != selectOverlayManager->GetSelectOverlayItem()) {
+            CHECK_NULL_VOID(overlayNode);
+            if (overlayNode != selectOverlayManager->GetSelectOverlayItem()) {
                 LOGD("current selectOverlayItem not is %{public}d", selectOverlayNode->GetId());
                 return;
             }
@@ -65,7 +64,6 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
                 rootNode = DynamicCast<FrameNode>(root);
             }
             CHECK_NULL_VOID(rootNode);
-
             // get keyboard index to put selet_overlay before keyboard node
             int32_t slot = DEFAULT_NODE_SLOT;
             int32_t index = 0;
@@ -77,10 +75,10 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
                 index++;
             }
 
-            selectOverlayNode->MountToParent(rootNode, slot);
+            overlayNode->MountToParent(rootNode, slot);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             if (!isUsingMouse) {
-                auto node = DynamicCast<SelectOverlayNode>(selectOverlayNode);
+                auto node = DynamicCast<SelectOverlayNode>(overlayNode);
                 CHECK_NULL_VOID(node);
                 node->ShowSelectOverlay(animation);
             }
@@ -338,6 +336,55 @@ void SelectOverlayManager::MarkDirty(PropertyChangeFlag flag)
     auto selectOverlayItem = selectOverlayItem_.Upgrade();
     if (selectOverlayItem) {
         selectOverlayItem->MarkDirtyNode(flag);
+    }
+}
+
+void SelectOverlayManager::NotifyOnScrollCallback(int32_t id, bool isEnd)
+{
+    LOGI("NotifyOnScrollCallback scroll id %{public}d", id);
+    if (parentScrollCallbacks_.empty()) {
+        return;
+    }
+    auto it = parentScrollCallbacks_.find(id);
+    if (it == parentScrollCallbacks_.end()) {
+        return;
+    }
+    auto callbackMap = it->second;
+    if (callbackMap.empty()) {
+        parentScrollCallbacks_.erase(id);
+        return;
+    }
+    for (const auto& pair : callbackMap) {
+        pair.second(isEnd);
+    }
+}
+
+void SelectOverlayManager::RegisterScrollCallback(
+    int32_t scrollableParentId, int32_t callbackId, std::function<void(bool)>&& callback)
+{
+    LOGI("RegisterScrollCallback scroll parent id %{public}d, callbackId %{public}d", scrollableParentId, callbackId);
+    auto it = parentScrollCallbacks_.find(scrollableParentId);
+    if (it == parentScrollCallbacks_.end()) {
+        std::map<int32_t, std::function<void(bool)>> callbackMap = { { callbackId, std::move(callback) } };
+        parentScrollCallbacks_.insert(std::make_pair(scrollableParentId, callbackMap));
+    } else {
+        it->second.insert(std::make_pair(callbackId, std::move(callback)));
+    }
+}
+
+void SelectOverlayManager::RemoveScrollCallback(int32_t callbackId)
+{
+    LOGI("RemoveScrollCallback callbackId %{public}d", callbackId);
+    if (parentScrollCallbacks_.empty()) {
+        return;
+    }
+    for (auto it = parentScrollCallbacks_.begin(); it != parentScrollCallbacks_.end();) {
+        it->second.erase(callbackId);
+        if (it->second.empty()) {
+            it = parentScrollCallbacks_.erase(it);
+        } else {
+            ++it;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

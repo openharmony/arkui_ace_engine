@@ -304,6 +304,7 @@ const char BADGE_ETS_TAG[] = "Badge";
 // search
 const char SEARCH_COMPONENT_TAG[] = "SearchComponent";
 const char SEARCH_ETS_TAG[] = "Search";
+const char SEARCH_Field_ETS_TAG[] = "SearchField";
 
 // formComponent
 const char FORM_COMPONENT_TAG[] = "FormComponent";

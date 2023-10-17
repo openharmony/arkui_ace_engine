@@ -20,13 +20,10 @@
 #include <utility>
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,44 +38,16 @@ public:
 
     void OnReset() override
     {
-        paragraph_.reset();
+        paragraph_->Reset();
     }
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    const RefPtr<Paragraph>& GetParagraph() const;
 
-    std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
-
-    void Layout(LayoutWrapper* layoutWrapper) override;
-
-    const std::shared_ptr<RSParagraph>& GetParagraph();
-
-    const std::shared_ptr<RSParagraph>& GetCounterParagraph() const;
-    const std::shared_ptr<RSParagraph>& GetErrorParagraph() const;
+    const RefPtr<Paragraph>& GetErrorParagraph() const;
 
     const RectF& GetTextRect() const
     {
         return textRect_;
-    }
-
-    const RectF& GetImageRect() const
-    {
-        return imageRect_;
-    }
-
-    const RectF& GetFrameRect() const
-    {
-        return frameRect_;
-    }
-
-    float GetCaretOffsetX() const
-    {
-        return caretOffsetX_;
-    }
-
-    void SetCaretOffset(float offsetX)
-    {
-        caretOffsetX_ = offsetX;
     }
 
     const OffsetF& GetParentGlobalOffset() const
@@ -91,27 +60,21 @@ public:
         return unitWidth_;
     }
 
-    float GetParagraphWidth() const
-    {
-        return paragraphWidth_;
-    }
-
     static TextDirection GetTextDirection(const std::string& content);
 
     static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled);
     static void UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
-        const RefPtr<TextFieldLayoutProperty>& layoutProperty,  const RefPtr<TextFieldTheme>& theme,
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled);
 
-private:
+protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
-        int32_t nakedCharPosition, bool disableTextAlign);
-    void CreateParagraph(const std::vector<TextStyle>& textStyles, const std::vector<std::string>& contents,
-        const std::string& content, bool needObscureText, bool disableTextAlign);
-    void CreateCounterParagraph(int32_t textLength, int32_t maxLength, const RefPtr<TextFieldTheme>& theme);
+        int32_t nakedCharPosition, bool disableTextAlign = false);
+    void CreateParagraph(const TextStyle& textStyle, const std::vector<std::string>& contents,
+        const std::string& content, bool needObscureText, bool disableTextAlign = false);
     void CreateErrorParagraph(const std::string& content, const RefPtr<TextFieldTheme>& theme);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
@@ -123,20 +86,29 @@ private:
     float GetTextFieldDefaultHeight();
     float GetTextFieldDefaultImageHeight();
 
+    void ConstructTextStyles(
+        const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder);
+    void ErrorTextMeasureContent(const std::string& content, const RefPtr<TextFieldTheme>& theme);
+
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
     void UpdateUnitLayout(LayoutWrapper* layoutWrapper);
+    ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
 
-    std::shared_ptr<RSParagraph> paragraph_;
-    std::shared_ptr<RSParagraph> counterParagraph_;
-    std::shared_ptr<RSParagraph> errorParagraph_;
-    RectF frameRect_;
+    SizeF CalculateConstraintSize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> InlineMeasureContent(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, const SizeF& idealSize);
+    SizeF PlaceHolderMeasureContent(const SizeF& idealSize, float imageWidth = 0.0f);
+    SizeF TextInputMeasureConetnt(const SizeF& idealSize, float imageWidth);
+    SizeF TextAreaMeasureContent(const SizeF& idealSize);
+
+    RefPtr<Paragraph> paragraph_;
+    RefPtr<Paragraph> errorParagraph_;
     RectF textRect_;
-    RectF imageRect_;
     OffsetF parentGlobalOffset_;
-    float paragraphWidth_ = 0.0f;
+    float preferredHeight_ = 0.0f;
 
-    float caretOffsetX_ = 0.0f;
     float unitWidth_ = 0.0f;
+    bool autoWidth_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };

@@ -73,6 +73,12 @@ public:
         return selectOverlayItem_;
     }
 
+    void NotifyOnScrollCallback(int32_t id, bool isEnd);
+
+    void RegisterScrollCallback(int32_t scrollableParentId, int32_t callbackId, std::function<void(bool)>&& callback);
+
+    void RemoveScrollCallback(int32_t callbackId);
+
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation = false);
 
@@ -93,6 +99,8 @@ private:
 
     std::vector<TouchEvent> touchDownPoints_;
     std::vector<std::string> touchTestResults_;
+
+    std::map<int32_t, std::map<int32_t, std::function<void(bool)>>> parentScrollCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayManager);
 };

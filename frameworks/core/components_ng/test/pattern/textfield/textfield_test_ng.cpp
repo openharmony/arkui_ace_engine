@@ -17,6 +17,8 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/render/mock_paragraph.h"
+
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
@@ -33,8 +35,8 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/test/mock/pattern/text_field/mock_text_input_connection.h"
-#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -128,7 +130,7 @@ void TextFieldPatternTestNg::RunSetUp()
     auto pipeline = MockPipelineBase::GetCurrent();
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     pattern_->clipboard_ = clipboard;
-    pattern_->paragraph_ = std::make_shared<RSParagraph>();
+    pattern_->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
 }
 
 RefPtr<FrameNode> TextFieldPatternTestNg::CreatTextFieldNode(
@@ -1055,7 +1057,7 @@ HWTEST_F(TextFieldPatternTestNg, CheckScrollable004, TestSize.Level1)
     EXPECT_FALSE(textFieldPattern->scrollable_);
 
     layoutProperty->UpdateShowCounter(true);
-    textFieldPattern->counterParagraph_ = std::make_shared<RSParagraph>();
+    textFieldPattern->counterParagraph_ = MockParagraph::GetOrCreateMockParagraph();
     textFieldPattern->CheckScrollable();
     EXPECT_FALSE(textFieldPattern->scrollable_);
 }
@@ -1470,38 +1472,6 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextAreaScroll001, TestSize.L
 }
 
 /**
- * @tc.name: MakeEmptyOffset
- * @tc.desc: test MakeEmptyOffset.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, MakeEmptyOffset, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create the TextFieldPattern.
-     * @tc.expected: step1. Check the TextFieldPattern success.
-     */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Call the MakeEmptyOffset.
-     * @tc.expected: step2. Check the return value.
-     */
-    auto width = pattern->contentRect_.Width();
-    std::pair<TextAlign, OffsetF> textAlignPairs[] = { std::make_pair(TextAlign::CENTER, OffsetF(width * 0.5f, 0.0f)),
-        std::make_pair(TextAlign::END, OffsetF(width, 0.0f)), std::make_pair(TextAlign::START, OffsetF()),
-        std::make_pair(TextAlign::JUSTIFY, OffsetF()) };
-    for (auto pair : textAlignPairs) {
-        layoutProperty->UpdateTextAlign(pair.first);
-        EXPECT_EQ(pattern->MakeEmptyOffset(), pair.second);
-    }
-}
-
-/**
  * @tc.name: onDraw001
  * @tc.desc: Verify that the onDraw interface calls normally and exits without exception.
  * @tc.type: FUNC
@@ -1587,17 +1557,10 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection003, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> textBoxes;
-    RSTypographyProperties::TextBox textBox;
-    textBoxes.emplace_back(textBox);
-    pattern->textBoxes_ = textBoxes;
-#else
-    std::vector<RSTypographyProperties::TextRect> textBoxs;
-    RSTypographyProperties::TextRect textBox;
+    std::vector<RectF> textBoxs;
+    RectF textBox;
     textBoxs.emplace_back(textBox);
     pattern->textBoxes_ = textBoxs;
-#endif
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
     TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
@@ -1645,7 +1608,7 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->selectionMode_ = SelectionMode::NONE;
-    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
     TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
@@ -2274,7 +2237,7 @@ HWTEST_F(TextFieldPatternTestNg, onDraw003, TestSize.Level1)
     /**
      * @tc.steps: step2. paragraph_ Pointer instantiation.
      */
-    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     textFieldContentModifier->contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     textFieldContentModifier->contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
@@ -2822,37 +2785,19 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextSelectionRectOffsetX, TestSize.Level1
     textFieldPattern->contentRect_.SetLeft(60.0f);
     textFieldPattern->contentRect_.SetWidth(100.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    RSTypographyProperties::TextBox textBox;
-#else
-    RSTypographyProperties::TextRect textBox;
-#endif
+    RectF textBox;
     textFieldPattern->textBoxes_.emplace_back(textBox);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    textFieldPattern->textBoxes_.begin()->rect_.SetRight(-30.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(-30.0f);
-#endif
+    textFieldPattern->textBoxes_.begin()->SetWidth(-30.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 60.0f);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(-20.0f);
-    textFieldPattern->textBoxes_.begin()->rect_.SetRight(-10.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(-20.0f);
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(-10.0f);
-#endif
+    textFieldPattern->textBoxes_.begin()->SetLeft(-20.0f);
+    textFieldPattern->textBoxes_.begin()->SetWidth(10.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 60.0f);
     EXPECT_EQ(textFieldPattern->unitWidth_, 0.0f);
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-    textFieldPattern->textBoxes_.begin()->rect_.SetRight(110.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(110.0f);
-#endif
+    textFieldPattern->textBoxes_.begin()->SetWidth(120.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 60.0f);
 }
@@ -2876,54 +2821,28 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextSelectionRectOffsetX001, TestSize.Lev
     textFieldPattern->contentRect_.SetLeft(0.0f);
     textFieldPattern->contentRect_.SetWidth(100.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    RSTypographyProperties::TextBox textBox;
-#else
-    RSTypographyProperties::TextRect textBox;
-#endif
+    RectF textBox;
     textFieldPattern->textBoxes_.emplace_back(textBox);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    textFieldPattern->textBoxes_.begin()->rect_.SetRight(50.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(50.0f);
-#endif
+    textFieldPattern->textBoxes_.begin()->SetWidth(50.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(-20.0f);
-    textFieldPattern->textBoxes_.begin()->rect_.SetRight(-10.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(-20.0f);
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(-10.0f);
-#endif
+    textFieldPattern->textBoxes_.begin()->SetLeft(-20.0f);
+    textFieldPattern->textBoxes_.begin()->SetWidth(10.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(0.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(0.0f);
-#endif
+    textFieldPattern->textBoxes_.begin()->SetLeft(0.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(100.0f);
-    textFieldPattern->textBoxes_.begin()->rect_.SetRight(200.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(100.0f);
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(200.0f);
-#endif
+    textFieldPattern->textBoxes_.begin()->SetLeft(100.0f);
+    textFieldPattern->textBoxes_.begin()->SetWidth(100.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(300.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(300.0f);
-#endif
+    textFieldPattern->textBoxes_.begin()->SetLeft(300.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
@@ -3251,8 +3170,8 @@ HWTEST_F(TextFieldPatternTestNg, onDraw005, TestSize.Level1)
     bool value = true;
     textFieldContentModifier.showErrorState_ = AceType::MakeRefPtr<PropertyBool>(value);
     textFieldContentModifier.showCounter_ = AceType::MakeRefPtr<PropertyBool>(value);
-    pattern->counterParagraph_ = std::make_shared<RSParagraph>();
-    pattern->errorParagraph_ = std::make_shared<RSParagraph>();
+    pattern->counterParagraph_ = MockParagraph::GetOrCreateMockParagraph();
+    pattern->errorParagraph_ = MockParagraph::GetOrCreateMockParagraph();
     textFieldContentModifier.onDraw(context);
 }
 
@@ -3399,7 +3318,7 @@ HWTEST_F(TextFieldPatternTestNg, CreateCounterParagraph001, TestSize.Level1)
     constexpr int32_t maxLength = 10;
     const RefPtr<TextFieldTheme> theme = AceType::MakeRefPtr<TextFieldTheme>();
     EXPECT_EQ(textFieldLayoutAlgorithm.counterParagraph_, nullptr);
-    textFieldLayoutAlgorithm.counterParagraph_ = std::make_shared<RSParagraph>();
+    textFieldLayoutAlgorithm.counterParagraph_ = MockParagraph::GetOrCreateMockParagraph();
     textFieldLayoutAlgorithm.CreateCounterParagraph(textLength, maxLength, theme);
     EXPECT_NE(textFieldLayoutAlgorithm.counterParagraph_, nullptr);
 }
@@ -3424,7 +3343,7 @@ HWTEST_F(TextFieldPatternTestNg, CreateCounterParagraph002, TestSize.Level1)
     constexpr int32_t maxLength = 10;
     const RefPtr<TextFieldTheme> theme = AceType::MakeRefPtr<TextFieldTheme>();
     EXPECT_EQ(textFieldLayoutAlgorithm.counterParagraph_, nullptr);
-    textFieldLayoutAlgorithm.counterParagraph_ = std::make_shared<RSParagraph>();
+    textFieldLayoutAlgorithm.counterParagraph_ = MockParagraph::GetOrCreateMockParagraph();
     textFieldLayoutAlgorithm.CreateCounterParagraph(textLength, maxLength, theme);
     EXPECT_NE(textFieldLayoutAlgorithm.counterParagraph_, nullptr);
 }
@@ -3446,7 +3365,7 @@ HWTEST_F(TextFieldPatternTestNg, GetCounterParagraph, TestSize.Level1)
      * @tc.expected: The member variable value of textFieldLayoutAlgorithm is the value set above.
      */
     EXPECT_EQ(textFieldLayoutAlgorithm.GetCounterParagraph(), nullptr);
-    textFieldLayoutAlgorithm.counterParagraph_ = std::make_shared<RSParagraph>();
+    textFieldLayoutAlgorithm.counterParagraph_ = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_NE(textFieldLayoutAlgorithm.GetCounterParagraph(), nullptr);
 }
 
@@ -3634,7 +3553,7 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor002, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->selectionMode_ = SelectionMode::NONE;
-    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
     TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
@@ -3649,7 +3568,7 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor002, TestSize.Level1)
      */
     textFieldOverlayModifier.cursorVisible_ = AceType::MakeRefPtr<PropertyBool>(true);
     textFieldOverlayModifier.showCounter_ = AceType::MakeRefPtr<PropertyBool>(true);
-    pattern->counterParagraph_ = std::make_shared<RSParagraph>();
+    pattern->counterParagraph_ = MockParagraph::GetOrCreateMockParagraph();
     textFieldOverlayModifier.PaintCursor(context);
 }
 
@@ -3670,13 +3589,8 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection004, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> textBoxes;
-    RSTypographyProperties::TextBox textBox;
-#else
-    std::vector<RSTypographyProperties::TextRect> textBoxes;
-    RSTypographyProperties::TextRect textBox;
-#endif
+    std::vector<RectF> textBoxes;
+    RectF textBox;
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
     EdgeEffect edgeEffect;
@@ -3696,7 +3610,7 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection004, TestSize.Level1)
      * @tc.expected: Check the properties set successfully.
      */
     textFieldOverlayModifier.showCounter_ = AceType::MakeRefPtr<PropertyBool>(true);
-    pattern->counterParagraph_ = std::make_shared<RSParagraph>();
+    pattern->counterParagraph_ = MockParagraph::GetOrCreateMockParagraph();
     textFieldOverlayModifier.inputStyle_ = InputStyle::DEFAULT;
     textFieldOverlayModifier.PaintSelection(context);
 }
@@ -4284,10 +4198,10 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     DirtySwapConfig dirtySwapConfig;
     EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
 
-    layoutAlgorithm->paragraph_ = std::make_shared<RSParagraph>();
-    layoutAlgorithm->counterParagraph_ = std::make_shared<RSParagraph>();
-    layoutAlgorithm->errorParagraph_ = std::make_shared<RSParagraph>();
-    layoutAlgorithm->errorParagraph_ = std::make_shared<RSParagraph>();
+    layoutAlgorithm->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
+    layoutAlgorithm->counterParagraph_ = MockParagraph::GetOrCreateMockParagraph();
+    layoutAlgorithm->errorParagraph_ = MockParagraph::GetOrCreateMockParagraph();
+    layoutAlgorithm->errorParagraph_ = MockParagraph::GetOrCreateMockParagraph();
     textFieldPattern->needToRefreshSelectOverlay_ = true;
     textFieldPattern->mouseStatus_ = MouseStatus::RELEASED;
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -4585,7 +4499,7 @@ HWTEST_F(TextFieldPatternTestNg, TFLayoutAlgorithmMeasureContent, TestSize.Level
     layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
     layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
-    pattern->counterParagraph_ = std::make_shared<RSParagraph>();
+    pattern->counterParagraph_ = MockParagraph::GetOrCreateMockParagraph();
     layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
     cloneLayoutProperty->UpdateShowErrorText(true);
@@ -4791,15 +4705,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateSelectionOffset, TestSize.Level2)
     EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 4);
     EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 8);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> textBoxes;
-    RSTypographyProperties::TextBox firstTextBox;
-    RSTypographyProperties::TextBox secondTextBox;
-#else
-    std::vector<RSTypographyProperties::TextRect> textBoxes;
-    RSTypographyProperties::TextRect firstTextBox;
-    RSTypographyProperties::TextRect secondTextBox;
-#endif
+    std::vector<RectF> textBoxes;
+    RectF firstTextBox;
+    RectF secondTextBox;
     textBoxes.emplace_back(firstTextBox);
     textBoxes.emplace_back(secondTextBox);
     pattern->textBoxes_ = textBoxes;
@@ -5508,7 +5416,7 @@ HWTEST_F(TextFieldPatternTestNg, HandleSelectionDown, TestSize.Level2)
      * @tc.steps: step3. in text area and call HandleSelectionDown.
      * @tc.expected: Check the value of the updated property.
      */
-    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     layoutProperty->UpdateMaxLines(2);
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->HandleSelectionDown();
@@ -5555,7 +5463,7 @@ HWTEST_F(TextFieldPatternTestNg, HandleSelectionUp, TestSize.Level2)
      * @tc.steps: step3. in text area and call HandleSelectionUp.
      * @tc.expected: Check the value of the updated property.
      */
-    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     layoutProperty->UpdateMaxLines(2);
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->HandleSelectionUp();
@@ -6016,7 +5924,7 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto context = PipelineContext::GetCurrentContext();
     context->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
-    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     pattern->imeAttached_ = true;
 
     KeyEvent event;
@@ -6228,8 +6136,8 @@ HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
     dy = pattern->AdjustTextAreaOffsetY();
     EXPECT_EQ(dy, 195.0f);
     EXPECT_EQ(pattern->caretRect_.GetX(), CARE_RECT_DANGEROUS.GetX());
-    int32_t charPosition[3] = {-1, 0, 2};
-    auto content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[1], true);;
+    int32_t charPosition[3] = { -1, 0, 2 };
+    auto content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[1], true);
     for (int i = 0; i < 3; i++) {
         content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[i], true);
         content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[i], false);
@@ -6276,7 +6184,7 @@ HWTEST_F(TextFieldPatternTestNg, UpdateSelectorByPosition001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     /*
      * @tc.steps: step2. call UpdateSelectorByPosition function.
      * @tc.expected: The UpdateSelectorByPosition function will exit without exception.
@@ -6642,11 +6550,11 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: CalcCursorOffsetByPosition
- * @tc.desc: test CalcCursorOffsetByPosition
+ * @tc.name: CalcCaretMetricsByPosition
+ * @tc.desc: test CalcCaretMetricsByPosition
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, CalcCursorOffsetByPosition, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, CalcCaretMetricsByPosition, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create TextFieldPattern.
@@ -6661,14 +6569,16 @@ HWTEST_F(TextFieldPatternTestNg, CalcCursorOffsetByPosition, TestSize.Level1)
     frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
 
     /**
-     * @tc.steps: step2. set clipboard avoid nullptr and call CalcCursorOffsetByPosition.
+     * @tc.steps: step2. set clipboard avoid nullptr and call CalcCaretMetricsByPosition.
      * @tc.expected: Check it is not nullptr.
      */
     textFieldPattern->textEditingValue_.caretPosition = 10;
     textFieldPattern->textEditingValue_.text = TEXT_VALUE;
     auto position = textFieldPattern->textEditingValue_.caretPosition;
-    textFieldPattern->CalcCursorOffsetByPosition(position, false);
-    textFieldPattern->CalcCursorOffsetByPosition(position, true);
+    CaretMetricsF baseMetrics;
+    CaretMetricsF destinationMetrics;
+    textFieldPattern->CalcCaretMetricsByPosition(position, baseMetrics);
+    textFieldPattern->CalcCaretMetricsByPosition(position, destinationMetrics, TextAffinity::UPSTREAM);
 
     /**
      * @tc.steps: step3. set contentSize and textSize. contentWidth less than textWidth.
@@ -6709,20 +6619,20 @@ HWTEST_F(TextFieldPatternTestNg, GetDragUpperLeftCoordinates, TestSize.Level1)
     pattern_->textBoxes_.clear();
     EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
 
-    RSTextRect front = {};
-    front.rect.top_ = 0;
-    front.rect.left_ = 0;
+    RectF front = {};
+    front.SetTop(0.0f);
+    front.SetLeft(0.0f);
     pattern_->textBoxes_.push_back(front);
-    RSTextRect back = {};
-    back.rect.top_ = 10;
+    RectF back = {};
+    back.SetTop(10.0f);
     pattern_->textBoxes_.push_back(back);
     EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
 
     pattern_->textBoxes_.clear();
-    front.rect.top_ = -100;
-    front.rect.left_ = -100;
+    front.SetTop(-100.0f);
+    front.SetLeft(-100.0f);
     pattern_->textBoxes_.push_back(front);
-    back.rect.top_ = -100;
+    back.SetTop(-100.0f);
     pattern_->textBoxes_.push_back(back);
     EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
 }
@@ -6841,7 +6751,7 @@ HWTEST_F(TextFieldPatternTestNg, TextAreaInputRectUpdate, TestSize.Level1)
      * @tc.steps: step2. call TextAreaInputRectUpdate.
      * @tc.expected: Check result.
      */
-    RectF rect (0, 0, 100, 100);
+    RectF rect(0, 0, 100, 100);
     layoutProperty_->UpdateMaxLines(1);
     pattern_->TextAreaInputRectUpdate(rect);
     EXPECT_EQ(rect.Left(), 0);
@@ -6867,7 +6777,7 @@ HWTEST_F(TextFieldPatternTestNg, TextAreaInputRectUpdate, TestSize.Level1)
         { TextAlign::START, 10, 0, 1, 0 },
         { TextAlign::START, 0, 0, 10, 0 },
         { TextAlign::CENTER, 10, 4.5, 1, 5 },
-        {TextAlign::CENTER, 0, 0, 10, 0 },
+        { TextAlign::CENTER, 0, 0, 10, 0 },
         { TextAlign::END, 10, 7.5, 1, 8.5 },
         { TextAlign::END, 0, 0, 10, -1.5 },
         { TextAlign::LEFT, 0, 0, 10, 0 },
@@ -6995,9 +6905,7 @@ HWTEST_F(TextFieldPatternTestNg, HandleSelection001, TestSize.Level1)
         pattern->textSelector_.destinationOffset = end;
     };
 
-    auto switchNormalMode = [pattern = pattern_]() {
-        pattern->selectionMode_ = SelectionMode::NONE;
-    };
+    auto switchNormalMode = [pattern = pattern_]() { pattern->selectionMode_ = SelectionMode::NONE; };
 
     pattern_->UpdateEditingValue("ABCD", 4);
     pattern_->HandleSelectionEnd();
@@ -7041,9 +6949,7 @@ HWTEST_F(TextFieldPatternTestNg, HandleSelection002, TestSize.Level1)
         pattern->textSelector_.destinationOffset = end;
     };
 
-    auto switchNormalMode = [pattern = pattern_]() {
-        pattern->selectionMode_ = SelectionMode::NONE;
-    };
+    auto switchNormalMode = [pattern = pattern_]() { pattern->selectionMode_ = SelectionMode::NONE; };
 
     /**
      * @tc.steps: step1. call HandleSelectionLineEnd.
@@ -7112,9 +7018,7 @@ HWTEST_F(TextFieldPatternTestNg, HandleSelection003, TestSize.Level1)
         pattern->textSelector_.destinationOffset = end;
     };
 
-    auto switchNormalMode = [pattern = pattern_]() {
-        pattern->selectionMode_ = SelectionMode::NONE;
-    };
+    auto switchNormalMode = [pattern = pattern_]() { pattern->selectionMode_ = SelectionMode::NONE; };
 
     /**
      * @tc.steps: step3. call HandleSelectionHome.
@@ -7163,11 +7067,9 @@ HWTEST_F(TextFieldPatternTestNg, HandleSelection004, TestSize.Level1)
         pattern->textSelector_.destinationOffset = end;
     };
 
-    auto switchNormalMode = [pattern = pattern_]() {
-        pattern->selectionMode_ = SelectionMode::NONE;
-    };
+    auto switchNormalMode = [pattern = pattern_]() { pattern->selectionMode_ = SelectionMode::NONE; };
 
-     /**
+    /**
      * @tc.steps: step3. call HandleSelectionLineBegin.
      * @tc.expected: Check result.
      */

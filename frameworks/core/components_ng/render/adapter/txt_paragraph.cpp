@@ -20,8 +20,8 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -88,6 +88,7 @@ void TxtParagraph::PushStyle(const TextStyle& style)
 #else
     Rosen::TextStyle txtStyle;
 #endif
+    textAlign_ = style.GetTextAlign();
     Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContext(), txtStyle);
     builder_->PushStyle(txtStyle);
 }
@@ -144,7 +145,7 @@ void TxtParagraph::Build()
 #endif
 
     if (paraStyle_.leadingMargin) {
-        SetIndents( { paraStyle_.leadingMargin->size.Width() });
+        SetIndents({ paraStyle_.leadingMargin->size.Width() });
     }
 }
 
@@ -262,19 +263,22 @@ void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
 #endif
 }
 
-int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
+// ToDo:adjust index
+int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset)
 {
     if (!paragraph_) {
         return 0;
     }
+    int32_t index;
 #ifndef USE_GRAPHIC_TEXT_GINE
-    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
+    index = static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
 #else
-    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
+    index = static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
 #endif
+    return index;
 }
 
-bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result)
+bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result)
 {
     if (!paragraph_) {
         return false;
@@ -339,11 +343,13 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
     prevChar = text_[std::max(0, index - 1)];
     if (prevChar == NEWLINE_CODE) {
         // Return the start of next line.
-        result.offset.SetX(0.0);
+        result.offset.SetX(MakeEmptyOffsetX());
 #ifndef USE_GRAPHIC_TEXT_GINE
         result.offset.SetY(textBox.rect.fBottom);
+        result.height = textBox.rect.fBottom - textBox.rect.fTop;
 #else
         result.offset.SetY(textBox.rect.GetBottom());
+        result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
 #endif
         return true;
     }
@@ -372,7 +378,21 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
     return true;
 }
 
-bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result)
+float TxtParagraph::MakeEmptyOffsetX()
+{
+    auto width = GetMaxWidth();
+    switch (textAlign_) {
+        case TextAlign::CENTER:
+            return width * 0.5f;
+        case TextAlign::END:
+            return width;
+        case TextAlign::START:
+        default:
+            return 0.0f;
+    }
+}
+
+bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result)
 {
     if (!paragraph_ || static_cast<size_t>(extent) >= GetParagraphLength()) {
         return false;
@@ -417,7 +437,7 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics&
     return true;
 }
 
-void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects)
+void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
 {
 #ifndef USE_GRAPHIC_TEXT_GINE
     CHECK_NULL_VOID(paragraph_);
@@ -431,12 +451,14 @@ void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect
         return;
     }
     for (const auto& box : boxes) {
-        auto selectionRect = Constants::ConvertSkRect(box.rect);
+        auto rect = Constants::ConvertSkRect(box.rect);
+        RectF selectionRect(static_cast<float>(rect.Left()), static_cast<float>(rect.Top()),
+            static_cast<float>(rect.Width()), static_cast<float>(rect.Height()));
         selectedRects.emplace_back(selectionRect);
     }
 }
 
-void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects)
+void TxtParagraph::GetRectsForPlaceholders(std::vector<RectF>& selectedRects)
 {
     CHECK_NULL_VOID(paragraph_);
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -448,9 +470,55 @@ void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects)
         return;
     }
     for (const auto& box : boxes) {
-        auto selectionRect = Constants::ConvertSkRect(box.rect);
+        auto rect = Constants::ConvertSkRect(box.rect);
+        RectF selectionRect(static_cast<float>(rect.Left()), static_cast<float>(rect.Top()),
+            static_cast<float>(rect.Width()), static_cast<float>(rect.Height()));
         selectedRects.emplace_back(selectionRect);
     }
+}
+
+bool TxtParagraph::CalcCaretMetricsByPosition(
+    int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
+{
+    CaretMetricsF metrics;
+    bool computeSuccess = false;
+    if (textAffinity == TextAffinity::DOWNSTREAM) {
+        computeSuccess =
+            ComputeOffsetForCaretDownstream(extent, metrics) || ComputeOffsetForCaretUpstream(extent, metrics);
+    } else {
+        computeSuccess =
+            ComputeOffsetForCaretUpstream(extent, metrics) || ComputeOffsetForCaretDownstream(extent, metrics);
+    }
+    if (computeSuccess) {
+        if (metrics.height <= 0 || std::isnan(metrics.height)) {
+            // The reason may be text lines is exceed the paragraph maxline.
+            LOGD("Illegal caret height. Consider release restriction of paragraph max_line.");
+            return false;
+        }
+        caretCaretMetric = metrics;
+        return true;
+    }
+    return false;
+}
+
+bool TxtParagraph::CalcCaretMetricsByPosition(
+    int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset)
+{
+    CaretMetricsF metricsUpstream;
+    CaretMetricsF metricsDownstream;
+    auto downStreamSuccess = ComputeOffsetForCaretDownstream(extent, metricsDownstream);
+    auto upStreamSuccess = ComputeOffsetForCaretUpstream(extent, metricsUpstream);
+    if (downStreamSuccess || upStreamSuccess) {
+        if (metricsDownstream.offset.GetY() < lastTouchOffset.GetY() && downStreamSuccess) {
+            caretCaretMetric = metricsDownstream;
+        } else if (upStreamSuccess) {
+            caretCaretMetric = metricsUpstream;
+        } else {
+            caretCaretMetric = metricsDownstream;
+        }
+        return true;
+    }
+    return false;
 }
 
 void TxtParagraph::SetIndents(const std::vector<float>& indents)
@@ -482,5 +550,10 @@ bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
     end = static_cast<int32_t>(range.rightIndex);
 #endif
     return true;
+}
+
+std::u16string TxtParagraph::GetParagraphText()
+{
+    return text_;
 }
 } // namespace OHOS::Ace::NG

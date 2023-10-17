@@ -243,11 +243,6 @@ public:
     void OnColorConfigurationUpdate() override {}
     bool IsDisabled() const;
     float GetLineHeight() const override;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
-#else
-    std::vector<RSTextRect> GetTextBoxes() override;
-#endif
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
@@ -391,7 +386,7 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
     std::map<std::pair<RichEditorType, ResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
     std::optional<RichEditorType> selectedType_;
-
+    
     std::function<void()> customKeyboardBuilder_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);

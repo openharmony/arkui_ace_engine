@@ -115,46 +115,31 @@ void TextPattern::ResetSelection()
     }
 }
 
-int32_t TextPattern::GetGraphemeClusterLength(int32_t extend) const
-{
-    auto text = textForDisplay_;
-    char16_t aroundChar = 0;
-
-    if (static_cast<size_t>(extend) < (text.length())) {
-        aroundChar = text[std::min(static_cast<int32_t>(text.length() - 1), extend)];
-    }
-    return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
-}
-
 void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
-    int32_t extend = paragraph_->GetHandlePositionForClick(pos);
+    int32_t extend = paragraph_->GetGlyphIndexByCoordinate(pos);
     int32_t start = 0;
     int32_t end = 0;
     if (!paragraph_->GetWordBoundary(extend, start, end)) {
         start = extend;
-        end = std::min(
-            static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
+        end = std::min(static_cast<int32_t>(GetWideText().length()) + imageCount_,
+            extend + GetGraphemeClusterLength(GetWideText(), extend));
     }
     textSelector_.Update(start, end);
 }
 
-OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)
+void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
+    CHECK_NULL_VOID(host);
     auto rect = host->GetGeometryNode()->GetFrameRect();
-    CHECK_NULL_RETURN(paragraph_, OffsetF(0.0f, 0.0f));
-    CaretMetrics metrics;
-    auto computeSuccess = paragraph_->ComputeOffsetForCaretDownstream(position, metrics) ||
-                          paragraph_->ComputeOffsetForCaretUpstream(position, metrics);
+    CHECK_NULL_VOID(paragraph_);
+    auto computeSuccess = paragraph_->CalcCaretMetricsByPosition(extent, caretCaretMetric, textAffinity);
     if (!computeSuccess) {
         LOGW("Get caret offset failed, set it to text tail");
-        return { rect.Width(), 0.0f };
+        caretCaretMetric = CaretMetricsF(OffsetF(0.0f, rect.Width()), 0.0f);
     }
-    selectLineHeight = metrics.height;
-    return { static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY()) };
 }
 
 void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
@@ -168,26 +153,38 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     auto textPaintOffset = offset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
 
     // calculate firstHandleOffset, secondHandleOffset and handlePaintSize
-    float startSelectHeight = 0.0f;
-    float endSelectHeight = 0.0f;
-    auto startOffset = CalcCursorOffsetByPosition(textSelector_.baseOffset, startSelectHeight);
-    auto endOffset = CalcCursorOffsetByPosition(textSelector_.destinationOffset, endSelectHeight);
-    OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
-    OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
+    CaretMetricsF firstHandleMetrics;
+    CaretMetricsF secondHandleMetrics;
+    CalcCaretMetricsByPosition(textSelector_.baseOffset, firstHandleMetrics, TextAffinity::DOWNSTREAM);
+    CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
+    OffsetF firstHandleOffset = firstHandleMetrics.offset + textPaintOffset - rootOffset;
+    OffsetF secondHandleOffset = secondHandleMetrics.offset + textPaintOffset - rootOffset;
 
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
 
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
-    firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight });
+    firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), firstHandleMetrics.height });
     textSelector_.firstHandle = firstHandle;
 
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleOffset);
-    secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight });
-    secondHandle.SetHeight(endSelectHeight);
+    secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), secondHandleMetrics.height });
+    secondHandle.SetHeight(secondHandleMetrics.height);
     textSelector_.secondHandle = secondHandle;
+}
+
+OffsetF TextPattern::GetTextPaintOffset() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset();
+    auto textPaintOffset = offset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    return textPaintOffset - rootOffset;
 }
 
 void TextPattern::HandleLongPress(GestureEvent& info)
@@ -523,7 +520,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         !spans_.empty() && paragraph_) {
         Offset textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
             info.GetLocalLocation().GetY() - textContentRect.GetY() };
-        auto position = paragraph_->GetHandlePositionForClick(textOffset);
+        auto position = paragraph_->GetGlyphIndexByCoordinate(textOffset);
         for (const auto& item : spans_) {
             if (item && position < item->position) {
                 if (!item->onClick) {
@@ -631,7 +628,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
             Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
                 info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
             CHECK_NULL_VOID(paragraph_);
-            auto start = paragraph_->GetHandlePositionForClick(textOffset);
+            auto start = paragraph_->GetGlyphIndexByCoordinate(textOffset);
             textSelector_.Update(start, start);
         }
 
@@ -644,7 +641,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
             Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
                 info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
             CHECK_NULL_VOID(paragraph_);
-            auto end = paragraph_->GetHandlePositionForClick(textOffset);
+            auto end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
             textSelector_.Update(textSelector_.baseOffset, end);
         }
 
@@ -656,11 +653,11 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
             if (isDoubleClick_) {
                 isDoubleClick_ = false;
             } else {
-                auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+                auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
                 Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
                     info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
                 CHECK_NULL_VOID(paragraph_);
-                auto end = paragraph_->GetHandlePositionForClick(textOffset);
+                auto end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
                 textSelector_.Update(textSelector_.baseOffset, end);
             }
             isMousePressed_ = false;
@@ -769,12 +766,12 @@ bool TextPattern::IsDraggable(const Offset& offset)
     if (copyOption_ != CopyOptions::None && draggable &&
         GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
-        std::vector<Rect> selectedRects;
+        std::vector<RectF> selectedRects;
         paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
         auto panOffset = OffsetF(offset.GetX(), offset.GetY()) - contentRect_.GetOffset() +
                          OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         for (const auto& selectedRect : selectedRects) {
-            if (selectedRect.IsInRegion(Point(panOffset.GetX(), panOffset.GetY()))) {
+            if (selectedRect.IsInRegion(PointF(panOffset.GetX(), panOffset.GetY()))) {
                 return true;
             }
         }
@@ -865,39 +862,17 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
 // TextDragBase implementations
 float TextPattern::GetLineHeight() const
 {
-    std::vector<Rect> selectedRects;
+    std::vector<RectF> selectedRects;
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
     CHECK_NULL_RETURN(selectedRects.size(), {});
     return selectedRects.front().Height();
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-RSTypographyProperties::TextBox TextPattern::ConvertRect(const Rect& rect)
-#else
-RSTextRect TextPattern::ConvertRect(const Rect& rect)
-#endif
+std::vector<RectF> TextPattern::GetTextBoxes()
 {
-    return { RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()), RSTextDirection::LTR };
-}
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
-#else
-std::vector<RSTextRect> TextPattern::GetTextBoxes()
-#endif
-{
-    std::vector<Rect> selectedRects;
+    std::vector<RectF> selectedRects;
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> res;
-#else
-    std::vector<RSTextRect> res;
-#endif
-    res.reserve(selectedRects.size());
-    for (auto&& rect : selectedRects) {
-        res.emplace_back(ConvertRect(rect));
-    }
-    return res;
+    return selectedRects;
 }
 
 OffsetF TextPattern::GetParentGlobalOffset() const
@@ -1369,17 +1344,10 @@ OffsetF TextPattern::GetDragUpperLeftCoordinates()
     if (dragBoxes_.empty()) {
         return { 0.0f, 0.0f };
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    auto startY = dragBoxes_.front().rect_.GetTop();
-    auto startX = dragBoxes_.front().rect_.GetLeft();
+    auto startY = dragBoxes_.front().Top();
+    auto startX = dragBoxes_.front().Left();
 
-    auto endY = dragBoxes_.back().rect_.GetTop();
-#else
-    auto startY = dragBoxes_.front().rect.GetTop();
-    auto startX = dragBoxes_.front().rect.GetLeft();
-
-    auto endY = dragBoxes_.back().rect.GetTop();
-#endif
+    auto endY = dragBoxes_.back().Top();
     OffsetF offset;
     if (NearEqual(startY, endY)) {
         offset = { contentRect_.GetX() + startX, startY + contentRect_.GetY() };
@@ -1423,7 +1391,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 
 int32_t TextPattern::GetHandleIndex(const Offset& offset) const
 {
-    return paragraph_->GetHandlePositionForClick(offset);
+    return paragraph_->GetGlyphIndexByCoordinate(offset);
 }
 
 } // namespace OHOS::Ace::NG

@@ -40,19 +40,24 @@ public:
     MOCK_METHOD0(GetLongestLine, float());
     MOCK_METHOD0(GetMaxWidth, float());
     MOCK_METHOD0(GetAlphabeticBaseline, float());
+    MOCK_METHOD0(GetParagraphText, std::u16string());
     MOCK_METHOD1(PushStyle, void(const TextStyle& style));
     MOCK_METHOD1(AddText, void(const std::u16string& text));
     MOCK_METHOD1(Layout, void(float width));
-    MOCK_METHOD1(GetHandlePositionForClick, int32_t(const Offset& offset));
+    MOCK_METHOD1(GetGlyphIndexByCoordinate, int32_t(const Offset& offset));
     MOCK_METHOD1(AddPlaceholder, int32_t(const PlaceholderRun& span));
-    MOCK_METHOD1(GetRectsForPlaceholders, void(std::vector<Rect>& selectedRects));
+    MOCK_METHOD1(GetRectsForPlaceholders, void(std::vector<RectF>& selectedRects));
     MOCK_METHOD1(SetIndents, void(const std::vector<float>& indents));
-    MOCK_METHOD2(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetrics& result));
-    MOCK_METHOD2(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetrics& result));
-    MOCK_METHOD3(GetRectsForRange, void(int32_t start, int32_t end, std::vector<Rect>& selectedRects));
+    MOCK_METHOD2(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetricsF& result));
+    MOCK_METHOD2(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetricsF& result));
+    MOCK_METHOD3(GetRectsForRange, void(int32_t start, int32_t end, std::vector<RectF>& selectedRects));
     MOCK_METHOD3(Paint, void(RSCanvas& canvas, float x, float y));
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
+    MOCK_METHOD3(
+        CalcCaretMetricsByPosition, bool(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity));
+    MOCK_METHOD3(
+        CalcCaretMetricsByPosition, bool(int32_t extent, CaretMetricsF& caretCaretMetric, OffsetF lastTouchOffsetF));
 
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();

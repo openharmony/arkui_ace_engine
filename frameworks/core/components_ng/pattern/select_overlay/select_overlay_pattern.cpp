@@ -403,6 +403,16 @@ void SelectOverlayPattern::SetHandleReverse(bool reverse)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void SelectOverlayPattern::SetSelectRegionVisible(bool isSelectRegionVisible)
+{
+    if (info_->isSelectRegionVisible != isSelectRegionVisible) {
+        info_->isSelectRegionVisible = isSelectRegionVisible;
+        auto host = DynamicCast<SelectOverlayNode>(GetHost());
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info)
 {
     if (info_->firstHandle == info) {
@@ -475,6 +485,15 @@ void SelectOverlayPattern::UpdateShowArea(const RectF& area)
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
+void SelectOverlayPattern::UpdateSelectMenuInfo(std::function<void(SelectMenuInfo& menuInfo)> updateAction)
+{
+    if (updateAction) {
+        SelectMenuInfo shadowMenuInfo = info_->menuInfo;
+        updateAction(shadowMenuInfo);
+        UpdateSelectMenuInfo(shadowMenuInfo);
+    }
+}
+
 void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -482,7 +501,8 @@ void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
     if (info_->menuInfo.menuIsShow && isHidden) {
         info_->menuInfo.menuIsShow = false;
         host->UpdateToolBar(false);
-    } else if (!info_->menuInfo.menuIsShow && !isHidden && (info_->firstHandle.isShow || info_->secondHandle.isShow)) {
+    } else if (!info_->menuInfo.menuIsShow && !isHidden &&
+               (info_->firstHandle.isShow || info_->secondHandle.isShow || info_->isSelectRegionVisible)) {
         info_->menuInfo.menuIsShow = true;
         host->UpdateToolBar(false);
     }

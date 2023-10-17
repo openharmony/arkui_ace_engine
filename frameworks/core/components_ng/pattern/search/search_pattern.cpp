@@ -362,7 +362,6 @@ void SearchPattern::OnClickCancelButton()
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->InitEditingValueText("");
-    textFieldPattern->InitCaretPosition("");
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetLeft(0.0f);
     textFieldPattern->SetTextRect(textRect);
@@ -776,7 +775,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
 
-    json->Put("value", textFieldPattern->GetTextEditingValue().text.c_str());
+    json->Put("value", textFieldPattern->GetTextValue().c_str());
     json->Put("placeholder", textFieldPattern->GetPlaceHolder().c_str());
     json->Put("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str());
     json->Put("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str());

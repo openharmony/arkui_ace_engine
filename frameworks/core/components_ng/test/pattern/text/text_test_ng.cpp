@@ -2361,11 +2361,11 @@ HWTEST_F(TextTestNg, TextOverlayModifierTest001, TestSize.Level1)
     OffsetF paintOffset;
     textOverlayModifier.SetPrintOffset(paintOffset);
     textOverlayModifier.SetSelectedColor(SELECTED_COLOR);
-    std::vector<Rect> rectList;
-    rectList.push_back(Rect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE));
+    std::vector<RectF> rectList;
+    rectList.push_back(RectF(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE));
     textOverlayModifier.SetSelectedRects(rectList);
     // change selectedRects_ and call IsSelectedRectsChanged function
-    Rect secondRect(RECT_SECOND_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
+    RectF secondRect(RECT_SECOND_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
     textOverlayModifier.selectedRects_[0] = secondRect;
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
@@ -2876,7 +2876,7 @@ HWTEST_F(TextTestNg, ShowSelectOverlay004, TestSize.Level1)
 HWTEST_F(TextTestNg, IsDraggable001, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    std::vector<Rect> rects { Rect(0, 0, 20, 20) };
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
 
     auto [host, pattern] = Init();
@@ -2930,19 +2930,14 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
     // test GetTextBoxes and GetLineHeight
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     pattern->paragraph_ = paragraph;
-    std::vector<Rect> rects { Rect(0, 0, 20, 20) };
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
 
     pattern->textSelector_.Update(0, 20);
     auto boxes = pattern->GetTextBoxes();
     EXPECT_EQ(boxes.size(), 1);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(boxes[0].rect_.GetLeft(), 0);
-    EXPECT_EQ(boxes[0].rect_.GetRight(), 20);
-#else
-    EXPECT_EQ(boxes[0].rect.GetLeft(), 0);
-    EXPECT_EQ(boxes[0].rect.GetRight(), 20);
-#endif
+    EXPECT_EQ(boxes[0].Left(), 0);
+    EXPECT_EQ(boxes[0].Right(), 20);
 
     auto height = pattern->GetLineHeight();
     EXPECT_EQ(height, 20);
@@ -3686,7 +3681,7 @@ HWTEST_F(TextTestNg, HandleLongPress002, TestSize.Level1)
     EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream).WillRepeatedly(Return(true));
     EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream).WillRepeatedly(Return(true));
     EXPECT_CALL(*paragraph, GetWordBoundary).WillRepeatedly(Return(false));
-    std::vector<Rect> rects { Rect(0, 0, 20, 20) };
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).Times(2).WillRepeatedly(SetArgReferee<2>(rects));
     /**
      * @tc.steps: step1. create frameNode and pattern
@@ -3957,7 +3952,7 @@ HWTEST_F(TextTestNg, TextSelectorTest001, TestSize.Level1)
 HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    std::vector<Rect> rects { Rect(0, 0, 20, 20) };
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillOnce(SetArgReferee<2>(rects));
     /**
      * @tc.steps: step1. create textFrameNode and geometryNode.
@@ -3990,7 +3985,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
         textPattern, paragraph, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
     textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
-    EXPECT_EQ(textContentModifier->drawObscuredRects_, std::vector<Rect>());
+    EXPECT_EQ(textContentModifier->drawObscuredRects_, std::vector<RectF>());
 
     /**
      * @tc.steps: step4. set textForDisplay_ to CREATE_VALUE.
@@ -4002,7 +3997,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
      * @tc.expected: The drawObscuredRects_ of textContentModifier is not empty.
      */
     textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
-    EXPECT_NE(textContentModifier->drawObscuredRects_, std::vector<Rect>());
+    EXPECT_NE(textContentModifier->drawObscuredRects_, std::vector<RectF>());
 
     /**
      * @tc.steps: step6. push UNKNOWN_REASON and PLACEHOLDER to reasons.
@@ -4143,8 +4138,8 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
     textContentModifier->SetDefaultTextColor(textStyle);
     SizeF contentSize(TEXT_CONTENT_SIZE, TEXT_CONTENT_SIZE);
     textContentModifier->SetContentSize(contentSize);
-    std::vector<Rect> drawObscuredRects;
-    Rect textRect;
+    std::vector<RectF> drawObscuredRects;
+    RectF textRect;
     textRect.SetHeight(TEXT_RECT_WIDTH);
     textRect.SetWidth(TEXT_RECT_WIDTH);
     textRect.SetTop(TEXT_RECT_TOP_ONE);
@@ -4283,7 +4278,7 @@ HWTEST_F(TextTestNg, TextModelGetFont001, TestSize.Level1)
 HWTEST_F(TextTestNg, BetweenSelectedPosition001, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    std::vector<Rect> rects { Rect(0, 0, 20, 20) };
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
     /**
      * @tc.steps: step1. create frameNode and pattern and some environment for running process.
@@ -4637,11 +4632,11 @@ HWTEST_F(TextTestNg, GetDragUpperLeftCoordinates001, TestSize.Level1)
     auto ret = pattern->GetDragUpperLeftCoordinates();
     EXPECT_EQ(ret, OffsetF(0, 0));
 
-    pattern->dragBoxes_.push_back({ {}, Testing::TextDirection::LTR });
+    pattern->dragBoxes_.push_back({});
     ret = pattern->GetDragUpperLeftCoordinates();
     EXPECT_EQ(ret, OffsetF(0, 0));
 
-    pattern->dragBoxes_.push_back({ { 1, 2, 3, 4 }, Testing::TextDirection::LTR });
+    pattern->dragBoxes_.push_back({ 1, 2, 3, 4 });
     ret = pattern->GetDragUpperLeftCoordinates();
     EXPECT_EQ(ret, OffsetF(0, 0));
 }

@@ -19,11 +19,13 @@
 #include <cstdint>
 #include <optional>
 #include <regex>
+#include <stdint.h>
 #include <string>
 #include <utility>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
@@ -43,8 +45,13 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -98,34 +105,14 @@ const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
+const std::string CLIPBOARD_HAS_DATA = "HAS_DATA";
+const std::string SELECT_OVERLAY_MENU_IS_SHOW = "MENU_IS_SHOW";
 
 void SwapIfLarger(int32_t& a, int32_t& b)
 {
     if (a > b) {
         std::swap(a, b);
     }
-}
-
-void RemoveErrorTextFromValue(const std::string& value, const std::string& errorText, std::string& result)
-{
-    int32_t valuePtr = 0;
-    int32_t errorTextPtr = 0;
-    auto valueSize = static_cast<int32_t>(value.length());
-    auto errorTextSize = static_cast<int32_t>(errorText.length());
-    while (errorTextPtr < errorTextSize) {
-        while (value[valuePtr] != errorText[errorTextPtr] && valuePtr < valueSize) {
-            result += value[valuePtr];
-            valuePtr++;
-        }
-        // no more text left to remove in value
-        if (valuePtr >= valueSize) {
-            return;
-        }
-        // increase both value ptr and error text ptr if char in value is removed
-        valuePtr++;
-        errorTextPtr++;
-    }
-    result += value.substr(valuePtr);
 }
 
 std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
@@ -199,6 +186,9 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
         !PipelineBase::GetCurrentContext()->IsFocusWindowIdSetted()) {
         needToRequestKeyboardOnFocus_ = true;
     }
+    contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
+    selectController_ = MakeRefPtr<TextSelectController>(WeakClaim(this));
+    selectController_->InitContentController(contentController_);
 }
 
 TextFieldPattern::~TextFieldPattern()
@@ -224,29 +214,6 @@ TextFieldPattern::~TextFieldPattern()
     }
 }
 
-void TextFieldPattern::BeforeCreateLayoutWrapper()
-{
-    if (caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK) {
-        UpdateSelectionByDoubleClick();
-        MarkRedrawOverlay();
-    } else if (caretUpdateType_ == CaretUpdateType::PRESSED || caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
-        UpdateCaretByPressOrLongPress();
-        MarkRedrawOverlay();
-    } else if (caretUpdateType_ == CaretUpdateType::EVENT) {
-        if (isDoubleClick_) {
-            // handle double click event only
-            UpdateSelectionByMouseDoubleClick();
-        } else if (isMousePressed_) {
-            // handle mouse event only
-            UpdateCaretPositionByMouseMovement();
-        }
-    }
-    UpdateEditingValueCaretPositionToRecord();
-    if (!IsSelected()) {
-        UpdateSelection(textEditingValue_.caretPosition);
-    }
-}
-
 bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
@@ -263,13 +230,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto textFieldLayoutAlgorithm = DynamicCast<TextFieldLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textFieldLayoutAlgorithm, false);
     auto paragraph = textFieldLayoutAlgorithm->GetParagraph();
+    float paragraphWidth = 0.0f;
     if (paragraph) {
         paragraph_ = paragraph;
-    }
-    auto counterParagraph = textFieldLayoutAlgorithm->GetCounterParagraph();
-    if (counterParagraph) {
-        counterParagraph_ = counterParagraph;
-        countHeight_ = counterParagraph->GetHeight();
+        paragraphWidth = paragraph->GetLongestLine();
     }
     auto errorParagraph = textFieldLayoutAlgorithm->GetErrorParagraph();
     if (errorParagraph) {
@@ -278,8 +242,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (!IsDragging()) {
         dragParagraph_ = paragraph_;
     }
-
-    auto paragraphWidth = textFieldLayoutAlgorithm->GetParagraphWidth();
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
     if (!(needToRefreshSelectOverlay_ &&
             (!NearEqual(paragraphWidth, paragraphWidth_) || !NearEqual(textRect, textRect_))) ||
@@ -288,48 +250,25 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     paragraphWidth_ = paragraphWidth;
     textRect_ = textRect;
-    imageRect_ = textFieldLayoutAlgorithm->GetImageRect();
-    unitWidth_ = textFieldLayoutAlgorithm->GetUnitWidth();
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
+    UpdateSelectController();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-    auto textRectNotNeedToChange = UpdateCaretRect();
+    AdjustTextInReasonableArea();
+    UpdateCaretRect();
     UpdateCaretInfoToController();
     auto hostLayoutProperty =
         dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
-    if (paragraph) {
-        if (inlineFocusState_ && needApplyInlineSize_ && IsNormalInlineState()) {
-            CalcSize idealSize;
-#ifndef USE_GRAPHIC_TEXT_GINE
-            auto paragraphWidth = paragraph_->GetLongestLine();
-#else
-            auto paragraphWidth = paragraph_->GetActualWidth();
-#endif
-            std::optional<CalcLength> width(paragraphWidth + inlinePadding_);
-            idealSize.SetWidth(width);
-            hostLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
-        }
-    }
     if (hostLayoutProperty) {
         hostLayoutProperty->ResetTextAlignChanged();
     }
     if (needToRefreshSelectOverlay_) {
-        ProcessOverlay();
         StopTwinkling();
+        ProcessOverlay();
         needToRefreshSelectOverlay_ = false;
     }
     if (inlineSelectAllFlag_) {
         HandleOnSelectAll(false, true);
         inlineSelectAllFlag_ = false;
-    }
-    if (updateSelectionAfterObscure_) {
-        GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
-        updateSelectionAfterObscure_ = false;
-    }
-    if (textRectWillChange_) {
-        if (!textSelector_.StartEqualToDest()) {
-            GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
-        }
-        textRectWillChange_ = false;
     }
     if (mouseStatus_ == MouseStatus::RELEASED) {
         mouseStatus_ = MouseStatus::NONE;
@@ -339,62 +278,24 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     } else {
         SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
     }
+    UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
-    if (textRectNotNeedToChange) {
-        return true;
-    }
-    // after new text input or events such as left right key,
-    // the procedure will be:
-    // caret position change (such as move left)
-    // caret get offset from typographic algorithm
-    // if caret position exceeds constrained content region, adjust both caret position and text rect offset
-    float dx = AdjustTextRectOffsetX();
-    float dy = AdjustTextAreaOffsetY();
-    UpdateSelectionOffset();
-    if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE) {
-        if ((!NearZero(dx) || !NearZero(dy)) && !isSingleHandle_) {
-            UpdateOtherHandleOnMove(dx, dy);
-        }
-        // trigger selection box repaint
-        MarkRedrawOverlay();
-    } else if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE_DONE) {
-        SetHandlerOnMoveDone();
-    } else if ((!NearZero(dx) || !NearZero(dy)) && SelectOverlayIsOn() && selectionMode_ == SelectionMode::SELECT) {
-        SelectHandleInfo firstInfo, secondInfo;
-        SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-        textSelector_.firstHandleOffset_.AddX(dx);
-        textSelector_.firstHandleOffset_.AddY(dy);
-        firstInfo.paintRect = { textSelector_.firstHandleOffset_, handlePaintSize };
-        textSelector_.secondHandleOffset_.AddX(dx);
-        textSelector_.secondHandleOffset_.AddY(dy);
-        secondInfo.paintRect = { textSelector_.secondHandleOffset_, handlePaintSize };
-        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstInfo, secondInfo);
-    }
-    UpdateScrollBarOffset();
-    caretUpdateType_ = CaretUpdateType::NONE;
     return true;
 }
 
 bool TextFieldPattern::HasFocus() const
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, false);
-    auto focusHub = tmpHost->GetOrCreateFocusHub();
-
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(tmpHost->GetParent());
-        focusHub = parentFrameNode->GetOrCreateFocusHub();
-    }
+    auto focusHub = GetFocusHub();
 
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsCurrentFocus();
 }
 
-void TextFieldPattern::UpdateCaretInfoToController() const
+void TextFieldPattern::UpdateCaretInfoToController() const // todo确定更新时机
 {
     CHECK_NULL_VOID(HasFocus());
 #if defined(ENABLE_STANDARD_INPUT)
@@ -404,46 +305,60 @@ void TextFieldPattern::UpdateCaretInfoToController() const
     LOGD("UpdateCaretInfoToController, left %{public}f, top %{public}f, width %{public}f, height %{public}f",
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height);
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
-    auto value = GetEditingValue();
-    LOGD("Start %{public}d, end %{public}d", textSelector_.GetStart(), textSelector_.GetEnd());
+    LOGD("Start %{public}d, end %{public}d", selectController_->GetStart(), selectController_->GetEnd());
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
-        StringUtils::Str8ToStr16(value.text), textSelector_.GetStart(), textSelector_.GetEnd());
+        StringUtils::Str8ToStr16(contentController_->GetTextValue()), selectController_->GetStartIndex(),
+        selectController_->GetEndIndex());
 
 #else
     if (HasConnection()) {
         TextEditingValue value;
-        value.text = textEditingValue_.text;
+        value.text = contentController_->GetTextValue();
         value.hint = GetPlaceHolder();
-        value.selection.Update(textSelector_.baseOffset, textSelector_.destinationOffset);
+        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         connection_->SetEditingState(value, GetInstanceId());
     }
 #endif
 }
 
 // return: true if text rect offset will NOT be further changed by caret position
-bool TextFieldPattern::UpdateCaretRect()
+void TextFieldPattern::UpdateCaretRect()
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, false);
-    auto focusHub = tmpHost->GetOrCreateFocusHub();
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(tmpHost->GetParent());
-        focusHub = parentFrameNode->GetOrCreateFocusHub();
-    }
+    CHECK_NULL_VOID(!selectController_->IsSelected());
+    auto focusHub = GetFocusHub();
     if (focusHub && !focusHub->IsCurrentFocus()) {
         CloseSelectOverlay(true);
         LOGW("Not on focus, cannot update caret");
-        return true;
+        return;
     }
 
-    if (textEditingValue_.text.empty()) {
-        SetCaretOffsetForEmptyTextOrPositionZero();
-        return false;
+    selectController_->UpdateCaretOffset();
+    auto caretRect = selectController_->GetCaretRect();
+    selectController_->MoveHandleToContentRect(caretRect);
+}
+
+void TextFieldPattern::AdjustTextInReasonableArea()
+{
+    auto contentBottomBoundary = contentRect_.GetY() + contentRect_.GetSize().Height();
+    if (textRect_.Height() > contentRect_.Height()) {
+        if (textRect_.GetY() + textRect_.Height() < contentBottomBoundary) {
+            auto dy = contentBottomBoundary - textRect_.GetY() - textRect_.Height();
+            textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
+        }
+    } else {
+        if (textRect_.GetY() < contentRect_.GetY()) {
+            auto dy = contentRect_.GetY() - textRect_.GetY();
+            textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
+        }
     }
 
-    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
-
-    return caretUpdateType_ == CaretUpdateType::NONE && !textRectWillChange_;
+    auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width();
+    if (textRect_.Width() > contentRect_.Width()) {
+        if (textRect_.GetX() + textRect_.Width() < contentRightBoundary) {
+            auto dx = contentRightBoundary - textRect_.GetX() - textRect_.Width();
+            textRect_.SetLeft(textRect_.GetX() + dx);
+        }
+    }
 }
 
 float TextFieldPattern::GetIconSize()
@@ -482,86 +397,6 @@ float TextFieldPattern::GetIconRightOffset()
     return (iconHotZoneSize - iconSize) / 2.0f;
 }
 
-void TextFieldPattern::CreateSingleHandle(bool animation, bool isMenuShow)
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    isSingleHandle_ = true;
-    RectF secondHandle;
-    auto secondHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition, isTouchAtLeftOffset_);
-    OffsetF secondHandleOffset(secondHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX(),
-        secondHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY());
-    if (textEditingValue_.Empty()) {
-        auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-        auto align = layoutProperty ? layoutProperty->GetTextAlignValue(TextAlign::START) : TextAlign::START;
-        float offsetX = contentRect_.GetX();
-        auto baseWidth = frameRect_.Width();
-        auto showingPasswordIcon = (layoutProperty ? layoutProperty->GetShowPasswordIcon().value_or(true) : false) &&
-                                   (layoutProperty ? layoutProperty->GetTextInputTypeValue(
-                                                         TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD
-                                                   : false);
-        baseWidth -= showingPasswordIcon ? GetIconSize() + GetIconRightOffset() : 0.0f;
-        switch (align) {
-            case TextAlign::CENTER:
-                offsetX = baseWidth * 0.5f;
-                break;
-            case TextAlign::END:
-                offsetX = baseWidth - GetPaddingRight();
-                break;
-            case TextAlign::START:
-            default:
-                break;
-        }
-        secondHandleOffset =
-            OffsetF(offsetX + parentGlobalOffset_.GetX(), contentRect_.GetY() + parentGlobalOffset_.GetY());
-    }
-    textSelector_.secondHandleOffset_ = secondHandleOffset;
-    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-    secondHandle.SetOffset(secondHandleOffset);
-    secondHandle.SetSize(handlePaintSize);
-    ShowSelectOverlay(std::nullopt, secondHandle, animation, isMenuShow);
-    selectionMode_ = SelectionMode::NONE;
-    StartTwinkling();
-}
-
-bool TextFieldPattern::UpdateCaretByPressOrLongPress()
-{
-    if (CaretPositionCloseToTouchPosition() && !SelectOverlayIsOn() &&
-        caretUpdateType_ != CaretUpdateType::LONG_PRESSED && !isMousePressed_) {
-        CreateSingleHandle(true, false);
-        return true;
-    }
-    // caret offset updated by gesture will not cause textRect to change offset
-    UpdateCaretPositionByPressOffset();
-    if (caretUpdateType_ == CaretUpdateType::PRESSED) {
-        UpdateSelection(textEditingValue_.caretPosition);
-        if (!GetEditingValue().text.empty() && isFocusedBeforeClick_ && !isMousePressed_) {
-            CreateSingleHandle(true, false);
-        } else {
-            StartTwinkling();
-        }
-    } else if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
-        // in long press case, we have caret and one handle at pressed location and another handle at -1 or +1 position
-        ProcessOverlay(true);
-    }
-    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
-    return true;
-}
-
-void TextFieldPattern::UpdateCaretByRightClick()
-{
-    ProcessOverlay(true);
-}
-
-bool TextFieldPattern::CaretPositionCloseToTouchPosition()
-{
-    auto xInRange = GreatOrEqual(lastTouchOffset_.GetX(), caretRect_.GetX() - PreferredLineHeight()) &&
-                    LessOrEqual(lastTouchOffset_.GetX(), caretRect_.GetX() + PreferredLineHeight());
-    auto yInRange = GreatOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY()) &&
-                    LessOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() + PreferredLineHeight());
-    return xInRange && yInRange;
-}
-
 bool TextFieldPattern::IsTextArea() const
 {
     auto tmpHost = GetHost();
@@ -571,374 +406,46 @@ bool TextFieldPattern::IsTextArea() const
     return layoutProperty->HasMaxLines() ? layoutProperty->GetMaxLinesValue(1) > 1 : true;
 }
 
-void TextFieldPattern::UpdateDestinationToCaretByEvent()
-{
-    CHECK_NULL_VOID(isMousePressed_);
-    UpdateSelection(textSelector_.GetStart(), textEditingValue_.caretPosition);
-    if (textSelector_.destinationOffset != textSelector_.baseOffset) {
-        selectionMode_ = SelectionMode::SELECT;
-    }
-}
-
-void TextFieldPattern::UpdateCaretPositionByLastTouchOffset()
-{
-    Offset offset = GetLastTouchOffset() - Offset(textRect_.GetX(), textRect_.GetY());
-    auto position = ConvertTouchOffsetToCaretPosition(offset);
-    textEditingValue_.CursorMoveToPosition(position);
-}
-
-// return bool that caret might move out of content rect and need adjust position
-bool TextFieldPattern::UpdateCaretPositionByMouseMovement()
-{
-    if (GetEditingValue().text.empty()) {
-        caretRect_.SetLeft(textRect_.GetX());
-        caretRect_.SetTop(textRect_.GetY());
-        selectionMode_ = SelectionMode::NONE;
-        UpdateSelection(0, 0);
-        return false;
-    }
-    bool needToShiftCaretAndTextRect = false;
-    // if mouse keep at position out of content rect, caret will keep moving left or right
-    if (lastTouchOffset_.GetX() < contentRect_.GetX() ||
-        lastTouchOffset_.GetX() > contentRect_.GetX() + contentRect_.Width()) {
-        needToShiftCaretAndTextRect = true;
-    }
-    UpdateCaretPositionByLastTouchOffset();
-    UpdateSelection(textSelector_.GetStart(), textEditingValue_.caretPosition);
-    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
-    selectionMode_ =
-        textSelector_.destinationOffset == textSelector_.baseOffset ? SelectionMode::NONE : SelectionMode::SELECT;
-    return needToShiftCaretAndTextRect;
-}
-
-void TextFieldPattern::UpdateSelectionByDoubleClick()
-{
-    isDoubleClick_ = false;
-    UpdateCaretPositionByPressOffset();
-    ProcessOverlay(true);
-    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
-}
-
-void TextFieldPattern::UpdateSelectionByMouseDoubleClick()
-{
-    isDoubleClick_ = false;
-    if (GetEditingValue().text.empty()) {
-        selectionMode_ = SelectionMode::NONE;
-        UpdateSelection(0, 0);
-        return;
-    }
-    UpdateCaretPositionByLastTouchOffset();
-    UpdateSelectorByPosition(textEditingValue_.caretPosition);
-    selectionMode_ = SelectionMode::SELECT;
-    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
-}
-
-void TextFieldPattern::UpdateCaretOffsetByEvent()
-{
-    if (textEditingValue_.text.empty()) {
-        UpdateSelection(0, 0);
-        SetCaretOffsetForEmptyTextOrPositionZero();
-        return;
-    }
-    if (isMousePressed_) {
-        // handle mouse event only
-        UpdateCaretPositionByMouseMovement();
-        return;
-    }
-    if (!IsSelected()) {
-        UpdateSelection(textEditingValue_.caretPosition);
-    }
-    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
-}
-
 void TextFieldPattern::UpdateSelectionOffset()
 {
     CHECK_NULL_VOID(IsSelected());
-    if (textSelector_.baseOffset == textSelector_.destinationOffset) {
-        textSelector_.selectionBaseOffset.SetX(caretRect_.GetX());
-        textSelector_.selectionDestinationOffset.SetX(caretRect_.GetX());
-        return;
-    }
-    if (selectionMode_ == SelectionMode::SELECT_ALL) {
-        textSelector_.selectionBaseOffset.SetX(textRect_.GetX());
-        textSelector_.selectionDestinationOffset.SetX(textRect_.GetX() + textRect_.Width());
-        std::optional<RectF> firstHandleOption;
-        std::optional<RectF> secondHandleOption;
-        if (textBoxes_.empty()) {
-            return;
-        }
-        if (SelectOverlayIsOn()) {
-            SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-#ifndef USE_GRAPHIC_TEXT_GINE
-            auto textBoxLocalOffsetBegin =
-                OffsetF(textBoxes_.begin()->rect_.GetLeft() + (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()),
-                    textBoxes_.begin()->rect_.GetTop() + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) +
-                        BOX_EPSILON);
-#else
-            auto textBoxLocalOffsetBegin =
-                OffsetF(textBoxes_.begin()->rect.GetLeft() + (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()),
-                    textBoxes_.begin()->rect.GetTop() + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) +
-                        BOX_EPSILON);
-#endif
-#ifndef USE_GRAPHIC_TEXT_GINE
-            auto textBoxLocalOffsetEnd =
-                OffsetF(textBoxes_.rbegin()->rect_.GetRight() + (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()),
-                    textBoxes_.rbegin()->rect_.GetTop() + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) +
-                        BOX_EPSILON);
-#else
-            auto textBoxLocalOffsetEnd =
-                OffsetF(textBoxes_.rbegin()->rect.GetRight() + (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()),
-                    textBoxes_.rbegin()->rect.GetTop() + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) +
-                        BOX_EPSILON);
-#endif
-            OffsetF firstHandleOffset(textBoxLocalOffsetBegin.GetX() + parentGlobalOffset_.GetX(),
-                textBoxLocalOffsetBegin.GetY() + parentGlobalOffset_.GetY() - BOX_EPSILON);
-            textSelector_.firstHandleOffset_ = firstHandleOffset;
-            RectF firstHandle;
-            firstHandle.SetOffset(firstHandleOffset);
-            firstHandle.SetSize(handlePaintSize);
-            firstHandleOption = firstHandle;
-            OffsetF secondHandleOffset(textBoxLocalOffsetEnd.GetX() + parentGlobalOffset_.GetX(),
-                textBoxLocalOffsetEnd.GetY() + parentGlobalOffset_.GetY() - BOX_EPSILON);
-            textSelector_.secondHandleOffset_ = secondHandleOffset;
-            RectF secondHandle;
-            secondHandle.SetOffset(secondHandleOffset);
-            secondHandle.SetSize(handlePaintSize);
-            secondHandleOption = secondHandle;
-            if (firstHandleOption.has_value() || secondHandleOption.has_value()) {
-                ShowSelectOverlay(firstHandleOption, secondHandleOption, true);
-            }
-        }
-        return;
-    }
+    selectController_->CalculateHandleOffset();
 }
 
-void TextFieldPattern::UpdateCaretPositionByTextEdit()
+void TextFieldPattern::CalcCaretMetricsByPosition(
+    int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
 {
-    if (textEditingValue_.text.empty()) {
-        UpdateSelection(0);
-        SetCaretOffsetForEmptyTextOrPositionZero();
-        return;
-    }
-    if (textEditingValue_.caretPosition == 0) {
-        SetCaretOffsetForEmptyTextOrPositionZero();
-        return;
-    }
-    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
-    UpdateSelection(textEditingValue_.caretPosition);
-}
-
-void TextFieldPattern::UpdateCaretRectByPosition(int32_t position)
-{
-    auto caretMetrics = CalcCursorOffsetByPosition(position, isTouchAtLeftOffset_);
-    caretRect_.SetLeft(caretMetrics.offset.GetX());
-    // add 1.0f here for offsetToParagraphBeginning offsetY is negative when caret position is zero
-    caretRect_.SetTop(caretMetrics.offset.GetY());
-    caretRect_.SetHeight(caretMetrics.height);
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCaretPosition(textEditingValue_.caretPosition);
-}
-
-void TextFieldPattern::SetCaretOffsetForEmptyTextOrPositionZero()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    caretRect_.SetLeft(IsTextArea() ? contentRect_.Left() : textRect_.GetX());
-    caretRect_.SetTop(IsTextArea() ? textRect_.GetY() : contentRect_.Top());
-    caretRect_.SetHeight(PreferredLineHeight());
-    switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
-        case TextAlign::START:
-            caretRect_.SetLeft(textRect_.GetX());
-            return;
-        case TextAlign::CENTER:
-            caretRect_.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() / 2.0f);
-            return;
-        case TextAlign::END:
-            caretRect_.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() -
-                               static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
-            return;
-        default:
-            caretRect_.SetLeft(textRect_.GetX());
-            return;
-    }
-}
-
-void TextFieldPattern::UpdateCaretPositionByPressOffset()
-{
-    if (GetEditingValue().text.empty()) {
-        textEditingValue_.CursorMoveToPosition(0);
-        return;
-    }
-    UpdateCaretPositionByLastTouchOffset();
-
-    selectionMode_ = SelectionMode::NONE;
-}
-
-CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position, bool isStart)
-{
-    // this function will calculate caret offset and height by caret position
-    auto tmpHost = GetHost();
-    CaretMetricsF result;
-    CHECK_NULL_RETURN(tmpHost, result);
-    CaretMetricsF resultDownstream;
-    CaretMetricsF resultUpstream;
-    auto isSuccessDownstream = ComputeOffsetForCaretDownstream(position, resultDownstream);
-    auto isSuccessUpstream = ComputeOffsetForCaretUpstream(position, resultUpstream);
-    LOGD("position : %{public}d resultDownstream: %{public}s resultUpstream: %{public}s", position,
-        resultDownstream.offset.ToString().c_str(), resultUpstream.offset.ToString().c_str());
-    if (!(isSuccessDownstream || isSuccessUpstream)) {
-        if (IsTextArea()) {
-            auto offsetX = contentRect_.GetX();
-            auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-            switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
-                case TextAlign::CENTER:
-                    offsetX = static_cast<float>(contentRect_.GetX()) + contentRect_.Width() / 2.0f;
-                    break;
-                case TextAlign::END:
-                    offsetX = static_cast<float>(contentRect_.GetX()) + contentRect_.Width() -
-                              static_cast<float>(CURSOR_WIDTH.ConvertToPx());
-                    break;
-                default:
-                    break;
-            }
-            result.offset = OffsetF(offsetX, contentRect_.GetY());
-        } else {
-            result.offset = OffsetF(textRect_.GetX(), contentRect_.GetY());
-        }
-#ifndef USE_GRAPHIC_TEXT_GINE
-        result.height = textBoxes_.empty() ? PreferredLineHeight() : textBoxes_.begin()->rect_.GetHeight();
-#else
-        result.height = textBoxes_.empty() ? PreferredLineHeight() : textBoxes_.begin()->rect.GetHeight();
-#endif
-        return result;
-    }
-    if (isSuccessDownstream && isStart && resultUpstream.offset.GetY() < resultDownstream.offset.GetY()) {
-        result = resultDownstream;
-    } else if (isSuccessUpstream && !isStart && resultUpstream.offset.GetY() < resultDownstream.offset.GetY()) {
-        result = resultUpstream;
-    } else {
-        if (isSuccessDownstream) {
-            result = resultDownstream;
-        } else {
-            result = resultUpstream;
-        }
-    }
-    LOGD("result stream: %{public}s ", result.ToString().c_str());
-    result.offset.AddX(IsTextArea() ? contentRect_.GetX() : textRect_.GetX());
-    result.offset.AddY(IsTextArea() ? textRect_.GetY() : contentRect_.GetY());
-    return result;
-}
-
-float TextFieldPattern::AdjustTextRectOffsetX()
-{
-    auto cursorWidth = caretRect_.Width();
-    auto contentLeftBoundary = contentRect_.GetX();
-    auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width() - unitWidth_;
-    if (IsTextArea() || textEditingValue_.text.empty()) {
-        caretRect_.SetLeft(std::clamp(
-            caretRect_.GetX(), contentLeftBoundary, std::max(contentLeftBoundary, contentRightBoundary - cursorWidth)));
-        return 0.0f;
-    }
-    float textDx = 0.0f;
-    if (textRect_.Width() > contentRect_.Width()) {
-        if (textRect_.GetX() + textRect_.Width() < contentRightBoundary) {
-            textDx = contentRightBoundary - textRect_.GetX() - textRect_.Width();
-            caretRect_.SetLeft(caretRect_.GetX() + textDx);
-            textRect_.SetLeft(textRect_.GetX() + textDx);
-        }
-    }
-    // text rect length exceeds content length, but cursor is still in the region
-    if (CursorInContentRegion()) {
-        return textDx;
-    }
-    auto offsetToParagraphBeginning = caretRect_.GetX() - textRect_.GetX();
-    float dx = 0.0f;
-    if (caretRect_.GetX() < contentLeftBoundary) {
-        dx = contentLeftBoundary - caretRect_.GetX();
-        caretRect_.SetLeft(caretRect_.GetX() + dx);
-        textRect_.SetLeft(caretRect_.GetX() - offsetToParagraphBeginning);
-    } else if (caretRect_.GetX() + cursorWidth > contentRightBoundary) {
-        dx = (contentRightBoundary - static_cast<float>(cursorWidth)) - caretRect_.GetX();
-        caretRect_.SetLeft(caretRect_.GetX() + dx);
-        textRect_.SetLeft(caretRect_.GetX() - offsetToParagraphBeginning);
-    }
-    dx += textDx;
-    return dx;
-}
-
-float TextFieldPattern::AdjustTextAreaOffsetY()
-{
-    if (!IsTextArea()) {
-        return 0.0f;
-    }
-    float textDy = 0.0f;
-    auto contentBottomBoundary = contentRect_.GetY() + contentRect_.GetSize().Height();
-    if (textRect_.Height() > contentRect_.Height()) {
-        if (textRect_.GetY() + textRect_.Height() < contentBottomBoundary) {
-            textDy = contentBottomBoundary - textRect_.GetY() - textRect_.Height();
-            caretRect_.SetTop(caretRect_.GetY() + textDy);
-            textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + textDy));
-        }
-    } else {
-        if (textRect_.GetY() < contentRect_.GetY()) {
-            textDy = contentRect_.GetY() - textRect_.GetY();
-            caretRect_.SetTop(caretRect_.GetY() + textDy);
-            textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + textDy));
-        }
-    }
-
-    if (caretRect_.GetY() < contentRect_.GetY()) {
-        auto dy = contentRect_.GetY() - caretRect_.GetY();
-        caretRect_.SetTop(caretRect_.GetY() + dy);
-        textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
-        return dy + textDy;
-    }
-    auto dy = contentRect_.GetY() + GetBorderTop() + contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) || IsNormalInlineState()) {
-        dy = contentRect_.GetY() + contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
-    }
-    // caret does not exceed bottom boundary, still need to check against safeArea
-    if (GreatOrEqual(dy, 0.0f)) {
-        return FitCursorInSafeArea() + textDy;
-    }
-    caretRect_.SetTop(caretRect_.GetY() + dy - BOX_EPSILON * 2);
-    textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy - BOX_EPSILON * 2));
-    return dy + textDy;
+    paragraph_->CalcCaretMetricsByPosition(extent, caretCaretMetric, textAffinity);
+    LOGD("result stream : %{public}s , textAffinity: %{public}d", result.ToString().c_str(), textAffinity);
+    caretCaretMetric.offset.AddX(textRect_.GetX());
+    caretCaretMetric.offset.AddY(textRect_.GetY());
 }
 
 bool TextFieldPattern::CursorInContentRegion()
 {
     if (IsTextArea()) {
-        return GreatOrEqual(caretRect_.Top(), contentRect_.GetY()) &&
-               LessOrEqual(
-                   caretRect_.Top() + GetTextOrPlaceHolderFontSize(), contentRect_.GetY() + contentRect_.Height());
+        return GreatOrEqual(selectController_->GetCaretRect().GetY(), contentRect_.GetY()) &&
+               LessOrEqual(selectController_->GetCaretRect().GetY() + GetTextOrPlaceHolderFontSize(),
+                   contentRect_.GetY() + contentRect_.Height());
     }
-    return GreatOrEqual(caretRect_.GetX(), contentRect_.GetX()) &&
-           LessOrEqual(
-               caretRect_.GetX() + CURSOR_WIDTH.ConvertToPx(), contentRect_.GetX() + contentRect_.Width() - unitWidth_);
+    return GreatOrEqual(selectController_->GetCaretRect().GetX(), contentRect_.GetX()) &&
+           LessOrEqual(selectController_->GetCaretRect().GetX() + CURSOR_WIDTH.ConvertToPx(),
+               contentRect_.GetX() + contentRect_.Width());
 }
 
 float TextFieldPattern::FitCursorInSafeArea()
 {
-    if (caretUpdateType_ != CaretUpdateType::INPUT) {
-        return 0.0f;
-    }
-    // check if caret is below safeArea
     auto pipeline = PipelineContext::GetCurrentContext();
     auto safeAreaBottom = pipeline->GetSafeArea().bottom_;
     safeAreaBottom = safeAreaBottom.Combine(pipeline->GetSafeAreaManager()->GetKeyboardInset());
     CHECK_NULL_RETURN(safeAreaBottom.IsValid(), 0.0f);
     // get global height of caret
     auto host = GetHost();
-    auto globalBottom = host->GetPaintRectOffset().GetY() + caretRect_.Bottom();
+    auto globalBottom = host->GetPaintRectOffset().GetY() + selectController_->GetCaretRect().Bottom();
     if (globalBottom > safeAreaBottom.start) {
         auto dy = safeAreaBottom.start - globalBottom;
-        caretRect_.SetTop(caretRect_.GetY() + dy);
         textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
+        selectController_->UpdateCaretOffset();
         return dy;
     }
     return 0.0f;
@@ -957,11 +464,7 @@ void TextFieldPattern::OnScrollEndCallback()
     if (scrollBar) {
         scrollBar->ScheduleDisappearDelayTask();
     }
-    auto selectOverlayProxy = GetSelectOverlay();
-    CHECK_NULL_VOID(selectOverlayProxy);
-    if (originalIsMenuShow_) {
-        selectOverlayProxy->ShowOrHiddenMenu(false);
-    }
+    UpdateSelectMenuVisibility(true);
 }
 
 void TextFieldPattern::OnTextAreaScroll(float offset)
@@ -975,53 +478,19 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
     } else if (textRect_.GetY() + textRect_.Height() + offset < contentRect_.GetY() + contentRect_.Height()) {
         offset = contentRect_.GetY() + contentRect_.Height() - textRect_.GetY() - textRect_.Height();
     }
-    caretRect_.SetTop(caretRect_.GetY() + offset);
     currentOffset_ = textRect_.GetY() + offset;
     textRect_.SetOffset(OffsetF(textRect_.GetX(), currentOffset_));
     if (SelectOverlayIsOn()) {
-        SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-        textSelector_.secondHandleOffset_.SetY(textSelector_.secondHandleOffset_.GetY() + offset);
-        std::optional<RectF> secondHandle = RectF(textSelector_.secondHandleOffset_, handlePaintSize);
-        auto secondHandleHeight = 0.0f;
-        auto secondHandleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
-        if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY(), contentRect_.GetY())) {
-            secondHandleHeight = secondHandle->Height();
-        }
-        if (LessNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY() + secondHandle->Height(),
-                                              contentRect_.GetY() + contentRect_.Height())) {
-            secondHandleHeight = secondHandle->Height();
-        }
-        std::optional<RectF> firstHandle;
-        auto firstHandleHeight = 0.0f;
-        if (!isSingleHandle_) {
-            textSelector_.firstHandleOffset_.SetY(textSelector_.firstHandleOffset_.GetY() + offset);
-            firstHandle = { textSelector_.firstHandleOffset_, handlePaintSize };
-            auto firstHandleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
-            if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY(), contentRect_.GetY())) {
-                firstHandleHeight = firstHandle->Height();
-            }
-            if (LessNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY() + firstHandle->Height(),
-                                                  contentRect_.GetY() + contentRect_.Height())) {
-                firstHandleHeight = firstHandle->Height();
-            }
-        }
-        SelectHandleInfo firstHandleInfo;
-        SelectHandleInfo secondHandleInfo;
-        firstHandleInfo.paintRect =
-            RectF(firstHandle->Left(), firstHandle->Top(), firstHandle->Width(), firstHandle->Height());
-        secondHandleInfo.paintRect =
-            RectF(secondHandle->Left(), secondHandle->Top(), secondHandle->Width(), secondHandle->Height());
-        if (firstHandle.has_value()) {
-            firstHandleInfo.isShow = CheckHandleVisible(firstHandle.value());
-        }
-        if (secondHandle.has_value()) {
-            secondHandleInfo.isShow = CheckHandleVisible(secondHandle.value());
-        }
-        if (!isSingleHandle_) {
-            selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+        selectController_->UpdateSecondHandleOffset();
+        if (!IsSingleHandle()) {
+            selectController_->UpdateFirstHandleOffset();
+            UpdateDoubleHandlePosition();
         } else {
-            selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
+            UpdateSecondHandlePosition();
+            selectController_->UpdateCaretOffset();
         }
+    } else {
+        selectController_->UpdateCaretOffset();
     }
     UpdateScrollBarOffset();
 }
@@ -1036,273 +505,35 @@ void TextFieldPattern::OnTextInputScroll(float offset)
     } else if (textRect_.GetX() + textRect_.Width() + offset < contentRect_.GetX() + contentRect_.Width()) {
         offset = contentRect_.GetX() + contentRect_.Width() - textRect_.GetX() - textRect_.Width();
     }
-    caretRect_.SetLeft(caretRect_.GetX() + offset);
     currentOffset_ = textRect_.GetX() + offset;
     textRect_.SetOffset(OffsetF(currentOffset_, textRect_.GetY()));
     if (SelectOverlayIsOn()) {
-        SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-        textSelector_.secondHandleOffset_.SetX(textSelector_.secondHandleOffset_.GetX() + offset);
-        std::optional<RectF> secondHandle = RectF(textSelector_.secondHandleOffset_, handlePaintSize);
-        std::optional<RectF> firstHandle;
-        if (!isSingleHandle_) {
-            textSelector_.firstHandleOffset_.SetX(textSelector_.firstHandleOffset_.GetX() + offset);
-            firstHandle = { textSelector_.firstHandleOffset_, handlePaintSize };
-        }
-        SelectHandleInfo firstHandleInfo;
-        SelectHandleInfo secondHandleInfo;
-        firstHandleInfo.paintRect =
-            RectF(firstHandle->Left(), firstHandle->Top(), firstHandle->Width(), firstHandle->Height());
-        secondHandleInfo.paintRect =
-            RectF(secondHandle->Left(), secondHandle->Top(), secondHandle->Width(), secondHandle->Height());
-        CheckHandles(firstHandle, secondHandle);
-        if (!firstHandle.has_value()) {
-            firstHandleInfo.isShow = false;
-        }
-        if (!secondHandle.has_value()) {
-            secondHandleInfo.isShow = false;
-        }
-        if (!isSingleHandle_) {
-            selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+        selectController_->UpdateSecondHandleOffset();
+        if (!IsSingleHandle()) {
+            selectController_->UpdateFirstHandleOffset();
+            UpdateDoubleHandlePosition();
         } else {
-            selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
+            UpdateSecondHandlePosition();
         }
+    } else {
+        selectController_->UpdateCaretOffset();
     }
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-void TextFieldPattern::GetTextRectsInRange(
-    int32_t base, int32_t destination, std::vector<RSTypographyProperties::TextBox>& textBoxes)
-#else
-void TextFieldPattern::GetTextRectsInRange(int32_t base, int32_t destination, std::vector<RSTextRect>& textBoxes)
-#endif
-{
-    SwapIfLarger(base, destination);
-    if (!paragraph_) {
-        return;
-    }
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-    textBoxes = paragraph_->GetRectsForRange(
-        base, destination, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
-#else
-    textBoxes = paragraph_->GetTextRectsByBoundary(
-        base, destination, RSTextRectHeightStyle::COVER_TOP_AND_BOTTOM, RSTextRectWidthStyle::TIGHT);
-#endif
-    if (textBoxes.size() == 1 && caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
-        Offset offset = GetLastTouchOffset() - Offset(textRect_.GetX(), textRect_.GetY());
-#ifndef USE_GRAPHIC_TEXT_GINE
-        if (offset.GetX() < textBoxes[0].rect_.GetLeft() || offset.GetY() < textBoxes[0].rect_.GetTop()) {
-            int32_t start = 0;
-            int32_t end = 0;
-            GetWordBoundaryPositon(base - 1, start, end);
-            auto tmp = paragraph_->GetRectsForRange(start, end, RSTypographyProperties::RectHeightStyle::MAX,
-                RSTypographyProperties::RectWidthStyle::TIGHT);
-#else
-        if (offset.GetX() < textBoxes[0].rect.GetLeft() || offset.GetY() < textBoxes[0].rect.GetTop()) {
-            int32_t start = 0;
-            int32_t end = 0;
-            GetWordBoundaryPositon(base - 1, start, end);
-            auto tmp = paragraph_->GetTextRectsByBoundary(
-                start, end, RSTextRectHeightStyle::COVER_TOP_AND_BOTTOM, RSTextRectWidthStyle::TIGHT);
-#endif
-            if (tmp.size() != 1) {
-                return;
-            }
-            if (LastTouchIsInSelectRegion(tmp)) {
-                textBoxes = tmp;
-#ifndef USE_GRAPHIC_TEXT_GINE
-                textSelector_.Update(start, end);
-                if (textEditingValue_.caretPosition != end) {
-                    textEditingValue_.caretPosition = end;
-                }
-#else
-                UpdateSelectorByPosition(base - 1);
-#endif
-            }
-        }
-    }
-}
-
-bool TextFieldPattern::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result)
-{
-    CHECK_NULL_RETURN(paragraph_, false);
-    auto wideText = textEditingValue_.GetWideText();
-    if (!IsTextArea() && static_cast<size_t>(extent) >= wideText.length()) {
-        return false;
-    }
-
-    result.Reset();
-    const int32_t graphemeClusterLength = 1;
-    const int32_t next = extent + graphemeClusterLength;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    auto textBoxes = paragraph_->GetRectsForRange(
-        extent, next, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
-#else
-    auto textBoxes = paragraph_->GetTextRectsByBoundary(
-        extent, next, RSTextRectHeightStyle::COVER_TOP_AND_BOTTOM, RSTextRectWidthStyle::TIGHT);
-#endif
-
-    if (textBoxes.empty()) {
-        LOGD("Box empty");
-        return false;
-    }
-
-    const auto& textBox = *textBoxes.begin();
-    auto lastStringBeforeCursor = wideText.substr(
-        std::clamp(textEditingValue_.caretPosition - 1, 0, static_cast<int32_t>(wideText.length()) - 1), 1);
-    // Caret is within width of the downstream glyphs.
-    if (lastStringBeforeCursor == WIDE_NEWLINE &&
-        (caretUpdateType_ == CaretUpdateType::INPUT || caretUpdateType_ == CaretUpdateType::DEL)) {
-        result.offset.SetX(MakeEmptyOffset().GetX());
-#ifndef USE_GRAPHIC_TEXT_GINE
-        result.offset.SetY(textBox.rect_.GetTop());
-        result.height = textBox.rect_.GetHeight();
-#else
-        result.offset.SetY(textBox.rect.GetTop());
-        result.height = textBox.rect.GetHeight();
-#endif
-        return true;
-    }
-
-    // Caret is within width of the downstream glyphs.
-#ifndef USE_GRAPHIC_TEXT_GINE
-    float offsetX = textBox.rect_.GetLeft();
-#else
-    float offsetX = textBox.rect.GetLeft();
-#endif
-    result.offset.SetX(offsetX);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    result.offset.SetY(textBox.rect_.GetTop());
-    result.height = textBox.rect_.GetHeight();
-#else
-    result.offset.SetY(textBox.rect.GetTop());
-    result.height = textBox.rect.GetHeight();
-#endif
-    return true;
-}
-
-bool TextFieldPattern::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) const
-{
-    auto text = textEditingValue_.text;
-    auto wideText = textEditingValue_.GetWideText();
-    if (!paragraph_ || wideText.empty() || textEditingValue_.caretPosition == 0 ||
-        textEditingValue_.caretPosition > static_cast<int32_t>(wideText.length())) {
-        return false;
-    }
-
-    char16_t prevChar = 0;
-    if (static_cast<size_t>(extent) <= textEditingValue_.GetWideText().length()) {
-        prevChar = text[std::max(0, extent - 1)];
-    }
-
-    result.Reset();
-    int32_t graphemeClusterLength = StringUtils::NotInUtf16Bmp(prevChar) ? 2 : 1;
-    int32_t prev = extent - graphemeClusterLength;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    auto boxes = paragraph_->GetRectsForRange(
-        prev, extent, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
-#else
-    auto boxes = paragraph_->GetTextRectsByBoundary(
-        prev, extent, RSTextRectHeightStyle::COVER_TOP_AND_BOTTOM, RSTextRectWidthStyle::TIGHT);
-#endif
-    while (boxes.empty() && !textEditingValue_.text.empty()) {
-        graphemeClusterLength *= 2;
-        prev = extent - graphemeClusterLength;
-        if (prev < 0) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            boxes = paragraph_->GetRectsForRange(
-                0, extent, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
-#else
-            boxes = paragraph_->GetTextRectsByBoundary(
-                0, extent, RSTextRectHeightStyle::COVER_TOP_AND_BOTTOM, RSTextRectWidthStyle::TIGHT);
-#endif
-            break;
-        }
-#ifndef USE_GRAPHIC_TEXT_GINE
-        boxes = paragraph_->GetRectsForRange(
-            prev, extent, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
-#else
-        boxes = paragraph_->GetTextRectsByBoundary(
-            prev, extent, RSTextRectHeightStyle::COVER_TOP_AND_BOTTOM, RSTextRectWidthStyle::TIGHT);
-#endif
-    }
-    if (boxes.empty()) {
-        LOGD("Empty box");
-        return false;
-    }
-
-    const auto& textBox = *boxes.begin();
-    auto caretPosition = textEditingValue_.caretPosition;
-    auto maxPos = static_cast<int32_t>(wideText.length()) - 1;
-    auto lastStringBeforeCursor = wideText.substr(std::clamp(caretPosition - 1, 0, maxPos), 1);
-    // Caret is within width of the downstream glyphs.
-    if (lastStringBeforeCursor == WIDE_NEWLINE &&
-        (caretUpdateType_ == CaretUpdateType::INPUT || caretUpdateType_ == CaretUpdateType::DEL)) {
-        result.offset.SetX(MakeEmptyOffset().GetX());
-#ifndef USE_GRAPHIC_TEXT_GINE
-        result.offset.SetY(textBox.rect_.GetBottom());
-        result.height = textBox.rect_.GetHeight();
-#else
-        result.offset.SetY(textBox.rect.GetBottom());
-        result.height = textBox.rect.GetHeight();
-#endif
-        return true;
-    }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    result.offset.SetX(textBox.rect_.GetRight());
-    result.offset.SetY(textBox.rect_.GetTop());
-    result.height = textBox.rect_.GetHeight();
-#else
-    result.offset.SetX(textBox.rect.GetRight());
-    result.offset.SetY(textBox.rect.GetTop());
-    result.height = textBox.rect.GetHeight();
-#endif
-    return true;
-}
-
-OffsetF TextFieldPattern::MakeEmptyOffset() const
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, {});
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, {});
-    switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
-        case TextAlign::CENTER:
-            return OffsetF(contentRect_.Width() * 0.5f, 0.0f);
-        case TextAlign::END:
-            return OffsetF(contentRect_.Width(), 0.0f);
-        case TextAlign::START:
-        default:
-            return {};
-    }
-}
-
 int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localOffset)
 {
     CHECK_NULL_RETURN(paragraph_, 0);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(localOffset.GetX(), localOffset.GetY()).pos_);
-#else
-    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(localOffset.GetX(), localOffset.GetY()).index);
-#endif
+    return paragraph_->GetGlyphIndexByCoordinate(localOffset);
 }
 
-void TextFieldPattern::GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end)
+int32_t TextFieldPattern::ConvertTouchOffsetToCaretPositionNG(const Offset& localOffset)
 {
-#ifndef USE_GRAPHIC_TEXT_GINE
-    CHECK_NULL_VOID(paragraph_);
-    auto positon = paragraph_->GetWordBoundary(offset);
-    start = static_cast<int32_t>(positon.start_);
-    end = static_cast<int32_t>(positon.end_);
-#else
-    CHECK_NULL_VOID(paragraph_);
-    auto positon = paragraph_->GetWordBoundaryByIndex(offset);
-    start = static_cast<int32_t>(positon.leftIndex);
-    end = static_cast<int32_t>(positon.rightIndex);
-#endif
+    CHECK_NULL_RETURN(paragraph_, 0);
+    auto offset = localOffset - Offset(textRect_.GetX(), textRect_.GetY());
+    return paragraph_->GetGlyphIndexByCoordinate(offset);
 }
 
 bool TextFieldPattern::DisplayPlaceHolder()
@@ -1362,16 +593,12 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(context);
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-    if (caretUpdateType_ != CaretUpdateType::PRESSED) {
-        caretUpdateType_ = CaretUpdateType::EVENT;
-        needToRequestKeyboardInner_ = !(dragRecipientStatus_ == DragStatus::DRAGGING);
-    }
+    needToRequestKeyboardInner_ = !(dragRecipientStatus_ == DragStatus::DRAGGING);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (IsNormalInlineState() &&
-        (!textEditingValue_.GetWideText().empty() || !layoutProperty->GetPlaceholderValue("").empty())) {
+    if (IsNormalInlineState() && (!contentController_->IsEmpty() || !layoutProperty->GetPlaceholderValue("").empty())) {
         ApplyInlineStates(true);
         inlineSelectAllFlag_ = true;
         inlineFocusState_ = true;
@@ -1382,7 +609,6 @@ void TextFieldPattern::HandleFocusEvent()
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnEditChanged(true);
-    CloseSelectOverlay();
     auto visible = layoutProperty->GetShowErrorTextValue(false);
     if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         auto renderContext = host->GetRenderContext();
@@ -1401,21 +627,14 @@ void TextFieldPattern::HandleFocusEvent()
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
 {
+    // todo
     LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
     CloseSelectOverlay();
+    StopTwinkling();
     UpdateSelection(start, end);
-    textEditingValue_.caretPosition =
-        std::clamp(end, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
-    selectionMode_ = start == end ? SelectionMode::NONE : SelectionMode::SELECT;
-    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     AdjustTextSelectionRectOffsetX();
-    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
     if (showHandle) {
-        if (start == end) {
-            CreateSingleHandle();
-        } else {
-            CreateHandles();
-        }
+        ProcessOverlay();
     }
     UpdateCaretInfoToController();
     auto tmpHost = GetHost();
@@ -1429,14 +648,9 @@ void TextFieldPattern::AdjustTextSelectionRectOffsetX()
         return;
     }
     auto contentLeftBoundary = contentRect_.GetX();
-    auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width() - unitWidth_;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    auto selectionStart = textBoxes_.begin()->rect_.GetLeft() + textRect_.GetX();
-    auto selectionEnd = textBoxes_.begin()->rect_.GetRight() + textRect_.GetX();
-#else
-    auto selectionStart = textBoxes_.begin()->rect.GetLeft() + textRect_.GetX();
-    auto selectionEnd = textBoxes_.begin()->rect.GetRight() + textRect_.GetX();
-#endif
+    auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width();
+    auto selectionStart = textBoxes_.begin()->Left() + textRect_.GetX();
+    auto selectionEnd = textBoxes_.begin()->Right() + textRect_.GetX();
 
     float dx = 0.0f;
     if (selectionEnd < contentLeftBoundary) {
@@ -1483,9 +697,8 @@ void TextFieldPattern::HandleExtendAction(int32_t action)
 
 void TextFieldPattern::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
 {
-    LOGI("HandleSelect, current caret position %{public}d", textEditingValue_.caretPosition);
+    LOGI("HandleSelect, current caret position %{public}d", selectController_->GetCaretIndex());
     KeyCode code = static_cast<KeyCode>(keyCode);
-    caretUpdateType_ = CaretUpdateType::EVENT;
     switch (code) {
         case KeyCode::KEY_DPAD_LEFT: {
             HandleSelectionLeft();
@@ -1576,9 +789,7 @@ void TextFieldPattern::HandleBlurEvent()
     isFocusedBeforeClick_ = false;
     StopTwinkling();
     CloseKeyboard(true);
-    MarkRedrawOverlay();
-    textSelector_.Update(-1);
-    selectionMode_ = SelectionMode::NONE;
+    selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
     CloseSelectOverlay(true);
@@ -1587,7 +798,6 @@ void TextFieldPattern::HandleBlurEvent()
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
-    caretUpdateType_ = CaretUpdateType::EVENT;
     CloseSelectOverlay(true);
     auto context = PipelineContext::GetCurrentContext();
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
@@ -1616,15 +826,16 @@ void TextFieldPattern::HandleOnUndoAction()
         ClearEditingValue();
         return;
     }
-    textEditingValue_ = operationRecords_.back();
-    SetEditingValueToProperty(textEditingValue_.text);
+    auto textEditingValue = operationRecords_.back(); // record应该包含光标、select状态、文本
+    contentController_->SetTextValue(textEditingValue.text);
+    selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
+    FireOnTextChangeEvent();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                    : PROPERTY_UPDATE_MEASURE);
-    FireEventHubOnChange(GetEditingValue().text);
+                                                                                      : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::HandleOnRedoAction()
@@ -1634,49 +845,52 @@ void TextFieldPattern::HandleOnRedoAction()
         LOGW("Redo operation records empty, cannot undo");
         return;
     }
-    textEditingValue_ = redoOperationRecords_.back();
+    auto textEditingValue = redoOperationRecords_.back();
+    contentController_->SetTextValue(textEditingValue.text);
+    selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
     redoOperationRecords_.pop_back();
-    operationRecords_.push_back(textEditingValue_);
-    SetEditingValueToProperty(textEditingValue_.text);
+    operationRecords_.push_back(textEditingValue);
+    FireOnTextChangeEvent();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                    : PROPERTY_UPDATE_MEASURE);
-    FireEventHubOnChange(GetEditingValue().text);
+                                                                                      : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
 {
     LOGI("TextFieldPattern::HandleOnSelectAll");
-    auto textSize = static_cast<int32_t>(GetEditingValue().GetWideText().length());
-    if (inlineStyle == true) {
-        if (GetEditingValue().GetWideText().rfind(L".") < textSize - FIND_TEXT_ZERO_INDEX) {
-            textSize = GetEditingValue().GetWideText().rfind(L".");
+    auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (inlineStyle) {
+        if (contentController_->GetWideText().rfind(L".") < textSize - FIND_TEXT_ZERO_INDEX) {
+            textSize = contentController_->GetWideText().rfind(L".");
         }
         UpdateSelection(0, textSize);
     } else {
         UpdateSelection(0, textSize);
     }
+    if (selectController_->IsSelected()) {
+        isSingleHandle_ = false;
+    }
     updateSelectionAfterObscure_ = ResetObscureTickCountDown();
-    textEditingValue_.caretPosition = textSize;
-    selectionMode_ = SelectionMode::SELECT_ALL;
-    caretUpdateType_ = CaretUpdateType::EVENT;
-    MarkRedrawOverlay();
-    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
-    isSingleHandle_ = textEditingValue_.text.empty();
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    // move text to end
+    if (IsTextArea() && GreatOrEqual(textRect_.Height(), contentRect_.Height())) {
+        auto offsetY = textRect_.GetY() + textRect_.Height() - contentRect_.GetY() - contentRect_.Height();
+        textRect_.SetTop(textRect_.GetY() - offsetY);
+    } else if (GreatOrEqual(textRect_.Width(), contentRect_.Width())) {
+        auto offsetX = textRect_.GetX() + textRect_.Width() - contentRect_.GetX() - contentRect_.Width();
+        textRect_.SetLeft(textRect_.GetX() - offsetX);
+    }
+    selectController_->MoveSecondHandleToContentRect(textSize);
     CloseSelectOverlay(true);
+    StopTwinkling();
     if (isKeyEvent || inlineSelectAllFlag_) {
         return;
     }
-    std::optional<RectF> firstHandle = textSelector_.firstHandle;
-    std::optional<RectF> secondHandle = textSelector_.secondHandle;
-    ShowSelectOverlay(firstHandle, secondHandle);
+    ProcessOverlay(true);
 }
 
 void TextFieldPattern::HandleOnCopy()
@@ -1687,25 +901,23 @@ void TextFieldPattern::HandleOnCopy()
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    caretUpdateType_ = CaretUpdateType::NONE;
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) == CopyOptions::None) {
         LOGW("Copy option not allowed");
         return;
     }
-    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD) {
-        LOGW("Cannot copy in password mode");
-        selectionMode_ = SelectionMode::NONE;
-        UpdateCaretPositionWithClamp(textSelector_.GetEnd());
-        UpdateSelection(textEditingValue_.caretPosition);
-        StartTwinkling();
-        return;
-    }
-    if (!IsSelected() || (textSelector_.IsValid() && textSelector_.GetStart() == textSelector_.GetEnd())) {
+    if (!IsSelected()) {
         LOGW("Nothing to select");
         return;
     }
-    LOGI("On copy, text selector %{public}s", textSelector_.ToString().c_str());
-    auto value = GetEditingValue().GetSelectedText(textSelector_.GetStart(), textSelector_.GetEnd());
+    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD) {
+        LOGW("Cannot copy in password mode");
+        UpdateSelection(selectController_->GetEndIndex());
+        StartTwinkling();
+        return;
+    }
+    LOGI("On copy, text selector %{public}s", selectController_->ToString().c_str());
+    auto value =
+        contentController_->GetSelectedValue(selectController_->GetStartIndex(), selectController_->GetEndIndex());
     if (value.empty()) {
         LOGW("Copy value is empty");
         return;
@@ -1715,21 +927,11 @@ void TextFieldPattern::HandleOnCopy()
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
-    UpdateCaretPositionWithClamp(textSelector_.GetEnd());
-    UpdateSelection(textEditingValue_.caretPosition);
-    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
-    selectionMode_ = SelectionMode::NONE;
+    selectController_->UpdateCaretIndex(selectController_->GetSecondHandleIndex());
     StartTwinkling();
-    // If the parent node is a Search, the Search callback is executed.
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(tmpHost->GetParent());
-        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnCopy(value);
-        return;
-    }
-
-    auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCopy(value);
 }
@@ -1737,7 +939,7 @@ void TextFieldPattern::HandleOnCopy()
 void TextFieldPattern::HandleOnPaste()
 {
     LOGI("TextFieldPattern::HandleOnPaste");
-    auto pasteCallback = [weak = WeakClaim(this), textSelector = textSelector_](const std::string& data) {
+    auto pasteCallback = [weak = WeakClaim(this)](const std::string& data) {
         if (data.empty()) {
             LOGW("Paste value is empty");
             return;
@@ -1748,58 +950,27 @@ void TextFieldPattern::HandleOnPaste()
         CHECK_NULL_VOID(tmpHost);
         auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto value = textfield->GetEditingValue();
-        auto valueLength = textfield->GetEditingValue().GetWideText().length();
-        int32_t start = 0;
-        int32_t end = 0;
-        if (textfield->IsSelected()) {
-            start = textSelector.GetStart();
-            end = textSelector.GetEnd();
-            SwapIfLarger(start, end);
-        } else {
-            start = value.caretPosition;
-            end = value.caretPosition;
-        }
-        std::string result;
-        std::string valueToUpdate(data);
-        textfield->EditingValueFilter(valueToUpdate, result, true);
-        LOGD("After filter paste value is %{private}s", result.c_str());
-        std::wstring pasteData;
-        std::wstring wData = StringUtils::ToWstring(result);
-        textfield->StripNextLine(wData);
-        if (wData.length() + valueLength - (end - start) > textfield->GetMaxLength()) {
-            pasteData = wData.substr(0, textfield->GetMaxLength() - valueLength + (end - start));
-        } else {
-            pasteData = wData;
-        }
-        value.text =
-            value.GetValueBeforePosition(start) + StringUtils::ToString(pasteData) + value.GetValueAfterPosition(end);
+
+        auto start = textfield->selectController_->GetStartIndex();
+        auto end = textfield->selectController_->GetEndIndex();
+
+        std::wstring pasteData = StringUtils::ToWstring(data);
+        textfield->StripNextLine(pasteData);
+        textfield->contentController_->ReplaceSelectedValue(start, end, StringUtils::ToString(pasteData));
         auto newCaretPosition = std::clamp(std::min(start, end) + static_cast<int32_t>(pasteData.length()), 0,
-            static_cast<int32_t>(StringUtils::ToWstring(value.text).length()));
+            static_cast<int32_t>(textfield->contentController_->GetWideText().length()));
         textfield->ResetObscureTickCountDown();
-        textfield->UpdateEditingValue(value.text, newCaretPosition);
-        textfield->UpdateSelection(newCaretPosition);
-        textfield->SetEditingValueToProperty(value.text);
-        textfield->SetInSelectMode(SelectionMode::NONE);
-        textfield->SetCaretUpdateType(CaretUpdateType::INPUT);
+        textfield->selectController_->UpdateCaretIndex(newCaretPosition);
+        textfield->FireOnTextChangeEvent();
         textfield->UpdateEditingValueToRecord();
+        if (textfield->IsTextArea() && layoutProperty->HasMaxLength()) {
+            textfield->HandleCounterBorder();
+        }
         auto host = textfield->GetHost();
         CHECK_NULL_VOID(host);
-        // If the parent node is a Search, the Search callback is executed.
-        if (textfield->IsSearchParentNode()) {
-            auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-            auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireOnPaste(StringUtils::ToString(pasteData));
-            textfield->FireEventHubOnChange(value.text);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            return;
-        }
-
-        auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
+        auto eventHub = textfield->GetHost()->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnPaste(StringUtils::ToString(pasteData));
-        textfield->FireEventHubOnChange(value.text);
         host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                      : PROPERTY_UPDATE_MEASURE);
         textfield->StartTwinkling();
@@ -1836,53 +1007,36 @@ void TextFieldPattern::HandleOnCut()
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    caretUpdateType_ = CaretUpdateType::NONE;
+
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) == CopyOptions::None) {
         LOGW("Copy option not allowed");
         return;
     }
-    auto start = textSelector_.GetStart();
-    auto end = textSelector_.GetEnd();
+    auto start = selectController_->GetStartIndex();
+    auto end = selectController_->GetEndIndex();
     SwapIfLarger(start, end);
-    if (!IsSelected() || (textSelector_.IsValid() && start == end)) {
+    if (!IsSelected()) {
         LOGW("HandleOnCut nothing Selected");
         return;
     }
-    auto value = GetEditingValue();
-    auto selectedText = value.GetSelectedText(start, end);
+    auto selectedText = contentController_->GetSelectedValue(start, end);
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         LOGI("Cut value is %{private}s", selectedText.c_str());
         clipboard_->SetData(selectedText, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
-    textEditingValue_.text =
-        textEditingValue_.GetValueBeforePosition(start) + textEditingValue_.GetValueAfterPosition(end);
-    textEditingValue_.CursorMoveToPosition(start);
-    SetEditingValueToProperty(textEditingValue_.text);
-    selectionMode_ = SelectionMode::NONE;
+    contentController_->erase(start, end - start);
+    UpdateSelection(start);
+    SetEditingValueToProperty(contentController_->GetTextValue());
     CloseSelectOverlay(true);
     StartTwinkling();
     UpdateEditingValueToRecord();
-    UpdateSelection(textEditingValue_.caretPosition);
-    MarkRedrawOverlay();
-    cursorVisible_ = true;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // If the parent node is a Search, the Search callback is executed.
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnCut(selectedText);
-        FireEventHubOnChange(textEditingValue_.text);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        return;
-    }
-
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCut(selectedText);
-    FireEventHubOnChange(textEditingValue_.text);
+    FireEventHubOnChange(contentController_->GetTextValue());
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
@@ -1894,9 +1048,13 @@ void TextFieldPattern::UpdateSelection(int32_t both)
 
 void TextFieldPattern::UpdateSelection(int32_t start, int32_t end)
 {
-    if (start != textSelector_.GetStart() || end != textSelector_.GetEnd()) {
-        FireOnSelectionChange(start, end);
-        textSelector_.Update(start, end);
+    auto startIndex = std::min(start, end);
+    auto endIndex = std::max(start, end);
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
+    endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
+    if (startIndex != selectController_->GetStartIndex() || endIndex != selectController_->GetEndIndex()) {
+        FireOnSelectionChange(startIndex, endIndex);
+        selectController_->UpdateHandleIndex(startIndex, endIndex);
     }
 }
 
@@ -1915,14 +1073,6 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->GetNeedFireOnChangeValue(false)) {
-        return;
-    }
-    // If the parent node is a Search, the Search callback is executed.
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->UpdateChangeEvent(text);
         return;
     }
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -2011,6 +1161,24 @@ void TextFieldPattern::HandleTouchUp()
     }
 }
 
+void TextFieldPattern::InitDragEvent()
+{
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD &&
+        layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None) {
+        InitDragDropEvent();
+        AddDragFrameNodeToManager(host);
+    } else {
+        ClearDragDropEvent();
+        RemoveDragFrameNodeFromManager(host);
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+}
+
 #ifdef ENABLE_DRAG_FRAMEWORK
 std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
 {
@@ -2030,6 +1198,89 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
     return callback;
 }
 
+std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> TextFieldPattern::OnDragStart()
+{
+    auto onDragStart = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
+                           const std::string& extraParams) -> NG::DragDropInfo {
+        NG::DragDropInfo itemInfo;
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_RETURN(pattern, itemInfo);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, itemInfo);
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, itemInfo);
+        pattern->dragStatus_ = DragStatus::DRAGGING;
+        pattern->textFieldContentModifier_->ChangeDragStatus();
+        auto contentController = pattern->contentController_;
+        auto selectController = pattern->selectController_;
+        std::string beforeStr = contentController->GetValueBeforeIndex(selectController->GetStartIndex());
+        std::string selectedStr = contentController->GetSelectedValue(selectController->GetStartIndex(), selectController->GetEndIndex());
+        std::string afterStr = contentController->GetValueAfterIndex(selectController->GetEndIndex());
+        pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
+        itemInfo.extraInfo = selectedStr;
+        RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+        UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
+        event->SetData(unifiedData);
+        host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                     : PROPERTY_UPDATE_MEASURE);
+        return itemInfo;
+    };
+    return onDragStart;
+}
+
+std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> TextFieldPattern::OnDragDrop()
+{
+    auto onDrop = [weakPtr = WeakClaim(this)](
+                      const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        if (extraParams.empty()) {
+            pattern->dragStatus_ = DragStatus::ON_DROP;
+            pattern->textFieldContentModifier_->ChangeDragStatus();
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                         : PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+        auto data = event->GetData();
+        CHECK_NULL_VOID(data);
+        auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
+        std::string str;
+        for (const auto& record : records) {
+            str += record;
+        }
+        pattern->needToRequestKeyboardInner_ = true;
+        pattern->dragRecipientStatus_ = DragStatus::NONE;
+        if (str.empty()) {
+            return;
+        }
+        if (pattern->dragStatus_ == DragStatus::NONE) {
+            pattern->InsertValue(str);
+        } else {
+            auto current = pattern->selectController_->GetCaretIndex();
+            auto dragTextStart = pattern->dragTextStart_;
+            auto dragTextEnd = pattern->dragTextEnd_;
+            if (current < dragTextStart) {
+                pattern->contentController_->erase(dragTextStart, dragTextEnd - dragTextStart);
+                pattern->InsertValue(str);
+            } else if (current > dragTextEnd) {
+                pattern->contentController_->erase(dragTextStart, dragTextEnd - dragTextStart);
+                pattern->selectController_->UpdateCaretIndex(current - (dragTextEnd - dragTextStart));
+                pattern->InsertValue(str);
+            }
+            pattern->dragStatus_ = DragStatus::NONE;
+            pattern->MarkContentChange();
+            host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    };
+    return onDrop;
+}
+
 void TextFieldPattern::InitDragDropEvent()
 {
     auto host = GetHost();
@@ -2042,35 +1293,8 @@ void TextFieldPattern::InitDragDropEvent()
     gestureHub->SetThumbnailCallback(std::move(callback));
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto onDragStart = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
-                           const std::string& extraParams) -> NG::DragDropInfo {
-        NG::DragDropInfo itemInfo;
-        auto pattern = weakPtr.Upgrade();
-        CHECK_NULL_RETURN(pattern, itemInfo);
-        auto host = pattern->GetHost();
-        CHECK_NULL_RETURN(host, itemInfo);
-        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, itemInfo);
-        pattern->dragStatus_ = DragStatus::DRAGGING;
-        pattern->textFieldContentModifier_->ChangeDragStatus();
-        pattern->selectionMode_ = SelectionMode::NONE;
-        pattern->dragTextStart_ = std::min(pattern->textSelector_.GetStart(), pattern->textSelector_.GetEnd());
-        pattern->dragTextEnd_ = std::max(pattern->textSelector_.GetStart(), pattern->textSelector_.GetEnd());
-        auto textEditingValue = pattern->GetEditingValue();
-        std::string beforeStr = textEditingValue.GetValueBeforePosition(pattern->dragTextStart_);
-        std::string selectedStr = textEditingValue.GetSelectedText(pattern->dragTextStart_, pattern->dragTextEnd_);
-        std::string afterStr = textEditingValue.GetValueAfterPosition(pattern->dragTextEnd_);
-        pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
-        itemInfo.extraInfo = selectedStr;
-        RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-        UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-        event->SetData(unifiedData);
-        host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                     : PROPERTY_UPDATE_MEASURE);
-        return itemInfo;
-    };
     if (!eventHub->HasOnDragStart()) {
-        eventHub->SetOnDragStart(std::move(onDragStart));
+        eventHub->SetOnDragStart(OnDragStart());
     }
 
     auto onDragEnter = [weakPtr = WeakClaim(this)](
@@ -2096,11 +1320,7 @@ void TextFieldPattern::InitDragDropEvent()
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto focusHub = host->GetOrCreateFocusHub();
-        if (pattern->IsSearchParentNode()) {
-            auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-            focusHub = parentFrameNode->GetOrCreateFocusHub();
-        }
+        auto focusHub = pattern->GetFocusHub();
         focusHub->RequestFocusImmediately();
         pattern->SetCaretPosition(position);
         pattern->StartTwinkling();
@@ -2135,57 +1355,7 @@ void TextFieldPattern::InitDragDropEvent()
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 
-    auto onDrop = [weakPtr = WeakClaim(this)](
-                      const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
-        auto pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        if (extraParams.empty()) {
-            pattern->dragStatus_ = DragStatus::ON_DROP;
-            pattern->textFieldContentModifier_->ChangeDragStatus();
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                         : PROPERTY_UPDATE_MEASURE);
-            return;
-        }
-        auto data = event->GetData();
-        CHECK_NULL_VOID(data);
-        auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
-        std::string str = "";
-        for (const auto& record : records) {
-            str += record;
-        }
-        pattern->needToRequestKeyboardInner_ = true;
-        pattern->dragRecipientStatus_ = DragStatus::NONE;
-        if (str.empty()) {
-            return;
-        }
-        if (pattern->dragStatus_ == DragStatus::NONE) {
-            pattern->InsertValue(str);
-        } else {
-            auto current = pattern->textEditingValue_.caretPosition;
-            float dragTextStart = pattern->dragTextStart_;
-            float dragTextEnd = pattern->dragTextEnd_;
-            if (current < dragTextStart) {
-                pattern->textEditingValue_.text = pattern->textEditingValue_.GetValueBeforePosition(dragTextStart) +
-                                                  pattern->textEditingValue_.GetValueAfterPosition(dragTextEnd);
-                pattern->InsertValue(str);
-            } else if (current > dragTextEnd) {
-                pattern->textEditingValue_.text = pattern->textEditingValue_.GetValueBeforePosition(dragTextStart) +
-                                                  pattern->textEditingValue_.GetValueAfterPosition(dragTextEnd);
-                pattern->textEditingValue_.caretPosition = current - (dragTextEnd - dragTextStart);
-                pattern->InsertValue(str);
-            }
-            pattern->dragStatus_ = DragStatus::NONE;
-            pattern->MarkContentChange();
-            host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
-        }
-    };
-    eventHub->SetOnDrop(std::move(onDrop));
+    eventHub->SetOnDrop(OnDragDrop());
 }
 
 void TextFieldPattern::ClearDragDropEvent()
@@ -2217,6 +1387,7 @@ void TextFieldPattern::InitTouchEvent()
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isUsingMouse_ = false;
         pattern->HandleTouchEvent(info);
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -2241,95 +1412,71 @@ void TextFieldPattern::InitClickEvent()
 
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
-    LOGI("TextFieldPattern::HandleClickEvent");
-    if (hasClicked_) {
-        hasClicked_ = false;
-        TimeStamp clickTimeStamp = info.GetTimeStamp();
-        std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout =
-            clickTimeStamp - lastClickTimeStamp_;
-        lastClickTimeStamp_ = info.GetTimeStamp();
-        if (timeout.count() < DOUBLECLICK_INTERVAL_MS) {
-            lastTouchOffset_ = info.GetLocalLocation();
-            HandleDoubleClickEvent(info);
-        } else {
-            HandleClickEvent(info);
-        }
+    TimeStamp clickTimeStamp = info.GetTimeStamp();
+    std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout = clickTimeStamp - lastClickTimeStamp_;
+    lastClickTimeStamp_ = info.GetTimeStamp();
+    isUsingMouse_ = false;
+    if (timeout.count() < DOUBLECLICK_INTERVAL_MS) {
+        HandleDoubleClickEvent(info); // 注册手势事件
     } else {
-        hasClicked_ = true;
-        lastClickTimeStamp_ = info.GetTimeStamp();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-        // emulate clicking bottom of the textField
-        UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-        auto focusHub = host->GetOrCreateFocusHub();
+        HandleSingleClickEvent(info);
+    }
+}
 
-        if (IsSearchParentNode()) {
-            auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-            focusHub = parentFrameNode->GetOrCreateFocusHub();
-        }
+void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
+{
+    // emulate clicking bottom of the textField
+    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = GetFocusHub();
 
-        if (!focusHub->IsFocusable()) {
-            LOGI("Textfield %{public}d is not focusable ,cannot request keyboard", host->GetId());
-            return;
-        }
-        lastTouchOffset_ = info.GetLocalLocation();
-        isTouchAtLeftOffset_ = IsTouchAtLeftOffset(lastTouchOffset_.GetX());
-        caretUpdateType_ = CaretUpdateType::PRESSED;
-        isFocusedBeforeClick_ = HasFocus();
-        selectionMode_ = SelectionMode::NONE;
-        isUsingMouse_ = false;
-        CloseSelectOverlay(true);
-        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-        if (lastTouchOffset_.GetX() > frameRect_.Width() - imageRect_.Width() - GetIconRightOffset() &&
-            NeedShowPasswordIcon()) {
-            LOGI("Password Icon pressed, change text to be shown only");
-            textObscured_ = !textObscured_;
-            ProcessPasswordIcon();
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            caretUpdateType_ = CaretUpdateType::ICON_PRESSED;
-            return;
-        }
-        ResetObscureTickCountDown();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        StartTwinkling();
-
-        if (isMousePressed_) {
-            LOGI("TextFieldPattern::HandleTouchUp of mouse");
-            isMousePressed_ = false;
-            return;
-        }
+    if (!focusHub->IsFocusable()) {
+        LOGI("Textfield %{public}d is not focusable ,cannot request keyboard", host->GetId());
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CloseSelectOverlay(true);
+    ResetObscureTickCountDown();
+    auto hasFocus = HasFocus();
+    if (!hasFocus) {
         if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
             LOGW("Request focus failed, cannot open input method");
             StopTwinkling();
             return;
         }
-        if (RequestKeyboard(false, true, true)) {
-            auto eventHub = host->GetEventHub<TextFieldEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireOnEditChanged(true);
-        }
     }
+    auto lastCaretIndex = selectController_->GetCaretIndex();
+    selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+    StartTwinkling();
+    isSingleHandle_ = true;
+    if (lastCaretIndex == selectController_->GetCaretIndex() && hasFocus && caretStatus_ == CaretStatus::SHOW &&
+        !isUsingMouse_ && !selectController_->IsSelected()) {
+        ProcessOverlay(true);
+    }
+
+    if (RequestKeyboard(false, true, true)) {
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnEditChanged(true); // 事件可能重复上报待整改
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
-    LOGI("TextFieldPattern::HandleDoubleClickEvent");
-    isDoubleClick_ = true;
-    if (!GetEditingValue().text.empty()) {
+    selectController_->UpdateSelectByOffset(info.GetLocalLocation());
+    if (selectController_->IsSelected()) {
         StopTwinkling();
-    }
-    if (!IsUsingMouse()) {
-        caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
         isSingleHandle_ = false;
-        isUsingMouse_ = false;
-        CloseSelectOverlay(true);
-        auto tmpHost = GetHost();
-        CHECK_NULL_VOID(tmpHost);
-        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    if (!isUsingMouse_) {
+        CloseSelectOverlay();
+        ProcessOverlay(true);
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::ScheduleCursorTwinkling()
@@ -2367,9 +1514,8 @@ void TextFieldPattern::StartTwinkling()
 
     // Show cursor right now.
     cursorVisible_ = true;
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    caretStatus_ = CaretStatus::SHOW;
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     ScheduleCursorTwinkling();
 }
 
@@ -2378,16 +1524,12 @@ void TextFieldPattern::OnCursorTwinkling()
     cursorTwinklingTask_.Cancel();
     cursorVisible_ = !cursorVisible_;
     auto shouldMeasure = !IsTextArea() && IsInPasswordMode() && GetTextObscured() && obscureTickCountDown_ == 1;
-    if (IsInPasswordMode() && GetTextObscured() && obscureTickCountDown_ > 0) {
-        --obscureTickCountDown_;
-    }
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (shouldMeasure) {
-        caretUpdateType_ = CaretUpdateType::EVENT;
-        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
-        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     ScheduleCursorTwinkling();
 }
@@ -2406,6 +1548,7 @@ void TextFieldPattern::StopTwinkling()
     if (ResetObscureTickCountDown()) {
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    caretStatus_ = CaretStatus::HIDE;
 }
 
 void TextFieldPattern::CheckIfNeedToResetKeyboard()
@@ -2478,7 +1621,12 @@ void TextFieldPattern::OnModifyDone()
     InitMouseEvent();
     InitTouchEvent();
     SetAccessibilityAction();
-    FilterExistText();
+    FilterInitializeText();
+    FireOnTextChangeEvent();
+    InitSelectOverlay();
+    if (responseArea_) {
+        responseArea_->InitResponseArea(WeakClaim(this));
+    }
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
         InitDragDropEvent();
@@ -2488,7 +1636,6 @@ void TextFieldPattern::OnModifyDone()
         RemoveDragFrameNodeFromManager(host);
     }
 #endif // ENABLE_DRAG_FRAMEWORK
-    ProcessPasswordIcon();
     context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
@@ -2504,13 +1651,14 @@ void TextFieldPattern::OnModifyDone()
     if (renderContext->HasBackgroundColor()) {
         paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
     }
-    auto textWidth = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+
+    auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
     if (SelectOverlayIsOn()) {
         needToRefreshSelectOverlay_ = true;
-        UpdateSelection(
-            std::clamp(textSelector_.GetStart(), 0, textWidth), std::clamp(textSelector_.GetEnd(), 0, textWidth));
-        UpdateCaretPositionWithClamp(textSelector_.GetEnd());
-        if (!textSelector_.StartEqualToDest()) {
+        UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
+            std::clamp(selectController_->GetEndIndex(), 0, textWidth));
+        UpdateCaretPositionWithClamp(selectController_->GetEndIndex());
+        if (IsSelected()) {
             selectionMode_ = SelectionMode::SELECT;
         }
     }
@@ -2519,16 +1667,6 @@ void TextFieldPattern::OnModifyDone()
         operationRecords_.clear();
         redoOperationRecords_.clear();
     }
-    auto maxLength = GetMaxLength();
-    if (GreatNotEqual(textWidth, maxLength)) {
-        textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
-        UpdateCaretPositionWithClamp(textEditingValue_.caretPosition);
-        SetEditingValueToProperty(textEditingValue_.text);
-        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateNeedFireOnChange(true);
-    }
-    FireOnChangeIfNeeded();
     if (IsTextArea() || IsNormalInlineState()) {
         SetAxis(Axis::VERTICAL);
         if (!GetScrollableEvent()) {
@@ -2552,7 +1690,6 @@ void TextFieldPattern::OnModifyDone()
         if (textFieldOverlayModifier_) {
             textFieldOverlayModifier_->SetScrollBar(scrollBar);
             UpdateScrollBarOffset();
-            MarkRedrawOverlay();
         }
     } else {
         SetAxis(Axis::HORIZONTAL);
@@ -2619,37 +1756,39 @@ void TextFieldPattern::CalculateDefaultCursor()
     float caretWidth = paintProperty->GetCursorWidth().has_value()
                            ? static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx())
                            : static_cast<float>(CURSOR_WIDTH.ConvertToPx());
-    caretRect_.SetWidth(caretWidth);
-    if (textEditingValue_.caretPosition != 0) {
+    selectController_->UpdateCaretWidth(caretWidth);
+    if (!contentController_->IsEmpty()) {
         return;
     }
-    caretRect_.SetLeft(GetPaddingLeft());
-    caretRect_.SetTop(GetPaddingTop());
-    caretRect_.SetHeight(PreferredLineHeight());
-    CHECK_NULL_VOID(layoutProperty->GetCalcLayoutConstraint());
-    CHECK_NULL_VOID(layoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
-    CHECK_NULL_VOID(layoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value().Height().has_value());
-    auto alignment = layoutProperty->GetPositionProperty()
-                         ? layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER)
-                         : Alignment::CENTER;
-    auto idealHeight = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value().Height().value();
-    caretRect_.SetTop(
-        (1.0 + alignment.GetVertical()) * (idealHeight.GetDimension().ConvertToPx() - PreferredLineHeight()) / 2.0);
+    selectController_->UpdateCaretHeight(PreferredLineHeight());
 }
 
-void TextFieldPattern::FireOnChangeIfNeeded()
+void TextFieldPattern::FireOnTextChangeEvent()
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetNeedFireOnChangeValue(false)) {
-        return;
-    }
-    layoutProperty->UpdateNeedFireOnChange(false);
-    auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnChange(textEditingValue_.text);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto textCache = layoutProperty->GetValueValue("");
+    if (textCache != contentController_->GetTextValue()) {
+        layoutProperty->UpdateValue(contentController_->GetTextValue());
+        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
+        eventHub->FireOnChange(contentController_->GetTextValue());
+    }
+}
+
+void TextFieldPattern::FilterInitializeText()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto inputFilter = layoutProperty->GetInputFilter();
+    auto inputType = layoutProperty->GetTextInputType();
+    if ((inputFilter.has_value() || inputType.has_value()) && !contentController_->IsEmpty()) {
+        contentController_->FilterValue();
+    }
 }
 
 bool TextFieldPattern::IsDisabled()
@@ -2728,26 +1867,20 @@ void TextFieldPattern::InitLongPressEvent()
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isUsingMouse_ = false;
         pattern->HandleLongPress(info);
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
     gesture->SetLongPressEvent(longPressEvent_);
-
-    auto onTextSelectorChange = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
-    };
-    textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 }
 
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
+    if (isUsingMouse_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    lastTouchOffset_ = info.GetLocalLocation();
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -2761,267 +1894,158 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 #ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
 #endif
-    caretUpdateType_ = (isMousePressed_ || !HasFocus()) ? CaretUpdateType::PRESSED : CaretUpdateType::LONG_PRESSED;
-    isSingleHandle_ = false;
-    isUsingMouse_ = false;
     ResetObscureTickCountDown();
-    LOGI("TextField %{public}d handle long press", host->GetId());
-    auto focusHub = host->GetOrCreateFocusHub();
-    CloseSelectOverlay(true);
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-        focusHub = parentFrameNode->GetOrCreateFocusHub();
-    }
+    isUsingMouse_ = false;
+    auto focusHub = GetFocusHub();
 
     if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
-        LOGE("Long press request focus failed");
-        StopTwinkling();
         return;
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-}
-
-void TextFieldPattern::UpdateSelectorByPosition(const int32_t& pos)
-{
-    CHECK_NULL_VOID(paragraph_);
-    int32_t start = 0;
-    int32_t end = 0;
-    GetWordBoundaryPositon(pos, start, end);
-    textSelector_.Update(start, end);
-}
-
-int32_t TextFieldPattern::GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev)
-{
-    char16_t aroundChar = 0;
-    if (checkPrev) {
-        if (static_cast<size_t>(extend) <= text.length()) {
-            aroundChar = text[std::max(0, extend - 1)];
-        }
-    } else {
-        if (static_cast<size_t>(extend) <= (text.length())) {
-            aroundChar = text[std::min(static_cast<int32_t>(text.length() - 1), extend)];
-        }
+    selectController_->UpdateSelectByOffset(info.GetLocalLocation());
+    if (IsSelected()) {
+        StopTwinkling();
+        isSingleHandle_ = false;
     }
-    return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
+    ProcessOverlay(true);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 {
-    textEditingValue_.caretPosition =
-        std::clamp(pos, 0, static_cast<int32_t>(GetEditingValue().GetWideText().length()));
+    selectController_->UpdateCaretIndex(
+        std::clamp(pos, 0, static_cast<int32_t>(contentController_->GetWideText().length())));
 }
 
-void TextFieldPattern::ProcessOverlay(bool animation)
+void TextFieldPattern::ProcessOverlay(bool animation, bool isShowMenu)
 {
-    if (caretUpdateType_ != CaretUpdateType::RIGHT_CLICK) {
-        StopTwinkling();
+    selectController_->CalculateHandleOffset();
+    if (isSingleHandle_) {
+        StartTwinkling();
+        LOGD("Show single handle Handle info %{public}s", selectController_->GetSecondHandleRect().ToString().c_str());
+        ShowSelectOverlay(std::nullopt, selectController_->GetSecondHandleRect(), animation, isShowMenu);
+    } else {
+        LOGD("Show handles firstHandle info %{public}s, secondHandle Info %{public}s",
+            selectController_->GetFirstHandleRect().ToString().c_str(),
+            selectController_->GetSecondHandleRect().ToString().c_str());
+        ShowSelectOverlay(
+            selectController_->GetFirstHandleRect(), selectController_->GetSecondHandleRect(), animation, isShowMenu);
     }
-    if (textEditingValue_.text.empty()) {
-        CreateSingleHandle(animation);
-        return;
-    }
-    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED || caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK) {
-        // When the content length is 1, you need to use the TextBox and pressing coordinates to determine whether it is
-        // selected
-        if (textEditingValue_.text.length() == 1) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            std::vector<RSTypographyProperties::TextBox> box;
-#else
-            std::vector<RSTextRect> box;
-#endif
-            GetTextRectsInRange(0, 1, box);
-            if (LastTouchIsInSelectRegion(box)) {
-                UpdateSelection(0, 1);
-                textEditingValue_.CursorMoveToPosition(1);
-                CreateHandles(animation);
-                return;
-            }
-        }
-        if (textEditingValue_.caretPosition == 0 && GetLastTouchOffset().GetX() < textRect_.GetX()) {
-            UpdateSelection(0);
-            CreateSingleHandle(animation);
-            return;
-        } else if (textEditingValue_.CaretAtLast() && GetLastTouchOffset().GetX() > textRect_.GetX()) {
-            UpdateSelection(textEditingValue_.caretPosition);
-            CreateSingleHandle(animation);
-            return;
-        } else {
-            UpdateSelectorByPosition(textEditingValue_.caretPosition);
-        }
-        if (!textSelector_.StartEqualToDest()) {
-            FireOnSelectionChange(textSelector_.GetStart(), textSelector_.GetEnd());
-            selectionMode_ = SelectionMode::SELECT;
-        }
-    }
-    CreateHandles(animation);
-}
-
-void TextFieldPattern::CreateHandles()
-{
-    CreateHandles(false);
-}
-
-void TextFieldPattern::CreateHandles(bool animation)
-{
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> tmp;
-#else
-    std::vector<RSTextRect> tmp;
-#endif
-    MarkRedrawOverlay();
-    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), tmp);
-    auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart());
-    OffsetF firstHandleOffset(firstHandlePosition.offset.GetX() + parentGlobalOffset_.GetX(),
-        firstHandlePosition.offset.GetY() + parentGlobalOffset_.GetY());
-    textSelector_.firstHandleOffset_ = firstHandleOffset;
-    auto secondHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetEnd(), false);
-    OffsetF secondHandleOffset(secondHandlePosition.offset.GetX() + parentGlobalOffset_.GetX(),
-        secondHandlePosition.offset.GetY() + parentGlobalOffset_.GetY());
-    textSelector_.secondHandleOffset_ = secondHandleOffset;
-    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-    std::optional<RectF> firstHandle = RectF(firstHandleOffset, handlePaintSize);
-    std::optional<RectF> secondHandle = RectF(secondHandleOffset, handlePaintSize);
-    LOGD("First handle %{public}s, second handle %{public}s", firstHandle->ToString().c_str(),
-        secondHandle->ToString().c_str());
-    CheckHandles(firstHandle, secondHandle);
-    ShowSelectOverlay(firstHandle, secondHandle, animation);
-    textBoxes_ = tmp;
 }
 
 void TextFieldPattern::ShowSelectOverlay(
     const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle, bool animation, bool isMenuShow)
 {
-    CloseSelectOverlay();
     if (isTransparent_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle, animation, isMenuShow](
-                               bool hasData) {
+    auto hasDataCallback = [weak = WeakClaim(this), firstHandle, secondHandle, animation, isMenuShow](bool hasData) {
         LOGI("HasData callback from clipboard, data available ? %{public}d", hasData);
         auto pattern = weak.Upgrade();
-        SelectOverlayInfo selectInfo;
-        if (!pattern->IsUsingMouse()) {
-            if (firstHandle.has_value()) {
-                selectInfo.firstHandle.paintRect = firstHandle.value();
-            } else {
-                selectInfo.firstHandle.isShow = false;
-            }
-            if (secondHandle.has_value()) {
-                selectInfo.secondHandle.paintRect = secondHandle.value();
-            } else {
-                selectInfo.secondHandle.isShow = false;
-            }
-        }
+        CHECK_NULL_VOID(pattern);
+        ClientOverlayInfo overlayInfo = { .animation = animation, .isMenuShow = isMenuShow };
         if (firstHandle.has_value()) {
-            selectInfo.firstHandle.isShow = pattern->CheckHandleVisible(firstHandle.value());
+            auto handle = firstHandle.value();
+            handle.SetOffset(handle.GetOffset() + pattern->GetTextPaintOffset());
+            SelectHandleInfo firstHandleInfo;
+            firstHandleInfo.paintRect = handle;
+            overlayInfo.firstHandleInfo = firstHandleInfo;
         }
         if (secondHandle.has_value()) {
-            selectInfo.secondHandle.isShow = pattern->CheckHandleVisible(secondHandle.value());
+            auto handle = secondHandle.value();
+            handle.SetOffset(handle.GetOffset() + pattern->GetTextPaintOffset());
+            SelectHandleInfo secondHandleInfo;
+            secondHandleInfo.paintRect = handle;
+            overlayInfo.secondHandleInfo = secondHandleInfo;
         }
-        selectInfo.isSingleHandle = !firstHandle.has_value() || !secondHandle.has_value();
-        if (selectInfo.isSingleHandle && pattern->IsTextArea() &&
-            pattern->GetSelectMode() == SelectionMode::SELECT_ALL) {
-            auto contentRect = pattern->GetContentRect();
-            auto parentGlobalOffset = pattern->GetParentGlobalOffset();
-            selectInfo.menuInfo.menuOffset =
+        overlayInfo.extraInfo.boolExtra.insert({ CLIPBOARD_HAS_DATA, hasData });
+        overlayInfo.extraInfo.boolExtra.insert({ SELECT_OVERLAY_MENU_IS_SHOW, isMenuShow });
+        pattern->RequestOpenSelectOverlay(overlayInfo);
+        auto start = pattern->GetTextSelectController()->GetStartIndex();
+        auto end = pattern->GetTextSelectController()->GetEndIndex();
+        pattern->UpdateSelectInfo(pattern->contentController_->GetSelectedValue(start, end));
+    };
+    clipboard_->HasData(hasDataCallback);
+}
+
+bool TextFieldPattern::OnPreShowSelectOverlay(SelectOverlayInfo& overlayInfo, OverlayExtraInfo& extraInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    bool isHideSelectionMenu = layoutProperty->GetSelectionMenuHiddenValue(false);
+    // right click menu
+    if (IsUsingMouse()) {
+        CHECK_NULL_RETURN(isHideSelectionMenu, false);
+        overlayInfo.rightClickOffset = GetRightClickOffset();
+        overlayInfo.isUsingMouse = true;
+    } else {
+        if (overlayInfo.isSingleHandle && IsTextArea() && GetSelectMode() == SelectionMode::SELECT_ALL) {
+            auto contentRect = GetContentRect();
+            auto parentGlobalOffset = GetParentGlobalOffset();
+            overlayInfo.menuInfo.menuOffset =
                 OffsetF(contentRect.GetOffset().GetX() + contentRect.Width() / 2.0 + parentGlobalOffset.GetX(),
                     contentRect.GetOffset().GetY() + parentGlobalOffset.GetY());
         }
-        selectInfo.onHandleMove = [weak](const RectF& handleRect, bool isFirst) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnHandleMove(handleRect, isFirst);
-        };
-        selectInfo.onHandleMoveDone = [weak](const RectF& handleRect, bool isFirst) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnHandleMoveDone(handleRect, isFirst);
-        };
+        overlayInfo.singleLineHeight = PreferredLineHeight();
+    }
+    auto hasTextContent = !contentController_->IsEmpty();
+    overlayInfo.menuInfo.showCopy = hasTextContent && AllowCopy() && IsSelected();
+    overlayInfo.menuInfo.showCut = overlayInfo.menuInfo.showCopy;
+    overlayInfo.menuInfo.showCopyAll = hasTextContent && !IsSelectAll();
+    auto hasData = extraInfo.GetBoolOrDefault(CLIPBOARD_HAS_DATA, false);
+    overlayInfo.menuInfo.showPaste = hasData;
+    overlayInfo.menuInfo.menuIsShow = (hasTextContent || hasData) && !isHideSelectionMenu &&
+                                      extraInfo.GetBoolOrDefault(SELECT_OVERLAY_MENU_IS_SHOW, false);
+    overlayInfo.isHandleLineShow = overlayInfo.isHandleLineShow && !IsSingleHandle();
+    overlayInfo.menuInfo.menuDisable = isHideSelectionMenu;
+    auto gesture = host->GetOrCreateGestureEventHub();
+    gesture->RemoveTouchEvent(GetTouchListener());
+    return true;
+}
 
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
+// 建议将函数名换成和overlay相关，此函数会和select中的handle产生歧义
+void TextFieldPattern::UpdateFirstHandlePosition(bool needLayout)
+{
+    auto proxy = GetSelectOverlayProxy();
+    CHECK_NULL_VOID(proxy);
+    SelectHandleInfo handleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
+    handleInfo.needLayout = needLayout;
+    proxy->UpdateFirstSelectHandleInfo(handleInfo);
+}
 
-        bool isHideSelectionMenu = layoutProperty->GetSelectionMenuHiddenValue(false);
-        selectInfo.isUsingMouse = pattern->IsUsingMouse();
-        if (isHideSelectionMenu && selectInfo.isUsingMouse) {
-            return;
-        }
+void TextFieldPattern::UpdateSecondHandlePosition(bool needLayout)
+{
+    auto proxy = GetSelectOverlayProxy();
+    CHECK_NULL_VOID(proxy);
+    SelectHandleInfo handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
+    proxy->UpdateSecondSelectHandleInfo(handleInfo);
+}
 
-        selectInfo.rightClickOffset = pattern->GetRightClickOffset();
-        selectInfo.singleLineHeight = pattern->PreferredLineHeight();
-        pattern->UpdateSelectMenuInfo(hasData, isHideSelectionMenu);
-        selectInfo.menuInfo = pattern->GetSelectMenuInfo();
-        if (!isMenuShow) {
-            selectInfo.menuInfo.menuIsShow = false;
-        }
-        if (pattern->isSingleHandle_) {
-            selectInfo.isHandleLineShow = false;
-        }
-        selectInfo.menuCallback.onCopy = [weak]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->HandleOnCopy();
-            pattern->CloseSelectOverlay(true);
-        };
+// 基于最新的代码整改
+void TextFieldPattern::UpdateDoubleHandlePosition(bool firstNeedLayout, bool secondNeedLayout)
+{
+    auto proxy = GetSelectOverlayProxy();
+    CHECK_NULL_VOID(proxy);
+    SelectHandleInfo firstHandleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
+    firstHandleInfo.needLayout = firstNeedLayout;
 
-        selectInfo.menuCallback.onCut = [weak]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->HandleOnCut();
-            pattern->CloseSelectOverlay(true);
-        };
+    SelectHandleInfo secondHandleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
+    secondHandleInfo.needLayout = secondNeedLayout;
+    proxy->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
 
-        selectInfo.menuCallback.onPaste = [weak]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->HandleOnPaste();
-            pattern->CloseSelectOverlay(true);
-        };
-        selectInfo.menuCallback.onSelectAll = [weak]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->HandleOnSelectAll(false);
-            pattern->UpdateCopyAllStatus();
-            pattern->SetNeedCloseOverlay(false);
-        };
-        selectInfo.onClose = [weak](bool closedByGlobalEvent) {
-            if (closedByGlobalEvent) {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                auto host = pattern->GetHost();
-                CHECK_NULL_VOID(host);
-                auto current = pattern->GetTextSelector().GetEnd();
-                pattern->SetInSelectMode(SelectionMode::NONE);
-                pattern->UpdateSelection(current);
-                pattern->MarkRedrawOverlay();
-                pattern->StartTwinkling();
-                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            }
-        };
+    auto selectionVisible = !firstHandleInfo.isShow && !secondHandleInfo.isShow && CheckSelectionRectVisible();
+    proxy->SetSelectRegionVisible(selectionVisible);
+}
 
-        if (!pattern->GetMenuOptionItems().empty()) {
-            selectInfo.menuOptionItems = pattern->GetMenuOptionItems();
-        }
-        auto gesture = host->GetOrCreateGestureEventHub();
-        gesture->RemoveTouchEvent(pattern->GetTouchListener());
-        pattern->SetSelectOverlay(pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(
-            selectInfo, WeakClaim(RawPtr(pattern)), animation));
-
-        auto selectOverlay = pattern->GetSelectOverlay();
-        CHECK_NULL_VOID(selectOverlay);
-        auto start = pattern->GetTextSelector().GetStart();
-        auto end = pattern->GetTextSelector().GetEnd();
-        selectOverlay->SetSelectInfo(pattern->GetTextEditingValue().GetSelectedText(start, end));
-        if (isMenuShow) {
-            selectOverlay->ShowOrHiddenMenu(isHideSelectionMenu);
-        }
-        selectOverlay->DisableMenu(isHideSelectionMenu);
-    };
-    clipboard_->HasData(hasDataCallback);
+SelectHandleInfo TextFieldPattern::GetSelectHandleInfo(OffsetF offset)
+{
+    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(),
+        selectController_->GetCaretRect().Height() };
+    // 要将相对textRect的坐标转换为全局坐标
+    auto paintRect = RectF(offset.GetX() + GetTextPaintOffset().GetX(), offset.GetY() + GetTextPaintOffset().GetY(),
+        handlePaintSize.Width(), handlePaintSize.Height());
+    return { .isShow = CheckHandleVisible(paintRect), .paintRect = paintRect };
 }
 
 bool TextFieldPattern::AllowCopy()
@@ -3035,6 +2059,11 @@ bool TextFieldPattern::AllowCopy()
 void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CloseSelectOverlay();
+    ResetSelectOverlayClient();
+    if (responseArea_) {
+        responseArea_->DestoryArea();
+        responseArea_.Reset();
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
@@ -3066,74 +2095,60 @@ void TextFieldPattern::CloseSelectOverlay()
 
 void TextFieldPattern::CloseSelectOverlay(bool animation)
 {
-    if (selectOverlayProxy_) {
-        LOGI("Close select overlay");
-        selectOverlayProxy_->Close(animation);
-    }
+    RequestCloseSelectOverlay(animation);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->AddTouchEvent(GetTouchListener());
-    originalIsMenuShow_ = false;
-}
-
-bool TextFieldPattern::SelectOverlayIsOn()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    CHECK_NULL_RETURN(selectOverlayProxy_, false);
-    auto overlayId = selectOverlayProxy_->GetSelectOverlayId();
-    return pipeline->GetSelectOverlayManager()->HasSelectOverlay(overlayId);
 }
 
 void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 {
     CHECK_NULL_VOID(SelectOverlayIsOn());
-    CHECK_NULL_VOID(!textEditingValue_.Empty());
-    isFirstHandle_ = isFirstHandle;
+    CHECK_NULL_VOID(!contentController_->IsEmpty());
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
-    isTouchAtLeftOffset_ = IsTouchAtLeftOffset(localOffset.GetX());
     auto position = UpdateCaretPositionOnHandleMove(localOffset);
-    textEditingValue_.CursorMoveToPosition(position);
-    auto caretMetrics = CalcCursorOffsetByPosition(position, isTouchAtLeftOffset_);
-    caretRect_.SetOffset(caretMetrics.offset);
-    selectionMode_ = isSingleHandle_ ? SelectionMode::NONE : SelectionMode::SELECT;
-    caretUpdateType_ = CaretUpdateType::HANDLE_MOVE;
-    UpdateTextSelectorByHandleMove(isFirstHandle, position, caretMetrics.offset);
-
-    auto selectOverlay = GetSelectOverlay();
-    CHECK_NULL_VOID(selectOverlay);
-    auto start = GetTextSelector().GetStart();
-    auto end = GetTextSelector().GetEnd();
-    selectOverlay->SetSelectInfo(GetTextEditingValue().GetSelectedText(start, end));
-
-    GetTextRectsInRange(start, end, textBoxes_);
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (isSingleHandle_) {
+        selectController_->MoveCaretToContentRect(position);
+    } else {
+        if (isFirstHandle) {
+            selectController_->MoveFirstHandleToContentRect(position);
+            auto proxy = GetSelectOverlayProxy();
+            CHECK_NULL_VOID(proxy);
+            SelectHandleInfo handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
+            proxy->UpdateSecondSelectHandleInfo(handleInfo);
+        } else {
+            selectController_->MoveSecondHandleToContentRect(position);
+            auto proxy = GetSelectOverlayProxy();
+            CHECK_NULL_VOID(proxy);
+            SelectHandleInfo handleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
+            proxy->UpdateFirstSelectHandleInfo(handleInfo);
+        }
+    }
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 int32_t TextFieldPattern::UpdateCaretPositionOnHandleMove(const OffsetF& localOffset)
 {
     int32_t position = 0;
     if (!IsTextArea()) {
-        if (localOffset.GetX() < contentRect_.GetX()) {
-            position = std::max(static_cast<int32_t>(textEditingValue_.caretPosition -
-                                                     GetGraphemeClusterLength(GetEditingValue().GetWideText(),
-                                                         GetEditingValue().caretPosition, true)),
+        if (LessNotEqual(localOffset.GetX(), contentRect_.GetX())) {
+            position = std::max(static_cast<int32_t>(selectController_->GetStartIndex() -
+                                                     GetGraphemeClusterLength(contentController_->GetWideText(),
+                                                         selectController_->GetStartIndex(), true)),
                 0);
         } else if (GreatOrEqual(localOffset.GetX(), contentRect_.GetX() + contentRect_.Width())) {
-            position = std::min(static_cast<int32_t>(textEditingValue_.caretPosition +
-                                                     GetGraphemeClusterLength(GetEditingValue().GetWideText(),
-                                                         GetEditingValue().caretPosition)),
-                static_cast<int32_t>(textEditingValue_.GetWideText().length()));
+            position = std::min(static_cast<int32_t>(selectController_->GetEndIndex() +
+                                                     GetGraphemeClusterLength(contentController_->GetWideText(),
+                                                         selectController_->GetEndIndex())),
+                static_cast<int32_t>(contentController_->GetWideText().length()));
         } else {
             Offset offset(localOffset.GetX() - textRect_.GetX(), 0.0f);
             position = ConvertTouchOffsetToCaretPosition(offset);
         }
         return position;
     }
-    if (localOffset.GetY() < contentRect_.GetY()) {
+    if (LessNotEqual(localOffset.GetY(), contentRect_.GetY())) {
         position = ConvertTouchOffsetToCaretPosition(Offset(
             localOffset.GetX() - GetPaddingLeft(), localOffset.GetY() - textRect_.GetY() - PreferredLineHeight()));
     } else if (GreatOrEqual(localOffset.GetY(), contentRect_.GetY() + contentRect_.Height())) {
@@ -3148,115 +2163,52 @@ int32_t TextFieldPattern::UpdateCaretPositionOnHandleMove(const OffsetF& localOf
 
 void TextFieldPattern::UpdateCopyAllStatus()
 {
-    selectMenuInfo_.showCopyAll = !IsSelectAll();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (selectOverlayProxy_ && !layoutProperty->GetSelectionMenuHiddenValue(false)) {
-        selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+    if (!layoutProperty->GetSelectionMenuHiddenValue(false)) {
+        UpdateSelectMenuInfo([weak = WeakClaim(this)](SelectMenuInfo& menuInfo) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            menuInfo.showCopyAll = !pattern->IsSelectAll();
+        });
     }
-}
-
-void TextFieldPattern::UpdateTextSelectorByHandleMove(
-    bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning)
-{
-    if (isSingleHandle_) {
-        textSelector_.selectionBaseOffset = offsetToParagraphBeginning;
-        textSelector_.selectionDestinationOffset = textSelector_.selectionBaseOffset;
-        UpdateSelection(position);
-        return;
-    }
-    if (isMovingBase) {
-        UpdateSelection(position, textSelector_.GetEnd());
-        textSelector_.selectionBaseOffset = offsetToParagraphBeginning;
-        return;
-    }
-    UpdateSelection(textSelector_.GetStart(), position);
-    textSelector_.selectionDestinationOffset = offsetToParagraphBeginning;
 }
 
 void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFirstHandle)
 {
-    CHECK_NULL_VOID(SelectOverlayIsOn());
-    caretUpdateType_ = CaretUpdateType::HANDLE_MOVE_DONE;
-    isFirstHandle_ = isFirstHandle;
-    if (!isSingleHandle_) {
-        StopTwinkling();
-    }
     UpdateCopyAllStatus();
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-}
-
-void TextFieldPattern::UpdateOtherHandleOnMove(float dx, float dy)
-{
-    SelectHandleInfo firstInfo, secondInfo;
-    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-    if (isFirstHandle_) {
-        // update position of the other handle
-        textSelector_.secondHandleOffset_.AddX(dx);
-        textSelector_.secondHandleOffset_.AddY(dy);
-        secondInfo.paintRect = { textSelector_.secondHandleOffset_, handlePaintSize };
-        // hide the other handle if it's outside content rect
-        auto handleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
-        secondInfo.isShow =
-            contentRect_.IsInRegion({ handleOffset.GetX(), handleOffset.GetY() + caretRect_.Height() / 2 });
-        selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondInfo);
-    } else {
-        textSelector_.firstHandleOffset_.AddX(dx);
-        textSelector_.firstHandleOffset_.AddY(dy);
-        firstInfo.paintRect = { textSelector_.firstHandleOffset_, handlePaintSize };
-
-        auto handleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
-        firstInfo.isShow =
-            contentRect_.IsInRegion({ handleOffset.GetX(), handleOffset.GetY() + caretRect_.Height() / 2 });
-        selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstInfo);
-    }
-}
-
-void TextFieldPattern::SetHandlerOnMoveDone()
-{
-    SelectHandleInfo info;
-    auto newHandleOffset = parentGlobalOffset_;
-    CaretMetricsF handleOffset;
+    auto proxy = GetSelectOverlayProxy();
+    CHECK_NULL_VOID(proxy);
     if (!isSingleHandle_) {
-        handleOffset = CalcCursorOffsetByPosition(
-            isFirstHandle_ ? textSelector_.baseOffset : textSelector_.destinationOffset, isFirstHandle_ ? true : false);
+        auto handleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
+        proxy->UpdateFirstSelectHandleInfo(handleInfo);
+        handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
+        proxy->UpdateSecondSelectHandleInfo(handleInfo);
     } else {
-        handleOffset = CalcCursorOffsetByPosition(textEditingValue_.caretPosition, isTouchAtLeftOffset_);
+        auto handleInfo = GetSelectHandleInfo(selectController_->GetCaretRect().GetOffset());
+        proxy->UpdateSecondSelectHandleInfo(handleInfo);
     }
-    newHandleOffset += handleOffset.offset;
-    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-    RectF newHandle;
-    newHandle.SetOffset(newHandleOffset);
-    newHandle.SetSize(handlePaintSize);
-    info.paintRect = newHandle;
-    info.needLayout = true;
-    selectionMode_ = isSingleHandle_ ? SelectionMode::NONE : SelectionMode::SELECT;
-    if (isFirstHandle_) {
-        textSelector_.firstHandleOffset_ = newHandleOffset;
-        selectOverlayProxy_->UpdateFirstSelectHandleInfo(info);
-        return;
+
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
+{
+    SelectOverlayClient::OnHandleClosed(closedByGlobalEvent);
+    if (closedByGlobalEvent) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        selectController_->UpdateCaretIndex(selectController_->GetSecondHandleIndex());
+        StartTwinkling();
     }
-    textSelector_.secondHandleOffset_ = newHandleOffset;
-    selectOverlayProxy_->UpdateSecondSelectHandleInfo(info);
 }
 
 void TextFieldPattern::InitEditingValueText(std::string content)
 {
-    textEditingValue_.text = std::move(content);
-    textEditingValue_.caretPosition = textEditingValue_.GetWideText().length();
-    SetEditingValueToProperty(textEditingValue_.text);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateNeedFireOnChange(true);
-}
-
-void TextFieldPattern::InitCaretPosition(std::string content)
-{
-    textEditingValue_.caretPosition = static_cast<int32_t>(StringUtils::ToWstring(content).length());
+    contentController_->SetTextValue(std::move(content));
+    selectController_->UpdateCaretIndex(static_cast<int32_t>(StringUtils::ToWstring(content).length()));
 }
 
 void TextFieldPattern::InitMouseEvent()
@@ -3342,125 +2294,102 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetMouseStyleHoldNode(frameId);
-
-    if (!IsSearchParentNode()) {
-        info.SetStopPropagation(true);
-    }
-
-    if (info.GetLocalLocation().GetX() > (frameRect_.Width() - imageRect_.Width() - GetIconRightOffset()) &&
-        NeedShowPasswordIcon()) {
+    auto responseAreaWidth = responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f;
+    if (info.GetLocalLocation().GetX() > (frameRect_.Width() - responseAreaWidth)) {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         return;
-    } else {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
     }
-
-    auto focusHub = tmpHost->GetOrCreateFocusHub();
-
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(tmpHost->GetParent());
-        focusHub = parentFrameNode->GetOrCreateFocusHub();
-    }
-
+    pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+    CloseSelectOverlay(true);
+    isUsingMouse_ = true;
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
-        if (info.GetAction() == MouseAction::PRESS) {
-            LOGI("Handle mouse right button press");
-            isMousePressed_ = true;
-        }
-        if (info.GetAction() == MouseAction::PRESS || info.GetAction() == MouseAction::RELEASE) {
-            CloseSelectOverlay(true);
-        }
-
-        if (info.GetAction() == MouseAction::RELEASE) {
-            LOGI("Handle mouse right button release");
-            rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
-                static_cast<float>(info.GetGlobalLocation().GetY()));
-            lastTouchOffset_ = info.GetLocalLocation();
-            caretUpdateType_ = CaretUpdateType::RIGHT_CLICK;
-            isSingleHandle_ = false;
-            isUsingMouse_ = true;
-            mouseStatus_ = MouseStatus::RELEASED;
-            isMousePressed_ = false;
-            ProcessOverlay(true);
-            caretUpdateType_ = CaretUpdateType::NONE;
-        }
-        return;
-    }
-    if (info.GetAction() == MouseAction::PRESS) {
-        LOGI("Handle mouse left button press");
-        if (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) {
-            blockPress_ = true;
-            return;
-        }
-        blockPress_ = false;
-        CloseSelectOverlay(true);
-        if (!focusHub->IsFocusable()) {
-            return;
-        }
-        isMousePressed_ = true;
-        isUsingMouse_ = true;
-        mouseStatus_ = MouseStatus::PRESSED;
-        StartTwinkling();
-        lastTouchOffset_ = info.GetLocalLocation();
-        isTouchAtLeftOffset_ = IsTouchAtLeftOffset(lastTouchOffset_.GetX());
-        caretUpdateType_ = CaretUpdateType::PRESSED;
-        selectionMode_ = SelectionMode::NONE;
-        UpdateCaretPositionByPressOffset();
-        auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE &&
-            (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately())) {
-            LOGW("Request focus failed, cannot open input method");
-            StopTwinkling();
-            return;
-        }
-        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        return;
-    }
-    if (info.GetAction() == MouseAction::RELEASE) {
-        LOGI("Handle mouse left button release");
-        if (blockPress_) {
-            blockPress_ = false;
-        }
-        if (isDoubleClick_) {
-            caretUpdateType_ = CaretUpdateType::EVENT;
-            isMousePressed_ = false;
-            mouseStatus_ = MouseStatus::RELEASED;
-            MarkRedrawOverlay();
-            tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        } else {
-            CloseSelectOverlay(true);
-            caretUpdateType_ = CaretUpdateType::NONE;
-            isMousePressed_ = false;
-            mouseStatus_ = MouseStatus::RELEASED;
-            if (!focusHub->IsCurrentFocus()) {
-                return;
-            }
-            if (RequestKeyboard(false, true, true)) {
-                auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
-                CHECK_NULL_VOID(eventHub);
-                eventHub->FireOnEditChanged(true);
-                tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            }
-        }
-    }
-
-    if (info.GetAction() == MouseAction::MOVE) {
-        if (!isMousePressed_ || blockPress_) {
-            return;
-        }
-        caretUpdateType_ = CaretUpdateType::EVENT;
-        lastTouchOffset_ = info.GetLocalLocation();
-        isTouchAtLeftOffset_ = IsTouchAtLeftOffset(lastTouchOffset_.GetX());
-        mouseStatus_ = MouseStatus::MOVE;
-        MarkRedrawOverlay();
-        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        HandleRightMouseEvent(info);
+    } else if (info.GetButton() == MouseButton::LEFT_BUTTON) {
+        HandleLeftMouseEvent(info);
     }
 }
 
-void TextFieldPattern::UpdatePositionOfParagraph(int32_t position)
+void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
 {
-    textEditingValue_.CursorMoveToPosition(position);
+    if (info.GetAction() == MouseAction::RELEASE) {
+        LOGI("Handle mouse right button release");
+        rightClickOffset_ = OffsetF(
+            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
+        ProcessOverlay();
+    }
+}
+
+void TextFieldPattern::HandleLeftMouseEvent(MouseInfo& info)
+{
+    switch (info.GetAction()) {
+        case OHOS::Ace::MouseAction::PRESS: {
+            HandleLeftMousePressEvent(info);
+            break;
+        }
+        case OHOS::Ace::MouseAction::MOVE: {
+            HandleLeftMouseMoveEvent(info); // 注意鼠标拖拽的滚动效果
+            break;
+        }
+        case OHOS::Ace::MouseAction::RELEASE: {
+            HandleLeftMouseReleaseEvent(info);
+            break;
+        }
+        default: {
+        }
+    }
+}
+
+void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
+{
+    if (selectController_->IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+        blockPress_ = true;
+        return;
+    }
+    auto focusHub = GetFocusHub();
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
+    mouseStatus_ = MouseStatus::PRESSED;
+    blockPress_ = false;
+    leftMouseCanMove_ = true;
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE &&
+        (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately())) {
+        StopTwinkling();
+        return;
+    }
+    selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+    StartTwinkling();
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
+{
+    if (!leftMouseCanMove_ || blockPress_) {
+        return;
+    }
+    mouseStatus_ = MouseStatus::MOVE;
+    selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
+{
+    if (blockPress_ && mouseStatus_ == MouseStatus::PRESSED) {
+        selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+        StartTwinkling();
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    mouseStatus_ = MouseStatus::NONE;
+    blockPress_ = false;
+    leftMouseCanMove_ = false;
+    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (HasFocus() && RequestKeyboard(false, true, true)) {
+        eventHub->FireOnEditChanged(true);
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height)
@@ -3482,9 +2411,7 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
 TextInputAction TextFieldPattern::GetDefaultTextInputAction()
 {
     TextInputAction defaultTextInputAction = TextInputAction::DONE;
-    if (IsSearchParentNode()) {
-        defaultTextInputAction = TextInputAction::SEARCH;
-    } else if (IsTextArea()) {
+    if (IsTextArea()) {
         defaultTextInputAction = TextInputAction::UNSPECIFIED;
     } else {
         defaultTextInputAction = TextInputAction::DONE;
@@ -3492,6 +2419,7 @@ TextInputAction TextFieldPattern::GetDefaultTextInputAction()
     return defaultTextInputAction;
 }
 
+// todo 代整改
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     auto tmpHost = GetHost();
@@ -3543,9 +2471,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
                 return false;
             }
             TextEditingValue value;
-            value.text = textEditingValue_.text;
+            value.text = contentController_->GetTextValue();
             value.hint = GetPlaceHolder();
-            value.selection.Update(textSelector_.baseOffset, textSelector_.destinationOffset);
+            value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
             connection_->SetEditingState(value, GetInstanceId());
         }
         connection_->Show(isFocusViewChanged, GetInstanceId());
@@ -3562,15 +2490,16 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto pipeline = tmpHost->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto windowRect = pipeline->GetCurrentWindowRect();
-    MiscServices::CursorInfo cursorInfo { .left = caretRect_.Left() + windowRect.Left() + parentGlobalOffset_.GetX(),
-        .top = caretRect_.Top() + windowRect.Top() + parentGlobalOffset_.GetY(),
+    MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
+                                                  parentGlobalOffset_.GetX(),
+        .top = selectController_->GetCaretRect().Top() + windowRect.Top() + parentGlobalOffset_.GetY(),
         .width = CURSOR_WIDTH.ConvertToPx(),
-        .height = caretRect_.Height() };
+        .height = selectController_->GetCaretRect().Height() };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
         .enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE) };
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
-        .range = { .start = textSelector_.GetStart(), .end = textSelector_.GetEnd() },
+        .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
         .windowId = pipeline->GetFocusWindowId() };
     return textConfig;
 }
@@ -3643,201 +2572,6 @@ bool TextFieldPattern::CloseCustomKeyboard()
     return true;
 }
 
-void TextFieldPattern::ProcessPasswordIcon()
-{
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
-        return;
-    }
-
-    bool showPasswordIcon = layoutProperty->GetShowPasswordIconValue(true);
-    if (!showPasswordIcon) {
-        return;
-    }
-    if (textObscured_) {
-        ImageSourceInfo hidePasswordSourceInfo = GetImageSourceInfoFromTheme(textObscured_);
-        if (hideUserDefinedIcon_) {
-            UpdateUserDefineResource(hidePasswordSourceInfo);
-        } else {
-            UpdateInternalResource(hidePasswordSourceInfo);
-        }
-        LoadNotifier hideIconLoadNotifier(CreateDataReadyCallback(textObscured_),
-            CreateLoadSuccessCallback(textObscured_), CreateLoadFailCallback(textObscured_));
-        hidePasswordImageLoadingCtx_ =
-            AceType::MakeRefPtr<ImageLoadingContext>(hidePasswordSourceInfo, std::move(hideIconLoadNotifier), true);
-        hidePasswordImageLoadingCtx_->LoadImageData();
-        return;
-    }
-    if (!textObscured_) {
-        ImageSourceInfo showPasswordSourceInfo = GetImageSourceInfoFromTheme(textObscured_);
-        if (showUserDefinedIcon_) {
-            UpdateUserDefineResource(showPasswordSourceInfo);
-        } else {
-            UpdateInternalResource(showPasswordSourceInfo);
-        }
-        LoadNotifier showIconLoadNotifier(CreateDataReadyCallback(textObscured_),
-            CreateLoadSuccessCallback(textObscured_), CreateLoadFailCallback(textObscured_));
-        showPasswordImageLoadingCtx_ =
-            AceType::MakeRefPtr<ImageLoadingContext>(showPasswordSourceInfo, std::move(showIconLoadNotifier), true);
-        showPasswordImageLoadingCtx_->LoadImageData();
-        return;
-    }
-}
-
-ImageSourceInfo TextFieldPattern::GetImageSourceInfoFromTheme(bool checkHidePasswordIcon)
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, {});
-    auto context = tmpHost->GetContext();
-    CHECK_NULL_RETURN(context, {});
-    ImageSourceInfo imageSourceInfo;
-    auto theme = context->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(theme, imageSourceInfo);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, imageSourceInfo);
-    if (checkHidePasswordIcon && hideUserDefinedIcon_) {
-        return layoutProperty->GetHidePasswordSourceInfoValue(imageSourceInfo);
-    }
-    if (checkHidePasswordIcon) {
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::HIDE_PASSWORD_SVG);
-        return imageSourceInfo;
-    }
-    if (showUserDefinedIcon_) {
-        return layoutProperty->GetShowPasswordSourceInfoValue(imageSourceInfo);
-    }
-    imageSourceInfo.SetResourceId(InternalResource::ResourceId::SHOW_PASSWORD_SVG);
-    return imageSourceInfo;
-}
-
-void TextFieldPattern::UpdateUserDefineResource(ImageSourceInfo& sourceInfo)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto iconPath = sourceInfo.GetSrc();
-    if (iconPath.empty()) {
-        LOGE("Icon path empty");
-        return;
-    }
-    sourceInfo.SetDimension(DEFAULT_FONT, DEFAULT_FONT);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (textObscured_) {
-        layoutProperty->UpdateHidePasswordSourceInfo(sourceInfo);
-        return;
-    }
-    layoutProperty->UpdateShowPasswordSourceInfo(sourceInfo);
-}
-
-void TextFieldPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
-{
-    CHECK_NULL_VOID(sourceInfo.IsInternalResource());
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto iconTheme = pipeline->GetTheme<IconTheme>();
-    CHECK_NULL_VOID(iconTheme);
-    auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
-    if (iconPath.empty()) {
-        LOGE("Icon path empty");
-        return;
-    }
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    if (IsDisabled()) {
-        sourceInfo.SetSrc(iconPath, theme->GetDisableTextColor());
-    } else {
-        sourceInfo.SetSrc(iconPath);
-    }
-    sourceInfo.SetDimension(DEFAULT_FONT, DEFAULT_FONT);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (textObscured_) {
-        layoutProperty->UpdateHidePasswordSourceInfo(sourceInfo);
-        return;
-    }
-    layoutProperty->UpdateShowPasswordSourceInfo(sourceInfo);
-}
-
-LoadSuccessNotifyTask TextFieldPattern::CreateLoadSuccessCallback(bool checkHidePasswordIcon)
-{
-    auto task = [weak = WeakClaim(this), checkHidePasswordIcon](const ImageSourceInfo& /* sourceInfo */) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnImageLoadSuccess(checkHidePasswordIcon);
-    };
-    return task;
-}
-
-DataReadyNotifyTask TextFieldPattern::CreateDataReadyCallback(bool checkHidePasswordIcon)
-{
-    auto task = [weak = WeakClaim(this), checkHidePasswordIcon](const ImageSourceInfo& /* sourceInfo */) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnImageDataReady(checkHidePasswordIcon);
-    };
-    return task;
-}
-
-LoadFailNotifyTask TextFieldPattern::CreateLoadFailCallback(bool checkHidePasswordIcon)
-{
-    auto task = [weak = WeakClaim(this), checkHidePasswordIcon](
-                    const ImageSourceInfo& /* sourceInfo */, const std::string& msg) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnImageLoadFail(checkHidePasswordIcon);
-    };
-    return task;
-}
-
-void TextFieldPattern::OnImageLoadFail(bool checkHidePasswordIcon)
-{
-    LOGE("Image data load fail for %{public}s", checkHidePasswordIcon ? "hide icon" : "show icon");
-    if (checkHidePasswordIcon && hideUserDefinedIcon_) {
-        hideUserDefinedIcon_ = false;
-        ProcessPasswordIcon();
-        hideUserDefinedIcon_ = true;
-    }
-    if (!checkHidePasswordIcon && showUserDefinedIcon_) {
-        showUserDefinedIcon_ = false;
-        ProcessPasswordIcon();
-        showUserDefinedIcon_ = true;
-    }
-}
-
-void TextFieldPattern::OnImageDataReady(bool checkHidePasswordIcon)
-{
-    ACE_SCOPED_TRACE("TextFieldPattern::OnImageDataReady");
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    LOGI("Image data ready for %{public}s", checkHidePasswordIcon ? "hide icon" : "show icon");
-
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-}
-
-void TextFieldPattern::OnImageLoadSuccess(bool checkHidePasswordIcon)
-{
-    ACE_SCOPED_TRACE("TextFieldPattern::OnImageLoadSuccess");
-    ImagePaintConfig config;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
-    if (checkHidePasswordIcon) {
-        LOGI("Load hide icon successfully");
-        hidePasswordCanvasImage_ = hidePasswordImageLoadingCtx_->MoveCanvasImage();
-        config.srcRect_ = hidePasswordImageLoadingCtx_->GetSrcRect();
-        config.dstRect_ = hidePasswordImageLoadingCtx_->GetDstRect();
-        config.isSvg_ = hidePasswordImageLoadingCtx_->GetSourceInfo().IsSvg();
-        hidePasswordCanvasImage_->SetPaintConfig(config);
-        return;
-    }
-    LOGI("Load show icon successfully");
-    showPasswordCanvasImage_ = showPasswordImageLoadingCtx_->MoveCanvasImage();
-    config.srcRect_ = showPasswordImageLoadingCtx_->GetSrcRect();
-    config.dstRect_ = showPasswordImageLoadingCtx_->GetDstRect();
-    config.isSvg_ = showPasswordImageLoadingCtx_->GetSourceInfo().IsSvg();
-    showPasswordCanvasImage_->SetPaintConfig(config);
-}
-
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
@@ -3847,75 +2581,51 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     }
     auto wideInsertValue = StringUtils::ToWstring(insertValue);
     LOGD("Insert length %{public}d", static_cast<int32_t>(wideInsertValue.length()));
-    auto originLength = static_cast<uint32_t>(textEditingValue_.GetWideText().length());
+    auto originLength = static_cast<uint32_t>(contentController_->GetWideText().length());
     if (originLength >= GetMaxLength() && !IsSelected()) {
         LOGW("Max length reached");
         return;
     }
-
-    std::string valueToUpdate;
-    if (originLength + wideInsertValue.length() >= GetMaxLength() && !IsSelected()) {
-        valueToUpdate = StringUtils::ToString(wideInsertValue.substr(0, GetMaxLength() - originLength));
-    } else {
-        valueToUpdate = insertValue;
-    }
-    std::string oldText = textEditingValue_.text;
     auto caretStart = 0;
-    std::string result;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto start = textSelector_.GetStart();
-    auto end = textSelector_.GetEnd();
-    SwapIfLarger(start, end);
+    auto start = selectController_->GetStartIndex();
+    auto end = selectController_->GetEndIndex();
+    // SwapIfLarger(start, end);
     if (IsSelected()) {
         LOGI("In select mode, replace selected text");
         caretStart = start;
     } else {
-        caretStart = textEditingValue_.caretPosition;
+        caretStart = selectController_->GetCaretIndex();
     }
-    EditingValueFilter(valueToUpdate, result, true);
-    if (result.empty()) {
-        return;
-    }
+    int32_t caretMoveLength = 0;
     if (IsSelected()) {
-        textEditingValue_.text =
-            textEditingValue_.GetValueBeforePosition(start) + result + textEditingValue_.GetValueAfterPosition(end);
+        auto originLength = static_cast<int32_t>(contentController_->GetWideText().length()) - (end - start);
+        contentController_->ReplaceSelectedValue(start, end, insertValue);
+        caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
     } else {
-        textEditingValue_.text =
-            textEditingValue_.GetValueBeforeCursor() + result + textEditingValue_.GetValueAfterCursor();
+        auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
+        contentController_->InsertValue(selectController_->GetCaretIndex(), insertValue);
+        caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
     }
-    textEditingValue_.CursorMoveToPosition(caretStart + static_cast<int32_t>(StringUtils::ToWstring(result).length()));
+    selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
     if (!IsTextArea() && IsInPasswordMode() && GetTextObscured()) {
         if (wideInsertValue.length() == 1) {
             obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
-            nakedCharPosition_ = textEditingValue_.caretPosition - 1;
+            nakedCharPosition_ = selectController_->GetCaretIndex() - 1;
         } else {
             obscureTickCountDown_ = 0;
             nakedCharPosition_ = -1;
         }
     }
-    SetEditingValueToProperty(textEditingValue_.text);
     UpdateEditingValueToRecord();
-    caretUpdateType_ = CaretUpdateType::INPUT;
     cursorVisible_ = true;
     selectionMode_ = SelectionMode::NONE;
     CloseSelectOverlay(true);
     StartTwinkling();
-    // If the parent node is a Search, the Search callback is executed.
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->UpdateChangeEvent(textEditingValue_.text);
-        parentFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        return;
-    }
-
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnChange(textEditingValue_.text);
+    FireOnTextChangeEvent();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
@@ -3934,172 +2644,31 @@ void TextFieldPattern::UpdateEditingValueToRecord()
         }
         operationRecords_.erase(operationRecords_.begin());
     }
-    operationRecords_.emplace_back(textEditingValue_);
-}
-
-void TextFieldPattern::UpdateEditingValueCaretPositionToRecord()
-{
-    if (operationRecords_.empty()) {
-        LOGW("Operation records empty, cannot update position");
-        return;
-    }
-    if (operationRecords_.back().caretPosition != textEditingValue_.caretPosition) {
-        operationRecords_.back().caretPosition = textEditingValue_.caretPosition;
-    }
-}
-
-bool TextFieldPattern::FilterWithRegex(
-    const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape)
-{
-    if (filter.empty() || valueToUpdate.empty()) {
-        LOGD("Text is empty or filter is empty");
-        return false;
-    }
-    std::string escapeFilter;
-    if (needToEscape && !TextFieldControllerBase::EscapeString(filter, escapeFilter)) {
-        LOGE("Escape filter string failed");
-        return false;
-    }
-    if (!needToEscape) {
-        escapeFilter = filter;
-    }
-    std::regex filterRegex(escapeFilter);
-    auto errorText = regex_replace(valueToUpdate, filterRegex, "");
-    RemoveErrorTextFromValue(valueToUpdate, errorText, result);
-    auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, false);
-    if (!errorText.empty()) {
-        auto textFieldEventHub = tmpHost->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_RETURN(textFieldEventHub, false);
-        LOGI("Error text %{private}s", errorText.c_str());
-        textFieldEventHub->FireOnInputFilterError(errorText);
-    }
-    auto textFieldAccessibilityProperty = tmpHost->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
-    CHECK_NULL_RETURN(textFieldAccessibilityProperty, false);
-    textFieldAccessibilityProperty->SetErrorText(errorText);
-    return !errorText.empty();
-}
-
-void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::string& result, bool isInsertValue)
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto textFieldLayoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    // filter text editing value with user defined filter first
-    auto inputFilter = textFieldLayoutProperty->GetInputFilterValue("");
-    bool textChanged = false;
-    if (!inputFilter.empty()) {
-        textChanged |= FilterWithRegex(inputFilter, valueToUpdate, result);
-    }
-    if (textChanged) {
-        valueToUpdate = result;
-        textChanged = false;
-    }
-    result = "";
-    switch (textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
-        case TextInputType::NUMBER: {
-            textChanged |= FilterWithRegex(DIGIT_WHITE_LIST, valueToUpdate, result);
-            break;
-        }
-        case TextInputType::PHONE: {
-            textChanged |= FilterWithRegex(PHONE_WHITE_LIST, valueToUpdate, result);
-            break;
-        }
-        case TextInputType::EMAIL_ADDRESS: {
-            if (valueToUpdate == "@" && isInsertValue) {
-                auto charExists = textEditingValue_.text.find('@') != std::string::npos;
-                result = charExists ? "" : valueToUpdate;
-                return;
-            } else {
-                textChanged |= FilterWithRegex(EMAIL_WHITE_LIST, valueToUpdate, result);
-                textChanged |= FilterWithEmail(result);
-            }
-            break;
-        }
-        case TextInputType::URL: {
-            textChanged |= FilterWithRegex(URL_WHITE_LIST, valueToUpdate, result);
-            break;
-        }
-        case TextInputType::VISIBLE_PASSWORD: {
-            textChanged |= FilterWithAscii(valueToUpdate, result);
-            break;
-        }
-        default: {
-            // No need limit.
-        }
-    }
-    if (!textChanged) {
-        result = valueToUpdate;
-    }
-}
-
-bool TextFieldPattern::FilterWithAscii(const std::string& valueToUpdate, std::string& result)
-{
-    if (valueToUpdate.empty()) {
-        LOGD("Text is empty or filter is empty");
-        return false;
-    }
-    bool textChange = true;
-    std::string errorText = "";
-    for (size_t valuePtr = 0; valuePtr < valueToUpdate.size(); valuePtr++) {
-        if (isascii(valueToUpdate[valuePtr])) {
-            result += valueToUpdate[valuePtr];
-        } else {
-            errorText += valueToUpdate[valuePtr];
-        }
-    }
-    if (errorText.empty()) {
-        textChange = false;
-    } else {
-        LOGI("FilterWithAscii Error text %{private}s", errorText.c_str());
-    }
-    return textChange;
-}
-
-bool TextFieldPattern::FilterWithEmail(std::string& result)
-{
-    auto valueToUpdate = result;
-    bool first = true;
-    std::replace_if(
-        result.begin(), result.end(),
-        [&first](const char c) {
-            if (c == '@' && !first)
-                return true;
-            if (c == '@')
-                first = false;
-            return false;
-        },
-        ' ');
-
-    // remove the spaces
-    result.erase(std::remove(result.begin(), result.end(), ' '), result.end());
-    return result != valueToUpdate;
+    TextEditingValueNG record {
+        .text = contentController_->GetTextValue(),
+        .caretPosition = selectController_->GetCaretIndex(),
+    };
+    operationRecords_.emplace_back(record);
 }
 
 float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
 {
+    if (paragraph_ && paragraph_->GetHeight() != 0.0f) {
+        return paragraph_->GetHeight() / paragraph_->GetLineCount();
+    }
+    RefPtr<Paragraph> paragraph;
+    std::string textContent;
+    TextStyle textStyle;
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, 0.0f);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
-    // check if util paragraph need to update
-    if (!isPlaceholder &&
-        (textLineHeightUtilParagraph_ && !layoutProperty->GetPreferredTextLineHeightNeedToUpdateValue(true))) {
-        return static_cast<float>(textLineHeightUtilParagraph_->GetHeight());
-
-    } else if (isPlaceholder && (placeholderLineHeightUtilParagraph_ &&
-                                    !layoutProperty->GetPreferredPlaceholderLineHeightNeedToUpdateValue(true))) {
-        return static_cast<float>(placeholderLineHeightUtilParagraph_->GetHeight());
-    }
-    auto pipeline = tmpHost->GetContext();
+    auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, 0.0f);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
-    std::string textContent;
-    TextStyle textStyle;
     // use text or placeHolder value if exists, space otherwise
     if (!isPlaceholder) {
         TextFieldLayoutAlgorithm::UpdateTextStyle(tmpHost, layoutProperty, textFieldTheme, textStyle, false);
@@ -4111,91 +2680,41 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
     if (textStyle.GetFontSize().IsNonPositive()) {
         textStyle.SetFontSize(DEFAULT_FONT);
     }
-    RSParagraphStyle paraStyle;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    paraStyle.textDirection_ = ToRSTextDirection(TextFieldLayoutAlgorithm::GetTextDirection(textEditingValue_.text));
-    paraStyle.textAlign_ = ToRSTextAlign(textStyle.GetTextAlign());
-    paraStyle.maxLines_ = textStyle.GetMaxLines();
-    paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
-    paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
-    paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
-    if (LessOrEqual(paraStyle.fontSize_, 0.0f)) {
-        paraStyle.fontSize_ = DEFAULT_FONT.ConvertToPx();
-#else
-    paraStyle.textDirection = ToRSTextDirection(TextFieldLayoutAlgorithm::GetTextDirection(textEditingValue_.text));
-    paraStyle.textAlign = ToRSTextAlign(textStyle.GetTextAlign());
-    paraStyle.maxLines = textStyle.GetMaxLines();
-    paraStyle.locale = Localization::GetInstance()->GetFontLocale();
-    paraStyle.wordBreakType = ToRSWordBreakType(textStyle.GetWordBreak());
-    paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
-    if (LessOrEqual(paraStyle.fontSize, 0.0f)) {
-        paraStyle.fontSize = DEFAULT_FONT.ConvertToPx();
-#endif
-    }
-    if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
-#else
-        paraStyle.ellipsis = RSParagraphStyle::ELLIPSIS;
-#endif
-    }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
-#else
-    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
-#endif
-    builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
-    StringUtils::TransformStrCase(textEditingValue_.text, static_cast<int32_t>(textStyle.GetTextCase()));
-#ifndef USE_GRAPHIC_TEXT_GINE
-    builder->AddText(StringUtils::Str8ToStr16(textContent));
-    builder->Pop();
-#else
-    builder->AppendText(StringUtils::Str8ToStr16(textContent));
-    builder->PopStyle();
-#endif
-    if (!isPlaceholder) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        textLineHeightUtilParagraph_ = builder->Build();
-#else
-        textLineHeightUtilParagraph_ = builder->CreateTypography();
-#endif
-        textLineHeightUtilParagraph_->Layout(std::numeric_limits<double>::infinity());
-        layoutProperty->UpdatePreferredTextLineHeightNeedToUpdate(false);
-        return static_cast<float>(textLineHeightUtilParagraph_->GetHeight());
-    }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    placeholderLineHeightUtilParagraph_ = builder->Build();
-#else
-    placeholderLineHeightUtilParagraph_ = builder->CreateTypography();
-#endif
-    placeholderLineHeightUtilParagraph_->Layout(std::numeric_limits<double>::infinity());
-    layoutProperty->UpdatePreferredPlaceholderLineHeightNeedToUpdate(false);
-    return static_cast<float>(placeholderLineHeightUtilParagraph_->GetHeight());
+    ParagraphStyle paraStyle { .direction =
+                                   TextFieldLayoutAlgorithm::GetTextDirection(contentController_->GetTextValue()),
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow(),
+        .fontSize = textStyle.GetFontSize().ConvertToPx() };
+    paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    CHECK_NULL_RETURN(paragraph, 0.0f);
+    paragraph->AddText(StringUtils::Str8ToStr16(textContent));
+    paragraph->Build();
+    paragraph->Layout(std::numeric_limits<double>::infinity());
+    return paragraph->GetHeight();
 }
 
 float TextFieldPattern::PreferredLineHeight()
 {
-    return PreferredTextHeight(textEditingValue_.text.empty());
+    return PreferredTextHeight(contentController_->IsEmpty());
 }
 
 void TextFieldPattern::OnCursorMoveDone()
 {
     CloseSelectOverlay();
-    caretUpdateType_ = CaretUpdateType::EVENT;
     selectionMode_ = SelectionMode::NONE;
-    UpdateSelection(textEditingValue_.caretPosition);
-    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    selectController_->MoveCaretToContentRect(GetCaretIndex());
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t directionMove)
 {
-    if (textEditingValue_.text.empty()) {
+    if (contentController_->IsEmpty()) {
         return 0;
     }
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
     if (originCaretPosition < 0 || originCaretPosition > textLength) {
         LOGD("Get word length failed, the origin caret position is out of range");
         return 0;
@@ -4207,7 +2726,7 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
     }
     int32_t offset = 0;
     int32_t strIndex = 0;
-    auto wideTextValue = textEditingValue_.GetWideText();
+    auto wideTextValue = contentController_->GetWideText();
     for (directionMove == 0 ? strIndex = (originCaretPosition - 1) : strIndex = originCaretPosition;
          directionMove == 0 ? strIndex >= 0 : strIndex <= textLength;) {
         if ((wideTextValue[strIndex] >= L'0' && wideTextValue[strIndex] <= L'9') ||
@@ -4232,10 +2751,11 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
 
 int32_t TextFieldPattern::GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged)
 {
-    if (textEditingValue_.text.empty()) {
+    if (contentController_->IsEmpty()) {
         return 0;
     }
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+    auto wideTextValue = contentController_->GetWideText();
+    int32_t textLength = static_cast<int32_t>(wideTextValue.length());
     if (originCaretPosition < 0 || originCaretPosition > textLength) {
         LOGD("Get begin position failed, the origin caret position is out of range");
         return 0;
@@ -4245,7 +2765,6 @@ int32_t TextFieldPattern::GetLineBeginPosition(int32_t originCaretPosition, bool
     }
     int32_t moveLineBeginOffset = 0;
     int32_t strIndex = originCaretPosition;
-    auto wideTextValue = textEditingValue_.GetWideText();
     do {
         moveLineBeginOffset++;
         strIndex--;
@@ -4266,10 +2785,11 @@ int32_t TextFieldPattern::GetLineBeginPosition(int32_t originCaretPosition, bool
 
 int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged)
 {
-    if (textEditingValue_.text.empty()) {
+    if (contentController_->IsEmpty()) {
         return 0;
     }
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+    auto wideTextValue = contentController_->GetWideText();
+    int32_t textLength = static_cast<int32_t>(wideTextValue.length());
     if (originCaretPosition < 0 || originCaretPosition > textLength) {
         LOGD("Get line end position failed, the origin caret position is out of range");
         return originCaretPosition;
@@ -4279,7 +2799,6 @@ int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool n
     }
     int32_t moveLineEndOffset = 0;
     int32_t strIndex = 0;
-    auto wideTextValue = textEditingValue_.GetWideText();
     for (strIndex = originCaretPosition + 1; (strIndex <= textLength && wideTextValue[strIndex] != L'\n') ||
                                              (needToCheckLineChanged && !CharLineChanged(strIndex));
          strIndex++) {
@@ -4293,74 +2812,72 @@ int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool n
 
 bool TextFieldPattern::CharLineChanged(int32_t caretPosition)
 {
-    if (caretPosition < 0 || caretPosition > static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
+    if (caretPosition < 0 || caretPosition > static_cast<int32_t>(contentController_->GetWideText().length())) {
         return true;
     }
-    auto caretMetrics = CalcCursorOffsetByPosition(caretPosition);
-    return !NearEqual(caretMetrics.offset.GetY(), caretRect_.GetY());
+    CaretMetricsF caretMetrics;
+    CalcCaretMetricsByPosition(selectController_->GetStartIndex(), caretMetrics);
+    return !NearEqual(caretMetrics.offset.GetY(), selectController_->GetCaretRect().GetY());
 }
 
 bool TextFieldPattern::CursorMoveLeft()
 {
     LOGI("Handle cursor move left");
     ResetObscureTickCountDown();
-    auto originCaretPosition = textEditingValue_.caretPosition;
-    if (IsSelected() && selectionMode_ == SelectionMode::SELECT_ALL) {
-        textEditingValue_.caretPosition = 0;
-    } else if (IsSelected()) {
-        textBoxes_.clear();
+    auto originCaretPosition = selectController_->GetCaretIndex();
+    if (IsSelected()) {
+        selectController_->UpdateCaretIndex(
+            selectController_->GetEndIndex() - GetGraphemeClusterLength(contentController_->GetWideText(),
+                                                   selectController_->GetSecondHandleIndex(), true));
+        CloseSelectOverlay();
     } else {
         UpdateCaretPositionWithClamp(
-            textEditingValue_.caretPosition -
-            GetGraphemeClusterLength(textEditingValue_.GetWideText(), textEditingValue_.caretPosition, true));
+            selectController_->GetCaretIndex() -
+            GetGraphemeClusterLength(contentController_->GetWideText(), selectController_->GetCaretIndex(), true));
     }
     OnCursorMoveDone();
-    if (originCaretPosition == textEditingValue_.caretPosition) {
-        return false;
-    }
-    return true;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveLeftWord()
 {
-    if (textEditingValue_.caretPosition == 0) {
+    if (selectController_->GetCaretIndex() == 0) {
         LOGW("Caret position at beginning, cannot move to left");
         return true;
     }
-    int32_t originCaretPosition = textEditingValue_.caretPosition;
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+    int32_t originCaretPosition = selectController_->GetCaretIndex();
+    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
     int32_t leftWordLength = GetWordLength(originCaretPosition, 0);
-    if (leftWordLength < 0 || leftWordLength > textLength || textEditingValue_.caretPosition - leftWordLength < 0) {
+    if (leftWordLength < 0 || leftWordLength > textLength || selectController_->GetCaretIndex() - leftWordLength < 0) {
         LOGD("Get left word length faild, the left word offset is out of range");
         return false;
     }
-    if (IsSelected() && selectionMode_ == SelectionMode::SELECT_ALL) {
-        textEditingValue_.caretPosition = 0;
-    } else if (IsSelected()) {
-        textBoxes_.clear();
+    if (IsSelected()) {
+        selectController_->UpdateCaretIndex(selectController_->GetSecondHandleIndex() - leftWordLength);
+        CloseSelectOverlay();
     } else {
         UpdateCaretPositionWithClamp(originCaretPosition - leftWordLength);
     }
     ResetObscureTickCountDown();
     OnCursorMoveDone();
-    return originCaretPosition != textEditingValue_.caretPosition;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveLineBegin()
 {
-    if (textEditingValue_.caretPosition == 0) {
+    if (selectController_->GetCaretIndex() == 0) {
         LOGW("Caret position at beginning, cannot move to left");
         return true;
     }
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
-    int32_t originCaretPosition = textEditingValue_.caretPosition;
+    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    int32_t originCaretPosition = selectController_->GetCaretIndex();
     int32_t lineBeginPosition = GetLineBeginPosition(originCaretPosition);
     if (lineBeginPosition < 0 || lineBeginPosition > textLength) {
         LOGD("Cursor move to line begin faild, the line begin offset is out of range");
         return false;
     }
-    if (IsSelected() && selectionMode_ == SelectionMode::SELECT_ALL) {
-        textEditingValue_.caretPosition = 0;
+    if (selectController_->IsSelectedAll()) {
+        selectController_->UpdateCaretIndex(0);
     } else if (IsTextArea()) {
         UpdateCaretPositionWithClamp(lineBeginPosition);
     } else {
@@ -4368,94 +2885,90 @@ bool TextFieldPattern::CursorMoveLineBegin()
     }
     ResetObscureTickCountDown();
     OnCursorMoveDone();
-    return originCaretPosition != textEditingValue_.caretPosition;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveToParagraphBegin()
 {
-    if (textEditingValue_.caretPosition == 0) {
+    if (selectController_->GetCaretIndex() == 0) {
         LOGW("Caret position at beginning, cannot move to left");
         return true;
     }
-    auto originCaretPosition = textEditingValue_.caretPosition;
+    auto originCaretPosition = selectController_->GetCaretIndex();
     UpdateCaretPositionWithClamp(GetLineBeginPosition(originCaretPosition, false));
     OnCursorMoveDone();
-    return originCaretPosition != textEditingValue_.caretPosition;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveHome()
 {
     // ctrl + home, caret move to position 0
-    if (textEditingValue_.caretPosition == 0) {
+    if (selectController_->GetCaretIndex() == 0) {
         LOGW("Caret position at beginning, cannot move to left");
         return true;
     }
-    int32_t originCaretPosition = textEditingValue_.caretPosition;
+    int32_t originCaretPosition = selectController_->GetCaretIndex();
     UpdateCaretPositionWithClamp(0);
     OnCursorMoveDone();
-    return originCaretPosition != textEditingValue_.caretPosition;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveRight()
 {
     LOGI("Handle cursor move right");
     ResetObscureTickCountDown();
-    auto originCaretPosition = textEditingValue_.caretPosition;
-    if (IsSelected() && selectionMode_ == SelectionMode::SELECT_ALL) {
-        textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.GetWideText().length());
-    } else if (IsSelected()) {
-        textBoxes_.clear();
+    auto originCaretPosition = selectController_->GetCaretIndex();
+    if (IsSelected()) {
+        CloseSelectOverlay();
+        selectController_->UpdateCaretIndex(selectController_->GetEndIndex() + 1);
     } else {
         UpdateCaretPositionWithClamp(
-            textEditingValue_.caretPosition +
-            GetGraphemeClusterLength(textEditingValue_.GetWideText(), textEditingValue_.caretPosition));
+            selectController_->GetCaretIndex() +
+            GetGraphemeClusterLength(contentController_->GetWideText(), selectController_->GetCaretIndex()));
     }
     OnCursorMoveDone();
-    if (originCaretPosition == textEditingValue_.caretPosition) {
-        return false;
-    }
-    return true;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveRightWord()
 {
-    if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
+    if (selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetWideText().length())) {
         LOGW("Caret position at the end, cannot move to right");
         return true;
     }
-    int32_t originCaretPosition = textEditingValue_.caretPosition;
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+    int32_t originCaretPosition = selectController_->GetCaretIndex();
+    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
     int32_t rightWordLength = GetWordLength(originCaretPosition, 1);
     if (rightWordLength < 0 || rightWordLength > textLength ||
-        rightWordLength + textEditingValue_.caretPosition > textLength) {
+        rightWordLength + selectController_->GetCaretIndex() > textLength) {
         LOGD("Get right word length failed, the right word offset is out of range");
         return false;
     }
-    if (IsSelected() && selectionMode_ == SelectionMode::SELECT_ALL) {
-        textEditingValue_.caretPosition = textLength;
+    if (selectController_->IsSelectedAll()) {
+        selectController_->UpdateCaretIndex(textLength);
     } else {
         UpdateCaretPositionWithClamp(originCaretPosition + rightWordLength);
     }
     ResetObscureTickCountDown();
     OnCursorMoveDone();
-    return originCaretPosition != textEditingValue_.caretPosition;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveLineEnd()
 {
-    if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
+    if (selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetWideText().length())) {
         LOGW("Caret position at the end, cannot move to right");
         return true;
     }
-    int32_t originCaretPosition = textEditingValue_.caretPosition;
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+    int32_t originCaretPosition = selectController_->GetCaretIndex();
+    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
     int32_t lineEndPosition = GetLineEndPosition(originCaretPosition);
     if (lineEndPosition < 0 || lineEndPosition > textLength) {
         LOGD("Handle cursor move to line end failed, the line end position is out of range");
         return false;
     }
-    if (IsSelected() && selectionMode_ == SelectionMode::SELECT_ALL) {
-        textEditingValue_.caretPosition = textLength;
+    if (selectController_->IsSelectedAll()) {
+        selectController_->UpdateCaretIndex(textLength);
     } else if (IsTextArea()) {
         UpdateCaretPositionWithClamp(lineEndPosition);
     } else {
@@ -4463,93 +2976,73 @@ bool TextFieldPattern::CursorMoveLineEnd()
     }
     ResetObscureTickCountDown();
     OnCursorMoveDone();
-    return originCaretPosition != textEditingValue_.caretPosition;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveToParagraphEnd()
 {
-    if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
+    if (selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetWideText().length())) {
         LOGW("Caret position at the end, cannot move to right");
         return true;
     }
-    auto originCaretPosition = textEditingValue_.caretPosition;
+    auto originCaretPosition = selectController_->GetCaretIndex();
     UpdateCaretPositionWithClamp(GetLineEndPosition(originCaretPosition, false));
     OnCursorMoveDone();
-    return originCaretPosition != textEditingValue_.caretPosition;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveEnd()
 {
     // ctrl end, caret to the very end
-    if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
+    if (selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetWideText().length())) {
         LOGW("Caret position at the end, cannot move to right");
         return true;
     }
-    int32_t originCaretPosition = textEditingValue_.caretPosition;
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+    int32_t originCaretPosition = selectController_->GetCaretIndex();
+    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
     UpdateCaretPositionWithClamp(textLength);
     OnCursorMoveDone();
-    return originCaretPosition != textEditingValue_.caretPosition;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveUp()
 {
     LOGI("Handle cursor move up");
     CHECK_NULL_RETURN(IsTextArea(), false);
-    auto originCaretPosition = textEditingValue_.caretPosition;
-    auto offsetX = caretRect_.GetX() - contentRect_.GetX();
-    auto offsetY = caretRect_.GetY() - textRect_.GetY();
+    auto originCaretPosition = selectController_->GetCaretIndex();
+    auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
+    auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
     // multiply by 0.5f to convert to the grapheme center point of the previous line.
     float verticalOffset = offsetY - PreferredLineHeight() * 0.5f;
-    textEditingValue_.caretPosition = static_cast<int32_t>(
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-        paragraph_->GetGlyphPositionAtCoordinate(offsetX, verticalOffset).pos_);
-#else
-        paragraph_->GetGlyphIndexByCoordinate(offsetX, verticalOffset).index);
-#endif
+    selectController_->UpdateCaretIndex(
+        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
     OnCursorMoveDone();
-    if (originCaretPosition == textEditingValue_.caretPosition) {
-        return false;
-    }
-    return true;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 bool TextFieldPattern::CursorMoveDown()
 {
     LOGI("Handle cursor move down");
     CHECK_NULL_RETURN(IsTextArea(), false);
-    auto originCaretPosition = textEditingValue_.caretPosition;
-    auto offsetX = caretRect_.GetX() - contentRect_.GetX();
-    auto offsetY = caretRect_.GetY() - textRect_.GetY();
+    auto originCaretPosition = selectController_->GetCaretIndex();
+    auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
+    auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
     // multiply by 1.5f to convert to the grapheme center point of the next line.
     float verticalOffset = offsetY + PreferredLineHeight() * 1.5f;
-    textEditingValue_.caretPosition = static_cast<int32_t>(
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-        paragraph_->GetGlyphPositionAtCoordinate(offsetX, verticalOffset).pos_);
-#else
-        paragraph_->GetGlyphIndexByCoordinate(offsetX, verticalOffset).index);
-#endif
+    selectController_->UpdateCaretIndex(
+        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
     OnCursorMoveDone();
-    if (originCaretPosition == textEditingValue_.caretPosition) {
-        return false;
-    }
-    return true;
+    return originCaretPosition != selectController_->GetCaretIndex();
 }
 
 void TextFieldPattern::Delete(int32_t start, int32_t end)
 {
     SwapIfLarger(start, end);
     LOGI("Handle Delete within [%{public}d, %{public}d]", start, end);
-    textEditingValue_.text =
-        textEditingValue_.GetValueBeforePosition(start) + textEditingValue_.GetValueAfterPosition(end);
-    UpdateCaretPositionWithClamp(start);
-    SetEditingValueToProperty(textEditingValue_.text);
-    FireEventHubOnChange(GetEditingValue().text);
-    selectionMode_ = SelectionMode::NONE;
-    caretUpdateType_ = CaretUpdateType::DEL;
-    CloseSelectOverlay();
+    contentController_->erase(start, end - start);
+    selectController_->UpdateCaretIndex(start);
+    FireOnTextChangeEvent();
+    CloseSelectOverlay(true);
     StartTwinkling();
     UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
@@ -4559,10 +3052,8 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
-    // trigger repaint of select mask
-    ++drawOverlayFlag_;
-    tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                    : PROPERTY_UPDATE_MEASURE);
+    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                      : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::SetEditingValueToProperty(const std::string& newValueText)
@@ -4575,8 +3066,7 @@ void TextFieldPattern::SetEditingValueToProperty(const std::string& newValueText
     layoutProperty->UpdateValue(newValueText);
     if (textCache != newValueText) {
         layoutProperty->UpdateNeedFireOnChange(true);
-        caretUpdateType_ = CaretUpdateType::INPUT;
-        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, newValueText.c_str());
+        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, newValueText);
     } else {
         layoutProperty->UpdateNeedFireOnChange(false);
     }
@@ -4584,8 +3074,9 @@ void TextFieldPattern::SetEditingValueToProperty(const std::string& newValueText
 
 void TextFieldPattern::ClearEditingValue()
 {
-    textEditingValue_.Reset();
-    SetEditingValueToProperty("");
+    contentController_->Reset();
+    selectController_->UpdateCaretIndex(0);
+    FireOnTextChangeEvent();
     UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -4611,7 +3102,7 @@ void TextFieldPattern::HandleCounterBorder()
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto maxLength = GetMaxLength();
-    auto currentLength = static_cast<uint32_t>(textEditingValue_.GetWideText().length());
+    auto currentLength = static_cast<uint32_t>(contentController_->GetWideText().length());
     BorderWidthProperty currentBorderWidth;
     if (layoutProperty->GetBorderWidthProperty() != nullptr) {
         currentBorderWidth = *(layoutProperty->GetBorderWidthProperty());
@@ -4655,16 +3146,6 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->UpdateSubmitEvent(textEditingValue_.text);
-        CloseKeyboard(forceCloseKeyboard);
-        FocusHub::LostFocusToViewRoot();
-        return;
-    }
-
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -4690,32 +3171,15 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
 
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
-    textEditingValue_.text = value->text;
-    textEditingValue_.caretPosition = value->selection.baseOffset;
+    contentController_->SetTextValue(value->text);
+    selectController_->UpdateCaretIndex(value->selection.baseOffset);
     ContainerScope scope(GetInstanceId());
-    SetEditingValueToProperty(textEditingValue_.text);
     UpdateEditingValueToRecord();
-    caretUpdateType_ = CaretUpdateType::INPUT;
-    selectionMode_ = SelectionMode::NONE;
     CloseSelectOverlay();
     StartTwinkling();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // If the parent node is a Search, the Search callback is executed.
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->UpdateChangeEvent(textEditingValue_.text);
-        parentFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        return;
-    }
-
-    if (needFireChangeEvent) {
-        auto eventHub = host->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnChange(textEditingValue_.text);
-    }
+    FireOnTextChangeEvent();
 
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -4742,22 +3206,15 @@ void TextFieldPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(host);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    auto parentGlobalOffset = GetTextPaintOffset();
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-        CHECK_NULL_VOID(SelectOverlayIsOn());
-        textSelector_.selectionBaseOffset.SetX(CalcCursorOffsetByPosition(textSelector_.GetStart()).offset.GetX());
-        textSelector_.selectionDestinationOffset.SetX(
-            CalcCursorOffsetByPosition(textSelector_.GetEnd(), false).offset.GetX());
-        UpdateSelection(textSelector_.GetStart(), textSelector_.GetEnd());
-        if (isSingleHandle_) {
-            CreateSingleHandle();
-            RequestKeyboardOnFocus();
-            return;
+        selectController_->UpdateCaretOffset();
+        selectController_->CalculateHandleOffset();
+        if (SelectOverlayIsOn()) {
+            ProcessOverlay();
         }
-        ProcessOverlay();
-        selectionMode_ = SelectionMode::SELECT;
     }
     RequestKeyboardOnFocus();
 }
@@ -4771,11 +3228,7 @@ void TextFieldPattern::RequestKeyboardOnFocus()
     if (!RequestKeyboard(false, true, true)) {
         return;
     }
-    StartTwinkling();
-    LOGI("RequestKeyboardOnFocus ok, reset flag");
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
+    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnEditChanged(true);
     needToRequestKeyboardInner_ = false;
@@ -4786,7 +3239,6 @@ void TextFieldPattern::OnVisibleChange(bool isVisible)
     LOGI("visible change to %{public}d", isVisible);
     if (!isVisible) {
         LOGI("TextField is not visible");
-        caretUpdateType_ = CaretUpdateType::INPUT;
         selectionMode_ = SelectionMode::NONE;
         CloseKeyboard(true);
         if (SelectOverlayIsOn()) {
@@ -4802,13 +3254,10 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
          "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
     CloseSelectOverlay();
-    if (HasFocus() && isSingleHandle_) {
+    if (HasFocus() && IsSingleHandle()) {
         StartTwinkling();
     }
-    textRectWillChange_ = true;
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     UpdateCaretInfoToController();
 }
 
@@ -4858,24 +3307,18 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     LOGI("Handle DeleteBackward %{public}d characters", length);
     if (IsSelected()) {
         ResetObscureTickCountDown();
-        Delete(textSelector_.GetStart(), textSelector_.GetEnd());
+        Delete(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return;
     }
-    if (textEditingValue_.caretPosition <= 0) {
+    if (selectController_->GetCaretIndex() <= 0) {
         LOGW("Caret position at the beginning , cannot DeleteBackward");
         return;
     }
     ResetObscureTickCountDown();
-    auto start = std::max(textEditingValue_.caretPosition - length, 0);
-    auto end =
-        std::min(textEditingValue_.caretPosition, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
-    textEditingValue_.text =
-        textEditingValue_.GetValueBeforePosition(start) + textEditingValue_.GetValueAfterPosition(end);
-    textEditingValue_.CursorMoveToPosition(textEditingValue_.caretPosition - length);
-    SetEditingValueToProperty(textEditingValue_.text);
-    FireEventHubOnChange(GetEditingValue().text);
-    selectionMode_ = SelectionMode::NONE;
-    caretUpdateType_ = CaretUpdateType::DEL;
+    auto start = std::max(selectController_->GetCaretIndex() - length, 0);
+    contentController_->erase(start, length);
+    selectController_->UpdateCaretIndex(start);
+    FireOnTextChangeEvent();
     CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
@@ -4895,20 +3338,17 @@ void TextFieldPattern::DeleteForward(int32_t length)
     LOGI("Handle DeleteForward %{public}d characters", length);
     if (IsSelected()) {
         ResetObscureTickCountDown();
-        Delete(textSelector_.GetStart(), textSelector_.GetEnd());
+        Delete(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return;
     }
-    if (textEditingValue_.caretPosition >= static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
+    if (selectController_->GetCaretIndex() >= static_cast<int32_t>(contentController_->GetWideText().length())) {
         LOGW("Caret position at the end , cannot DeleteForward");
         return;
     }
     ResetObscureTickCountDown();
-    textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textEditingValue_.caretPosition) +
-                             textEditingValue_.GetValueAfterPosition(textEditingValue_.caretPosition + length);
-    SetEditingValueToProperty(textEditingValue_.text);
-    FireEventHubOnChange(GetEditingValue().text);
+    contentController_->erase(selectController_->GetCaretIndex(), length);
+    FireOnTextChangeEvent();
     selectionMode_ = SelectionMode::NONE;
-    caretUpdateType_ = CaretUpdateType::INPUT;
     CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
@@ -4925,39 +3365,37 @@ void TextFieldPattern::DeleteForward(int32_t length)
 
 std::u16string TextFieldPattern::GetLeftTextOfCursor(int32_t number)
 {
-    auto start = textEditingValue_.caretPosition;
+    auto start = selectController_->GetCaretIndex();
     if (IsSelected()) {
-        start = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
+        start = selectController_->GetStartIndex();
     }
-    auto stringText = textEditingValue_.GetSelectedText(start - number, start);
+    auto stringText = contentController_->GetSelectedValue(start - number, start);
     return StringUtils::Str8ToStr16(stringText);
 }
 
 std::u16string TextFieldPattern::GetRightTextOfCursor(int32_t number)
 {
-    auto end = textEditingValue_.caretPosition;
+    auto end = selectController_->GetCaretIndex();
     if (IsSelected()) {
-        end = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
+        end = selectController_->GetEndIndex();
     }
-    auto stringText = textEditingValue_.GetSelectedText(end, end + number);
+    auto stringText = contentController_->GetSelectedValue(end, end + number);
     return StringUtils::Str8ToStr16(stringText);
 }
 
 int32_t TextFieldPattern::GetTextIndexAtCursor()
 {
-    return textEditingValue_.caretPosition;
+    return selectController_->GetCaretIndex();
 }
 
 void TextFieldPattern::AfterSelection()
 {
-    LOGI("Selection %{public}s, caret position %{public}d", textSelector_.ToString().c_str(),
-        textEditingValue_.caretPosition);
+    LOGI("Selection %{public}s, caret position %{public}d", selectController_->ToString().c_str(),
+        selectController_->GetCaretIndex());
     updateSelectionAfterObscure_ = ResetObscureTickCountDown();
-    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
-    caretUpdateType_ = CaretUpdateType::EVENT;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                     : PROPERTY_UPDATE_MEASURE);
@@ -4970,22 +3408,12 @@ void TextFieldPattern::HandleSelectionUp()
         LOGW("Unsupported operation for text field");
         return;
     }
-    if (selectionMode_ != SelectionMode::SELECT) {
-        UpdateSelection(textEditingValue_.caretPosition);
+    if (!IsSelected()) {
+        UpdateSelection(selectController_->GetCaretIndex());
     }
-    auto newOffsetY = caretRect_.GetY() - PreferredLineHeight() * 0.5 - textRect_.GetY();
-    textEditingValue_.caretPosition =
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-        static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), newOffsetY).pos_);
-#else
-        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(caretRect_.GetX(), newOffsetY).index);
-#endif
-    UpdateSelection(textSelector_.GetStart(), textEditingValue_.caretPosition);
-    selectionMode_ = SelectionMode::SELECT;
-    if (textSelector_.baseOffset == textSelector_.destinationOffset) {
-        selectionMode_ = SelectionMode::NONE;
-    }
+    auto newOffsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5 - textRect_.GetY();
+    selectController_->MoveSecondHandleToContentRect(static_cast<int32_t>(
+        paragraph_->GetGlyphIndexByCoordinate(Offset(selectController_->GetCaretRect().GetX(), newOffsetY))));
     AfterSelection();
 }
 
@@ -4996,22 +3424,12 @@ void TextFieldPattern::HandleSelectionDown()
         LOGW("Unsupported operation for text field");
         return;
     }
-    if (selectionMode_ != SelectionMode::SELECT) {
-        UpdateSelection(textEditingValue_.caretPosition);
+    if (!IsSelected()) {
+        UpdateSelection(selectController_->GetCaretIndex());
     }
-    auto newOffsetY = caretRect_.GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
-    textEditingValue_.caretPosition =
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-        static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), newOffsetY).pos_);
-#else
-        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(caretRect_.GetX(), newOffsetY).index);
-#endif
-    UpdateSelection(textSelector_.GetStart(), textEditingValue_.caretPosition);
-    selectionMode_ = SelectionMode::SELECT;
-    if (textSelector_.baseOffset == textSelector_.destinationOffset) {
-        selectionMode_ = SelectionMode::NONE;
-    }
+    auto newOffsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
+    selectController_->MoveSecondHandleToContentRect(static_cast<int32_t>(
+        paragraph_->GetGlyphIndexByCoordinate(Offset(selectController_->GetCaretRect().GetX(), newOffsetY))));
     AfterSelection();
 }
 
@@ -5019,100 +3437,75 @@ void TextFieldPattern::HandleSelectionLeft()
 {
     LOGI("Handle selection left");
     if (!IsSelected()) {
-        if (textEditingValue_.caretPosition == 0) {
+        if (selectController_->GetCaretIndex() == 0) {
             LOGW("Caret position at beginning, cannot update selection to left");
             return;
         }
-        UpdateSelection(textEditingValue_.caretPosition,
-            std::max(textSelector_.baseOffset -
-                         GetGraphemeClusterLength(GetEditingValue().GetWideText(), textSelector_.baseOffset, true),
-                0));
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        selectionMode_ = SelectionMode::SELECT;
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleToContentRect(
+            selectController_->GetSecondHandleIndex() -
+            GetGraphemeClusterLength(contentController_->GetWideText(), selectController_->GetCaretIndex(), true));
     } else {
-        textSelector_.destinationOffset =
-            std::max(textSelector_.destinationOffset - GetGraphemeClusterLength(GetEditingValue().GetWideText(),
-                                                           textSelector_.destinationOffset, true),
-                0);
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        if (textSelector_.destinationOffset == textSelector_.baseOffset) {
-            selectionMode_ = SelectionMode::NONE;
-        }
+        selectController_->MoveSecondHandleToContentRect(
+            selectController_->GetSecondHandleIndex() - GetGraphemeClusterLength(contentController_->GetWideText(),
+                                                            selectController_->GetSecondHandleIndex(), true));
     }
     AfterSelection();
 }
 
 void TextFieldPattern::HandleSelectionLeftWord()
 {
-    if (textEditingValue_.caretPosition == 0) {
+    if (selectController_->GetCaretIndex() == 0) {
         LOGW("Caret position at beginning, cannot update selection to left");
         return;
     }
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
-    int32_t leftWordLength = GetWordLength(textEditingValue_.caretPosition, 0);
-    if (leftWordLength < 0 || leftWordLength > textLength || textEditingValue_.caretPosition - leftWordLength < 0) {
+    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    int32_t leftWordLength = GetWordLength(selectController_->GetCaretIndex(), 0);
+    if (leftWordLength < 0 || leftWordLength > textLength || selectController_->GetCaretIndex() - leftWordLength < 0) {
         LOGD("Handle select a left word failed, the left word offset is out of range");
         return;
     }
     if (!IsSelected()) {
-        textSelector_.destinationOffset = textEditingValue_.caretPosition - leftWordLength;
-        UpdateSelection(textEditingValue_.caretPosition, textSelector_.destinationOffset);
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        selectionMode_ = SelectionMode::SELECT;
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex() - leftWordLength);
     } else {
-        textSelector_.destinationOffset = textEditingValue_.caretPosition - leftWordLength;
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        if (textSelector_.destinationOffset == textSelector_.baseOffset) {
-            selectionMode_ = SelectionMode::NONE;
-        }
+        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex() - leftWordLength);
     }
     AfterSelection();
 }
 
 void TextFieldPattern::HandleSelectionLineBegin()
 {
-    if (textEditingValue_.caretPosition == 0) {
+    if (selectController_->GetCaretIndex()) {
         LOGW("Caret position at beginning, cannot update selection to left");
         return;
     }
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
-    int32_t lineBeginPosition = GetLineBeginPosition(textEditingValue_.caretPosition);
+    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    int32_t lineBeginPosition = GetLineBeginPosition(selectController_->GetCaretIndex());
     if (lineBeginPosition < 0 || lineBeginPosition > textLength) {
         LOGD("Handle select line begin failed, the line begin offset is out of range");
         return;
     }
     if (!IsSelected()) {
-        textSelector_.destinationOffset = lineBeginPosition;
-        UpdateSelection(textEditingValue_.caretPosition, textSelector_.destinationOffset);
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        selectionMode_ = SelectionMode::SELECT;
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleToContentRect(lineBeginPosition);
     } else {
-        textSelector_.destinationOffset = lineBeginPosition;
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        if (textSelector_.destinationOffset == textSelector_.baseOffset) {
-            selectionMode_ = SelectionMode::NONE;
-        }
+        selectController_->MoveSecondHandleToContentRect(lineBeginPosition);
     }
     AfterSelection();
 }
 
 void TextFieldPattern::HandleSelectionHome()
 {
-    if (textEditingValue_.caretPosition == 0) {
+    if (selectController_->GetCaretIndex() == 0) {
         LOGW("Caret position at beginning, cannot update selection to left");
         return;
     }
     if (!IsSelected()) {
-        textSelector_.destinationOffset = 0;
-        UpdateSelection(textEditingValue_.caretPosition, textSelector_.destinationOffset);
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        selectionMode_ = SelectionMode::SELECT;
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleToContentRect(0);
     } else {
-        textSelector_.destinationOffset = 0;
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        if (textSelector_.destinationOffset == textSelector_.baseOffset) {
-            selectionMode_ = SelectionMode::NONE;
-        }
+        selectController_->MoveSecondHandleToContentRect(0);
     }
     AfterSelection();
 }
@@ -5122,81 +3515,62 @@ void TextFieldPattern::HandleSelectionRight()
     LOGI("Handle selection right");
     // if currently not in select mode, reset baseOffset and move destinationOffset and caret position
     if (!IsSelected()) {
-        if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
+        if (selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetWideText().length())) {
             LOGW("Caret position at the end, cannot update selection to right");
             return;
         }
-        UpdateSelection(textEditingValue_.caretPosition,
-            std::min(textSelector_.baseOffset +
-                         GetGraphemeClusterLength(GetEditingValue().GetWideText(), textSelector_.baseOffset),
-                static_cast<int32_t>(textEditingValue_.GetWideText().length())));
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        selectionMode_ = SelectionMode::SELECT;
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleToContentRect(
+            selectController_->GetSecondHandleIndex() +
+            GetGraphemeClusterLength(contentController_->GetWideText(), selectController_->GetSecondHandleIndex()));
     } else {
         // if currently not in select mode, move destinationOffset and caret position only
-        textSelector_.destinationOffset =
-            std::min(textSelector_.destinationOffset +
-                         GetGraphemeClusterLength(GetEditingValue().GetWideText(), textSelector_.destinationOffset),
-                static_cast<int32_t>(textEditingValue_.GetWideText().length()));
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        if (textSelector_.destinationOffset == textSelector_.baseOffset) {
-            selectionMode_ = SelectionMode::NONE;
-        }
+        selectController_->MoveSecondHandleToContentRect(
+            selectController_->GetSecondHandleIndex() +
+            GetGraphemeClusterLength(contentController_->GetWideText(), selectController_->GetSecondHandleIndex()));
     }
     AfterSelection();
 }
 
 void TextFieldPattern::HandleSelectionRightWord()
 {
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
-    if (textEditingValue_.caretPosition == textLength) {
+    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (selectController_->GetCaretIndex() == textLength) {
         LOGW("Caret position at the end, cannot update selection to right");
         return;
     }
-    int32_t rightWordLength = GetWordLength(textEditingValue_.caretPosition, 1);
+    int32_t rightWordLength = GetWordLength(selectController_->GetCaretIndex(), 1);
     if (rightWordLength < 0 || rightWordLength > textLength ||
-        rightWordLength + textEditingValue_.caretPosition > textLength) {
+        rightWordLength + selectController_->GetCaretIndex() > textLength) {
         LOGD("Handle select a right word failed, the right word offset is out of range");
         return;
     }
     if (!IsSelected()) {
-        textSelector_.destinationOffset = textEditingValue_.caretPosition + rightWordLength;
-        UpdateSelection(textEditingValue_.caretPosition, textSelector_.destinationOffset);
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        selectionMode_ = SelectionMode::SELECT;
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex() + rightWordLength);
     } else {
-        textSelector_.destinationOffset = textEditingValue_.caretPosition + rightWordLength;
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        if (textSelector_.destinationOffset == textSelector_.baseOffset) {
-            selectionMode_ = SelectionMode::NONE;
-        }
+        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex() + rightWordLength);
+        AfterSelection();
     }
-    AfterSelection();
 }
 
 void TextFieldPattern::HandleSelectionLineEnd()
 {
-    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
-    if (textEditingValue_.caretPosition == textLength) {
+    int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (selectController_->GetCaretIndex() == textLength) {
         LOGW("Caret position at the end, cannot update selection to right");
         return;
     }
-    int32_t lineEndPosition = GetLineEndPosition(textEditingValue_.caretPosition);
+    int32_t lineEndPosition = GetLineEndPosition(selectController_->GetCaretIndex());
     if (lineEndPosition < 0 || lineEndPosition > textLength) {
         LOGD("Handle select a line end failed, the line end offset is out of range");
         return;
     }
     if (!IsSelected()) {
-        textSelector_.destinationOffset = lineEndPosition;
-        UpdateSelection(textEditingValue_.caretPosition, textSelector_.destinationOffset);
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        selectionMode_ = SelectionMode::SELECT;
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleToContentRect(lineEndPosition);
     } else {
-        textSelector_.destinationOffset = lineEndPosition;
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        if (textSelector_.destinationOffset == textSelector_.baseOffset) {
-            selectionMode_ = SelectionMode::NONE;
-        }
+        selectController_->MoveSecondHandleToContentRect(lineEndPosition);
     }
     AfterSelection();
 }
@@ -5204,22 +3578,16 @@ void TextFieldPattern::HandleSelectionLineEnd()
 void TextFieldPattern::HandleSelectionEnd()
 {
     // shift end, select to the end of current line
-    int32_t endPos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
-    if (textEditingValue_.caretPosition == endPos) {
+    int32_t endPos = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (selectController_->GetCaretIndex() == endPos) {
         LOGW("Caret position at the end, cannot update selection to right");
         return;
     }
     if (!IsSelected()) {
-        textSelector_.destinationOffset = endPos;
-        UpdateSelection(textEditingValue_.caretPosition, textSelector_.destinationOffset);
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        selectionMode_ = SelectionMode::SELECT;
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleToContentRect(endPos);
     } else {
-        textSelector_.destinationOffset = endPos;
-        UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
-        if (textSelector_.destinationOffset == textSelector_.baseOffset) {
-            selectionMode_ = SelectionMode::NONE;
-        }
+        selectController_->MoveSecondHandleToContentRect(endPos);
     }
     AfterSelection();
 }
@@ -5227,57 +3595,11 @@ void TextFieldPattern::HandleSelectionEnd()
 void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     LOGI("Set caret position to %{public}d", position);
-    textEditingValue_.caretPosition =
-        std::clamp(position, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
-    selectionMode_ = SelectionMode::NONE;
-    caretUpdateType_ = CaretUpdateType::EVENT;
+    selectController_->UpdateCaretIndex(position);
     CloseSelectOverlay();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-}
-
-void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
-{
-    selectionStart = selectionStart < 0 ? 0 : selectionStart;
-    selectionEnd = std::clamp(selectionEnd, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
-    if (selectionStart > selectionEnd) {
-        selectionStart = selectionEnd;
-    }
-    auto instanceId = GetInstanceId();
-    ContainerScope scope(instanceId);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    auto task = [weak = WeakClaim(this), selectionStart, selectionEnd] {
-        auto client = AceType::DynamicCast<TextFieldPattern>(weak.Upgrade());
-        if (!client) {
-            LOGE("text field is null");
-            return;
-        }
-        ContainerScope scope(client->GetInstanceId());
-        client->HandleSetSelection(selectionStart, selectionEnd, false);
-        if (selectionStart == selectionEnd) {
-            client->SetInSelectMode(SelectionMode::NONE);
-            client->StartTwinkling();
-        } else {
-            client->SetInSelectMode(SelectionMode::SELECT);
-            client->StopTwinkling();
-        }
-        client->isUsingMouse_ = false;
-        client->SetCaretUpdateType(CaretUpdateType::EVENT);
-        client->CloseSelectOverlay();
-        client->MarkRedrawOverlay();
-        if (client->RequestKeyboard(false, true, true)) {
-            auto textFieldFrameNode = client->GetHost();
-            CHECK_NULL_VOID(textFieldFrameNode);
-            auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireOnEditChanged(true);
-        }
-    };
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
 void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd)
@@ -5286,21 +3608,10 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
         return;
     }
     cursorVisible_ = false;
-    MarkRedrawOverlay();
-    SetTextSelection(selectionStart, selectionEnd);
+    HandleSetSelection(selectionStart, selectionEnd, true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void TextFieldPattern::CaretMoveToLastNewLineChar()
-{
-    while (textEditingValue_.caretPosition > 0) {
-        textEditingValue_.caretPosition -= 1;
-        if (textEditingValue_.text.substr(textEditingValue_.caretPosition, 1) == "\n") {
-            break;
-        }
-    }
 }
 
 bool TextFieldPattern::OnBackPressed()
@@ -5583,18 +3894,9 @@ bool TextFieldPattern::GetErrorTextState() const
     return layoutProperty->GetShowErrorTextValue(false);
 }
 
-bool TextFieldPattern::IsSearchParentNode() const
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, false);
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(tmpHost->GetParent());
-    return parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG;
-}
-
 void TextFieldPattern::SearchRequestKeyboard()
 {
     StartTwinkling();
-    caretUpdateType_ = CaretUpdateType::PRESSED;
     selectionMode_ = SelectionMode::NONE;
     if (RequestKeyboard(false, true, true)) {
         auto tmpHost = GetHost();
@@ -5649,7 +3951,7 @@ std::string TextFieldPattern::GetBarStateString() const
 
 void TextFieldPattern::UpdateScrollBarOffset()
 {
-    if (textEditingValue_.text.empty()) {
+    if (contentController_->IsEmpty()) {
         return;
     }
     if (!GetScrollBar() && !GetScrollBarProxy()) {
@@ -5678,13 +3980,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
         if (scrollBar) {
             scrollBar->PlayScrollBarAppearAnimation();
         }
-        auto selectOverlayProxy = GetSelectOverlay();
-        if (selectOverlayProxy) {
-            if (selectOverlayProxy->IsHandleShow()) {
-                originalIsMenuShow_ = selectOverlayProxy->IsMenuShow();
-            }
-            selectOverlayProxy->ShowOrHiddenMenu(true);
-        }
+        UpdateSelectMenuVisibility(false);
         return true;
     }
     if (IsReachedBoundary(offset)) {
@@ -5706,15 +4002,10 @@ void TextFieldPattern::CheckScrollable()
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    if (textEditingValue_.text.empty()) {
+    if (contentController_->IsEmpty()) {
         scrollable_ = false;
     } else {
-        if (layoutProperty->GetShowCounterValue(false) && counterParagraph_ && !isCounterIdealheight_ &&
-            !IsNormalInlineState()) {
-            scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height() - counterParagraph_->GetHeight());
-        } else {
-            scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
-        }
+        scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
     }
     SetScrollEnable(scrollable_);
 }
@@ -5743,10 +4034,32 @@ void TextFieldPattern::SetUnitNode(const RefPtr<NG::UINode>& unitNode)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(unitNode);
-    if (host->GetChildren().size() != 0) {
+    if (!host->GetChildren().empty()) {
         host->Clean();
     }
     unitNode->MountToParent(host);
+}
+
+void TextFieldPattern::AddCounterNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GetChildren().empty()) {
+        host->Clean();
+    }
+    auto counterTextNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    counterTextNode->MountToParent(host);
+    counterTextNode->MarkModifyDone();
+    counterTextNode->MarkDirtyNode();
+}
+
+void TextFieldPattern::ClearCounterNode()
+{
+    auto host = GetHost();
+    if (!host->GetChildren().empty()) {
+        host->Clean();
+    }
 }
 
 void TextFieldPattern::SetShowError()
@@ -5936,7 +4249,7 @@ float TextFieldPattern::GetMarginBottom() const
     CHECK_NULL_RETURN(tmpHost, 0.0f);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
-    auto& getMargin = layoutProperty->GetMarginProperty();
+    const auto& getMargin = layoutProperty->GetMarginProperty();
     if (getMargin && getMargin->bottom.has_value()) {
         return getMargin->bottom->GetDimension().ConvertToPx();
     }
@@ -5949,8 +4262,9 @@ std::string TextFieldPattern::GetShowResultImageSrc() const
     CHECK_NULL_RETURN(tmpHost, "");
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    if (showUserDefinedIcon_) {
-        return showUserDefinedIconSrc_;
+    auto showImageSource = layoutProperty->GetShowPasswordSourceInfo();
+    if (showImageSource) {
+        return showImageSource->GetSrc();
     }
     return SHOW_PASSWORD_SVG;
 }
@@ -5961,8 +4275,9 @@ std::string TextFieldPattern::GetHideResultImageSrc() const
     CHECK_NULL_RETURN(tmpHost, "");
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    if (hideUserDefinedIcon_) {
-        return hideUserDefinedIconSrc_;
+    auto hideSourceInfo = layoutProperty->GetHidePasswordSourceInfo();
+    if (hideSourceInfo) {
+        return hideSourceInfo->GetSrc();
     }
     return HIDE_PASSWORD_SVG;
 }
@@ -6020,37 +4335,13 @@ void TextFieldPattern::SaveInlineStates()
     }
 }
 
-void TextFieldPattern::TextIsEmptyRect(RectF& rect)
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (GetEditingValue().text.empty()) {
-        switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
-            case TextAlign::START:
-                break;
-            case TextAlign::CENTER:
-                rect.SetLeft(static_cast<float>(rect.GetX()) + contentRect_.Width() / 2.0f);
-                break;
-            case TextAlign::END:
-                rect.SetLeft(static_cast<float>(rect.GetX()) + contentRect_.Width() -
-                             static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
-                break;
-            default:
-                break;
-        }
-        return;
-    }
-}
-
 void TextFieldPattern::TextAreaInputRectUpdate(RectF& rect)
 {
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (IsTextArea() && !GetEditingValue().text.empty()) {
+    if (IsTextArea() && !contentController_->IsEmpty()) {
         auto inputContentWidth = GetParagraph()->GetMaxIntrinsicWidth();
         switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
             case TextAlign::START:
@@ -6076,6 +4367,11 @@ void TextFieldPattern::TextAreaInputRectUpdate(RectF& rect)
                 break;
         }
     }
+}
+
+void TextFieldPattern::TextIsEmptyRect(RectF& rect)
+{
+    rect = selectController_->CalculateEmptyValueCaretRect();
 }
 
 void TextFieldPattern::UpdateRectByAlignment(RectF& rect)
@@ -6137,26 +4433,6 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     margin.left = CalcLength(inlineState_.padding.left->GetDimension() + inlineState_.margin.left->GetDimension());
     margin.top = CalcLength(inlineState_.padding.top->GetDimension() + inlineState_.margin.top->GetDimension());
     layoutProperty->UpdateMargin(margin);
-    CalcSize idealSize;
-    inlinePadding_ = padding.ConvertToPx() + padding.ConvertToPx();
-    if (focusStatus) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        previewWidth_ = paragraph_->GetLongestLine() + inlinePadding_;
-#else
-        previewWidth_ = paragraph_->GetActualWidth() + inlinePadding_;
-#endif
-        std::optional<CalcLength> width(previewWidth_);
-        idealSize.SetWidth(width);
-    } else {
-        std::optional<CalcLength> width(previewWidth_);
-        idealSize.SetWidth(width);
-    }
-    layoutProperty->UpdateUserDefinedIdealSize(idealSize);
-    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
-    if (layoutConstraint && layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->Height()) {
-        layoutProperty->ClearUserDefinedIdealSize(false, true);
-        inlineState_.setHeight = true;
-    }
     if (!IsTextArea()) {
         layoutProperty->ResetMaxLines();
     }
@@ -6205,14 +4481,6 @@ void TextFieldPattern::RestorePreInlineStates()
         textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     }
     layoutProperty->UpdateMargin(inlineState_.margin);
-    CalcSize idealSize;
-    std::optional<CalcLength> width(inlineState_.frameRect.Width());
-    idealSize.SetWidth(width);
-    if (inlineState_.setHeight) {
-        std::optional<CalcLength> height(inlineState_.frameRect.Height());
-        idealSize.SetHeight(height);
-    }
-    layoutProperty->UpdateUserDefinedIdealSize(idealSize);
     renderContext->UpdateBackgroundColor(inlineState_.bgColor);
     layoutProperty->UpdateBorderWidth(inlineState_.borderWidth);
     renderContext->UpdateBorderWidth(inlineState_.borderWidth);
@@ -6246,16 +4514,13 @@ bool TextFieldPattern::IsUnspecifiedOrTextType() const
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
-    if (inputType == TextInputType::UNSPECIFIED || inputType == TextInputType::TEXT) {
-        return true;
-    }
-    return false;
+    return inputType == TextInputType::UNSPECIFIED || inputType == TextInputType::TEXT;
 }
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("placeholder", GetPlaceHolder().c_str());
-    json->Put("text", textEditingValue_.text.c_str());
+    json->Put("text", contentController_->GetTextValue().c_str());
     json->Put("fontSize", GetFontSize().c_str());
     json->Put("fontColor", GetTextColor().c_str());
     json->Put("fontStyle", GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
@@ -6287,8 +4552,8 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     layoutProperty->UpdatePlaceholder(json->GetString("placeholder"));
     UpdateEditingValue(json->GetString("text"), StringUtils::StringToInt(json->GetString("caretPosition")));
-    SetEditingValueToProperty(textEditingValue_.text);
-    UpdateSelection(textEditingValue_.caretPosition);
+    FireOnTextChangeEvent();
+    UpdateSelection(selectController_->GetCaretIndex());
     auto maxLines = json->GetString("maxLines");
     if (!maxLines.empty() && maxLines != "INF") {
         layoutProperty->UpdateMaxLines(StringUtils::StringToUint(maxLines));
@@ -6350,7 +4615,7 @@ void TextFieldPattern::SetAccessibilityAction()
     accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto current = pattern->GetTextSelector().GetEnd();
+        auto current = pattern->selectController_->GetEndIndex();
         pattern->SetInSelectMode(SelectionMode::NONE);
         pattern->UpdateSelection(current);
         pattern->SetSelectionFlag(current, current);
@@ -6372,19 +4637,18 @@ void TextFieldPattern::SetAccessibilityMoveTextAction()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        if (pattern->GetEditingValue().GetWideText().empty()) {
+        if (pattern->contentController_->IsEmpty()) {
             return;
         }
         int range = 0;
         if (moveUnit == 1) {
             range = 1;
         }
-        auto caretPosition = forward ? pattern->textEditingValue_.caretPosition + range
-                                     : pattern->textEditingValue_.caretPosition - range;
+        auto caretPosition = forward ? pattern->selectController_->GetCaretIndex() + range
+                                     : pattern->selectController_->GetCaretIndex() - range;
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         layoutProperty->UpdateCaretPosition(caretPosition);
         pattern->SetCaretPosition(caretPosition);
-        pattern->UpdateCaretPositionByTextEdit();
     });
 }
 
@@ -6432,25 +4696,6 @@ void TextFieldPattern::SetAccessibilityScrollAction()
     });
 }
 
-void TextFieldPattern::CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle,
-    float firstHandleSize, float secondHandleSize)
-{
-    auto firstHandleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
-    if (!contentRect_.IsInRegion(
-            { firstHandleOffset.GetX(), firstHandleOffset.GetY() + BOX_EPSILON + firstHandleSize })) {
-        // hide firstHandle when it's out of content region
-        firstHandle = std::nullopt;
-    }
-    auto secondHandleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
-    if (!contentRect_.IsInRegion(
-            { secondHandleOffset.GetX(), secondHandleOffset.GetY() + BOX_EPSILON + secondHandleSize })) {
-        // hide secondHandle when it's out of content region
-        secondHandle = std::nullopt;
-    }
-    LOGD("firstHandleOffset %{public}s, secondHandleOffset %{public}s contentRect: %{public}s",
-        firstHandleOffset.ToString().c_str(), secondHandleOffset.ToString().c_str(), contentRect_.ToString().c_str());
-}
-
 void TextFieldPattern::StopEditing()
 {
     LOGI("TextFieldPattern: StopEditing");
@@ -6468,52 +4713,40 @@ void TextFieldPattern::StopEditing()
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnEditChanged(false);
     }
-    HandleSetSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition);
+    UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
-    MarkRedrawOverlay();
     CloseSelectOverlay();
     CloseKeyboard(true);
 }
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-bool TextFieldPattern::LastTouchIsInSelectRegion(const std::vector<RSTypographyProperties::TextBox>& boxes)
-{
-    if (boxes.empty()) {
-        return false;
-    }
-
-    Offset offset = GetLastTouchOffset() - Offset(textRect_.GetX(), textRect_.GetY());
-    for (const auto& box : boxes) {
-        RectF rect(box.rect_.GetLeft(), box.rect_.GetTop(), box.rect_.GetWidth(), box.rect_.GetHeight());
-        if (rect.IsInRegion({ offset.GetX(), offset.GetY() })) {
-            return true;
-        }
-    }
-    return false;
-}
-#else
-bool TextFieldPattern::LastTouchIsInSelectRegion(const std::vector<RSTextRect>& boxes)
-{
-    if (boxes.empty()) {
-        return false;
-    }
-
-    Offset offset = GetLastTouchOffset() - Offset(textRect_.GetX(), textRect_.GetY());
-    for (const auto& box : boxes) {
-        RectF rect(box.rect.GetLeft(), box.rect.GetTop(), box.rect.GetWidth(), box.rect.GetHeight());
-        if (rect.IsInRegion({ offset.GetX(), offset.GetY() })) {
-            return true;
-        }
-    }
-    return false;
-}
-#endif
 
 bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
 {
     OffsetF offset(paintRect.GetX() - parentGlobalOffset_.GetX(), paintRect.GetY() - parentGlobalOffset_.GetY());
     return !(!contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) ||
              !contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON }));
+}
+
+bool TextFieldPattern::CheckSelectionRectVisible()
+{
+    if (!selectController_->IsSelected()) {
+        return false;
+    }
+    std::vector<RectF> selectedRects;
+    paragraph_->GetRectsForRange(selectController_->GetStartIndex(), selectController_->GetEndIndex(), selectedRects);
+    if (selectedRects.empty()) {
+        return false;
+    }
+    for (const auto& rect : selectedRects) {
+        auto left = rect.Left();
+        auto top = rect.Top();
+        SizeF boxSize = { rect.Width(), rect.Height() };
+        auto boxOffset = OffsetF(left + (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()),
+            top + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) + BOX_EPSILON);
+        if (contentRect_.IsIntersectWith(RectF(boxOffset, boxSize))) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void TextFieldPattern::SetTextRectOffset()
@@ -6530,23 +4763,7 @@ void TextFieldPattern::SetTextRectOffset()
     }
 }
 
-void TextFieldPattern::FilterExistText()
-{
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto inputFilter = layoutProperty->GetInputFilter();
-    auto inputType = layoutProperty->GetTextInputType();
-    if ((inputFilter.has_value() || inputType.has_value()) && !textEditingValue_.text.empty()) {
-        std::string result;
-        auto textEditorValue = textEditingValue_.text;
-        EditingValueFilter(textEditorValue, result);
-        if (textEditingValue_.text != result) {
-            InitEditingValueText(result);
-        }
-    }
-}
-
-void TextFieldPattern::DumpAdvanceInfo()
+void TextFieldPattern::DumpInfo()
 {
     if (customKeyboardBulder_) {
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
@@ -6585,20 +4802,13 @@ bool TextFieldPattern::IsTouchAtLeftOffset(float currentOffsetX)
 
 OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
 {
-    if (textBoxes_.empty()) {
+    if (!IsSelected()) {
         return { 0.0f, 0.0f };
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    auto startY = textBoxes_.front().rect_.GetTop();
-    auto startX = textBoxes_.front().rect_.GetLeft();
-
-    auto endY = textBoxes_.back().rect_.GetTop();
-#else
-    auto startY = textBoxes_.front().rect.GetTop();
-    auto startX = textBoxes_.front().rect.GetLeft();
-
-    auto endY = textBoxes_.back().rect.GetTop();
-#endif
+    auto selectRects = selectController_->GetSelectedRects();
+    auto startY = selectRects.front().Top();
+    auto startX = selectRects.front().Left();
+    auto endY = selectRects.back().Top();
     OffsetF startOffset;
     if (NearEqual(startY, endY)) {
         startOffset = { (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()) + startX,
@@ -6641,5 +4851,96 @@ bool TextFieldPattern::IsReachedBoundary(float offset)
     return (NearEqual(textRect_.GetX(), contentRect_.GetX()) && GreatNotEqual(offset, 0.0f)) ||
            (NearEqual(textRect_.GetX() + textRect_.Width(), contentRect_.GetX() + contentRect_.Width()) &&
                LessNotEqual(offset, 0.0f));
+}
+
+OffsetF TextFieldPattern::GetTextPaintOffset() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto textPaintOffset = host->GetPaintRectOffset();
+    return textPaintOffset - rootOffset;
+}
+
+void TextFieldPattern::UpdateSelectController()
+{
+    selectController_->UpdateContentRect(contentRect_);
+    selectController_->UpdateParagraph(paragraph_);
+    selectController_->UpdateCaretOffset();
+}
+
+bool TextFieldPattern::IsSingleHandle() const
+{
+    return contentController_->IsEmpty() || !selectController_->IsSelected();
+}
+
+void TextFieldPattern::OnAttachToFrameNode()
+{
+    auto onTextSelectorChange = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
+    };
+    selectController_->SetOnAccessibility(std::move(onTextSelectorChange));
+}
+
+bool TextFieldPattern::NeedPaintSelect()
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto firstHandle = paintProperty->GetFirstHandleInfo();
+    auto secondHandle = paintProperty->GetSecondHandleInfo();
+    if (!selectController_->IsSelected()) {
+        if (!firstHandle.has_value() || !secondHandle.has_value()) {
+            paintProperty->UpdateFirstHandleInfo(selectController_->GetCaretInfo());
+            paintProperty->UpdateSecondHandleInfo(selectController_->GetCaretInfo());
+            return false;
+        }
+
+        if (firstHandle->index != secondHandle->index) {
+            paintProperty->UpdateFirstHandleInfo(selectController_->GetCaretInfo());
+            paintProperty->UpdateSecondHandleInfo(selectController_->GetCaretInfo());
+            return true;
+        }
+    }
+    auto needPaint = firstHandle != selectController_->GetFirstHandleInfo() ||
+                     secondHandle != selectController_->GetSecondHandleInfo();
+    paintProperty->UpdateFirstHandleInfo(selectController_->GetFirstHandleInfo());
+    paintProperty->UpdateSecondHandleInfo(selectController_->GetSecondHandleInfo());
+    return needPaint;
+}
+
+RefPtr<FocusHub> TextFieldPattern::GetFocusHub() const
+{
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    return focusHub;
+}
+
+void TextFieldPattern::UpdateRecordCaretIndex(int32_t index)
+{
+    if (operationRecords_.empty()) {
+        LOGW("Operation records empty, cannot update position");
+        return;
+    }
+    operationRecords_.back().caretPosition = index;
+}
+
+void TextFieldPattern::OnObscuredChanged(bool isObscured)
+{
+    textObscured_ = isObscured;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    selectController_->UpdateCaretIndex(selectController_->GetSecondHandleIndex());
+    StartTwinkling();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TextFieldPattern::CreateHandles()
+{
+    ProcessOverlay(false, false);
 }
 } // namespace OHOS::Ace::NG

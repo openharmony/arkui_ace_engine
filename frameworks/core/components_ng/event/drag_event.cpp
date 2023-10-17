@@ -723,10 +723,6 @@ void DragEventActuator::GetTextPixelMap(bool startDrag)
     auto manager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     manager->RemovePixelMap();
-    if (!startDrag) {
-        CHECK_NULL_VOID(pattern);
-        pattern->CreateHandles();
-    }
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     if (!dragDropManager->IsDragged()) {

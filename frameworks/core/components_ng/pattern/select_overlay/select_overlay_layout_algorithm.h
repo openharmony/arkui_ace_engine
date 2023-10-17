@@ -25,6 +25,13 @@
 
 namespace OHOS::Ace::NG {
 
+struct ConstraintMenuParams {
+    float minSpacing;
+    float menuHeight;
+    RefPtr<FrameNode> anchorNode;
+    RectF viewPort;
+};
+
 class ACE_EXPORT SelectOverlayLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(SelectOverlayLayoutAlgorithm, BoxLayoutAlgorithm);
 
@@ -64,6 +71,7 @@ private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
     OffsetF ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset);
     bool IsTextAreaSelectAll();
+    void ConstraintMenuWithAnchorNode(OffsetF& menuOffset, const ConstraintMenuParams& params);
 
     std::shared_ptr<SelectOverlayInfo> info_;
 

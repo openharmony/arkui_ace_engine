@@ -27,7 +27,7 @@ namespace {
 #define KEY_META_OR_CTRL_LEFT KeyCode::KEY_CTRL_LEFT
 #define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_CTRL_RIGHT
 #endif
-}
+} // namespace
 bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     LOGD("HandleKeyEvent event, caps lock %{public}d, key code %{public}d", keyEvent.enableCapsLock, keyEvent.code);
@@ -89,21 +89,21 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
         }
         if (keyEvent.code == KeyCode::KEY_DEL) {
 #if defined(PREVIEW)
-            pattern->DeleteForward(TextFieldPattern::GetGraphemeClusterLength(
-                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition));
+            pattern->DeleteForward(
+                TextFieldPattern::GetGraphemeClusterLength(pattern->GetWideText(), pattern->GetCaretIndex()));
 #else
-            pattern->DeleteBackward(TextFieldPattern::GetGraphemeClusterLength(
-                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition, true));
+            pattern->DeleteBackward(
+                TextFieldPattern::GetGraphemeClusterLength(pattern->GetWideText(), pattern->GetCaretIndex(), true));
 #endif
             return true;
         }
         if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
 #if defined(PREVIEW)
             pattern->DeleteBackward(TextFieldPattern::GetGraphemeClusterLength(
-                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition, true));
+                pattern->GetWideText(), pattern->GetCaretIndex().caretPosition, true));
 #else
-            pattern->DeleteForward(TextFieldPattern::GetGraphemeClusterLength(
-                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition));
+            pattern->DeleteForward(
+                TextFieldPattern::GetGraphemeClusterLength(pattern->GetWideText(), pattern->GetCaretIndex()));
 #endif
             return true;
         }
