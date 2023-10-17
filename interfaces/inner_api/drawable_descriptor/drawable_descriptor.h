@@ -31,9 +31,13 @@
 
 #include "foundation/arkui/ace_engine/interfaces/inner_api/form_render/include/form_renderer_hilog.h"
 #include "image_converter.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
+#else
+#include "draw/canvas.h"
+#endif
 #include "resource_manager.h"
 
 #include "base/memory/ace_type.h"
@@ -80,8 +84,13 @@ private:
     bool GetDefaultMask();
     bool GetMaskByName(const std::string& name);
     bool CreatePixelMap();
+#ifndef USE_ROSEN_DRAWING
     void DrawOntoCanvas(
         const std::shared_ptr<SkBitmap>& bitMap, float width, float height, SkCanvas& canvas, const SkPaint& paint);
+#else
+    void DrawOntoCanvas(
+        const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap, float width, float height, Rosen::Drawing::Canvas& canvas);
+#endif
 
     std::unique_ptr<uint8_t[]> jsonBuf_;
     size_t len_ = 0;

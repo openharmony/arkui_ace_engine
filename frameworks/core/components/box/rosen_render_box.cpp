@@ -713,7 +713,7 @@ void RosenRenderBox::DrawOnPixelMap()
     RSBitmap tempBitmap;
     tempBitmap.Build(pixelMap_->GetWidth(), pixelMap_->GetHeight(), tempFormat);
     tempBitmap.SetPixels(dstPixels);
-    tempCache.CopyPixels(tempBitmap, 0, 0, pixelMap_->GetWidth(), pixelMap_->GetHeight());
+    tempCache.CopyPixels(tempBitmap, 0, 0);
 }
 #endif
 

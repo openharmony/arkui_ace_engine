@@ -15,8 +15,12 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_IMAGE_CONVERTER_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_IMAGE_CONVERTER_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBitmap.h"
 #include "include/core/SkImageInfo.h"
+#else
+#include "image/bitmap.h"
+#endif
 #ifdef NEW_SKIA
 #include "include/core/SkSamplingOptions.h"
 #endif
@@ -31,12 +35,21 @@ namespace OHOS::Ace::Napi {
 class ImageConverter {
 public:
     std::unique_ptr<Media::ImageSource> CreateImageSource(const char* item, uint32_t& errorCode);
+#ifndef USE_ROSEN_DRAWING
     static SkColorType PixelFormatToSkColorType(Media::PixelFormat pixelFormat);
     static SkAlphaType AlphaTypeToSkAlphaType(Media::AlphaType alphaType);
     static std::shared_ptr<SkBitmap> PixelMapToBitmap(
         const std::shared_ptr<Media::PixelMap>& pixelMap);
     static std::shared_ptr<Media::PixelMap> BitmapToPixelMap(
         const std::shared_ptr<SkBitmap>& bitMap, Media::InitializationOptions& opts);
+#else
+    static Rosen::Drawing::ColorType PixelFormatToColorType(Media::PixelFormat pixelFormat);
+    static Rosen::Drawing::AlphaType AlphaTypeToAlphaType(Media::AlphaType alphaType);
+    static std::shared_ptr<Rosen::Drawing::Bitmap> PixelMapToBitmap(
+        const std::shared_ptr<Media::PixelMap>& pixelMap);
+    static std::shared_ptr<Media::PixelMap> BitmapToPixelMap(
+        const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap, Media::InitializationOptions& opts);
+#endif
 };
 } // namespace OHOS::Ace::Napi
 #endif // #define FOUNDATION_ACE_INTERFACE_INNERKITS_IMAGE_CONVERTER_H

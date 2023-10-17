@@ -26,6 +26,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
+#include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 #endif
 #include "core/image/image_provider.h"
 
@@ -137,13 +138,6 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
     }
     return SkImage::MakeFromBitmap(bitmap);
 }
-#else
-std::shared_ptr<RSImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
-{
-    LOGE("Drawing is not supported");
-    return std::make_shared<RSImage>();
-}
-#endif
 
 bool AnimatedImagePlayer::CopyTo(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src)
 {
@@ -169,5 +163,65 @@ bool AnimatedImagePlayer::CopyTo(SkBitmap* dst, SkColorType dstColorType, const 
     dst->swap(tempDstBitmap);
     return true;
 }
+#else
+std::shared_ptr<RSImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
+{
+    // first seek in cache
+    auto iterator = cachedFrame_.find(index);
+    if (iterator != cachedFrame_.end() && iterator->second != nullptr) {
+        LOGD("index %{private}d found in cache.", index);
+        auto image = std::shared_ptr<RSImage>();
+        image->BuildFromBitmap(*iterator->second);
+        return image;
+    }
+
+    RSBitmap bitmap;
+    SkImageInfo skImageInfo = codec_->getInfo().makeColorType(kN32_SkColorType);
+    auto ImageInfo = Rosen::Drawing::ConvertToRSImageInfo(skImageInfo);
+    bitmap.Build(ImageInfo);
+    SkCodec::Options options;
+    options.fFrameIndex = index;
+    const int32_t requiredFrame = frameInfos_[index].fRequiredFrame;
+    if (requiredFrame != SkCodec::kNoFrame) {
+        if (requiredFrame == lastRequiredFrameIndex_ && lastRequiredBitmap_ && lastRequiredBitmap_->GetPixels() &&
+            CopyTo(&bitmap, *lastRequiredBitmap_)) {
+            options.fPriorFrame = requiredFrame;
+        } else if (requiredFrame != lastRequiredFrameIndex_) {
+            // find requiredFrame in cached frame.
+            auto iter = cachedFrame_.find(requiredFrame);
+            if (iter != cachedFrame_.end() && iter->second != nullptr &&
+                CopyTo(&bitmap, *iter->second)) {
+                options.fPriorFrame = requiredFrame;
+            }
+        }
+    }
+
+    if (SkCodec::kSuccess != codec_->getPixels(skImageInfo, bitmap.GetPixels(), bitmap.GetRowBytes(), &options)) {
+        LOGW("Could not getPixels for frame %{public}d:", index);
+        return nullptr;
+    }
+
+    if (frameInfos_[index].fDisposalMethod != SkCodecAnimation::DisposalMethod::kRestorePrevious) {
+        lastRequiredBitmap_ = std::make_unique<RSBitmap>(bitmap);
+        lastRequiredFrameIndex_ = index;
+    }
+
+    if (iterator != cachedFrame_.end() && iterator->second == nullptr) {
+        LOGD("index %{private}d cached.", index);
+        iterator->second = std::make_unique<RSBitmap>(bitmap);
+    }
+    auto image = std::shared_ptr<RSImage>();
+    image->BuildFromBitmap(bitmap);
+    return image;
+}
+
+bool AnimatedImagePlayer::CopyTo(RSBitmap* dst, const RSBitmap& src)
+{
+    auto info = src.GetImageInfo();
+    dst->Build(info);
+    src.CopyPixels(*dst, 0, 0);
+    return true;
+}
+#endif
 
 } // namespace OHOS::Ace
