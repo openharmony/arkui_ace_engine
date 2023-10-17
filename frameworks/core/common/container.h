@@ -35,6 +35,7 @@
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/pipeline/pipeline_base.h"
+#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 namespace OHOS::Ace {
 
@@ -247,7 +248,7 @@ public:
     static bool IsCurrentUseNewPipeline()
     {
         auto container = Current();
-        return container ? container->useNewPipeline_ : false;
+        return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
     }
 
     // SetCurrentUsePartialUpdate is called when initial render on a page

@@ -99,6 +99,7 @@ ohos_unittest("event_manager_test_ng") {
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_flutter_window.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "event_manager_test_ng.cpp",
   ]
 

@@ -424,6 +424,7 @@ source_set("ace_components_mock") {
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/render/mock_font_collection.cpp",
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
   ]
   deps = [ "//third_party/googletest:gmock_main" ]
   configs += [ ":ace_unittest_config" ]

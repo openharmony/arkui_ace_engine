@@ -916,22 +916,27 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
-    auto result = loadJs_(target.path, target.errorCallback);
-    if (pageNode->GetChildren().empty()) {
-        // try to load named route
-        result = loadNamedRouter_(target.url, target.isNamedRouterMode);
-        if (!result && target.isNamedRouterMode && target.errorCallback) {
+
+    loadJs_(target.path, target.errorCallback);
+    auto result = loadNamedRouter_(target.url, target.isNamedRouterMode);
+    if (!result) {
+        if (!target.isNamedRouterMode) {
+            result = updateRootComponent_();
+        } else if (target.errorCallback) {
             target.errorCallback("The named route is not exist.", Framework::ERROR_CODE_NAMED_ROUTE_ERROR);
         }
     }
-    if (target.errorCallback != nullptr) {
-        target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
-    }
+
     if (!result) {
         LOGE("fail to load page file");
         pageRouterStack_.pop_back();
         return;
     }
+
+    if (target.errorCallback != nullptr) {
+        target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
+    }
+
     if (!OnPageReady(pageNode, needHideLast, needTransition)) {
         LOGE("fail to mount page");
         pageRouterStack_.pop_back();

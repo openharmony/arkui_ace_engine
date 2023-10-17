@@ -256,6 +256,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             return;
         }
         jsEngine->LoadJs(url, jsPage, isMainPage);
+        jsEngine->UpdateRootComponent();
     };
 
     const auto& setPluginMessageTransferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -530,7 +531,16 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             }
             return jsEngine->LoadNamedRouterSource(namedRouter, isTriggeredByJs);
         };
-        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadNamedRouterCallback));
+        auto updateRootComponentCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->UpdateRootComponent();
+        };
+        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadNamedRouterCallback),
+                                           std::move(updateRootComponentCallback));
+
         auto moduleNamecallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& pageName)->
         std::string {
             auto jsEngine = weakEngine.Upgrade();
