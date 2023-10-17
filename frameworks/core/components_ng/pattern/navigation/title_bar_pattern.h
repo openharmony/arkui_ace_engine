@@ -106,7 +106,7 @@ public:
     {
         isInitialSubtitle_ = isInitialSubtitle;
     }
-    void ProcessTitleAssociatedUpdate(float offset);
+    bool ProcessTitleAssociatedUpdate(float offset);
     void ProcessTitleDragStart(float offset);
     void SetTitleStyleByOffset(float offset);
 
@@ -165,8 +165,13 @@ public:
         CanOverDrag_ = CanOverDrag;
     }
 
+    void SetTitleScaleChange(bool isTitleScaleChange)
+    {
+        isTitleScaleChange_ = isTitleScaleChange;
+    }
+
     void ResetAssociatedScroll();
-    void UpdateAssociatedScrollOffset(float offset);
+    bool UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node);
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -236,6 +241,7 @@ private:
     float minTitleHeight_ = 0.0f;
     bool CanOverDrag_ = true;
     bool isOverDrag_ = true;
+    bool isTitleScaleChange_ = true;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
     bool enableAssociatedScroll_ = false;
@@ -243,6 +249,7 @@ private:
     bool dragScrolling_ = false;
     bool associatedScrollOverSize_ = false;
     float associatedScrollOffsetMax_ = 0.0f;
+    RefPtr<FrameNode> associatedScrollNode_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include "ecmascript/napi/include/jsnapi.h"
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 namespace OHOS::Ace::Framework {
 class JsValue;
@@ -73,7 +75,7 @@ public:
     virtual shared_ptr<JsValue> NewNativePointer(void *ptr) = 0;
     virtual void ThrowError(const std::string& msg, int32_t code) = 0;
     virtual void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) = 0;
-    virtual void HandleUncaughtException(
+    virtual void HandleUncaughtException(panda::TryCatch& tryCatch,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) = 0;
     virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;

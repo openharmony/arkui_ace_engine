@@ -110,6 +110,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
     int32_t curDuration = duration_;
+#ifndef PREVIEW
     int64_t currentTimeStamp = GetSysTimestamp();
     int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
     if (currentTimeStamp > eventTimeStamp) {
@@ -120,6 +121,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             curDuration = 0;
         }
     }
+#endif
 
     if (isForDrag_ && event.sourceType == SourceType::MOUSE) {
         curDuration = 0;
@@ -174,11 +176,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
     Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
-    auto longPressThreshold = MAX_THRESHOLD;
-    if (isForDrag_) {
-        longPressThreshold = DRAG_LONG_PRESS_THRESHOLD;
-    }
-    if (offset.GetDistance() > longPressThreshold) {
+    if (offset.GetDistance() > MAX_THRESHOLD) {
         TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "This gesture is not long press, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;

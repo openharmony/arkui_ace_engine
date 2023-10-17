@@ -279,7 +279,7 @@ void JSList::SetDivider(const JSCallbackInfo& args)
         !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
     if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
         LOGW("Invalid strokeWidth of divider");
-        divider.strokeWidth.Reset();
+        divider.strokeWidth = 0.0_vp;
     }
     if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
         // Failed to get color from param, using default color defined in theme
@@ -292,13 +292,13 @@ void JSList::SetDivider(const JSCallbackInfo& args)
     needReset = obj->GetProperty("startMargin")->IsString() &&
         !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
     if (needReset || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)) {
-        divider.startMargin.Reset();
+        divider.startMargin = 0.0_vp;
     }
 
     needReset = obj->GetProperty("endMargin")->IsString() &&
         !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
     if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)) {
-        divider.endMargin.Reset();
+        divider.endMargin = 0.0_vp;
     }
 
     ListModel::GetInstance()->SetDivider(divider);

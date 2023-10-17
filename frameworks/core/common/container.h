@@ -214,6 +214,16 @@ public:
         return filesDataPath_;
     }
 
+    void SetTempDir(const std::string& path)
+    {
+        tempDir_ = path;
+    }
+
+    const std::string& GetTempDir() const
+    {
+        return tempDir_;
+    }
+
     virtual void SetViewFirstUpdating(std::chrono::time_point<std::chrono::high_resolution_clock> time) {}
 
     virtual void UpdateResourceConfiguration(const std::string& jsonStr) {}
@@ -375,6 +385,7 @@ private:
     std::string moduleName_;
     std::string bundlePath_;
     std::string filesDataPath_;
+    std::string tempDir_;
     bool usePartialUpdate_ = false;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;

@@ -20,10 +20,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t STOP_DURATION = 2000; // 2000ms
-constexpr float KEY_TIME_START = 0.0f;
-constexpr float KEY_TIME_MIDDLE = 0.7f;
-constexpr float KEY_TIME_END = 1.0f;
+constexpr double FRICTION_VELOCITY_THRESHOLD = 100.0;
+constexpr int32_t BAR_DISAPPEAR_DELAY_DURATION = 2000; // 2000ms
+constexpr int32_t BAR_DISAPPEAR_DURATION = 400;        // 400ms
 } // namespace
 
 void ScrollBarPattern::OnAttachToFrameNode()
@@ -51,11 +50,11 @@ void ScrollBarPattern::OnModifyDone()
 
     auto oldDisplayMode = displayMode_;
     displayMode_ = layoutProperty->GetDisplayMode().value_or(DisplayMode::AUTO);
-    if ((oldDisplayMode != displayMode_ || !scrollEndAnimator_)  && scrollBarProxy_) {
+    if (oldDisplayMode != displayMode_ && scrollBarProxy_) {
         if (displayMode_ == DisplayMode::ON) {
-            scrollBarProxy_->StopScrollBarAnimator();
-        } else if (displayMode_ == DisplayMode::AUTO || !scrollEndAnimator_) {
-            scrollBarProxy_->StartScrollBarAnimator();
+            StopDisappearAnimator();
+        } else if (displayMode_ == DisplayMode::AUTO) {
+            StartDisappearAnimator();
         }
     }
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
@@ -70,7 +69,7 @@ void ScrollBarPattern::OnModifyDone()
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         if (source == SCROLL_FROM_START) {
-            pattern->StopAnimator();
+            pattern->StopDisappearAnimator();
             pattern->SendAccessibilityEvent(AccessibilityEventType::SCROLL_START);
             return true;
         }
@@ -80,7 +79,7 @@ void ScrollBarPattern::OnModifyDone()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->GetDisplayMode() == DisplayMode::AUTO) {
-            pattern->StartAnimator();
+            pattern->StartDisappearAnimator();
         }
         pattern->SendAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     };
@@ -133,7 +132,7 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         if (Positive(controlDistance_) && opacity_ == 0) {
             SetOpacity(UINT8_MAX);
             if (displayMode_ == DisplayMode::AUTO) {
-                StartAnimator();
+                StartDisappearAnimator();
             }
             return true;
         } else if (!Positive(controlDistance_) && opacity_ == UINT8_MAX) {
@@ -183,47 +182,45 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
     return true;
 }
 
-void ScrollBarPattern::StartAnimator()
+void ScrollBarPattern::StartDisappearAnimator()
 {
     if (!Positive(controlDistance_)) {
         return;
     }
-    if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
-        scrollEndAnimator_->Stop();
+    LOGD("outer scrollBar start disappear animator");
+    if (disapplearDelayTask_) {
+        disapplearDelayTask_.Cancel();
     }
-    if (scrollEndAnimator_) {
-        scrollEndAnimator_->Play();
-        return;
-    }
-
-    scrollEndAnimator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_START, UINT8_MAX);
-    auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_MIDDLE, UINT8_MAX);
-    auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_END, 0);
-    hiddenMiddleKeyframe->SetCurve(Curves::LINEAR);
-    hiddenEndKeyframe->SetCurve(Curves::FRICTION);
-
-    auto animation = AceType::MakeRefPtr<KeyframeAnimation<int32_t>>();
-    animation->AddKeyframe(hiddenStartKeyframe);
-    animation->AddKeyframe(hiddenMiddleKeyframe);
-    animation->AddKeyframe(hiddenEndKeyframe);
-    animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {
-        auto scrollBar = weakBar.Upgrade();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    disapplearDelayTask_.Reset([weak = WeakClaim(this)] {
+        auto scrollBar = weak.Upgrade();
         CHECK_NULL_VOID(scrollBar);
-        scrollBar->SetOpacity(value);
+        AnimationOption option;
+        option.SetCurve(Curves::FRICTION);
+        option.SetDuration(BAR_DISAPPEAR_DURATION);
+        auto disappearAnimation = AnimationUtils::StartAnimation(option, [weak]() {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_VOID(scrollBar);
+            scrollBar->SetOpacity(0);
+        });
+        scrollBar->SetDisappearAnimation(disappearAnimation);
     });
-    scrollEndAnimator_->AddInterpolator(animation);
-    scrollEndAnimator_->SetDuration(STOP_DURATION);
-    scrollEndAnimator_->Play();
+    taskExecutor->PostDelayedTask(disapplearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPEAR_DELAY_DURATION);
 }
 
-void ScrollBarPattern::StopAnimator()
+void ScrollBarPattern::StopDisappearAnimator()
 {
     if (!Positive(controlDistance_)) {
         return;
     }
-    if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
-        scrollEndAnimator_->Stop();
+    if (disapplearDelayTask_) {
+        disapplearDelayTask_.Cancel();
+    }
+    if (disappearAnimation_) {
+        AnimationUtils::StopAnimation(disappearAnimation_);
     }
     SetOpacity(UINT8_MAX);
 }
@@ -338,9 +335,9 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     }
     frictionPosition_ = 0.0;
     if (frictionMotion_) {
-        frictionMotion_->Reset(friction_, 0, velocity);
+        frictionMotion_->Reset(friction_, 0, velocity, FRICTION_VELOCITY_THRESHOLD);
     } else {
-        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity);
+        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity, FRICTION_VELOCITY_THRESHOLD);
         frictionMotion_->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
             auto scrollBar = weakBar.Upgrade();
             CHECK_NULL_VOID(scrollBar);

@@ -34,7 +34,6 @@ constexpr Dimension ARROW_ZERO_PERCENT_VALUE = Dimension(0.0, DimensionUnit::PER
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = Dimension(0.5, DimensionUnit::PERCENT);
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = Dimension(1.0, DimensionUnit::PERCENT);
 // preview menu
-constexpr Dimension PREVIEW_MENU_GAP = 12.0_vp;
 constexpr Dimension PORTRAIT_TOP_SECURITY = 48.0_vp;
 constexpr Dimension PORTRAIT_BOTTOM_SECURITY = 48.0_vp;
 constexpr Dimension LANDSCAPE_TOP_SECURITY = 24.0_vp;

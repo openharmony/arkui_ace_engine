@@ -204,11 +204,11 @@ void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t tar
     }
 }
 
-void SubwindowManager::HideMenuNG()
+void SubwindowManager::HideMenuNG(bool showPreviewAnimation)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->HideMenuNG();
+        subwindow->HideMenuNG(showPreviewAnimation);
     }
 }
 
@@ -418,7 +418,8 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
     return subwindow;
 }
 
-void SubwindowManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void SubwindowManager::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
     auto containerId = Container::CurrentId();
     // Get active container when current instanceid is less than 0
@@ -432,25 +433,47 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
         auto subwindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
-        subwindow->ShowToast(message, duration, bottom);
-        // for ability
+        subwindow->ShowToast(message, duration, bottom, showMode);
     } else {
+        // for ability
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [containerId, message, duration, bottom] {
+            [containerId, message, duration, bottom, showMode] {
                 auto manager = SubwindowManager::GetInstance();
                 CHECK_NULL_VOID(manager);
                 auto subwindow = manager->GetSubwindow(containerId);
                 if (!subwindow) {
                     LOGI("Subwindow is null, add a new one.");
                     subwindow = Subwindow::CreateSubwindow(containerId);
+                    subwindow->SetAboveApps(showMode == NG::ToastShowMode::TOP_MOST);
                     subwindow->InitContainer();
                     manager->AddSubwindow(containerId, subwindow);
                 }
-                subwindow->ShowToast(message, duration, bottom);
+                subwindow->ShowToast(message, duration, bottom, showMode);
             },
             TaskExecutor::TaskType::PLATFORM);
+    }
+}
+
+void SubwindowManager::ClearToastInSubwindow()
+{
+    auto containerId = Container::CurrentId();
+    // Get active container when current instanceid is less than 0
+    if (containerId < 0) {
+        auto container = Container::GetActive();
+        if (container) {
+            containerId = container->GetInstanceId();
+        }
+    }
+    RefPtr<Subwindow> subwindow;
+    // The main window does not need to clear Toast
+    if (containerId != -1 && containerId < MIN_SUBCONTAINER_ID) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(containerId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(containerId) : containerId);
+    }
+    if (subwindow) {
+        subwindow->ClearToast();
     }
 }
 

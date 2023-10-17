@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 
 #include "session_manager/include/scene_session_manager.h"
+#include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -123,7 +124,13 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
 
     CHECK_NULL_VOID(session_);
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
+    if (transactionController && (session_->GetSessionRect() != windowRect)) {
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED,
+            transactionController->GetRSTransaction());
+    } else {
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    }
 }
 
 void WindowScene::BufferAvailableCallback()
@@ -140,6 +147,7 @@ void WindowScene::BufferAvailableCallback()
             CHECK_NULL_VOID(context);
             auto rsNode = context->GetRSNode();
             CHECK_NULL_VOID(rsNode);
+            rsNode->MarkNodeGroup(true);
             auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
             rsNode->SetTransitionEffect(effect);
             Rosen::RSAnimationTimingProtocol protocol;
@@ -194,6 +202,15 @@ void WindowScene::OnActivation()
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+
+        if (self->session_ && self->session_->GetShowRecent() && self->startingNode_) {
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            host->AddChild(self->contentNode_, 0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            self->session_->GetSurfaceNode()->SetBufferAvailableCallback(self->callback_);
         }
     };
 
@@ -244,10 +261,6 @@ void WindowScene::OnForeground()
         host->RemoveChild(self->snapshotNode_);
         self->snapshotNode_.Reset();
         host->AddChild(self->contentNode_);
-        if (!self->session_->GetBufferAvailable() && !self->startingNode_) {
-            self->CreateStartingNode();
-            host->AddChild(self->startingNode_);
-        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 

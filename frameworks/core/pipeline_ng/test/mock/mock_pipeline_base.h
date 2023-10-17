@@ -33,7 +33,6 @@ public:
     static RefPtr<MockPipelineBase> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
 
-    MOCK_METHOD0(SetupRootElement, void());
     MOCK_METHOD3(
         AddKeyFrame, void(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback));
     MOCK_METHOD2(AddKeyFrame, void(float fraction, const std::function<void()>& propertyCallback));
@@ -104,7 +103,7 @@ public:
 
     static RefPtr<MockPipelineBase> pipeline_;
 
-    void FlushUITasks() {}
+    void FlushUITasks() override {}
 
 protected:
     double dipScale_ = 1.0;

@@ -445,6 +445,7 @@ public:
         StopDragCallback&& stopDragCallback) override;
 
 private:
+    virtual bool MaybeRelease() override;
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask();

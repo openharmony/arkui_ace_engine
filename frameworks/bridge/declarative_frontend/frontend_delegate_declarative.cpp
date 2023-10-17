@@ -1359,18 +1359,19 @@ Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void FrontendDelegateDeclarative::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft, containerId = Container::CurrentId()](
+        auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
                         const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
             LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
-            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
+            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
         };
         MainWindowOverlay(std::move(task));
         return;

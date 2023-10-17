@@ -147,20 +147,23 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         auto event = [builder = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
+            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto dragDropManager = pipelineContext->GetDragDropManager();
+            CHECK_NULL_VOID(dragDropManager);
+            if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
+                return;
+            }
             if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
                 auto context = targetNode->GetRenderContext();
                 CHECK_NULL_VOID(context);
                 auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
                 CHECK_NULL_VOID(gestureHub);
-                if (gestureHub->GetPixelMap() == nullptr) {
-                    auto pixelMap = context->GetThumbnailPixelMap();
-                    gestureHub->SetPixelMap(pixelMap);
-                }
+                auto pixelMap = context->GetThumbnailPixelMap();
+                gestureHub->SetPixelMap(pixelMap);
             }
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
             auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
             menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
             CreateCustomMenu(builder, targetNode, menuPosition, previewBuildFunc, menuParam);

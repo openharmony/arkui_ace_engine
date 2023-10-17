@@ -45,8 +45,8 @@
 namespace OHOS::Ace::NG {
 class UIExtensionLifecycleListener : public Rosen::ILifecycleListener {
 public:
-    explicit UIExtensionLifecycleListener(const WeakPtr<UIExtensionPattern>& uiExtensionPattern_)
-        : uiExtensionPattern_(uiExtensionPattern_) {}
+    UIExtensionLifecycleListener(int32_t instanceId, const WeakPtr<UIExtensionPattern>& uiExtensionPattern_)
+        : instanceId_(instanceId), uiExtensionPattern_(uiExtensionPattern_) {}
     virtual ~UIExtensionLifecycleListener() = default;
 
     void OnActivation() override {}
@@ -55,26 +55,48 @@ public:
 
     void OnConnect() override
     {
-        auto uiExtensionPattern = uiExtensionPattern_.Upgrade();
-        CHECK_NULL_VOID(uiExtensionPattern);
-        uiExtensionPattern->OnConnect();
+        ContainerScope scope(instanceId_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([weak = uiExtensionPattern_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnConnect();
+        }, TaskExecutor::TaskType::UI);
     }
 
     void OnDisconnect() override
     {
-        auto uiExtensionPattern = uiExtensionPattern_.Upgrade();
-        CHECK_NULL_VOID(uiExtensionPattern);
-        uiExtensionPattern->OnDisconnect();
+        ContainerScope scope(instanceId_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([weak = uiExtensionPattern_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnDisconnect();
+        }, TaskExecutor::TaskType::UI);
     }
 
     void OnExtensionDied() override
     {
-        auto uiExtensionPattern = uiExtensionPattern_.Upgrade();
-        CHECK_NULL_VOID(uiExtensionPattern);
-        uiExtensionPattern->OnExtensionDied();
+        ContainerScope scope(instanceId_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([weak = uiExtensionPattern_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnExtensionDied();
+        }, TaskExecutor::TaskType::UI);
     }
 
 private:
+    int32_t instanceId_;
     WeakPtr<UIExtensionPattern> uiExtensionPattern_;
 };
 
@@ -104,9 +126,12 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
+    // Prohibit rebuilding the session unless the Want is updated.
     if (session_ && (!session_->GetSessionInfo().want->IsEquals(want))) {
         DestorySession();
+        session_ = nullptr;
     }
+    CHECK_NULL_VOID(!session_);
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID(container);
     auto callerToken = container->GetToken();
@@ -129,23 +154,8 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 
 void UIExtensionPattern::OnConnect()
 {
+    CHECK_RUN_ON(UI);
     LOGI("UIExtension OnConnect called");
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)]() {
-            auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID(extensionPattern);
-            extensionPattern->OnConnectInner();
-        },
-        TaskExecutor::TaskType::UI);
-}
-
-void UIExtensionPattern::OnConnectInner()
-{
     CHECK_NULL_VOID(session_);
     ContainerScope scope(instanceId_);
     contentNode_ = FrameNode::CreateFrameNode(
@@ -181,46 +191,26 @@ void UIExtensionPattern::OnConnectInner()
 
 void UIExtensionPattern::OnDisconnect()
 {
+    CHECK_RUN_ON(UI);
     LOGI("UIExtension OnDisconnect called");
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
     state_ = AbilityState::DESTRUCTION;
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)]() {
-            auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID(extensionPattern);
-            if (extensionPattern->onReleaseCallback_) {
-                extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
-            }
-        },
-        TaskExecutor::TaskType::UI);
+    if (onReleaseCallback_) {
+        onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
+    }
 }
 
 void UIExtensionPattern::OnExtensionDied()
 {
+    CHECK_RUN_ON(UI);
     LOGI("UIExtension OnExtensionDied called");
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveChild(contentNode_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     state_ = AbilityState::DESTRUCTION;
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)]() {
-            auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID(extensionPattern);
-            if (extensionPattern->onReleaseCallback_) {
-                extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
-            }
-        },
-        TaskExecutor::TaskType::UI);
+    if (onReleaseCallback_) {
+        onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
+    }
 }
 
 bool UIExtensionPattern::OnBackPressed()
@@ -233,7 +223,7 @@ bool UIExtensionPattern::OnBackPressed()
 void UIExtensionPattern::RegisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
-    lifecycleListener_ = std::make_shared<UIExtensionLifecycleListener>(WeakClaim(this));
+    lifecycleListener_ = std::make_shared<UIExtensionLifecycleListener>(instanceId_, WeakClaim(this));
     session_->RegisterLifecycleListener(lifecycleListener_);
 }
 
@@ -500,7 +490,8 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
-    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
+    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
+    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
@@ -645,13 +636,13 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->transferAbilityResultFunc_ =
         [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor](int32_t code, const AAFwk::Want& want) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->state_ = AbilityState::DESTRUCTION;
-            taskExecutor->PostTask([pattern, instanceId, code, want]() {
+            taskExecutor->PostTask([weak, instanceId, code, want]() {
                 ContainerScope scope(instanceId);
-                LOGI("UIExtension OnResult called");
-                if (pattern && pattern->onResultCallback_) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (pattern && (pattern->state_ != AbilityState::DESTRUCTION) && pattern->onResultCallback_) {
+                    LOGI("UIExtension OnResult called");
+                    pattern->state_ = AbilityState::DESTRUCTION;
                     pattern->onResultCallback_(code, want);
                 }
             }, TaskExecutor::TaskType::UI);

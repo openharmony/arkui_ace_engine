@@ -1272,6 +1272,14 @@ void NavigationModelNG::SetOnNavBarStateChange(std::function<void(bool)>&& onNav
     navigationEventHub->SetOnNavBarStateChange(std::move(onNavBarStateChange));
 }
 
+void NavigationModelNG::SetOnNavigationModeChange(std::function<void(NavigationMode)>&& modeChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navigationEventHub);
+    navigationEventHub->SetOnNavigationModeChange(std::move(modeChange));
+}
+
 void NavigationModelNG::SetNavigationMode(NavigationMode mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, mode);

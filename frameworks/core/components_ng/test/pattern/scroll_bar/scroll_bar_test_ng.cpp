@@ -735,23 +735,23 @@ HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
     ASSERT_NE(pattern->scrollableEvent_, nullptr);
     auto callback = pattern->scrollEndCallback_;
     ASSERT_NE(callback, nullptr);
-    EXPECT_EQ(pattern->scrollEndAnimator_, nullptr);
+    EXPECT_EQ(pattern->disappearAnimation_, nullptr);
 
     /**
      * @tc.steps: step3. call callback function and controlDistance_ is 0.
-     * @tc.expected: scrollEndAnimator_ is nullptr.
+     * @tc.expected: disappearAnimation_ is nullptr.
      */
     pattern->displayMode_ = DisplayMode::AUTO;
     callback();
-    EXPECT_EQ(pattern->scrollEndAnimator_, nullptr);
+    EXPECT_EQ(pattern->disappearAnimation_, nullptr);
 
     /**
      * @tc.steps: step4. call callback function and controlDistance_ bigger than 0.
-     * @tc.expected: scrollEndAnimator_ is not nullptr.
+     * @tc.expected: disappearAnimation_ is not nullptr.
      */
     pattern->controlDistance_ = 10.f;
     pattern->displayMode_ = DisplayMode::AUTO;
     callback();
-    EXPECT_NE(pattern->scrollEndAnimator_, nullptr);
+    EXPECT_EQ(pattern->disappearAnimation_, nullptr);
 }
 } // namespace OHOS::Ace::NG

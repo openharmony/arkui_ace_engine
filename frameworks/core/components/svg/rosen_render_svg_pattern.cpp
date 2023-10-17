@@ -54,23 +54,10 @@ bool RosenRenderSvgPattern::OnAsPaint(const Offset& offset, const Rect& paintRec
         return false;
     }
 
-#ifdef USE_SYSTEM_SKIA
-    SkISize skISize = SkISize::Make(tileRect.Width(), tileRect.Height());
-    auto skImage = SkImage::MakeFromPicture(
-        std::move(skPicture), skISize, nullptr, nullptr, SkImage::BitDepth::kU8, SkColorSpace::MakeSRGB());
-    if (!skImage) {
-        return false;
-    }
-    skPaint.setShader(skImage->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &skMatrix4));
-#else
     SkRect skRect = SkRect::MakeXYWH(tileRect.Left(), tileRect.Top(), tileRect.Width(), tileRect.Height());
-#if defined(NEW_SKIA)
-    skPaint.setShader(skPicture->makeShader(
-        SkTileMode::kRepeat, SkTileMode::kRepeat, SkFilterMode::kNearest, &skMatrix4, &skRect));
-#else
-    skPaint.setShader(skPicture->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, &skMatrix4, &skRect));
-#endif
-#endif
+    skPaint.setShader(
+        skPicture->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, SkFilterMode::kNearest, &skMatrix4, &skRect));
+
     return true;
 }
 #else
@@ -93,8 +80,8 @@ bool RosenRenderSvgPattern::OnAsPaint(const Offset& offset, const Rect& paintRec
     }
 
     RSRect rect = RSRect(tileRect.Left(), tileRect.Top(), tileRect.Right(), tileRect.Bottom());
-    auto shaderEffect = RSRecordingShaderEffect::CreatePictureShader(*rsPicture,
-        RSTileMode::REPEAT, RSTileMode::REPEAT, RSFilterMode::NEAREST, matrix4, rect);
+    auto shaderEffect = RSRecordingShaderEffect::CreatePictureShader(
+        *rsPicture, RSTileMode::REPEAT, RSTileMode::REPEAT, RSFilterMode::NEAREST, matrix4, rect);
 
     if (rsPen != nullptr) {
         rsPen->SetShaderEffect(shaderEffect);

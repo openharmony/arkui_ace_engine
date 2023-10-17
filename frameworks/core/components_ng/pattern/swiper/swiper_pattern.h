@@ -27,6 +27,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
@@ -37,8 +38,8 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
-class SwiperPattern : public Pattern {
-    DECLARE_ACE_TYPE(SwiperPattern, Pattern);
+class SwiperPattern : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
 public:
     SwiperPattern();
@@ -94,6 +95,7 @@ public:
         Pattern::ToJsonValue(json);
         json->Put("currentIndex", currentIndex_);
         json->Put("currentOffset", currentOffset_);
+        json->Put("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1));
 
         if (indicatorIsBoolean_) {
             return;
@@ -111,10 +113,14 @@ public:
     {
         currentIndex_ = json->GetInt("currentIndex");
         auto currentOffset = json->GetDouble("currentOffset");
+        auto jumpIndex = json->GetInt("uiCastJumpIndex");
         if (currentOffset != currentOffset_) {
             auto delta = currentOffset - currentOffset_;
             LOGD("UITree delta=%{public}f", delta);
             UpdateCurrentOffset(delta);
+        } else if (jumpIndex >= 0) {
+            jumpIndex_ = jumpIndex;
+            MarkDirtyNodeSelf();
         }
         Pattern::FromJson(json);
     }
@@ -240,6 +246,7 @@ public:
         indicatorDoingAnimation_ = indicatorDoingAnimation;
     }
 
+    void UpdateCurrentOffset(float offset);
 
     void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f);
 
@@ -397,6 +404,11 @@ public:
         indicatorIsBoolean_ = isBoolean;
     }
 
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt)
+    {
+        enableNestedScroll_ = nestedOpt.NeedParent();
+    }
+
     bool GetIsAtHotRegion() const
     {
         return isAtHotRegion_;
@@ -489,16 +501,13 @@ private:
     void StopFadeAnimation();
 
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
-    float GetRemainingOffset() const;
+    float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
     void FireChangeEvent() const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
-
-    void UpdateCurrentOffset(float offset);
-    bool HandleSpringEdgeOffset(float offset);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -508,7 +517,7 @@ private:
     int32_t GetDisplayCount() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
-    float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
+        float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
@@ -560,6 +569,28 @@ private:
     void StopSpringAnimationAndFlushImmediately();
     void UpdateItemRenderGroup(bool itemRenderGroup);
     void MarkDirtyNodeSelf();
+    void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
+
+    /**
+     *  NestableScrollContainer implementations
+     */
+    Axis GetAxis() const override
+    {
+        return GetDirection();
+    }
+
+    ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
+    ScrollResult HandleScrollSelfFirst(float offset, int32_t source, NestedState state);
+
+    bool HandleScrollVelocity(float velocity) override;
+
+    void OnScrollStartRecursive(float position) override;
+    void OnScrollEndRecursive() override;
+
+    WeakPtr<NestableScrollContainer> parent_;
+    /**
+     *  End of NestableScrollContainer implementations
+     */
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -580,6 +611,7 @@ private:
     RefPtr<SwiperController> swiperController_;
     RefPtr<InputEvent> mouseEvent_;
 
+    bool enableNestedScroll_ = false;
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
@@ -607,6 +639,7 @@ private:
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
+    bool childScrolling_ = false;
     bool isTouchDown_ = false;
     std::optional<bool> preLoop_;
 
@@ -633,6 +666,7 @@ private:
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
 
+    std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> preTargetIndex_;
@@ -649,6 +683,9 @@ private:
     bool isVoluntarilyClear_ = false;
     bool isIndicatorLongPress_ = false;
     bool stopIndicatorAnimation_ = true;
+    bool isTouchPad_ = false;
+
+    float mainDeltaSum_ = 0.0f;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;

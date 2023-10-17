@@ -76,7 +76,6 @@ RefPtr<ButtonComponent> DOMButtonUtil::CreateComponentAndSetChildAttr(
             boxComponent->SetBackDecoration(backDecoration);
         }
     } else {
-        LOGE("boxComponent is null");
         return component;
     }
     if (LessOrEqual(node.GetHeight().Value(), 0.0)) {
@@ -104,7 +103,6 @@ void DOMButtonUtil::SetChildAttr(const RefPtr<ButtonComponent>& component,
     const std::map<std::string, std::string>& attrs, const RefPtr<ButtonTheme>& theme)
 {
     if (!component) {
-        LOGE("fail to set child attr due to button component is null");
         return;
     }
     component->SetType(ButtonType::NORMAL);
@@ -137,7 +135,6 @@ void DOMButtonUtil::SetChildStyle(const RefPtr<BoxComponent>& boxComponent, cons
     const std::map<std::string, std::string>& styles, DOMInput& node)
 {
     if (!boxComponent || !component) {
-        LOGE("fail to set child style due to box and button component is null");
         return;
     }
     // get style which is set by theme
@@ -253,7 +250,6 @@ void DOMButtonUtil::AddChildEvent(const RefPtr<ButtonComponent>& component, int3
     const std::vector<std::string>& events)
 {
     if (!component) {
-        LOGE("fail to add child event due to button component is null");
         return;
     }
     static const LinearMapNode<void (*)(const RefPtr<ButtonComponent>&, EventMarker&)> eventOperators[] = {

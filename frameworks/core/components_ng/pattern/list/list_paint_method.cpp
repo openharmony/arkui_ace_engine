@@ -16,19 +16,9 @@
 #include "core/components_ng/pattern/list/list_paint_method.h"
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 #include "core/components_ng/render/divider_painter.h"
 
 namespace OHOS::Ace::NG {
-void ListPaintMethod::PaintScrollBar(RSCanvas& canvas)
-{
-    auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID(scrollBar);
-    if (scrollBar->NeedPaint()) {
-        ScrollBarPainter::PaintRectBar(canvas, scrollBar);
-    }
-}
-
 void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
     auto edgeEffect = edgeEffect_.Upgrade();
@@ -102,16 +92,10 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         return;
     }
     OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
-    OffsetF bgOffset(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top());
-    scrollBarOverlayModifier->StartHoverAnimation(
-        SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
-        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()), fgOffset, bgOffset,
-        scrollBar->GetHoverAnimationType());
-    scrollBarOverlayModifier->SetOffset(fgOffset, bgOffset);
+    scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
+        scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    scrollBarOverlayModifier->SetFgColor(scrollBar->GetForegroundColor());
-    scrollBarOverlayModifier->SetBgColor(scrollBar->GetBackgroundColor());
-    scrollBarOverlayModifier->StartOpacityAnimation(scrollBar->GetOpacityAnimationType());
+    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

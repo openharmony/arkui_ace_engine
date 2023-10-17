@@ -7713,7 +7713,6 @@ HWTEST_F(TextFieldPatternTestNg, HandleDoubleClickEvent, TestSize.Level1)
     focusHub->currentFocus_ = true;
     pattern_->hasClicked_ = false;
     pattern_->HandleClickEvent(info);
-
     focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     focusHub->focusCallbackEvents_->isFocusOnTouch_ = false;
     pattern_->hasClicked_ = false;

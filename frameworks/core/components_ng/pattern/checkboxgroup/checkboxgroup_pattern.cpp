@@ -165,7 +165,7 @@ void CheckBoxGroupPattern::OnClick()
     auto status = paintProperty->GetSelectStatus();
     isSelected = status == CheckBoxGroupPaintProperty::SelectStatus::NONE;
     paintProperty->UpdateCheckBoxGroupSelect(isSelected);
-    isClick_ = true;
+    updateFlag_ = true;
     UpdateState();
 }
 
@@ -270,17 +270,21 @@ void CheckBoxGroupPattern::UpdateState()
     }
     bool isSelected = paintProperty->GetCheckBoxGroupSelectValue();
     paintProperty->ResetCheckBoxGroupSelect();
+    if (eventHub->HasChangeEvent() && skipFlag_) {
+        skipFlag_ = false;
+        return;
+    }
 
     // Setting selectAll to false when clicked requires processing, changing selectAll to false dynamically does
     // not require processing
-    if (isClick_ || isSelected) {
+    if (updateFlag_ || isSelected) {
         if (pattern->GetIsAddToMap()) {
             UpdateGroupCheckStatus(host, isSelected);
         } else {
             UpdateRepeatedGroupStatus(host, isSelected);
         }
     }
-    isClick_ = false;
+    updateFlag_ = false;
 }
 
 void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select)

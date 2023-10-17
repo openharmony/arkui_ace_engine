@@ -129,7 +129,6 @@ bool DOMMenu::AddSpecializedEvent(int32_t pageId, const std::string& event)
     } else if (event == DOM_CANCEL) {
         menuChild_->SetOnCancel(EventMarker(GetNodeIdForEvent(), event, pageId));
     } else {
-        LOGE("unsupported event: %{public}s.", event.c_str());
         return false;
     }
     return true;

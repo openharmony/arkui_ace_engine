@@ -30,8 +30,6 @@ build_component("indexer_v2") {
     "render_popup_list_creator.cpp",
     "render_popup_list_item.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_popup_list.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_popup_list.cpp" ]
 }

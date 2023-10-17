@@ -113,6 +113,38 @@ public:
     }
 
     /*
+     * Set physical width of device.
+     */
+    static void SetDevicePhysicalWidth(int32_t devicePhysicalWidth)
+    {
+        devicePhysicalWidth_ = devicePhysicalWidth;
+    }
+
+    /*
+     * Set physical height of device.
+     */
+    static void SetDevicePhysicalHeight(int32_t devicePhysicalHeight)
+    {
+        devicePhysicalHeight_ = devicePhysicalHeight;
+    }
+
+    /*
+     * Get physical width of device.
+     */
+    static int32_t GetDevicePhysicalWidth()
+    {
+        return devicePhysicalWidth_;
+    }
+
+    /*
+     * Get physical height of device.
+     */
+    static int32_t GetDevicePhysicalHeight()
+    {
+        return devicePhysicalHeight_;
+    }
+
+    /*
      * Get wght scale of device.
      */
     static float GetFontWeightScale();
@@ -356,6 +388,8 @@ private:
     static bool isDeviceAccess_;
     static int32_t deviceWidth_;
     static int32_t deviceHeight_;
+    static int32_t devicePhysicalWidth_;
+    static int32_t devicePhysicalHeight_;
     static double resolution_;
     static DeviceType deviceType_;
     static DeviceOrientation orientation_;

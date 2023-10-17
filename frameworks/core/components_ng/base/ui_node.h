@@ -137,6 +137,8 @@ public:
     // DFX info.
     void DumpTree(int32_t depth);
 
+    bool DumpTreeById(int32_t depth, const std::string& id);
+
     const std::string& GetTag() const
     {
         return tag_;
@@ -233,8 +235,7 @@ public:
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const PointF& parentRevertPoint, const TouchRestrict& touchRestrict,
-        TouchTestResult& result, int32_t touchId);
+        const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId);
     virtual HitTestMode GetHitTestMode() const
     {
         return HitTestMode::HTMDEFAULT;
@@ -504,7 +505,7 @@ protected:
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
-
+    virtual void DumpAdvanceInfo() {}
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
     virtual void OnDetachFromMainTree(bool recursive = false);

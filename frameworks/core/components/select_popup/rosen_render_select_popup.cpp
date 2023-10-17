@@ -107,13 +107,9 @@ void RosenRenderSelectPopup::PaintGradient(RenderContext& context, bool isTop)
         colors[1] = tvBackColor_.ChangeAlpha(0).GetValue();
     }
     const float stopPositions[2] = { 0.0f, 0.85f };
-#ifdef USE_SYSTEM_SKIA
-    paintGradient.setShader(
-        SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkShader::kMirror_TileMode));
-#else
+
     paintGradient.setShader(
         SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kMirror));
-#endif
     canvas->drawRect(
         { gradientRect.Left(), gradientRect.Top(), gradientRect.Right(), gradientRect.Bottom() }, paintGradient);
 #else
@@ -124,10 +120,8 @@ void RosenRenderSelectPopup::PaintGradient(RenderContext& context, bool isTop)
     gradientRect.SetOffset(Offset(GetOptionLeft() + interval, yPos));
     gradientRect.SetHeight(NormalizeToPx(GRADIENT_HEIGHT));
     gradientRect.SetWidth(GetOptionWidth() - 2 * interval);
-    RSPoint beginPoint(static_cast<RSScalar>(gradientRect.Left()),
-        static_cast<RSScalar>(gradientRect.Top()));
-    RSPoint endPoint(static_cast<RSScalar>(gradientRect.Left()),
-        static_cast<RSScalar>(gradientRect.Bottom()));
+    RSPoint beginPoint(static_cast<RSScalar>(gradientRect.Left()), static_cast<RSScalar>(gradientRect.Top()));
+    RSPoint endPoint(static_cast<RSScalar>(gradientRect.Left()), static_cast<RSScalar>(gradientRect.Bottom()));
     std::vector<RSPoint> points = { beginPoint, endPoint };
     // color with red 13, green 13, and blue 13 is used for color stop (0.85) in gradient
     std::vector<RSColorQuad> colors = { tvBackColor_.ChangeAlpha(0).GetValue(),
@@ -137,11 +131,10 @@ void RosenRenderSelectPopup::PaintGradient(RenderContext& context, bool isTop)
         colors.at(1) = tvBackColor_.ChangeAlpha(0).GetValue();
     }
     const std::vector<RSScalar> stopPositions = { 0.0f, 0.85f };
-    penGradient.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
-        points.at(0), points.at(1), colors, stopPositions, RSTileMode::MIRROR));
+    penGradient.SetShaderEffect(
+        RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, stopPositions, RSTileMode::MIRROR));
     canvas->AttachPen(penGradient);
-    canvas->DrawRect(
-        RSRect(gradientRect.Left(), gradientRect.Top(), gradientRect.Right(), gradientRect.Bottom()));
+    canvas->DrawRect(RSRect(gradientRect.Left(), gradientRect.Top(), gradientRect.Right(), gradientRect.Bottom()));
     canvas->DetachPen();
 #endif
 }

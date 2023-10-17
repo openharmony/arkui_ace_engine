@@ -218,7 +218,7 @@ void ElementRegister::DumpGeometryTransition()
         if (!item || item->IsInAndOutEmpty()) {
             iter = geometryTransitionMap_.erase(iter);
         } else {
-            LOGD("GeometryTransition map item: id: %{public}s, %{public}s", itemId.c_str(), item->ToString().c_str());
+            LOGI("GeometryTransition map item: id: %{public}s, %{public}s", itemId.c_str(), item->ToString().c_str());
             iter++;
         }
     }

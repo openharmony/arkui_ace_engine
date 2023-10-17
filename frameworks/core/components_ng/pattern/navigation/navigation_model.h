@@ -62,6 +62,7 @@ public:
     virtual void SetMaxNavBarWidth(const Dimension& value) = 0;
     virtual void SetMinContentWidth(const Dimension& value) = 0;
     virtual void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) = 0;
+    virtual void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onNavigationModeChange);
     virtual void SetNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavDestination(std::function<void(std::string)>&& builder) = 0;
     virtual RefPtr<NG::NavigationStack> GetNavigationStack() = 0;

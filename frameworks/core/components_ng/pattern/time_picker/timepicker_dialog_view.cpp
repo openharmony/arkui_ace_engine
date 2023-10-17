@@ -148,7 +148,9 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
 
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
-    auto event = [dialogNode](const GestureEvent& /* info */) {
+    auto event = [weak = WeakPtr<FrameNode>(dialogNode)](const GestureEvent& /* info */) {
+        auto dialogNode = weak.Upgrade();
+        CHECK_NULL_VOID(dialogNode);
         auto pipeline = PipelineContext::GetCurrentContext();
         auto overlayManager = pipeline->GetOverlayManager();
         overlayManager->CloseDialog(dialogNode);
@@ -316,7 +318,9 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     CHECK_NULL_RETURN(dateNode, nullptr);
     SetDialogAcceptEvent(dateNode, std::move(acceptEvent));
-    auto clickCallback = [dateNode](const GestureEvent& /* info */) {
+    auto clickCallback = [weak = WeakPtr<FrameNode>(dateNode)](const GestureEvent& /* info */) {
+        auto dateNode = weak.Upgrade();
+        CHECK_NULL_VOID(dateNode);
         auto pickerPattern = dateNode->GetPattern<TimePickerRowPattern>();
         CHECK_NULL_VOID(pickerPattern);
         auto timePickerEventHub = pickerPattern->GetEventHub<TimePickerEventHub>();

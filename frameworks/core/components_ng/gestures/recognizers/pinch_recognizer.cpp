@@ -113,7 +113,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         SendCallbackMsg(onActionEnd_);
     }
 }
@@ -138,7 +138,7 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pinch recognizer receives touch move event");
-    if (currentFingers_ < fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "PinchGesture current finger number is less than requiried finger number.");
         return;
     }

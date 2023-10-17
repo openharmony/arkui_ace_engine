@@ -29,6 +29,7 @@
 namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
     IDLE,
+    ABOUT_TO_PREVIEW,
     DRAGGING
 };
 
@@ -93,6 +94,8 @@ public:
     {
         summaryMap_ = summaryMap;
     }
+    void ResetRecordSize(uint32_t recordSize = 0);
+    uint32_t GetRecordSize() const;
     Rect GetDragWindowRect(const Point& point);
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
     void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
@@ -159,6 +162,11 @@ public:
         return dragDropState_ == DragDropMgrState::DRAGGING;
     }
 
+    bool IsAboutToPreview()
+    {
+        return dragDropState_ == DragDropMgrState::ABOUT_TO_PREVIEW;
+    }
+
     void ResetDragging(DragDropMgrState dragDropMgrState = DragDropMgrState::IDLE)
     {
         dragDropState_ = dragDropMgrState;
@@ -178,6 +186,8 @@ private:
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
     void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
+    void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
+        RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -198,6 +208,7 @@ private:
     bool isDragCancel_ = false;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::map<std::string, int64_t> summaryMap_;
+    uint32_t recordSize_ = 0;
 #endif // ENABLE_DRAG_FRAMEWORK
     int64_t currentId_ = -1;
 

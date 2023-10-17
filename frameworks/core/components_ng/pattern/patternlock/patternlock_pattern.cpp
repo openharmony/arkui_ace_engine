@@ -154,11 +154,7 @@ bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int32_t x, int32_
             AddPassPoint(x, y);
             choosePoint_.emplace_back(x, y);
             StartModifierConnectedAnimate(x, y);
-            auto host = GetHost();
-            CHECK_NULL_RETURN(host, false);
-            auto eventHub = host->GetEventHub<PatternLockEventHub>();
-            CHECK_NULL_RETURN(eventHub, false);
-            eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
+            UpdateDotConnectEvent();
         }
         return true;
     }
@@ -173,6 +169,40 @@ bool PatternLockPattern::CheckChoosePoint(int32_t x, int32_t y) const
         }
     }
     return false;
+}
+
+void PatternLockPattern::UpdateDotConnectEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<PatternLockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
+}
+
+void PatternLockPattern::AddPassPointToChoosePoint(
+    int32_t lastCode, int32_t nowCode, std::vector<PatternLockCell> passPointVec)
+{
+    passPointCount_ = static_cast<int32_t>(passPointVec.size());
+    if (nowCode > lastCode) {
+        choosePoint_.emplace_back(passPointVec.front());
+        UpdateDotConnectEvent();
+        StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
+        if (passPointCount_ > 1) {
+            choosePoint_.emplace_back(passPointVec.back());
+            UpdateDotConnectEvent();
+            StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
+        }
+    } else {
+        choosePoint_.emplace_back(passPointVec.back());
+        UpdateDotConnectEvent();
+        StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
+        if (passPointCount_ > 1) {
+            choosePoint_.emplace_back(passPointVec.front());
+            UpdateDotConnectEvent();
+            StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
+        }
+    }
 }
 
 void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
@@ -208,22 +238,7 @@ void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
     if (passPointLength == 0) {
         return;
     }
-    passPointCount_ = static_cast<int32_t>(passPointLength);
-    if (nowCode > lastCode) {
-        choosePoint_.emplace_back(passPointVec.front());
-        StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
-        if (passPointLength > 1) {
-            choosePoint_.emplace_back(passPointVec.back());
-            StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
-        }
-    } else {
-        choosePoint_.emplace_back(passPointVec.back());
-        StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
-        if (passPointLength > 1) {
-            choosePoint_.emplace_back(passPointVec.front());
-            StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
-        }
-    }
+    AddPassPointToChoosePoint(lastCode, nowCode, passPointVec);
 }
 
 void PatternLockPattern::HandleReset()
@@ -468,9 +483,8 @@ void PatternLockPattern::OnFocusClick()
     AddPassPoint(currentPoint_.first, currentPoint_.second);
     choosePoint_.emplace_back(currentPoint_.first, currentPoint_.second);
     StartModifierConnectedAnimate(currentPoint_.first, currentPoint_.second);
-    auto eventHub = host->GetEventHub<PatternLockEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
+    UpdateDotConnectEvent();
+
     isMoveEventValid_ = true;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

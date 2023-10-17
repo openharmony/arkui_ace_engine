@@ -297,9 +297,6 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
     hapPath_ = hapModuleInfo->hapPath;
-    auto applicationInfo = context->GetApplicationInfo();
-    CHECK_NULL_VOID(applicationInfo);
-    minCompatibleVersionCode_ = applicationInfo->minCompatibleVersionCode;
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     SetConfiguration(context->GetConfiguration());
     context_ = context->weak_from_this();
@@ -364,16 +361,6 @@ void UIContentImpl::InitializeInner(
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
-void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
-{
-    InitializeInner(window, url, reinterpret_cast<napi_value>(storage), false);
-}
-
-void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage)
-{
-    InitializeInner(window, name, reinterpret_cast<napi_value>(storage), true);
-}
-
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
     InitializeInner(window, url, storage, false);
@@ -382,12 +369,6 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
     InitializeInner(window, name, storage, true);
-}
-
-void UIContentImpl::Initialize(
-    OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId)
-{
-    Initialize(window, url, reinterpret_cast<napi_value>(storage), focusWindowId);
 }
 
 void UIContentImpl::Initialize(
@@ -409,11 +390,6 @@ void UIContentImpl::Initialize(
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
-NativeValue* UIContentImpl::GetUIContext()
-{
-    return reinterpret_cast<NativeValue*>(GetUINapiContext());
-}
-
 napi_value UIContentImpl::GetUINapiContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -432,11 +408,6 @@ napi_value UIContentImpl::GetUINapiContext()
     }
 
     return result;
-}
-
-void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
-{
-    Restore(window, contentInfo, reinterpret_cast<napi_value>(storage));
 }
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
@@ -811,8 +782,9 @@ void UIContentImpl::CommonInitializeForm(
         Platform::AceViewOhos::SurfaceChanged(aceView, formWidth_, formHeight_, deviceHeight >= deviceWidth ? 0 : 1);
         // Set sdk version in module json mode for form
         auto pipeline = container->GetPipelineContext();
-        if (pipeline) {
-            pipeline->SetMinPlatformVersion(minCompatibleVersionCode_);
+        if (pipeline && appInfo) {
+            LOGD("SetMinPlatformVersion is %{public}d", appInfo->apiCompatibleVersion);
+            pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     } else {
         Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
@@ -821,8 +793,8 @@ void UIContentImpl::CommonInitializeForm(
     if (isModelJson) {
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
-            LOGD("SetMinPlatformVersion code is %{public}d", appInfo->minCompatibleVersionCode);
-            pipeline->SetMinPlatformVersion(appInfo->minCompatibleVersionCode);
+            LOGD("SetMinPlatformVersion is %{public}d", appInfo->apiCompatibleVersion);
+            pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
     if (runtime_ && !isFormRender_) { // ArkTSCard not support inherit local strorage from context
@@ -966,15 +938,22 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
     float density = 1.0f;
+    int32_t devicePhysicalWidth = 0;
+    int32_t devicePhysicalHeight = 0;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
         density = defaultDisplay->GetVirtualPixelRatio();
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
-        LOGD("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
-            deviceHeight, density);
+        devicePhysicalWidth = defaultDisplay->GetPhysicalWidth();
+        devicePhysicalHeight = defaultDisplay->GetPhysicalHeight();
+        LOGD("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, devicePhysicalWidth=%{public}d, "
+             "devicePhysicalHeight=%{public}d, default density: %{public}f",
+            deviceWidth, deviceHeight, devicePhysicalWidth, devicePhysicalHeight, density);
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
+    SystemProperties::SetDevicePhysicalWidth(devicePhysicalWidth);
+    SystemProperties::SetDevicePhysicalHeight(devicePhysicalHeight);
     // Initialize performance check parameters
     AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
@@ -1162,7 +1141,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetWindowId(window_->GetWindowId());
     auto token = context->GetToken();
     container->SetToken(token);
-    container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context));
+    container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -1266,6 +1245,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     auto pipeline = container->GetPipelineContext();
+    // Use metadata to control the center-alignment of text at line height.
+    bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
+        [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
+    pipeline->SetHalfLeading(halfLeading);
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
@@ -1275,7 +1258,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // Set sdk version in module json mode
     if (isModelJson) {
         if (pipeline && appInfo) {
-            LOGI("SetMinPlatformVersion code is %{public}d", appInfo->apiCompatibleVersion);
+            LOGI("SetMinPlatformVersion is %{public}d", appInfo->apiCompatibleVersion);
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
@@ -1293,6 +1276,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     InitializeSafeArea(container);
+
+    // set container temp dir
+    if (abilityContext) {
+        if (!abilityContext->GetTempDir().empty()) {
+            container->SetTempDir(abilityContext->GetTempDir());
+        }
+    } else {
+        LOGI("UIContentImpl::OnStart abilityContext is null");
+    }
 
     LayoutInspector::SetCallback(instanceId_);
 }
@@ -1527,6 +1519,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
+        SubwindowManager::GetInstance()->ClearToastInSubwindow();
     };
     if (container->IsUseStageModel() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
         task();
@@ -1757,6 +1750,31 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
     auto density = pipelineContext->GetDensity();
     pipelineContext->SetRootSize(density, width, height);
     pipelineContext->OnSurfaceChanged(width, height);
+}
+
+void UIContentImpl::SetFormBackgroundColor(const std::string& color)
+{
+    LOGI("UIContentImpl: SetFormBackgroundColor color is %{public}s", color.c_str());
+    if (!Rosen::RSSystemProperties::GetUniRenderEnabled()) {
+        // cannot set transparent background effects in not-uniform-render mode
+        return;
+    }
+    Color bgColor;
+    if (!Color::ParseColorString(color, bgColor)) {
+        return;
+    }
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [container, bgColor]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetAppBgColor(bgColor);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,

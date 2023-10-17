@@ -41,10 +41,10 @@ public:
     }
 
     // UI content lifeCycles
-    void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
-    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage) override;
+    void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
     void Initialize(
-        OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId) override;
+        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -53,15 +53,9 @@ public:
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
     // distribute
-    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
+    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override;
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
-
-    void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
-    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
-    void Initialize(
-        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
-    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override;
 
     // UI content event process
     bool ProcessBackPressed() override;
@@ -120,6 +114,8 @@ public:
 
     void OnFormSurfaceChange(float width, float height) override;
 
+    void SetFormBackgroundColor(const std::string& color) override;
+
     SerializeableObjectArray DumpUITree() override
     {
         return uiManager_->DumpUITree();
@@ -156,7 +152,6 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) override;
     void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) override;
-    NativeValue* GetUIContext() override;
 
     napi_value GetUINapiContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
@@ -197,7 +192,6 @@ private:
     std::string moduleName_;
     std::string hapPath_;
     bool isBundle_ = false;
-    int32_t minCompatibleVersionCode_ = 0;
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
     std::string formData_;

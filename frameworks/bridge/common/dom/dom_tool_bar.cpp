@@ -28,7 +28,6 @@ void DOMToolBar::InitializeStyle()
 {
     RefPtr<ToolBarTheme> theme = GetTheme<ToolBarTheme>();
     if (!theme || !declaration_) {
-        LOGE("ToolBarTheme or declaration is null");
         return;
     }
     declaration_->GetBackDecoration()->SetBackgroundColor(theme->GetToolBarBgColor());
@@ -62,7 +61,6 @@ void DOMToolBar::Rebuild()
 void DOMToolBar::AddChildNode(const RefPtr<DOMNode>& child, int32_t slot, bool isRebuild)
 {
     if (!child) {
-        LOGE("Child is nullptr, add node failed, slot:%{public}d.", slot);
         return;
     }
 

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_PATTERN_H
 
 #include <cstddef>
+#include <optional>
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
@@ -41,11 +42,17 @@ public:
         }
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
-            sliderContentModifier_ =
-                AceType::MakeRefPtr<SliderContentModifier>(paintParameters, [weak = WeakClaim(this)]() {
+            sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(
+                paintParameters,
+                [weak = WeakClaim(this)](float x) {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->LayoutImageNode();
+                    pattern->UpdateImagePositionX(x);
+                },
+                [weak = WeakClaim(this)](float y) {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateImagePositionY(y);
                 });
         }
         SliderPaintMethod::TipParameters tipParameters { bubbleFlag_,
@@ -96,13 +103,13 @@ public:
         return circleCenter_;
     }
 
-    OffsetF GetAnimatableBlockCenter() const
+    std::optional<OffsetF> GetAnimatableBlockCenter() const
     {
         if (sliderContentModifier_ != nullptr) {
             auto blockCenter = sliderContentModifier_->GetBlockCenter();
-            return { blockCenter.GetX(), blockCenter.GetY() };
+            return OffsetF(blockCenter.GetX(), blockCenter.GetY());
         }
-        return {};
+        return std::nullopt;
     }
 
     float GetValueRatio() const
@@ -174,6 +181,8 @@ private:
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void UpdateBlock();
     void LayoutImageNode();
+    void UpdateImagePositionX(float centerX);
+    void UpdateImagePositionY(float centerY);
     OffsetF GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
     void SetAccessibilityAction();
 

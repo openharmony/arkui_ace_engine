@@ -56,6 +56,7 @@
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/test/mock/pattern/picker/mock_picker_theme_manager.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
@@ -1214,7 +1215,7 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest001, TestSize.Level1)
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
     auto res = overlayManager->RemoveOverlay(false);
     EXPECT_FALSE(res);
-    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
 }
 /**
  * @tc.name: RemoveOverlayTest002
@@ -1270,6 +1271,49 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
     overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     EXPECT_TRUE(overlayManager->RemoveModalInOverlay());
 }
+
+/**
+ * @tc.name: ToastShowModeTest001
+ * @tc.desc: Test OverlayManager::ShowToast with showMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, ToastShowModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toast node with showMode, and show it.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto toastTheme = AceType::MakeRefPtr<ToastTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toastTheme));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    MockPipelineBase::GetCurrent()->rootNode_ = rootNode;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOM, true, ToastShowMode::TOP_MOST);
+    EXPECT_FALSE(overlayManager->toastMap_.empty());
+    /**
+     * @tc.steps: step2. Test Toast showMode and offset.
+     */
+    auto toastNode = overlayManager->toastMap_.begin()->second.Upgrade();
+    ASSERT_NE(toastNode, nullptr);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toastContext = toastNode->GetRenderContext();
+    ASSERT_NE(toastContext, nullptr);
+    EXPECT_FALSE(pattern->IsDefaultToast());
+    EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(toastNode->CreateLayoutWrapper(), DirtySwapConfig()));
+    EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 0.0);
+    EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 0.0);
+    /**
+     * @tc.steps: step3. PopToast.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    overlayManager->ClearToast();
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+}
+
 /**
  * @tc.name: ToastTest001
  * @tc.desc: Test OverlayManager::ShowToast->PopToast.

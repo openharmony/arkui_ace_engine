@@ -208,7 +208,6 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode)
     AnimationOption option;
     option.SetDuration(menuTheme->GetPreviewAnimationDuration());
     option.SetCurve(Curves::SHARP);
-    imageContext->UpdateOpacity(0.0);
     AnimationUtils::Animate(
         option,
         [imageContext, previewBorderRadius, shadow]() mutable {
@@ -220,7 +219,6 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode)
                 BorderRadiusProperty borderRadius;
                 borderRadius.SetRadius(previewBorderRadius);
                 imageContext->UpdateBorderRadius(borderRadius);
-                imageContext->UpdateOpacity(1.0);
             }
         },
         option.GetOnFinishEvent());
@@ -326,14 +324,24 @@ void SetFilter(const RefPtr<FrameNode>& targetNode)
         }
         auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
         CHECK_NULL_VOID(menuTheme);
+
+        auto filterRenderContext = columnNode->GetRenderContext();
+        CHECK_NULL_VOID(filterRenderContext);
+
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
+        styleOption.colorMode = ThemeColorMode::SYSTEM;
+
         AnimationOption option;
         option.SetDuration(menuTheme->GetFilterAnimationDuration());
         option.SetCurve(Curves::SHARP);
-        columnNode->GetRenderContext()->UpdateBackBlurRadius(Dimension(0.0f));
-        auto filterRadius = menuTheme->GetFilterRadius();
+        filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
         AnimationUtils::Animate(
             option,
-            [columnNode, filterRadius]() { columnNode->GetRenderContext()->UpdateBackBlurRadius(filterRadius); },
+            [filterRenderContext, styleOption]() {
+                CHECK_NULL_VOID(filterRenderContext);
+                filterRenderContext->UpdateBackBlurStyle(styleOption);
+            },
             option.GetOnFinishEvent());
     }
 }
@@ -414,6 +422,11 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
+    if (menuParam.backgroundEffectOption.has_value()) {
+        auto renderContext = menuNode->GetRenderContext();
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBackgroundEffect(menuParam.backgroundEffectOption.value());
+    }
     menuNode->MarkModifyDone();
 
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();

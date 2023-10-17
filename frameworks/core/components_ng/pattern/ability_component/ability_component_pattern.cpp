@@ -193,7 +193,8 @@ void AbilityComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
-    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
+    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
+    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
     WindowPattern::DispatchPointerEvent(pointerEvent);
     auto hub = host->GetFocusHub();
     CHECK_NULL_VOID(hub);

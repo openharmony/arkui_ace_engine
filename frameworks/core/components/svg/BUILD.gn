@@ -101,29 +101,7 @@ build_component("svg") {
     "svg_tspan_component.cpp",
     "svg_use_component.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [
-      "flutter_render_svg.cpp",
-      "flutter_render_svg_circle.cpp",
-      "flutter_render_svg_ellipse.cpp",
-      "flutter_render_svg_fe_colormatrix.cpp",
-      "flutter_render_svg_fe_composite.cpp",
-      "flutter_render_svg_fe_gaussianblur.cpp",
-      "flutter_render_svg_fe_offset.cpp",
-      "flutter_render_svg_filter.cpp",
-      "flutter_render_svg_g.cpp",
-      "flutter_render_svg_line.cpp",
-      "flutter_render_svg_mask.cpp",
-      "flutter_render_svg_path.cpp",
-      "flutter_render_svg_pattern.cpp",
-      "flutter_render_svg_polygon.cpp",
-      "flutter_render_svg_rect.cpp",
-      "flutter_render_svg_text.cpp",
-      "flutter_render_svg_text_path.cpp",
-      "flutter_render_svg_tspan.cpp",
-      "flutter_render_svg_use.cpp",
-    ]
-  }
+
   rosen_sources = [
     "rosen_render_svg.cpp",
     "rosen_render_svg_circle.cpp",

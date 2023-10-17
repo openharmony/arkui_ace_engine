@@ -30,12 +30,7 @@ build_component("list_v2") {
     "render_list_item_group.cpp",
     "render_list_item_group_creator.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [
-      "flutter_render_list.cpp",
-      "flutter_render_list_item_group.cpp",
-    ]
-  }
+
   rosen_sources = [
     "rosen_render_list.cpp",
     "rosen_render_list_item_group.cpp",

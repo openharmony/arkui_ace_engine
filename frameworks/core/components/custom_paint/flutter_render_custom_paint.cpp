@@ -369,11 +369,8 @@ void FlutterRenderCustomPaint::Mesh(
     sk_sp<SkColorFilter> colorFter;
     sk_sp<SkShader> shader;
     sk_sp<SkImage> image = SkImage::MakeFromBitmap(bitmap);
-#ifdef USE_SYSTEM_SKIA
-    shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
-#else
+
     shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp);
-#endif
     if (colorFter) {
         shader = shader->makeWithColorFilter(colorFter);
     }
@@ -1430,11 +1427,7 @@ void FlutterRenderCustomPaint::UpdatePaintShader(const Offset& offset, SkPaint& 
         pos[i] = gradientColor.GetDimension().Value();
     }
 
-#ifdef USE_SYSTEM_SKIA
-    auto mode = SkShader::kClamp_TileMode;
-#else
     auto mode = SkTileMode::kClamp;
-#endif
 
     sk_sp<SkShader> skShader = nullptr;
     if (gradient.GetType() == GradientType::LINEAR) {
@@ -1609,35 +1602,19 @@ void FlutterRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint
     static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&)> staticPattern[] = {
         { "no-repeat",
             [](sk_sp<SkImage> image, SkPaint& paint) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kDecal_TileMode, nullptr));
-#else
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, nullptr));
-#endif
             } },
         { "repeat",
             [](sk_sp<SkImage> image, SkPaint& paint) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, nullptr));
-#else
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, nullptr));
-#endif
             } },
         { "repeat-x",
             [](sk_sp<SkImage> image, SkPaint& paint) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kDecal_TileMode, nullptr));
-#else
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, nullptr));
-#endif
             } },
         { "repeat-y",
             [](sk_sp<SkImage> image, SkPaint& paint) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kRepeat_TileMode, nullptr));
-#else
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, nullptr));
-#endif
             } },
     };
     auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
@@ -1728,9 +1705,6 @@ void FlutterRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
                 SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
                     SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
             webglBitmap_.allocPixels(imageInfo);
-#ifdef USE_SYSTEM_SKIA
-            webglBitmap_.eraseColor(SK_ColorTRANSPARENT);
-#endif
         }
         webGLContext_->SetBitMapPtr(
             reinterpret_cast<char*>(webglBitmap_.getPixels()), webglBitmap_.width(), webglBitmap_.height());

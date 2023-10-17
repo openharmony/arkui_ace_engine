@@ -70,7 +70,7 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
-#if defined(ANDROID_PLATFORM)  || defined(IOS_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "render_service_client/core/pipeline/rs_render_thread.h"
 #endif
 #ifndef USE_ROSEN_DRAWING
@@ -251,10 +251,9 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
     SetPivot(xPivot, yPivot, zPivot);
 }
 
-void RosenRenderContext::SetSurfaceChangedCallBack(
-    const std::function<void(float, float, float, float)>& callback)
+void RosenRenderContext::SetSurfaceChangedCallBack(const std::function<void(float, float, float, float)>& callback)
 {
-#if defined(ANDROID_PLATFORM)  || defined(IOS_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     if (rsNode_) {
         RSRenderThread::Instance().AddSurfaceChangedCallBack(rsNode_->GetId(), callback);
     }
@@ -263,7 +262,7 @@ void RosenRenderContext::SetSurfaceChangedCallBack(
 
 void RosenRenderContext::RemoveSurfaceChangedCallBack()
 {
-#if defined(ANDROID_PLATFORM)  || defined(IOS_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     if (rsNode_) {
         RSRenderThread::Instance().RemoveSurfaceChangedCallBack(rsNode_->GetId());
     }
@@ -339,10 +338,19 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
     }
 }
 
-void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
+void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool needRoundToPixelGrid)
 {
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
     auto paintRect = AdjustPaintRect();
+
+    if (needRoundToPixelGrid) {
+        RoundToPixelGrid(geometryNode->GetParentAbsoluteOffset().GetX(),
+            geometryNode->GetParentAbsoluteOffset().GetY());
+        paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetFrameSize());
+    }
     SyncGeometryProperties(paintRect);
 }
 
@@ -685,9 +693,9 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
 #else
     float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
 #endif
-    std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
-        backblurRadius, static_cast<float>(effectOption->saturation),
-        static_cast<float>(effectOption->brightness), effectOption->color.GetValue());
+    std::shared_ptr<Rosen::RSFilter> backFilter =
+        Rosen::RSFilter::CreateMaterialFilter(backblurRadius, static_cast<float>(effectOption->saturation),
+            static_cast<float>(effectOption->brightness), effectOption->color.GetValue());
     rsNode_->SetBackgroundFilter(backFilter);
 }
 
@@ -1405,6 +1413,9 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
 {
     RectF rect;
     CHECK_NULL_RETURN(rsNode_, rect);
+    if (rsNode_->GetStagingProperties().GetRotation()) {
+        return RectF(0, 0, -1, -1);
+    }
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
@@ -1424,11 +1435,11 @@ void RosenRenderContext::GetPointWithRevert(PointF& point)
 
     auto translateMat = Matrix4::CreateTranslate(translate[0], translate[1], 0);
     auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-        Matrix4::CreateRotate(degree, 0, 0, 1) *
-        Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+                       Matrix4::CreateRotate(degree, 0, 0, 1) *
+                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
     auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-        Matrix4::CreateScale(scale[0], scale[1], 1) *
-        Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+                    Matrix4::CreateScale(scale[0], scale[1], 1) *
+                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
 
     auto invertMat = Matrix4::Invert(translateMat * rotationMat * scaleMat);
     Point tmp(point.GetX(), point.GetY());
@@ -1464,7 +1475,6 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
         point.SetY(currentPointY - rect.Top());
     }
 }
-
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
 {
@@ -1662,8 +1672,7 @@ void RosenRenderContext::PaintAccessibilityFocus()
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
     frameRect.SetRect(RectF(ACCESSIBILITY_FOCUS_WIDTH, ACCESSIBILITY_FOCUS_WIDTH,
-        bounds.z_ - (2 * ACCESSIBILITY_FOCUS_WIDTH),
-        bounds.w_ - (2 * ACCESSIBILITY_FOCUS_WIDTH)));
+        bounds.z_ - (2 * ACCESSIBILITY_FOCUS_WIDTH), bounds.w_ - (2 * ACCESSIBILITY_FOCUS_WIDTH)));
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
@@ -1931,9 +1940,18 @@ RectF RosenRenderContext::AdjustPaintRect()
     CHECK_NULL_RETURN(rsNode_, rect);
     const auto& geometryNode = frameNode->GetGeometryNode();
     rect = geometryNode->GetFrameRect();
-    if (!rect.GetSize().IsPositive()) {
-        LOGD("paint size is zero");
-        return rect;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!rect.GetSize().IsPositive()) {
+            LOGD("paint size is zero");
+            geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
+            return rect;
+        }
+    } else {
+        if (!rect.GetSize().IsPositive() && !frameNode->IsLayoutComplete()) {
+            LOGD("paint size is zero");
+            geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
+            return rect;
+        }
     }
     const auto& layoutConstraint = frameNode->GetGeometryNode()->GetParentLayoutConstraint();
     auto widthPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Width()
@@ -1956,6 +1974,7 @@ RectF RosenRenderContext::AdjustPaintRect()
             resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
         rect.SetLeft(resultX.ConvertToPx() - anchorX.value_or(0));
         rect.SetTop(resultY.ConvertToPx() - anchorY.value_or(0));
+        geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
         return rect;
     }
     if (HasOffset()) {
@@ -1966,13 +1985,108 @@ RectF RosenRenderContext::AdjustPaintRect()
         }
         auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
+        auto offsetForArea = OffsetF(rect.GetX() - anchorX.value_or(0), rect.GetY() - anchorY.value_or(0));
+        geometryNode->SetPixelGridRoundOffsetForArea(offsetForArea);
         rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
         rect.SetTop(rect.GetY() + offsetY.value_or(0) - anchorY.value_or(0));
+        geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
         return rect;
     }
     rect.SetLeft(rect.GetX() - anchorX.value_or(0));
     rect.SetTop(rect.GetY() - anchorY.value_or(0));
+    geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
     return rect;
+}
+
+float RosenRenderContext::RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor)
+{
+    float scaledValue = value;
+    // We want to calculate `fractial` such that `floor(scaledValue) = scaledValue
+    // - fractial`.
+    float fractial = fmod(scaledValue, 1.0);
+    if (fractial < 0) {
+        // This branch is for handling negative numbers for `value`.
+        //
+        // Regarding `floor` and `ceil`. Note that for a number x, `floor(x) <= x <=
+        // ceil(x)` even for negative numbers. Here are a couple of examples:
+        //   - x =  2.2: floor( 2.2) =  2, ceil( 2.2) =  3
+        //   - x = -2.2: floor(-2.2) = -3, ceil(-2.2) = -2
+        //
+        // Regarding `fmodf`. For fractional negative numbers, `fmodf` returns a
+        // negative number. For example, `fmodf(-2.2) = -0.2`. However, we want
+        // `fractial` to be the number such that subtracting it from `value` will
+        // give us `floor(value)`. In the case of negative numbers, adding 1 to
+        // `fmodf(value)` gives us this. Let's continue the example from above:
+        //   - fractial = fmodf(-2.2) = -0.2
+        //   - Add 1 to the fraction: fractial2 = fractial + 1 = -0.2 + 1 = 0.8
+        //   - Finding the `floor`: -2.2 - fractial2 = -2.2 - 0.8 = -3
+        ++fractial;
+    }
+    if (NearEqual(fractial, 0)) {
+        // First we check if the value is already rounded
+        scaledValue = scaledValue - fractial;
+    } else if (NearEqual(fractial, 1.0)) {
+        scaledValue = scaledValue - fractial + 1.0;
+    } else if (forceCeil) {
+        // Next we check if we need to use forced rounding
+        scaledValue = scaledValue - fractial + 1.0;
+    } else if (forceFloor) {
+        scaledValue = scaledValue - fractial;
+    } else {
+        // Finally we just round the value
+        scaledValue = scaledValue - fractial + (!std::isnan(fractial) && (GreatOrEqual(fractial, 0.5)) ? 1.0 : 0.0);
+    }
+    return scaledValue;
+}
+
+void RosenRenderContext::RoundToPixelGrid(float absoluteLeft, float absoluteTop)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+
+    float nodeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
+    float nodeTop = geometryNode->GetPixelGridRoundOffset().GetY();
+
+    float nodeWidth = geometryNode->GetFrameSize().Width();
+    float nodeHeight = geometryNode->GetFrameSize().Height();
+
+    float absoluteNodeLeft = absoluteLeft + nodeLeft;
+    float absoluteNodeTop = absoluteTop + nodeTop;
+
+    float absoluteNodeRight = absoluteNodeLeft + nodeWidth;
+    float absoluteNodeBottom = absoluteNodeTop + nodeHeight;
+
+    // If a node has a custom measure function we never want to round down its
+    // size as this could lead to unwanted text truncation.
+    bool textRounding = frameNode->GetTag() == V2::TEXT_ETS_TAG;
+
+    geometryNode->SetPixelGridRoundOffset(OffsetF(RoundValueToPixelGrid(nodeLeft, false, textRounding),
+        RoundValueToPixelGrid(nodeTop, false, textRounding)));
+
+    if (HasOffset()) {
+        float nodeLeftWithoutOffset = geometryNode->GetPixelGridRoundOffsetForArea().GetX();
+        float nodeTopWithoutOffset = geometryNode->GetPixelGridRoundOffsetForArea().GetY();
+        geometryNode->SetPixelGridRoundOffsetForArea(OffsetF(RoundValueToPixelGrid(nodeLeftWithoutOffset, false,
+            textRounding), RoundValueToPixelGrid(nodeTopWithoutOffset, false, textRounding)));
+    } else {
+        geometryNode->SetPixelGridRoundOffsetForArea(geometryNode->GetPixelGridRoundOffset());
+    }
+
+    // We multiply dimension by scale factor and if the result is close to the
+    // whole number, we don't have any fraction To verify if the result is close
+    // to whole number we want to check both floor and ceil numbers
+    bool hasFractionalWidth =
+        !NearEqual(fmod(nodeWidth, 1.0), 0) && !NearEqual(fmod(nodeWidth, 1.0), 1.0);
+    bool hasFractionalHeight =
+        !NearEqual(fmod(nodeHeight, 1.0), 0) && !NearEqual(fmod(nodeHeight, 1.0), 1.0);
+
+    geometryNode->SetFrameSize(SizeF(
+        RoundValueToPixelGrid(absoluteNodeRight, (textRounding && hasFractionalWidth),
+            (textRounding && !hasFractionalWidth)) - RoundValueToPixelGrid(absoluteNodeLeft, false, textRounding),
+        RoundValueToPixelGrid(absoluteNodeBottom, (textRounding && hasFractionalHeight),
+            (textRounding && !hasFractionalHeight)) - RoundValueToPixelGrid(absoluteNodeTop, false, textRounding)));
 }
 
 void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension& resultY,
@@ -2536,6 +2650,7 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
     rsNode_->SetShadowMask(shadow.GetShadowType() == ShadowType::BLUR);
+    rsNode_->SetShadowIsFilled(shadow.GetIsFilled());
     if (shadow.GetHardwareAcceleration()) {
         rsNode_->SetShadowElevation(shadow.GetElevation());
     } else {
@@ -2840,8 +2955,8 @@ void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& cli
         clipBoundModifier_ = std::make_shared<Rosen::RSClipBoundsModifier>(prop);
         rsNode_->AddModifier(clipBoundModifier_);
     } else {
-        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSPath>>>(
-            clipBoundModifier_->GetProperty());
+        auto property =
+            std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSPath>>>(clipBoundModifier_->GetProperty());
         property->Set(shapePath);
     }
 #else
@@ -2852,8 +2967,8 @@ void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& cli
         clipBoundModifier_ = std::make_shared<Rosen::RSClipBoundsModifier>(prop);
         rsNode_->AddModifier(clipBoundModifier_);
     } else {
-        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<RSPath>>>(
-            clipBoundModifier_->GetProperty());
+        auto property =
+            std::static_pointer_cast<RSProperty<std::shared_ptr<RSPath>>>(clipBoundModifier_->GetProperty());
         property->Set(shapePath);
     }
 #endif
@@ -2876,26 +2991,23 @@ void RosenRenderContext::PaintClipMask(const std::unique_ptr<ClipProperty>& clip
         clipMaskModifier_ = std::make_shared<Rosen::RSMaskModifier>(prop);
         rsNode_->AddModifier(clipMaskModifier_);
     } else {
-        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSMask>>>(
-            clipMaskModifier_->GetProperty());
+        auto property =
+            std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSMask>>>(clipMaskModifier_->GetProperty());
         property->Set(maskPath);
     }
 #else
     auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
-    auto maskPath = Rosen::RSMask::CreatePathMask(
-        rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
+    auto maskPath = Rosen::RSMask::CreatePathMask(rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
     if (!clipMaskModifier_) {
         auto prop = std::make_shared<RSProperty<RSMask>>(maskPath);
         clipMaskModifier_ = std::make_shared<Rosen::RSMaskModifier>(prop);
         rsNode_->AddModifier(clipMaskModifier_);
     } else {
-        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<RSMask>>>(
-            clipMaskModifier_->GetProperty());
+        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<RSMask>>>(clipMaskModifier_->GetProperty());
         property->Set(maskPath);
     }
 #endif
 }
-
 
 void RosenRenderContext::PaintClip(const SizeF& frameSize)
 {

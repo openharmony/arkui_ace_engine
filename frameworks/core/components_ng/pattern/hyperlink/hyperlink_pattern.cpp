@@ -86,6 +86,8 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(theme);
     if (!enabled) {
         hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextDisabledColor());
+    } else {
+        hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor());
     }
     if (host->IsDraggable()) {
         EnableDrag();
@@ -181,6 +183,9 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (touchType == TouchType::UP) {
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+        if (!isLinked_) {
+            hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor());
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }

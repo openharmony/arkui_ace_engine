@@ -14,7 +14,10 @@
  */
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -39,6 +42,22 @@ float GetTextHeight(const RefPtr<FrameNode>& textNode)
     auto textSize = textGeometry->GetMarginFrameSize();
     return textSize.Height();
 }
+
+// get main window's pipeline
+RefPtr<PipelineContext> GetMainPipelineContext()
+{
+    auto containerId = Container::CurrentId();
+    RefPtr<PipelineContext> context;
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        context = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+    } else {
+        context = PipelineContext::GetCurrentContext();
+    }
+    return context;
+}
 } // namespace
 
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
@@ -47,7 +66,8 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
     auto toastBottom = GetBottomValue(dirty);
     // todo get parent width and height
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    CHECK_NULL_RETURN(context, false);
     auto rootHeight = context->GetRootHeight();
     auto rootWidth = context->GetRootWidth();
     auto text = dirty->GetOrCreateChildByIndex(0);
@@ -67,16 +87,22 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     } else {
         offset.SetY(Dimension { rootHeight - toastBottom });
     }
+    // show in the float subwindow
+    if (!IsDefaultToast()) {
+        OffsetT<Dimension> displayWindowOffset = { Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetX()),
+            Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetY()) };
+        offset += displayWindowOffset;
+    }
     LOGD("Toast bottom value: [%{public}f], offsetX [%{public}s] offsetY [%{public}s]", toastBottom,
         offset.GetX().ToString().c_str(), offset.GetY().ToString().c_str());
     toastContext->UpdateOffset(offset);
-
     return true;
 }
 
 double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    // Obtain the height relative to the main window
+    auto pipeline = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipeline, 0.0);
     auto rootHeight = Dimension(pipeline->GetRootHeight());
     auto toastTheme = pipeline->GetTheme<ToastTheme>();

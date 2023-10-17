@@ -60,6 +60,10 @@ std::string srcimages = "";
 const std::string NAME = "propertyName";
 float value = 1.0;
 const std::function<void(float)> onCallbackEvent = [](float) {};
+
+const float CONTAINER_WIDTH = 600.0f;
+const float CONTAINER_HEIGHT = 1000.0f;
+const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 } // namespace
 class FrameNodeTestNg : public testing::Test {
 public:
@@ -373,14 +377,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest, TestSize.Level1)
             for (auto hitTestModeofChild : hitTestModeofChilds) {
                 childNode->SetExclusiveEventForChild(isStack);
                 childEventHub->SetHitTestMode(hitTestModeofChild);
-                auto result = childNode->TouchTest(globalPoint, parentLocalPointOne,
-                    parentLocalPointOne, touchRestrict, touchTestResult, 0);
+                auto result = childNode->TouchTest(
+                    globalPoint, parentLocalPointOne, parentLocalPointOne, touchRestrict, touchTestResult, 0);
                 auto expectedResult =
                     (hitTestModeofGrandChild == HitTestMode::HTMBLOCK || hitTestModeofChild == HitTestMode::HTMBLOCK)
                         ? HitTestResult::STOP_BUBBLING
                         : HitTestResult::BUBBLING;
-                result = node->TouchTest(globalPoint, parentLocalPointOne,
-                    parentLocalPointOne, touchRestrict, touchTestResult, 0);
+                result = node->TouchTest(
+                    globalPoint, parentLocalPointOne, parentLocalPointOne, touchRestrict, touchTestResult, 0);
                 EXPECT_EQ(result, expectedResult);
             }
         }
@@ -409,6 +413,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg005, TestSize.Level1)
     EXPECT_EQ(FRAME_NODE2->layoutProperty_->propertyChangeFlag_, 1);
 
     FRAME_NODE2->needSyncRenderTree_ = true;
+    FRAME_NODE2->RebuildRenderContextTree();
+    EXPECT_FALSE(FRAME_NODE2->needSyncRenderTree_);
+
+    /**
+     * @tc.steps: step 2. create and set overlayNode.
+     * @tc.expect:cover branch overlayNode is not null and function is run ok.
+     */
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> overlayNode =
+        FrameNode::CreateFrameNode("overlayNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    FRAME_NODE2->SetOverlayNode(overlayNode);
     FRAME_NODE2->RebuildRenderContextTree();
     EXPECT_FALSE(FRAME_NODE2->needSyncRenderTree_);
 
@@ -1460,5 +1475,162 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0039, TestSize.Level1)
     layoutProperty->SetIsOverlayNode(true);
     childNode->DumpOverlayInfo();
     EXPECT_TRUE(layoutProperty->IsOverlayNode());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_SetOnAreaChangeCallback040
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, SetOnAreaChangeCallback040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a object to SetOnAreaChangeCallback
+     * @tc.expected: expect cover branch lastFrameRect_ non null and function is run ok.
+     */
+    OnAreaChangedFunc callback = [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
+                                     const OffsetF& origin) {};
+    FRAME_NODE2->lastFrameRect_ = std::make_unique<RectF>();
+    FRAME_NODE2->SetOnAreaChangeCallback(std::move(callback));
+    EXPECT_NE(FRAME_NODE2->lastFrameRect_, nullptr);
+
+    /**
+     * @tc.steps: step2.test while callback is nullptr
+     * @tc.expected:expect cover branch lastParentOffsetToWindow_ non null and function is run ok.
+     */
+
+    FRAME_NODE2->lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
+    FRAME_NODE2->SetOnAreaChangeCallback(nullptr);
+    EXPECT_NE(FRAME_NODE2->lastParentOffsetToWindow_, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_SwapDirtyLayoutWrapperOnMainThread040
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, SwapDirtyLayoutWrapperOnMainThread040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat frameNode and layoutProperty
+     */
+    RefPtr<LayoutWrapper> layoutWrapper = FRAME_NODE2->CreateLayoutWrapper(true, true);
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. setBorderWidth and updateBorderWidth.
+     * @tc.expected: expect borderWidth property is not nullptr.
+     */
+    BorderWidthProperty overCountBorderWidth;
+    overCountBorderWidth.SetBorderWidth(Dimension(10, DimensionUnit::VP));
+    layoutProperty->UpdateBorderWidth(overCountBorderWidth);
+    frameNode->SetLayoutProperty(layoutProperty);
+
+    /**
+     * @tc.steps: step3. callback SwapDirtyLayoutWrapperOnMainThread
+     * @tc.expected: expect GetBorderWidthProperty is not nullptr.
+     */
+    frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
+    EXPECT_NE(layoutProperty->GetBorderWidthProperty(), nullptr);
+
+    /**
+     * @tc.steps: step4. updatae layoutConstraint and set eventHub_.
+     * @tc.expected: expect cover branch eventHub_ non null and function is run ok .
+     */
+    auto layoutConstraintF_ = LayoutConstraintF();
+    layoutConstraintF_.maxSize = CONTAINER_SIZE;
+    layoutConstraintF_.percentReference = CONTAINER_SIZE;
+    frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraintF_);
+    layoutProperty->UpdateLayoutConstraint(layoutConstraintF_);
+
+    frameNode->eventHub_->GetOrCreateFocusHub();
+    frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
+    EXPECT_NE(frameNode->eventHub_, nullptr);
+
+    /**
+     * @tc.steps: step5. set currentFocus_ is true and call SwapDirtyLayoutWrapperOnMainThread.
+     * @tc.expected: expect cover branch IsCurrentFocus() is true and function is run ok .
+     */
+    frameNode->eventHub_->GetOrCreateFocusHub()->currentFocus_ = true;
+    frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
+    EXPECT_TRUE(frameNode->eventHub_->GetOrCreateFocusHub()->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_TouchTest041
+ * @tc.desc: Test frameNode TouchTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    /**
+     * @tc.steps: step2. set isActive_ and debugEnabled_ is true and FRAME_NODE2 eventHub is HTMBLOCK.
+     * @tc.expected: expect The function return value is STOP_BUBBLING.
+     */
+    FRAME_NODE2->isActive_ = true;
+    FRAME_NODE2->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+    auto eventHub = FRAME_NODE2->GetOrCreateGestureEventHub();
+    eventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    auto test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+    EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_TouchTest042
+ * @tc.desc: Test frameNode TouchTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+
+    /**
+     * @tc.steps: step2. set debugEnabled_ is true.
+     */
+    FRAME_NODE2->isActive_ = true;
+    FRAME_NODE2->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+    auto test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+
+    /**
+     * @tc.steps: step3. create childnode.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    childNode->renderContext_ = mockRenderContextforChild;
+    auto localPoint = PointF(10, 10);
+    EXPECT_CALL(*mockRenderContextforChild, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF(0, 0, 100, 100)));
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    auto childEventHub = childNode->GetOrCreateGestureEventHub();
+    childEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    childNode->SetActive(true);
+
+    /**
+     * @tc.steps: step4. add childnode to the framenode.
+     * @tc.expected: expect The function return value is STOP_BUBBLING.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    FRAME_NODE2->frameChildren_ = { children.begin(), children.end() };
+    test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+    EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
 }
 } // namespace OHOS::Ace::NG

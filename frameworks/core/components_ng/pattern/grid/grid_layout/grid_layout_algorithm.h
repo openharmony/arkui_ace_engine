@@ -18,10 +18,10 @@
 
 #include <utility>
 
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/pattern/grid/grid_layout_options.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 
@@ -48,6 +48,8 @@ private:
         int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan,
         const RefPtr<LayoutProperty>& childLayoutProperty) const;
     float GetItemSize(int32_t row, int32_t col, bool height) const;
+    GridItemRect GetItemRect(const RefPtr<GridLayoutProperty>& gridLayoutProperty,
+        const RefPtr<GridItemLayoutProperty>& childLayoutProperty, int32_t index) const;
 
     int32_t crossCount_ = 0;
     int32_t mainCount_ = 0;

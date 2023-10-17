@@ -25,12 +25,14 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 using namespace testing;
 using namespace testing::ext;
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
+constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 constexpr float DEVICE_WIDTH = 480.f;
 constexpr float DEVICE_HEIGHT = 800.f;
 constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
@@ -47,11 +49,21 @@ public:
     void OldRunMeasureAndLayout(const RefPtr<FrameNode>& frameNode,
         float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
+    void MockGetPaintRectWithTransform(const RefPtr<FrameNode>& frameNode, RectF paintRect = RectF());
 
     testing::AssertionResult IsEqualOffset(Offset offset, Offset expectOffset);
     testing::AssertionResult IsEqualOverScrollOffset(OverScrollOffset offset, OverScrollOffset expectOffset);
     testing::AssertionResult IsEqualRect(Rect rect, Rect expectRect);
     testing::AssertionResult IsEqualRect(RectF rect, RectF expectRect);
+
+    template<typename T>
+    testing::AssertionResult IsEqual(const T& actual, const T& expected)
+    {
+        if (!NearEqual(actual, expected)) {
+            return testing::AssertionFailure() << "Actual: " << actual << " != expected: " << expected;
+        }
+        return testing::AssertionSuccess();
+    }
 
     RefPtr<FrameNode> GetChildFrameNode(const RefPtr<FrameNode>& frameNode, int32_t index)
     {

@@ -37,15 +37,7 @@ sk_sp<SkShader> FlutterRenderLinearTrack::BlendSkShader(const SkPoint pts, const
     sk_sp<SkShader> backgroundShader;
     sk_sp<SkShader> blendShader;
     const SkPoint gradientPoints[2] = { { pts.fX - scanLeftOffset, pts.fY }, { pts.fX + scanRightOffset, pts.fY } };
-#ifdef USE_SYSTEM_SKIA
-    backgroundShader = SkShader::MakeColorShader(color);
-    scanShader = SkGradientShader::MakeLinear(gradientPoints, scanColors, scanPos, 3, SkShader::kDecal_TileMode);
-    if (useAnimator) {
-        blendShader = SkShader::MakeCompose(backgroundShader, scanShader, SkBlendMode::kSrcOver);
-    } else {
-        blendShader = backgroundShader;
-    }
-#else
+
     backgroundShader = SkShaders::Color(color);
     scanShader = SkGradientShader::MakeLinear(gradientPoints, scanColors, scanPos, 3, SkTileMode::kDecal);
     if (useAnimator) {
@@ -53,7 +45,6 @@ sk_sp<SkShader> FlutterRenderLinearTrack::BlendSkShader(const SkPoint pts, const
     } else {
         blendShader = backgroundShader;
     }
-#endif
     return blendShader;
 }
 
@@ -93,7 +84,7 @@ void FlutterRenderLinearTrack::Paint(RenderContext& context, const Offset& offse
         cachedPaint.paint()->setColor(GetCachedColor().GetValue());
         double startRect = leftToRight_ ? offset.GetX() : offset.GetX() + GetLayoutSize().Width();
         double endRect = leftToRight_ ? startRect + trackHeight + trackLength * GetCachedRatio()
-                                            : startRect - trackHeight - trackLength * GetCachedRatio();
+                                      : startRect - trackHeight - trackLength * GetCachedRatio();
         SkRRect cachedRect = SkRRect::MakeRectXY(
             { startRect, offset.GetY(), endRect, offset.GetY() + trackHeight }, trackHeight * HALF, trackHeight * HALF);
         flutter::RRect cachedRectFlutter = flutter::RRect();
@@ -264,8 +255,8 @@ void FlutterRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Of
         double toOffset = 0.0;
         if (direction_ == Axis::VERTICAL) {
             fromOffset = isReverse_ ? offset.GetY() + trackLength : offset.GetY();
-            toOffset = isReverse_ ?
-                fromOffset - trackLength * GetTotalRatio() : fromOffset + trackLength * GetTotalRatio();
+            toOffset =
+                isReverse_ ? fromOffset - trackLength * GetTotalRatio() : fromOffset + trackLength * GetTotalRatio();
             canvas->drawLine(dxOffset, fromOffset, dxOffset, toOffset, selectPaint, selectPaintData);
             return;
         }
@@ -291,13 +282,11 @@ void FlutterRenderLinearTrack::PaintBackgroundTrack(
     if (direction_ == Axis::VERTICAL) {
         rrect = SkRRect::MakeRectXY(
             { offset.GetX(), offset.GetY(), offset.GetX() + trackHeight, offset.GetY() + GetLayoutSize().Height() },
-            trackHeight * HALF,
-            trackHeight * HALF);
+            trackHeight * HALF, trackHeight * HALF);
     } else {
         rrect = SkRRect::MakeRectXY(
             { offset.GetX(), offset.GetY(), offset.GetX() + GetLayoutSize().Width(), offset.GetY() + trackHeight },
-            trackHeight * HALF,
-            trackHeight * HALF);
+            trackHeight * HALF, trackHeight * HALF);
     }
     flutter::RRect flutterRect = flutter::RRect();
     flutterRect.sk_rrect = rrect;

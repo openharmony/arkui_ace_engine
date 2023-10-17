@@ -412,6 +412,86 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TitleBarPatternProcessTitleAssociatedUpdateTest003
+ * @tc.desc: Test ProcessTitleAssociatedUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleAssociatedUpdateTest003, TestSize.Level1)
+{
+    constexpr float offset = 200.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    frameNode_->GetSubtitle();
+    titleBarPattern_->ProcessTitleAssociatedUpdate(offset);
+    EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
+}
+
+/**
+ * @tc.name: TitleBarPatternProcessTitleAssociatedUpdateTest005
+ * @tc.desc: Test ProcessTitleAssociatedUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleAssociatedUpdateTest005, TestSize.Level1)
+{
+    constexpr float offset = 200.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    frameNode_->GetSubtitle();
+    titleBarPattern_->isOverDrag_ = true;
+    titleBarPattern_->defaultTitleBarHeight_ = 0.0f;
+    titleBarPattern_->maxTitleBarHeight_ = 400.0f;
+    titleBarPattern_->ProcessTitleAssociatedUpdate(offset);
+    EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), offset);
+}
+
+/**
+ * @tc.name: TitleBarPatternProcessTitleAssociatedUpdateTest006
+ * @tc.desc: Test ProcessTitleAssociatedUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleAssociatedUpdateTest006, TestSize.Level1)
+{
+    constexpr float offset = 200.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    frameNode_->GetSubtitle();
+    titleBarPattern_->isOverDrag_ = false;
+    titleBarPattern_->ProcessTitleAssociatedUpdate(offset);
+    EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
+}
+
+/**
+ * @tc.name: TitleBarPatternProcessTitleDragStartTest002
+ * @tc.desc: Test ProcessTitleDragStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest002, TestSize.Level1)
+{
+    constexpr float offset = 200.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    frameNode_->GetSubtitle();
+    titleBarPattern_->springController_ = nullptr;
+    titleBarPattern_->animator_  = nullptr;
+    titleBarPattern_->ProcessTitleDragStart(offset);
+    EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
+
+    titleBarPattern_->springMotion_ = nullptr;
+    titleBarPattern_->SpringAnimation(100.0f, 0);
+    titleBarPattern_->AnimateTo(offset);
+    titleBarPattern_->ProcessTitleDragStart(offset);
+    EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
+}
+
+/**
  * @tc.name: TitleBarPattern003
  * @tc.desc: Test ProcessTittleDragUpdate function.
  * @tc.type: FUNC

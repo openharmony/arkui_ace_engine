@@ -48,7 +48,8 @@ public:
         Color blockColor;
     };
 
-    explicit SliderContentModifier(const Parameters& parameters, std::function<void()> updateImageFunc);
+    explicit SliderContentModifier(const Parameters& parameters, std::function<void(float)> updateImageCenterX,
+        std::function<void(float)> updateImageCenterY);
     ~SliderContentModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
@@ -257,9 +258,12 @@ private:
     void SetBlockClip(DrawingContext& context);
     void StopSelectAnimation(const PointF& end);
     void StopCircleCenterAnimation(const PointF& center);
+    void UpdateBlockCenterX(float x);
+    void UpdateBlockCenterY(float y);
 
 private:
-    std::function<void()> updateImageFunc_;
+    std::function<void(float)> updateImageCenterX_;
+    std::function<void(float)> updateImageCenterY_;
 
     // animatable property
     RefPtr<AnimatablePropertyOffsetF> selectStart_;

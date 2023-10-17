@@ -68,12 +68,20 @@ public:
         ResetWaterflowLayoutInfoAndMeasure();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsGap, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ColumnsGap, Dimension, PROPERTY_UPDATE_MEASURE);
+    void OnColumnsGapUpdate(Dimension /* columnsGap */) const
+    {
+        if (GetAxis() == Axis::HORIZONTAL) {
+            ResetWaterflowLayoutInfoAndMeasure();
+        }
+    }
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RowsGap, Dimension);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(RowsGap, Dimension, PROPERTY_UPDATE_MEASURE);
     void OnRowsGapUpdate(Dimension /* rowsGap */) const
     {
-        ResetWaterflowLayoutInfoAndMeasure();
+        if (GetAxis() == Axis::VERTICAL) {
+            ResetWaterflowLayoutInfoAndMeasure();
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CachedCount, int32_t);

@@ -99,6 +99,17 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     return res;
 }
 
+void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    OptionalSizeF frameSize =
+        CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT_MAIN_AXIS);
+    if (layoutConstraint->maxSize.Width() < layoutConstraint->minSize.Width()) {
+        frameSize.SetWidth(layoutConstraint->minSize.Width());
+    }
+    TextLayoutAlgorithm::Measure(layoutWrapper);
+}
+
 void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto context = layoutWrapper->GetHostNode()->GetContext();

@@ -22,7 +22,7 @@ extern const char _binary_breadcrumb_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_breadcrumb_GetABCCode(const char** buf, int* buflen)
+void NAPI_arkui_advanced_Breadcrumb_GetABCCode(const char** buf, int* buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_breadcrumb_abc_start;
@@ -35,11 +35,11 @@ void NAPI_arkui_advanced_breadcrumb_GetABCCode(const char** buf, int* buflen)
 /*
  * Module define
  */
-static napi_module breadcrumbModule = {
+static napi_module BreadcrumbModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.breadcrumb",
+    .nm_modname = "arkui.advanced.Breadcrumb",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -49,5 +49,5 @@ static napi_module breadcrumbModule = {
  */
 extern "C" __attribute__((constructor)) void BreadcrumbRegisterModule(void)
 {
-    napi_module_register(&breadcrumbModule);
+    napi_module_register(&BreadcrumbModule);
 }

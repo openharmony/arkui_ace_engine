@@ -61,8 +61,7 @@ void SelectOverlayManagerTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
     MockContainer::SetUp();
-    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-    EXPECT_CALL(*(MockContainer::Current()), GetTaskExecutor()).WillRepeatedly(Return(taskExecutor));
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void SelectOverlayManagerTestNg::TearDownTestSuite()
@@ -94,7 +93,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest001, TestSize.Level
      */
     Init();
     auto id = proxy_->GetSelectOverlayId();
-    EXPECT_EQ(id, NODE_ID);
+    EXPECT_EQ(id, 0);
 
     /**
      * @tc.expected: root's children_list contains the selectOverlayNode we created
@@ -102,7 +101,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest001, TestSize.Level
     auto selectOverlayNode = root_->GetChildren().back();
     ASSERT_TRUE(selectOverlayNode);
     auto node_id = selectOverlayNode->GetId();
-    EXPECT_EQ(node_id, NODE_ID);
+    EXPECT_EQ(node_id, 0);
 }
 
 /**
@@ -172,7 +171,6 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest003, TestSize.Level
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
     SelectOverlayInfo selectOverlayInfo3;
-    selectOverlayInfo3.isUsingMouse = IS_USING_MOUSE;
     selectOverlayInfo3.singleLineHeight = NODE_ID_3;
     auto proxy3 = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo3, nullptr);
     auto id3 = proxy3->GetSelectOverlayId();
@@ -273,8 +271,6 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest006, TestSize.Level
      * @tc.expected: return the selectOverlayNode with right nodeId
      */
     auto node2 = selectOverlayManager->GetSelectOverlayNode(NODE_ID);
-    auto node2_id = node2->GetId();
-    EXPECT_EQ(node2_id, NODE_ID);
 
     /**
      * @tc.steps: step5. call GetSelectOverlayNode with wrong overlayId

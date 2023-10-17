@@ -121,31 +121,17 @@ JSRef<JSObject> GenSelfLayoutInfo(RefPtr<NG::LayoutProperty> layoutProperty)
     if (!layoutProperty) {
         return selfLayoutInfo;
     }
+    auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+        layoutProperty = parentNode->GetLayoutProperty();
+    }
     auto width = layoutProperty->GetCalcLayoutConstraint()
                      ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToVp()
                      : 0.0f;
     auto height = layoutProperty->GetCalcLayoutConstraint()
                       ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height()->GetDimension().ConvertToVp()
                       : 0.0f;
-
-    auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
-    auto pipeline = PipelineBase::GetCurrentContext();
-    if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
-        layoutProperty = parentNode->GetLayoutProperty();
-        if (NearEqual(width, 0.0f)) {
-            width = (layoutProperty->GetLayoutConstraint() &&
-                        layoutProperty->GetLayoutConstraint()->selfIdealSize.Width().has_value())
-                        ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Width().value() / pipeline->GetDipScale()
-                        : 0.0f;
-        }
-        if (NearEqual(height, 0.0f)) {
-            height =
-                (layoutProperty->GetLayoutConstraint() &&
-                    layoutProperty->GetLayoutConstraint()->selfIdealSize.Height().has_value())
-                    ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Height().value() / pipeline->GetDipScale()
-                    : 0.0f;
-        }
-    }
 
     const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
     const std::unique_ptr<NG::BorderWidthProperty>& defaultEdgeWidth = std::make_unique<NG::BorderWidthProperty>();
@@ -337,6 +323,10 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     NG::CalcSize idealSize = { NG::CalcLength(measureWidth.ConvertToPx()),
         NG::CalcLength(measureHeight.ConvertToPx()) };
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(idealSize);
+    if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+        auto parentLayoutProperty = parentNode->GetLayoutProperty();
+        parentLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
+    }
 }
 
 void ViewFunctions::ExecuteReload(bool deep)

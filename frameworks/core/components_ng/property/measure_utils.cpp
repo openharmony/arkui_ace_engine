@@ -130,6 +130,19 @@ PaddingPropertyF ConvertToPaddingPropertyF(
     auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
+    if (left.has_value()) {
+        left = Round(left.value());
+    }
+    if (right.has_value()) {
+        right = Round(right.value());
+    }
+    if (top.has_value()) {
+        top = Round(top.value());
+    }
+    if (bottom.has_value()) {
+        bottom = Round(bottom.value());
+    }
+
     return PaddingPropertyF { left, right, top, bottom };
 }
 
@@ -161,6 +174,18 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
     auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
     auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
+    if (left.has_value()) {
+        left = Round(left.value());
+    }
+    if (right.has_value()) {
+        right = Round(right.value());
+    }
+    if (top.has_value()) {
+        top = Round(top.value());
+    }
+    if (bottom.has_value()) {
+        bottom = Round(bottom.value());
+    }
 
     return BorderWidthPropertyF { left, top, right, bottom };
 }
@@ -424,5 +449,45 @@ void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding)
 
     size.SetHeight(size.Height() - height);
     size.SetWidth(size.Width() - width);
+}
+
+PaddingProperty ConvertToCalcPaddingProperty(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
+{
+    PaddingProperty paddings;
+    if (top.has_value()) {
+        if (top.value().Unit() == DimensionUnit::CALC) {
+            paddings.top =
+                NG::CalcLength(top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : CalcDimension());
+        }
+    }
+    if (bottom.has_value()) {
+        if (bottom.value().Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(
+                bottom.value().IsNonNegative() ? bottom.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
+        }
+    }
+    if (left.has_value()) {
+        if (left.value().Unit() == DimensionUnit::CALC) {
+            paddings.left =
+                NG::CalcLength(left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
+        }
+    }
+    if (right.has_value()) {
+        if (right.value().Unit() == DimensionUnit::CALC) {
+            paddings.right =
+                NG::CalcLength(right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
+        }
+    }
+    return paddings;
 }
 } // namespace OHOS::Ace::NG

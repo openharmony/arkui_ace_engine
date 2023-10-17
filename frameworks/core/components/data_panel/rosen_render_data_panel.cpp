@@ -61,14 +61,12 @@ void PaintTrackBackground(SkCanvas* canvas, const Offset& center, double thickne
     canvas->drawPath(backgroundTrackPath, backgroundTrackData);
 }
 #else
-void PaintTrackBackground(
-    RSCanvas* canvas, const Offset& center, double thickness, const Color& color, double diameter)
+void PaintTrackBackground(RSCanvas* canvas, const Offset& center, double thickness, const Color& color, double diameter)
 {
     RSPen backgroundTrackData;
     RSRecordingPath backgroundTrackPath;
 
-    RSRect rect(center.GetX() - diameter / 2 + thickness / 2,
-        center.GetY() - diameter / 2 + thickness / 2,
+    RSRect rect(center.GetX() - diameter / 2 + thickness / 2, center.GetY() - diameter / 2 + thickness / 2,
         center.GetX() - diameter / 2 + thickness / 2 + diameter - thickness,
         center.GetY() - diameter / 2 + thickness / 2 + diameter - thickness);
     backgroundTrackPath.AddArc(rect, 0.0, HALF_CIRCLE * 2);
@@ -87,10 +85,9 @@ sk_sp<SkShader> BlendSkShader(SkScalar cx, SkScalar cy, const SkColor colors[], 
     SkScalar startAngle, SkScalar drawAngle, const SkMatrix* localMatrix, bool useAnimator = false,
     bool useEffect = false)
 #else
-std::shared_ptr<RSShaderEffect> BlendShader(RSScalar cx, RSScalar cy,
-    const std::vector<RSColorQuad> colors, const std::vector<RSScalar> pos, int colorCount,
-    RSScalar startAngle, RSScalar drawAngle, const RSMatrix* localMatrix,
-    bool useAnimator = false, bool useEffect = false)
+std::shared_ptr<RSShaderEffect> BlendShader(RSScalar cx, RSScalar cy, const std::vector<RSColorQuad> colors,
+    const std::vector<RSScalar> pos, int colorCount, RSScalar startAngle, RSScalar drawAngle,
+    const RSMatrix* localMatrix, bool useAnimator = false, bool useEffect = false)
 #endif
 {
     // the skia interface is more than 5 params.
@@ -125,17 +122,7 @@ std::shared_ptr<RSShaderEffect> BlendShader(RSScalar cx, RSScalar cy,
             HIGHLIGHT.ChangeAlpha(((drawAngle - scanEndDegree) / (0.1 * drawAngle)) * HIGHLIGHT.GetAlpha()).GetValue();
     }
 #ifndef USE_ROSEN_DRAWING
-#ifdef USE_SYSTEM_SKIA
-    backgroundShader =
-        SkGradientShader::MakeSweep(cx, cy, colors, pos, 2, SkShader::kDecal_TileMode, 0.0, drawAngle, 0, nullptr);
-    scanShader = SkGradientShader::MakeSweep(
-        cx, cy, scanColors, scanPos, 3, SkShader::kDecal_TileMode, scanStartDegree, scanEndDegree, 0, nullptr);
-    if (useAnimator) {
-        blendShader = SkShader::MakeCompose(backgroundShader, scanShader, SkBlendMode::kSrcOver);
-    } else {
-        blendShader = backgroundShader;
-    }
-#else
+
     backgroundShader =
         SkGradientShader::MakeSweep(cx, cy, colors, pos, 2, SkTileMode::kDecal, 0.0, drawAngle, 0, nullptr);
     scanShader = SkGradientShader::MakeSweep(
@@ -145,15 +132,13 @@ std::shared_ptr<RSShaderEffect> BlendShader(RSScalar cx, RSScalar cy,
     } else {
         blendShader = backgroundShader;
     }
-#endif
 #else
-    backgroundShader = RSShaderEffect::CreateSweepGradient(
-        RSPoint(cx, cy), colors, pos, RSTileMode::DECAL, 0.0, drawAngle);
-    scanShader = RSShaderEffect::CreateSweepGradient(RSPoint(cx, cy), scanColors, scanPos,
-        RSTileMode::DECAL, scanStartDegree, scanEndDegree);
+    backgroundShader =
+        RSShaderEffect::CreateSweepGradient(RSPoint(cx, cy), colors, pos, RSTileMode::DECAL, 0.0, drawAngle);
+    scanShader = RSShaderEffect::CreateSweepGradient(
+        RSPoint(cx, cy), scanColors, scanPos, RSTileMode::DECAL, scanStartDegree, scanEndDegree);
     if (useAnimator) {
-        blendShader = RSShaderEffect::CreateBlendShader(
-            *backgroundShader, *scanShader, RSBlendMode::SRC_OVER);
+        blendShader = RSShaderEffect::CreateBlendShader(*backgroundShader, *scanShader, RSBlendMode::SRC_OVER);
     } else {
         blendShader = backgroundShader;
     }
@@ -272,8 +257,8 @@ void PaintProgress(
     canvas->restore();
 }
 #else
-void PaintProgress(RSCanvas* canvas, ArcData arcData, bool useEffect = false, bool useAnimator = false,
-    double percent = 0.0)
+void PaintProgress(
+    RSCanvas* canvas, ArcData arcData, bool useEffect = false, bool useAnimator = false, double percent = 0.0)
 {
     double thickness = arcData.thickness;
     double radius = arcData.radius;
@@ -315,8 +300,7 @@ void PaintProgress(RSCanvas* canvas, ArcData arcData, bool useEffect = false, bo
     // this part is used to draw the circle edge
     if (useEffect) {
         RSFilter filter;
-        filter.SetMaskFilter(
-            RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, SHADOW_BLUR_RADIUS));
+        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, SHADOW_BLUR_RADIUS));
 
         gradientPen.SetFilter(filter);
         startCircleBrush.SetFilter(filter);
@@ -369,8 +353,8 @@ void PaintProgress(RSCanvas* canvas, ArcData arcData, bool useEffect = false, bo
         // draw end edge circle
         canvas->Save();
         canvas->Rotate(startAngle + drawAngle - PRECISION_CORRECTION, center.GetX(), center.GetY());
-        RSRect endOval(center.GetX() - thickness / 2, center.GetY() - radius,
-            center.GetX() - thickness / 2 + thickness, center.GetY() - radius + thickness);
+        RSRect endOval(center.GetX() - thickness / 2, center.GetY() - radius, center.GetX() - thickness / 2 + thickness,
+            center.GetY() - radius + thickness);
         canvas->AttachBrush(endCircleBrush);
         canvas->DrawPie(endOval, 3 * QUARTER_CIRCLE, HALF_CIRCLE);
         canvas->DetachBrush();
@@ -382,13 +366,13 @@ void PaintProgress(RSCanvas* canvas, ArcData arcData, bool useEffect = false, bo
 
         if (progress < START_COLOR_TRANSITION_EDGE) {
             colors[0] =
-                Color::LineColorTransition(
-                    arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE).GetValue();
-            gradientPen.SetShaderEffect(BlendShader(center.GetX(), center.GetY(), colors, pos, 2,
-                percent * drawAngle, drawAngle, nullptr, useAnimator, useEffect));
+                Color::LineColorTransition(arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE)
+                    .GetValue();
+            gradientPen.SetShaderEffect(BlendShader(center.GetX(), center.GetY(), colors, pos, 2, percent * drawAngle,
+                drawAngle, nullptr, useAnimator, useEffect));
         } else {
-            gradientPen.SetShaderEffect(BlendShader(center.GetX(), center.GetY(), colors, pos, 2,
-                percent * drawAngle, drawAngle, nullptr, useAnimator, useEffect));
+            gradientPen.SetShaderEffect(BlendShader(center.GetX(), center.GetY(), colors, pos, 2, percent * drawAngle,
+                drawAngle, nullptr, useAnimator, useEffect));
         }
         canvas->AttachPen(gradientPen);
         canvas->DrawPath(botPath);
@@ -448,13 +432,9 @@ void PaintProgressFilterMask(RSCanvas* canvas, ArcData arcData)
         arcData.endColor.ChangeAlpha(101).GetValue() };
     SkScalar pos[2] = { 0.0, 1.0 };
     // kClamp_TileMode
-#ifdef USE_SYSTEM_SKIA
-    filterPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2,
-        SkShader::kDecal_TileMode, startAngle, startAngle + sweepAngle, 0, nullptr));
-#else
+
     filterPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2, SkTileMode::kDecal,
         startAngle, startAngle + sweepAngle, 0, nullptr));
-#endif
     canvas->drawPath(rainbowFilterPath, filterPaint);
     startAngle += sweepAngle;
 
@@ -479,8 +459,7 @@ void PaintProgressFilterMask(RSCanvas* canvas, ArcData arcData)
     filterPen.SetWidth(thickness);
 
     RSFilter filter;
-    filter.SetMaskFilter(
-        RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, SHADOW_BLUR_RADIUS));
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, SHADOW_BLUR_RADIUS));
     filterPen.SetFilter(filter);
 
     RSRect rect(center.GetX() - radius + thickness / 2, center.GetY() - radius + thickness / 2,
@@ -501,9 +480,8 @@ void PaintProgressFilterMask(RSCanvas* canvas, ArcData arcData)
     startCircleBrush.SetFilter(filter);
 
     RSRecordingPath startCircleArch;
-    RSRect startCircleArchRect =
-        RSRect(center.GetX() - thickness / 2, center.GetY() - radius,
-            thickness + center.GetX() - thickness / 2, thickness + center.GetY() - radius);
+    RSRect startCircleArchRect = RSRect(center.GetX() - thickness / 2, center.GetY() - radius,
+        thickness + center.GetX() - thickness / 2, thickness + center.GetY() - radius);
     canvas->AttachPen(startCirclePen);
     canvas->AttachBrush(startCircleBrush);
     canvas->DrawCircle(RSPoint(center.GetX(), center.GetY() - radius + thickness / 2), thickness / 2);
@@ -522,9 +500,8 @@ void PaintProgressFilterMask(RSCanvas* canvas, ArcData arcData)
     std::vector<RSColorQuad> colors = { arcData.startColor.ChangeAlpha(101).GetValue(),
         arcData.endColor.ChangeAlpha(101).GetValue() };
     std::vector<RSScalar> pos = { 0.0, 1.0 };
-    filterPen.SetShaderEffect(
-        RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()), colors,
-            pos, RSTileMode::DECAL, startAngle, startAngle + sweepAngle));
+    filterPen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+        RSPoint(center.GetX(), center.GetY()), colors, pos, RSTileMode::DECAL, startAngle, startAngle + sweepAngle));
     canvas->AttachPen(filterPen);
     canvas->DrawPath(rainbowFilterPath);
     canvas->DetachPen();
@@ -610,13 +587,9 @@ void PaintRainbowFilterMask(SkCanvas* canvas, double factor, const std::vector<S
         SkColor colors[2] = { segment.GetStartColor().ChangeAlpha(101).GetValue(),
             segment.GetEndColor().ChangeAlpha(101).GetValue() };
         SkScalar pos[2] = { 0.0, 1.0 };
-#ifdef USE_SYSTEM_SKIA
-        filterPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2,
-            SkShader::kClamp_TileMode, startAngle, startAngle + sweepAngle, 0, nullptr));
-#else
+
         filterPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2,
             SkTileMode::kClamp, startAngle, startAngle + sweepAngle, 0, nullptr));
-#endif
         canvas->drawPath(rainbowFilterPath, filterPaint);
         startAngle += sweepAngle;
     }
@@ -636,8 +609,7 @@ void PaintRainbowFilterMask(SkCanvas* canvas, double factor, const std::vector<S
 }
 } // namespace
 #else
-void PaintRainbowFilterMask(
-    RSCanvas* canvas, double factor, const std::vector<Segment>& segments, ArcData arcData)
+void PaintRainbowFilterMask(RSCanvas* canvas, double factor, const std::vector<Segment>& segments, ArcData arcData)
 {
     if (segments.empty()) {
         return;
@@ -652,11 +624,9 @@ void PaintRainbowFilterMask(
     filterPen.SetWidth(thickness);
 
     RSFilter filter;
-    filter.SetMaskFilter(
-        RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, SHADOW_BLUR_RADIUS));
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, SHADOW_BLUR_RADIUS));
     filterPen.SetFilter(filter);
-    RSRect rect = RSRect(
-        center.GetX() - radius + thickness / 2, center.GetY() - radius + thickness / 2,
+    RSRect rect = RSRect(center.GetX() - radius + thickness / 2, center.GetY() - radius + thickness / 2,
         radius * 2 - thickness + center.GetX() - radius + thickness / 2,
         radius * 2 - thickness + center.GetY() - radius + thickness / 2);
     double startAngle = arcData.startAngle;
@@ -674,9 +644,8 @@ void PaintRainbowFilterMask(
     startCircleBrush.SetColor(segments[0].GetStartColor().ChangeAlpha(101).GetValue());
     startCircleBrush.SetFilter(filter);
     RSRecordingPath startCircleArch;
-    RSRect startCircleArchRect =
-        RSRect(center.GetX() - thickness / 2, center.GetY() - radius,
-            thickness + center.GetX() - thickness / 2, thickness + center.GetY() - radius);
+    RSRect startCircleArchRect = RSRect(center.GetX() - thickness / 2, center.GetY() - radius,
+        thickness + center.GetX() - thickness / 2, thickness + center.GetY() - radius);
     startCircleArch.AddArc(startCircleArchRect, 90.0, 180.0);
     canvas->AttachPen(startCirclePen);
     canvas->AttachBrush(startCircleBrush);
@@ -697,9 +666,8 @@ void PaintRainbowFilterMask(
         std::vector<RSColorQuad> colors = { segment.GetStartColor().ChangeAlpha(101).GetValue(),
             segment.GetEndColor().ChangeAlpha(101).GetValue() };
         std::vector<RSScalar> pos = { 0.0, 1.0 };
-        filterPen.SetShaderEffect(
-            RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()),
-                colors, pos, RSTileMode::CLAMP, startAngle, startAngle + sweepAngle));
+        filterPen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()), colors,
+            pos, RSTileMode::CLAMP, startAngle, startAngle + sweepAngle));
         canvas->AttachPen(filterPen);
         canvas->DrawPath(rainbowFilterPath);
         canvas->DetachPen();
@@ -838,15 +806,9 @@ void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, 
     botPaint.setStrokeWidth(thickness);
     botPaint.setAntiAlias(true);
 
-#ifdef USE_SYSTEM_SKIA
-    botPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2,
-        SkShader::kDecal_TileMode, 0.0,
-        sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2)), 0, nullptr));
-#else
     botPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2, SkTileMode::kDecal,
         0.0, sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2)), 0,
         nullptr));
-#endif
     canvas->save();
     PaintTrackBackground(canvas, center, thickness, backgroundTrack_, diameter);
     canvas->rotate(animateAngle, center.GetX(), center.GetY()); // animate
@@ -855,8 +817,7 @@ void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, 
 #else
     RSPen botPen;
     RSRecordingPath botPath;
-    RSRect rect = RSRect(
-        center.GetX() - diameter / 2 + thickness / 2, center.GetY() - diameter / 2 + thickness / 2,
+    RSRect rect = RSRect(center.GetX() - diameter / 2 + thickness / 2, center.GetY() - diameter / 2 + thickness / 2,
         (center.GetX() - diameter / 2 + thickness / 2) + diameter - thickness,
         (center.GetY() - diameter / 2 + thickness / 2) + diameter - thickness);
     botPath.AddArc(rect, 0, sweepDegree_);
@@ -868,9 +829,9 @@ void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, 
     botPen.SetWidth(thickness);
     botPen.SetAntiAlias(true);
 
-    botPen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        RSPoint(center.GetX(), center.GetY()), colors, pos, RSTileMode::DECAL, 0.0,
-        sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2))));
+    botPen.SetShaderEffect(
+        RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()), colors, pos, RSTileMode::DECAL, 0.0,
+            sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2))));
     canvas->Save();
     PaintTrackBackground(canvas, center, thickness, backgroundTrack_, diameter);
     canvas->Rotate(animateAngle, center.GetX(), center.GetY()); // animate
@@ -931,8 +892,7 @@ void RosenRenderPercentageDataPanel::PaintBackground(
     backgroundBrush.SetAntiAlias(true);
     canvas->ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
     canvas->AttachBrush(backgroundBrush);
-    canvas->DrawRect(
-        RSRect(leftTop.GetX(), leftTop.GetY(), totalWidth + leftTop.GetX(), height + leftTop.GetY()));
+    canvas->DrawRect(RSRect(leftTop.GetX(), leftTop.GetY(), totalWidth + leftTop.GetX(), height + leftTop.GetY()));
     canvas->DetachBrush();
 #endif
 }
@@ -953,8 +913,7 @@ void RosenRenderPercentageDataPanel::PaintSpace(
     canvas->drawRect(rect, segmentPaint);
 #else
     RSBrush segmentBrush;
-    RSRect rect = RSRect(xSpace, leftTop.GetY(),
-        spaceWidth + xSpace, height + leftTop.GetY());
+    RSRect rect = RSRect(xSpace, leftTop.GetY(), spaceWidth + xSpace, height + leftTop.GetY());
     segmentBrush.SetColor(Color::WHITE.GetValue());
     segmentBrush.SetAntiAlias(true);
     canvas->AttachBrush(segmentBrush);
@@ -994,8 +953,8 @@ void RosenRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, c
     RSPoint segmentPoint[2] = { segmentStartPoint, segmentEndPoint };
     std::vector<RSColorQuad> segmentColor = { segmentStartColor.GetValue(), segmentEndColor.GetValue() };
     std::vector<RSScalar> pos = { 0.0, 1.0 };
-    segmentBrush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
-        segmentPoint[0], segmentPoint[1], segmentColor, pos, RSTileMode::CLAMP));
+    segmentBrush.SetShaderEffect(
+        RSShaderEffect::CreateLinearGradient(segmentPoint[0], segmentPoint[1], segmentColor, pos, RSTileMode::CLAMP));
     segmentBrush.SetAntiAlias(true);
     canvas->AttachBrush(segmentBrush);
     canvas->DrawRect(rect);

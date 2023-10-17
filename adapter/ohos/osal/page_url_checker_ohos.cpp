@@ -18,6 +18,7 @@
 #include <string>
 
 #include "ability_runtime/context/context.h"
+#include "app_mgr_client.h"
 #include "atomic_service_status_callback.h"
 #include "errors.h"
 #include "iremote_broker.h"
@@ -25,6 +26,7 @@
 #include "iremote_stub.h"
 #include "iservice_registry.h"
 #include "nocopyable.h"
+#include "singleton.h"
 #include "system_ability_definition.h"
 #include "want.h"
 
@@ -252,5 +254,74 @@ void PageUrlCheckerOhos::CheckPreload(const std::string& url)
         want.SetParam("uid", appInfo->uid);
         bms->ProcessPreload(want);
     }
+}
+
+void PageUrlCheckerOhos::NotifyPageShow(const std::string& pageName)
+{
+    LOGD("NotifyPageShow start pageName %{public}s", pageName.c_str());
+    std::string bundleName;
+    std::string moduleName;
+    if (pageName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+        moduleName = moduleNameCallback_(pageName);
+        if (moduleName == "") {
+            LOGD("moduleName moduleNameCallback_ is null");
+            moduleName = abilityInfo_->moduleName;
+        }
+        bundleName = abilityInfo_->bundleName;
+    } else {
+        size_t bundleEndPos = pageName.find('/');
+        bundleName = pageName.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
+        size_t moduleStartPos = bundleEndPos + 1;
+        size_t moduleEndPos = pageName.find('/', moduleStartPos);
+        moduleName = pageName.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+    }
+
+    AppExecFwk::PageStateData pageStateData;
+    pageStateData.bundleName = bundleName;
+    pageStateData.moduleName = moduleName;
+    pageStateData.abilityName = abilityInfo_->name;
+    pageStateData.pageName = pageName;
+    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->
+        NotifyPageShow(context_->GetToken(), pageStateData);
+    LOGD("NotifyPageShow end,bundleName: %{public}s moduleName: %{public}s abilityName: %{public}s "
+        "pageName: %{public}s", abilityInfo_->bundleName.c_str(), moduleName.c_str(),
+        abilityInfo_->name.c_str(), pageName.c_str());
+}
+
+void PageUrlCheckerOhos::NotifyPageHide(const std::string& pageName)
+{
+    LOGD("NotifyPageHide start pageName %{public}s", pageName.c_str());
+    std::string bundleName;
+    std::string moduleName;
+    if (pageName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+        moduleName = moduleNameCallback_(pageName);
+        if (moduleName == "") {
+            LOGD("moduleName moduleNameCallback_ is null");
+            moduleName = abilityInfo_->moduleName;
+        }
+        bundleName = abilityInfo_->bundleName;
+    } else {
+        size_t bundleEndPos = pageName.find('/');
+        bundleName = pageName.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
+        size_t moduleStartPos = bundleEndPos + 1;
+        size_t moduleEndPos = pageName.find('/', moduleStartPos);
+        moduleName = pageName.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+    }
+    
+    AppExecFwk::PageStateData pageStateData;
+    pageStateData.bundleName = bundleName;
+    pageStateData.moduleName = moduleName;
+    pageStateData.abilityName = abilityInfo_->name;
+    pageStateData.pageName = pageName;
+    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->
+        NotifyPageHide(context_->GetToken(), pageStateData);
+    LOGD("NotifyPageHide end,bundleName: %{public}s moduleName: %{public}s abilityName: %{public}s "
+        "pageName: %{public}s", abilityInfo_->bundleName.c_str(), moduleName.c_str(),
+        abilityInfo_->name.c_str(), pageName.c_str());
+}
+
+void PageUrlCheckerOhos::SetModuleNameCallback(std::function<std::string(const std::string&)>&& callback)
+{
+    moduleNameCallback_ = std::move(callback);
 }
 } // namespace OHOS::Ace

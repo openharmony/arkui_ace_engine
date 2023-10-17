@@ -220,7 +220,7 @@ public:
         pageProfile_ = pageProfile;
     }
 
-    void InitializeStageAppConfig(const std::string& assetPath, const std::string& bundleName,
+    void InitializeAppConfig(const std::string& assetPath, const std::string& bundleName,
         const std::string& moduleName, const std::string& compileMode);
 
     void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) override

@@ -28,6 +28,7 @@ bool DividerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     constrainStrokeWidth_ = dividerLayoutAlgorithm->GetConstrainStrokeWidth();
     dividerLength_ = dividerLayoutAlgorithm->GetDividerLength();
     vertical_ = dividerLayoutAlgorithm->GetVertical();
+    strokeWidthLimitation_ = dividerLayoutAlgorithm->GetStrokeWidthLimitation();
     return true;
 }
 } // namespace OHOS::Ace::NG

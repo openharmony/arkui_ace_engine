@@ -1603,13 +1603,11 @@ HWTEST_F(RichEditorTestNg, HandleTouchEvent001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->textForDisplay_ = "tesol";
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
     TouchEventInfo touchInfo("");
     richEditorPattern->isMousePressed_ = true;
     richEditorPattern->HandleTouchEvent(touchInfo);
     EXPECT_FALSE(richEditorPattern->isMousePressed_);
 
-    richEditorPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(0);
     richEditorPattern->HandleTouchEvent(touchInfo);
     EXPECT_FALSE(richEditorPattern->isMousePressed_);
 
@@ -2233,6 +2231,9 @@ HWTEST_F(RichEditorTestNg, GetParagraphNodes001, TestSize.Level1)
     nodes = richEditorPattern->GetParagraphNodes(2, 20);
     EXPECT_EQ(nodes.size(), 4);
     EXPECT_EQ(nodes[3]->GetId(), richEditorNode_->GetChildAtIndex(4)->GetId());
+
+    nodes = richEditorPattern->GetParagraphNodes(400, 404);
+    EXPECT_EQ(nodes.size(), 7);
 }
 
 /**
@@ -2263,6 +2264,57 @@ HWTEST_F(RichEditorTestNg, GetParagraphNodes002, TestSize.Level1)
 
     nodes = richEditorPattern->GetParagraphNodes(4, 6);
     EXPECT_EQ(nodes.size(), 1);
+}
+
+/**
+ * @tc.name: GetParagraphNodes003
+ * @tc.desc: test get paragraph nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetParagraphNodes003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    AddSpan("0123");
+    AddImageSpan();
+    AddSpan("45789\n");
+    AddSpan("aaaaaaaaaa");
+
+    EXPECT_EQ(richEditorNode_->children_.size(), 4);
+
+    auto nodes = richEditorPattern->GetParagraphNodes(50, 52);
+    EXPECT_EQ(nodes.size(), 3);
+
+    nodes = richEditorPattern->GetParagraphNodes(1, 2);
+    EXPECT_EQ(nodes.size(), 2);
+}
+
+/**
+ * @tc.name: GetParagraphLength001
+ * @tc.desc: test get paragraph length
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetParagraphLength001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    // Add multiple paragraphs
+    auto host = richEditorPattern->GetHost();
+    AddImageSpan();               // length 1
+    auto length = richEditorPattern->GetParagraphLength(host->GetChildren());
+    EXPECT_EQ(length, 1);
+    AddImageSpan();
+    AddImageSpan();
+    length = richEditorPattern->GetParagraphLength(host->GetChildren());
+    EXPECT_EQ(length, 3);
+    AddSpan(INIT_VALUE_1 + "\n"); // length 7
+    length = richEditorPattern->GetParagraphLength(host->GetChildren());
+    EXPECT_EQ(length, 10);
+    AddImageSpan();
+    length = richEditorPattern->GetParagraphLength(host->GetChildren());
+    EXPECT_EQ(length, 11);
 }
 
 } // namespace OHOS::Ace::NG

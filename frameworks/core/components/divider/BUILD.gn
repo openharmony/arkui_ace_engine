@@ -17,12 +17,9 @@ import(
 build_component("divider") {
   sources = [
     "divider_component.cpp",
-    "flutter_render_divider.cpp",
     "render_divider.cpp",
     "render_divider_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_divider.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_divider.cpp" ]
 }

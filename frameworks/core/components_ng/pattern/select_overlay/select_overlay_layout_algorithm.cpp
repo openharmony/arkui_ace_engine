@@ -33,9 +33,11 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(*info_) || (!info_->firstHandle.isShow && !info_->secondHandle.isShow)) {
+    if (!CheckInShowArea(*info_)) {
         menu->SetActive(false);
         return;
+    } else if (!info_->firstHandle.isShow && !info_->secondHandle.isShow) {
+        menu->SetActive(false);
     } else {
         menu->SetActive(true);
     }
@@ -132,7 +134,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             singleHandle.Width(), singleHandle.Height());
     }
 
-    if (info_->isSingleHandle) {
+    if (info_->isSingleHandle || !(info_->firstHandle.isShow && info_->secondHandle.isShow)) {
         auto menuSpacing = static_cast<float>(menuSpacingBetweenText);
         menuPosition = OffsetF((singleHandle.Left() + singleHandle.Right() - menuWidth) / 2.0f,
             static_cast<float>(singleHandle.Top() - menuSpacing - menuHeight));
@@ -177,6 +179,12 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         }
     } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText)) {
         menuPosition.SetY(viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText);
+    }
+    if (info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->handleReverse) {
+        menuPosition.SetY(menuPosition.GetY() - menuSpacingBetweenHandle);
+    }
+    if (!info_->firstHandle.isShow && info_->secondHandle.isShow && info_->handleReverse) {
+        menuPosition.SetY(menuPosition.GetY() - menuSpacingBetweenHandle);
     }
     LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);

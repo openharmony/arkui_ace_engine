@@ -15,8 +15,8 @@
 
 #include "core/components/picker/flutter_render_picker_base.h"
 
-#include "lib/ui/painting/rrect.h"
 #include "include/effects/SkGradientShader.h"
+#include "lib/ui/painting/rrect.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -141,13 +141,9 @@ void FlutterRenderPickerBase::PaintGradient(
         SkColor colors[] = { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(), endColor.GetValue() };
         const float stopPositions[] = { 0.0f, gradientHeight / rect.Height(),
             (rect.Height() - gradientHeight) / rect.Height(), 1.0f };
-#ifdef USE_SYSTEM_SKIA
-        paint.paint()->setShader(
-            SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkShader::kClamp_TileMode));
-#else
+
         paint.paint()->setShader(
             SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kClamp));
-#endif
         canvas->drawRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom(), paint, paintData);
         return;
     }

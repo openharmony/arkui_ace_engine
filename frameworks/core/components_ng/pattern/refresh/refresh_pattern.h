@@ -23,11 +23,13 @@
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_accessibility_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_event_hub.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_render_property.h"
+#include "frameworks/core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "frameworks/core/components_ng/pattern/text/text_layout_property.h"
 #include "frameworks/core/components_ng/property/property.h"
 #include "frameworks/core/components_ng/pattern/list/list_layout_property.h"
@@ -82,9 +84,9 @@ public:
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
     void OnActive() override {}
-    void CheckCoordinationEvent();
-    RefPtr<FrameNode> FindScrollableChild();
+    void InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& coordinationEvent);
     void AddCustomBuilderNode(const RefPtr<NG::UINode>& builder);
+    void UpdateInternalPlacement();
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
@@ -112,27 +114,22 @@ public:
 
 private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart();
+    void HandleDragStart(bool isDrag = true);
     void HandleDragUpdate(float delta);
-    void HandleDragEnd();
+    void HandleDragEnd(float speed);
     void HandleDragCancel();
-    void TriggerRefresh();
-    void TriggerInActive();
-    void TriggerDone();
     void TriggerFinish();
     void TriggerStatusChange(RefreshStatus newStatus);
     void TransitionPeriodAnimation();
-    void RefreshStatusChange(RefreshStatus newStatus);
     void LoadingProgressExit();
     void LoadingProgressAppear();
-    void LoadingProgressRecycle();
     void UpdateLoadingProgress(int32_t state, float ratio);
     void ReplaceLoadingProgressNode();
     void LoadingProgressReset();
+    void OnAttachToFrameNode() override;
     void OnExitAnimationFinish();
     void ResetLoadingProgressColor();
-    float GetFollowRatio();
-    float GetFadeAwayRatio();
+    float GetFollowRatio(float scrollOffset);
     float GetCustomBuilderOpacityRatio();
     float GetScrollOffset(float delta);
     bool ScrollComponentReactInMove();
@@ -152,20 +149,44 @@ private:
     void QuickEndFresh();
     void QuickStartFresh();
     void UpdateCustomBuilderIndex(int32_t index);
+    void UpdateRefreshStatus(RefreshStatus newStatus);
+    void UpdateRefreshDraw();
+    void UpdateFirstChildPlacement(float deltaOffset);
+    void UpdateFirstChildDragStart(bool isDrag);
+    void UpdateLoadingProgressTranslate(float loadingOffset);
+    void UpdateLoadingProgressStatus(RefreshAnimationState state, float followToRecycleRatio = 0.0f);
+    void UpdateBuilderHeight(float builderHeight);
+    void ResetOffsetProperty();
+    void SpeedTriggerAnimation(float speed);
+    void SpeedAnimationFinish();
+    void SwitchToRefresh();
+    void SwitchToFinish();
+    void QuiteAnimation();
+    void InitChildNode();
+    void QuickFirstChildAppear();
+    void QuickFirstChildDisappear();
+    float GetLoadingVisibleHeight();
+    void UpdateScrollTransition(float scrollOffset);
+    RefreshAnimationState GetLoadingProgressStatus();
+    void RefreshStatusChangeEffect();
+    float GetTargetOffset();
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;
-
+    bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
     float triggerLoadingDistance_ = 0.0f;
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> customBuilder_;
-    WeakPtr<FrameNode> scrollableNode_;
-    // customBuilder
+    RefPtr<FrameNode> scrollableNode_;
     bool isCustomBuilderExist_ = false;
+    bool updatePerFrame_ = false;
     float customBuilderOffset_ = 0.0f;
     std::optional<int32_t> customBuilderIndex_;
+    RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
+    uint32_t animationId_ = 0;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
 };
 } // namespace OHOS::Ace::NG

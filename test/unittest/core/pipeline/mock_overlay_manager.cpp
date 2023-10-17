@@ -19,10 +19,12 @@
 namespace OHOS::Ace::NG {
 namespace {
 bool removeOverlayFlag = false;
-}
-void OverlayManager::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
+} // namespace
+void OverlayManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    bool isRightToLeft, const ToastShowMode& showMode)
 {}
+
+void OverlayManager::ClearToast() {}
 
 void OverlayManager::PopToast(int32_t toastId) {}
 

@@ -56,13 +56,11 @@ public:
         const auto& loadCallback = [outSidePipelineContext](const std::string& url, int64_t cardId) -> bool {
             auto context = outSidePipelineContext.Upgrade();
             if (!context) {
-                LOGE("Load card callback failed, host pipeline nullptr");
                 return false;
             }
 
             auto outSidefrontend = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
             if (!outSidefrontend) {
-                LOGE("Load card callback failed, host frontend nullptr");
                 return false;
             }
 

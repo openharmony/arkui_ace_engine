@@ -662,6 +662,11 @@ enum class RenderFit : int32_t {
     RESIZE_COVER_BOTTOM_RIGHT,
 };
 
+enum class KeyBoardAvoidMode : int32_t {
+    OFFSET = 0,
+    RESIZE,
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

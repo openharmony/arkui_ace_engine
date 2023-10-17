@@ -34,18 +34,23 @@ template("ace_unittest") {
   forward_variables_from(invoker, "*")
 
   type = "components"
+  module_output = "components"
   flutter_skia = false
   render = false
-  ace_unittest_out_path = "ace_engine/$type"
   ace_unittest_name = target_name
-  ace_unittest_config = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  ace_unittest_config = [
+    "$ace_root/test/unittest:ace_unittest_config",
+    "$ace_flutter_engine_root:flutter_config",
+  ]
   ace_external_deps = []
-  flutter_sources = []
+  flutter_sources =
+      [ "$ace_root/test/mock/core/common/mock_flutter_window.cpp" ]
   flutter_external_deps = []
   ace_unittest_deps = [
-    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_flutter_engine_root:flutter_engine_common_ohos",
+    "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
-    "$ace_root/test/unittest:ace_unittest_trace",
+    "$skia_root_new:skia_ohos",
     "//third_party/googletest:gmock",
   ]
 
@@ -60,11 +65,18 @@ template("ace_unittest") {
 
   if (defined(invoker.type)) {
     type = invoker.type
-    ace_unittest_out_path = "ace_engine/$type"
+  }
+
+  if (defined(invoker.module_output)) {
+    module_output = invoker.module_output
   }
 
   if (defined(invoker.flutter_skia)) {
     flutter_skia = invoker.flutter_skia
+  }
+
+  if (defined(invoker.extra_deps)) {
+    ace_unittest_deps += invoker.extra_deps
   }
 
   if (render) {
@@ -78,35 +90,20 @@ template("ace_unittest") {
   }
 
   if (flutter_skia) {
-    if (ace_use_new_skia) {
-      flutter_sources +=
-          [ "$ace_root/test/mock/core/common/mock_flutter_window.cpp" ]
+    if (enable_graphic_text_gine) {
+      ace_unittest_deps -=
+          [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos" ]
       ace_unittest_deps += [
-        "$ace_flutter_engine_root:flutter_engine_common_ohos",
-        "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos",
-        "$skia_root_new:skia_ohos",
-      ]
-      if (enable_graphic_text_gine) {
-        ace_unittest_deps -=
-            [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos" ]
-        ace_unittest_deps += [
-          "$ace_flutter_engine_root:flutter_engine_fml_ohos",
-          "$ace_flutter_engine_root/icu:ace_libicu_ohos",
-        ]
-      }
-      ace_unittest_config += [ "$ace_flutter_engine_root:flutter_config" ]
-      flutter_external_deps = [ "eventhandler:libeventhandler" ]
-    } else {
-      ace_unittest_deps += [
-        "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
-        "$ace_flutter_engine_root/skia:ace_skia_ohos",
+        "$ace_flutter_engine_root:flutter_engine_fml_ohos",
+        "$ace_flutter_engine_root/icu:ace_libicu_ohos",
       ]
     }
+    flutter_external_deps = [ "eventhandler:libeventhandler" ]
   }
 
   if (type == "components") {
     ohos_unittest(ace_unittest_name) {
-      module_out_path = ace_unittest_out_path
+      module_out_path = "ace_engine/${module_output}"
 
       sources = []
       sources += invoker.sources
@@ -118,7 +115,6 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_base",
         "$ace_root/test/unittest:ace_components_base",
         "$ace_root/test/unittest:ace_components_event",
-        "$ace_root/test/unittest:ace_components_extra",
         "$ace_root/test/unittest:ace_components_gestures",
         "$ace_root/test/unittest:ace_components_layout",
         "$ace_root/test/unittest:ace_components_mock",
@@ -126,6 +122,7 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_components_render",
         "$ace_root/test/unittest:ace_components_syntax",
         "$ace_root/test/unittest:ace_core_animation",
+        "$ace_root/test/unittest:ace_core_extra",
       ]
 
       configs = []
@@ -135,15 +132,30 @@ template("ace_unittest") {
       external_deps += ace_external_deps
       external_deps += flutter_external_deps
     }
-  } else if (type == "basic/common") {
+  } else if (type == "new") {
     ohos_unittest(ace_unittest_name) {
-      module_out_path = ace_unittest_out_path
+      module_out_path = "ace_engine/${module_output}"
       sources = []
       sources += invoker.sources
       sources += flutter_sources
 
       deps = ace_unittest_deps
-      deps += [ "$ace_root/test/unittest:ace_base" ]
+      deps += [
+        "$ace_root/frameworks/core/components/theme:build_theme_code",
+        "$ace_root/test/unittest:ace_base",
+        "$ace_root/test/unittest:ace_components_base",
+        "$ace_root/test/unittest:ace_components_event",
+        "$ace_root/test/unittest:ace_components_gestures",
+        "$ace_root/test/unittest:ace_components_layout",
+        "$ace_root/test/unittest:ace_components_manager",
+        "$ace_root/test/unittest:ace_components_mock",
+        "$ace_root/test/unittest:ace_components_pattern",
+        "$ace_root/test/unittest:ace_components_property",
+        "$ace_root/test/unittest:ace_components_render",
+        "$ace_root/test/unittest:ace_components_syntax",
+        "$ace_root/test/unittest:ace_core_animation",
+        "$ace_root/test/unittest:ace_core_extra",
+      ]
 
       configs = []
       configs = ace_unittest_config

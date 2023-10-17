@@ -59,7 +59,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
-#include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
@@ -75,7 +75,6 @@ namespace {
 constexpr int32_t TOAST_ANIMATION_DURATION = 100;
 constexpr int32_t MENU_ANIMATION_DURATION = 150;
 constexpr float TOAST_ANIMATION_POSITION = 15.0f;
-constexpr float PREVIEW_MENU_ANIMATION_SCALE = 0.4f;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
@@ -104,17 +103,46 @@ RefPtr<FrameNode> GetLastPage()
     return pageNode;
 }
 
-void ShowPreviewDisappearAnimation(int32_t duration, const RefPtr<RenderContext>& previewRenderContext)
+void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
 {
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto previewChild = menuWrapperPattern->GetPreview();
+    CHECK_NULL_VOID(previewChild);
+    auto previewRenderContext = previewChild->GetRenderContext();
     CHECK_NULL_VOID(previewRenderContext);
+
+    auto menuChild = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menuChild);
+    auto menuPattern = menuChild->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto previewPosition = menuPattern->GetPreviewOriginOffset();
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
+    auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
+    AnimationOption scaleOption;
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
+    scaleOption.SetCurve(motion);
+    AnimationUtils::Animate(scaleOption, [previewRenderContext, previewPosition]() {
+        if (previewRenderContext) {
+            previewRenderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+            previewRenderContext->UpdatePosition(
+                OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
+        }
+    });
+
     auto shadow = previewRenderContext->GetBackShadow();
     if (!shadow.has_value()) {
         shadow = Shadow::CreateShadow(ShadowStyle::None);
     }
     previewRenderContext->UpdateBackShadow(shadow.value());
+    auto disappearDuration = menuTheme->GetDisappearDuration();
     AnimationOption previewOption;
     previewOption.SetCurve(Curves::SHARP);
-    previewOption.SetDuration(duration);
+    previewOption.SetDuration(disappearDuration);
     AnimationUtils::Animate(previewOption, [previewRenderContext, shadow]() mutable {
         if (previewRenderContext) {
             auto color = shadow->GetColor();
@@ -128,8 +156,7 @@ void ShowPreviewDisappearAnimation(int32_t duration, const RefPtr<RenderContext>
     });
 }
 
-void ShowPreviewAndContextMenuDisapperAnimation(AnimationOption& option, const RefPtr<RenderContext>& context,
-    const OffsetT<Dimension>& menuAnimationOffset, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+void ShowContextMenuDisappearAnimation(AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
 {
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuChild = menuWrapperPattern->GetMenu();
@@ -138,49 +165,45 @@ void ShowPreviewAndContextMenuDisapperAnimation(AnimationOption& option, const R
     CHECK_NULL_VOID(menuRenderContext);
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto menuPosition = menuPattern->GetOriginOffset();
-
-    auto previewChild = menuWrapperPattern->GetPreview();
-    CHECK_NULL_VOID(previewChild);
-    auto previewRenderContext = previewChild->GetRenderContext();
-    CHECK_NULL_VOID(previewRenderContext);
-    auto previewPosition = menuPattern->GetPreviewOriginOffset();
+    auto menuPosition = menuPattern->GetEndOffset();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
-    AnimationOption previewScaleOption;
+    AnimationOption positionOption;
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
-    previewScaleOption.SetCurve(motion);
-    AnimationUtils::Animate(
-        previewScaleOption, [previewRenderContext, menuRenderContext, previewPosition, menuPosition]() {
-            if (previewRenderContext && menuRenderContext) {
-                previewRenderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
-                previewRenderContext->UpdatePosition(
-                    OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
-                menuRenderContext->UpdatePosition(
-                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-            }
-        });
+    positionOption.SetCurve(motion);
+    AnimationUtils::Animate(positionOption, [menuRenderContext, menuPosition]() {
+        if (menuRenderContext) {
+            menuRenderContext->UpdatePosition(
+                OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+        }
+    });
 
     auto disappearDuration = menuTheme->GetDisappearDuration();
-    ShowPreviewDisappearAnimation(disappearDuration, previewRenderContext);
-
+    auto menuAnimationScale = menuTheme->GetMenuAnimationScale();
     AnimationOption scaleOption;
     scaleOption.SetCurve(Curves::FAST_OUT_LINEAR_IN);
     scaleOption.SetDuration(disappearDuration);
-    AnimationUtils::Animate(scaleOption, [menuRenderContext]() {
+    AnimationUtils::Animate(scaleOption, [menuRenderContext, menuAnimationScale]() {
         if (menuRenderContext) {
-            menuRenderContext->UpdateTransformScale({ PREVIEW_MENU_ANIMATION_SCALE, PREVIEW_MENU_ANIMATION_SCALE });
+            menuRenderContext->UpdateTransformScale({ menuAnimationScale, menuAnimationScale });
         }
     });
 
     option.SetDuration(disappearDuration);
+    option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(
-        option, [context, menuAnimationOffset]() { context->UpdateOpacity(0.0); }, option.GetOnFinishEvent());
+        option,
+        [menuRenderContext]() {
+            if (menuRenderContext) {
+                menuRenderContext->UpdateOpacity(0.0);
+            }
+        },
+        option.GetOnFinishEvent());
 }
 } // namespace
 
@@ -417,7 +440,7 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
     menuPattern->SetFirstShow();
 }
 
-void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
+void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation)
 {
     ResetLowerNodeFocusable(menu);
 
@@ -461,13 +484,16 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     CHECK_NULL_VOID(context);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
     if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
-        ShowPreviewAndContextMenuDisapperAnimation(option, context, menuAnimationOffset, menuWrapperPattern);
+        if (!showPreviewAnimation) {
+            CleanPreviewInSubWindow();
+        } else {
+            ShowPreviewDisappearAnimation(menuWrapperPattern);
+        }
+        ShowContextMenuDisappearAnimation(option, menuWrapperPattern);
     } else {
         AnimationUtils::Animate(
             option,
@@ -481,15 +507,10 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     pipeline->RequestFrame();
 }
 
-void OverlayManager::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
+void OverlayManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    bool isRightToLeft, const ToastShowMode& showMode)
 {
     LOGI("OverlayManager::ShowToast");
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        SubwindowManager::GetInstance()->ShowToast(message, duration, bottom);
-        return;
-    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
@@ -501,7 +522,7 @@ void OverlayManager::ShowToast(
     }
     toastMap_.clear();
 
-    auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
+    auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft, showMode);
     CHECK_NULL_VOID(toastNode);
     auto toastId = toastNode->GetId();
     // mount to parent
@@ -525,7 +546,9 @@ void OverlayManager::ShowToast(
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostDelayedTask(continuousTask, TaskExecutor::TaskType::UI, duration);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostDelayedTask(continuousTask, TaskExecutor::TaskType::UI, duration);
     });
     auto ctx = toastNode->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -557,7 +580,9 @@ void OverlayManager::PopToast(int32_t toastId)
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostTask(
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
             [weak, toastId, id]() {
                 ContainerScope scope(id);
                 auto overlayManager = weak.Upgrade();
@@ -616,6 +641,18 @@ void OverlayManager::PopToast(int32_t toastId)
     event.type = AccessibilityEventType::CHANGE;
     event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
     pipeline->SendEventToAccessibility(event);
+}
+
+void OverlayManager::ClearToast()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    for (auto [id, toastNodeWeak] : toastMap_) {
+        PopToast(id);
+    }
+    toastMap_.clear();
 }
 
 void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo)
@@ -911,7 +948,7 @@ void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t 
     PopMenuAnimation(menu);
 }
 
-void OverlayManager::HideMenuInSubWindow()
+void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation)
 {
     LOGI("OverlayManager::HideMenuInSubWindow from close");
     if (menuMap_.empty()) {
@@ -921,7 +958,7 @@ void OverlayManager::HideMenuInSubWindow()
     auto rootNode = rootNodeWeak_.Upgrade();
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
-        PopMenuAnimation(node);
+        PopMenuAnimation(node, showPreviewAnimation);
     }
 }
 
@@ -1031,7 +1068,8 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
     if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
-        ShowPreviewAndContextMenuDisapperAnimation(option, context, menuAnimationOffset, menuWrapperPattern);
+        ShowPreviewDisappearAnimation(menuWrapperPattern);
+        ShowContextMenuDisappearAnimation(option, menuWrapperPattern);
     } else {
         AnimationUtils::Animate(
             option,
@@ -1040,6 +1078,27 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
                 context->UpdateOffset(menuAnimationOffset);
             },
             option.GetOnFinishEvent());
+    }
+}
+
+void OverlayManager::CleanPreviewInSubWindow()
+{
+    LOGD("OverlayManager::CleanPreviewInSubWindow");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    for (const auto& child : rootNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            for (auto& childNode : node->GetChildren()) {
+                auto frameNode = DynamicCast<FrameNode>(childNode);
+                if (frameNode &&
+                    (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
+                    node->RemoveChild(frameNode);
+                    break;
+                }
+            }
+            break;
+        }
     }
 }
 
@@ -1053,7 +1112,8 @@ void OverlayManager::CleanMenuInSubWindow()
         if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
             for (auto& childNode : node->GetChildren()) {
                 auto frameNode = DynamicCast<FrameNode>(childNode);
-                if (frameNode && frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+                if (frameNode &&
+                    (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
                     node->RemoveChild(frameNode);
                     break;
                 }
@@ -1266,6 +1326,9 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         }
         if (InstanceOf<MenuWrapperPattern>(pattern)) {
             return RemoveMenu(overlay);
+        }
+        if (InstanceOf<ToastPattern>(pattern)) {
+            return false;
         }
         // remove navDestination in navigation first
         do {
@@ -2482,9 +2545,15 @@ void OverlayManager::RemoveFilterAnimation()
     });
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
-    filterContext->UpdateBackBlurRadius(menuTheme->GetFilterRadius());
     AnimationUtils::Animate(
-        option, [filterContext]() { filterContext->UpdateBackBlurRadius(Dimension(0.0f)); }, option.GetOnFinishEvent());
+        option,
+        [filterContext]() {
+            CHECK_NULL_VOID(filterContext);
+            BlurStyleOption styleOption;
+            styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+            filterContext->UpdateBackBlurStyle(styleOption);
+        },
+        option.GetOnFinishEvent());
 }
 
 void OverlayManager::RemoveFilter()

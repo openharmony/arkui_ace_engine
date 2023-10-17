@@ -169,6 +169,9 @@ double TossAnimationController::GetCurrentTime() const
 
 void TossAnimationController::CreatePropertyCallback()
 {
+    if (property_) {
+        return;
+    }
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
     auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());

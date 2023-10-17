@@ -17,7 +17,6 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"

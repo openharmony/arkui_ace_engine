@@ -141,7 +141,6 @@ void DOMSwitch::PrepareCheckedListener()
     auto checkableChangeCallback = [weak](const std::string& checked) {
         auto domNode = weak.Upgrade();
         if (!domNode) {
-            LOGE("get dom node failed!");
             return;
         }
         bool isChecked = checked.find("\"checked\":true") != std::string::npos;

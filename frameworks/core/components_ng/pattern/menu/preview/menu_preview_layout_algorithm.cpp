@@ -28,11 +28,19 @@ void MenuPreviewLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto previewScale = menuTheme->GetPreviewAfterAnimationScale();
     PaddingProperty padding;
-    padding.left = CalcLength(PREVIEW_INNER_SECURITY);
-    padding.right = CalcLength(PREVIEW_INNER_SECURITY);
-    padding.top = CalcLength(PREVIEW_INNER_SECURITY);
-    padding.bottom = CalcLength(PREVIEW_INNER_SECURITY);
+    if (LessOrEqual(previewScale, 0.0f)) {
+        previewScale = 1.0f;
+    }
+    padding.left = CalcLength(PREVIEW_INNER_SECURITY / previewScale);
+    padding.right = CalcLength(PREVIEW_INNER_SECURITY / previewScale);
+    padding.top = CalcLength(PREVIEW_INNER_SECURITY / previewScale);
+    padding.bottom = CalcLength(PREVIEW_INNER_SECURITY / previewScale);
     layoutProperty->UpdatePadding(padding);
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {

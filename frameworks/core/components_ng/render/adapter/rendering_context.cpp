@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/adapter/pixelmap_image.h"
-
 #include "image_painter_utils.h"
 
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -81,23 +80,16 @@ void PixelMapImage::DrawToRSCanvas(
     }
     SkPaint paint;
     auto config = GetPaintConfig();
-#ifndef NEW_SKIA
-    ImagePainterUtils::AddFilter(paint, config);
-#else
+
     SkSamplingOptions options;
     ImagePainterUtils::AddFilter(paint, options, config);
-#endif
     auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
     recordingCanvas->ClipAdaptiveRRect(radii.get());
     recordingCanvas->scale(config.scaleX_, config.scaleY_);
 
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
 
-#ifndef NEW_SKIA
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
-#else
-    recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
-#endif
 #endif
 }
 } // namespace OHOS::Ace::NG

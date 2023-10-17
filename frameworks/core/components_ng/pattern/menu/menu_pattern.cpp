@@ -44,6 +44,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float PAN_MAX_VELOCITY = 2000.0f;
+
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
 {
@@ -126,6 +128,22 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<Men
         label->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
+
+void ShowMenuOpacityAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(menuTheme);
+    CHECK_NULL_VOID(renderContext);
+
+    renderContext->UpdateOpacity(0.0);
+    AnimationOption option = AnimationOption();
+    option.SetCurve(Curves::FRICTION);
+    option.SetDuration(menuTheme->GetContextMenuAppearDuration());
+    AnimationUtils::Animate(option, [renderContext]() {
+        if (renderContext) {
+            renderContext->UpdateOpacity(1.0);
+        }
+    });
+}
 } // namespace
 
 void MenuPattern::OnAttachToFrameNode()
@@ -159,6 +177,18 @@ void MenuPattern::OnModifyDone()
         CopyMenuAttr(menuFirstNode);
     }
     SetAccessibilityAction();
+
+    if (previewMode_ != MenuPreviewMode::NONE) {
+        auto node = host->GetChildren().front();
+        CHECK_NULL_VOID(node);
+        auto scroll = AceType::DynamicCast<FrameNode>(node);
+        CHECK_NULL_VOID(scroll);
+        auto hub = scroll->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitPanEvent(gestureHub);
+    }
 }
 
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
@@ -697,7 +727,9 @@ void MenuPattern::ShowPreviewMenuAnimation()
         previewRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
         renderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(originPosition_.GetX()), Dimension(originPosition_.GetY())));
+            OffsetT<Dimension>(Dimension(originOffset_.GetX()), Dimension(originOffset_.GetY())));
+
+        ShowMenuOpacityAnimation(menuTheme, renderContext);
 
         AnimationOption scaleOption = AnimationOption();
         auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
@@ -707,6 +739,9 @@ void MenuPattern::ShowPreviewMenuAnimation()
                 renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
                 renderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+            }
+            
+            if (previewRenderContext) {
                 previewRenderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
             }
@@ -841,6 +876,65 @@ void MenuPattern::OnColorConfigurationUpdate()
     }
     host->SetNeedCallChildrenUpdate(false);
 }
+
+void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID(gestureHub);
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto offsetX = static_cast<float>(info.GetOffsetX());
+        auto offsetY = static_cast<float>(info.GetOffsetY());
+        auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
+        auto offsetPerSecondY = info.GetVelocity().GetOffsetPerSecond().GetY();
+        auto velocity =
+            static_cast<float>(std::sqrt(offsetPerSecondX * offsetPerSecondX + offsetPerSecondY * offsetPerSecondY));
+        pattern->HandleDragEnd(offsetX, offsetY, velocity);
+    };
+    auto actionScrollEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto offsetX = static_cast<float>(info.GetOffsetX());
+        auto offsetY = static_cast<float>(info.GetOffsetY());
+        auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
+        auto offsetPerSecondY = info.GetVelocity().GetOffsetPerSecond().GetY();
+        auto velocity =
+            static_cast<float>(std::sqrt(offsetPerSecondX * offsetPerSecondX + offsetPerSecondY * offsetPerSecondY));
+        pattern->HandleScrollDragEnd(offsetX, offsetY, velocity);
+    };
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    gestureHub->AddPreviewMenuHandleDragEnd(std::move(actionScrollEndTask));
+}
+
+void MenuPattern::HandleDragEnd(float offsetX, float offsetY, float velocity)
+{
+    if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || LessOrEqual(offsetY, 0.0f)) &&
+        LessOrEqual(velocity, PAN_MAX_VELOCITY)) {
+        return;
+    }
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->HideMenu();
+}
+
+void MenuPattern::HandleScrollDragEnd(float offsetX, float offsetY, float velocity)
+{
+    if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || !NearZero(offsetY)) &&
+        LessOrEqual(velocity, PAN_MAX_VELOCITY)) {
+        return;
+    }
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->HideMenu();
+}
+
 void MenuPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(

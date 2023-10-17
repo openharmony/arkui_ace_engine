@@ -19,9 +19,6 @@
 
 #include "base/utils/system_properties.h"
 #include "frameworks/core/components/box/render_box.h"
-#ifndef NEW_SKIA
-#include "frameworks/core/components/svg/flutter_render_svg.h"
-#endif
 #include "frameworks/core/components/svg/parse/svg_animation.h"
 #include "frameworks/core/components/svg/parse/svg_circle.h"
 #include "frameworks/core/components/svg/parse/svg_clip_path.h"
@@ -314,18 +311,6 @@ void SvgDom::SetAttrValue(const std::string& name, const std::string& value, con
     }
 }
 
-#ifndef NEW_SKIA
-void SvgDom::PaintDirectly(RenderContext& context, const Offset& offset)
-{
-    auto svgRoot = AceType::DynamicCast<FlutterRenderSvg>(svgRoot_.Upgrade());
-    if (svgRoot) {
-        svgRoot->PaintDirectly(context, offset);
-    } else {
-        LOGD("paint fail as svg root is null");
-    }
-}
-#endif
-
 #ifdef ENABLE_ROSEN_BACKEND
 void SvgDom::PaintDirectly(RenderContext& context, const Offset& offset, ImageFit imageFit, Size layout)
 {
@@ -463,8 +448,7 @@ SvgRenderTree SvgDom::GetSvgRenderTree() const
         .svgRoot = svgRoot_.Upgrade(),
         .svgSize = svgSize_,
         .containerSize = containerSize_,
-        .svgAnimate = svgAnimate_
-    };
+        .svgAnimate = svgAnimate_ };
 }
 
 SvgRenderTree SvgDom::CreateRenderTree(ImageFit imageFit, const SvgRadius& svgRadius, bool useBox)

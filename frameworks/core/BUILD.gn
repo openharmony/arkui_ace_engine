@@ -240,33 +240,28 @@ template("ace_core_source_set") {
       sources += [ "common/hdc_register.cpp" ]
     }
 
-    configs = [ "$ace_root:ace_config" ]
+    configs = [
+      "$ace_root:ace_config",
+      "$ace_flutter_engine_root:flutter_config",
+    ]
 
     deps = [
+      "$skia_root_new:skia_$platform",
       "pipeline:ace_core_pipeline_$platform",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
 
     external_deps = []
 
-    if (ace_use_new_skia) {
-      if (is_ohos) {
-        sources += [
-          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
-          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-        ]
-      } else {
-        sources += [
-          "$flutter_root/engine/flutter/common/task_runners.cc",
-          "$flutter_root/engine/flutter/shell/common/thread_host.cc",
-        ]
-      }
-      configs += [ "$ace_flutter_engine_root:flutter_config" ]
-      deps += [ "$skia_root_new:skia_$platform" ]
+    if (is_ohos) {
+      sources += [
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
+      ]
     } else {
-      deps += [
-        "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-        "$ace_flutter_engine_root/skia:ace_skia_$platform",
+      sources += [
+        "$flutter_root/engine/flutter/common/task_runners.cc",
+        "$flutter_root/engine/flutter/shell/common/thread_host.cc",
       ]
     }
 
@@ -369,11 +364,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/wrap:ace_core_components_wrap_$platform",
     ]
 
-    if (defined(config.model_component_support) &&
-        config.model_component_support) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_model_component_ng_$platform" ]
-    }
-
     deps += [
       "$ace_root/frameworks/core/components_v2/common:ace_core_components_common_v2_$platform",
       "$ace_root/frameworks/core/components_v2/foreach:ace_core_components_foreach_v2_$platform",
@@ -404,9 +394,23 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
+
+    deps += [
+      "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/pattern/rich_editor:ace_core_components_rich_editor_pattern_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
+    ]
+
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/model:ace_core_components_model_pattern_ng_$platform" ]
+    }
+
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ability_component_ng_$platform" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/ability_component:ace_core_components_ability_component_pattern_ng_$platform" ]
     }
     if (defined(config.enable_image_compression) &&
         config.enable_image_compression) {
@@ -460,14 +464,6 @@ template("ace_core_source_set") {
     } else {
       deps += [ "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_$platform" ]
     }
-
-    deps += [
-      "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
-      "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
-      "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
-    ]
-
-    deps += [ "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform" ]
 
     # xcomponent components supports phone, TV and wearable except PC Preview
     if (defined(config.xcomponent_components_support) &&
@@ -804,31 +800,25 @@ template("ace_core_ng_source_set") {
       sources -= [ "common/anr_thread.cpp" ]
     }
 
-    configs = [ "$ace_root:ace_config" ]
+    configs = [
+      "$ace_root:ace_config",
+      "$ace_flutter_engine_root:flutter_config",
+    ]
 
     deps = [
       "$ace_root/frameworks/core/components/theme:build_theme_code",
+      "$skia_root_new:skia_$platform",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
     external_deps = []
-    if (ace_use_new_skia) {
-      configs += [ "$ace_flutter_engine_root:flutter_config" ]
 
-      if (is_cross_platform_build) {
-        deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
-      }
-
-      deps += [ "$skia_root_new:skia_$platform" ]
-      if (is_ohos) {
-        sources += [
-          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
-          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-        ]
-      }
-    } else {
-      deps += [
-        "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-        "$ace_flutter_engine_root/skia:ace_skia_$platform",
+    if (is_cross_platform_build) {
+      deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
+    }
+    if (is_ohos) {
+      sources += [
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
       ]
     }
 
@@ -861,6 +851,7 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
       "$ace_root/frameworks/core/components_ng/manager:ace_core_components_manager_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/pattern/rich_editor:ace_core_components_rich_editor_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
@@ -882,7 +873,7 @@ template("ace_core_ng_source_set") {
 
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ability_component_ng_$platform" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/ability_component:ace_core_components_ability_component_pattern_ng_$platform" ]
     }
     if (defined(config.web_components_support) &&
         config.web_components_support) {
@@ -988,7 +979,7 @@ template("ace_core_ng_source_set") {
         config.model_component_support) {
       deps += [
         "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform",
-        "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_model_component_ng_$platform",
+        "$ace_root/frameworks/core/components_ng/pattern/model:ace_core_components_model_pattern_ng_$platform",
       ]
     }
 

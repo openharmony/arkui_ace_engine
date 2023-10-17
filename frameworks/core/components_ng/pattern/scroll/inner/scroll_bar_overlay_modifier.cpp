@@ -25,84 +25,227 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double FULL_ALPHA = 255.0;
 constexpr float HALF = 0.5f;
-constexpr int32_t BAR_END_DURATION = 400;        // 400ms
-constexpr int32_t BAR_APPEAR_DURATION = 100;     // 100ms
-constexpr int32_t BAR_GROW_DURATION = 150;       // 150ms, scroll bar width expands from 4dp to 8dp
-constexpr int32_t BAR_SHRINK_DURATION = 250;     // 250ms, scroll bar width shrinks from 8dp to 4dp
+constexpr float SPRING_MOTION_RESPONSE = 0.314f;
+constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
+constexpr int32_t BAR_DISAPPEAR_DURATION = 400; // 400ms
+constexpr int32_t BAR_APPEAR_DURATION = 100;    // 100ms
+constexpr int32_t BAR_GROW_DURATION = 150;      // 150ms, scroll bar width expands from 4dp to 8dp
+constexpr int32_t BAR_SHRINK_DURATION = 250;    // 250ms, scroll bar width shrinks from 8dp to 4dp
 } // namespace
 
-ScrollBarOverlayModifier::ScrollBarOverlayModifier(
-    const OffsetF& fgOffset, const OffsetF& bgOffset, const SizeF& fgSize, const SizeF& bgSize)
+ScrollBarOverlayModifier::ScrollBarOverlayModifier(const OffsetF& barOffset, const SizeF& barSize)
 {
-    fgOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(fgOffset);
-    AttachProperty(fgOffset_);
-    fgSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(fgSize);
-    AttachProperty(fgSize_);
-    bgOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(bgOffset);
-    AttachProperty(bgOffset_);
-    bgSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(bgSize);
-    AttachProperty(bgSize_);
-
+    barX_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(barOffset.GetX());
+    AttachProperty(barX_);
+    barY_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(barOffset.GetY());
+    AttachProperty(barY_);
+    barWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(barSize.Width());
+    AttachProperty(barWidth_);
+    barHeight_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(barSize.Height());
+    AttachProperty(barHeight_);
     opacity_ = AceType::MakeRefPtr<AnimatablePropertyUint8>(UINT8_MAX);
     AttachProperty(opacity_);
-    fgColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
-    AttachProperty(fgColor_);
-    bgColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
-    AttachProperty(bgColor_);
+    barColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
+    AttachProperty(barColor_);
 }
 
 void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
     CHECK_NULL_VOID(opacity_);
-    CHECK_NULL_VOID(fgOffset_);
-    CHECK_NULL_VOID(fgSize_);
-    CHECK_NULL_VOID(bgOffset_);
-    CHECK_NULL_VOID(bgSize_);
-    CHECK_NULL_VOID(fgColor_);
-    CHECK_NULL_VOID(bgColor_);
-
-    auto fgSize = fgSize_->Get();
-    auto bgSize = bgSize_->Get();
-    auto fgOffset = fgOffset_->Get();
-    auto bgOffset = bgOffset_->Get();
-    if (!NearZero(fgSize.Height()) && !NearZero(bgSize.Height())) {
+    CHECK_NULL_VOID(barColor_);
+    CHECK_NULL_VOID(barWidth_);
+    CHECK_NULL_VOID(barHeight_);
+    CHECK_NULL_VOID(barX_);
+    CHECK_NULL_VOID(barY_);
+    auto barWidth = barWidth_->Get();
+    auto barHeight = barHeight_->Get();
+    auto barX = barX_->Get();
+    auto barY = barY_->Get();
+    if (!NearZero(barWidth) && !NearZero(barHeight)) {
         auto& canvas = drawingContext.canvas;
         RSBrush brush;
         brush.SetBlendMode(RSBlendMode::SRC_OVER);
         brush.SetAntiAlias(true);
-        RSRect bgRect(
-            bgOffset.GetX(), bgOffset.GetY(), bgOffset.GetX() + bgSize.Width(), bgOffset.GetY() + bgSize.Height());
-        RSColor bgColor = ToRSColor(bgColor_->Get());
-        brush.SetColor(bgColor);
-        double filletRadius = bgRect.GetWidth() * HALF;
-        canvas.AttachBrush(brush);
-        canvas.DrawRoundRect({ bgRect, filletRadius, filletRadius });
-        canvas.DetachBrush();
-
-        RSRect fgRect(
-            fgOffset.GetX(), fgOffset.GetY(), fgOffset.GetX() + fgSize.Width(), fgOffset.GetY() + fgSize.Height());
-        RSColor fgColor = ToRSColor(fgColor_->Get().BlendOpacity(opacity_->Get() / FULL_ALPHA));
-        brush.SetColor(fgColor);
+        RSRect fgRect(barX, barY, barX + barWidth, barY + barHeight);
+        double filletRadius = barWidth * HALF;
+        RSColor barColor = ToRSColor(barColor_->Get().BlendOpacity(opacity_->Get() / FULL_ALPHA));
+        brush.SetColor(barColor);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect({ fgRect, filletRadius, filletRadius });
+    }
+}
+
+void ScrollBarOverlayModifier::SetOffset(const OffsetF& barOffset)
+{
+    CHECK_NULL_VOID(barX_);
+    CHECK_NULL_VOID(barY_);
+    barX_->Set(barOffset.GetX());
+    barY_->Set(barOffset.GetY());
+}
+
+void ScrollBarOverlayModifier::SetSize(const SizeF& barSize)
+{
+    CHECK_NULL_VOID(barWidth_);
+    CHECK_NULL_VOID(barHeight_);
+    barWidth_->Set(barSize.Width());
+    barHeight_->Set(barSize.Height());
+}
+
+void ScrollBarOverlayModifier::SetRect(const Rect& fgRect)
+{
+    SetOffset(OffsetF(fgRect.Left(), fgRect.Top()));
+    SetSize(SizeF(fgRect.Width(), fgRect.Height()));
+}
+
+void ScrollBarOverlayModifier::SetMainModeSize(const Size& size)
+{
+    if (positionMode_ == PositionMode::BOTTOM) {
+        CHECK_NULL_VOID(barWidth_);
+        barWidth_->Set(size.Width());
+    } else {
+        CHECK_NULL_VOID(barHeight_);
+        barHeight_->Set(size.Height());
+    }
+}
+
+void ScrollBarOverlayModifier::SetCrossModeSize(const Size& size)
+{
+    if (positionMode_ == PositionMode::BOTTOM) {
+        CHECK_NULL_VOID(barHeight_);
+        barHeight_->Set(size.Height());
+    } else {
+        CHECK_NULL_VOID(barWidth_);
+        barWidth_->Set(size.Width());
+    }
+}
+
+void ScrollBarOverlayModifier::SetMainModeOffset(const Offset& offset)
+{
+    if (positionMode_ == PositionMode::BOTTOM) {
+        CHECK_NULL_VOID(barX_);
+        barX_->Set(offset.GetX());
+    } else {
+        CHECK_NULL_VOID(barY_);
+        barY_->Set(offset.GetY());
+    }
+}
+
+void ScrollBarOverlayModifier::SetCrossModeOffset(const Offset& offset)
+{
+    if (positionMode_ == PositionMode::BOTTOM) {
+        CHECK_NULL_VOID(barY_);
+        barY_->Set(offset.GetY());
+    } else {
+        CHECK_NULL_VOID(barX_);
+        barX_->Set(offset.GetX());
+    }
+}
+
+void ScrollBarOverlayModifier::StartBarAnimation(HoverAnimationType hoverAnimationType,
+    OpacityAnimationType opacityAnimationType, bool needAdaptAnimation, const Rect& fgRect)
+{
+    LOGD("startBarAnimation hoverAnimationType:%{public}d, opacityAnimationType:%{public}d, "
+         "needAdaptAnimation:%{public}u, fgRect:%{public}s",
+        hoverAnimationType, opacityAnimationType, needAdaptAnimation, fgRect.ToString().c_str());
+    CHECK_NULL_VOID(barX_);
+    CHECK_NULL_VOID(barY_);
+    CHECK_NULL_VOID(barWidth_);
+    CHECK_NULL_VOID(barHeight_);
+    if (hoverAnimationType == HoverAnimationType::NONE && !needAdaptAnimation) {
+        SetRect(fgRect);
+    } else {
+        StartHoverAnimation(fgRect, hoverAnimationType);
+        StartAdaptAnimation(fgRect, needAdaptAnimation);
+    }
+    if (opacityAnimationType != OpacityAnimationType::NONE) {
+        StartOpacityAnimation(opacityAnimationType);
+    }
+}
+
+void ScrollBarOverlayModifier::StartAdaptAnimation(const Rect& fgRect, bool needAdaptAnimation)
+{
+    CHECK_NULL_VOID(needAdaptAnimation);
+    AnimationOption option;
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
+    option.SetCurve(motion);
+    adaptAnimation_ = AnimationUtils::StartAnimation(option, [&]() {
+        SetMainModeSize(fgRect.GetSize());
+        SetMainModeOffset(fgRect.GetOffset());
+    });
+}
+
+void ScrollBarOverlayModifier::StopAdaptAnimation()
+{
+    if (adaptAnimation_) {
+        AnimationOption option;
+        option.SetCurve(Curves::FRICTION);
+        option.SetDuration(0);
+        adaptAnimation_ = AnimationUtils::StartAnimation(option, [&]() {
+            SetMainModeSize(Size(barWidth_->Get(), barHeight_->Get()));
+            SetMainModeOffset(Offset(barX_->Get(), barY_->Get()));
+        });
+    }
+}
+
+void ScrollBarOverlayModifier::StartHoverAnimation(const Rect& fgRect, HoverAnimationType hoverAnimationType)
+{
+    CHECK_NULL_VOID(hoverAnimationType != HoverAnimationType::NONE);
+    if (hoverAnimationType != hoverAnimatingType_) {
+        StopHoverAnimation();
+    }
+    hoverAnimatingType_ = hoverAnimationType;
+    AnimationOption option;
+    option.SetCurve(Curves::SHARP);
+    if (hoverAnimatingType_ == HoverAnimationType::GROW) {
+        option.SetDuration(BAR_GROW_DURATION);
+    } else if (hoverAnimatingType_ == HoverAnimationType::SHRINK) {
+        option.SetDuration(BAR_SHRINK_DURATION);
+    }
+    hoverAnimation_ = AnimationUtils::StartAnimation(
+        option,
+        [&]() {
+            SetCrossModeSize(fgRect.GetSize());
+            SetCrossModeOffset(fgRect.GetOffset());
+        },
+        [weak = WeakClaim(this)]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->SetHoverAnimatingType(HoverAnimationType::NONE);
+        });
+}
+
+void ScrollBarOverlayModifier::StopHoverAnimation()
+{
+    if (hoverAnimation_) {
+        AnimationOption option;
+        option.SetCurve(Curves::SHARP);
+        option.SetDuration(0);
+        hoverAnimation_ = AnimationUtils::StartAnimation(option, [&]() {
+            SetCrossModeSize(Size(barWidth_->Get(), barHeight_->Get()));
+            SetCrossModeOffset(Offset(barX_->Get(), barY_->Get()));
+        });
+    }
+}
+
+void ScrollBarOverlayModifier::StopOpacityAnimation()
+{
+    if (opacityAnimation_) {
+        AnimationUtils::StopAnimation(opacityAnimation_);
     }
 }
 
 void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacityAnimationType)
 {
     CHECK_NULL_VOID(opacity_);
-    if (opacityAnimationType == OpacityAnimationType::NONE) {
-        return;
-    }
     if (opacityAnimationType != opacityAnimatingType_) {
-        StopBarOpacityAnimation();
+        StopOpacityAnimation();
     } else {
         return;
     }
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     if (opacityAnimationType == OpacityAnimationType::DISAPPEAR) {
-        option.SetDuration(BAR_END_DURATION);
+        option.SetDuration(BAR_DISAPPEAR_DURATION);
     } else if (opacityAnimationType == OpacityAnimationType::APPEAR) {
         option.SetDuration(BAR_APPEAR_DURATION);
     }
@@ -123,94 +266,9 @@ void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacit
         });
 }
 
-void ScrollBarOverlayModifier::StopBarOpacityAnimation()
+void ScrollBarOverlayModifier::SetBarColor(Color barColor)
 {
-    if (opacityAnimation_) {
-        AnimationUtils::StopAnimation(opacityAnimation_);
-    }
-}
-
-void ScrollBarOverlayModifier::SetOffset(const OffsetF& fgOffset, const OffsetF& bgOffset)
-{
-    CHECK_NULL_VOID(fgOffset_);
-    CHECK_NULL_VOID(bgOffset_);
-    fgOffset_->Set(fgOffset);
-    bgOffset_->Set(bgOffset);
-}
-
-void ScrollBarOverlayModifier::SetSize(const SizeF& fgSize, const SizeF& bgSize)
-{
-    CHECK_NULL_VOID(fgSize_);
-    CHECK_NULL_VOID(bgSize_);
-    fgSize_->Set(fgSize);
-    bgSize_->Set(bgSize);
-}
-
-void ScrollBarOverlayModifier::SetRect(const Rect& fgRect, const Rect& bgRect)
-{
-    SetOffset(OffsetF(fgRect.Left(), fgRect.Top()), OffsetF(bgRect.Left(), bgRect.Top()));
-    SetSize(SizeF(fgRect.Width(), fgRect.Height()), SizeF(bgRect.Width(), bgRect.Height()));
-}
-
-void ScrollBarOverlayModifier::StartHoverAnimation(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset,
-    const OffsetF& bgOffset, HoverAnimationType hoverAnimationType)
-{
-    CHECK_NULL_VOID(fgSize_);
-    CHECK_NULL_VOID(bgSize_);
-    CHECK_NULL_VOID(fgOffset_);
-    CHECK_NULL_VOID(bgOffset_);
-    if (hoverAnimationType == HoverAnimationType::NONE) {
-        if (hoverAnimatingType_ == HoverAnimationType::NONE) {
-            fgSize_->Set(fgSize);
-            bgSize_->Set(bgSize);
-            fgOffset_->Set(fgOffset);
-            bgOffset_->Set(bgOffset);
-        }
-        return;
-    }
-    if (hoverAnimationType != hoverAnimatingType_) {
-        StopBarHoverAnimation();
-    }
-    AnimationOption option;
-    option.SetCurve(Curves::SHARP);
-    hoverAnimatingType_ = hoverAnimationType;
-    if (hoverAnimatingType_ == HoverAnimationType::GROW) {
-        option.SetDuration(BAR_GROW_DURATION);
-    } else if (hoverAnimatingType_ == HoverAnimationType::SHRINK) {
-        option.SetDuration(BAR_SHRINK_DURATION);
-    }
-
-    hoverAnimation_ = AnimationUtils::StartAnimation(
-        option,
-        [&]() {
-            fgSize_->Set(fgSize);
-            bgSize_->Set(bgSize);
-            fgOffset_->Set(fgOffset);
-            bgOffset_->Set(bgOffset);
-        },
-        [weak = WeakClaim(this)]() {
-            auto modifier = weak.Upgrade();
-            CHECK_NULL_VOID(modifier);
-            modifier->SetHoverAnimatingType(HoverAnimationType::NONE);
-        });
-}
-
-void ScrollBarOverlayModifier::StopBarHoverAnimation()
-{
-    if (hoverAnimation_) {
-        AnimationUtils::StopAnimation(hoverAnimation_);
-    }
-}
-
-void ScrollBarOverlayModifier::SetFgColor(Color fgColor)
-{
-    CHECK_NULL_VOID(fgColor_);
-    fgColor_->Set(fgColor);
-}
-
-void ScrollBarOverlayModifier::SetBgColor(Color bgColor)
-{
-    CHECK_NULL_VOID(bgColor_);
-    bgColor_->Set(bgColor);
+    CHECK_NULL_VOID(barColor_);
+    barColor_->Set(barColor);
 }
 } // namespace OHOS::Ace::NG

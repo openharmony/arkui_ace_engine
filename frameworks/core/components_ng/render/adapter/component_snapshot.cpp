@@ -30,29 +30,38 @@ namespace OHOS::Ace::NG {
 namespace {
 class CustomizedCallback : public Rosen::SurfaceCaptureCallback {
 public:
-    CustomizedCallback(ComponentSnapshot::JsCallback&& jsCallback, RefPtr<FrameNode> node)
-        : callback_(std::move(jsCallback)), node_(node)
+    CustomizedCallback(ComponentSnapshot::JsCallback&& jsCallback, WeakPtr<FrameNode> node)
+        : callback_(std::move(jsCallback)), node_(std::move(node))
     {}
     ~CustomizedCallback() override = default;
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
         if (callback_ == nullptr) {
-            Inspector::RemoveOffscreenNode(node_);
+            auto node = node_.Upgrade();
+            CHECK_NULL_VOID(node);
+            Inspector::RemoveOffscreenNode(node);
             return;
         }
         if (!pixelMap) {
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Snapshot creation failed");
-            callback_(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR,
-                [node = node_]() { Inspector::RemoveOffscreenNode(node); });
+
+            callback_(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, [node = node_]() {
+                auto frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                Inspector::RemoveOffscreenNode(frameNode);
+            });
         } else {
-            callback_(
-                pixelMap, Framework::ERROR_CODE_NO_ERROR, [node = node_]() { Inspector::RemoveOffscreenNode(node); });
+            callback_(pixelMap, Framework::ERROR_CODE_NO_ERROR, [node = node_]() {
+                auto frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                Inspector::RemoveOffscreenNode(frameNode);
+            });
         }
     }
 
 private:
     ComponentSnapshot::JsCallback callback_;
-    RefPtr<FrameNode> node_;
+    WeakPtr<FrameNode> node_;
 };
 } // namespace
 

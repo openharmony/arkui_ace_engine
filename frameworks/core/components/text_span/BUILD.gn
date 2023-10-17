@@ -20,8 +20,6 @@ build_component("text_span") {
     "render_text_span_creator.cpp",
     "text_span_component.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_text_span.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_text_span.cpp" ]
 }

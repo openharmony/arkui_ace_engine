@@ -27,7 +27,6 @@ bool DOMSelect::IsParentNavigation() const
 {
     auto parent = GetParentNode();
     if (!parent) {
-        LOGE("parent of dom select is null.");
         return false;
     }
     return parent->GetTag() == DOM_NODE_TAG_NAVIGATION_BAR;
@@ -51,7 +50,6 @@ void DOMSelect::ResetInitializedStyle()
 void DOMSelect::InitializeStyle()
 {
     if (!selectComponent_) {
-        LOGE("selectComponent is null");
         return;
     }
     selectComponent_->InitTheme(GetThemeManager());
@@ -170,7 +168,7 @@ bool DOMSelect::SetSpecializedStyle(const std::pair<std::string, std::string>& s
 void DOMSelect::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
     if (!child || child->GetTag() != DOM_NODE_TAG_OPTION) {
-        LOGE("DOMSelect child is not correct");
+        LOGW("DOMSelect child is not tag node");
         return;
     }
 
@@ -185,7 +183,6 @@ void DOMSelect::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
             if (text) {
                 tipText_->SetData(text->GetData());
             } else {
-                LOGE("text of option component is null.");
                 tipText_->SetData("");
             }
         }

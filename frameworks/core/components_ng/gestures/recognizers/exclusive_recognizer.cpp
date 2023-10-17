@@ -57,6 +57,9 @@ void ExclusiveRecognizer::OnAccepted()
 
 void ExclusiveRecognizer::OnRejected()
 {
+    if (refereeState_ == RefereeState::SUCCEED) {
+        return;
+    }
     refereeState_ = RefereeState::FAIL;
     for (const auto& recognizer : recognizers_) {
         if (!recognizer) {

@@ -21,8 +21,8 @@
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
 #else
-#include "rosen_text/typography_create.h"
 #include "rosen_text/typography.h"
+#include "rosen_text/typography_create.h"
 #endif
 #include "render_service_client/core/ui/rs_node.h"
 #include "unicode/uchar.h"
@@ -457,19 +457,6 @@ void RosenRenderText::ApplyIndents(double width)
         indents.push_back(0.0);
         indents.push_back(-indent);
     }
-#ifndef NEW_SKIA
-    // TODO SetIndents need must
-#ifndef USE_GRAPHIC_TEXT_GINE
-    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
-    if (paragraphTxt != nullptr) {
-        paragraphTxt->SetIndents(indents);
-    }
-#else
-    if (paragraph_ != nullptr) {
-        paragraph_->SetIndents(indents);
-    }
-#endif
-#endif
 }
 
 bool RosenRenderText::UpdateParagraph()
@@ -534,13 +521,6 @@ bool RosenRenderText::UpdateParagraph()
 #endif
         }
     }
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-    style.word_break_type = static_cast<minikin::WordBreakType>(textStyle_.GetWordBreak());
-#else
-    style.wordBreakType = static_cast<Rosen::WordBreakType>(textStyle_.GetWordBreak());
-#endif
-#endif
 
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder;

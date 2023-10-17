@@ -64,35 +64,25 @@ std::unique_ptr<RSPoint[]> ImagePainterUtils::ToRSRadius(const BorderRadiusArray
 {
     auto radii = std::make_unique<RSPoint[]>(RADIUS_POINTS_SIZE);
     if (radiusXY.size() == RADIUS_POINTS_SIZE) {
-        radii[RSRoundRect::TOP_LEFT_POS] = RSPoint(
-            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_LEFT_POS].GetX(), 0.0f)),
-            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_LEFT_POS].GetY(), 0.0f)));
-        radii[RSRoundRect::TOP_RIGHT_POS] = RSPoint(
-            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_RIGHT_POS].GetX(), 0.0f)),
-            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_RIGHT_POS].GetY(), 0.0f)));
-        radii[RSRoundRect::BOTTOM_RIGHT_POS] = RSPoint(
-            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_RIGHT_POS].GetX(), 0.0f)),
-            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_RIGHT_POS].GetY(), 0.0f)));
-        radii[RSRoundRect::BOTTOM_LEFT_POS] = RSPoint(
-            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_LEFT_POS].GetX(), 0.0f)),
-            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_LEFT_POS].GetY(), 0.0f)));
+        radii[RSRoundRect::TOP_LEFT_POS] =
+            RSPoint(static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_LEFT_POS].GetX(), 0.0f)),
+                static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_LEFT_POS].GetY(), 0.0f)));
+        radii[RSRoundRect::TOP_RIGHT_POS] =
+            RSPoint(static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_RIGHT_POS].GetX(), 0.0f)),
+                static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_RIGHT_POS].GetY(), 0.0f)));
+        radii[RSRoundRect::BOTTOM_RIGHT_POS] =
+            RSPoint(static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_RIGHT_POS].GetX(), 0.0f)),
+                static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_RIGHT_POS].GetY(), 0.0f)));
+        radii[RSRoundRect::BOTTOM_LEFT_POS] =
+            RSPoint(static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_LEFT_POS].GetX(), 0.0f)),
+                static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_LEFT_POS].GetY(), 0.0f)));
     }
     return radii;
 }
 #endif
 
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-void ImagePainterUtils::AddFilter(SkPaint& paint, const ImagePaintConfig& config)
-{
-    paint.setFilterQuality(SkFilterQuality(config.imageInterpolation_));
-    if (config.colorFilter_) {
-        paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_->data()));
-    } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
-        paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
-    }
-}
-#else
+
 void ImagePainterUtils::AddFilter(SkPaint& paint, SkSamplingOptions& options, const ImagePaintConfig& config)
 {
     switch (config.imageInterpolation_) {
@@ -119,7 +109,6 @@ void ImagePainterUtils::AddFilter(SkPaint& paint, SkSamplingOptions& options, co
         paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
     }
 }
-#endif
 #else
 void ImagePainterUtils::AddFilter(RSBrush& brush, RSSamplingOptions& options, const ImagePaintConfig& config)
 {

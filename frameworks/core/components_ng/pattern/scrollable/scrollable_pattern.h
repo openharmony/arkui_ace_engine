@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -35,8 +36,8 @@ constexpr double FRICTION = 0.6;
 #else
 constexpr double FRICTION = 0.9;
 #endif
-class ScrollablePattern : public Pattern, NestableScrollContainer {
-    DECLARE_ACE_TYPE(ScrollablePattern, Pattern, NestableScrollContainer);
+class ScrollablePattern : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
     bool IsAtomicNode() const override
@@ -61,6 +62,12 @@ public:
     {
         return IsAtTop() || IsAtBottom();
     }
+
+    virtual bool IsOutOfBoundary(bool useCurrentDelta = true)
+    {
+        return false;
+    }
+
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
     {
@@ -136,11 +143,6 @@ public:
         return axis_ == Axis::HORIZONTAL ? size.Width() : size.Height();
     }
 
-    void SetCoordinationEvent(RefPtr<ScrollableCoordinationEvent> coordinationEvent)
-    {
-        coordinationEvent_ = coordinationEvent;
-    }
-
     bool IsScrollableStopped() const
     {
         CHECK_NULL_RETURN(scrollableEvent_, true);
@@ -184,7 +186,6 @@ public:
     }
 
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
-    RefPtr<NestableScrollContainer> SearchParent();
     void GetParentNavigation();
 
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
@@ -279,14 +280,13 @@ public:
     void SetScrollSource(int32_t scrollSource)
     {
         if (scrollSource == SCROLL_FROM_JUMP) {
-            if (scrollBar_ && scrollBarOverlayModifier_) {
+            if (scrollBar_ && scrollBar_->IsScrollable() && scrollBarOverlayModifier_) {
                 scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
                 scrollBar_->ScheduleDisappearDelayTask();
             }
             StopScrollBarAnimatorByProxy();
             StartScrollBarAnimatorByProxy();
         }
-
         scrollSource_ = scrollSource;
     }
 
@@ -376,7 +376,7 @@ private:
     float GetOffsetWithLimit(float position, float offset) const;
     void LimitMouseEndOffset();
 
-    void ProcessAssociatedScroll(double offset, int32_t source);
+    bool ProcessAssociatedScroll(double offset, int32_t source);
 
     /******************************************************************************
      * NestableScrollContainer implementations
@@ -412,10 +412,21 @@ private:
      *  End of NestableScrollContainer implementations
      *******************************************************************************/
 
+    void CreateRefreshCoordination()
+    {
+        if (!refreshCoordination_) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(host);
+        }
+    }
+    float GetVelocity() const;
+    bool NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source);
+    RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
-    RefPtr<ScrollableCoordinationEvent> coordinationEvent_;
+    RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
@@ -424,6 +435,7 @@ private:
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
+    bool isRefreshInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = FRICTION;

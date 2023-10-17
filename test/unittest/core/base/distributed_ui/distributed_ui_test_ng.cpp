@@ -433,4 +433,33 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg009, TestSize.Level1)
     distributedUI.ModNode(nodeObject);
     EXPECT_NE(childNode->GetLayoutProperty()->GetPaddingProperty()->left->calcValue_, "0.0");
 }
+
+/**
+ * @tc.name: DistributedUiTestNg010
+ * @tc.desc: DistributedUi UpdateUITree
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. statement distributedUI and SerializeableObjectArray
+     */
+    SerializeableObjectArray array;
+    DistributedUI distributedUI;
+
+    /**
+     * @tc.steps: step2. call UpdateUITree()
+     * @tc.expected: step2. call AttachToTree() and cover branch status_ is INIT
+     */
+    distributedUI.UpdateUITree(array);
+    EXPECT_EQ(distributedUI.status_, DistributedUI::StateMachine::INIT);
+
+    /**
+     * @tc.steps: step3. call UpdateUITree()
+     * @tc.expected: step3. call AttachToTree() and cover branch status_ is not INIT
+     */
+    distributedUI.status_ = DistributedUI::StateMachine::SINK_START;
+    distributedUI.UpdateUITree(array);
+    EXPECT_NE(distributedUI.status_, DistributedUI::StateMachine::INIT);
+}
 } // namespace OHOS::Ace::NG

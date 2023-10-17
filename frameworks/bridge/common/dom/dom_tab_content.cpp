@@ -41,7 +41,6 @@ bool DOMTabContent::SetSpecializedAttr(const std::pair<std::string, std::string>
 void DOMTabContent::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
     if (!child) {
-        LOGE("Child is nullptr, add node failed, slot:%{public}d.", slot);
         return;
     }
     if (tabContentChild_) {
@@ -56,13 +55,11 @@ void DOMTabContent::PrepareChangeListener(const RefPtr<DOMTabs>& parentNode)
     auto changeCallback = [weak, weakParent](uint32_t currentIndex) {
         auto domNode = weak.Upgrade();
         if (!domNode) {
-            LOGE("get dom node failed!");
             return;
         }
 
         auto parentRef = weakParent.Upgrade();
         if (!parentRef) {
-            LOGE("get parent node failed!");
             return;
         }
         for (const auto& node : parentRef->GetChildList()) {
@@ -111,7 +108,6 @@ void DOMTabContent::OnMounted(const RefPtr<DOMNode>& parentNode)
 void DOMTabContent::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 {
     if (!child) {
-        LOGE("Child is nullptr, remove node failed.");
         return;
     }
     if (tabContentChild_) {
