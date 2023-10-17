@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #include <stack>
+#include <string>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -1173,7 +1174,7 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
     }
 }
 
-void TextPattern::DumpInfo()
+void TextPattern::DumpAdvanceInfo()
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
@@ -1184,6 +1185,11 @@ void TextPattern::DumpInfo()
         std::string("FontSize: ")
             .append(
                 (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(16.0, DimensionUnit::FP)).ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("contentRect-->x:")
+                                       .append(std::to_string(contentRect_.GetX()))
+                                       .append(" y:")
+                                       .append(std::to_string(contentRect_.GetY())));
+    DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
@@ -1369,4 +1375,5 @@ int32_t TextPattern::GetHandleIndex(const Offset& offset) const
 {
     return paragraph_->GetHandlePositionForClick(offset);
 }
+
 } // namespace OHOS::Ace::NG

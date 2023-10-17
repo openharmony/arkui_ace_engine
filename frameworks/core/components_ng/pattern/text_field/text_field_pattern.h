@@ -1054,7 +1054,7 @@ public:
         customKeyboardBulder_ = keyboardBuilder;
     }
 
-    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
     void OnColorConfigurationUpdate() override;
 
     void ShowPasswordIconChange()
