@@ -80,19 +80,20 @@ public:
 
     static void NapiCallback(JsEngine* jsEngine)
     {
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            OnNapiCallback(jsEngine);
-        }
+        OnNapiCallback(jsEngine);
     }
 
     static void OnNapiCallback(JsEngine* jsEngine)
     {
         MediaQueryer queryer;
         std::set<std::unique_ptr<MediaQueryListener>> delayDeleteListenerSets;
-        if (delayDeleteListenerSets_) {
-            abort();
-        }
+        std::lock_guard<std::mutex> lock(mutex_);
+        struct Leave {
+            ~Leave()
+            {
+                delayDeleteListenerSets_ = nullptr;
+            }
+        } leave;
         delayDeleteListenerSets_ = &delayDeleteListenerSets;
         for (auto listener : listenerSets_[jsEngine]) {
             auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
@@ -101,7 +102,6 @@ public:
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(listener->env_, &scope);
                 if (scope == nullptr) {
-                    delayDeleteListenerSets_ = nullptr;
                     return;
                 }
 
@@ -116,7 +116,6 @@ public:
                 napi_close_handle_scope(listener->env_, scope);
             }
         }
-        delayDeleteListenerSets_ = nullptr;
     }
 
     static napi_value On(napi_env env, napi_callback_info info)
