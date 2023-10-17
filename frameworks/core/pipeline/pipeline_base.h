@@ -503,6 +503,17 @@ public:
         return {};
     }
 
+    template<typename T>
+    bool GetDraggable()
+    {
+        if (IsJsCard()) {
+            return false;
+        }
+        auto theme = GetTheme<T>();
+        CHECK_NULL_RETURN(theme, false);
+        return theme->GetDraggable();
+    }
+
     const RefPtr<ManagerInterface>& GetTextFieldManager()
     {
         return textFieldManager_;

@@ -61,9 +61,6 @@ void TextPattern::OnAttachToFrameNode()
     }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
-    auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    host->SetDraggable(theme->GetDraggable());
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateTextAlign(TextAlign::START);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);

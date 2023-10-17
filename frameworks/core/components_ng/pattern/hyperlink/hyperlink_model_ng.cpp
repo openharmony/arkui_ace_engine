@@ -33,9 +33,8 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<HyperlinkTheme>();
-    CHECK_NULL_VOID(theme);
-    SetDraggable(theme->GetDraggable());
+    auto draggable = pipeline->GetDraggable<HyperlinkTheme>();
+    SetDraggable(draggable);
 }
 
 void HyperlinkModelNG::SetColor(const Color& value)
