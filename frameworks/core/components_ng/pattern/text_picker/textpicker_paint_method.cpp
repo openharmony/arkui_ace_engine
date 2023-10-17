@@ -94,6 +94,9 @@ void TextPickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     topEndPoint.SetY(frameRect.Height());
     Color endColor = backgroundColor_;
     Color middleColor = endColor.ChangeAlpha(0);
+    if (NearZero(frameRect.Bottom())) {
+        return;
+    }
     std::vector<float> topPos { 0.0f, height / frameRect.Bottom(), (frameRect.Bottom() - height) / frameRect.Bottom(),
         1.0f };
     std::vector<RSColorQuad> topColors { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(),
