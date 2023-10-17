@@ -356,7 +356,6 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     }
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
-            LOGE("fail to initialize text paragraph when adapt min text size.");
             return false;
         }
         return true;
@@ -643,7 +642,6 @@ bool TextLayoutAlgorithm::AdaptMaxTextSize(TextStyle& textStyle, const std::stri
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         // minFontSize or maxFontSize is invalid
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
-            LOGE("fail to initialize text paragraph when adapt min text size.");
             return false;
         }
         return true;

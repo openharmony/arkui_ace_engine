@@ -56,7 +56,6 @@ void TextModelNG::SetFont(const Font& value)
 void TextModelNG::SetFontSize(const Dimension& value)
 {
     if (!value.IsValid()) {
-        LOGE("FontSize value is not valid");
         ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension());
         return;
     }
@@ -188,7 +187,6 @@ void TextModelNG::ClearOnClick()
 
 void TextModelNG::SetRemoteMessage(std::function<void()>&& event)
 {
-    LOGE("no support RemoteMessage");
 }
 
 void TextModelNG::SetCopyOption(CopyOptions copyOption)

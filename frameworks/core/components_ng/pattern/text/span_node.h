@@ -58,7 +58,6 @@ public:                                                                      \
             spanItem_->fontStyle = std::make_unique<FontStyle>();            \
         }                                                                    \
         if (spanItem_->fontStyle->Check##name(value)) {                      \
-            LOGD("the %{public}s is same, just ignore", #name);              \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
@@ -76,7 +75,6 @@ public:                                                                      \
             spanItem_->fontStyle = std::make_unique<FontStyle>();            \
         }                                                                    \
         if (spanItem_->fontStyle->Check##name(value)) {                      \
-            LOGD("the %{public}s is same, just ignore", #name);              \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
@@ -111,7 +109,6 @@ public:                                                                         
             spanItem_->textLineStyle = std::make_unique<TextLineStyle>();        \
         }                                                                        \
         if (spanItem_->textLineStyle->Check##name(value)) {                      \
-            LOGD("the %{public}s is same, just ignore", #name);                  \
             return;                                                              \
         }                                                                        \
         spanItem_->textLineStyle->Update##name(value);                           \
@@ -129,7 +126,6 @@ public:                                                                         
             spanItem_->textLineStyle = std::make_unique<TextLineStyle>();        \
         }                                                                        \
         if (spanItem_->textLineStyle->Check##name(value)) {                      \
-            LOGD("the %{public}s is same, just ignore", #name);                  \
             return;                                                              \
         }                                                                        \
         spanItem_->textLineStyle->Update##name(value);                           \
@@ -244,7 +240,6 @@ public:
     void UpdateContent(const std::string& content)
     {
         if (spanItem_->content == content) {
-            LOGD("the content is same, just ignore");
             return;
         }
         spanItem_->content = content;

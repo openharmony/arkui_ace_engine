@@ -107,7 +107,6 @@ void SpanNode::MountToParagraph()
         }
         parent = parent->GetParent();
     }
-    LOGE("fail to find Text or Parent Span");
 }
 
 void SpanNode::RequestTextFlushDirty()
@@ -125,7 +124,6 @@ void SpanNode::RequestTextFlushDirty()
         }
         parent = parent->GetParent();
     }
-    LOGD("fail to find Text or Parent Span");
 }
 
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
@@ -280,9 +278,6 @@ bool SpanItem::IsDragging()
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign)
 {
-    LOGD("ImageSpanItem::UpdateParagraph imageWidth = %{public}f, imageHeight = %{public}f verticalAlign = "
-         "%{public}d",
-        width, height, verticalAlign);
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;
     run.width = width;
@@ -307,7 +302,9 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     // ImageSpan should ignore decoration styles
     textStyle.SetTextDecoration(TextDecoration::NONE);
     builder->PushStyle(textStyle);
-    LOGD("ImageSpan fontsize = %{public}f", textStyle.GetFontSize().Value());
+    TAG_LOGD(AceLogTag::ACE_TEXT, "Span item paragraph updated, imageWidth = %{public}f, "
+         "imageHeight = %{public}f verticalAlign = %{public}d, ImageSpan fontsize = %{public}f",
+        width, height, verticalAlign, textStyle.GetFontSize().Value());
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;
