@@ -58,6 +58,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     patternlockModifier_->SetSideLength(sideLength_);
     patternlockModifier_->SetCircleRadius(circleRadius_.ConvertToPxWithSize(sideLength_));
     patternlockModifier_->SetPathStrokeWidth(pathStrokeWidth_.ConvertToPxWithSize(sideLength_));
+    patternlockModifier_->UpdateBoundsRect();
 }
 
 void PatternLockPaintMethod::GetThemeProp()
