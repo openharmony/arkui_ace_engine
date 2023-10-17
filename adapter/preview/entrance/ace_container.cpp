@@ -17,7 +17,7 @@
 
 #include <functional>
 
-#include "base/log/log_wrapper.h"
+#include "base/log/log.h"
 
 #ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/lib/ui/ui_dart_state.h"
