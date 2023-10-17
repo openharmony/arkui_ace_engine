@@ -79,7 +79,6 @@ void Scrollable::SetVelocityScale(double sVelocityScale)
 void Scrollable::SetFriction(double sFriction)
 {
     if (LessOrEqual(sFriction, 0.0)) {
-        TAG_LOGW(AceLogTag::ACE_SCROLLABLE, "SetFriction invalid friction value: %{public}lf", sFriction);
         return;
     }
     sFriction_ = sFriction;

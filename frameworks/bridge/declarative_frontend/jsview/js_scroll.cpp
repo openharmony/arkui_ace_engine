@@ -334,7 +334,6 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "set edge effect args is invalid");
         return;
     }
     int32_t edgeEffect;

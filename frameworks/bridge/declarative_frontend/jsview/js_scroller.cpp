@@ -229,7 +229,6 @@ void JSScroller::CurrentOffset(const JSCallbackInfo& args)
     }
     auto retObj = JSRef<JSObject>::New();
     auto offset = scrollController->GetCurrentOffset();
-    TAG_LOGD(AceLogTag::ACE_SCROLL, "Scroller get current offset offsetx = %{public}d offsety = %{public}d", offset.GetX(), offset.GetY());
     retObj->SetProperty("xOffset", offset.GetX());
     retObj->SetProperty("yOffset", offset.GetY());
     args.SetReturnValue(retObj);
@@ -238,7 +237,6 @@ void JSScroller::CurrentOffset(const JSCallbackInfo& args)
 void JSScroller::ScrollBy(const JSCallbackInfo& args)
 {
     if (args.Length() < 2) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollBy Invalid params");
         return;
     }
 
