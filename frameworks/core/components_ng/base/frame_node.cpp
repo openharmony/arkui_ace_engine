@@ -978,11 +978,9 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     UpdateLayoutPropertyFlag();
     SetSkipSyncGeometryNode(false);
     {
-        ACE_SCOPED_TRACE("Measure");
+        ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
+            GetParent() ? GetParent()->GetId() : 0);
         Measure(GetLayoutConstraint());
-    }
-    {
-        ACE_SCOPED_TRACE("Layout");
         Layout();
     }
     SetRootMeasureNode(false);
