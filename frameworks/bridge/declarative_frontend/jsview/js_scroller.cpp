@@ -161,7 +161,6 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
     if (!scrollController) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollEdge(%{public}d)", static_cast<int32_t>(edge));
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
     scrollController->ScrollToEdge(edgeType, true);
 }

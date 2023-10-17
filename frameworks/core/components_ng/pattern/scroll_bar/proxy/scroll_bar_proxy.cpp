@@ -48,7 +48,6 @@ float GetScrollOffset(RefPtr<Pattern> pattern)
 void ScrollBarProxy::RegisterScrollableNode(const ScrollableNodeInfo& scrollableNode)
 {
     if (std::find(scrollableNodes_.begin(), scrollableNodes_.end(), scrollableNode) != scrollableNodes_.end()) {
-        TAG_LOGW(AceLogTag::ACE_OUTER_SCROLL_BAR, "scrollable node is already exist.");
         return;
     }
     scrollableNodes_.emplace_back(scrollableNode);
@@ -57,7 +56,6 @@ void ScrollBarProxy::RegisterScrollableNode(const ScrollableNodeInfo& scrollable
 void ScrollBarProxy::RegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar)
 {
     if (std::find(scrollBars_.begin(), scrollBars_.end(), scrollBar) != scrollBars_.end()) {
-        TAG_LOGW(AceLogTag::ACE_OUTER_SCROLL_BAR, "scroll bar is already exist.");
         return;
     }
     scrollBars_.emplace_back(scrollBar);
@@ -193,7 +191,6 @@ float ScrollBarProxy::CalcPatternOffset(float scrollableDistance, float controlD
     if (!NearZero(controlDistance)) {
         return delta * scrollableDistance / controlDistance;
     } else {
-        TAG_LOGD(AceLogTag::ACE_OUTER_SCROLL_BAR, "scroll bar scrollable distance is zero");
         return 0.0f;
     }
 }

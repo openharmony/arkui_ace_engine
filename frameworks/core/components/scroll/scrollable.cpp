@@ -586,7 +586,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "scroll drag end, position is %{public}lf and %{public}lf, "
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, position is %{public}lf and %{public}lf, "
         "velocity is %{public}lf",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
     controller_->ClearAllListeners();
@@ -783,9 +783,6 @@ void Scrollable::FixScrollMotion(double position)
 #ifdef WEARABLE_PRODUCT
     if (motion_ && needCenterFix_ && watchFixCallback_) {
         double finalPoisition = watchFixCallback_(motion_->GetFinalPosition(), position);
-        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "final position before fix(%{public}lf), "
-            "need to fix to position(%{public}lf)",
-            motion_->GetFinalPosition(), finalPoisition);
         if (!NearEqual(finalPoisition, motion_->GetFinalPosition(), DISTANCE_EPSILON)) {
             double velocity = motion_->GetVelocityByFinalPosition(finalPoisition);
             double friction = friction_ > 0 ? friction_ : sFriction_;
@@ -796,8 +793,6 @@ void Scrollable::FixScrollMotion(double position)
                 velocity = motion_->GetVelocityByFinalPosition(finalPoisition, 0.0);
                 motion_->Reset(friction, position, velocity, 0.0);
             }
-            TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "final position after fix (%{public}lf), ",
-                motion_->GetFinalPosition());
         }
     }
 #endif
@@ -826,8 +821,6 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "ProcessScrollSnapSpringMotion scrollSnapDelta:%{public}f, "
-        "scrollSnapVelocity:%{public}f", scrollSnapDelta, scrollSnapVelocity);
     if (!snapController_) {
         snapController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
         snapController_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
@@ -878,7 +871,6 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
 
 void Scrollable::ProcessScrollSnapMotion(double position)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "[scroll] currentPos_(%{public}lf), position(%{public}lf)", currentPos_, position);
     currentVelocity_ = scrollSnapMotion_->GetCurrentVelocity();
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
@@ -922,7 +914,6 @@ void Scrollable::OnAnimateStop()
     }
     moved_ = false;
 #ifdef OHOS_PLATFORM
-    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "springController stop increase cpu frequency");
     ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndListFling();
@@ -952,7 +943,6 @@ void Scrollable::StartSpringMotion(
         mainPosition, mainVelocity, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
     scrollMotion_ = AceType::MakeRefPtr<ScrollMotion>(mainPosition, mainVelocity, extent, initExtent, spring_);
     if (!scrollMotion_->IsValid()) {
-        TAG_LOGW(AceLogTag::ACE_SCROLLABLE, "scrollMotion is invalid, no available spring motion.");
         return;
     }
     scrollMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
@@ -992,7 +982,6 @@ void Scrollable::ProcessScrollMotionStop()
         moved_ = false;
         HandleScrollEnd();
 #ifdef OHOS_PLATFORM
-        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "controller stop increase cpu frequency");
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
@@ -1010,8 +999,6 @@ void Scrollable::ProcessScrollMotionStop()
 
 void Scrollable::ProcessSpringMotion(double position)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "[scroll] currentPos_(%{public}lf), position(%{public}lf)",
-        currentPos_, position);
     currentVelocity_ = scrollMotion_->GetCurrentVelocity();
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
@@ -1037,8 +1024,6 @@ void Scrollable::ProcessScrollMotion(double position)
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
     }
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "[scrolling] position(%{public}lf), currentVelocity_(%{public}lf), "
-        "needScrollSnapChange_(%{public}u)", position, currentVelocity_, needScrollSnapChange_);
     if ((NearEqual(currentPos_, position))) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION);
     } else {

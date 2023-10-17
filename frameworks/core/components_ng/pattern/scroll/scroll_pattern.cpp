@@ -638,11 +638,6 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     auto scrollGeometry = scrollFrame->GetGeometryNode();
     CHECK_NULL_RETURN(scrollGeometry, false);
     auto scrollFrameSize = scrollGeometry->GetFrameSize();
-    TAG_LOGD(AceLogTag::ACE_SCROLL, "Child: %{public}s/%{public}d on focus. Size is (%{public}f,%{public}f). "
-         "Offset to Scroll is (%{public}f,%{public}f). Scroll size is (%{public}f,%{public}f)",
-        focusFrameNode->GetTag().c_str(), focusFrameNode->GetId(), focusNodeSize.Width(), focusNodeSize.Height(),
-        focusNodeOffsetToScrolll.GetX(), focusNodeOffsetToScrolll.GetY(), scrollFrameSize.Width(),
-        scrollFrameSize.Height());
 
     float focusNodeDiffToScroll =
         GetAxis() == Axis::VERTICAL ? focusNodeOffsetToScrolll.GetY() : focusNodeOffsetToScrolll.GetX();
@@ -658,7 +653,6 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
         moveOffset = scrollFrameLength - focusNodeDiffToScroll - focusNodeLength;
     }
     if (!NearZero(moveOffset)) {
-        TAG_LOGD(AceLogTag::ACE_SCROLL, "Scroll offset: %{public}f on axis: %{public}d", moveOffset, GetAxis());
         return OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
     }
     return false;
@@ -707,8 +701,6 @@ std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta)
     }
     if (predictSnapOffset.has_value()) {
         predictSnapOffset = predictSnapOffset.value() - currentOffset_;
-        TAG_LOGD(AceLogTag::ACE_SCROLL, "CalePredictSnapOffset predictSnapOffset:%{public}f",
-            predictSnapOffset.value());
     }
     return predictSnapOffset;
 }
