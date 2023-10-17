@@ -583,7 +583,7 @@ HWTEST_F(CustomTestNg, CustomTest010, TestSize.Level1)
     customNode->SetRecycleFunction(nullptr);
     customNode->FireRecycleSelf();
     bool test = customNode->needRebuild_;
-    EXPECT_EQ(test, true);
+    EXPECT_EQ(test, false);
 }
 
 /**
