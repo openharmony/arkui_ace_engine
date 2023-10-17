@@ -54,6 +54,12 @@ const LinearMapNode<RefPtr<Curve>> CURVE_MAP[] = {
 };
 
 constexpr double DEFAULT_DURATION = 1000.0;
+constexpr ScrollAlign ALIGN_TABLE[] = {
+    ScrollAlign::START,
+    ScrollAlign::CENTER,
+    ScrollAlign::END,
+    ScrollAlign::AUTO,
+};
 
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
 
@@ -174,6 +180,10 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
     // 2：parameters count, 1: parameter index
     if (args.Length() >= 2 && args[1]->IsBoolean()) {
         smooth = args[1]->ToBoolean();
+    }
+    // 3：parameters count, 2: parameter index
+    if (args.Length() == 3) {
+        ConvertFromJSValue(args[2], ALIGN_TABLE, align);
     }
     scrollController->JumpTo(index, smooth, align, SCROLL_FROM_JUMP);
 }
