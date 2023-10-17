@@ -40,7 +40,7 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     CHECK_NULL_VOID(frameNode);
 
     if (!clickRecognizer_) {
-        LOGD("Create clickRecognizer");
+        TAG_LOGD(AceLogTag::ACE_GESTURE_TAP, "ClickRecognizer create");
         clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
     }
     clickRecognizer_->SetOnAction(GetClickEvent());

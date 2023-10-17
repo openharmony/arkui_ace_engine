@@ -28,7 +28,7 @@ RefPtr<NGGestureRecognizer> SwipeGesture::CreateRecognizer()
 
     double speed = context->NormalizeToPx(Dimension(speed_, DimensionUnit::VP));
     RefPtr<SwipeRecognizer> swipeRecognizer;
-    LOGD("AceType::MakeRefPtr<SwipeRecognizer>(fingers_, direction_, speed)");
+    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "AceType::MakeRefPtr<SwipeRecognizer>(fingers_, direction_, speed)");
     swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(fingers_, direction_, speed);
     if (onActionId_) {
         swipeRecognizer->SetOnAction(*onActionId_);

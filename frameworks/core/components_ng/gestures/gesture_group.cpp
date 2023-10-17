@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> GestureGroup::CreateRecognizer()
 {
-    LOGD("create gesture group, sub size %{public}d, mode %{public}d", static_cast<int32_t>(gestures_.size()), mode_);
+    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Create gesture group, sub size %{public}d, mode %{public}d", static_cast<int32_t>(gestures_.size()), mode_);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers;
     for (auto& subGesture : gestures_) {
         auto recognizer = subGesture->CreateRecognizer();
@@ -47,7 +47,7 @@ RefPtr<NGGestureRecognizer> GestureGroup::CreateRecognizer()
             groupRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
             break;
         default:
-            LOGE("unknown gesture mode %{public}d when create gesture group recognizer", mode_);
+            TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "Unknown gesture mode %{public}d when create gesture group recognizer", mode_);
             return nullptr;
     }
     DynamicCast<RecognizerGroup>(groupRecognizer)->RemainChildOnResetStatus();

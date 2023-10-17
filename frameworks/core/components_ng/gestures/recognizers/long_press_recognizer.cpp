@@ -41,11 +41,9 @@ LongPressRecognizer::LongPressRecognizer(
       isDisableMouseLeft_(isDisableMouseLeft)
 {
     if (fingers_ > MAX_LONGPRESS_FINGERS || fingers_ < DEFAULT_LONGPRESS_FINGERS) {
-        LOGW("longPressRecognizer fingers_ is illegal, change to DEFAULT_LONGPRESS_FINGERS.");
         fingers_ = DEFAULT_LONGPRESS_FINGERS;
     }
     if (duration_ <= 0) {
-        LOGW("longPressRecognizer duration_ is illegal, change to DEAULT_LONGPRESS_DURATION.");
         duration_ = DEFAULT_LONGPRESS_DURATION;
     }
 }
@@ -89,13 +87,12 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
     auto&& callback = [weakPtr = AceType::WeakClaim(this), customCallback = callback_]() {
         auto refPtr = weakPtr.Upgrade();
         if (!refPtr) {
-            LOGI("fail to get thumbnail pixelMap due to context is nullptr");
             return;
         }
         if (refPtr->refereeState_ == RefereeState::DETECTING) {
             customCallback(Offset(refPtr->globalPoint_.GetX(), refPtr->globalPoint_.GetY()));
         } else {
-            LOGW("the state is not detecting for accept long press gesture");
+            TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "The state is not detecting for accept long press gesture");
         }
     };
     thumbnailTimer_.Reset(callback);
@@ -106,17 +103,17 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     if (isDisableMouseLeft_ && event.sourceType == SourceType::MOUSE) {
-        LOGI("mouse left button is disabled for long press recognizer.");
+        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Mouse left button is disabled for long press recognizer");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
-    LOGI("long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
     int32_t curDuration = duration_;
     int64_t currentTimeStamp = GetSysTimestamp();
     int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
     if (currentTimeStamp > eventTimeStamp) {
-        LOGI("currentTimeStamp is larger than eventTimeStamp, need to minus time spent waiting");
+        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "CurrentTimeStamp is larger than eventTimeStamp, need to minus time spent waiting");
         // nanoseconds to millisceond.
         curDuration = curDuration - static_cast<int32_t>((currentTimeStamp - eventTimeStamp) / (1000 * 1000));
         if (curDuration < 0) {
@@ -128,7 +125,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         curDuration = 0;
     }
     if ((touchRestrict_.forbiddenType & TouchRestrict::LONG_PRESS) == TouchRestrict::LONG_PRESS) {
-        LOGI("the long press is forbidden");
+        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "The long press is forbidden");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -150,9 +147,9 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 {
-    LOGD("long press recognizer receives touch up event");
+    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "long press recognizer receives touch up event");
     if (currentFingers_ < fingers_) {
-        LOGW("LongPressGesture current finger number is less than requiried finger number.");
+        TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "LongPressGesture current finger number is less than requiried finger number");
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
@@ -167,13 +164,13 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    LOGD("long press recognizer receives touch move event");
+    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Long press recognizer receives touch move event");
     if (currentFingers_ < fingers_) {
-        LOGW("LongPressGesture current finger number is less than requiried finger number.");
+        TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "LongPressGesture current finger number is less than requiried finger number");
         return;
     }
     if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
+        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Referee has already receives the result");
         return;
     }
     Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
@@ -182,7 +179,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         longPressThreshold = DRAG_LONG_PRESS_THRESHOLD;
     }
     if (offset.GetDistance() > longPressThreshold) {
-        LOGD("this gesture is not long press, try to reject it");
+        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "This gesture is not long press, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -192,9 +189,9 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    LOGD("long press recognizer receives touch cancel event");
+    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Long press recognizer receives touch cancel event");
     if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
+        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Referee has already receives the result");
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
@@ -207,14 +204,14 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
 {
     if (refereeState_ == RefereeState::DETECTING) {
-        LOGI("this gesture is long press, try to accept it");
+        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "This gesture is long press, try to accept it");
         if (isCatchMode) {
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         } else {
             OnAccepted();
         }
     } else {
-        LOGW("the state is not detecting for accept long press gesture");
+        TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "The state is not detecting for accept long press gesture");
     }
 }
 
@@ -228,7 +225,7 @@ void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
         if (refPtr) {
             refPtr->HandleOverdueDeadline(isCatchMode);
         } else {
-            LOGI("fail to handle overdue deadline due to context is nullptr");
+            TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Fail to handle overdue deadline due to context is nullptr");
         }
     };
     deadlineTimer_.Reset(callback);
@@ -257,7 +254,7 @@ void LongPressRecognizer::StartRepeatTimer()
         if (refPtr) {
             refPtr->DoRepeat();
         } else {
-            LOGW("fail to handle overdue deadline due to context is nullptr");
+            TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Fail to handle overdue deadline due to context is nullptr");
         }
     };
     timer_.Reset(callback);

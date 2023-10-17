@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 
+#include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/models/gesture_model_impl.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "frameworks/base/log/ace_scoring_log.h"
@@ -242,7 +243,7 @@ constexpr char ROTATION_ANGLE[] = "angle";
 
 void JSGesture::Create(const JSCallbackInfo& info)
 {
-    LOGD("JS gesture create");
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JS gesture create");
     int32_t priorityNum = 0;
     if (info.Length() > 0 && info[0]->IsNumber()) {
         priorityNum = info[0]->ToNumber<int32_t>();
@@ -258,19 +259,18 @@ void JSGesture::Create(const JSCallbackInfo& info)
 
 void JSGesture::Finish()
 {
-    LOGD("JS gesture finish");
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JS gesture finish");
     GestureModel::GetInstance()->Finish();
 }
 
 void JSGesture::Pop()
 {
-    LOGD("JS gesture pop");
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JS gesture pop");
     GestureModel::GetInstance()->Pop();
 }
 
 void JSTapGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSTapGesture Create");
     int32_t countNum = DEFAULT_TAP_COUNT;
     int32_t fingersNum = DEFAULT_TAP_FINGER;
     if (args.Length() > 0 && args[0]->IsObject()) {
@@ -288,13 +288,13 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
         }
     }
 
-    LOGD("JS Tap gesture created with count %{public}d, fingers %{public}d", countNum, fingersNum);
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JSTapgesture created with count %{public}d, fingers %{public}d", countNum, fingersNum);
     TapGestureModel::GetInstance()->Create(countNum, fingersNum);
 }
 
 void JSLongPressGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSLongPressGesture Create");
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JSLongPressGesture create");
     int32_t fingersNum = DEFAULT_LONG_PRESS_FINGER;
     bool repeatResult = false;
     int32_t durationNum = DEFAULT_LONG_PRESS_DURATION;
@@ -322,7 +322,7 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
 
 void JSPanGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSPanGesture Create");
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JSPanGesture create");
     int32_t fingersNum = DEFAULT_PAN_FINGER;
     double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
     PanDirection panDirection;
@@ -367,7 +367,7 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
 
 void JSSwipeGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSSwipeGesture Create");
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JSSwipeGesture create");
     int32_t fingersNum = DEFAULT_SLIDE_FINGER;
     double speedNum = DEFAULT_SLIDE_SPEED;
     SwipeDirection slideDirection;
@@ -403,7 +403,7 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
 
 void JSPinchGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSPinchGesture Create");
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JSPinchGesture create");
     int32_t fingersNum = DEFAULT_PINCH_FINGER;
     double distanceNum = DEFAULT_PINCH_DISTANCE;
     if (args.Length() > 0 && args[0]->IsObject()) {
@@ -427,7 +427,7 @@ void JSPinchGesture::Create(const JSCallbackInfo& args)
 
 void JSRotationGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSRotationGesture Create");
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JSRotationGesture create");
     double angleNum = DEFAULT_ROTATION_ANGLE;
     int32_t fingersNum = DEFAULT_ROTATION_FINGER;
     if (args.Length() > 0 && args[0]->IsObject()) {
@@ -455,14 +455,14 @@ void JSGestureGroup::Create(const JSCallbackInfo& args)
         gestureMode = args[0]->ToNumber<int32_t>();
     }
 
-    LOGD("Js Gesture group create with mode %{public}d", gestureMode);
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JSGestureGroup create with mode %{public}d", gestureMode);
     GestureGroupModel::GetInstance()->Create(gestureMode);
 }
 
 void JSGesture::JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("args is not js function");
+        TAG_LOGW(AceLogTag::ACE_GESTURE, "Args is not js function");
         return;
     }
 
@@ -681,7 +681,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
 void JSTimeoutGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSTimeoutGesture::Create()");
+    TAG_LOGD(AceLogTag::ACE_GESTURE, "JSTimeoutGesture create");
     if (!args[0]->IsNumber()) {
         return;
     }

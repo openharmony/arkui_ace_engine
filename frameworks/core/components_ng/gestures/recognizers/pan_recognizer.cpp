@@ -18,6 +18,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
+#include "base/log/log_wrapper.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/gesture_referee.h"
@@ -47,7 +48,6 @@ PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, dou
         velocityTracker_ = VelocityTracker(Axis::VERTICAL);
     }
     if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
-        LOGW("panRecognizer fingers_ is illegal, change to DEFAULT_PAN_FINGERS.");
         fingers_ = DEFAULT_PAN_FINGERS;
     }
 }
@@ -63,7 +63,6 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
     distance_ = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceNumber;
     fingers_ = fingersNumber;
     if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
-        LOGW("panRecognizer fingers_ is illegal, change to DEFAULT_PAN_FINGERS.");
         fingers_ = DEFAULT_PAN_FINGERS;
     }
 
@@ -110,7 +109,7 @@ void PanRecognizer::OnAccepted()
 
 void PanRecognizer::OnRejected()
 {
-    LOGD("pan gesture has been rejected!");
+    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan gesture has been rejected!");
     // fix griditem drag interrupted by click while pull moving
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
@@ -131,18 +130,18 @@ void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, b
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    LOGI("pan recognizer receives %{public}d touch down event, begin to detect pan event", event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer receives %{public}d touch down event, begin to detect pan event", event.id);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
 
     if (direction_.type == PanDirection::NONE) {
-        LOGI("the direction type is none");
+        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "The direction type is none");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
     if (event.sourceType == SourceType::MOUSE && !isAllowMouse_) {
-        LOGI("mouse pan is not allowed");
+        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Mouse pan is not allowed");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -169,7 +168,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
-    LOGI("pan recognizer receives axis start event, begin to detect pan event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer receives axis start event, begin to detect pan event");
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -180,7 +179,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     }
 
     if (direction_.type == PanDirection::NONE) {
-        LOGI("the direction type is none");
+        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "The direction type is none");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -200,9 +199,9 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    LOGI("pan recognizer receives %{public}d touch up event", event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer receives %{public}d touch up event", event.id);
     if (currentFingers_ < fingers_) {
-        LOGW("PanGesture current finger number is less than requiried finger number.");
+        TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "PanGesture current finger number is less than requiried finger number");
         return;
     }
     globalPoint_ = Point(event.x, event.y);
@@ -230,7 +229,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    LOGI("pan recognizer receives axis end event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer receives axis end event");
     globalPoint_ = Point(event.x, event.y);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -245,9 +244,9 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    LOGD("pan recognizer receives touch move event");
+    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer receives touch move event");
     if (currentFingers_ < fingers_) {
-        LOGW("PanGesture current finger number is less than requiried finger number.");
+        TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "PanGesture current finger number is less than requiried finger number.");
         return;
     }
     globalPoint_ = Point(event.x, event.y);
@@ -275,7 +274,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         if (result == GestureAcceptResult::ACCEPT) {
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         } else if (result == GestureAcceptResult::REJECT) {
-            LOGW("pan recognizer reject");
+            TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer reject");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
@@ -290,7 +289,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
                 element.second.SetX(0.0);
             }
         }
-        LOGD("pan recognizer detected successful");
+        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer detected successful");
         if (isFlushTouchEventsEnd_) {
             SendCallbackMsg(onActionUpdate_);
         }
@@ -309,7 +308,7 @@ void PanRecognizer::OnFlushTouchEventsEnd()
 
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
-    LOGD("pan recognizer receives axis update event");
+    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer receives axis update event");
     if (fingers_ != AXIS_PAN_FINGERS) {
         return;
     }
@@ -339,7 +338,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         if (result == GestureAcceptResult::ACCEPT) {
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         } else if (result == GestureAcceptResult::REJECT) {
-            LOGW("pan recognizer reject");
+            TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer reject");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
@@ -349,14 +348,14 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             averageDistance_.SetX(0.0);
         }
 
-        LOGD("pan recognizer detected successful");
+        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer detected successful");
         SendCallbackMsg(onActionUpdate_);
     }
 }
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
 {
-    LOGD("pan recognizer receives touch cancel event");
+    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer receives touch cancel event");
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -370,7 +369,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
 
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& /*event*/)
 {
-    LOGD("pan recognizer receives touch cancel event");
+    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Pan recognizer receives touch cancel event");
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;

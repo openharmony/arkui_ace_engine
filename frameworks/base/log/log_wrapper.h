@@ -78,6 +78,9 @@ enum class AceLogTag : uint8_t {
     ACE_FORM,
     ACE_DRAG,
     ACE_VIDEO,
+    ACE_GESTURE,
+    ACE_GESTURE_RECOGNIZER,
+    ACE_COMPONENT_SNAPSHOT,
 };
 
 enum class LogDomain : uint32_t {
