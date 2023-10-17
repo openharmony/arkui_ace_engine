@@ -590,7 +590,8 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "handle drag end, position is %{public}lf and %{public}lf, velocity is %{public}lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "handle drag end, position is %{public}lf and %{public}lf, "
+        "velocity is %{public}lf",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
@@ -788,7 +789,8 @@ void Scrollable::FixScrollMotion(double position)
 #ifdef WEARABLE_PRODUCT
     if (motion_ && needCenterFix_ && watchFixCallback_) {
         double finalPoisition = watchFixCallback_(motion_->GetFinalPosition(), position);
-        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "final position before fix(%{public}lf), need to fix to position(%{public}lf)",
+        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "final position before fix(%{public}lf), "
+            "need to fix to position(%{public}lf)",
             motion_->GetFinalPosition(), finalPoisition);
         if (!NearEqual(finalPoisition, motion_->GetFinalPosition(), DISTANCE_EPSILON)) {
             double velocity = motion_->GetVelocityByFinalPosition(finalPoisition);
@@ -800,7 +802,8 @@ void Scrollable::FixScrollMotion(double position)
                 velocity = motion_->GetVelocityByFinalPosition(finalPoisition, 0.0);
                 motion_->Reset(friction, position, velocity, 0.0);
             }
-            TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "final position after fix (%{public}lf), ", motion_->GetFinalPosition());
+            TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "final position after fix (%{public}lf), ",
+                motion_->GetFinalPosition());
         }
     }
 #endif
@@ -1013,7 +1016,8 @@ void Scrollable::ProcessScrollMotionStop()
 
 void Scrollable::ProcessSpringMotion(double position)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "[scroll] currentPos_(%{public}lf), position(%{public}lf)", currentPos_, position);
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "[scroll] currentPos_(%{public}lf), position(%{public}lf)",
+        currentPos_, position);
     currentVelocity_ = scrollMotion_->GetCurrentVelocity();
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
