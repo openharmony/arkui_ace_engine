@@ -424,6 +424,14 @@ private:
     Velocity velocity_;
 };
 
+class NotifyDragEvent : public DragEvent {
+    DECLARE_ACE_TYPE(NotifyDragEvent, DragEvent)
+
+public:
+    NotifyDragEvent() = default;
+    ~NotifyDragEvent() = default;
+};
+
 struct FingerInfo {
     int32_t fingerId_ = -1;
     // global position at which the touch point contacts the screen.

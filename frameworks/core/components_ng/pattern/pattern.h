@@ -362,6 +362,9 @@ public:
         return -1;
     }
 
+    virtual void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
     virtual void OnDirectionOrDpiConfigurationUpdate() {}
