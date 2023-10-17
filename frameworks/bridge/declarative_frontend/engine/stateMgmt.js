@@ -3432,18 +3432,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     }
     notifyPropertyHasBeenReadPU() {
         
-        
-        this.subscriberRefs_.forEach((subscriber) => {
-            if (subscriber) {
-                // TODO
-                // propertyHasBeenReadPU is not use in the code
-                // defined by interface that is not used either: PropertyReadEventListener
-                // Maybe compiler generated code has it?
-                if ('propertyHasBeenReadPU' in subscriber) {
-                    subscriber.propertyHasBeenReadPU(this);
-                }
-            }
-        });
         this.recordDependentUpdate();
         
     }
