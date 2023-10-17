@@ -118,8 +118,6 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     if (animationValue->IsObject()) {
         auto animationObj = JSRef<JSObject>::Cast(animationValue);
         if (!ConvertFromJSValue(animationObj->GetProperty("duration"), duration) || NonPositive(duration)) {
-            TAG_LOGW(AceLogTag::ACE_SCROLL, "Failed to parse param 'duration' or it is not a positive number, "
-                "set it as the default value");
             duration = DEFAULT_DURATION;
         }
 
@@ -136,7 +134,6 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        TAG_LOGE(AceLogTag::ACE_SCROLL, "controller_ is nullptr");
         return;
     }
     auto direction = scrollController->GetScrollDirection();
@@ -170,7 +167,6 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        TAG_LOGE(AceLogTag::ACE_SCROLL, "ScrollEdge controller_ is nullptr");
         return;
     }
     TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollEdge(%{public}d)", static_cast<int32_t>(edge));
@@ -189,7 +185,6 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        TAG_LOGE(AceLogTag::ACE_SCROLL, "ScrollToIndex controller_ is nullptr");
         return;
     }
     // 2：parameters count, 1: parameter index
@@ -206,14 +201,12 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
 void JSScroller::ScrollPage(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollPage Invalid params");
         return;
     }
 
     auto obj = JSRef<JSObject>::Cast(args[0]);
     bool next = true;
     if (!ConvertFromJSValue(obj->GetProperty("next"), next)) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollPage Failed to parse param 'next'");
         return;
     }
 
@@ -221,7 +214,6 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
     ConvertFromJSValue(obj->GetProperty("direction"), DIRECTION_TABLE, direction);
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollPage controller_ is nullptr");
         return;
     }
     TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollPage(%{public}s, %{public}d)", next ? "true" : "false",
@@ -231,14 +223,13 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
 
 void JSScroller::CurrentOffset(const JSCallbackInfo& args)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLL, "CurrentOffset()");
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        TAG_LOGE(AceLogTag::ACE_SCROLL, "CurrentOffset controller_ is nullptr");
         return;
     }
     auto retObj = JSRef<JSObject>::New();
     auto offset = scrollController->GetCurrentOffset();
+    TAG_LOGD(AceLogTag::ACE_SCROLL, "Scroller get current offset offsetx = %{public}d offsety = %{public}d", offset.GetX(), offset.GetY());
     retObj->SetProperty("xOffset", offset.GetX());
     retObj->SetProperty("yOffset", offset.GetY());
     args.SetReturnValue(retObj);
@@ -287,7 +278,6 @@ void JSScroller::IsAtEnd(const JSCallbackInfo& args)
 {
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        TAG_LOGE(AceLogTag::ACE_SCROLL, "controller_ is nullptr");
         return;
     }
     bool isAtEnd = scrollController->IsAtEnd();

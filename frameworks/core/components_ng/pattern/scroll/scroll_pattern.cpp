@@ -658,7 +658,7 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
         moveOffset = scrollFrameLength - focusNodeDiffToScroll - focusNodeLength;
     }
     if (!NearZero(moveOffset)) {
-        LOGD("Scroll offset: %{public}f on axis: %{public}d", moveOffset, GetAxis());
+        TAG_LOGD(AceLogTag::ACE_SCROLL, "Scroll offset: %{public}f on axis: %{public}d", moveOffset, GetAxis());
         return OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
     }
     return false;

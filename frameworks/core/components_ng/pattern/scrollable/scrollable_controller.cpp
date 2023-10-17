@@ -23,7 +23,7 @@ bool ScrollableController::AnimateTo(
     CHECK_NULL_RETURN(pattern, false);
     if (pattern->GetAxis() != Axis::NONE) {
         if (position.Unit() == DimensionUnit::PERCENT) {
-            TAG_LOGW(AceLogTag::ACE_SCROLL, "not support percent dimension now");
+            TAG_LOGW(AceLogTag::ACE_SCROLLABLE, "not support percent dimension now");
             return false;
         }
         if (Positive(duration) || smooth) {
