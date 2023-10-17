@@ -44,7 +44,6 @@ public:
         }
         if (!pixelMap) {
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Snapshot creation failed");
-
             callback_(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, [node = node_]() {
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
@@ -78,13 +77,12 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
 {
     auto node = Inspector::GetFrameNodeByKey(componentId);
     if (!node) {
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Node not found %{public}s", componentId.c_str());
         callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
     auto rsNode = GetRsNode(node);
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "TakeSurfaceCaptureForUI");
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Begin to take surfaceCapture for ui");
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr));
 }
 
@@ -93,13 +91,12 @@ void ComponentSnapshot::Create(
 {
     auto node = AceType::DynamicCast<FrameNode>(customNode);
     if (!node) {
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Builder is invalid");
         callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
 
     FrameNode::ProcessOffscreenNode(node);
-    TAG_LOGD(AceLogTag::ACE_COMPONENT_SNAPSHOT, "ProcessOffscreenNode finished, root size = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Process off screen Node finished, root size = %{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str());
 
     if (enableInspector) {
@@ -114,7 +111,8 @@ void ComponentSnapshot::Create(
     executor->PostDelayedTask(
         [callback, node, enableInspector]() mutable {
             auto rsNode = GetRsNode(node);
-            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "TakeSurfaceCaptureForUI rootNode = %{public}s", node->GetTag().c_str());
+            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "Begin to take surfaceCapture for ui, rootNode = %{public}s", node->GetTag().c_str());
             auto& rsInterface = Rosen::RSInterfaces::GetInstance();
             rsInterface.TakeSurfaceCaptureForUI(
                 rsNode, std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr));

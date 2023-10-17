@@ -61,13 +61,13 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_MOUSE;
             break;
         default:
-            TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Unrecognized input source type: %{public}d", sourceType);
+            break;
     }
 }
 
 void ClickRecognizer::OnAccepted()
 {
-    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Click gesture has been accepted!");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture has been accepted");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
     }
@@ -113,7 +113,7 @@ void ClickRecognizer::OnAccepted()
 
 void ClickRecognizer::OnRejected()
 {
-    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Click gesture has been rejected!");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
@@ -124,14 +124,13 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         touchDownTime_ = event.time;
     }
     if (IsRefereeFinished()) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Referee has already receives the result");
         return;
     }
     InitGlobalValue(event.sourceType);
-    TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
-         "%{public}d, %{public}d",
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
+        "%{public}d, %{public}d",
         event.id, equalsToFingers_, currentTouchPointsNum_);
-
     // The last recognition sequence has been completed, reset the timer.
     if (tappedCount_ > 0 && currentTouchPointsNum_ == 0) {
         tapDeadlineTimer_.Cancel();
@@ -146,7 +145,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         fingerDeadlineTimer_.Cancel();
         equalsToFingers_ = true;
         if (ExceedSlop()) {
-            TAG_LOGE(AceLogTag::ACE_GESTURE_RECOGNIZER, "Fail to detect multi finger tap due to offset is out of slop");
+            TAG_LOGW(AceLogTag::ACE_GESTURE, "Fail to detect multi finger tap due to offset is out of slop");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
@@ -165,12 +164,9 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
     }
     if (IsRefereeFinished()) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Referee has already receives the result");
         return;
     }
     InitGlobalValue(event.sourceType);
-    TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Click recognizer receives %{public}d touch up event, current finger info: %{public}d, %{public}d", event.id,
-        equalsToFingers_, currentTouchPointsNum_);
     touchPoints_[event.id] = event;
     --currentTouchPointsNum_;
     // Check whether multi-finger taps are completed in count_ times
@@ -181,7 +177,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         tappedCount_++;
 
         if (tappedCount_ == count_) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "This gesture is click, try to accept it");
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is click, try to accept it");
             time_ = event.time;
             if (useCatchMode_) {
                 Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
@@ -207,18 +203,15 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     if (currentFingers_ < fingers_) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "ClickGesture current finger number is less than requiried finger number.");
         return;
     }
     if (IsRefereeFinished()) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Referee has already receives the result");
         return;
     }
     InitGlobalValue(event.sourceType);
-    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Click recognizer receives touch move event");
     Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
     if (offset.GetDistance() > MAX_THRESHOLD) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "This gesture is out of offset, try to reject it");
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is out of offset, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
 }
@@ -226,20 +219,15 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     if (IsRefereeFinished()) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Referee has already receives the result");
         return;
     }
     InitGlobalValue(event.sourceType);
-    TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Click recognizer receives touch cancel event");
     Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
 }
 
 void ClickRecognizer::HandleOverdueDeadline()
 {
     if (currentTouchPointsNum_ < fingers_ || tappedCount_ < count_) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "The state is not detecting for accept multi-finger tap gesture, finger number is %{public}d, tappedCount "
-             "is %{public}d",
-            currentTouchPointsNum_, tappedCount_);
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
 }
@@ -253,8 +241,6 @@ void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, i
         auto refPtr = weakPtr.Upgrade();
         if (refPtr) {
             refPtr->HandleOverdueDeadline();
-        } else {
-            TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "Fail to handle overdue deadline due to context is nullptr");
         }
     };
 

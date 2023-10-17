@@ -54,7 +54,6 @@ void GestureModelNG::Finish()
 
     auto gesture = gestureProcessor->FinishGestureNG();
     if (!gesture) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE, "gesture is not exist when component finish");
         return;
     }
     gesture->SetGestureMask(gestureProcessor->GetGestureMask());
@@ -173,7 +172,6 @@ void GestureModelNG::SetOnActionFunc(const GestureEventFunc& gestureEventFunc, c
             gesture->SetOnActionEndId(gestureEventFunc);
             break;
         default:
-            TAG_LOGW(AceLogTag::ACE_GESTURE, "Unknown gesture action %{public}d", action);
             break;
     }
 }

@@ -151,7 +151,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
 {
     auto host = GetFrameNode();
     if (!host) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE, "The host is nullptr");
         for (auto&& recognizer : innerRecognizers) {
             finalResult.emplace_back(std::move(recognizer));
         }
@@ -252,14 +251,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     }
 
     if (exclusiveIndex != static_cast<int32_t>(externalExclusiveRecognizer_.size())) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE, "ExternalExclusiveRecognizer size changed, %{public}d resize to %{public}d",
-            static_cast<int32_t>(externalExclusiveRecognizer_.size()), exclusiveIndex);
         externalExclusiveRecognizer_.resize(exclusiveIndex);
     }
 
     if (parallelIndex != static_cast<int32_t>(externalParallelRecognizer_.size())) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE, "ExternalParallelRecognizer size changed, %{public}d resize to %{public}d",
-            static_cast<int32_t>(externalParallelRecognizer_.size()), parallelIndex);
         externalParallelRecognizer_.resize(parallelIndex);
     }
 
@@ -395,16 +390,13 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
 
     if (frameNode->IsDraggable()) {
         if (!eventHub->HasOnDragStart() && !pattern->DefaultSupportDrag()) {
-            TAG_LOGW(AceLogTag::ACE_GESTURE, "Default support for drag and drop, but there is no onDragStart function.");
             return false;
         }
     } else {
         if (frameNode->IsUserSet()) {
-            TAG_LOGW(AceLogTag::ACE_GESTURE, "User settings cannot be dragged");
             return false;
         }
         if (!eventHub->HasOnDragStart() && !pattern->DefaultSupportDrag()) {
-            TAG_LOGW(AceLogTag::ACE_GESTURE, "The default does not support drag and drop, and there is no onDragStart function.");
             return false;
         }
     }
@@ -458,7 +450,6 @@ void GestureEventHub::ResetDragActionForWeb()
 void GestureEventHub::StartDragTaskForWeb()
 {
     if (!isReceivedDragGestureInfo_) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Not received drag info, wait ark drag start");
         return;
     }
 
@@ -538,7 +529,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
         result.SetY(1.0f - size.Height());
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE, "Get pixelMap offset is %{public}f and %{public}f",
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Get pixelMap offset is x = %{public}f and y = %{public}f",
             result.GetX(), result.GetY());
     }
     return result;
@@ -610,11 +601,7 @@ std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEve
         Msdp::DeviceStatus::ShadowInfo shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
         int ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateShadowPic(shadowInfo);
         if (ret != 0) {
-            TAG_LOGW(AceLogTag::ACE_GESTURE, "InteractionManager: UpdateShadowPic error");
             return;
-        }
-        if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "In setThumbnailPixelMap callback, set DragWindowVisible true");
         }
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
         dragDropManager->SetIsDragWindowShow(true);
@@ -628,7 +615,6 @@ void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Web component receive drag start, need to let web kernel start drag action");
         gestureInfoForWeb_ = info;
         isReceivedDragGestureInfo_ = true;
     }
@@ -646,7 +632,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     if (!IsAllowedDrag(eventHub)) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGW(AceLogTag::ACE_GESTURE, "FrameNode is not allow drag.");
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "FrameNode is not allow drag");
         }
         HandleNotallowDrag(info);
         return;
@@ -665,7 +651,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Web on drag start");
         event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
         event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
     } else {
@@ -688,7 +673,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         auto callback = [pipeline, info, gestureEventHubPtr = AceType::Claim(this), frameNode, dragDropInfo, event](
                             std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
             if (pixelMap == nullptr) {
-                TAG_LOGW(AceLogTag::ACE_GESTURE, "%{public}s: failed to get pixelmap, return nullptr", __func__);
                 g_getPixelMapSucc = false;
             } else {
                 g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
@@ -729,7 +713,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(dragEvent);
     auto eventRet = dragEvent->GetResult();
     if (eventRet == DragRet::DRAG_FAIL || eventRet == DragRet::DRAG_CANCEL) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE, "HandleOnDragStart: User Set DRAG_FAIL or DRAG_CANCEL");
         return;
     }
     std::string udKey;
@@ -745,15 +728,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         recordsSize = recordSize > 1 ? recordSize : 1;
     }
     SetDragData(unifiedData, udKey);
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE, "HandleOnDragStart: setDragData finish, udKey is %{public}s", udKey.c_str());
-    }
 
     std::map<std::string, int64_t> summary;
     int32_t ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
-    if (ret != 0) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE, "HandleOnDragStart: UDMF GetSummary failed, ret %{public}d", ret);
-    }
     dragDropManager->SetSummaryMap(summary);
     std::shared_ptr<Media::PixelMap> pixelMap;
     if (g_getPixelMapSucc) {
@@ -794,7 +771,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
         dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE, "InteractionManager: drag start error");
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag start error");
+        }
         return;
     }
     dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
@@ -804,7 +783,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     eventManager->SetIsDragging(true);
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_->GetIsNotInPreviewState()) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "Drag window start for not in previewState, set DragWindowVisible true");
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag window start for not in previewState, set DragWindowVisible true");
         }
         overlayManager->RemovePixelMap();
         pipeline->FlushPipelineImmediately();
@@ -812,14 +791,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON &&
                (dragDropInfo.pixelMap || dragDropInfo.customNode)) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "Drag window start for Mouse with custom pixelMap, set DragWindowVisible true");
+            TAG_LOGI(AceLogTag::ACE_DRAG,
+                "Drag window start for Mouse with custom pixelMap, set DragWindowVisible true");
         }
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
         dragDropManager->SetIsDragWindowShow(true);
     }
     dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
     if (!dragDropProxy_) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE, "HandleOnDragStart: drag start error");
         return;
     }
     CHECK_NULL_VOID(dragDropProxy_);
@@ -833,7 +812,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(pixelMap_, info);
     }
     if (!dragDropProxy_) {
-        LOGE("HandleOnDragStart: drag start error");
         return;
     }
 
@@ -878,7 +856,6 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
         if (eventHub->HasOnDrop() || eventHub->HasCustomerOnDrop()) {
             RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
             if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-                TAG_LOGI(AceLogTag::ACE_GESTURE, "Web on drag end");
                 event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
                 event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
             } else {
@@ -1087,12 +1064,13 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
 int32_t GestureEventHub::SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey)
 {
     if (unifiedData == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE, "HandleOnDragStart: SetDragData unifiedData is null");
         return -1;
     }
     int32_t ret = UdmfClient::GetInstance()->SetData(unifiedData, udKey);
     if (ret != 0) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE, "HandleOnDragStart: UDMF Setdata failed:%{public}d", ret);
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF Setdata failed:%{public}d", ret);
+        }
     }
     return ret;
 }

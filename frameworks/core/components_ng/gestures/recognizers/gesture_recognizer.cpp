@@ -77,7 +77,6 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             HandleTouchCancelEvent(point);
             break;
         default:
-            TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "Unknown touch type");
             break;
     }
     return true;
@@ -101,7 +100,6 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
             break;
         default:
             HandleTouchCancelEvent(event);
-            TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "Unknown touch type");
             break;
     }
     return true;
@@ -117,7 +115,6 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
 
     auto referee = GetCurrentGestureReferee();
     if (!referee) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "The referee is nullptr");
         recognizer->OnRejected();
         return;
     }

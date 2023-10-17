@@ -48,11 +48,11 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_DRAG, "AceDrag" },
     { AceLogTag::ACE_VIDEO, "AceVideo" },
     { AceLogTag::ACE_GESTURE, "AceGesture" },
-    { AceLogTag::ACE_GESTURE_RECOGNIZER, "AceGestureRecognizer" },
     { AceLogTag::ACE_COMPONENT_SNAPSHOT, "AceComponentSnapshot" },
-    { AceLogTag::ACE_COMPONENT_SNAPSHOT, "AceComponentUtils" },
     { AceLogTag::ACE_FONT, "AceFont" },
     { AceLogTag::ACE_TEXTINPUT, "AceTextInput" },
+    { AceLogTag::ACE_SWIPER, "AceSwiper" },
+    { AceLogTag::ACE_TABS, "AceTabs" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";

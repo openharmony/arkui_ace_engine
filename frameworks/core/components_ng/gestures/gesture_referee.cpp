@@ -27,7 +27,6 @@ void GestureScope::AddMember(const RefPtr<NGGestureRecognizer>& recognizer)
     CHECK_NULL_VOID(recognizer);
 
     if (Existed(recognizer)) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Gesture recognizer has already been added");
         return;
     }
 
@@ -87,7 +86,6 @@ RefPtr<NGGestureRecognizer> GestureScope::UnBlockGesture()
                                      (recognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED));
         });
     if (iter == recognizers_.end()) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "No blocked gesture in recognizers");
         return nullptr;
     }
     return (*iter).Upgrade();
@@ -148,7 +146,6 @@ bool GestureScope::QueryAllDone(size_t touchId)
 
 void GestureScope::Close(bool isBlocked)
 {
-    TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "Force close gesture scope of id %{public}d", static_cast<int32_t>(touchId_));
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
         if (recognizer) {
@@ -162,7 +159,6 @@ void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& re
     RefPtr<GestureScope> scope;
     const auto iter = gestureScopes_.find(touchId);
     if (iter != gestureScopes_.end()) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Gesture scope of touch id %{public}d already exists", static_cast<int32_t>(touchId));
         scope = iter->second;
     } else {
         scope = MakeRefPtr<GestureScope>(touchId);
@@ -238,7 +234,6 @@ void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, G
             HandleRejectDisposal(recognizer);
             break;
         default:
-            TAG_LOGW(AceLogTag::ACE_GESTURE_RECOGNIZER, "Handle known gesture disposal %{public}d", disposal);
             break;
     }
 }
@@ -351,7 +346,6 @@ bool GestureReferee::HasGestureAccepted(size_t touchId) const
 {
     const auto& iter = gestureScopes_.find(touchId);
     if (iter == gestureScopes_.end()) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE_RECOGNIZER, "Gesture scope is not exist");
         return false;
     }
 

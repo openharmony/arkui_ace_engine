@@ -28,10 +28,8 @@ RefPtr<NGGestureRecognizer> PanGesture::CreateRecognizer()
 
     RefPtr<PanRecognizer> panRecognizer;
     if (panGestureOption_) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(panGestureOption_)");
         panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption_);
     } else {
-        TAG_LOGD(AceLogTag::ACE_GESTURE_RECOGNIZER, "AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(fingers_, direction_, distance)");
         panRecognizer = AceType::MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
     }
     if (onActionStartId_) {

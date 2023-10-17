@@ -78,7 +78,6 @@ void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto children = frameNode->GetChildren();
     if (children.empty()) {
-        LOGW("text has no child node.");
         return;
     }
     auto textWrapperList = layoutWrapper->GetAllChildrenWithBuild();

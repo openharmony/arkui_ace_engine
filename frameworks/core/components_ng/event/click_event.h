@@ -61,7 +61,6 @@ public:
 
     void SetUserCallback(GestureEventFunc&& callback)
     {
-        TAG_LOGD(AceLogTag::ACE_GESTURE_TAP, "Set usercallback");
         if (userCallback_) {
             userCallback_.Reset();
         }
@@ -71,7 +70,6 @@ public:
     void ClearUserCallback()
     {
         // When the event param is undefined, it will clear the callback.
-        TAG_LOGD(AceLogTag::ACE_GESTURE_TAP, "Clear user callback");
         if (userCallback_) {
             userCallback_.Reset();
         }
