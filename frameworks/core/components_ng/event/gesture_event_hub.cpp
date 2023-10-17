@@ -755,10 +755,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     dragDropManager->SetSummaryMap(summary);
     std::shared_ptr<Media::PixelMap> pixelMap;
-    if (g_getPixelMapSucc) {
-        pixelMap = g_pixelMap->GetPixelMapSharedPtr();
-    } else if (dragDropInfo.pixelMap) {
+    if (dragDropInfo.pixelMap != nullptr) {
         pixelMap = dragDropInfo.pixelMap->GetPixelMapSharedPtr();
+    } else if (g_getPixelMapSucc) {
+        pixelMap = g_pixelMap->GetPixelMapSharedPtr();
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         dragDropManager->SetIsMouseDrag(true);
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);

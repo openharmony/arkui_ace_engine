@@ -4332,13 +4332,7 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
             return dragDropInfo;
         }
 
-        auto node = ParseDragNode(ret);
-        if (node) {
-            LOGI("use custom builder param.");
-            dragDropInfo.node = node;
-            return dragDropInfo;
-        }
-
+        dragDropInfo.node = ParseDragNode(ret);
         auto builderObj = JSRef<JSObject>::Cast(ret);
 #if defined(PIXEL_MAP_SUPPORTED)
         auto pixmap = builderObj->GetProperty("pixelMap");
@@ -4346,8 +4340,6 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 #endif
         auto extraInfo = builderObj->GetProperty("extraInfo");
         ParseJsString(extraInfo, dragDropInfo.extraInfo);
-        node = ParseDragNode(builderObj->GetProperty("builder"));
-        dragDropInfo.node = node;
         return dragDropInfo;
     };
     ViewAbstractModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
