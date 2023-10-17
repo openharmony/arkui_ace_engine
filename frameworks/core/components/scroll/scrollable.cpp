@@ -152,6 +152,10 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
                 scrollEvent.eventType = "scrollend";
                 context->SendEventToAccessibility(scrollEvent);
             }
+            if (scroll->actionEnd_) {
+                auto gestureEvent = info;
+                scroll->actionEnd_(gestureEvent);
+            }
         }
     };
 

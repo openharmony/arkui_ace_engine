@@ -294,6 +294,7 @@ private:
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
+    void HandleScrollDragEnd(float offsetX, float offsetY, float velocity);
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
