@@ -44,7 +44,6 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT();
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
-        LOGW("Size is infinity.");
         geometryNode->SetFrameSize(SizeF());
         return;
     }
@@ -109,7 +108,6 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
     if (!frameSize.IsPositive()) {
-        LOGW("Frame size is not positive.");
         return;
     }
 
