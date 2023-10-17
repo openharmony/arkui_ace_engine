@@ -18,6 +18,7 @@
 #include "adapter/ohos/osal/resource_theme_style.h"
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/osal/resource_convertor.h"
+#include "core/common/container.h"
 #include "core/components/theme/theme_attributes.h"
 
 namespace OHOS::Ace {
@@ -130,14 +131,20 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     if (resConfig != nullptr) {
         auto configRet = newResMgr->UpdateResConfig(*resConfig);
         LOGI("AddAppRes result=%{public}d, AddSysRes result=%{public}d,  UpdateResConfig result=%{public}d, "
-            "ori=%{public}d, dpi=%{public}f, device=%{public}d",
+             "ori=%{public}d, dpi=%{public}f, device=%{public}d",
             appResRet, sysResRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(),
             resConfig->GetDeviceType());
     }
-    
+
     Platform::AceApplicationInfoImpl::GetInstance().SetResourceManager(newResMgr);
     resourceManager_ = newResMgr;
     packagePathStr_ = appResPath;
+}
+
+RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName)
+{
+    return nullptr;
 }
 
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)

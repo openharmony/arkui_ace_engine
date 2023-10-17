@@ -17,6 +17,8 @@
 
 #include <functional>
 
+#include "base/log/log.h"
+
 #ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/lib/ui/ui_dart_state.h"
 
@@ -53,6 +55,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_window.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
 #include "core/components/theme/app_theme.h"
@@ -73,6 +76,20 @@ const char UNICODE_SETTING_TAG[] = "unicodeSetting";
 const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
+
+void SaveResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName, RefPtr<ResourceAdapter>& resourceAdapter)
+{
+    auto defaultBundleName = "";
+    auto defaultModuleName = "";
+    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+    LOGI("Save default adapter");
+
+    if (!bundleName.empty() && !moduleName.empty()) {
+        LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName.c_str(), moduleName.c_str());
+        ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+    }
+}
 } // namespace
 
 std::once_flag AceContainer::onceFlag_;
@@ -555,6 +572,9 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
         return;
     }
     themeManager->UpdateConfig(resConfig);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    }
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_, config = resConfig,
             weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
@@ -780,6 +800,9 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
         return;
     }
     themeManager->UpdateConfig(resConfig);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    }
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_,
             weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
@@ -868,10 +891,19 @@ void AceContainer::AttachView(
     ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::Create();
+        resourceAdapter->Init(resourceInfo);
+        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
+        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+    }
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource, load theme map.
-        themeManager->InitResource(resourceInfo_);
+        if (!SystemProperties::GetResourceDecoupling()) {
+            themeManager->InitResource(resourceInfo_);
+        }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
@@ -984,10 +1016,20 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
     ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::Create();
+        resourceAdapter->Init(resourceInfo_);
+        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
+        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+    }
+
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource, load theme map.
-        themeManager->InitResource(resourceInfo_);
+        if (!SystemProperties::GetResourceDecoupling()) {
+            themeManager->InitResource(resourceInfo_);
+        }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {

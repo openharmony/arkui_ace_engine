@@ -31,12 +31,14 @@
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
 #include "base/log/log.h"
+#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
@@ -47,6 +49,7 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "bridge/js_frontend/js_frontend.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
@@ -56,6 +59,7 @@
 #include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
 #include "core/common/plugin_manager.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
@@ -72,7 +76,6 @@
 
 namespace OHOS::Ace::Platform {
 namespace {
-
 
 constexpr uint32_t DIRECTION_OR_DPI_KEY = 0b1100;
 
@@ -96,6 +99,38 @@ const char* GetDeclarativeSharedLibrary()
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
 }
 
+void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
+    const ColorScheme& colorScheme, const ResourceInfo& resourceInfo,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
+    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    auto resourceAdapter = ResourceAdapter::CreateV2();
+    resourceAdapter->Init(resourceInfo);
+
+    ThemeConstants::InitDeviceType();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+    pipelineContext->SetThemeManager(themeManager);
+    themeManager->SetColorScheme(colorScheme);
+    themeManager->LoadCustomTheme(assetManager);
+    themeManager->LoadResourceThemes();
+
+    auto defaultBundleName = "";
+    auto defaultModuleName = "";
+    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+    if (context) {
+        auto bundleName = context->GetBundleName();
+        auto moduleName = context->GetHapModuleInfo()->name;
+        if (!bundleName.empty() && !moduleName.empty()) {
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+        }
+    } else if (abilityInfo) {
+        auto bundleName = abilityInfo->bundleName;
+        auto moduleName = abilityInfo->moduleName;
+        if (!bundleName.empty() && !moduleName.empty()) {
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+        }
+    }
+}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -1259,16 +1294,22 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
 
     // Load custom style at UI thread before frontend attach, for loading style before building tree.
     auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
-                                    colorScheme = colorScheme_, resourceInfo = resourceInfo_]() {
+                                    colorScheme = colorScheme_, resourceInfo = resourceInfo_,
+                                    context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock()]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
-        LOGD("UIContent load theme");
-        ThemeConstants::InitDeviceType();
-        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
-        pipelineContext->SetThemeManager(themeManager);
-        themeManager->InitResource(resourceInfo);
-        themeManager->SetColorScheme(colorScheme);
-        themeManager->LoadCustomTheme(assetManager);
-        themeManager->LoadResourceThemes();
+        LOGD("UIContent load theme, Resource decoupling: %{public}d", SystemProperties::GetResourceDecoupling());
+
+        if (SystemProperties::GetResourceDecoupling()) {
+            InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo);
+        } else {
+            ThemeConstants::InitDeviceType();
+            auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+            pipelineContext->SetThemeManager(themeManager);
+            themeManager->InitResource(resourceInfo);
+            themeManager->SetColorScheme(colorScheme);
+            themeManager->LoadCustomTheme(assetManager);
+            themeManager->LoadResourceThemes();
+        }
     };
 
     auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
@@ -1522,6 +1563,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    }
     themeManager->LoadResourceThemes();
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
@@ -1655,12 +1699,21 @@ void AceContainer::UpdateResource()
 {
     // Reload theme and resource
     CHECK_NULL_VOID(pipelineContext_);
-    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
-    pipelineContext_->SetThemeManager(themeManager);
-    themeManager->InitResource(resourceInfo_);
-    themeManager->SetColorScheme(colorScheme_);
-    themeManager->LoadCustomTheme(assetManager_);
-    themeManager->LoadResourceThemes();
+
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().Reset();
+        auto context = runtimeContext_.lock();
+        auto abilityInfo = abilityInfo_.lock();
+        InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo);
+    } else {
+        ThemeConstants::InitDeviceType();
+        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+        pipelineContext_->SetThemeManager(themeManager);
+        themeManager->InitResource(resourceInfo_);
+        themeManager->SetColorScheme(colorScheme_);
+        themeManager->LoadCustomTheme(assetManager_);
+        themeManager->LoadResourceThemes();
+    }
 
     auto cache = pipelineContext_->GetImageCache();
     if (cache) {

@@ -262,6 +262,18 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
     return RefPtr<ResourceAdapter>();
 }
 
+RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName)
+{
+    return nullptr;
+}
+
+ResourceAdapterImpl::ResourceAdapterImpl(std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
+{
+    resourceManager_ = resourceManager;
+    sysResourceManager_ = resourceManager;
+}
+
 void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 {
     std::vector<std::string> hapFiles;

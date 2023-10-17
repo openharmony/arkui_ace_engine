@@ -32,6 +32,7 @@
 #include "adapter/preview/external/multimodalinput/key_event.h"
 #include "adapter/preview/external/multimodalinput/pointer_event.h"
 #include "adapter/preview/inspector/inspector_client.h"
+#include "base/log/log_wrapper.h"
 #include "frameworks/base/log/log.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -199,6 +200,11 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     : instanceId_(ACE_INSTANCE_ID), runtime_(runtime), isFormRender_(isCard)
 {
     LOGI("The constructor is used to support ets card, isFormRender_ = %{public}d", isFormRender_);
+    if (context) {
+        auto options = context->GetOptions();
+        bundleName_ = options.bundleName;
+        moduleName_ = options.moduleName;
+    }
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability) : instanceId_(ACE_INSTANCE_ID) {}
@@ -263,6 +269,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     CHECK_NULL_VOID(container);
     container->SetContainerSdkPath(containerSdkPath_);
     container->SetIsFRSCardContainer(false);
+    container->SetBundleName(bundleName_);
+    container->SetModuleName(moduleName_);
+    LOGI("Save bundle %{public}s, module %{public}s", bundleName_.c_str(), moduleName_.c_str());
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
         container->SetSharedRuntime(runtime_);

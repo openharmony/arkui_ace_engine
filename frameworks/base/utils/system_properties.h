@@ -380,6 +380,8 @@ public:
 
     static bool IsFormAnimationLimited();
 
+    static bool GetResourceDecoupling();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -417,6 +419,7 @@ private:
     static int32_t astcPsnr_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
+    static bool resourceDecoupling_;
 };
 
 } // namespace OHOS::Ace
