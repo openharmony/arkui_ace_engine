@@ -1115,6 +1115,10 @@ private:
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
     bool IsSingleHandle() const;
+    void SetIsSingleHandle(bool isSingleHandle)
+    {
+        isSingleHandle_ = isSingleHandle;
+    }
 
     RectF frameRect_;
     RectF contentRect_;

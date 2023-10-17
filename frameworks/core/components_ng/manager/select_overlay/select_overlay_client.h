@@ -136,6 +136,13 @@ public:
 
     void UpdateSelectMenuVisibility(bool isVisible);
 
+    bool IsShowingSingleHandle()
+    {
+        auto proxy = GetSelectOverlayProxy();
+        CHECK_NULL_RETURN(proxy, false);
+        return proxy->IsSingleHandle();
+    }
+
 protected:
     const RefPtr<SelectOverlayProxy>& GetSelectOverlayProxy()
     {
@@ -149,6 +156,7 @@ protected:
     }
 
 private:
+    void UpdateShowingSelectOverlay(HandleShowMode mode, const SelectOverlayInfo& overlayInfo);
     ParentScrollableCallback scrollCallback_;
     ScrollableParentInfo scrollableParentInfo_;
     SelectOverlayInfo selectOverlayInfo_;

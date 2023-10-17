@@ -145,6 +145,7 @@ public:
 
     bool IsMenuShow();
     bool IsHandleShow();
+    bool IsSingleHandle();
 
     void SetHasShowAnimation(bool animation)
     {

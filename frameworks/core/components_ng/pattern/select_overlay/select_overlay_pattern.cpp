@@ -549,6 +549,12 @@ bool SelectOverlayPattern::IsHandleShow()
     return info_->firstHandle.isShow || info_->secondHandle.isShow;
 }
 
+bool SelectOverlayPattern::IsSingleHandle()
+{
+    CHECK_NULL_RETURN(info_, false);
+    return info_->isSingleHandle;
+}
+
 void SelectOverlayPattern::StartHiddenHandleTask()
 {
     auto host = GetHost();

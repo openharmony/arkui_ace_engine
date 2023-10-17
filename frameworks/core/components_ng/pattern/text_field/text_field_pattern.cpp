@@ -324,7 +324,7 @@ void TextFieldPattern::UpdateCaretInfoToController() const // todo确定更新�
 // return: true if text rect offset will NOT be further changed by caret position
 void TextFieldPattern::UpdateCaretRect()
 {
-    CHECK_NULL_VOID(!selectController_->IsSelected());
+    CHECK_NULL_VOID(!IsSelected());
     auto focusHub = GetFocusHub();
     if (focusHub && !focusHub->IsCurrentFocus()) {
         CloseSelectOverlay(true);
@@ -629,12 +629,13 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showH
 {
     // todo
     LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
-    CloseSelectOverlay();
     StopTwinkling();
     UpdateSelection(start, end);
     AdjustTextSelectionRectOffsetX();
     if (showHandle) {
         ProcessOverlay();
+    } else {
+        CloseSelectOverlay();
     }
     UpdateCaretInfoToController();
     auto tmpHost = GetHost();
@@ -871,8 +872,8 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     } else {
         UpdateSelection(0, textSize);
     }
-    if (selectController_->IsSelected()) {
-        isSingleHandle_ = false;
+    if (IsSelected()) {
+        SetIsSingleHandle(false);
     }
     updateSelectionAfterObscure_ = ResetObscureTickCountDown();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -885,9 +886,9 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
         textRect_.SetLeft(textRect_.GetX() - offsetX);
     }
     selectController_->MoveSecondHandleToContentRect(textSize);
-    CloseSelectOverlay(true);
     StopTwinkling();
     if (isKeyEvent || inlineSelectAllFlag_) {
+        CloseSelectOverlay(true);
         return;
     }
     ProcessOverlay(true);
@@ -1421,6 +1422,11 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     } else {
         HandleSingleClickEvent(info);
     }
+    if (ResetObscureTickCountDown()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
@@ -1436,12 +1442,11 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
         return;
     }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CloseSelectOverlay(true);
-    ResetObscureTickCountDown();
     auto hasFocus = HasFocus();
     if (!hasFocus) {
         if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
             LOGW("Request focus failed, cannot open input method");
+            CloseSelectOverlay(true);
             StopTwinkling();
             return;
         }
@@ -1449,10 +1454,12 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     auto lastCaretIndex = selectController_->GetCaretIndex();
     selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
     StartTwinkling();
-    isSingleHandle_ = true;
+    SetIsSingleHandle(true);
     if (lastCaretIndex == selectController_->GetCaretIndex() && hasFocus && caretStatus_ == CaretStatus::SHOW &&
-        !isUsingMouse_ && !selectController_->IsSelected()) {
+        !isUsingMouse_ && !IsSelected()) {
         ProcessOverlay(true);
+    } else {
+        CloseSelectOverlay(true);
     }
 
     if (RequestKeyboard(false, true, true)) {
@@ -1466,12 +1473,11 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     selectController_->UpdateSelectByOffset(info.GetLocalLocation());
-    if (selectController_->IsSelected()) {
+    if (IsSelected()) {
         StopTwinkling();
-        isSingleHandle_ = false;
+        SetIsSingleHandle(false);
     }
     if (!isUsingMouse_) {
-        CloseSelectOverlay();
         ProcessOverlay(true);
     }
     auto host = GetHost();
@@ -1904,8 +1910,8 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     selectController_->UpdateSelectByOffset(info.GetLocalLocation());
     if (IsSelected()) {
         StopTwinkling();
-        isSingleHandle_ = false;
     }
+    SetIsSingleHandle(!IsSelected());
     ProcessOverlay(true);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -2341,7 +2347,7 @@ void TextFieldPattern::HandleLeftMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
 {
-    if (selectController_->IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
     }
@@ -4728,7 +4734,7 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
 
 bool TextFieldPattern::CheckSelectionRectVisible()
 {
-    if (!selectController_->IsSelected()) {
+    if (!IsSelected()) {
         return false;
     }
     std::vector<RectF> selectedRects;
@@ -4873,7 +4879,7 @@ void TextFieldPattern::UpdateSelectController()
 
 bool TextFieldPattern::IsSingleHandle() const
 {
-    return contentController_->IsEmpty() || !selectController_->IsSelected();
+    return contentController_->IsEmpty() || !IsSelected();
 }
 
 void TextFieldPattern::OnAttachToFrameNode()
@@ -4894,7 +4900,7 @@ bool TextFieldPattern::NeedPaintSelect()
     CHECK_NULL_RETURN(paintProperty, false);
     auto firstHandle = paintProperty->GetFirstHandleInfo();
     auto secondHandle = paintProperty->GetSecondHandleInfo();
-    if (!selectController_->IsSelected()) {
+    if (!IsSelected()) {
         if (!firstHandle.has_value() || !secondHandle.has_value()) {
             paintProperty->UpdateFirstHandleInfo(selectController_->GetCaretInfo());
             paintProperty->UpdateSecondHandleInfo(selectController_->GetCaretInfo());

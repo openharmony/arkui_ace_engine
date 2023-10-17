@@ -64,6 +64,7 @@ public:
     void DisableMenu(bool isDisabled);
     bool IsMenuShow();
     bool IsHandleShow();
+    bool IsSingleHandle();
 
 private:
     int32_t selectOverlayId_ = 0;

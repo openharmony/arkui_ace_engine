@@ -90,9 +90,7 @@ void SelectOverlayClient::RequestOpenSelectOverlay(ClientOverlayInfo showOverlay
     } else {
         showMode = HandleShowMode::NONE;
     }
-    if (!selectOverlayProxy_ || selectOverlayProxy_->IsClosed()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
+    auto getSelectOverlay = [&]() -> std::optional<SelectOverlayInfo> {
         SelectOverlayInfo overlayInfo = selectOverlayInfo_;
         if (showOverlayInfo.overlayInfoModifier) {
             showOverlayInfo.overlayInfoModifier(overlayInfo);
@@ -104,23 +102,58 @@ void SelectOverlayClient::RequestOpenSelectOverlay(ClientOverlayInfo showOverlay
         if (!GetMenuOptionItems().empty()) {
             overlayInfo.menuOptionItems = GetMenuOptionItems();
         }
-        if (!OnPreShowSelectOverlay(overlayInfo, showOverlayInfo.extraInfo)) {
-            return;
+        if (OnPreShowSelectOverlay(overlayInfo, showOverlayInfo.extraInfo)) {
+            return overlayInfo;
         }
+        return std::nullopt;
+    };
+    auto currentShowMode = IsShowingSingleHandle() ? HandleShowMode::SINGLE : HandleShowMode::DOUBLE;
+    if (showMode != currentShowMode) {
+        RequestCloseSelectOverlay(true);
+    }
+    if (SelectOverlayIsOn()) {
+        auto overlayInfo = getSelectOverlay();
+        CHECK_NULL_VOID(overlayInfo);
+        UpdateShowingSelectOverlay(showMode, *overlayInfo);
+        return;
+    }
+    if (!SelectOverlayIsOn()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayInfo = getSelectOverlay();
+        CHECK_NULL_VOID(overlayInfo);
         LOGD("first handle visibility %{public}d, second handle visibility %{public}d, select rect visibility "
              "%{public}d",
             overlayInfo.firstHandle.isShow, overlayInfo.secondHandle.isShow, overlayInfo.isSelectRegionVisible);
         selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(
-            overlayInfo, WeakClaim(this), showOverlayInfo.animation);
+            *overlayInfo, WeakClaim(this), showOverlayInfo.animation);
         StartListeningScrollableParent(GetClientHost());
+    }
+}
+
+void SelectOverlayClient::UpdateShowingSelectOverlay(HandleShowMode mode, const SelectOverlayInfo& overlayInfo)
+{
+    if (mode == HandleShowMode::SINGLE) {
+        auto proxy = GetSelectOverlayProxy();
+        CHECK_NULL_VOID(proxy);
+        proxy->UpdateSelectMenuInfo([newMenuInfo = overlayInfo.menuInfo](SelectMenuInfo& menuInfo) {
+            menuInfo.showPaste = newMenuInfo.showPaste;
+            menuInfo.showCopyAll = true;
+        });
+        proxy->UpdateSecondSelectHandleInfo(overlayInfo.secondHandle);
         return;
     }
-    if (showMode == HandleShowMode::DOUBLE) {
-        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(*firstHandleInfo, *secondHandleInfo);
-        return;
-    }
-    if (showMode == HandleShowMode::SINGLE) {
-        selectOverlayProxy_->UpdateSecondSelectHandleInfo(*secondHandleInfo);
+
+    if (mode == HandleShowMode::DOUBLE) {
+        auto proxy = GetSelectOverlayProxy();
+        CHECK_NULL_VOID(proxy);
+        proxy->UpdateSelectMenuInfo([newMenuInfo = overlayInfo.menuInfo](SelectMenuInfo& menuInfo) {
+            menuInfo.showPaste = newMenuInfo.showPaste;
+            menuInfo.showCopyAll = newMenuInfo.showCopyAll;
+            menuInfo.showCopy = newMenuInfo.showCopy;
+            menuInfo.showCut = newMenuInfo.showCut;
+        });
+        proxy->UpdateFirstAndSecondHandleInfo(overlayInfo.firstHandle, overlayInfo.secondHandle);
     }
 }
 

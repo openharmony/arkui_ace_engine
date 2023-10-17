@@ -146,4 +146,11 @@ bool SelectOverlayProxy::IsHandleShow()
     CHECK_NULL_RETURN(pattern, false);
     return pattern->IsHandleShow();
 }
+
+bool SelectOverlayProxy::IsSingleHandle()
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsSingleHandle();
+}
 } // namespace OHOS::Ace::NG
