@@ -454,6 +454,6 @@ bool SystemProperties::IsFormAnimationLimited()
 
 bool SystemProperties::GetResourceDecoupling()
 {
-    return system::GetBoolParameter("resource.decoupling", true);
+    return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
 }
 } // namespace OHOS::Ace

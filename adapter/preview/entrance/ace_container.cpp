@@ -76,6 +76,20 @@ const char UNICODE_SETTING_TAG[] = "unicodeSetting";
 const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
+
+void SaveResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName, RefPtr<ResourceAdapter>& resourceAdapter)
+{
+    auto defaultBundleName = "";
+    auto defaultModuleName = "";
+    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+    LOGI("Save default adapter");
+
+    if (!bundleName.empty() && !moduleName.empty()) {
+        LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName.c_str(), moduleName.c_str());
+        ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+    }
+}
 } // namespace
 
 std::once_flag AceContainer::onceFlag_;
@@ -881,16 +895,7 @@ void AceContainer::AttachView(
     if (SystemProperties::GetResourceDecoupling()) {
         auto resourceAdapter = ResourceAdapter::Create();
         resourceAdapter->Init(resourceInfo);
-
-        auto defaultBundleName = "";
-        auto defaultModuleName = "";
-        ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
-        LOGI("Save default adapter");
-
-        if (!bundleName_.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName_, moduleName, resourceAdapter);
-        }
-
+        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
         themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     }
     if (themeManager) {
@@ -1011,19 +1016,11 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
     ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
-    
+
     if (SystemProperties::GetResourceDecoupling()) {
         auto resourceAdapter = ResourceAdapter::Create();
         resourceAdapter->Init(resourceInfo_);
-
-        auto defaultBundleName = "";
-        auto defaultModuleName = "";
-        ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
-
-        if (!bundleName_.empty() && !moduleName_.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName_, moduleName_, resourceAdapter);
-        }
-
+        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
         themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     }
 

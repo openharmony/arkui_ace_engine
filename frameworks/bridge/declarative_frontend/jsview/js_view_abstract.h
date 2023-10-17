@@ -63,6 +63,8 @@ enum class ResourceType : uint32_t {
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
 RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
+RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject);
+RefPtr<ResourceWrapper> CreateResourceWrapper();
 
 class JSViewAbstract {
 public:
@@ -375,23 +377,7 @@ public:
         }
 
         auto resourceObject = GetResourceObject(jsObj);
-        RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-        RefPtr<ThemeConstants> themeConstants = nullptr;
-        if (SystemProperties::GetResourceDecoupling()) {
-            resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-            if (!resourceAdapter) {
-                LOGW("resourceAdapter is nullptr");
-                return false;
-            }
-        } else {
-            themeConstants = GetThemeConstants();
-            if (!themeConstants) {
-                LOGW("themeConstants is nullptr");
-                return false;
-            }
-        }
-        auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-
+        auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
         auto resIdNum = resId->ToNumber<int32_t>();
         if (resIdNum == -1) {
             if (!IsGetResourceByName(jsObj)) {

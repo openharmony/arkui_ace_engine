@@ -1043,6 +1043,49 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
     return resourceObject;
 }
 
+RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject)
+{
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return nullptr;
+        }
+    } else {
+        themeConstants = JSViewAbstract::GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return nullptr;
+        }
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    return resourceWrapper;
+}
+
+RefPtr<ResourceWrapper> CreateResourceWrapper()
+{
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return nullptr;
+        }
+    } else {
+        themeConstants = JSViewAbstract::GetThemeConstants();
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return nullptr;
+        }
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    return resourceWrapper;
+}
+
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     uint32_t result = origin;
@@ -3437,22 +3480,11 @@ bool JSViewAbstract::ParseJsDimensionNG(
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -3513,22 +3545,11 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -3605,22 +3626,11 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
     auto resType = type->ToNumber<uint32_t>();
 
     auto resourceObject = GetResourceObject(jsObj);
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     if (resId == -1) {
         if (!IsGetResourceByName(jsObj)) {
@@ -3697,22 +3707,11 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -3742,22 +3741,11 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -3842,22 +3830,11 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -3910,22 +3887,11 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
     auto resIdNum = resourceObject->GetId();
@@ -3996,22 +3962,11 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNull() && !type->IsNull() && type->IsNumber() && resId->IsNumber()) {
         auto resourceObject = GetResourceObject(jsObj);
-        RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-        RefPtr<ThemeConstants> themeConstants = nullptr;
-        if (SystemProperties::GetResourceDecoupling()) {
-            resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-            if (!resourceAdapter) {
-                LOGW("resourceAdapter is nullptr");
-                return false;
-            }
-        } else {
-            themeConstants = GetThemeConstants(jsObj);
-            if (!themeConstants) {
-                LOGW("themeConstants is nullptr");
-                return false;
-            }
+        auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+        if (!resourceWrapper) {
+            LOGD("resourceWrapper is null");
+            return false;
         }
-        auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
         if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
             JSRef<JSVal> args = jsObj->GetProperty("params");
@@ -4084,22 +4039,11 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -4178,22 +4122,11 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -4261,22 +4194,11 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
     }
 
     auto resourceObject = GetResourceObject(jsObj);
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
@@ -6198,22 +6120,11 @@ bool JSViewAbstract::ParseJsonDimension(
         return false;
     }
 
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants();
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper();
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     result = resourceWrapper->GetDimension(resId->GetUInt());
     return true;
 }
@@ -6254,22 +6165,11 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
     CHECK_NULL_RETURN(resType && resType->IsNumber(), false);
     auto type = resType->GetUInt();
 
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants();
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper();
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     if (type == static_cast<uint32_t>(ResourceType::STRING)) {
         auto numberString = resourceWrapper->GetString(id);
         return StringUtils::StringToDouble(numberString, result);
@@ -6316,22 +6216,11 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         LOGE("invalid resource id");
         return false;
     }
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
-        if (!resourceAdapter) {
-            LOGW("resourceAdapter is nullptr");
-            return false;
-        }
-    } else {
-        themeConstants = GetThemeConstants();
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
+    auto resourceWrapper = CreateResourceWrapper();
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     result = resourceWrapper->GetColor(resId->GetUInt());
     return true;
 }
