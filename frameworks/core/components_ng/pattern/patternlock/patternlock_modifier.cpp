@@ -887,4 +887,24 @@ void PatternLockModifier::SetCircleClip(RSCanvas& canvas)
     }
     canvas.ClipPath(path, RSClipOp::DIFFERENCE, true);
 }
+
+void PatternLockModifier::UpdateBoundsRect()
+{
+    auto offset = offset_->Get();
+    auto pathStrokeWidth = pathStrokeWidth_->Get();
+    auto sideLength = sideLength_->Get();
+
+    auto addDistance = circleRadius_->Get() * scaleLightRingRadiusEnd_ -
+                       sideLength_->Get() / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER;
+    if (pathStrokeWidth / 2.0f > addDistance) {
+        addDistance = pathStrokeWidth / 2.0f;
+    }
+
+    RectF boundsRect;
+    boundsRect.SetLeft((offset.GetX() - addDistance) < 0 ? (offset.GetX() - addDistance) : 0);
+    boundsRect.SetTop((offset.GetY() - addDistance) < 0 ? (offset.GetY() - addDistance) : 0);
+    boundsRect.SetWidth(sideLength + addDistance * 2.0f);
+    boundsRect.SetHeight(sideLength + addDistance * 2.0f);
+    SetBoundsRect(boundsRect);
+}
 } // namespace OHOS::Ace::NG
