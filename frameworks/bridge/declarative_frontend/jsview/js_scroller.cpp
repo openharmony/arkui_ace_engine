@@ -54,12 +54,6 @@ const LinearMapNode<RefPtr<Curve>> CURVE_MAP[] = {
 };
 
 constexpr double DEFAULT_DURATION = 1000.0;
-constexpr ScrollAlign ALIGN_TABLE[] = {
-    ScrollAlign::START,
-    ScrollAlign::CENTER,
-    ScrollAlign::END,
-    ScrollAlign::AUTO,
-};
 
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
 
