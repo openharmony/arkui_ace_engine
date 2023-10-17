@@ -109,11 +109,7 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
             RenderNode::Paint(context, offset);
         }
         if (column_ == 0 && row_ == 0) {
-#ifndef NEW_SKIA
-            skCanvas_->drawBitmap(skOffBitmap_, 0, 0);
-#else
             skCanvas_->drawImage(skOffBitmap_.asImage(), 0, 0, SkSamplingOptions());
-#endif
         }
     } else {
         BitmapMesh(context, offset);
@@ -140,7 +136,7 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
         for (const auto& item : SortChildrenByZIndex(children)) {
             Offset childOffset = offset;
             RefPtr<RosenRenderShape> renderShape = GetShapeChild(item, childOffset);
-            //type
+            // type
             if (renderShape) {
                 renderShape->PaintOnCanvas(tmpCanvas.get(), childOffset);
                 continue;
@@ -245,11 +241,8 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
     }
     if (column_ == 0 && row_ == 0) {
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-        skCanvas_->drawBitmap(skOffBitmap_, 0, 0);
-#else
+
         skCanvas_->drawImage(skOffBitmap_.asImage(), 0, 0, SkSamplingOptions());
-#endif
 #else
         canvas_->DrawBitmap(offBitmap_, 0, 0);
 #endif
@@ -268,11 +261,11 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
 }
 
 #ifndef USE_ROSEN_DRAWING
-void RosenRenderShapeContainer::DrawBitmapMesh(SkBitmap& bitmap, int column, int row,
-    const float* vertices, const int* colors, const SkPaint* paint)
+void RosenRenderShapeContainer::DrawBitmapMesh(
+    SkBitmap& bitmap, int column, int row, const float* vertices, const int* colors, const SkPaint* paint)
 #else
-void RosenRenderShapeContainer::DrawBitmapMesh(RSBitmap& bitmap, int column, int row,
-    const float* vertices, const int* colors, const RSBrush* brush)
+void RosenRenderShapeContainer::DrawBitmapMesh(
+    RSBitmap& bitmap, int column, int row, const float* vertices, const int* colors, const RSBrush* brush)
 #endif
 {
     const int vertCounts = (column + 1) * (row + 1);
@@ -316,7 +309,7 @@ void RosenRenderShapeContainer::DrawBitmapMesh(RSBitmap& bitmap, int column, int
     SkScalar y = 0;
     for (int i = 0; i <= row; i++) {
         if (i == row) {
-            y = height;  // to ensure numerically we hit h exactly
+            y = height; // to ensure numerically we hit h exactly
         }
         SkScalar x = 0;
         for (int j = 0; j < column; j++) {
@@ -352,13 +345,9 @@ void RosenRenderShapeContainer::DrawBitmapMesh(RSBitmap& bitmap, int column, int
     }
     sk_sp<SkShader> shader;
     sk_sp<SkImage> image = SkImage::MakeFromBitmap(bitmap);
-#ifdef USE_SYSTEM_SKIA
-    shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
-#elif defined(NEW_SKIA)
+
     shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions());
-#else
-    shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp);
-#endif
+
     tempPaint.setShader(shader);
     skCanvas_->drawVertices(builder.detach(), SkBlendMode::kModulate, tempPaint);
 #else

@@ -129,7 +129,6 @@ HWTEST_F(AceEngineSpecialTest, TriggerGarbageCollection01, TestSize.Level1)
      * @tc.steps: step2. TriggerGarbageCollection.
      */
     aceEngine.AddContainer(CONTAINER_INSTANCE_ID, MockContainer::container_);
-    EXPECT_CALL(*(MockContainer::container_), GetTaskExecutor()).Times(1).WillRepeatedly(Return(MOCK_TASK_EXECUTOR));
     EXPECT_CALL(*(MockContainer::container_), TriggerGarbageCollection()).Times(1);
     aceEngine.TriggerGarbageCollection();
 }

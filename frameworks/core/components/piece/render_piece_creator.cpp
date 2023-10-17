@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NEW_SKIA
-#include "flutter_render_piece.h"
-#endif
+
 #include "rosen_render_piece.h"
 
 namespace OHOS::Ace {
@@ -27,11 +25,7 @@ RefPtr<RenderNode> RenderPiece::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderPiece>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

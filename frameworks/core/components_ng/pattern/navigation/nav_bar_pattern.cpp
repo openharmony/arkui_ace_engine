@@ -573,6 +573,7 @@ void NavBarPattern::HandleOnDragStart(float offset)
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     titlePattern->SetCanOverDrag(false);
+    titlePattern->SetTitleScaleChange(true);
     titlePattern->ProcessTitleDragStart(offset);
 }
 
@@ -608,6 +609,7 @@ void NavBarPattern::OnCoordScrollStart()
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     titlePattern->SetCanOverDrag(true);
+    titlePattern->SetTitleScaleChange(false);
     titlePattern->ProcessTitleDragStart(offset_);
 }
 
@@ -746,15 +748,15 @@ void NavBarPattern::ResetAssociatedScroll()
     titlePattern->ResetAssociatedScroll();
 }
 
-void NavBarPattern::UpdateAssociatedScrollOffset(float offset)
+bool NavBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node)
 {
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_RETURN(hostNode, true);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
+    CHECK_NULL_RETURN(titleNode, true);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->UpdateAssociatedScrollOffset(offset);
+    CHECK_NULL_RETURN(titlePattern, true);
+    return titlePattern->UpdateAssociatedScrollOffset(offset, node);
 }
 
 bool NavBarPattern::IsTitleModeFree()

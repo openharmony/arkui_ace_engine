@@ -763,7 +763,22 @@ bool SubwindowOhos::CreateEventRunner()
     return true;
 }
 
-void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom)
+void SubwindowOhos::ClearToast()
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    ContainerScope scope(childContainerId_);
+    overlayManager->ClearToast();
+    context->FlushPipelineImmediately();
+    HideWindow();
+}
+
+void SubwindowOhos::ShowToastForAbility(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos ShowToastForAbility Show the toast");
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
@@ -783,15 +798,16 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
     ContainerScope scope(childContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
-    if (parentContainer->IsScenceBoardWindow()) {
+    if (parentContainer->IsScenceBoardWindow() || showMode == NG::ToastShowMode::TOP_MOST) {
         ShowWindow(false);
         ResizeWindow();
         window_->SetTouchable(false);
     }
-    delegate->ShowToast(message, duration, bottom);
+    delegate->ShowToast(message, duration, bottom, showMode);
 }
 
-void SubwindowOhos::ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom)
+void SubwindowOhos::ShowToastForService(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos ShowToastForService begin");
     bool ret = CreateEventRunner();
@@ -837,12 +853,13 @@ void SubwindowOhos::ShowToastForService(const std::string& message, int32_t dura
     }
 }
 
-void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void SubwindowOhos::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
-        ShowToastForService(message, duration, bottom);
+        ShowToastForService(message, duration, bottom, showMode);
     } else {
-        ShowToastForAbility(message, duration, bottom);
+        ShowToastForAbility(message, duration, bottom, showMode);
     }
 }
 

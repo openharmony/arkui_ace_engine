@@ -44,7 +44,7 @@ enum class CalendarPickerSelectedType {
 struct CalendarSettingData {
     PickerDate selectedDate = PickerDate::Current();
     std::optional<Dimension> dayRadius;
-    RefPtr<FrameNode> entryNode = nullptr;
+    WeakPtr<FrameNode> entryNode = nullptr;
 };
 
 struct CalendarPickerOption {

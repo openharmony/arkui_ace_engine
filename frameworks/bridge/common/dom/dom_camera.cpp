@@ -115,7 +115,6 @@ TakePhotoParams DOMCamera::GetParamFromJson(const std::string& args) const
 
     TakePhotoParams takePhotoParams;
     if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() == 0) {
-        LOGE("parse args error");
         return takePhotoParams;
     }
     std::unique_ptr<JsonValue> firstItem = argsValue->GetArrayItem(0);

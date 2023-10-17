@@ -24,6 +24,7 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
@@ -32,6 +33,7 @@
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
@@ -138,6 +140,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("width", &JSSwiper::SetWidth);
     JSClass<JSSwiper>::StaticMethod("size", &JSSwiper::SetSize);
     JSClass<JSSwiper>::StaticMethod("displayArrow", &JSSwiper::SetDisplayArrow);
+    JSClass<JSSwiper>::StaticMethod("nestedScroll", &JSSwiper::SetNestedScroll);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1070,4 +1073,27 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
     controller_->FinishAnimation();
 }
 
+void JSSwiper::SetNestedScroll(const JSCallbackInfo& args)
+{
+    // default value
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
+        return;
+    }
+    int32_t value = -1;
+    JSViewAbstract::ParseJsInt32(args[0], value);
+    auto mode = static_cast<NestedScrollMode>(value);
+    if (mode < NestedScrollMode::SELF_ONLY || mode > NestedScrollMode::SELF_FIRST) {
+        SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
+        return;
+    }
+    nestedOpt.forward = mode;
+    nestedOpt.backward = mode;
+    SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
+    args.ReturnSelf();
+}
 } // namespace OHOS::Ace::Framework

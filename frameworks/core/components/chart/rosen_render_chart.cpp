@@ -31,11 +31,7 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
-#ifndef NEW_SKIA
-#include "core/components/font/flutter_font_collection.h"
-#else
 #include "core/components/font/rosen_font_collection.h"
-#endif
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -139,8 +135,7 @@ void RosenRenderChart::PaintStylePoints(SkCanvas* canvas, const Rect& paintRegio
     }
 }
 #else
-void RosenRenderChart::PaintStylePoints(
-    RSCanvas* canvas, const Rect& paintRegion, const MainChart& chartData)
+void RosenRenderChart::PaintStylePoints(RSCanvas* canvas, const Rect& paintRegion, const MainChart& chartData)
 {
     RSPen pen;
     RSBrush brush;
@@ -177,11 +172,8 @@ void RosenRenderChart::PaintText(RSCanvas* canvas, const Rect& paintRegion, cons
     if (chartData.GetData().empty()) {
         return;
     }
-#ifndef NEW_SKIA
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
-#else
+
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-#endif
     if (!fontCollection) {
         LOGW("PaintText: fontCollection is null");
         return;
@@ -306,8 +298,8 @@ void RosenRenderChart::PaintPoint(SkCanvas* canvas, const Offset& offset, SkPain
     }
 }
 #else
-void RosenRenderChart::PaintPoint(RSCanvas* canvas, const Offset& offset, RSPen pen,
-    RSBrush brush, const PointInfo& point)
+void RosenRenderChart::PaintPoint(
+    RSCanvas* canvas, const Offset& offset, RSPen pen, RSBrush brush, const PointInfo& point)
 {
     pen.SetColor(point.GetFillColor().GetValue());
     brush.SetColor(point.GetFillColor().GetValue());
@@ -599,42 +591,34 @@ void RosenRenderChart::PaintLineEdge(
         }
         SkPoint points[2] = { SkPoint::Make(startOffset_.GetX(), 0.0f), SkPoint::Make(end, 0.0f) };
         SkColor colors[2] = { segmentInfo.GetSegmentColor().GetValue(), targetColor_.GetValue() };
-#ifdef USE_SYSTEM_SKIA
-        paint.setShader(
-            SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr));
-#else
+
         paint.setShader(SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
-#endif
     }
     if (gradientOfLine_ && drawGradient) {
         SkPoint points[2] = { SkPoint::Make(startGradientPoint_.GetX(), 0.0f),
             SkPoint::Make(endGradientPoint_.GetX(), 0.0f) };
         SkColor colors[2] = { segmentInfo.GetSegmentColor().ChangeAlpha(0).GetValue(),
             segmentInfo.GetSegmentColor().GetValue() };
-#ifdef USE_SYSTEM_SKIA
-        paint.setShader(
-            SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr));
-#else
+
         paint.setShader(SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
-#endif
     }
     paint.setStyle(SkPaint::Style::kStroke_Style);
     canvas->drawPath(path, paint);
 }
 #else
-void RosenRenderChart::PaintLineEdge(RSCanvas* canvas, RSPath& path,
-    const SegmentInfo segmentInfo, double thickness, bool drawGradient)
+void RosenRenderChart::PaintLineEdge(
+    RSCanvas* canvas, RSPath& path, const SegmentInfo segmentInfo, double thickness, bool drawGradient)
 {
     RSPen pen;
     pen.SetAntiAlias(true);
     pen.SetColor(segmentInfo.GetSegmentColor().GetValue());
     if (segmentInfo.GetLineType() == LineType::DASHED) {
         RSRecordingPath subPath;
-        subPath.AddRoundRect(RSRoundRect(
-            RSRect(0.0, -0.5 * thickness, segmentInfo.GetSolidWidth(), thickness - 0.5 * thickness),
-            0.5 * thickness, 0.5 * thickness));
-        pen.SetPathEffect(RSPathEffect::CreatePathDashEffect(subPath,
-            segmentInfo.GetSpaceWidth() + segmentInfo.GetSolidWidth(), 5.0f, RSPathDashStyle::MORPH));
+        subPath.AddRoundRect(
+            RSRoundRect(RSRect(0.0, -0.5 * thickness, segmentInfo.GetSolidWidth(), thickness - 0.5 * thickness),
+                0.5 * thickness, 0.5 * thickness));
+        pen.SetPathEffect(RSPathEffect::CreatePathDashEffect(
+            subPath, segmentInfo.GetSpaceWidth() + segmentInfo.GetSolidWidth(), 5.0f, RSPathDashStyle::MORPH));
     } else {
         pen.SetWidth(thickness);
     }
@@ -643,13 +627,11 @@ void RosenRenderChart::PaintLineEdge(RSCanvas* canvas, RSPath& path,
         if (NearZero(end)) {
             end = startOffset_.GetX() + paintWidth_;
         }
-        std::vector<RSPoint> points = { RSPoint(startOffset_.GetX(), 0.0f),
-            RSPoint(end, 0.0f) };
-        std::vector<RSColorQuad> colors = { segmentInfo.GetSegmentColor().GetValue(),
-            targetColor_.GetValue() };
+        std::vector<RSPoint> points = { RSPoint(startOffset_.GetX(), 0.0f), RSPoint(end, 0.0f) };
+        std::vector<RSColorQuad> colors = { segmentInfo.GetSegmentColor().GetValue(), targetColor_.GetValue() };
         std::vector<RSScalar> pos = { 0.0f };
-        pen.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
-            points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
+        pen.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
     }
     if (gradientOfLine_ && drawGradient) {
         std::vector<RSPoint> points = { RSPoint(startGradientPoint_.GetX(), 0.0f),
@@ -657,8 +639,8 @@ void RosenRenderChart::PaintLineEdge(RSCanvas* canvas, RSPath& path,
         std::vector<RSColorQuad> colors = { segmentInfo.GetSegmentColor().ChangeAlpha(0).GetValue(),
             segmentInfo.GetSegmentColor().GetValue() };
         std::vector<RSScalar> pos = { 0.0f };
-        pen.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
-            points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
+        pen.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
     }
     canvas->AttachPen(pen);
     canvas->DrawPath(path);
@@ -678,8 +660,8 @@ void RosenRenderChart::PaintLineGradient(
     canvas->drawPath(path, paint);
 }
 #else
-void RosenRenderChart::PaintLineGradient(RSCanvas* canvas, RSPath& path,
-    const Rect& paintRect, Color fillColor, const PointInfo& peekPoint)
+void RosenRenderChart::PaintLineGradient(
+    RSCanvas* canvas, RSPath& path, const Rect& paintRect, Color fillColor, const PointInfo& peekPoint)
 {
     RSPen pen;
     RSBrush brush;
@@ -703,11 +685,7 @@ sk_sp<SkShader> RosenRenderChart::CreateFillGradientShader(const Rect& paintRect
     SkPoint points[2] = { SkPoint::Make(paintRect.GetOffset().GetX(), top),
         SkPoint::Make(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() + paintRect.Height()) };
     SkColor colors[2] = { fillColor.GetValue(), fillColor.ChangeAlpha(0).GetValue() };
-#ifdef USE_SYSTEM_SKIA
-    return SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr);
-#else
     return SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr);
-#endif
 }
 #else
 std::shared_ptr<RSShaderEffect> RosenRenderChart::CreateFillGradientShader(
@@ -718,8 +696,7 @@ std::shared_ptr<RSShaderEffect> RosenRenderChart::CreateFillGradientShader(
     std::vector<RSColorQuad> colors = { fillColor.GetValue(), fillColor.ChangeAlpha(0).GetValue() };
     std::vector<RSScalar> pos = { 0.0f };
 
-    return RSShaderEffect::CreateLinearGradient(
-        points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP);
+    return RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP);
 }
 #endif
 
@@ -739,8 +716,8 @@ Offset RosenRenderChart::CalculateControlB(const Offset& cur, const Offset& next
 int32_t RosenRenderChart::PaintLine(
     uint32_t startIndex, const std::vector<LineInfo>& line, SkPath& path, const MainChart& data, const Rect& paintRect)
 #else
-int32_t RosenRenderChart::PaintLine(uint32_t startIndex, const std::vector<LineInfo>& line, RSPath& path,
-    const MainChart& data, const Rect& paintRect)
+int32_t RosenRenderChart::PaintLine(
+    uint32_t startIndex, const std::vector<LineInfo>& line, RSPath& path, const MainChart& data, const Rect& paintRect)
 #endif
 {
     uint32_t index = startIndex;
@@ -814,8 +791,8 @@ int32_t RosenRenderChart::PaintLine(uint32_t startIndex, const std::vector<LineI
 void RosenRenderChart::AddCubicPath(
     SkPath& path, const Rect& paintRect, const std::vector<LineInfo>& line, uint32_t index, bool isEnd)
 #else
-void RosenRenderChart::AddCubicPath(RSPath& path, const Rect& paintRect,
-    const std::vector<LineInfo>& line, uint32_t index, bool isEnd)
+void RosenRenderChart::AddCubicPath(
+    RSPath& path, const Rect& paintRect, const std::vector<LineInfo>& line, uint32_t index, bool isEnd)
 #endif
 {
     // use control point A = [(Xi + (Xi+1 - Xi-1) / 4), (Yi + (Yi+1 - Yi-1) / 4)]
@@ -936,15 +913,13 @@ void RosenRenderChart::PaintVerticalAxis(RenderContext& context, const Offset& o
 #else
     canvas->AttachPen(pen);
     for (int32_t index = 0; index < vertical_.tickNumber; index++) {
-        canvas->DrawLine(
-            RSPoint(offset.GetX() + paintRect.Width() - TICK_LENGTH, offset.GetY() + tickPosition),
+        canvas->DrawLine(RSPoint(offset.GetX() + paintRect.Width() - TICK_LENGTH, offset.GetY() + tickPosition),
             RSPoint(offset.GetX() + paintRect.Width(), offset.GetY() + tickPosition));
         tickPosition += tickOffset_;
     }
 
     canvas->DrawLine(RSPoint(offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY()),
-        RSPoint(
-            offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY() + paintRect.Height()));
+        RSPoint(offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY() + paintRect.Height()));
     canvas->DetachPen();
 #endif
 }
@@ -953,9 +928,8 @@ void RosenRenderChart::PaintVerticalAxis(RenderContext& context, const Offset& o
 void RosenRenderChart::PaintBar(SkCanvas* canvas, SkPaint& paint, const std::vector<LineInfo>& barGroupData,
     const Rect& paintRect, int32_t barGroupNum, int32_t barsAreaNum, int32_t barGroupIndex)
 #else
-void RosenRenderChart::PaintBar(RSCanvas* canvas, RSPen& pen, RSBrush brush,
-    const std::vector<LineInfo>& barGroupData, const Rect& paintRect, int32_t barGroupNum, int32_t barsAreaNum,
-    int32_t barGroupIndex)
+void RosenRenderChart::PaintBar(RSCanvas* canvas, RSPen& pen, RSBrush brush, const std::vector<LineInfo>& barGroupData,
+    const Rect& paintRect, int32_t barGroupNum, int32_t barsAreaNum, int32_t barGroupIndex)
 #endif
 {
     if (NearEqual(paintRect.Width(), 0.0) || NearEqual(paintRect.Height(), 0.0)) {
@@ -989,9 +963,8 @@ void RosenRenderChart::PaintBar(RSCanvas* canvas, RSPen& pen, RSBrush brush,
 #else
         canvas->AttachPen(pen);
         canvas->AttachBrush(brush);
-        canvas->DrawRect(
-            RSRect(originX, originY, originX + barAreaPaintRect.Width() * (1 - BAR_INTERVAL_PROPORTION),
-                paintRect.GetOffset().GetY() + paintRect.Height()));
+        canvas->DrawRect(RSRect(originX, originY, originX + barAreaPaintRect.Width() * (1 - BAR_INTERVAL_PROPORTION),
+            paintRect.GetOffset().GetY() + paintRect.Height()));
         canvas->DetachPen();
         canvas->DetachBrush();
 #endif

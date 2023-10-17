@@ -15,11 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_offset.h"
 
-#ifndef NEW_SKIA
-#include "include/effects/SkOffsetImageFilter.h"
-#else
 #include "include/effects/SkImageFilters.h"
-#endif
 
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_offset_declaration.h"
@@ -50,11 +46,9 @@ void SvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, c
     CHECK_NULL_VOID(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-    imageFilter = SkOffsetImageFilter::Make(declaration->GetDx(), declaration->GetDy(), imageFilter);
-#else
+
     imageFilter = SkImageFilters::Offset(declaration->GetDx(), declaration->GetDy(), imageFilter);
-#endif
+
 #else
     imageFilter =
         RSRecordingImageFilter::CreateOffsetImageFilter(declaration->GetDx(), declaration->GetDy(), imageFilter);

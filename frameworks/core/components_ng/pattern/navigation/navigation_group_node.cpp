@@ -318,8 +318,7 @@ bool NavigationGroupNode::CheckCanHandleBack()
     auto navigation = AceType::WeakClaim(this).Upgrade();
     CHECK_NULL_RETURN(navigation, false);
     if (navigation->isOnAnimation_) {
-        LOGI("animation is ongoing");
-        return false;
+        return true;
     }
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navigationPattern, false);
@@ -496,16 +495,18 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                 }
                 auto node = weakNode.Upgrade();
                 CHECK_NULL_VOID(node);
-                bool needSetInVisible = false;
+                bool needSetInvisible = false;
                 if (isNavBar) {
-                    needSetInVisible =
+                    needSetInvisible =
                         AceType::DynamicCast<NavBarNode>(node)->GetTransitionType() == PageTransitionType::EXIT_PUSH;
+                    // store this flag for navBar layout only
+                    navigation->SetNeedSetInvisible(needSetInvisible);
                 } else {
-                    needSetInVisible = AceType::DynamicCast<NavDestinationGroupNode>(node)->GetTransitionType() ==
+                    needSetInvisible = AceType::DynamicCast<NavDestinationGroupNode>(node)->GetTransitionType() ==
                                        PageTransitionType::EXIT_PUSH;
                 }
                 // for the case, the navBar form EXIT_PUSH to push during animation
-                if (needSetInVisible) {
+                if (needSetInvisible) {
                     node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 }
                 node->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -628,7 +629,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
     }
     CHECK_NULL_VOID(titleNode);
 
-    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), id = Container::CurrentId()] {
+    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), id = Container::CurrentId(), isNavBar] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -636,12 +637,16 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
-            [weakNavigation]() {
+            [weakNavigation, isNavBar]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 LOGI("navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
+                // clear this flag for navBar layout only
+                if (isNavBar) {
+                    navigation->SetNeedSetInvisible(false);
+                }
             },
             TaskExecutor::TaskType::UI);
     });

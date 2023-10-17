@@ -875,7 +875,6 @@ HWTEST_F(ScrollTestNg, PaintMethod001, TestSize.Level1)
     CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::NONE); });
     auto paint = pattern_->CreateNodePaintMethod();
     auto scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
-    scrollPaint->PaintScrollBar(canvas, &paintWrapper);
     auto scrollBar = scrollPaint->scrollBar_.Upgrade();
     EXPECT_FALSE(scrollBar->NeedPaint());
     auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
@@ -889,7 +888,6 @@ HWTEST_F(ScrollTestNg, PaintMethod001, TestSize.Level1)
     CreateWithContent();
     paint = pattern_->CreateNodePaintMethod();
     scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
-    scrollPaint->PaintScrollBar(canvas, &paintWrapper);
     scrollBar = scrollPaint->scrollBar_.Upgrade();
     EXPECT_TRUE(scrollBar->NeedPaint());
     modifier = scrollPaint->GetOverlayModifier(&paintWrapper);

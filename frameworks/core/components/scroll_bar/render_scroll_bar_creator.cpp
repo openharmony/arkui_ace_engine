@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NEW_SKIA
-#include "flutter_render_scroll_bar.h"
-#endif
+
 #include "rosen_render_scroll_bar.h"
 
 namespace OHOS::Ace {
@@ -27,11 +25,7 @@ RefPtr<RenderNode> RenderScrollBar::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderScrollBar>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

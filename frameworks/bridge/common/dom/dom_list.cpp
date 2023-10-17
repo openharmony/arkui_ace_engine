@@ -214,7 +214,7 @@ void DOMList::ParseIndexer(const std::string& indexerAlphabet)
     StringUtils::StringSplitter(indexerAlphabet, INDEXER_ALPHABET_DIV, indexerAlphabet_);
     int32_t alphabetCount = static_cast<int32_t>(indexerAlphabet_.size());
     indexer_ = alphabetCount > 0;
-    LOGI("IndexerFlag:%{public}d, AlphabetCount:%{public}d.", indexer_, alphabetCount);
+    LOGD("IndexerFlag:%{public}d, AlphabetCount:%{public}d.", indexer_, alphabetCount);
 }
 
 bool DOMList::SupportChainAnimation() const
@@ -280,7 +280,6 @@ bool DOMList::AddSpecializedEvent(int32_t pageId, const std::string& event)
 void DOMList::ResetInitializedStyle()
 {
     if (!listComponent_) {
-        LOGE("list component is null, reset style failed.");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
@@ -534,16 +533,12 @@ bool DOMList::SetSpecializedStyle(const std::pair<std::string, std::string>& sty
             } },
         { DOM_FLEX_DIRECTION,
             [](const std::string& val, DOMList& list) {
-                LOGD("DOMList::SetSpecializedStyle, val:%{public}s ", val.c_str());
+                LOGD("DOMList Set specialized style, val:%{public}s ", val.c_str());
                 if (val == DOM_FLEX_ROW) {
                     list.flexDirection_ = FlexDirection::ROW;
                 } else if (val == DOM_FLEX_ROW_REVERSE) {
-                    LOGD("DOMList::SetSpecializedStyle, val:%{public}s ,rv:%{public}s ", val.c_str(),
-                        DOM_FLEX_ROW_REVERSE);
                     list.flexDirection_ = FlexDirection::ROW_REVERSE;
                 } else if (val == DOM_FLEX_COLUMN_REVERSE) {
-                    LOGD("DOMList::SetSpecializedStyle, val:%{public}s ,cv:%{public}s ", val.c_str(),
-                        DOM_FLEX_COLUMN_REVERSE);
                     list.flexDirection_ = FlexDirection::COLUMN_REVERSE;
                 } else {
                     list.flexDirection_ = FlexDirection::COLUMN;
@@ -612,7 +607,6 @@ void DOMList::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
     auto childListItem = AceType::DynamicCast<DOMListItem>(child);
     if (!childListItem) {
-        LOGE("child is not list item, add to list failed.");
         return;
     }
 
@@ -651,12 +645,11 @@ void DOMList::CallSpecializedMethod(const std::string& method, const std::string
     if (method == DOM_LIST_METHOD_SCROLL_TO) {
         std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
         if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != 1) {
-            LOGE("parse args error");
+            LOGW("list parse args error");
             return;
         }
         std::unique_ptr<JsonValue> indexValue = argsValue->GetArrayItem(0)->GetValue("index");
         if (!indexValue || !indexValue->IsNumber()) {
-            LOGE("get index failed");
             return;
         }
         int32_t index = indexValue->GetInt();
@@ -664,7 +657,7 @@ void DOMList::CallSpecializedMethod(const std::string& method, const std::string
     } else if (method == DOM_LIST_METHOD_SCROLL_ARROW) {
         std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
         if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != 1) {
-            LOGE("parse args error");
+            LOGW("list parse args error");
             return;
         }
         std::unique_ptr<JsonValue> scrollArrowParams = argsValue->GetArrayItem(0);
@@ -693,11 +686,9 @@ void DOMList::CallSpecializedMethod(const std::string& method, const std::string
     } else if (method == DOM_ROTATION) {
         auto controller = listComponent_->GetRotationController();
         if (controller) {
-            LOGD("Rotation focus list request");
             controller->RequestRotation(true);
         }
     } else {
-        LOGE("CallSpecializedMethod: undefined method :%{private}s", method.c_str());
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
     }
 }
@@ -710,7 +701,6 @@ void DOMList::OnScrollBy(double dx, double dy, bool isSmooth)
 void DOMList::ExpandGroup(const std::string& groupId, bool expand)
 {
     if (!listComponent_) {
-        LOGE("DOMList ExpandGroup listComponent_ is null");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
@@ -737,13 +727,11 @@ void DOMList::ExpandGroup(const std::string& groupId, bool expand)
 void DOMList::ScrollToMethod(int32_t index)
 {
     if (!listComponent_) {
-        LOGE("DOMList ScrollToMethod listComponent_ is null");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
     auto controller = listComponent_->GetPositionController();
     if (!controller) {
-        LOGE("get controller failed");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
@@ -753,13 +741,11 @@ void DOMList::ScrollToMethod(int32_t index)
 void DOMList::ScrollByMethod(double x, double y, bool isSmooth)
 {
     if (!listComponent_) {
-        LOGE("DOMList ScrollByMethod listComponent_ is null");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
     auto controller = listComponent_->GetPositionController();
     if (!controller) {
-        LOGE("get controller failed");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
@@ -769,13 +755,11 @@ void DOMList::ScrollByMethod(double x, double y, bool isSmooth)
 void DOMList::ScrollArrowMethod(bool reverse, bool isSmooth)
 {
     if (!listComponent_) {
-        LOGE("DOMList ScrollArrowMethod listComponent_ is null");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
     auto controller = listComponent_->GetPositionController();
     if (!controller) {
-        LOGE("get controller failed");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
@@ -785,20 +769,18 @@ void DOMList::ScrollArrowMethod(bool reverse, bool isSmooth)
 void DOMList::ScrollToEdgeMethod(const std::string& method, const std::string& args)
 {
     if (!listComponent_) {
-        LOGE("DOMList ScrollToEdgeMethod listComponent_ is null");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
     auto controller = listComponent_->GetPositionController();
     if (!controller) {
-        LOGE("get controller failed");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
 
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
     if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != 1) {
-        LOGE("parse args error");
+        LOGW("list parse args error");
         return;
     }
     std::unique_ptr<JsonValue> params = argsValue->GetArrayItem(0);
@@ -813,20 +795,18 @@ void DOMList::ScrollToEdgeMethod(const std::string& method, const std::string& a
 void DOMList::ScrollPageMethod(const std::string& method, const std::string& args)
 {
     if (!listComponent_) {
-        LOGE("DOMList ScrollPageMethod listComponent_ is null");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
     auto controller = listComponent_->GetPositionController();
     if (!controller) {
-        LOGE("get controller failed");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return;
     }
 
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
     if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != 1) {
-        LOGE("parse args error");
+        LOGW("list parse args error");
         return;
     }
     std::unique_ptr<JsonValue> params = argsValue->GetArrayItem(0);
@@ -838,13 +818,11 @@ void DOMList::ScrollPageMethod(const std::string& method, const std::string& arg
 Offset DOMList::GetCurrentOffset() const
 {
     if (!listComponent_) {
-        LOGE("DOMList GetCurrentOffset listComponent_ is null");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return Offset::Zero();
     }
     auto controller = listComponent_->GetPositionController();
     if (!controller) {
-        LOGE("get controller failed");
         EventReport::SendComponentException(ComponentExcepType::LIST_COMPONENT_ERR);
         return Offset::Zero();
     }
@@ -854,7 +832,6 @@ Offset DOMList::GetCurrentOffset() const
 void DOMList::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 {
     if (!listComponent_ || !child) {
-        LOGE("DOMList OnChildNodeRemoved listComponent_ is null");
         return;
     }
     LOGD("DOMList %{public}s, remove child %{public}s", GetTag().c_str(), child->GetTag().c_str());
@@ -943,8 +920,6 @@ void DOMList::UpdateAccessibilityOrder()
     }
     if (!children.empty()) {
         accessibilityNode->ResetChildList(children);
-    } else {
-        LOGW("Update accessibility node order failed.");
     }
 }
 

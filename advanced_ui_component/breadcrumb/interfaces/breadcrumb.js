@@ -56,6 +56,7 @@ export class Breadcrumb extends ViewPU {
     this.labelPadding = 16;
     this.iconWidth = 24;
     this.labelSpace = 4;
+    this.labelHeight = 40;
     this.setInitiallyProvidedValue(t);
     this.declareWatch("labelInfo", this.onInfoChanged)
   }
@@ -90,7 +91,8 @@ export class Breadcrumb extends ViewPU {
     void 0 !== e.separatorIconWidth && (this.separatorIconWidth = e.separatorIconWidth);
     void 0 !== e.labelPadding && (this.labelPadding = e.labelPadding);
     void 0 !== e.iconWidth && (this.iconWidth = e.iconWidth);
-    void 0 !== e.labelSpace && (this.labelSpace = e.labelSpace)
+    void 0 !== e.labelSpace && (this.labelSpace = e.labelSpace);
+    void 0 !== e.labelHeight && (this.labelHeight = e.labelHeight)
   }
   updateStateVars(e) {}
   purgeVariableDependenciesOnElmtId(e) {
@@ -184,16 +186,17 @@ export class Breadcrumb extends ViewPU {
   }
   onMeasureSize(e, t, i) {
     let s = {
-      width: i.maxWidth,
-      height: i.maxHeight
+      width: e.width,
+      height: e.height
     };
     if (!this.labels || this.labels.length <= 0) return s;
-    this.selfWidth = px2vp(i.maxWidth);
+    this.selfWidth = e.width;
     this.clearMenu();
     1 === this.labels.length ? this.measureWithOneLabel() : 2 === this.labels.length ? this.measureWithTwoLabels() :
       3 === this.labels.length ? this.measureWithThreeLabels() : this.measureWithManyLabels();
     t.forEach(((e, t) => {
-      let i;
+      let i = 0;
+      let s = 0;
       if (0 === t) i = this.labelWidths[t];
       else if (2 === t) i = this.hasMenu ? this.menuButtonWidth : 0;
       else if (t % 2 == 0) i = this.labelWidths[t / 2 - 1];
@@ -203,9 +206,12 @@ export class Breadcrumb extends ViewPU {
           this.separatorIconWidth;
         i = e
       }
+      s = 0 === i ? 0 : this.labelHeight;
       e.measure({
         minWidth: i,
-        maxWidth: i
+        maxWidth: i,
+        minHeight: s,
+        maxHeight: s
       })
     }));
     return s
@@ -330,9 +336,9 @@ export class Breadcrumb extends ViewPU {
         s = 0
       } else i = !0
     }
-    let o = 0;
-    for (let e = t; e < this.labels.length - 2; e++) o += this.originalLabelWidth[e] + this.separatorIconWidth;
-    if (e - this.menuButtonWidth - this.separatorIconWidth >= o)
+    let l = 0;
+    for (let e = t; e < this.labels.length - 2; e++) l += this.originalLabelWidth[e] + this.separatorIconWidth;
+    if (e - this.menuButtonWidth - this.separatorIconWidth >= l)
       for (let e = t; e < this.labels.length - 2; e++) this.labelWidths[e] = this.originalLabelWidth[e];
     else this.adjustFourthLevelLabelWidth(e - this.menuButtonWidth - this.separatorIconWidth, t);
     this.labelWidths[0] = this.thirdLevelLabelWidth;
@@ -363,23 +369,23 @@ export class Breadcrumb extends ViewPU {
     }
     let s = [];
     let h = 0;
-    let o = 0;
+    let l = 0;
     for (;;) {
       for (let e = t; e < this.labels.length - 2; e++) h < this.labelWidths[e] && this.labelWidths[e] > this.minLabelWidth[
         e] && (h = this.labelWidths[e]);
-      for (let e = t; e < this.labels.length - 2; e++) o < this.labelWidths[e] && this.labelWidths[e] < h && (o =
+      for (let e = t; e < this.labels.length - 2; e++) l < this.labelWidths[e] && this.labelWidths[e] < h && (l =
         this.labelWidths[e]);
       for (let e = t; e < this.labels.length - 2; e++) h === this.labelWidths[e] && this.labelWidths[e] > this.minLabelWidth[
         e] && s.push(e);
       if (0 === s.length) break;
-      let l = h - (i - e) / s.length;
-      if (l >= o)
-        for (let e = 0; e < s.length; e++) l >= this.minLabelWidth[s[e]] ? this.labelWidths[s[e]] = l : this.labelWidths[
+      let o = h - (i - e) / s.length;
+      if (o >= l)
+        for (let e = 0; e < s.length; e++) o >= this.minLabelWidth[s[e]] ? this.labelWidths[s[e]] = o : this.labelWidths[
           s[e]] = this.minLabelWidth[s[e]];
       else {
-        for (let e = 0; e < s.length; e++) this.labelWidths[s[e]] = o;
-        h = o;
-        o = 0;
+        for (let e = 0; e < s.length; e++) this.labelWidths[s[e]] = l;
+        h = l;
+        l = 0;
         s = []
       }
       i = 0;
@@ -559,7 +565,6 @@ export class Breadcrumb extends ViewPU {
                 bundleName: "",
                 moduleName: ""
               });
-              Button.height(40);
               ViewStackProcessor.visualState("focused");
               Button.borderColor({
                 id: -1,
@@ -697,7 +702,6 @@ export class Breadcrumb extends ViewPU {
                 this.observeComponentCreation(((e, t) => {
                   ViewStackProcessor.StartGetAccessRecordingFor(e);
                   Button.createWithChild();
-                  Button.height(40);
                   Button.clip(!0);
                   Button.type(ButtonType.Normal);
                   Button.borderWidth(2);
@@ -728,7 +732,6 @@ export class Breadcrumb extends ViewPU {
                     bundleName: "",
                     moduleName: ""
                   });
-                  Button.height(40);
                   Button.onClick((() => {
                     this.showMenu = !this.showMenu
                   }));
@@ -854,7 +857,6 @@ export class Breadcrumb extends ViewPU {
                 bundleName: "",
                 moduleName: ""
               });
-              Row.height(40);
               Row.onHover((e => {
                 this.hoverIndex = e ? t : -1
               }));

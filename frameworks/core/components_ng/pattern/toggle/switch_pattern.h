@@ -76,6 +76,7 @@ public:
         paintMethod->SetDragOffsetX(dragOffsetX_);
         paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         paintMethod->SetIsDragEvent(isDragEvent_);
+        paintMethod->SetShowHoverEffect(showHoverEffect_);
         return paintMethod;
     }
 
@@ -107,6 +108,11 @@ public:
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
+    }
+
+    void SetShowHoverEffect(bool showHoverEffect)
+    {
+        showHoverEffect_ = showHoverEffect;
     }
 
     std::string ProvideRestoreInfo() override;
@@ -159,6 +165,7 @@ private:
     bool isTouch_ = false;
     bool isHover_ = false;
     bool isUserSetResponseRegion_ = false;
+    bool showHoverEffect_ = true;
 
     float width_ = 0.0f;
     float height_ = 0.0f;

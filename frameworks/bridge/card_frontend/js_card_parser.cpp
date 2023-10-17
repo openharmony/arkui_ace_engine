@@ -50,7 +50,6 @@ public:
         std::vector<std::string> result;
         int32_t sysApiVersion = StringUtils::StringToInt(SystemProperties::GetApiVersion());
         if (sysApiVersion <= 0) {
-            LOGE("get system api version failed!");
             return result;
         }
         std::sort(records_.begin(), records_.end(),
@@ -134,9 +133,9 @@ void GetAttrOptionsSeriesPoint(const std::unique_ptr<JsonValue>& jsonPoint, Poin
             { "shape",
                 [](std::unique_ptr<JsonValue>& child, PointInfo& pointInfo) {
                     const auto& valStr = child->GetString();
-                    PointShape shape = (valStr == "circle")
-                                           ? PointShape::CIRCLE
-                                           : (valStr == "square") ? PointShape::SQUARE : PointShape::TRIANGLE;
+                    PointShape shape = (valStr == "circle")   ? PointShape::CIRCLE
+                                       : (valStr == "square") ? PointShape::SQUARE
+                                                              : PointShape::TRIANGLE;
                     pointInfo.SetPointShape(shape);
                 } },
             { "size",
@@ -159,8 +158,6 @@ void GetAttrOptionsSeriesPoint(const std::unique_ptr<JsonValue>& jsonPoint, Poin
         auto iter = BinarySearchFindIndex(chartOptionsPointMap, ArraySize(chartOptionsPointMap), key.c_str());
         if (iter != -1) {
             chartOptionsPointMap[iter].value(child, pointInfo);
-        } else {
-            LOGD("key : %{public}s unsupported. Ignoring!", key.c_str());
         }
         child = child->GetNext();
     }
@@ -224,8 +221,6 @@ void GetChartAttrOptionsSeries(const std::unique_ptr<JsonValue>& jsonSeries, Cha
             auto iter = BinarySearchFindIndex(chartOptionsSeriesMap, ArraySize(chartOptionsSeriesMap), key.c_str());
             if (iter != -1) {
                 chartOptionsSeriesMap[iter].value(child, options);
-            } else {
-                LOGD("key : %{public}s unsupported. Ignoring!", key.c_str());
             }
         }
         child = child->GetNext();
@@ -276,8 +271,6 @@ void GetAttrOptionsAxis(const std::unique_ptr<JsonValue>& jsonAxis, AxisOption& 
         auto iter = BinarySearchFindIndex(chartOptionsAxisMap, ArraySize(chartOptionsAxisMap), key.c_str());
         if (iter != -1) {
             chartOptionsAxisMap[iter].value(child, axisOption);
-        } else {
-            LOGD("key : %{public}s unsupported. Ignoring!", key.c_str());
         }
         child = child->GetNext();
     }
@@ -311,8 +304,6 @@ void GetAttrOptions(const std::unique_ptr<JsonValue>& jsonOption, ChartOptions& 
         auto iter = BinarySearchFindIndex(chartOptionsMap, ArraySize(chartOptionsMap), key.c_str());
         if (iter != -1) {
             chartOptionsMap[iter].value(child, options);
-        } else {
-            LOGD("key : %{public}s unsupported. Ignoring!", key.c_str());
         }
         child = child->GetNext();
     }
@@ -378,8 +369,6 @@ void GetAttrDataSetData(const std::unique_ptr<JsonValue>& jsonData, MainChart& d
                     pointInfo.SetY(data->GetDouble());
                 } else if (key == "pointStyle" && data->IsObject()) {
                     GetAttrOptionsSeriesPoint(data, pointInfo);
-                } else {
-                    LOGW("key is %{public}s. Ignoring!", key.c_str());
                 }
                 data = data->GetNext();
             }
@@ -452,8 +441,6 @@ void ParseSegmentObject(const std::unique_ptr<JsonValue>& jsonDataSet, Segment& 
             segment.SetValue(data->GetDouble());
         } else if (key == "name") {
             segment.SetSegmentName(data->GetString());
-        } else {
-            LOGD("json parser %{public}s fail", key.c_str());
         }
         data = data->GetNext();
     }
@@ -515,8 +502,6 @@ void GetBadgeConfig(const std::unique_ptr<JsonValue>& jsonDataSets, BadgeConfig&
         auto operatorIter = BinarySearchFindIndex(badgeConfigOperators, ArraySize(badgeConfigOperators), key.c_str());
         if (operatorIter != -1) {
             badgeConfigOperators[operatorIter].value(valStr, badgeConfig);
-        } else {
-            LOGD("key : %{public}s unsupported. Ignoring!", key.c_str());
         }
         data = data->GetNext();
     }
@@ -585,8 +570,8 @@ std::vector<std::string> GetVecFromArrStr(const std::string& value)
     tmp.erase(std::remove(tmp.begin(), tmp.end(), '"'), tmp.end());
     tmp.erase(std::remove(tmp.begin(), tmp.end(), ' '), tmp.end());
     std::regex strDivider(",");
-    std::vector<std::string> strVec(std::sregex_token_iterator(tmp.begin(), tmp.end(), strDivider, -1),
-        std::sregex_token_iterator());
+    std::vector<std::string> strVec(
+        std::sregex_token_iterator(tmp.begin(), tmp.end(), strDivider, -1), std::sregex_token_iterator());
     return strVec;
 }
 
@@ -723,7 +708,7 @@ bool JsCardParser::GetRepeatData(std::unique_ptr<JsonValue>& repeatValue, std::s
 {
     CHECK_NULL_RETURN(repeatValue, false);
     if (!repeatValue->IsValid()) {
-        LOGE("GetRepeatData failed, repeat value is invalid.");
+        TAG_LOGW(AceLogTag::ACE_FORM, "GetRepeatData failed, repeat value is invalid.");
         return false;
     }
     auto dataValue = repeatValue->IsString() ? repeatValue->GetString() : repeatValue->ToString();
@@ -742,7 +727,7 @@ void JsCardParser::SetRepeatItemValue(uint32_t index, const std::unique_ptr<Json
 {
     CHECK_NULL_VOID(repeatValue);
     if (!repeatValue->IsValid()) {
-        LOGE("SetRepeatItemValue failed, repeat value is invalid.");
+        TAG_LOGW(AceLogTag::ACE_FORM, "SetRepeatItemValue failed, repeat value is invalid.");
         return;
     }
     auto idx = std::to_string(index);
@@ -769,7 +754,7 @@ void JsCardParser::ParseRepeatIndexItem(const std::unique_ptr<JsonValue>& repeat
 {
     CHECK_NULL_VOID(repeatValue);
     if (!repeatValue->IsValid()) {
-        LOGE("ParseRepeatIndexItem failed, repeat value is invalid.");
+        TAG_LOGW(AceLogTag::ACE_FORM, "ParseRepeatIndexItem failed, repeat value is invalid.");
         return;
     }
     if (repeatValue->Contains("key")) {
@@ -791,11 +776,10 @@ void JsCardParser::LoadResImageUrl(const std::string& jsonFile, const std::strin
         return;
     }
     // Path only print relative path
-    LOGI("load res image file is %{public}s", jsonFile.c_str());
+    TAG_LOGD(AceLogTag::ACE_FORM, "load res image file is %{public}s", jsonFile.c_str());
     auto content = resourceJson_->GetValue(jsonFile);
     CHECK_NULL_VOID(content);
     if (!content->IsValid()) {
-        LOGE("LoadResImageUrl failed, content is invalid.");
         return;
     }
     std::vector<std::string> keys;
@@ -829,8 +813,7 @@ void JsCardParser::GetResImageUrl(std::string& value)
     }
 
     if (!themeArray[mode].empty() && imagePath.empty()) {
-        jsonFile =
-            std::string(RESOURCES_FOLDER) + "res-" + themeArray[mode] + std::string(FILE_TYPE_JSON);
+        jsonFile = std::string(RESOURCES_FOLDER) + "res-" + themeArray[mode] + std::string(FILE_TYPE_JSON);
         LoadResImageUrl(jsonFile, splitStr, imagePath);
     }
 
@@ -991,8 +974,8 @@ void JsCardParser::SelectMediaQueryStyle(
                 if (!SelectStyle(styleClass, mediaIter->second, styles)) {
                     continue;
                 }
-                LOGI("current condition is %{public}s, style class is %{public}s", mediaIter->first.c_str(),
-                    styleClass.c_str());
+                TAG_LOGD(AceLogTag::ACE_FORM, "current condition is %{public}s, style class is %{public}s",
+                    mediaIter->first.c_str(), styleClass.c_str());
             }
         }
     }
@@ -1044,7 +1027,7 @@ void JsCardParser::PreUpdateMethodToAction(const std::unique_ptr<JsonValue>& roo
 void JsCardParser::ParseEvents(const std::unique_ptr<JsonValue>& rootJson, const std::unique_ptr<JsonValue>& eventJson,
     std::vector<std::string>& events, const RefPtr<Framework::JsAcePage>& page, int32_t nodeId)
 {
-    LOGD("ParseEvents json:%{public}s", eventJson->ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_FORM, "ParseEvents json:%{public}s", eventJson->ToString().c_str());
     auto eventList = rootJson->GetValue("events");
     CHECK_NULL_VOID(eventList);
     if (!eventList->IsValid()) {
@@ -1074,7 +1057,6 @@ std::string JsCardParser::GetEventAction(const std::string& action, const std::s
     auto actionDetail = JsonUtil::ParseJsonString(action);
     CHECK_NULL_RETURN(actionDetail, "");
     if (!actionDetail->IsValid()) {
-        LOGE("GetEventAction: action detail is invalid");
         return "";
     }
     ReplaceParam(actionDetail);
@@ -1174,10 +1156,10 @@ void JsCardParser::LoadImageInfo()
 
 void JsCardParser::UpdatePageData(const std::string& dataList, const RefPtr<JsAcePage>& page)
 {
-    LOGI("update data is %{private}s card hap path %{public}s", dataList.c_str(), cardHapPath_.c_str());
+    TAG_LOGD(AceLogTag::ACE_FORM, "Update data is %{private}s card hap path %{public}s", dataList.c_str(),
+        cardHapPath_.c_str());
     CHECK_NULL_VOID(page);
     if (dataList.empty()) {
-        LOGE("update data is null");
         return;
     }
     const auto& rootData = JsonUtil::ParseJsonString(dataList);
@@ -1188,7 +1170,6 @@ void JsCardParser::UpdatePageData(const std::string& dataList, const RefPtr<JsAc
     auto data = rootData->GetChild();
     CHECK_NULL_VOID(data);
     if (!data->IsValid()) {
-        LOGE("update card data error");
         return;
     }
     while (data && data->IsValid()) {
@@ -1287,10 +1268,10 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     int32_t parentId, const std::vector<int>& idArray, const std::unique_ptr<JsonValue>& dataJson,
     const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson)
 {
-    LOGD("UpdateDomNode root json: %{public}s", rootJson->ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_FORM, "UpdateDomNode root json: %{public}s", rootJson->ToString().c_str());
     CHECK_NULL_VOID(page);
     if (!rootJson->IsValid()) {
-        LOGE("fail to UpdateDomNode due to page or root is invalid");
+        TAG_LOGW(AceLogTag::ACE_FORM, "Fail to UpdateDomNode due to page or root is invalid");
         return;
     }
     if (rootJson->Contains("repeat") && !isRepeat_) {
@@ -1506,7 +1487,6 @@ bool JsCardParser::ParsePropsVariable(std::string& value, const std::unique_ptr<
     auto propsObject = propsJson->GetValue(value);
     CHECK_NULL_RETURN(propsObject, false);
     if (!propsObject->IsValid()) {
-        LOGI("GetAndParseProps propsObject is empty or propsObject->IsValid()");
         return false;
     }
     auto propValueJson = propsObject->GetValue("value");
@@ -1543,7 +1523,6 @@ bool JsCardParser::ParsePropsArray(std::string& value, const std::unique_ptr<Jso
     auto propsObject = propsJson->GetValue(arrayParam);
     CHECK_NULL_RETURN(propsObject, false);
     if (!propsObject->IsValid()) {
-        LOGI("GetAndParseProps propsObject is empty or propsObject->IsValid()");
         return false;
     }
     auto propValueJson = propsObject->GetValue("value");
@@ -1573,7 +1552,8 @@ bool JsCardParser::ParseSpecialVariable(std::string& value)
         // $t('value') --> value
         value = value.substr(4, value.size() - 6);
         auto result = GetI18nData(value);
-        LOGI("Get i18n data is %{public}s, card hap path %{public}s", value.c_str(), cardHapPath_.c_str());
+        TAG_LOGD(AceLogTag::ACE_FORM, "Get i18n data is %{public}s, card hap path %{public}s", value.c_str(),
+            cardHapPath_.c_str());
         return result;
     } else if (StartWith(value, "$tc(") && EndWith(value, ")")) {
         GetPlurals(value);
@@ -1590,7 +1570,6 @@ bool JsCardParser::GetVariable(std::string& value, const std::unique_ptr<JsonVal
     }
 
     CHECK_NULL_RETURN(dataJson, false);
-    LOGD("GetVariable value :%{private}s dataJson:%{private}s", value.c_str(), dataJson->ToString().c_str());
     auto dataValue = dataJson->GetValue(key);
     if (isRepeat_) {
         dataValue = repeatJson_->GetValue(key);
@@ -1603,7 +1582,6 @@ bool JsCardParser::GetVariable(std::string& value, const std::unique_ptr<JsonVal
     if (IsVariable(value)) {
         ParseVariable(value, dataJson);
     }
-    LOGD("return value :%{private}s", value.c_str());
     return true;
 }
 
@@ -1666,8 +1644,7 @@ void JsCardParser::CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const
 {
     CHECK_NULL_VOID(page);
     if (!rootJson->IsValid()) {
-        LOGE("fail to CreateDomNode due to page or root is invalid");
-        EventReport::SendFormException(FormExcepType::CREATE_NODE_ERR);
+        TAG_LOGW(AceLogTag::ACE_FORM, "Fail to CreateDomNode due to page or root is invalid");
         return;
     }
     if (rootJson->Contains("repeat") && !isRepeat_) {
@@ -1761,7 +1738,6 @@ void JsCardParser::CreateRepeatDomNode(
     auto repeatValue = rootJson->GetValue("repeat");
     CHECK_NULL_VOID(repeatValue);
     if (!repeatValue->IsValid()) {
-        LOGE("CreateRepeatDomNode failed, repeat value is invalid.");
         return;
     }
     isRepeat_ = true;
@@ -1769,7 +1745,6 @@ void JsCardParser::CreateRepeatDomNode(
     if (repeatValue->IsString()) {
         // eg: repeatValue = {{list}}.
         if (!GetRepeatData(repeatValue, key)) {
-            LOGE("CreateRepeatDomNode failed, root data does not contains repeat value.");
             isRepeat_ = false;
             return;
         }
@@ -1777,13 +1752,11 @@ void JsCardParser::CreateRepeatDomNode(
     } else {
         // eg: repeatValue = {"exp": {{list}}, "key":"index", "value": "item"}.
         if (!repeatValue->Contains("exp")) {
-            LOGE("CreateRepeatDomNode failed, repeat value does not contains exp.");
             isRepeat_ = false;
             return;
         }
         auto expValue = repeatValue->GetValue("exp");
         if (!GetRepeatData(expValue, key)) {
-            LOGE("CreateRepeatDomNode failed, root data does not contains exp value.");
             isRepeat_ = false;
             return;
         }
@@ -1805,14 +1778,10 @@ void JsCardParser::GetClockConfig(const std::unique_ptr<JsonValue>& jsonDataSets
         auto key = data->GetKey();
         auto valStr = data->IsString() ? data->GetString() : data->ToString();
         static const LinearMapNode<void (*)(std::string&, ClockConfig&, JsCardParser&)> clockConfigOperators[] = {
-            { DOM_DIGIT_COLOR,
-                [](std::string& valStr, ClockConfig& clockConfig, JsCardParser& jsCardParser) {
-                    clockConfig.digitColor_ = valStr;
-                } },
-            { DOM_DIGIT_COLOR_NIGHT,
-                [](std::string& valStr, ClockConfig& clockConfig, JsCardParser& jsCardParser) {
-                    clockConfig.digitColorNight_ = valStr;
-                } },
+            { DOM_DIGIT_COLOR, [](std::string& valStr, ClockConfig& clockConfig,
+                                   JsCardParser& jsCardParser) { clockConfig.digitColor_ = valStr; } },
+            { DOM_DIGIT_COLOR_NIGHT, [](std::string& valStr, ClockConfig& clockConfig,
+                                         JsCardParser& jsCardParser) { clockConfig.digitColorNight_ = valStr; } },
             { DOM_DIGIT_RADIUS_RATIO,
                 [](std::string& valStr, ClockConfig& clockConfig, JsCardParser& jsCardParser) {
                     clockConfig.digitRadiusRatio_ = StringToDouble(valStr);
@@ -1881,8 +1850,6 @@ void JsCardParser::GetClockConfig(const std::unique_ptr<JsonValue>& jsonDataSets
         auto operatorIter = BinarySearchFindIndex(clockConfigOperators, ArraySize(clockConfigOperators), key.c_str());
         if (operatorIter != -1) {
             clockConfigOperators[operatorIter].value(valStr, clockConfig, *this);
-        } else {
-            LOGD("key : %{public}s unsupported. Ignoring!", key.c_str());
         }
         data = data->GetNext();
     }
@@ -1971,7 +1938,6 @@ void JsCardParser::GetShownAttr(const std::unique_ptr<JsonValue>& rootJson, cons
 
 void JsCardParser::ParseVersionAndUpdateData()
 {
-    LOGI("parse version info and update data field");
     auto versionJson = rootBody_->GetValue("apiVersion");
     CHECK_NULL_VOID(versionJson);
     if (!versionJson->IsValid()) {
@@ -1991,7 +1957,7 @@ void JsCardParser::ParseVersionAndUpdateData()
     for (const auto& patchInfo : versionPatch) {
         auto patchJson = JsonUtil::ParseJsonString(patchInfo);
         if (!patchJson || !patchJson->IsValid()) {
-            LOGW("parse version patch failed, patchInfo = %{public}s", patchInfo.c_str());
+            TAG_LOGW(AceLogTag::ACE_FORM, "Parse version patch failed, patchInfo = %{public}s", patchInfo.c_str());
             continue;
         }
         auto patchItem = patchJson->GetChild();
@@ -2019,7 +1985,7 @@ bool JsCardParser::Initialize()
     CHECK_NULL_RETURN(eventJson_, false);
     CHECK_NULL_RETURN(dataJson_, false);
     if (!rootJson_->IsValid() || !styleJson_->IsValid() || !eventJson_->IsValid() || !dataJson_->IsValid()) {
-        LOGE("the json template is error");
+        TAG_LOGW(AceLogTag::ACE_FORM, "The json template is error");
         return false;
     }
 
@@ -2080,7 +2046,7 @@ void JsCardParser::GetBoolValue(const std::unique_ptr<JsonValue>& rootJson, cons
 
 void JsCardParser::SetColorMode(ColorMode colorMode)
 {
-    LOGI("current color mode is %{public}d", colorMode);
+    TAG_LOGD(AceLogTag::ACE_FORM, "current color mode is %{public}d", colorMode);
     colorMode_ = colorMode;
     mediaQueryer_.SetColorMode(colorMode);
 }

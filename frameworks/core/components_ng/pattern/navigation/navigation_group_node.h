@@ -91,6 +91,16 @@ public:
         isModeChange_ = isModeChange;
     }
 
+    bool GetNeedSetInvisible() const
+    {
+        return needSetInvisible_;
+    }
+
+    void SetNeedSetInvisible(bool needSetInvisible)
+    {
+        needSetInvisible_ = needSetInvisible;
+    }
+
     bool CheckCanHandleBack();
 
     bool HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride);
@@ -116,6 +126,7 @@ private:
     RefPtr<UINode> dividerNode_;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
+    bool needSetInvisible_ { false };
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

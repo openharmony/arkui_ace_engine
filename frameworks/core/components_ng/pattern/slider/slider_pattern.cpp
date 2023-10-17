@@ -592,11 +592,17 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
             return true;
         }
     } else if (event.action == KeyAction::UP) {
-        if (showTips_) {
-            bubbleFlag_ = true;
-            InitializeBubble();
+        if ((direction_ == Axis::HORIZONTAL &&
+                (event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT)) ||
+            (direction_ == Axis::VERTICAL &&
+                (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN))) {
+            if (showTips_) {
+                bubbleFlag_ = true;
+                InitializeBubble();
+            }
+            PaintFocusState();
+            return true;
         }
-        PaintFocusState();
     }
     return false;
 }
@@ -835,7 +841,10 @@ void SliderPattern::UpdateBlock()
         }
         if (imageFrameNode_ != nullptr) {
             auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(imageFrameNode_->GetLayoutProperty());
-            imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(sliderPaintProperty->GetBlockImage().value()));
+            CHECK_NULL_VOID(imageLayoutProperty);
+            imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(sliderPaintProperty->GetBlockImageValue(""),
+                sliderPaintProperty->GetBlockImageBundleNameValue(""),
+                sliderPaintProperty->GetBlockImageModuleNameValue("")));
             imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
             imageLayoutProperty->UpdateAutoResize(true);
             imageFrameNode_->MarkModifyDone();
@@ -875,6 +884,34 @@ void SliderPattern::LayoutImageNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void SliderPattern::UpdateImagePositionX(float centerX)
+{
+    CHECK_NULL_VOID(imageFrameNode_);
+    auto renderContext = imageFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = imageFrameNode_->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto offset = geometryNode->GetMarginFrameOffset();
+    offset.SetX(centerX - blockSize_.Width() * HALF);
+    geometryNode->SetMarginFrameOffset(offset);
+    renderContext->SyncGeometryProperties(nullptr);
+}
+
+void SliderPattern::UpdateImagePositionY(float centerY)
+{
+    CHECK_NULL_VOID(imageFrameNode_);
+    auto renderContext = imageFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = imageFrameNode_->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto offset = geometryNode->GetMarginFrameOffset();
+    offset.SetY(centerY - blockSize_.Height() * HALF);
+    geometryNode->SetMarginFrameOffset(offset);
+    renderContext->SyncGeometryProperties(nullptr);
 }
 
 void SliderPattern::OpenTranslateAnimation()

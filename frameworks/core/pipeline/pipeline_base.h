@@ -764,6 +764,12 @@ public:
 
     virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
 
+    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+
+    virtual bool IsEnableKeyBoardAvoidMode() {
+        return false;
+    }
+
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;
@@ -876,14 +882,34 @@ public:
         return isAppWindow_;
     }
 
-    void SetEnableImplicitAnimation(bool enableImplicitAnimation)
+    void SetFormAnimationStartTime(int64_t time)
     {
-        enableImplicitAnimation_ = enableImplicitAnimation;
+        formAnimationStartTime_ = time;
     }
 
-    bool GetEnableImplicitAnimation() const
+    int64_t GetFormAnimationStartTime() const
     {
-        return enableImplicitAnimation_;
+        return formAnimationStartTime_;
+    }
+
+    void SetIsFormAnimation(bool isFormAnimation)
+    {
+        isFormAnimation_ = isFormAnimation;
+    }
+
+    bool IsFormAnimation() const
+    {
+        return isFormAnimation_;
+    }
+
+    void SetFormAnimationFinishCallback(bool isFormAnimationFinishCallback)
+    {
+        isFormAnimationFinishCallback_ = isFormAnimationFinishCallback;
+    }
+
+    bool IsFormAnimationFinishCallback() const
+    {
+        return isFormAnimationFinishCallback_;
     }
 
     // restore
@@ -908,6 +934,16 @@ public:
     virtual bool IsLayouting() const
     {
         return false;
+    }
+
+    void SetHalfLeading(bool halfLeading)
+    {
+        halfLeading_ = halfLeading;
+    }
+
+    bool GetHalfLeading() const
+    {
+        return halfLeading_;
     }
 
 protected:
@@ -1038,8 +1074,11 @@ private:
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
-    bool enableImplicitAnimation_ = true;
+    bool isFormAnimationFinishCallback_ = false;
+    int64_t formAnimationStartTime_ = 0;
+    bool isFormAnimation_ = false;
     bool isReloading_ = false;
+    bool halfLeading_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

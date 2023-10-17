@@ -14,10 +14,15 @@
  */
 
 #include "gtest/gtest.h"
+
+#define private public
+#define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 
 #include "core/common/thread_checker.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -46,10 +51,7 @@ void ThreadCheckerTest::TearDownTestSuite()
  */
 HWTEST_F(ThreadCheckerTest, ThreadCheckerGetThread, TestSize.Level1)
 {
-    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-    EXPECT_CALL(*(MockContainer::Current()), GetTaskExecutor())
-        .WillOnce(Return(nullptr))
-        .WillRepeatedly(Return(taskExecutor));
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_FALSE(CheckThread(TaskExecutor::TaskType::UI));
     EXPECT_TRUE(CheckThread(TaskExecutor::TaskType::UI));
     EXPECT_TRUE(CheckThread(TaskExecutor::TaskType::JS));

@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-
 #include <refbase.h>
 
 #include "base/memory/referenced.h"
@@ -123,7 +122,6 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void UnregisterAbilityResultListener();
-    void OnConnectInner();
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);

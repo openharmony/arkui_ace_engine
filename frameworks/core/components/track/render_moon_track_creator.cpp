@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_moon_track.h"
-#endif
 #include "rosen_render_moon_track.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderMoonTrack::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderMoonTrack>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

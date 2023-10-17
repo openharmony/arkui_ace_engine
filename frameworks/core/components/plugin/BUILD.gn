@@ -18,7 +18,6 @@ import(
 build_component("plugin") {
   sources = [
     "file_asset_provider.cpp",
-    "flutter_render_plugin.cpp",
     "hap_asset_provider.cpp",
     "plugin_component.cpp",
     "plugin_component_manager.cpp",
@@ -30,9 +29,7 @@ build_component("plugin") {
     "resource/plugin_manager_delegate.cpp",
     "resource/plugin_manager_resource.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_plugin.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_plugin.cpp" ]
 
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {

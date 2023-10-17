@@ -65,7 +65,6 @@ class PixelMap;
 } // namespace OHOS
 
 class NativeEngine;
-class NativeValue;
 typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
@@ -81,12 +80,12 @@ public:
     virtual ~UIContent() = default;
 
     // UI content life-cycles
-    virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
-    virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage) = 0;
+    virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
+    virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) = 0;
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(
-        OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowID) = 0;
+        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;
@@ -95,15 +94,9 @@ public:
     virtual void OnNewWant(const OHOS::AAFwk::Want& want) = 0;
 
     // distribute
-    virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) = 0;
+    virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) = 0;
     virtual std::string GetContentInfo() const = 0;
     virtual void DestroyUIDirector() = 0;
-
-    virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
-    virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) = 0;
-    virtual void Initialize(
-        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID) = 0;
-    virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) = 0;
 
     // UI content event process
     virtual bool ProcessBackPressed() = 0;
@@ -146,6 +139,7 @@ public:
     virtual float GetFormHeight() = 0;
     virtual void ReloadForm(const std::string& url) {};
     virtual void OnFormSurfaceChange(float width, float height) {}
+    virtual void SetFormBackgroundColor(const std::string& color) {};
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
@@ -171,11 +165,6 @@ public:
         const std::vector<std::string>& assetBasePaths) {};
 
     virtual void UpdateResource() {}
-
-    virtual NativeValue* GetUIContext()
-    {
-        return nullptr;
-    }
 
     virtual napi_value GetUINapiContext()
     {

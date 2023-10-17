@@ -59,7 +59,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
-#include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
@@ -165,7 +165,7 @@ void ShowContextMenuDisappearAnimation(AnimationOption& option, const RefPtr<Men
     CHECK_NULL_VOID(menuRenderContext);
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto menuPosition = menuPattern->GetOriginOffset();
+    auto menuPosition = menuPattern->GetEndOffset();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -195,6 +195,7 @@ void ShowContextMenuDisappearAnimation(AnimationOption& option, const RefPtr<Men
     });
 
     option.SetDuration(disappearDuration);
+    option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(
         option,
         [menuRenderContext]() {
@@ -506,15 +507,10 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     pipeline->RequestFrame();
 }
 
-void OverlayManager::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
+void OverlayManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    bool isRightToLeft, const ToastShowMode& showMode)
 {
     LOGI("OverlayManager::ShowToast");
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        SubwindowManager::GetInstance()->ShowToast(message, duration, bottom);
-        return;
-    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
@@ -526,7 +522,7 @@ void OverlayManager::ShowToast(
     }
     toastMap_.clear();
 
-    auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
+    auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft, showMode);
     CHECK_NULL_VOID(toastNode);
     auto toastId = toastNode->GetId();
     // mount to parent
@@ -550,7 +546,9 @@ void OverlayManager::ShowToast(
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostDelayedTask(continuousTask, TaskExecutor::TaskType::UI, duration);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostDelayedTask(continuousTask, TaskExecutor::TaskType::UI, duration);
     });
     auto ctx = toastNode->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -582,7 +580,9 @@ void OverlayManager::PopToast(int32_t toastId)
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostTask(
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
             [weak, toastId, id]() {
                 ContainerScope scope(id);
                 auto overlayManager = weak.Upgrade();
@@ -641,6 +641,18 @@ void OverlayManager::PopToast(int32_t toastId)
     event.type = AccessibilityEventType::CHANGE;
     event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
     pipeline->SendEventToAccessibility(event);
+}
+
+void OverlayManager::ClearToast()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    for (auto [id, toastNodeWeak] : toastMap_) {
+        PopToast(id);
+    }
+    toastMap_.clear();
 }
 
 void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo)
@@ -1314,6 +1326,9 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         }
         if (InstanceOf<MenuWrapperPattern>(pattern)) {
             return RemoveMenu(overlay);
+        }
+        if (InstanceOf<ToastPattern>(pattern)) {
+            return false;
         }
         // remove navDestination in navigation first
         do {

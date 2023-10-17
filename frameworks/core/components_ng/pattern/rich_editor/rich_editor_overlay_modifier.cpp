@@ -57,6 +57,11 @@ void RichEditorOverlayModifier::SetCaretWidth(float width)
     caretWidth_->Set(width);
 }
 
+float RichEditorOverlayModifier::GetCaretWidth() const
+{
+    return caretWidth_->Get();
+}
+
 void RichEditorOverlayModifier::SetCaretVisible(bool value)
 {
     caretVisible_->Set(value);

@@ -40,6 +40,10 @@ public:
         (const RefPtr<UnifiedData>& unifiedData, const std::string& url, const std::string& description), (override));
     MOCK_METHOD(void, GetLinkRecord,
         (const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description), (override));
+    MOCK_METHOD(bool, GetFileUriRecord,
+        (const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri), (override));
+    MOCK_METHOD(bool, AddFileUriRecord,
+        (const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri), (override));
     MOCK_METHOD(void, AddHtmlRecord, (const RefPtr<UnifiedData>& unifiedData,
         const std::string& htmlContent, const std::string& plainContent), (override));
     MOCK_METHOD(void, GetHtmlRecord,

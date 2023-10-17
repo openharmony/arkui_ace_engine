@@ -27,10 +27,6 @@ class MockUIContent : public UIContent {
 public:
     MockUIContent() = default;
     ~MockUIContent() override = default;
-    MOCK_METHOD3(Initialize, void(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage));
-    MOCK_METHOD3(InitializeByName, void(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage));
-    MOCK_METHOD4(Initialize,
-        void(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowID));
 
     MOCK_METHOD3(Initialize, void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage));
     MOCK_METHOD3(InitializeByName, void(OHOS::Rosen::Window* window, const std::string& name, napi_value storage));
@@ -42,7 +38,6 @@ public:
     MOCK_METHOD0(UnFocus, void());
     MOCK_METHOD0(Destroy, void());
     MOCK_METHOD1(OnNewWant, void(const OHOS::AAFwk::Want& want));
-    MOCK_METHOD3(Restore, void(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage));
     MOCK_METHOD3(Restore, void(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage));
     MOCK_CONST_METHOD0(GetContentInfo, std::string());
     MOCK_METHOD0(DestroyUIDirector, void());

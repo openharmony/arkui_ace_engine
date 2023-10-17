@@ -28,6 +28,7 @@ double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
+ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 
 int32_t AceChecker::pageNodes_ = 0;
 int32_t AceChecker::pageDepth_ = 0;

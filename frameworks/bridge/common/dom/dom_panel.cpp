@@ -130,7 +130,7 @@ void DOMPanel::CallSpecializedMethod(const std::string& method, const std::strin
         }
         controller->ClosePanel();
     } else {
-        LOGW("no such method available.");
+        LOGW("No method match in panel.");
     }
 }
 

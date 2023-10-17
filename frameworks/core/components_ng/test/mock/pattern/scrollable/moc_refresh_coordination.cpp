@@ -25,7 +25,7 @@ RefPtr<ScrollableCoordinationEvent> RefreshCoordination::CreateCoordinationEvent
     return nullptr;
 }
 
-void RefreshCoordination::OnScrollStart() const {}
+void RefreshCoordination::OnScrollStart(bool isDrag) const {}
 
 bool RefreshCoordination::OnScroll(float offset) const
 {
@@ -33,4 +33,8 @@ bool RefreshCoordination::OnScroll(float offset) const
 }
 
 void RefreshCoordination::OnScrollEnd(float speed) const {}
+bool RefreshCoordination::IsRefreshInScroll() const
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

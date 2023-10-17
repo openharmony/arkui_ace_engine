@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NEW_SKIA
-#include "flutter_render_checkbox.h"
-#endif
+
 #include "rosen_render_checkbox.h"
 
 namespace OHOS::Ace {
@@ -27,11 +25,7 @@ RefPtr<RenderNode> RenderCheckbox::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderCheckbox>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

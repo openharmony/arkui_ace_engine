@@ -33,7 +33,6 @@
 #include "core/animation/curve_animation.h"
 
 namespace OHOS::Ace::Napi {
-constexpr size_t MAX_STRING_BUFF_SIZE = 1024;
 static void ParseString(napi_env env, napi_value propertyNapi, std::string& property)
 {
     if (propertyNapi != nullptr) {
@@ -49,7 +48,7 @@ static void ParseString(napi_env env, napi_value propertyNapi, std::string& prop
 
         size_t buffSize = 0;
         napi_status status = napi_get_value_string_utf8(env, propertyNapi, nullptr, 0, &buffSize);
-        if (status != napi_ok || buffSize == 0 || buffSize >= MAX_STRING_BUFF_SIZE) {
+        if (status != napi_ok || buffSize == 0) {
             return;
         }
         std::unique_ptr<char[]> propertyString = std::make_unique<char[]>(buffSize + 1);

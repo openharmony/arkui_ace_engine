@@ -16,15 +16,12 @@ import(
 
 build_component("side_bar") {
   sources = [
-    "flutter_render_side_bar_container.cpp",
     "render_side_bar_container.cpp",
     "render_side_bar_container_creator.cpp",
     "side_bar_animation_controller.cpp",
     "side_bar_container_component.cpp",
     "side_bar_container_element.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_side_bar_container.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_side_bar_container.cpp" ]
 }

@@ -82,6 +82,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         contentModifier->ModifyTextStyle(textStyle);
         contentModifier->SetFontReady(false);
     }
+    textStyle.SetHalfLeading(pipeline->GetHalfLeading());
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
 

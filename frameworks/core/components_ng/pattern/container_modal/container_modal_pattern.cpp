@@ -32,7 +32,7 @@ constexpr int32_t MINIMIZE_BUTTON_INDEX = 4;
 constexpr int32_t CLOSE_BUTTON_INDEX = 5;
 constexpr int32_t TITLE_POPUP_DURATION = 200;
 constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
-constexpr double MOVE_POPUP_DISTANCE_X = 10.0;    // 10.0px
+constexpr double MOVE_POPUP_DISTANCE_X = 40.0;    // 40.0px
 constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 

@@ -95,6 +95,7 @@ constexpr int32_t CLOSE_BUTTON_INDEX = 5;
 const std::string TEST_TAG("test");
 const std::string ACCESS_TAG("-accessibility");
 const std::string TEST_FORM_INFO("test_info");
+const int64_t RENDER_EVENT_ID = 10;
 } // namespace
 
 class PipelineContextTestNg : public testing::Test {
@@ -1928,6 +1929,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
      */
     context_->SetContainerButtonHide(false, true, false);
     EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
+
+    /**
+     * @tc.steps4: call SetContainerButtonHide with params false, true, false.
+     * @tc.expected: cover branch windowModal_ is not CONTAINER_MODAL
+     */
+    context_->SetWindowModal(WindowModal::DIALOG_MODAL);
+    context_->SetContainerButtonHide(false, true, false);
+    EXPECT_FALSE(containerPattern->hideSplitButton_);
 }
 
 /**
@@ -2445,7 +2454,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg050, TestSize.Level1)
     EXPECT_EQ(context_->safeAreaManager_->systemSafeArea_, safeAreaInsets);
 
     context_->UpdateCutoutSafeArea(safeAreaInsets);
-    EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_, safeAreaInsets);
+    EXPECT_NE(context_->safeAreaManager_->cutoutSafeArea_, safeAreaInsets);
 }
 
 /**
@@ -2620,5 +2629,80 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg057, TestSize.Level1)
     context_->SetNeedRenderNode(needRenderNode);
     context_->InspectDrew();
     EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg058
+ * @tc.desc: Test the function FlushMouseEventG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg058, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function FlushMouseEvent with default action.
+     * @tc.expected: The function is called and cover branch mouseAction is not WINDOW_LEAVE.
+     */
+    context_->FlushMouseEvent();
+    auto result = context_->lastMouseEvent_->action == MouseAction::WINDOW_LEAVE;
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps3: Call the function FlushMouseEvent with lastMouseEvent_ is nullptr.
+     * @tc.expected: The function is called and cover branch lastMouseEvent_ is nullptr.
+     */
+    context_->lastMouseEvent_ = nullptr;
+    context_->FlushMouseEvent();
+    EXPECT_EQ(context_->lastMouseEvent_, nullptr);
+
+    /**
+     * @tc.steps4: Call the function FlushMouseEvent with mouseAction is  WINDOW_LEAVE.
+     * @tc.expected: The function is called and cover branch mouseAction is WINDOW_LEAVE.
+     */
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>();
+    context_->lastMouseEvent_->action = MouseAction::WINDOW_LEAVE;
+    context_->FlushMouseEvent();
+    result = context_->lastMouseEvent_->action == MouseAction::WINDOW_LEAVE;
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg059
+ * @tc.desc: Test the function OnIdle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg059, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function OnIdle with canUseLongPredictTask_.
+     * @tc.expected: called OnIdle and cover branch canUseLongPredictTask_ is true.
+     */
+    context_->canUseLongPredictTask_ = true;
+    context_->OnIdle(1);
+    EXPECT_TRUE(context_->touchEvents_.empty());
+
+    /**
+     * @tc.steps3: Call the function OnIdle with touchEvents_ is not empty.
+     * @tc.expected: The value of flagCbk changed.
+     */
+    bool flagCbk = false;
+    context_->AddPredictTask([&flagCbk](int64_t, bool) { flagCbk = true; });
+    TouchEvent event;
+    event.id = RENDER_EVENT_ID;
+    context_->touchEvents_.push_back(event);
+    context_->canUseLongPredictTask_ = true;
+    context_->OnIdle(2);
+    EXPECT_TRUE(flagCbk);
 }
 } // namespace OHOS::Ace::NG

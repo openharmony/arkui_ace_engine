@@ -15,22 +15,14 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_gaussianblur.h"
 
-#ifndef NEW_SKIA
-#include "include/effects/SkBlurImageFilter.h"
-#else
 #include "include/effects/SkImageFilters.h"
-#endif
 
 namespace OHOS::Ace {
 
 #ifndef USE_ROSEN_DRAWING
 void RosenRenderSvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const
 {
-#ifndef NEW_SKIA
-    imageFilter = SkBlurImageFilter::Make(deviationX_, deviationY_, imageFilter, nullptr);
-#else
     imageFilter = SkImageFilters::Blur(deviationX_, deviationY_, imageFilter, nullptr);
-#endif
 }
 #else
 void RosenRenderSvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter) const

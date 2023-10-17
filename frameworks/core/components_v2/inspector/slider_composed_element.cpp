@@ -19,19 +19,15 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
-#ifndef NEW_SKIA
-#include "core/components/slider/flutter_render_slider.h"
-#endif
 #include "core/components/slider/slider_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
 
-const std::unordered_map<std::string,
-    std::function<std::unique_ptr<JsonValue>(const SliderComposedElement&)>> CREATE_JSON_MAP {
-    { "constructor", [](const SliderComposedElement& inspector) { return inspector.GetConstructor(); } }
-};
+const std::unordered_map<std::string, std::function<std::unique_ptr<JsonValue>(const SliderComposedElement&)>>
+    CREATE_JSON_MAP { { "constructor",
+        [](const SliderComposedElement& inspector) { return inspector.GetConstructor(); } } };
 
 const std::unordered_map<std::string, std::function<std::string(const SliderComposedElement&)>> CREATE_JSON_STRING_MAP {
     { "blockColor", [](const SliderComposedElement& inspector) { return inspector.GetBlockColor(); } },
@@ -169,49 +165,16 @@ std::string SliderComposedElement::GetThickness() const
 
 std::string SliderComposedElement::GetBlockColor() const
 {
-#ifndef NEW_SKIA
-    auto renderSlider = GetRenderSlider();
-    auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
-    if (flutterRenderSlider) {
-        auto block = flutterRenderSlider->GetRenderBlock();
-        if (block) {
-            return block->GetBlockColor().ColorToString();
-        }
-        return "";
-    }
-#endif
     return "";
 }
 
 std::string SliderComposedElement::GetTrackColor() const
 {
-#ifndef NEW_SKIA
-    auto renderSlider = GetRenderSlider();
-    auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
-    if (flutterRenderSlider) {
-        auto track = flutterRenderSlider->GetRenderTrack();
-        if (track) {
-            return track->GetBackgroundColor().ColorToString();
-        }
-        return "";
-    }
-#endif
     return "";
 }
 
 std::string SliderComposedElement::GetSelectedColor() const
 {
-#ifndef NEW_SKIA
-    auto renderSlider = GetRenderSlider();
-    auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
-    if (flutterRenderSlider) {
-        auto track = flutterRenderSlider->GetRenderTrack();
-        if (track) {
-            return track->GetSelectColor().ColorToString();
-        }
-        return "";
-    }
-#endif
     return "";
 }
 

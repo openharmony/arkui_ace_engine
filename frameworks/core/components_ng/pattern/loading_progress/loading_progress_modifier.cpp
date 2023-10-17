@@ -66,8 +66,8 @@ constexpr float SIZE_SCALE3 = 0.93f;
 constexpr float MOVE_STEP = 0.06f;
 constexpr float TRANS_OPACITY_SPAN = 0.3f;
 constexpr float FULL_OPACITY = 255.0f;
-constexpr float TWO = 2.0f;
 constexpr float FAKE_DELTA = 0.01f; 
+constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
     : enableLoading_(AceType::MakeRefPtr<PropertyBool>(true)),
@@ -79,7 +79,8 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       cometOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_OPACITY_SCALE)),
       cometSizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_SIZE_SCALE)),
       cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TOTAL_TAIL_LENGTH)),
-      sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)), loadingProgressOwner_(loadingProgressOwner)
+      sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)),
+      loadingProgressOwner_(loadingProgressOwner)
 {
     AttachProperty(enableLoading_);
     AttachProperty(offset_);
@@ -90,7 +91,6 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
     AttachProperty(cometOpacity_);
     AttachProperty(cometSizeScale_);
     AttachProperty(cometTailLen_);
-    AttachProperty(sizeScale_);
 };
 
 void LoadingProgressModifier::onDraw(DrawingContext& context)
@@ -259,6 +259,7 @@ void LoadingProgressModifier::StartRecycleCometAnimation()
     }
 
     cometOpacity_->Set(OPACITY2);
+    cometTailLen_->Set(TOTAL_TAIL_LENGTH);
     AnimationUtils::OpenImplicitAnimation(option, curve, nullptr);
     AnimationUtils::AddKeyFrame(STAGE1, curve,
         [weakCometOpacity = AceType::WeakClaim(AceType::RawPtr(cometOpacity_)),
@@ -392,6 +393,7 @@ void LoadingProgressModifier::StartRecycle()
 
 void LoadingProgressModifier::StartTransToRecycleAnimation()
 {
+    sizeScale_->Set(1.0f);
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.6f, 0.2f, 1.0f, 1.0f);
     AnimationOption option;
     option.SetDuration(TRANS_DURATION);
@@ -426,7 +428,7 @@ void LoadingProgressModifier::StartTransToRecycleAnimation()
 void LoadingProgressModifier::ChangeRefreshFollowData(float refreshFollowRatio)
 {
     auto ratio = CorrectNormalize(refreshFollowRatio);
-    sizeScale_->Set(std::sqrt(TWO) * HALF + (1.0 - std::sqrt(TWO) * HALF) * ratio);
+    sizeScale_->Set(BASE_SCALE + (1.0 - BASE_SCALE) * ratio);
     if (isLoading_) {
         CloseAnimation(FOLLOW_START, COMET_TAIL_ANGLE, 1.0f, 1.0f);
     }
@@ -435,6 +437,12 @@ void LoadingProgressModifier::ChangeRefreshFollowData(float refreshFollowRatio)
     cometTailLen_->Set(COMET_TAIL_ANGLE);
     cometOpacity_->Set(1.0f);
     cometSizeScale_->Set(1.0f);
+}
+
+void LoadingProgressModifier::ChangeSizeScaleData(float refreshFadeAwayRatio)
+{
+    auto ratio = CorrectNormalize(refreshFadeAwayRatio);
+    sizeScale_->Set(BASE_SCALE + (1.0 - BASE_SCALE) * ratio);
 }
 
 void LoadingProgressModifier::CloseAnimation(float date, float cometLen, float cometOpacity, float cometScale)

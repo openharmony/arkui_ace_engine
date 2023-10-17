@@ -68,7 +68,8 @@ public:
     bool operator==(const Shadow& rhs) const
     {
         return color_ == rhs.color_ && NearEqual(blurRadius_, rhs.blurRadius_) && offset_ == rhs.offset_ &&
-               NearEqual(spreadRadius_, rhs.spreadRadius_) && NearEqual(elevation_, rhs.elevation_);
+               NearEqual(spreadRadius_, rhs.spreadRadius_) && NearEqual(elevation_, rhs.elevation_) &&
+               isFilled_ == rhs.isFilled_;
     }
 
     bool operator!=(const Shadow& rhs) const
@@ -152,6 +153,11 @@ public:
         isHardwareAcceleration_ = acceleration;
     }
 
+    void SetIsFilled(bool isFilled)
+    {
+        isFilled_ = isFilled;
+    }
+
     bool GetHardwareAcceleration() const
     {
         return isHardwareAcceleration_;
@@ -196,6 +202,11 @@ public:
         return type_;
     }
 
+    bool GetIsFilled() const
+    {
+        return isFilled_;
+    }
+
     bool IsValid() const
     {
         if (isHardwareAcceleration_) {
@@ -213,6 +224,7 @@ private:
     Offset offset_;
     Color color_ = Color::BLACK;
     bool isHardwareAcceleration_ = false;
+    bool isFilled_ = false;
     ShadowStyle style_ = ShadowStyle::None;
     ShadowType type_ = ShadowType::COLOR;
 };

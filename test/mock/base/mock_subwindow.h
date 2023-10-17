@@ -47,7 +47,9 @@ public:
     MOCK_METHOD0(GetShown, bool());
     MOCK_METHOD2(SetHotAreas, void(const std::vector<Rect>& rects, int32_t overlayId));
     MOCK_CONST_METHOD0(GetParentWindowRect, Rect());
-    MOCK_METHOD3(ShowToast, void(const std::string& message, int32_t duration, const std::string& bottom));
+    MOCK_METHOD0(ClearToast, void());
+    MOCK_METHOD4(ShowToast, void(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode));
     MOCK_METHOD6(ShowDialog,
         void(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
             bool autoCancel, std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks));

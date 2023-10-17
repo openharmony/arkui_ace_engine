@@ -26,12 +26,10 @@ DOMSvgBase::DOMSvgBase(NodeId nodeId, const std::string& nodeName) : DOMNode(nod
 void DOMSvgBase::InheritAttrs(const RefPtr<DOMNode>& parentNode)
 {
     if (!AceType::InstanceOf<DOMSvg>(parentNode) && !AceType::InstanceOf<DOMSvgG>(parentNode)) {
-        LOGE("parentNode is null");
         return;
     }
     auto declaration = AceType::DynamicCast<SvgBaseDeclaration>(declaration_);
     if (!declaration) {
-        LOGE("declaration is null");
         return;
     }
     declaration->Inherit(parentNode->GetDeclaration());

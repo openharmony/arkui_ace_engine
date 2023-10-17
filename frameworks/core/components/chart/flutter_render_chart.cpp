@@ -428,26 +428,16 @@ void FlutterRenderChart::PaintLineEdge(const ScopedCanvas& canvas, fml::RefPtr<f
         }
         SkPoint points[2] = { SkPoint::Make(startOffset_.GetX(), 0.0f), SkPoint::Make(end, 0.0f) };
         SkColor colors[2] = { segmentInfo.GetSegmentColor().GetValue(), targetColor_.GetValue() };
-#ifdef USE_SYSTEM_SKIA
-        paint.paint()->setShader(
-            SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr));
-#else
         paint.paint()->setShader(
             SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
-#endif
     }
     if (gradientOfLine_ && drawGradient) {
         SkPoint points[2] = { SkPoint::Make(startGradientPoint_.GetX(), 0.0f),
             SkPoint::Make(endGradientPoint_.GetX(), 0.0f) };
         SkColor colors[2] = { segmentInfo.GetSegmentColor().ChangeAlpha(0).GetValue(),
             segmentInfo.GetSegmentColor().GetValue() };
-#ifdef USE_SYSTEM_SKIA
-        paint.paint()->setShader(
-            SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr));
-#else
         paint.paint()->setShader(
             SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
-#endif
     }
     paint.paint()->setStyle(SkPaint::Style::kStroke_Style);
     canvas->drawPath(path.get(), paint, paintData);
@@ -471,11 +461,7 @@ sk_sp<SkShader> FlutterRenderChart::CreateFillGradientShader(const Rect& paintRe
     SkPoint points[2] = { SkPoint::Make(paintRect.GetOffset().GetX(), top),
         SkPoint::Make(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() + paintRect.Height()) };
     SkColor colors[2] = { fillColor.GetValue(), fillColor.ChangeAlpha(0).GetValue() };
-#ifdef USE_SYSTEM_SKIA
-    return SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr);
-#else
     return SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr);
-#endif
 }
 
 Offset FlutterRenderChart::CalculateControlA(const Offset& prev, const Offset& cur, const Offset& next)

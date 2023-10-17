@@ -16,8 +16,6 @@ import(
 
 build_component("stepper") {
   sources = [
-    "flutter_render_stepper.cpp",
-    "flutter_render_stepper_item.cpp",
     "render_stepper.cpp",
     "render_stepper_creator.cpp",
     "render_stepper_item.cpp",
@@ -29,12 +27,7 @@ build_component("stepper") {
     "stepper_item_component_v2.cpp",
     "stepper_item_element.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [
-      "flutter_render_stepper.cpp",
-      "flutter_render_stepper_item.cpp",
-    ]
-  }
+
   rosen_sources = [
     "rosen_render_stepper.cpp",
     "rosen_render_stepper_item.cpp",

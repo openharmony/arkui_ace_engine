@@ -27,15 +27,17 @@ constexpr char FORM_RENDER_STATE[] = "ohos.extra.param.key.form_render_state";
 }
 std::shared_ptr<FormRendererGroup> FormRendererGroup::Create(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
-    const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
+    const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime,
+    std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler)
 {
-    return std::make_shared<FormRendererGroup>(context, runtime);
+    return std::make_shared<FormRendererGroup>(context, runtime, eventHandler);
 }
 
 FormRendererGroup::FormRendererGroup(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
-    const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
-    : context_(context), runtime_(runtime) {}
+    const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime,
+    std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler)
+    : context_(context), runtime_(runtime), eventHandler_(eventHandler) {}
 
 FormRendererGroup::~FormRendererGroup()
 {
@@ -87,7 +89,7 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
     OHOS::AAFwk::Want want = formRequest.want;
     AppExecFwk::FormJsInfo formJsInfo = formRequest.formJsInfo;
     if (formRenderer_ == nullptr) {
-        formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_);
+        formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_, eventHandler_);
         if (!formRenderer_) {
             HILOG_ERROR("InnerAddForm create form render failed");
             return;

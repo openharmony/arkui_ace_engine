@@ -34,7 +34,6 @@ enum class ResourceType : uint32_t {
 };
 
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
-constexpr size_t MAX_STRING_BUFF_SIZE = 1024;
 
 } // namespace
 
@@ -110,7 +109,7 @@ size_t GetParamLen(napi_env env, napi_value param)
 {
     size_t buffSize = 0;
     napi_status status = napi_get_value_string_utf8(env, param, nullptr, 0, &buffSize);
-    if (status != napi_ok || buffSize == 0 || buffSize >= MAX_STRING_BUFF_SIZE) {
+    if (status != napi_ok || buffSize == 0) {
         return 0;
     }
     return buffSize;

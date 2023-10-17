@@ -35,10 +35,6 @@ build_component("text_overlay") {
     "text_overlay_manager.cpp",
   ]
 
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_text_overlay.cpp" ]
-  }
-
   rosen_sources = [ "rosen_render_text_overlay.cpp" ]
 }
 
@@ -51,9 +47,6 @@ build_component("text_overlay_for_web") {
     "text_overlay_manager.cpp",
   ]
 
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_text_overlay.cpp" ]
-  }
   external_deps = []
   if (is_ohos_standard_system) {
     deps = [

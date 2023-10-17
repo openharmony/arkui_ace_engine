@@ -62,6 +62,11 @@ public:
         offset_->Set(offset);
     }
 
+    void SetStrokeWidthLimitation(bool limite)
+    {
+        strokeWidthLimitation_->Set(limite);
+    }
+
 private:
     RefPtr<AnimatablePropertyFloat> strokeWidth_;
     RefPtr<AnimatablePropertyColor> color_;
@@ -69,6 +74,7 @@ private:
     RefPtr<PropertyInt> lineCap_;
     RefPtr<PropertyBool> vertical_;
     RefPtr<PropertyOffsetF> offset_;
+    RefPtr<PropertyBool> strokeWidthLimitation_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DividerModifier);
 };

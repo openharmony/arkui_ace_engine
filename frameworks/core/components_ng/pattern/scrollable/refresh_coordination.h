@@ -27,21 +27,35 @@ class RefreshCoordination : public AceType {
 public:
     RefreshCoordination(RefPtr<FrameNode> scrollableNode)
     {
-        scrollableNode_ = scrollableNode;
-        refreshNode_ = FindRefreshNode();
+        scrollableNode_ = WeakClaim(RawPtr(scrollableNode));
+        auto refreshNode = FindRefreshNode();
+        refreshNode_ = WeakClaim(RawPtr(refreshNode));
         coordinationEvent_ = CreateCoordinationEvent();
     };
     ~RefreshCoordination() = default;
-    void OnScrollStart() const;
+    void OnScrollStart(bool isDrag) const;
     bool OnScroll(float offset) const;
     void OnScrollEnd(float speed) const;
+    bool InCoordination()
+    {
+        auto refreshNode = refreshNode_.Upgrade();
+        CHECK_NULL_RETURN(refreshNode, false);
+        return !!refreshNode;
+    }
+    bool IsRefreshInScroll() const;
 
 private:
     RefPtr<FrameNode> FindRefreshNode() const;
     RefPtr<ScrollableCoordinationEvent> CreateCoordinationEvent();
-    RefPtr<FrameNode> refreshNode_;
-    RefPtr<FrameNode> scrollableNode_;
+    WeakPtr<FrameNode> refreshNode_;
+    WeakPtr<FrameNode> scrollableNode_;
     RefPtr<ScrollableCoordinationEvent> coordinationEvent_;
+};
+
+enum class RefreshCoordinationMode : char {
+    UNKNOWN = 0,
+    REFRESH_SCROLL = 1,
+    SCROLLABLE_SCROLL = 2,
 };
 } // namespace OHOS::Ace::NG
 #endif

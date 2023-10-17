@@ -376,12 +376,14 @@ void RenderBubble::InitArrowTopAndBottomPosition(Offset& topArrowPosition, Offse
     double scaledBubbleSpacing = NormalizeToPx(BUBBLE_SPACING);
     auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
-        topArrowPosition = topPosition + Offset(
-            std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.TopLeftRadius().GetX())) +
-            NormalizeToPx(BEZIER_WIDTH_HALF), childSize.Height() + NormalizeToPx(BUBBLE_SPACING));
-        bottomArrowPosition = bottomPosition + Offset(
-            std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.BottomLeftRadius().GetX())) +
-            NormalizeToPx(BEZIER_WIDTH_HALF), -NormalizeToPx(BUBBLE_SPACING));
+        topArrowPosition = topPosition + Offset(std::max(NormalizeToPx(padding_.Left()),
+                                                    NormalizeToPx(border_.TopLeftRadius().GetX())) +
+                                                    NormalizeToPx(BEZIER_WIDTH_HALF),
+                                             childSize.Height() + NormalizeToPx(BUBBLE_SPACING));
+        bottomArrowPosition = bottomPosition + Offset(std::max(NormalizeToPx(padding_.Left()),
+                                                          NormalizeToPx(border_.BottomLeftRadius().GetX())) +
+                                                          NormalizeToPx(BEZIER_WIDTH_HALF),
+                                                   -NormalizeToPx(BUBBLE_SPACING));
         return;
     }
     topArrowPosition = Offset(targetOffset_.GetX() + targetSize_.Width() / 2.0,
@@ -641,31 +643,6 @@ bool RenderBubble::HandleMouseEvent(const MouseEvent& event)
 }
 
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-void RenderBubble::BuildCornerPath(SkPath& path, Placement placement, double radius)
-{
-    switch (placement) {
-        case Placement::TOP_LEFT:
-            path.arcTo(radius, radius, 0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction,
-                childOffset_.GetX() + radius, childOffset_.GetY());
-            break;
-        case Placement::TOP_RIGHT:
-            path.arcTo(radius, radius, 0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction,
-                childOffset_.GetX() + childSize_.Width(), childOffset_.GetY() + radius);
-            break;
-        case Placement::BOTTOM_RIGHT:
-            path.arcTo(radius, radius, 0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction,
-                childOffset_.GetX() + childSize_.Width() - radius, childOffset_.GetY() + childSize_.Height());
-            break;
-        case Placement::BOTTOM_LEFT:
-            path.arcTo(radius, radius, 0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction,
-                childOffset_.GetX(), childOffset_.GetY() + childSize_.Height() - radius);
-            break;
-        default:
-            break;
-    }
-}
-#else
 void RenderBubble::BuildCornerPath(SkPath& path, Placement placement, double radius)
 {
     switch (placement) {
@@ -682,33 +659,32 @@ void RenderBubble::BuildCornerPath(SkPath& path, Placement placement, double rad
                 childOffset_.GetX() + childSize_.Width() - radius, childOffset_.GetY() + childSize_.Height());
             break;
         case Placement::BOTTOM_LEFT:
-            path.arcTo(radius, radius, 0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathDirection::kCW,
-                childOffset_.GetX(), childOffset_.GetY() + childSize_.Height() - radius);
+            path.arcTo(radius, radius, 0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathDirection::kCW, childOffset_.GetX(),
+                childOffset_.GetY() + childSize_.Height() - radius);
             break;
         default:
             break;
     }
 }
-#endif
-#else // USE_ROSEN_DRAWING
+#else  // USE_ROSEN_DRAWING
 void RenderBubble::BuildCornerPath(RSPath& path, Placement placement, double radius)
 {
     switch (placement) {
         case Placement::TOP_LEFT:
-            path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION,
-                childOffset_.GetX() + radius, childOffset_.GetY());
+            path.ArcTo(
+                radius, radius, 0.0f, RSPathDirection::CW_DIRECTION, childOffset_.GetX() + radius, childOffset_.GetY());
             break;
         case Placement::TOP_RIGHT:
-            path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION,
-                childOffset_.GetX() + childSize_.Width(), childOffset_.GetY() + radius);
+            path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION, childOffset_.GetX() + childSize_.Width(),
+                childOffset_.GetY() + radius);
             break;
         case Placement::BOTTOM_RIGHT:
             path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION,
                 childOffset_.GetX() + childSize_.Width() - radius, childOffset_.GetY() + childSize_.Height());
             break;
         case Placement::BOTTOM_LEFT:
-            path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION,
-                childOffset_.GetX(), childOffset_.GetY() + childSize_.Height() - radius);
+            path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION, childOffset_.GetX(),
+                childOffset_.GetY() + childSize_.Height() - radius);
             break;
         default:
             break;
@@ -783,15 +759,15 @@ void RenderBubble::BuildRightLinePath(SkPath& path, double arrowOffset, double r
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
-            path.lineTo(childOffset_.GetX() + childSize_.Width(), arrowPosition_.GetY() + arrowOffset -
-                NormalizeToPx(BEZIER_WIDTH_HALF));
+            path.lineTo(childOffset_.GetX() + childSize_.Width(),
+                arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_WIDTH_HALF));
             path.quadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
                 arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD),
                 arrowPosition_.GetX() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND),
                 arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND));
             path.quadTo(arrowPosition_.GetX() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
-                arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST),
-                arrowPosition_.GetX(), arrowPosition_.GetY() + arrowOffset);
+                arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST), arrowPosition_.GetX(),
+                arrowPosition_.GetY() + arrowOffset);
             path.quadTo(arrowPosition_.GetX() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
                 arrowPosition_.GetY() + arrowOffset + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST),
                 arrowPosition_.GetX() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND),
@@ -813,15 +789,15 @@ void RenderBubble::BuildRightLinePath(RSPath& path, double arrowOffset, double r
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
-            path.LineTo(childOffset_.GetX() + childSize_.Width(), arrowPosition_.GetY() + arrowOffset -
-                NormalizeToPx(BEZIER_WIDTH_HALF));
+            path.LineTo(childOffset_.GetX() + childSize_.Width(),
+                arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_WIDTH_HALF));
             path.QuadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
                 arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD),
                 arrowPosition_.GetX() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND),
                 arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND));
             path.QuadTo(arrowPosition_.GetX() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
-                arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST),
-                arrowPosition_.GetX(), arrowPosition_.GetY() + arrowOffset);
+                arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST), arrowPosition_.GetX(),
+                arrowPosition_.GetY() + arrowOffset);
             path.QuadTo(arrowPosition_.GetX() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
                 arrowPosition_.GetY() + arrowOffset + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST),
                 arrowPosition_.GetX() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND),
@@ -913,8 +889,8 @@ void RenderBubble::BuildLeftLinePath(SkPath& path, double arrowOffset, double ra
                 arrowPosition_.GetX() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND),
                 arrowPosition_.GetY() + arrowOffset + NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND));
             path.quadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
-                arrowPosition_.GetY() + arrowOffset + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST),
-                arrowPosition_.GetX(), arrowPosition_.GetY() + arrowOffset);
+                arrowPosition_.GetY() + arrowOffset + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST), arrowPosition_.GetX(),
+                arrowPosition_.GetY() + arrowOffset);
             path.quadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
                 arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST),
                 arrowPosition_.GetX() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND),
@@ -936,14 +912,14 @@ void RenderBubble::BuildLeftLinePath(RSPath& path, double arrowOffset, double ra
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            path.LineTo(childOffset_.GetX(), arrowPosition_.GetY() + arrowOffset +  NormalizeToPx(BEZIER_WIDTH_HALF));
+            path.LineTo(childOffset_.GetX(), arrowPosition_.GetY() + arrowOffset + NormalizeToPx(BEZIER_WIDTH_HALF));
             path.QuadTo(arrowPosition_.GetX() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
                 arrowPosition_.GetY() + arrowOffset + NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD),
                 arrowPosition_.GetX() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND),
                 arrowPosition_.GetY() + arrowOffset + NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND));
             path.QuadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
-                arrowPosition_.GetY() + arrowOffset + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST),
-                arrowPosition_.GetX(), arrowPosition_.GetY() + arrowOffset);
+                arrowPosition_.GetY() + arrowOffset + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST), arrowPosition_.GetX(),
+                arrowPosition_.GetY() + arrowOffset);
             path.QuadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
                 arrowPosition_.GetY() + arrowOffset - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST),
                 arrowPosition_.GetX() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND),
@@ -994,14 +970,16 @@ void RenderBubble::BuildCompletePath(RSPath& path)
 void RenderBubble::InitEdgeSize(Edge& edge)
 {
     edge.SetTop(Dimension(std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.TopLeftRadius().GetX())) +
-        std::max(NormalizeToPx(padding_.Right()), NormalizeToPx(border_.TopRightRadius().GetX()))));
-    edge.SetBottom(Dimension(std::max(NormalizeToPx(padding_.Left()),
-        NormalizeToPx(border_.BottomLeftRadius().GetX())) + std::max(NormalizeToPx(padding_.Right()),
-        NormalizeToPx(border_.BottomRightRadius().GetX()))));
-    edge.SetLeft(Dimension(std::max(NormalizeToPx(padding_.Top()), NormalizeToPx(border_.TopRightRadius().GetY())) +
-        std::max(NormalizeToPx(padding_.Bottom()), NormalizeToPx(border_.BottomRightRadius().GetY()))));
-    edge.SetRight(Dimension(std::max(NormalizeToPx(padding_.Top()), NormalizeToPx(border_.TopLeftRadius().GetY())) +
-        std::max(NormalizeToPx(padding_.Bottom()), NormalizeToPx(border_.BottomLeftRadius().GetY()))));
+                          std::max(NormalizeToPx(padding_.Right()), NormalizeToPx(border_.TopRightRadius().GetX()))));
+    edge.SetBottom(
+        Dimension(std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.BottomLeftRadius().GetX())) +
+                  std::max(NormalizeToPx(padding_.Right()), NormalizeToPx(border_.BottomRightRadius().GetX()))));
+    edge.SetLeft(
+        Dimension(std::max(NormalizeToPx(padding_.Top()), NormalizeToPx(border_.TopRightRadius().GetY())) +
+                  std::max(NormalizeToPx(padding_.Bottom()), NormalizeToPx(border_.BottomRightRadius().GetY()))));
+    edge.SetRight(
+        Dimension(std::max(NormalizeToPx(padding_.Top()), NormalizeToPx(border_.TopLeftRadius().GetY())) +
+                  std::max(NormalizeToPx(padding_.Bottom()), NormalizeToPx(border_.BottomLeftRadius().GetY()))));
 }
 
 double RenderBubble::GetArrowOffset(const Placement& placement)
@@ -1032,13 +1010,14 @@ double RenderBubble::GetArrowOffset(const Placement& placement)
             break;
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            motionRange = childSize_.Width() - edge.Bottom().Value()  - NormalizeToPx(ARROW_WIDTH);
+            motionRange = childSize_.Width() - edge.Bottom().Value() - NormalizeToPx(ARROW_WIDTH);
             break;
         default:
             break;
     }
-    return std::clamp(arrowOffset_.Unit() == DimensionUnit::PERCENT ? arrowOffset_.Value() * motionRange :
-        NormalizeToPx(arrowOffset_), 0.0, motionRange);
+    return std::clamp(arrowOffset_.Unit() == DimensionUnit::PERCENT ? arrowOffset_.Value() * motionRange
+                                                                    : NormalizeToPx(arrowOffset_),
+        0.0, motionRange);
 }
 
 void RenderBubble::OnPaintFinish()

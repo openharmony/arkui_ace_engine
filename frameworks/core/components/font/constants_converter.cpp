@@ -21,8 +21,8 @@
 #include "txt/paragraph_style.h"
 #include "txt/text_decoration.h"
 #else
-#include "rosen_text/typography_style.h"
 #include "rosen_text/typography_create.h"
+#include "rosen_text/typography_style.h"
 #endif
 
 #include "base/i18n/localization.h"
@@ -441,6 +441,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.decoration_color = ConvertSkColor(textStyle.GetTextDecorationColor());
     txtStyle.font_families = textStyle.GetFontFamilies();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
+    txtStyle.half_leading = textStyle.GetHalfLeading();
 
     for (auto& spanShadow : textStyle.GetTextShadows()) {
         txt::TextShadow txtShadow;
@@ -452,11 +453,8 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtShadow.offset.SetX(static_cast<SkScalar>(spanShadow.GetOffset().GetX()));
         txtShadow.offset.SetY(static_cast<SkScalar>(spanShadow.GetOffset().GetY()));
 #endif
-#if defined (FLUTTER_2_5) || defined (NEW_SKIA)
         txtShadow.blur_sigma = spanShadow.GetBlurRadius();
-#else
-        txtShadow.blur_radius = spanShadow.GetBlurRadius();
-#endif
+
         txtStyle.text_shadows.emplace_back(txtShadow);
     }
 
@@ -528,6 +526,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
+    txtStyle.halfLeading = textStyle.GetHalfLeading();
 
     for (auto& spanShadow : textStyle.GetTextShadows()) {
         Rosen::TextShadow txtShadow;
@@ -584,7 +583,7 @@ Rect ConvertSkRect(SkRect skRect)
     return result;
 }
 #else
-Rect ConvertSkRect(const Rosen::Drawing::RectF &skRect)
+Rect ConvertSkRect(const Rosen::Drawing::RectF& skRect)
 {
     Rect result;
     result.SetLeft(skRect.GetLeft());
@@ -627,8 +626,7 @@ txt::PlaceholderAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textD
 #else
 Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration)
 {
-    Rosen::PlaceholderVerticalAlignment convertValue =
-        Rosen::PlaceholderVerticalAlignment::OFFSET_AT_BASELINE;
+    Rosen::PlaceholderVerticalAlignment convertValue = Rosen::PlaceholderVerticalAlignment::OFFSET_AT_BASELINE;
     switch (textDecoration) {
         case PlaceholderAlignment::BASELINE:
             convertValue = Rosen::PlaceholderVerticalAlignment::OFFSET_AT_BASELINE;

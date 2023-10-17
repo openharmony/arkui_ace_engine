@@ -58,11 +58,6 @@ RefPtr<FrameNode> CreateSharedNode(const std::string& shareId, const int32_t& du
 }
 } // namespace
 
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return AceType::MakeRefPtr<MockRenderContext>();
-}
-
 class SharedOverlayManagerTestNg : public testing::Test {
 public:
     static void SetUpTestSuite() {};

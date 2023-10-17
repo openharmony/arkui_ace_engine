@@ -52,17 +52,11 @@ sk_sp<SkTypeface> RosenSvgPainter::fontTypeNormal_;
 void RosenSvgPainter::SetMask(SkCanvas* canvas)
 {
     SkPaint mask_filter;
-#ifdef USE_SYSTEM_SKIA
-    auto outerFilter = SkLumaColorFilter::Make();
-    auto innerFilter = SkColorFilter::MakeSRGBToLinearGamma();
-    auto filter = SkColorFilter::MakeComposeFilter(outerFilter, std::move(innerFilter));
-    mask_filter.setColorFilter(filter);
-#else
+
     auto outerFilter = SkLumaColorFilter::Make();
     auto innerFilter = SkColorFilters::SRGBToLinearGamma();
     auto filter = SkColorFilters::Compose(outerFilter, std::move(innerFilter));
     mask_filter.setColorFilter(filter);
-#endif
     canvas->saveLayer(nullptr, &mask_filter);
 }
 #else
@@ -153,33 +147,21 @@ void RosenSvgPainter::SetGradientStyle(SkPaint& skPaint, const FillState& fillSt
     if (gradient->GetType() == GradientType::LINEAR) {
         auto info = gradient->GetLinearGradientInfo();
         SkPoint pts[2] = { SkPoint::Make(info.x1, info.y1), SkPoint::Make(info.x2, info.y2) };
-#ifdef USE_SYSTEM_SKIA
-        skPaint.setShader(SkGradientShader::MakeLinear(pts, &colors[0], &pos[0], gradientColors.size(),
-            static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-#else
+
         skPaint.setShader(SkGradientShader::MakeLinear(pts, &colors[0], &pos[0], gradientColors.size(),
             static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-#endif
     }
     if (gradient->GetType() == GradientType::RADIAL) {
         auto info = gradient->GetRadialGradientInfo();
         auto center = SkPoint::Make(info.cx, info.cy);
         auto focal = SkPoint::Make(info.fx, info.fx);
-#ifdef USE_SYSTEM_SKIA
-        return center == focal ? skPaint.setShader(SkGradientShader::MakeRadial(center, info.r, &colors[0], &pos[0],
-                                     gradientColors.size(),
-                                     static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr))
-                               : skPaint.setShader(SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r,
-                                     &colors[0], &pos[0], gradientColors.size(),
-                                     static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-#else
+
         return center == focal
                    ? skPaint.setShader(SkGradientShader::MakeRadial(center, info.r, &colors[0], &pos[0],
                          gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr))
                    : skPaint.setShader(
                          SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r, &colors[0], &pos[0],
                              gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-#endif
     }
 }
 #else

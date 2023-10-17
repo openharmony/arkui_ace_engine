@@ -122,24 +122,22 @@ public:
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
-    int32_t GetInstanceId() const;
-    void InsertValue(const std::string& insertValue);
+    void InsertValue(const std::string& insertValue) override;
     void InsertValueByPaste(const std::string& insertValue);
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
         RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
-    void SpanNodeFission(
-        RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
+    void SpanNodeFission(RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
     void SpanNodeFission(RefPtr<SpanNode>& spanNode);
     void CreateTextSpanNode(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
-    void DeleteBackward(int32_t length = 0);
-    void DeleteForward(int32_t length);
-    void SetInputMethodStatus(bool keyboardShown);
-    bool CursorMoveLeft();
-    bool CursorMoveRight();
-    bool CursorMoveUp();
-    bool CursorMoveDown();
+    void DeleteBackward(int32_t length = 0) override;
+    void DeleteForward(int32_t length) override;
+    void SetInputMethodStatus(bool keyboardShown) override;
+    bool CursorMoveLeft() override;
+    bool CursorMoveRight() override;
+    bool CursorMoveUp() override;
+    bool CursorMoveDown() override;
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength();
@@ -166,9 +164,9 @@ public:
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
-    std::u16string GetLeftTextOfCursor(int32_t number);
-    std::u16string GetRightTextOfCursor(int32_t number);
-    int32_t GetTextIndexAtCursor();
+    std::u16string GetLeftTextOfCursor(int32_t number) override;
+    std::u16string GetRightTextOfCursor(int32_t number) override;
+    int32_t GetTextIndexAtCursor() override;
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     int32_t GetHandleIndex(const Offset& offset) const override;
@@ -279,7 +277,7 @@ private:
     void StartTwinkling();
     void StopTwinkling();
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
-    void UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpanAttribute imageStyle);
+    void UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
     void InitTouchEvent();
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
@@ -309,6 +307,7 @@ private:
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 
+    int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
     RefPtr<UINode> GetChildByIndex(int32_t index) const;
@@ -336,6 +335,9 @@ private:
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
     bool OnKeyEvent(const KeyEvent& keyEvent);
+    bool HandleShiftPressedEvent(const KeyEvent& event);
+    bool HandleDirectionalKey(const KeyEvent& keyEvent);
+    void ParseAppendValue(KeyCode keyCode, std::string& appendElement);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
     void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);
@@ -366,7 +368,6 @@ private:
     bool usingMouseRightButton_ = false;
 
     int32_t moveLength_ = 0;
-    int32_t instanceId_ = -1;
     int32_t caretPosition_ = 0;
     int32_t caretSpanIndex_ = -1;
     long long timestamp_ = 0;

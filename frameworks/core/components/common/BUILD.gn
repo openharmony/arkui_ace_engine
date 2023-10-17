@@ -20,12 +20,6 @@ build_component("common") {
     # painter
     "painter/border_image_painter.cpp",
     "painter/debug_boundary_painter.cpp",
-    "painter/flutter_checkable_painter.cpp",
-    "painter/flutter_decoration_painter.cpp",
-    "painter/flutter_scroll_bar_painter.cpp",
-    "painter/flutter_scroll_fade_painter.cpp",
-    "painter/flutter_svg_painter.cpp",
-    "painter/flutter_universal_painter.cpp",
 
     # #properties
     "properties/alignment.cpp",
@@ -54,16 +48,7 @@ build_component("common") {
     "layout/screen_system_manager.cpp",
     "layout/templates_parser.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [
-      "painter/flutter_checkable_painter.cpp",
-      "painter/flutter_decoration_painter.cpp",
-      "painter/flutter_scroll_bar_painter.cpp",
-      "painter/flutter_scroll_fade_painter.cpp",
-      "painter/flutter_svg_painter.cpp",
-      "painter/flutter_universal_painter.cpp",
-    ]
-  }
+
   rosen_sources = [
     "painter/rosen_checkable_painter.cpp",
     "painter/rosen_decoration_painter.cpp",

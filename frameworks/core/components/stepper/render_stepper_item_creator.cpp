@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_stepper_item.h"
-#endif
 #include "rosen_render_stepper_item.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderStepperItem::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderStepperItem>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

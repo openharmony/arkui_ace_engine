@@ -16,7 +16,6 @@ import(
 
 build_component("image") {
   sources = [
-    "flutter_render_image.cpp",
     "image_animator_component.cpp",
     "image_animator_element.cpp",
     "image_component.cpp",
@@ -24,8 +23,5 @@ build_component("image") {
     "render_image.cpp",
     "render_image_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_image.cpp" ]
-  }
   rosen_sources = [ "rosen_render_image.cpp" ]
 }

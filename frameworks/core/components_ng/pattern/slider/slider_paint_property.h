@@ -115,6 +115,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, BlockType, SliderModel::BlockStyleType, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockImage, std::string, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockImageBundleName, std::string, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockImageModuleName, std::string, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockShape, RefPtr<BasicShape>, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, StepSize, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SliderMode, SliderModel::SliderMode, PROPERTY_UPDATE_RENDER)

@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NEW_SKIA
-#include "core/components/arc/flutter_render_arc.h"
-#endif
+ 
 #include "core/components/arc/rosen_render_arc.h"
 
 namespace OHOS::Ace {
@@ -27,11 +25,7 @@ RefPtr<RenderNode> RenderArc::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderArc>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

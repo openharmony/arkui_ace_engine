@@ -157,10 +157,12 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
         sourceType = PERF_JOY_STICK;
     }
     int32_t pointerAction = pointerEvent->GetPointerAction();
-    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         inputType = LAST_DOWN;
         isFirstMove = true;
-    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP) {
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
         inputType = LAST_UP;
         isFirstMove = false;
     } else if (isFirstMove && pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) {

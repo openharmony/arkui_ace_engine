@@ -106,8 +106,6 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
 RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
 {
     CHECK_NULL_RETURN(obj_ && data_, nullptr);
-    ACE_SCOPED_TRACE("MakePixmapImage %s", obj_->GetSourceInfo().ToString().c_str());
-
 #ifndef USE_ROSEN_DRAWING
     auto source = ImageSource::Create(data_->bytes(), data_->size());
 #else
@@ -117,6 +115,11 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
 
     auto width = std::lround(desiredSize_.Width());
     auto height = std::lround(desiredSize_.Height());
+    std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
+    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ]",
+        obj_->GetSourceInfo().ToString().c_str(), sourceSize.first, sourceSize.second,
+        static_cast<int32_t>(width),
+        static_cast<int32_t>(height));
     auto pixmap = source->CreatePixelMap({ width, height });
     CHECK_NULL_RETURN(pixmap, nullptr);
     auto image = PixelMapImage::Create(pixmap);
@@ -132,12 +135,9 @@ sk_sp<SkImage> ImageDecoder::ForceResizeImage(const sk_sp<SkImage>& image, const
     SkBitmap bitmap;
     bitmap.allocPixels(info);
 
-#ifdef NEW_SKIA
     auto res = image->scalePixels(
         bitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone), SkImage::kDisallow_CachingHint);
-#else
-    auto res = image->scalePixels(bitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint);
-#endif
+
     CHECK_NULL_RETURN(res, image);
 
     bitmap.setImmutable();
@@ -165,6 +165,10 @@ sk_sp<SkImage> ImageDecoder::ResizeSkImage()
 #endif
     CHECK_NULL_RETURN(codec, {});
     auto info = codec->getInfo();
+
+    ACE_SCOPED_TRACE(
+        "ImageResize %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ]", obj_->GetSourceInfo().ToString().c_str(),
+        info.width(), info.height(), static_cast<int32_t>(width), static_cast<int32_t>(height));
 
     // sourceSize is set by developer, then we will force scaling to [TargetSize] using SkImage::scalePixels,
     // this method would succeed even if the codec doesn't support that size.

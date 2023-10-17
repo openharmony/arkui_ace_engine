@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_row_split.h"
-#endif
 #include "rosen_render_row_split.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderRowSplit::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderRowSplit>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

@@ -41,7 +41,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t TARGET_ID = 3;
 constexpr double RADIUS_DEFAULT = 300.0;
 const std::string HYPERLINK_ADDRESS = "https://www.baidu.com";
 const std::string HYPERLINK_CONTENT = "baidu";
@@ -164,61 +163,51 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
 
 /**
  * @tc.name: HyperlinkPatternTest002
- * @tc.desc: Test HyperlinkPattern InitTouchEvent.
+ * @tc.desc: Test HyperlinkPattern InitLongPressEvent.
  * @tc.type: FUNC
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest002, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
-    stack->Push(hyperlinkNode);
-
-    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    ASSERT_NE(frameNode, nullptr);
+    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto inputHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
 
-    hyperlinkPattern->onTouchEvent_ = nullptr;
-    hyperlinkPattern->InitTouchEvent(gestureEventHub);
-    TouchEventFunc callback = [](TouchEventInfo& info) {};
-    hyperlinkPattern->onTouchEvent_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
-    EXPECT_TRUE(hyperlinkPattern->onTouchEvent_);
+    hyperlinkPattern->InitLongPressEvent(inputHub);
+    auto longPressEvent = hyperlinkPattern->longPressEvent_->callback_;
+
+    auto info = GestureEvent();
+    longPressEvent(info);
+    EXPECT_EQ(hyperlinkPattern->isLinked_, 1);
 }
 
 /**
  * @tc.name: HyperlinkPatternTest003
- * @tc.desc: Test HyperlinkPattern InitOnKeyEvent.
+ * @tc.desc: Test HyperlinkPattern InitTouchEvent.
  * @tc.type: FUNC
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest003, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
-    stack->Push(hyperlinkNode);
-
-    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    ASSERT_NE(frameNode, nullptr);
+    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
-    RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
-    hyperlinkPattern->InitOnKeyEvent(focusHub);
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-    event.code = KeyCode::KEY_TAB;
-    bool result = hyperlinkPattern->OnKeyEvent(event);
-    EXPECT_FALSE(result);
-    event.code = KeyCode::KEY_SPACE;
-    result = hyperlinkPattern->OnKeyEvent(event);
-    EXPECT_TRUE(result);
-    event.action = KeyAction::CLICK;
-    result = hyperlinkPattern->OnKeyEvent(event);
-    EXPECT_FALSE(result);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto inputHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_FALSE(hyperlinkPattern->onTouchEvent_);
+    hyperlinkPattern->InitTouchEvent(inputHub);
+    EXPECT_TRUE(hyperlinkPattern->onTouchEvent_);
 }
 
 /**
  * @tc.name: HyperlinkPatternTest004
- * @tc.desc: Test HyperlinkPattern OnTouchEvent when ouchType = TouchType::DOWN
+ * @tc.desc: Test HyperlinkPattern InitOnKeyEvent.
  * @tc.type: FUNC
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest004, TestSize.Level1)
@@ -227,95 +216,31 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest004, TestSize.Level1)
     auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
         []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
     stack->Push(hyperlinkNode);
+
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
-    auto hyperlinkLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(hyperlinkLayoutProperty, nullptr);
-    std::string type = "1";
-    TouchEventInfo info(type);
-    TouchType touchType = TouchType::DOWN;
-    TouchLocationInfo locationInfo(TARGET_ID);
-    Offset globalLocation(1, 1);
-    locationInfo.SetTouchType(touchType);
-    hyperlinkPattern->OnTouchEvent(info);
-    hyperlinkLayoutProperty->UpdateTextDecoration(TextDecoration::UNDERLINE);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration(), TextDecoration::UNDERLINE);
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_TAB;
+    bool result = hyperlinkPattern->OnKeyEvent(event);
+    EXPECT_FALSE(result);
+    event.code = KeyCode::KEY_SPACE;
+    result = hyperlinkPattern->OnKeyEvent(event);
+    EXPECT_TRUE(result);
+    event.code = KeyCode::KEY_ENTER;
+    result = hyperlinkPattern->OnKeyEvent(event);
+    EXPECT_TRUE(result);
+    event.action = KeyAction::CLICK;
+    result = hyperlinkPattern->OnKeyEvent(event);
+    EXPECT_FALSE(result);
 }
 
 /**
  * @tc.name: HyperlinkPatternTest005
- * @tc.desc: Test HyperlinkPattern OnTouchEvent when ouchType = TouchType::UP
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest005, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
-    stack->Push(hyperlinkNode);
-    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
-    ASSERT_NE(hyperlinkPattern, nullptr);
-    auto hyperlinkLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(hyperlinkLayoutProperty, nullptr);
-    std::string type = "1";
-    TouchEventInfo info(type);
-    TouchType touchType = TouchType::UP;
-    TouchLocationInfo locationInfo(TARGET_ID);
-    Offset globalLocation(1, 1);
-    locationInfo.SetTouchType(touchType);
-    hyperlinkPattern->OnTouchEvent(info);
-    hyperlinkLayoutProperty->UpdateTextDecoration(TextDecoration::NONE);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration(), TextDecoration::NONE);
-}
-
-/**
- * @tc.name: HyperlinkPatternTest006
- * @tc.desc: Test HyperlinkPattern OnHoverEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest006, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
-    stack->Push(hyperlinkNode);
-
-    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
-    ASSERT_NE(hyperlinkPattern, nullptr);
-    auto hyperlinkLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(hyperlinkLayoutProperty, nullptr);
-    hyperlinkPattern->OnHoverEvent(true);
-    hyperlinkLayoutProperty->UpdateTextDecoration(TextDecoration::UNDERLINE);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration(), TextDecoration::UNDERLINE);
-}
-
-/**
- * @tc.name: HyperlinkPatternTest007
- * @tc.desc: Test HyperlinkPattern OnHoverEvent when bool isHovered = false.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest007, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
-    stack->Push(hyperlinkNode);
-
-    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
-    ASSERT_NE(hyperlinkPattern, nullptr);
-    auto hyperlinkLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(hyperlinkLayoutProperty, nullptr);
-    hyperlinkPattern->OnHoverEvent(false);
-    hyperlinkLayoutProperty->UpdateTextDecoration(TextDecoration::NONE);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration(), TextDecoration::NONE);
-}
-
-/**
- * @tc.name: HyperlinkPatternTest008
  * @tc.desc: Test HyperlinkPattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
+HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
@@ -356,11 +281,11 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: HyperlinkPatternTest009
+ * @tc.name: HyperlinkPatternTest006
  * @tc.desc: Test HyperlinkPattern OnTouchEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest009, TestSize.Level1)
+HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
@@ -418,11 +343,51 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: HyperlinkPatternTest010
+ * @tc.name: HyperlinkPatternTest007
+ * @tc.desc: Test HyperlinkPattern OnTouchEvent Unnormal Scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
+     */
+    auto hyperlinkNode =
+        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    ASSERT_NE(hyperlinkNode, nullptr);
+    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnTouchEvent when the touchEventInfo is empty.
+     * @tc.expected: DecorationColor and TextColor of the hyperlink will not change.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->textColor_ = Color::RED;
+    theme->textLinkedColor_ = Color::GREEN;
+    theme->textTouchedColor_ = Color::GRAY;
+    theme->textUnSelectedDecoration_ = TextDecoration::UNDERLINE;
+    auto hyperlinkLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(hyperlinkLayoutProperty, nullptr);
+    hyperlinkLayoutProperty->UpdateTextColor(Color::BLACK);
+    hyperlinkLayoutProperty->UpdateTextDecorationColor(Color::BLACK);
+    hyperlinkPattern->isLinked_ = true;
+    TouchEventInfo touchEventInfo("");
+    hyperlinkPattern->OnTouchEvent(touchEventInfo);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::BLACK);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::BLACK);
+}
+
+/**
+ * @tc.name: HyperlinkPatternTest008
  * @tc.desc: Test HyperlinkPattern OnHoverEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest010, TestSize.Level1)
+HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.

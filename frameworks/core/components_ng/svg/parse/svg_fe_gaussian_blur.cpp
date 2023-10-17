@@ -15,11 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_gaussian_blur.h"
 
-#ifndef NEW_SKIA
-#include "include/effects/SkBlurImageFilter.h"
-#else
 #include "include/effects/SkImageFilters.h"
-#endif
 
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
@@ -39,8 +35,8 @@ SvgFeGaussianBlur::SvgFeGaussianBlur() : SvgFe()
 }
 
 #ifndef USE_ROSEN_DRAWING
-void SvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
-    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+void SvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
+    ColorInterpolationType& currentColor) const
 #else
 void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
@@ -50,13 +46,9 @@ void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFil
     CHECK_NULL_VOID(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-    imageFilter = SkBlurImageFilter::Make(
-        declaration->GetStdDeviation(), declaration->GetStdDeviation(), imageFilter, nullptr);
-#else
-    imageFilter = SkImageFilters::Blur(
-        declaration->GetStdDeviation(), declaration->GetStdDeviation(), imageFilter, nullptr);
-#endif
+
+    imageFilter =
+        SkImageFilters::Blur(declaration->GetStdDeviation(), declaration->GetStdDeviation(), imageFilter, nullptr);
 #else
     imageFilter = RSRecordingImageFilter::CreateBlurImageFilter(
         declaration->GetStdDeviation(), declaration->GetStdDeviation(), RSTileMode::DECAL, imageFilter);

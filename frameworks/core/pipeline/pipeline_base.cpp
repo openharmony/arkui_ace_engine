@@ -22,6 +22,7 @@
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -539,18 +540,32 @@ void PipelineBase::OpenImplicitAnimation(
             [finishCallback, weak]() {
                 auto context = weak.Upgrade();
                 CHECK_NULL_VOID(context);
-                CHECK_NULL_VOID(finishCallback);
+                if (!finishCallback) {
+                    if (context->IsFormRender()) {
+                        LOGW("[Form animation]  Form animation is finish.");
+                        context->SetIsFormAnimation(false);
+                    }
+                    return;
+                }
                 if (context->IsFormRender()) {
-                    context->SetEnableImplicitAnimation(false);
+                    LOGW("[Form animation]  Form animation is finish.");
+                    context->SetFormAnimationFinishCallback(true);
                     finishCallback();
                     context->FlushBuild();
-                    context->SetEnableImplicitAnimation(true);
+                    context->SetFormAnimationFinishCallback(false);
+                    context->SetIsFormAnimation(false);
                     return;
                 }
                 finishCallback();
             },
             TaskExecutor::TaskType::UI);
     };
+    if (IsFormRender()) {
+        SetIsFormAnimation(true);
+        if (!IsFormAnimationFinishCallback()) {
+            SetFormAnimationStartTime(GetMicroTickCount());
+        }
+    }
     AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
 #endif
 }
@@ -744,7 +759,6 @@ void PipelineBase::RemoveJsFormVsyncCallback(int32_t subWindowId)
 
 bool PipelineBase::MaybeRelease()
 {
-    CHECK_RUN_ON(UI);
     CHECK_NULL_RETURN(taskExecutor_, true);
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         LOGI("Destroy Pipeline on UI thread.");

@@ -21,6 +21,10 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "core/common/container.h"
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
@@ -48,6 +52,7 @@
 #include "core/event/mouse_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -113,11 +118,14 @@ public:
 void ImageTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void ImageTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+    MockContainer::TearDown();
 }
 
 RefPtr<FrameNode> ImageTestNg::CreateImageNode(const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)

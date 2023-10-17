@@ -80,14 +80,14 @@ private:
     void PlayInAnimation();
     void PlayOutAnimation();
 
-    RefPtr<FrameNode> buttonIcon_;
-    RefPtr<FrameNode> datePicker_;
-    RefPtr<FrameNode> monthDays_;
-    RefPtr<FrameNode> timePicker_;
-    RefPtr<FrameNode> year_;
-    RefPtr<FrameNode> month_;
-    RefPtr<FrameNode> day_;
-    RefPtr<FrameNode> buttonRow_;
+    WeakPtr<FrameNode> buttonIcon_;
+    WeakPtr<FrameNode> datePicker_;
+    WeakPtr<FrameNode> monthDays_;
+    WeakPtr<FrameNode> timePicker_;
+    WeakPtr<FrameNode> year_;
+    WeakPtr<FrameNode> month_;
+    WeakPtr<FrameNode> day_;
+    WeakPtr<FrameNode> buttonRow_;
     // move range of date
     double yearStart_ = 0.0;
     double yearEnd_ = 0.0;

@@ -35,6 +35,7 @@ struct MagicLayoutNode {
     RefPtr<LayoutWrapper> layoutWrapper;
     OptionalSizeF calcSize;
     bool needSecondMeasure = false;
+    bool needKeepMinCalcSize = false;
 };
 
 struct BaselineProperties {
@@ -92,6 +93,8 @@ private:
         float& spacePerFlex, FlexItemProperties& flexItemProperties, RefPtr<LayoutWrapper>& lastChild);
     void CheckBlankAndKeepMin(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
     float MainAxisMinValue(LayoutWrapper* layoutWrapper);
+    bool MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper);
+    bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;

@@ -43,6 +43,8 @@ void SubwindowManager::HideMenuNG(bool showPreviewAnimation) {}
 
 void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId) {}
 
+void SubwindowManager::HideSubWindowNG() {}
+
 const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 {
     return g_currentWindow;

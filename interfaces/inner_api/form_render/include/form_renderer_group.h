@@ -22,6 +22,7 @@
 
 #include "form_js_info.h"
 #include "want.h"
+#include "event_handler.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -31,6 +32,7 @@ class Runtime;
 
 namespace AppExecFwk {
 class Configuration;
+class EventHandler;
 }
 
 namespace Ace {
@@ -61,10 +63,12 @@ struct FormRequest {
 class ACE_EXPORT FormRendererGroup {
 public:
     static std::shared_ptr<FormRendererGroup> Create(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
-                                                     const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
+                                                     const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime,
+                                                     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler);
 
     FormRendererGroup(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
-                      const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
+                      const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime,
+                      std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler);
     ~FormRendererGroup();
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
@@ -81,6 +85,7 @@ private:
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     std::shared_ptr<FormRenderer> formRenderer_;
+    std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     std::vector<FormRequest> formRequests_;
     std::string currentCompId_;
 };

@@ -20,9 +20,9 @@
 #include "include/core/SkRSXform.h"
 #include "include/core/SkTextBlob.h"
 #include "include/effects/SkDashPathEffect.h"
+#include "include/effects/SkGradientShader.h"
 #include "include/effects/SkLumaColorFilter.h"
 #include "include/utils/SkParsePath.h"
-#include "include/effects/SkGradientShader.h"
 
 #include "frameworks/core/components/svg/flutter_render_svg_pattern.h"
 #include "frameworks/core/components/transform/flutter_render_transform.h"
@@ -53,17 +53,11 @@ sk_sp<SkTypeface> FlutterSvgPainter::fontTypeNormal_;
 void FlutterSvgPainter::SetMask(SkCanvas* canvas)
 {
     SkPaint mask_filter;
-#ifdef USE_SYSTEM_SKIA
-    auto outerFilter = SkLumaColorFilter::Make();
-    auto innerFilter = SkColorFilter::MakeSRGBToLinearGamma();
-    auto filter = SkColorFilter::MakeComposeFilter(outerFilter, std::move(innerFilter));
-    mask_filter.setColorFilter(filter);
-#else
+
     auto outerFilter = SkLumaColorFilter::Make();
     auto innerFilter = SkColorFilters::SRGBToLinearGamma();
     auto filter = SkColorFilters::Compose(outerFilter, std::move(innerFilter));
     mask_filter.setColorFilter(filter);
-#endif
     canvas->saveLayer(nullptr, &mask_filter);
 }
 
@@ -110,33 +104,21 @@ void FlutterSvgPainter::SetGradientStyle(SkPaint& skPaint, const FillState& fill
     if (gradient->GetType() == GradientType::LINEAR) {
         auto info = gradient->GetLinearGradientInfo();
         SkPoint pts[2] = { SkPoint::Make(info.x1, info.y1), SkPoint::Make(info.x2, info.y2) };
-#ifdef USE_SYSTEM_SKIA
-        skPaint.setShader(SkGradientShader::MakeLinear(pts, &colors[0], &pos[0], gradientColors.size(),
-            static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-#else
+
         skPaint.setShader(SkGradientShader::MakeLinear(pts, &colors[0], &pos[0], gradientColors.size(),
             static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-#endif
     }
     if (gradient->GetType() == GradientType::RADIAL) {
         auto info = gradient->GetRadialGradientInfo();
         auto center = SkPoint::Make(info.cx, info.cy);
         auto focal = SkPoint::Make(info.fx, info.fx);
-#ifdef USE_SYSTEM_SKIA
-        return center == focal ? skPaint.setShader(SkGradientShader::MakeRadial(center, info.r, &colors[0], &pos[0],
-                                     gradientColors.size(),
-                                     static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr))
-                               : skPaint.setShader(SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r,
-                                     &colors[0], &pos[0], gradientColors.size(),
-                                     static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-#else
+
         return center == focal
                    ? skPaint.setShader(SkGradientShader::MakeRadial(center, info.r, &colors[0], &pos[0],
                          gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr))
                    : skPaint.setShader(
                          SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r, &colors[0], &pos[0],
                              gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-#endif
     }
 }
 
@@ -162,8 +144,8 @@ void FlutterSvgPainter::SetFillStyle(
     canvas->drawPath(skPath, skPaint);
 }
 
-void FlutterSvgPainter::SetStrokeStyle(SkPaint& skPaint, const StrokeState& strokeState, uint8_t opacity,
-    bool antiAlias)
+void FlutterSvgPainter::SetStrokeStyle(
+    SkPaint& skPaint, const StrokeState& strokeState, uint8_t opacity, bool antiAlias)
 {
     skPaint.setStyle(SkPaint::Style::kStroke_Style);
     double curOpacity = strokeState.GetOpacity().GetValue() * opacity * (1.0f / UINT8_MAX);
@@ -366,8 +348,8 @@ double FlutterSvgPainter::UpdateTextPath(
         }
         auto width = font.measureText(&temp, sizeof(wchar_t), SkTextEncoding::kUTF16);
         if (length < offset + width + space) {
-            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf",
-                length, offset + width + space);
+            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf", length,
+                offset + width + space);
             break;
         }
         if (offset < 0) {
@@ -454,8 +436,8 @@ double FlutterSvgPainter::MeasureTextPathBounds(
         }
         auto width = font.measureText(&temp, sizeof(temp), SkTextEncoding::kUTF16);
         if (length < offset + width + space) {
-            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf",
-                length, offset + width + space);
+            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf", length,
+                offset + width + space);
             break;
         }
         offset = offset + width + space;
@@ -522,8 +504,8 @@ void FlutterSvgPainter::StringToPoints(const char str[], std::vector<SkPoint>& p
     }
 }
 
-Matrix4 FlutterSvgPainter::CreateMotionMatrix(const std::string& path, const std::string& rotate,
-    double percent, bool& isSuccess)
+Matrix4 FlutterSvgPainter::CreateMotionMatrix(
+    const std::string& path, const std::string& rotate, double percent, bool& isSuccess)
 {
     if (path.empty()) {
         isSuccess = false;

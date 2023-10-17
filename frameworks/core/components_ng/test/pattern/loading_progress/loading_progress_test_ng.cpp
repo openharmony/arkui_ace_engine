@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
+#include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -332,32 +333,24 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
     EXPECT_EQ(paintMethod->color_, Color::FOREGROUND);
     /**
      * test loadingState == REFRESH_STATE_FOLLOW_HAND
-    */
-    loadingProgressPaintProperty->UpdateRefreshAnimationState(REFRESH_STATE_FOLLOW_HAND);
-    loadingProgressPaintProperty->UpdateRefreshFollowRatio(-1.0f);
+     */
+    loadingProgressPaintProperty->UpdateRefreshAnimationState(RefreshAnimationState::FOLLOW_HAND);
+    loadingProgressPaintProperty->UpdateRefreshSizeScaleRatio(-1.0f);
     paintMethod->loadingProgressModifier_->loadingProgressOwner_ = LoadingProgressOwner::REFRESH;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper3);
     /**
-     * test loadingState == REFRESH_STATE_FADEAWAY
-    */
-    loadingProgressPaintProperty->UpdateRefreshAnimationState(REFRESH_STATE_FADEAWAY);
-    loadingProgressPaintProperty->UpdateRefreshFadeAwayRatio(11.0f);
-    paintMethod->loadingProgressModifier_->isLoading_ = false;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
-    paintMethod->UpdateContentModifier(&paintWrapper3);
-    /**
-     * test loadingState == REFRESH_STATE_FOLLOW_TO_RESYCLE
-    */
+     * test loadingState == REFRESH_STATE_FOLLOW_TO_RECYCLE
+     */
     auto context = PipelineBase::GetCurrentContext();
     context->SetIsFormRender(true);
-    loadingProgressPaintProperty->UpdateRefreshAnimationState(REFRESH_STATE_FOLLOW_TO_RESYCLE);
+    loadingProgressPaintProperty->UpdateRefreshAnimationState(RefreshAnimationState::FOLLOW_TO_RECYCLE);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper3);
     /**
-     * test loadingState == REFRESH_STATE_RESYCLE
-    */
-    loadingProgressPaintProperty->UpdateRefreshAnimationState(REFRESH_STATE_RESYCLE);
+     * test loadingState == REFRESH_STATE_RECYCLE
+     */
+    loadingProgressPaintProperty->UpdateRefreshAnimationState(RefreshAnimationState::FOLLOW_TO_RECYCLE);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper3);
 }

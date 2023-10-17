@@ -796,6 +796,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         LOGE("InteractionManager: drag start error");
         return;
     }
+    dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     eventManager->DoMouseActionRelease();
@@ -873,7 +874,7 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
 
         // Only the onDrop callback of dragged frame node is triggered.
         // The onDrop callback of target frame node is triggered in PipelineContext::OnDragEvent.
-        if (eventHub->HasOnDrop()) {
+        if (eventHub->HasOnDrop() || eventHub->HasCustomerOnDrop()) {
             RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
             if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
                 LOGI("web on drag end");
@@ -885,7 +886,8 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
             }
             event->SetScreenX(info.GetScreenLocation().GetX());
             event->SetScreenY(info.GetScreenLocation().GetY());
-            eventHub->FireOnDrop(event, "");
+            eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event);
+            eventHub->HandleInternalOnDrop(event, "");
         }
     }
 
@@ -1117,6 +1119,9 @@ OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& cont
             case DragResult::DRAG_FAIL:
                 result = DragRet::DRAG_FAIL;
                 break;
+            case DragResult::DRAG_CANCEL:
+                result = DragRet::DRAG_CANCEL;
+                break;
             default:
                 break;
         }
@@ -1128,6 +1133,7 @@ OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& cont
                 if (eventManager) {
                     eventManager->DoMouseActionRelease();
                 }
+                eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }

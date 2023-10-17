@@ -255,6 +255,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("menus", &JSNavigation::SetMenus);
     JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
     JSClass<JSNavigation>::StaticMethod("onTitleModeChange", &JSNavigation::SetOnTitleModeChanged);
+    JSClass<JSNavigation>::StaticMethod("onNavigationModeChange", &JSNavigation::SetOnNavigationModeChange);
     JSClass<JSNavigation>::StaticMethod("mode", &JSNavigation::SetUsrNavigationMode);
     JSClass<JSNavigation>::StaticMethod("navBarWidth", &JSNavigation::SetNavBarWidth);
     JSClass<JSNavigation>::StaticMethod("minContentWidth", &JSNavigation::SetMinContentWidth);
@@ -306,19 +307,21 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
 
         JSRef<JSVal> height = jsObj->GetProperty("height");
         if (height->IsNumber()) {
-            if (height->ToNumber<int32_t>() == 0) {
-                NavigationModel::GetInstance()->SetTitleHeight(NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
-                return;
-            }
-            if (height->ToNumber<int32_t>() == 1) {
-                NavigationModel::GetInstance()->SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
-                return;
-            }
             CalcDimension titleHeight;
             if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
                 return;
             }
             NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
+        } else if (height->IsString()) {
+            std::string heightValue;
+            ParseJsString(height, heightValue);
+            if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
+                NavigationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
+            } else if (heightValue == NG::TITLE_MAIN) {
+                NavigationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
+            } else {
+                LOGW("title height value is invalid string");
+            }
         } else {
             CalcDimension titleHeight;
             if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
@@ -656,5 +659,27 @@ void JSNavigation::SetNavDestination(const JSCallbackInfo& info)
         jsNavigationStack->SetJSExecutionContext(info.GetExecutionContext());
         jsNavigationStack->SetNavDestBuilderFunc(JSRef<JSFunc>::Cast(builder));
     }
+}
+
+void JSNavigation::SetOnNavigationModeChange(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        info.ReturnSelf();
+        return;
+    }
+    auto onModeChangeCallback =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onModeChange = [execCtx = info.GetExecutionContext(),
+        func = std::move(onModeChangeCallback)](NG::NavigationMode mode) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("OnNavigationModeChange");
+        JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(static_cast<int8_t>(mode)));
+        func->ExecuteJS(1, &param);
+    };
+    NavigationModel::GetInstance()->SetOnNavigationModeChange(std::move(onModeChange));
+    info.ReturnSelf();
 }
 } // namespace OHOS::Ace::Framework

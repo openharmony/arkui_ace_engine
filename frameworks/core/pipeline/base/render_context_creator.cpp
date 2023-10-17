@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "core/pipeline/base/flutter_render_context.h"
-#endif
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -29,11 +26,7 @@ RefPtr<RenderContext> RenderContext::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderContext>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

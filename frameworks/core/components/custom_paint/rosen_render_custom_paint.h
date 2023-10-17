@@ -16,11 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_CUSTOM_PAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_CUSTOM_PAINT_H
 
-#ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
-#else
-#include "experimental/svg/model/SkSVGDOM.h"
-#endif
+
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph.h"
 #else
@@ -190,9 +187,7 @@ private:
     SkPath skPath2d_;
     SkPaint imagePaint_;
     SkPaint cachePaint_;
-#ifdef NEW_SKIA
     SkSamplingOptions options_;
-#endif
     SkBitmap cacheBitmap_;
     SkBitmap canvasCache_;
     SkBitmap webglBitmap_;

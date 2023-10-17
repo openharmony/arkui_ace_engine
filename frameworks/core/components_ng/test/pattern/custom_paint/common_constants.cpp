@@ -61,88 +61,32 @@ const std::string DEFAULT_STR = "default";
 const std::string IMAGE_SRC = "common/images/test.png";
 const std::string REPETITION_STR = "repetition";
 
-const std::vector<std::string> CANDIDATE_STRINGS = {
-    "aaaaaaaaaaaa",
-    "bbbbbb",
-    "abcdefg"
-};
+const std::vector<std::string> CANDIDATE_STRINGS = { "aaaaaaaaaaaa", "bbbbbb", "abcdefg" };
 
-const std::vector<std::string> FUNCTION_NAMES = {
-    "grayscale",
-    "sepia",
-    "invert",
-    "opacity",
-    "brightness",
-    "contrast",
-    "blur",
-    "drop-shadow",
-    "saturate",
-    "hue-rotate"
-};
+const std::vector<std::string> FUNCTION_NAMES = { "grayscale", "sepia", "invert", "opacity", "brightness", "contrast",
+    "blur", "drop-shadow", "saturate", "hue-rotate" };
 
 const std::vector<double> CANDIDATE_DOUBLES = { 0.0, 1.0, 10.0, 100.0, 1000.0 };
 
-const std::vector<Color> CANDIDATE_COLORS = {
-    Color::TRANSPARENT,
-    Color::WHITE,
-    Color::BLACK,
-    Color::RED,
-    Color::GREEN,
-    Color::BLUE,
-    Color::GRAY
-};
+const std::vector<Color> CANDIDATE_COLORS = { Color::TRANSPARENT, Color::WHITE, Color::BLACK, Color::RED, Color::GREEN,
+    Color::BLUE, Color::GRAY };
 
-const std::vector<CompositeOperation> CANDIDATE_COMPOSITE_OPERATIONS = {
-    CompositeOperation::SOURCE_OVER,
-    CompositeOperation::SOURCE_ATOP,
-    CompositeOperation::SOURCE_IN,
-    CompositeOperation::SOURCE_OUT,
-    CompositeOperation::DESTINATION_OVER,
-    CompositeOperation::DESTINATION_ATOP,
-    CompositeOperation::DESTINATION_IN,
-    CompositeOperation::DESTINATION_OUT,
-    CompositeOperation::LIGHTER,
-    CompositeOperation::COPY,
-    CompositeOperation::XOR
-};
+const std::vector<CompositeOperation> CANDIDATE_COMPOSITE_OPERATIONS = { CompositeOperation::SOURCE_OVER,
+    CompositeOperation::SOURCE_ATOP, CompositeOperation::SOURCE_IN, CompositeOperation::SOURCE_OUT,
+    CompositeOperation::DESTINATION_OVER, CompositeOperation::DESTINATION_ATOP, CompositeOperation::DESTINATION_IN,
+    CompositeOperation::DESTINATION_OUT, CompositeOperation::LIGHTER, CompositeOperation::COPY,
+    CompositeOperation::XOR };
 
-const std::vector<TextAlign> CANDIDATE_TEXT_ALIGNS = {
-    TextAlign::LEFT,
-    TextAlign::RIGHT,
-    TextAlign::CENTER,
-    TextAlign::JUSTIFY,
-    TextAlign::START,
-    TextAlign::END
-};
+const std::vector<TextAlign> CANDIDATE_TEXT_ALIGNS = { TextAlign::LEFT, TextAlign::RIGHT, TextAlign::CENTER,
+    TextAlign::JUSTIFY, TextAlign::START, TextAlign::END };
 
-const std::vector<TextBaseline> CANDIDATE_TEXT_BASELINES = {
-    TextBaseline::ALPHABETIC,
-    TextBaseline::IDEOGRAPHIC,
-    TextBaseline::TOP,
-    TextBaseline::BOTTOM,
-    TextBaseline::MIDDLE,
-    TextBaseline::HANGING
-};
+const std::vector<TextBaseline> CANDIDATE_TEXT_BASELINES = { TextBaseline::ALPHABETIC, TextBaseline::IDEOGRAPHIC,
+    TextBaseline::TOP, TextBaseline::BOTTOM, TextBaseline::MIDDLE, TextBaseline::HANGING };
 
-const std::vector<Dimension> CANDIDATE_DIMENSIONS = {
-    0.0_vp,
-    10.0_vp,
-    100.0_vp,
-    0.0_px,
-    10.0_px,
-    100.0_px,
-    0.0_fp,
-    10.0_fp,
-    100.0_fp,
-    0.0_pct,
-    10.0_pct,
-    100.0_pct
-};
+const std::vector<Dimension> CANDIDATE_DIMENSIONS = { 0.0_vp, 10.0_vp, 100.0_vp, 0.0_px, 10.0_px, 100.0_px, 0.0_fp,
+    10.0_fp, 100.0_fp, 0.0_pct, 10.0_pct, 100.0_pct };
 
-const std::vector<FontStyle> CANDIDATE_FONT_STYLES = {
-    FontStyle::NORMAL,
-    FontStyle::ITALIC
-};
+const std::vector<FontStyle> CANDIDATE_FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 
 const std::vector<FontWeight> CANDIDATE_FONT_WEIGHTS = {
     FontWeight::W100,
@@ -162,44 +106,16 @@ const std::vector<FontWeight> CANDIDATE_FONT_WEIGHTS = {
     FontWeight::REGULAR,
 };
 
-const std::vector<std::string> FONT_FAMILY = {
-    "Arial",
-    "sans-serif",
-    "monospace",
-    "fantasy",
-    "serif",
-    "cursive",
-    "system-ui",
-    "emoji",
-    "math"
-};
+const std::vector<std::string> FONT_FAMILY = { "Arial", "sans-serif", "monospace", "fantasy", "serif", "cursive",
+    "system-ui", "emoji", "math" };
 
-const std::vector<LineCapStyle> CANDIDATE_LINE_CAP_STYLES = {
-    LineCapStyle::BUTT,
-    LineCapStyle::ROUND,
-    LineCapStyle::SQUARE
-};
+const std::vector<LineCapStyle> CANDIDATE_LINE_CAP_STYLES = { LineCapStyle::BUTT, LineCapStyle::ROUND,
+    LineCapStyle::SQUARE };
 
-const std::vector<LineJoinStyle> CANDIDATE_LINE_JOIN_STYLES = {
-    LineJoinStyle::MITER,
-    LineJoinStyle::ROUND,
-    LineJoinStyle::BEVEL
-};
+const std::vector<LineJoinStyle> CANDIDATE_LINE_JOIN_STYLES = { LineJoinStyle::MITER, LineJoinStyle::ROUND,
+    LineJoinStyle::BEVEL };
 
-const std::vector<CanvasFillRule> CANDIDATE_CANVAS_FILL_RULES = {
-    CanvasFillRule::NONZERO,
-    CanvasFillRule::EVENODD
-};
+const std::vector<CanvasFillRule> CANDIDATE_CANVAS_FILL_RULES = { CanvasFillRule::NONZERO, CanvasFillRule::EVENODD };
 
-#ifndef NEW_SKIA
-const std::vector<SkPath::FillType> CANDIDATE_SKPATH_FILL_TYPES = {
-    SkPath::FillType::kWinding_FillType,
-    SkPath::FillType::kEvenOdd_FillType
-};
-#else
-const std::vector<SkPathFillType> CANDIDATE_SKPATH_FILL_TYPES = {
-    SkPathFillType::kWinding,
-    SkPathFillType::kEvenOdd
-};
-#endif
+const std::vector<SkPathFillType> CANDIDATE_SKPATH_FILL_TYPES = { SkPathFillType::kWinding, SkPathFillType::kEvenOdd };
 } // namespace OHOS::Ace::NG

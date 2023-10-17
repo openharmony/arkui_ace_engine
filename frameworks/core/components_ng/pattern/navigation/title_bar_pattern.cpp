@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -127,7 +128,7 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
     }
     if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||
         currentMaxLine != titleLayoutProperty->GetMaxLinesValue(0)) {
-        titleLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
     titleNode->MarkModifyDone();
 }
@@ -399,17 +400,23 @@ void TitleBarPattern::ProcessTitleDragEnd()
         SpringAnimation(overDragOffset_, 0);
         enableAssociatedScroll_ = false;
     }
-
-    auto titleMiddleValue =
-        (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
-    if (LessNotEqual(tempTitleBarHeight_, titleMiddleValue) || NearEqual(tempTitleBarHeight_, titleMiddleValue)) {
-        AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
-        enableAssociatedScroll_ = false;
-        return;
-    } else if (GreatNotEqual(tempTitleBarHeight_, titleMiddleValue)) {
-        AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
-        enableAssociatedScroll_ = false;
-        return;
+    if (CanOverDrag_ || isTitleScaleChange_) {
+        auto titleMiddleValue =
+            (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
+        if (LessNotEqual(tempTitleBarHeight_, titleMiddleValue) || NearEqual(tempTitleBarHeight_, titleMiddleValue)) {
+            AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
+            enableAssociatedScroll_ = false;
+            return;
+        } else if (GreatNotEqual(tempTitleBarHeight_, titleMiddleValue)) {
+            AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
+            enableAssociatedScroll_ = false;
+            CHECK_NULL_VOID(associatedScrollNode_);
+            auto scrollablePattern = associatedScrollNode_->GetPattern<ScrollablePattern>();
+            CHECK_NULL_VOID(scrollablePattern);
+            scrollablePattern->StopAnimate();
+            scrollablePattern->AnimateTo(0, DEFAULT_ANIMATION_DURATION, Curves::FAST_OUT_SLOW_IN, false);
+            return;
+        }
     }
 }
 
@@ -767,10 +774,11 @@ void TitleBarPattern::ResetAssociatedScroll()
     SetMaxTitleBarHeight();
 }
 
-void TitleBarPattern::UpdateAssociatedScrollOffset(float offset)
+bool TitleBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node)
 {
+    associatedScrollNode_ = node;
     if (!enableAssociatedScroll_) {
-        return;
+        return true;
     }
 
     associatedScrollOffset_ += offset;
@@ -783,7 +791,7 @@ void TitleBarPattern::UpdateAssociatedScrollOffset(float offset)
     }
 
     if (dragScrolling_) {
-        return;
+        return true;
     }
 
     auto titleMiddleValue =
@@ -801,30 +809,30 @@ void TitleBarPattern::UpdateAssociatedScrollOffset(float offset)
         if (associatedScrollOverSize_) {
             SpringAnimation(associatedScrollOffsetMax_ + defaultTitleBarHeight_ - maxTitleBarHeight_, 0);
             enableAssociatedScroll_ = false;
-            return;
+            return true;
         } else {
             if (GreatNotEqual(associatedScrollOffsetMax_ + defaultTitleBarHeight_, titleMiddleValue)) {
-                AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
-                enableAssociatedScroll_ = false;
-                return;
+                SetTitleStyleByOffset(maxTitleBarHeight_ - defaultTitleBarHeight_);
+                    enableAssociatedScroll_ = false;
             } else {
                 AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
                 enableAssociatedScroll_ = false;
-                return;
             }
+            return true;
         }
     }
 
-    ProcessTitleAssociatedUpdate(titleBarOffset);
+    return ProcessTitleAssociatedUpdate(titleBarOffset);
 }
-void TitleBarPattern::ProcessTitleAssociatedUpdate(float offset)
+
+bool TitleBarPattern::ProcessTitleAssociatedUpdate(float offset)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
+    CHECK_NULL_RETURN(titleBarNode, true);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
+    CHECK_NULL_RETURN(titleBarLayoutProperty, true);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
-        return;
+        return true;
     }
     SetTitleStyleByOffset(offset);
     if (isOverDrag_) {
@@ -834,8 +842,10 @@ void TitleBarPattern::ProcessTitleAssociatedUpdate(float offset)
     }
     if (Positive(overDragOffset_)) {
         UpdateScaleByDragOverDragOffset(overDragOffset_);
+        return true;
     } else {
         overDragOffset_ = 0.0f;
     }
+    return true;
 }
 } // namespace OHOS::Ace::NG

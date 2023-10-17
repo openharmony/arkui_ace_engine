@@ -38,6 +38,7 @@ public:
     static void SetMenus(const JSCallbackInfo& info);
     static void SetMenuCount(int32_t menuCount);
     static void SetOnTitleModeChanged(const JSCallbackInfo& info);
+    static void SetOnNavigationModeChange(const JSCallbackInfo& info);
     static void SetUsrNavigationMode(int32_t value);
     static void SetNavBarWidth(const JSCallbackInfo& info);
     static void SetNavBarWidthRange(const JSCallbackInfo& info);

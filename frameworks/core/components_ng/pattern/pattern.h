@@ -266,7 +266,7 @@ public:
     }
 
     virtual void DumpInfo() {}
-
+    virtual void DumpAdvanceInfo() {}
     template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
@@ -365,11 +365,13 @@ public:
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
     virtual void OnDirectionOrDpiConfigurationUpdate() {}
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
-    
+
     WeakPtr<FrameNode> frameNode_;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);
 };

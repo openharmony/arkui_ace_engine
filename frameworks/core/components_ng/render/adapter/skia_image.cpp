@@ -211,12 +211,9 @@ bool SkiaImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArra
 
     SkPaint paint;
     auto config = GetPaintConfig();
-#ifndef NEW_SKIA
-    ImagePainterUtils::AddFilter(paint, config);
-#else
+
     SkSamplingOptions options;
     ImagePainterUtils::AddFilter(paint, options, config);
-#endif
     auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
     recordingCanvas->ClipAdaptiveRRect(radii.get());
     recordingCanvas->scale(config.scaleX_, config.scaleY_);
@@ -224,12 +221,9 @@ bool SkiaImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArra
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, GetUniqueID(),
         GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
-#ifndef NEW_SKIA
-    recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);
-#else
+
     // TODO:Haw to set SamplingOptions?
     recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options, paint);
-#endif
     return true;
 #else // !ENABLE_ROSEN_BACKEND
     return false;

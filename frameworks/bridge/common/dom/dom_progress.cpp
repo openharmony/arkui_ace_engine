@@ -39,12 +39,10 @@ Gradient ParseGradient(const DOMProgress& progress, const std::string& value)
     auto gradientJson = JsonUtil::ParseJsonString(value);
     Gradient gradient = Gradient();
     if (!gradientJson->IsObject()) {
-        LOGW("gradientJson json param error");
         return gradient;
     }
     auto gradientValue = gradientJson->GetValue(DOM_VALUES);
     if ((gradientValue == nullptr) || (!gradientValue->IsArray()) || (gradientValue->GetArraySize() <= 0)) {
-        LOGW("gradientValue json param error");
         return gradient;
     }
     auto values = gradientValue->GetArrayItem(0);

@@ -71,6 +71,7 @@ public:
     void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) override;
     void SetDisplayArrow(bool displayArrow) override;
     void SetHoverShow(bool hoverShow) override;
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
 };
 
 } // namespace OHOS::Ace::NG
