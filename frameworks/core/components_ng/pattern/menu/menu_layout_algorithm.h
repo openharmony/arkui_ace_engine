@@ -159,7 +159,7 @@ private:
     void UpdateScrollAndColumnLayoutConstraint(
         const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     float GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& menuLayoutWrapper);
-    OffsetF FixMenuOriginOffset();
+    OffsetF FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale);
 
     OffsetF targetOffset_;
     SizeF targetSize_;

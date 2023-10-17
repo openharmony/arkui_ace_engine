@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -467,6 +468,24 @@ void JSRichEditor::CreateImageStyleObj(
     }
 }
 
+void JSRichEditor::JsClip(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetClipEdge(true);
+        return;
+    }
+    if (info[0]->IsObject()) {
+        JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            LOGD("clipShape is null");
+            return;
+        }
+        ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
+    } else if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
+    }
+}
+
 void JSRichEditor::JsFocusable(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsBoolean()) {
@@ -608,6 +627,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRichEditor>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRichEditor>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSRichEditor>::StaticMethod("clip", &JSRichEditor::JsClip);
     JSClass<JSRichEditor>::StaticMethod("focusable", &JSRichEditor::JsFocusable);
     JSClass<JSRichEditor>::StaticMethod("copyOptions", &JSRichEditor::SetCopyOptions);
     JSClass<JSRichEditor>::StaticMethod("bindSelectionMenu", &JSRichEditor::BindSelectionMenu);
@@ -929,13 +949,19 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
 
 void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
 {
+    RangeOptions options;
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
+
+    if (args.Length() < 1) {
+        controller->DeleteSpans(options);
+        return;
+    }
+
     if (!args[0]->IsObject() || !controller) {
         return;
     }
     JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[0]);
-    RangeOptions options;
     JSRef<JSVal> startVal = spanObject->GetProperty("start");
     int32_t start = 0;
     if (!startVal->IsNull() && JSContainerBase::ParseJsInt32(startVal, start)) {

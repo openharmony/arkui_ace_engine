@@ -368,6 +368,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBo
     CHECK_NULL_VOID(groupPaintProperty);
     auto pattern = checkBoxGroupNode->GetPattern<CheckBoxGroupPattern>();
     CHECK_NULL_VOID(pattern);
+    auto preStatus = groupPaintProperty->GetSelectStatus();
     if (isSameAsSelf) {
         if (select) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
@@ -387,6 +388,10 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBo
     }
 
     auto status = groupPaintProperty->GetSelectStatus();
+    if (preStatus != status && (preStatus == CheckBoxGroupPaintProperty::SelectStatus::ALL ||
+                                   status == CheckBoxGroupPaintProperty::SelectStatus::ALL)) {
+        pattern->SetSkipFlag(true);
+    }
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -429,6 +434,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* check
     CHECK_NULL_VOID(groupPaintProperty);
     auto pattern = checkBoxGroupNode->GetPattern<CheckBoxGroupPattern>();
     CHECK_NULL_VOID(pattern);
+    auto preStatus = groupPaintProperty->GetSelectStatus();
     if (haveCheckBoxSelected) {
         if (isAllCheckBoxSelected) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
@@ -443,6 +449,10 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* check
     }
     checkBoxGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto status = groupPaintProperty->GetSelectStatus();
+    if (preStatus != status && (preStatus == CheckBoxGroupPaintProperty::SelectStatus::ALL ||
+                                   status == CheckBoxGroupPaintProperty::SelectStatus::ALL)) {
+        pattern->SetSkipFlag(true);
+    }
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);

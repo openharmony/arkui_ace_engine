@@ -264,10 +264,6 @@ bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, in
     int32_t index = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
     int32_t buttonsLenInt = buttonsLen;
-    if (buttonsLenInt == 0) {
-        DeleteContextAndThrowError(env, context, "Required input parameters are missing.");
-        return false;
-    }
     if (buttonsLenInt > maxButtonNum && maxButtonNum != -1) {
         buttonsLenInt = maxButtonNum;
         LOGW("Supports 1 - %{public}u buttons", maxButtonNum);

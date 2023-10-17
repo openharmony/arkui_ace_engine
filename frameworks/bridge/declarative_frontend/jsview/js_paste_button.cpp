@@ -165,9 +165,7 @@ void JSPasteButton::JSBind(BindingTarget globalObj)
     JSClass<JSPasteButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSPasteButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
     JSClass<JSPasteButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
-#if defined(PREVIEW)
     JSClass<JSPasteButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
-#endif
     JSClass<JSPasteButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -1603,13 +1603,11 @@ HWTEST_F(RichEditorTestNg, HandleTouchEvent001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->textForDisplay_ = "tesol";
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
     TouchEventInfo touchInfo("");
     richEditorPattern->isMousePressed_ = true;
     richEditorPattern->HandleTouchEvent(touchInfo);
     EXPECT_FALSE(richEditorPattern->isMousePressed_);
 
-    richEditorPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(0);
     richEditorPattern->HandleTouchEvent(touchInfo);
     EXPECT_FALSE(richEditorPattern->isMousePressed_);
 

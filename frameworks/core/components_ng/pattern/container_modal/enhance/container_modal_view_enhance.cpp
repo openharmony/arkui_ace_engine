@@ -88,9 +88,10 @@ const Color MENU_ITEM_HOVER_COLOR = Color(0x0c000000);
 const Color MENU_ITEM_PRESS_COLOR = Color(0x1a000000);
 const Color MENU_ITEM_COLOR = Color(0xffffff);
 } // namespace
-bool ContainerModalViewEnhance::sIsHovering = false;
+bool ContainerModalViewEnhance::sIsLeftMouse_ = false;
 bool ContainerModalViewEnhance::sIsMenuPending_ = false;
 bool ContainerModalViewEnhance::enableSplit_ = true;
+OffsetF ContainerModalViewEnhance::menuOffset_ = {};
 CancelableCallback<void()> ContainerModalViewEnhance::sContextTimer_;
 
 RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
@@ -238,8 +239,8 @@ void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(
         auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() - MENU_FLOAT_X.ConvertToPx();
         auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
         OffsetF menuPosition { menuPosX, menuPosY };
-        menuPosition = RecalculateMenuOffset(menuPosition);
-        ShowMaxMenu(maximizeBtn, menuPosition);
+        CalculateMenuOffset(menuPosition);
+        ShowMaxMenu(maximizeBtn, menuOffset_);
     };
     // diable mouse left!
     auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
@@ -252,43 +253,48 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
     auto hub = maximizeBtn->GetOrCreateInputEventHub();
-    auto hoverMoveFuc = [weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn)),
-        weakPipeline = AceType::WeakClaim(AceType::RawPtr(pipeline))](MouseInfo& info) {
-        auto maximizeBtn = weakMaximizeBtn.Upgrade();
-        CHECK_NULL_VOID(maximizeBtn);
-        auto pipeline = weakPipeline.Upgrade();
-        CHECK_NULL_VOID(pipeline);
-
+    auto hoverMoveFuc = [](MouseInfo& info) {
         LOGD("container window on hover event action_ = %{public}d sIsMenuPending_ %{public}d", info.GetAction(),
             sIsMenuPending_);
-        bool isLeftButtonPressed = info.GetButton() == MouseButton::LEFT_BUTTON;
-        if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE && !isLeftButtonPressed) {
-            auto&& callback = [weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn)), info]() {
-                auto maximizeBtn = weakMaximizeBtn.Upgrade();
-                auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() -
-                    MENU_FLOAT_X.ConvertToPx();
-                auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() +
-                    MENU_FLOAT_Y.ConvertToPx();
-                OffsetF menuPosition {menuPosX, menuPosY};
-                menuPosition = RecalculateMenuOffset(menuPosition);
-                ShowMaxMenu(maximizeBtn, menuPosition);
-            };
-            sContextTimer_.Reset(callback);
-            ACE_SCOPED_TRACE("ContainerModalEnhance::PendingMaxMenu");
-            pipeline->GetTaskExecutor()->PostDelayedTask(sContextTimer_, TaskExecutor::TaskType::UI,
-                MENU_TASK_DELAY_TIME);
-            sIsMenuPending_ = true;
+        sIsLeftMouse_ = info.GetButton() == MouseButton::LEFT_BUTTON;
+        if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE) {
+            auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() -
+                MENU_FLOAT_X.ConvertToPx();
+            auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() +
+                MENU_FLOAT_Y.ConvertToPx();
+            OffsetF menuPosition {menuPosX, menuPosY};
+            CalculateMenuOffset(menuPosition);
         }
     };
     hub->AddOnMouseEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverMoveFuc)));
 
     // add hover in out event
-    auto hoverEventFuc = [](bool hover) {
-        if (hover) {
-            sIsHovering = true;
-        } else {
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    auto hoverEventFuc = [weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn)),
+        weakContainerPattern = AceType::WeakClaim(AceType::RawPtr(containerPattern)),
+        weakPipeline = AceType::WeakClaim(AceType::RawPtr(pipeline))](bool hover) {
+        if (!hover) {
             ResetHoverTimer();
+            return;
         }
+        auto pattern = weakContainerPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (sIsMenuPending_ || sIsLeftMouse_ || !pattern->GetIsFocus()) {
+            return;
+        }
+        auto maximizeBtn = weakMaximizeBtn.Upgrade();
+        CHECK_NULL_VOID(maximizeBtn);
+        auto pipeline = weakPipeline.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        auto&& callback = [weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn))]() {
+            auto maximizeBtn = weakMaximizeBtn.Upgrade();
+            ShowMaxMenu(maximizeBtn, menuOffset_);
+        };
+        sContextTimer_.Reset(callback);
+        ACE_SCOPED_TRACE("ContainerModalEnhance::PendingMaxMenu");
+        pipeline->GetTaskExecutor()->PostDelayedTask(sContextTimer_, TaskExecutor::TaskType::UI,
+            MENU_TASK_DELAY_TIME);
+        sIsMenuPending_ = true;
     };
     hub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));
 }
@@ -579,7 +585,7 @@ void ContainerModalViewEnhance::ResetHoverTimer()
     sIsMenuPending_ = false;
 }
 
-OffsetF ContainerModalViewEnhance::RecalculateMenuOffset(OffsetF currentOffset)
+void ContainerModalViewEnhance::CalculateMenuOffset(OffsetF currentOffset)
 {
     auto screenWidth = SystemProperties::GetDeviceWidth();
     auto screenHeight = SystemProperties::GetDeviceHeight();
@@ -600,6 +606,6 @@ OffsetF ContainerModalViewEnhance::RecalculateMenuOffset(OffsetF currentOffset)
         LOGI("ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen bottom");
         offsetY = offsetY - menuHeight - CONTAINER_TITLE_HEIGHT.ConvertToPx();
     }
-    return {offsetX, offsetY};
+    menuOffset_ = {offsetX, offsetY};
 }
 } // namespace OHOS::Ace::NG

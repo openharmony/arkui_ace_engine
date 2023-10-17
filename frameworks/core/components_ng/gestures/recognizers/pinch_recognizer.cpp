@@ -56,6 +56,9 @@ void PinchRecognizer::OnAccepted()
 
 void PinchRecognizer::OnRejected()
 {
+    if (refereeState_ == RefereeState::SUCCEED) {
+        return;
+    }
     LOGD("pinch gesture has been rejected!");
     refereeState_ = RefereeState::FAIL;
 }

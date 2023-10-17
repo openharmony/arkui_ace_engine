@@ -1310,8 +1310,7 @@ HWTEST_F(OverlayManagerTestNg, ToastShowModeTest001, TestSize.Level1)
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    overlayManager->ClearToast();
-    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    EXPECT_FALSE(overlayManager->toastMap_.empty());
 }
 
 /**

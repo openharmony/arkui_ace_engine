@@ -116,7 +116,7 @@ public:
     }
 
     void ResetAssociatedScroll();
-    void UpdateAssociatedScrollOffset(float offset);
+    bool UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node);
     bool IsTitleModeFree();
 
 protected:

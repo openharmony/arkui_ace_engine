@@ -127,17 +127,6 @@ FlutterTaskExecutor::FlutterTaskExecutor(const flutter::TaskRunners& taskRunners
 #endif
 }
 
-void FlutterTaskExecutor::Destory()
-{
-    LOG_DESTROY();
-    jsThread_ = nullptr;
-    platformRunner_ = nullptr;
-    uiRunner_ = nullptr;
-    ioRunner_ = nullptr;
-    jsRunner_ = nullptr;
-    gpuRunner_ = nullptr;
-}
-
 FlutterTaskExecutor::~FlutterTaskExecutor()
 {
     // To guarantee the jsThread released in platform thread

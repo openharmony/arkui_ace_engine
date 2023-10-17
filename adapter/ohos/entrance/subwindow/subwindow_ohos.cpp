@@ -112,7 +112,7 @@ void SubwindowOhos::InitContainer()
     auto subSurface = window_->GetSurfaceNode();
     CHECK_NULL_VOID(subSurface);
     subSurface->SetShadowElevation(0.0f);
-    window_->SetUIContent(url, nullptr, nullptr, false);
+    window_->NapiSetUIContent(url, nullptr, nullptr, false);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(window_->GetWindowId());
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
 
@@ -701,7 +701,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
 {
 #ifndef NG_BUILD
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos InitToastDialogView begin");
-    dialogWindow_->SetUIContent("", nullptr, nullptr, false);
+    dialogWindow_->NapiSetUIContent("", nullptr, nullptr, false);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(dialogWindow_->GetWindowId());
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
     ContainerScope scope(childContainerId_);

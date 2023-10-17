@@ -70,6 +70,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_indexer.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.h"
@@ -499,6 +500,7 @@ void JsBindViews(BindingTarget globalObj)
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
+    JSKeyboardAvoid::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");

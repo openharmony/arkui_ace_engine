@@ -99,7 +99,6 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
     if (childCount <= 0) {
-        LOGI("ChildCount is illegal.");
         return;
     }
     
@@ -150,7 +149,6 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (int32_t index = 0; index < childCount; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
-            LOGI("Child %{public}d is null.", index);
             continue;
         }
         if (static_cast<int32_t>(itemWidths_.size()) == childCount && useItemWidth_) {

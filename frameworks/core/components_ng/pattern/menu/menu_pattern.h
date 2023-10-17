@@ -240,22 +240,27 @@ public:
 
     void SetOriginOffset(OffsetF offset)
     {
-        originPosition_ = offset;
+        originOffset_ = offset;
     }
 
-    OffsetF GetOriginOffset() const
+    void SetEndOffset(OffsetF offset)
     {
-        return originPosition_;
+        endOffset_ = offset;
+    }
+
+    OffsetF GetEndOffset() const
+    {
+        return endOffset_;
     }
 
     void SetPreviewOriginOffset(OffsetF offset)
     {
-        previewOriginPosition_ = offset;
+        previewOriginOffset_ = offset;
     }
 
     OffsetF GetPreviewOriginOffset() const
     {
-        return previewOriginPosition_;
+        return previewOriginOffset_;
     }
 
 protected:
@@ -289,6 +294,7 @@ private:
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
+    void HandleScrollDragEnd(float offsetX, float offsetY, float velocity);
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
@@ -304,8 +310,9 @@ private:
     bool isSelectMenu_ = false;
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool isFirstShow_ = false;
-    OffsetF originPosition_;
-    OffsetF previewOriginPosition_;
+    OffsetF originOffset_;
+    OffsetF endOffset_;
+    OffsetF previewOriginOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

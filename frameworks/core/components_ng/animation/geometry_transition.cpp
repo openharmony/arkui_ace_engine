@@ -142,16 +142,25 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     auto outNode = outNode_.Upgrade();
     CHECK_NULL_VOID(IsInAndOutValid() && (inNode != outNode));
 
+    bool isImplicitAnimationOpen = AnimationUtils::IsImplicitAnimationOpen();
     bool follow = false;
     if (hasOutAnim_) {
-        MarkLayoutDirty(outNode, -1);
+        if (isImplicitAnimationOpen) {
+            MarkLayoutDirty(outNode, -1);
+        } else {
+            hasOutAnim_ = false;
+        }
         if (!hasInAnim_) {
             follow = OnFollowWithoutTransition(false);
         }
     }
     if (hasInAnim_ && !follow) {
-        state_ = State::ACTIVE;
-        MarkLayoutDirty(inNode, 1);
+        if (isImplicitAnimationOpen) {
+            state_ = State::ACTIVE;
+            MarkLayoutDirty(inNode, 1);
+        } else {
+            hasInAnim_ = false;
+        }
         if (!hasOutAnim_) {
             follow = OnFollowWithoutTransition(true);
         }
@@ -457,8 +466,8 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
 {
     auto inNode = inNode_.Upgrade();
     auto outNode = outNode_.Upgrade();
-    CHECK_NULL_VOID(!staticNodeAbsRect_ &&
-        inNode && outNode && outNode->IsRemoving() && outNodeTargetAbsRect_ && outNodeTargetAbsRect_->IsValid());
+    CHECK_NULL_VOID(!staticNodeAbsRect_ && inNode && inNode->IsOnMainTree() &&
+        outNode && outNode->IsRemoving() && outNodeTargetAbsRect_ && outNodeTargetAbsRect_->IsValid());
     if (trigger.Upgrade()) {
         RecordAnimationOption(trigger, option);
         return;
