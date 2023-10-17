@@ -270,7 +270,6 @@ void Scrollable::HandleTouchUp()
         return;
     }
     if (springController_->IsStopped() && scrollOverCallback_) {
-        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "HandleTouchUp need scroll to boundary");
         ProcessScrollOverCallback(0.0);
     }
 }
@@ -359,14 +358,13 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     const auto dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "HandleDragStart. LocalLocation: %{public}s, GlobalLocation: %{public}s",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, localLocation: %{public}s, globalLocation: %{public}s",
         info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding start.
     auto currentTime = GetSysTimestamp();
     auto increaseCpuTime = currentTime - startIncreaseTime_;
     if (!moved_ || increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
-        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "HandleDragStart increase cpu frequency, moved_ = %{public}d", moved_);
         startIncreaseTime_ = currentTime;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         if (FrameReport::GetInstance().GetEnable()) {
@@ -570,7 +568,6 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     auto currentTime = GetSysTimestamp();
     auto increaseCpuTime = currentTime - startIncreaseTime_;
     if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
-        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "HandleDragUpdate increase cpu frequency, moved_ = %{public}d", moved_);
         startIncreaseTime_ = currentTime;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         if (FrameReport::GetInstance().GetEnable()) {
@@ -578,7 +575,6 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
         }
     }
 #endif
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "handle drag update, offset is %{public}lf", info.GetMainDelta());
     auto mainDelta = info.GetMainDelta();
     if (RelatedScrollEventPrepare(Offset(0.0, mainDelta))) {
         return;
@@ -590,7 +586,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "handle drag end, position is %{public}lf and %{public}lf, "
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "scroll drag end, position is %{public}lf and %{public}lf, "
         "velocity is %{public}lf",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
     controller_->ClearAllListeners();
@@ -624,7 +620,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         HandleScrollEnd();
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM
-        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "springController stop increase cpu frequency");
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
@@ -642,7 +637,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             springController_->Stop();
         }
         StopSnapController();
-            mainPosition, correctVelocity);
         double friction = friction_ > 0 ? friction_ : sFriction_;
         if (motion_) {
             motion_->Reset(friction, mainPosition, correctVelocity, FRICTION_VELOCITY_THRESHOLD);

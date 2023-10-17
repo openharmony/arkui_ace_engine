@@ -95,7 +95,6 @@ void JSScroller::Destructor(JSScroller* scroller)
 void JSScroller::ScrollTo(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "Scroll to with Invalid params");
         return;
     }
 
@@ -107,7 +106,6 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     if (!std::regex_match(xOffsetStr->ToString(), DIMENSION_REGEX) ||
         !std::regex_match(yOffsetStr->ToString(), DIMENSION_REGEX) || !ConvertFromJSValue(xOffsetStr, xOffset) ||
         !ConvertFromJSValue(yOffsetStr, yOffset)) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "Failed to parse param 'xOffset' or 'yOffset'");
         return;
     }
 
@@ -127,11 +125,6 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
         smooth = animationValue->ToBoolean();
     }
 
-    if (GreatNotEqual(duration, 0.0)) {
-        TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollTo(%lf, %lf, %lf)", xOffset.Value(), yOffset.Value(), duration);
-    } else {
-        TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollTo(%lf, %lf)", xOffset.Value(), yOffset.Value());
-    }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         return;
@@ -162,7 +155,6 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
 {
     AlignDeclaration::Edge edge = AlignDeclaration::Edge::AUTO;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], EDGE_TABLE, edge)) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollEdge with Invalid params");
         return;
     }
     auto scrollController = controllerWeak_.Upgrade();
@@ -180,7 +172,6 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
     bool smooth = false;
     ScrollAlign align = ScrollAlign::NONE;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], index) || index < 0) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollToIndex Invalid params");
         return;
     }
     auto scrollController = controllerWeak_.Upgrade();
@@ -190,10 +181,6 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
     // 2：parameters count, 1: parameter index
     if (args.Length() >= 2 && args[1]->IsBoolean()) {
         smooth = args[1]->ToBoolean();
-    }
-    // 3：parameters count, 2: parameter index
-    if (args.Length() == 3 && !ConvertFromJSValue(args[2], ALIGN_TABLE, align)) {
-        TAG_LOGE(AceLogTag::ACE_SCROLL, "ScrollToIndex Invalid align params");
     }
     scrollController->JumpTo(index, smooth, align, SCROLL_FROM_JUMP);
 }
@@ -216,8 +203,6 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
     if (!scrollController) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollPage(%{public}s, %{public}d)", next ? "true" : "false",
-        static_cast<int32_t>(direction));
     scrollController->ScrollPage(!next, true);
 }
 
@@ -244,7 +229,6 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
     Dimension yOffset;
     if (!ConvertFromJSValue(args[0], xOffset) ||
         !ConvertFromJSValue(args[1], yOffset)) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollBy Failed to parse param");
         return;
     }
 
