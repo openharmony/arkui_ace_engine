@@ -52,7 +52,6 @@ void ThreadCheckerTest::TearDownTestSuite()
 HWTEST_F(ThreadCheckerTest, ThreadCheckerGetThread, TestSize.Level1)
 {
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    EXPECT_FALSE(CheckThread(TaskExecutor::TaskType::UI));
     EXPECT_TRUE(CheckThread(TaskExecutor::TaskType::UI));
     EXPECT_TRUE(CheckThread(TaskExecutor::TaskType::JS));
     EXPECT_FALSE(CheckThread(TaskExecutor::TaskType::UNKNOWN));

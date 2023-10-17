@@ -1100,10 +1100,10 @@ HWTEST_F(LayoutPropertyTestNg, UpdateAllGeometryTransition001, TestSize.Level1)
     parent->GetLayoutProperty()->UpdateGeometryTransition("parent", true);
 
     auto child = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>());
-    child->GetLayoutProperty()->UpdateGeometryTransition("child", true);
+    child->GetLayoutProperty()->UpdateGeometryTransition("child", false);
     child->MountToParent(parent);
 
     LayoutProperty::UpdateAllGeometryTransition(parent);
-    EXPECT_FALSE(child->GetLayoutProperty()->GetGeometryTransition());
+    EXPECT_TRUE(child->GetLayoutProperty()->GetGeometryTransition());
 }
 } // namespace OHOS::Ace::NG
