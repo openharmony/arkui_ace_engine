@@ -422,6 +422,11 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
+    if (menuParam.backgroundEffectOption.has_value()) {
+        auto renderContext = menuNode->GetRenderContext();
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBackgroundEffect(menuParam.backgroundEffectOption.value());
+    }
     menuNode->MarkModifyDone();
 
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();

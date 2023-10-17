@@ -2118,17 +2118,8 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
 }
 
-void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
+void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOption& effectOption)
 {
-    if (info.Length() == 0) {
-        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have 1 argument");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGW("failed to set background effect.");
-        return;
-    }
-    JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
     CalcDimension radius;
     if (!ParseJsDimensionVp(jsOption->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);
@@ -2147,7 +2138,22 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
     if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
-    EffectOption option = { radius, saturation, brightness, color };
+    effectOption = { radius, saturation, brightness, color };
+}
+
+void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have 1 argument");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGW("failed to set background effect.");
+        return;
+    }
+    JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
+    EffectOption option;
+    ParseEffectOption(jsOption, option);
     ViewAbstractModel::GetInstance()->SetBackgroundEffect(option);
 }
 
@@ -2493,7 +2499,13 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         };
         menuParam.onDisappear = std::move(onDisappear);
     }
-
+    auto effectOptionVal = menuOptions->GetProperty("effectOption");
+    if (effectOptionVal->IsObject()) {
+        auto effectOptionJson = JSRef<JSObject>::Cast(effectOptionVal);
+        EffectOption option;
+        JSViewAbstract::ParseEffectOption(effectOptionJson, option);
+        menuParam.backgroundEffectOption = option;
+    }
     ParseMenuArrowParam(menuOptions, menuParam);
 }
 
