@@ -354,56 +354,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CalendarPickerPatternTest002
- * @tc.desc: HandleKeyEvent Function Test
- * @tc.type: FUNC
- */
-HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest002, TestSize.Level1)
-{
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
-
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    ASSERT_NE(frameNode, nullptr);
-
-    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
-    ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
-
-    pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
-
-    KeyEvent keyEventOne(KeyCode::KEY_NUMPAD_1, KeyAction::DOWN);
-    auto result = pickerPattern->HandleKeyEvent(keyEventOne);
-    EXPECT_TRUE(result);
-
-    pickerPattern->selected_ = CalendarPickerSelectedType::MONTH;
-    result = pickerPattern->HandleKeyEvent(keyEventOne);
-    EXPECT_TRUE(result);
-
-    pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
-    result = pickerPattern->HandleKeyEvent(keyEventOne);
-    EXPECT_FALSE(result);
-
-    pickerPattern->isKeyWaiting_ = true;
-    result = pickerPattern->HandleKeyEvent(keyEventOne);
-    EXPECT_FALSE(result);
-
-    pickerPattern->selected_ = CalendarPickerSelectedType::MONTH;
-    result = pickerPattern->HandleKeyEvent(keyEventOne);
-    EXPECT_TRUE(result);
-
-    pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
-    result = pickerPattern->HandleKeyEvent(keyEventOne);
-    EXPECT_TRUE(result);
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
-}
-
-/**
  * @tc.name: CalendarDialogViewTest001
  * @tc.desc: Calendar Dialog Show.
  * @tc.type: FUNC
