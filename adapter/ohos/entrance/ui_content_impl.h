@@ -118,34 +118,42 @@ public:
 
     SerializeableObjectArray DumpUITree() override
     {
+        CHECK_NULL_RETURN(uiManager_, SerializeableObjectArray());
         return uiManager_->DumpUITree();
     }
     void SubscribeUpdate(const std::function<void(int32_t, SerializeableObjectArray&)>& onUpdate) override
     {
+        CHECK_NULL_VOID(uiManager_);
         return uiManager_->SubscribeUpdate(onUpdate);
     }
     void UnSubscribeUpdate() override
     {
+        CHECK_NULL_VOID(uiManager_);
         uiManager_->UnSubscribeUpdate();
     }
     void ProcessSerializeableInputEvent(const SerializeableObjectArray& array) override
     {
+        CHECK_NULL_VOID(uiManager_);
         uiManager_->ProcessSerializeableInputEvent(array);
     }
     void RestoreUITree(const SerializeableObjectArray& array) override
     {
+        CHECK_NULL_VOID(uiManager_);
         uiManager_->RestoreUITree(array);
     }
     void UpdateUITree(const SerializeableObjectArray& array) override
     {
+        CHECK_NULL_VOID(uiManager_);
         uiManager_->UpdateUITree(array);
     }
     void SubscribeInputEventProcess(const std::function<void(SerializeableObjectArray&)>& onEvent) override
     {
+        CHECK_NULL_VOID(uiManager_);
         uiManager_->SubscribeInputEventProcess(onEvent);
     }
     void UnSubscribeInputEventProcess() override
     {
+        CHECK_NULL_VOID(uiManager_);
         uiManager_->UnSubscribeInputEventProcess();
     }
     void GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,
