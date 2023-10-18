@@ -91,6 +91,7 @@ ohos_unittest("frame_node_test_ng") {
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
