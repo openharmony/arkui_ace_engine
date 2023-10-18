@@ -676,6 +676,7 @@ void JSSearchController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSearchController>::Declare("SearchController");
     JSClass<JSSearchController>::Method("caretPosition", &JSSearchController::CaretPosition);
+    JSClass<JSSearchController>::CustomMethod("getCaretOffset", &JSSearchController::GetCaretOffset);
     JSClass<JSSearchController>::CustomMethod("getTextContentRect", &JSSearchController::GetTextContentRect);
     JSClass<JSSearchController>::CustomMethod("getTextContentLineCount", &JSSearchController::GetTextContentLinesNum);
     JSClass<JSSearchController>::Method("stopEditing", &JSSearchController::StopEditing);
@@ -701,6 +702,22 @@ void JSSearchController::CaretPosition(int32_t caretPosition)
     auto controller = controller_.Upgrade();
     if (controller) {
         controller->CaretPosition(caretPosition);
+    }
+}
+
+void JSSearchController::GetCaretOffset(const JSCallbackInfo& info)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        JSRef<JSObject> caretObj = JSRef<JSObject>::New();
+        NG::OffsetF caretOffset = controller->GetCaretPosition();
+        caretObj->SetProperty<int32_t>("index", controller->GetCaretIndex());
+        caretObj->SetProperty<float>("x", caretOffset.GetX());
+        caretObj->SetProperty<float>("y", caretOffset.GetY());
+        JSRef<JSVal> ret = JSRef<JSObject>::Cast(caretObj);
+        info.SetReturnValue(ret);
+    } else {
+        LOGE("GetCaretOffset: The JSSearchController is NULL");
     }
 }
 

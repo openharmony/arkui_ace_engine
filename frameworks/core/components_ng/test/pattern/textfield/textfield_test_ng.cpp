@@ -2956,6 +2956,9 @@ HWTEST_F(TextFieldPatternTestNg, SetTextSelection001, TestSize.Level1)
     textFieldPattern->SetTextSelection(TEXT_SELECTION_END, TEXT_SELECTION_END);
     EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, CARET_POSITION_2);
     EXPECT_EQ(textFieldPattern->GetEditingValue().caretPosition, CARET_POSITION_2);
+    textFieldController->GetCaretPosition();
+    auto index = textFieldController->GetCaretIndex();
+    EXPECT_EQ(index, CARET_POSITION_2);
 }
 
 /**

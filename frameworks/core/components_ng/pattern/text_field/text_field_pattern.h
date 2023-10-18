@@ -374,8 +374,9 @@ public:
         return textSelector_.selectionDestinationOffset.GetX();
     }
 
-    OffsetF GetCaretOffset() const
+    OffsetF GetCaretOffset()
     {
+        UpdateCaretRectByPosition(textEditingValue_.caretPosition);
         return OffsetF(caretRect_.GetX(), caretRect_.GetY());
     }
 
@@ -538,6 +539,7 @@ public:
     bool CursorMoveUp() override;
     bool CursorMoveDown() override;
     void SetCaretPosition(int32_t position);
+    int32_t GetCaretIndex();
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;

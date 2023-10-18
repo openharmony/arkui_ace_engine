@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/common/ime/text_input_action.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
+constexpr int32_t ERROR = -1;
 
 struct Font {
     std::optional<FontWeight> fontWeight;
@@ -72,10 +74,30 @@ public:
     virtual void Insert(const std::string& args) {}
 
     virtual void CaretPosition(int32_t caretPosition) {}
+    virtual int32_t GetCaretIndex()
+    {
+        return ERROR;
+    }
+
+    virtual NG::OffsetF GetCaretPosition()
+    {
+        return NG::OffsetF(ERROR, ERROR);
+    }
+
     virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
     virtual Rect GetTextContentRect() { return {}; }
     virtual int32_t GetTextContentLinesNum() { return {}; }
     virtual void StopEditing() {}
+
+    void SetGetCaretIndex(std::function<int32_t()>&& setGetCaretIndex)
+    {
+        getCaretIndex_ = std::move(setGetCaretIndex);
+    }
+
+    void SetGetCaretPosition(std::function<NG::OffsetF()>&& setGetCaretPosition)
+    {
+        getCaretPosition_ = std::move(setGetCaretPosition);
+    }
 
     void SetCaretPosition(std::function<void(const int32_t)>&& setCaretPosition)
     {
@@ -128,6 +150,8 @@ public:
 protected:
     std::function<void(const int32_t)> setCaretPosition_;
     std::function<Rect(void)> getTextContentRect_;
+    std::function<int32_t(void)> getCaretIndex_;
+    std::function<NG::OffsetF(void)> getCaretPosition_;
     std::function<int32_t(void)> getTextContentLinesNum_;
     std::function<void(void)> stopEditing_;
 };

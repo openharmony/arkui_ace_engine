@@ -90,6 +90,7 @@ void JSTextAreaController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextAreaController>::Declare("TextAreaController");
     JSClass<JSTextAreaController>::Method("caretPosition", &JSTextAreaController::CaretPosition);
+    JSClass<JSTextAreaController>::CustomMethod("getCaretOffset", &JSTextAreaController::GetCaretOffset);
     JSClass<JSTextAreaController>::Method("setTextSelection", &JSTextAreaController::SetTextSelection);
     JSClass<JSTextAreaController>::CustomMethod("getTextContentRect", &JSTextAreaController::GetTextContentRect);
     JSClass<JSTextAreaController>::CustomMethod("getTextContentLineCount",
@@ -117,6 +118,22 @@ void JSTextAreaController::CaretPosition(int32_t caretPosition)
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
         controller->CaretPosition(caretPosition);
+    }
+}
+
+void JSTextAreaController::GetCaretOffset(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        JSRef<JSObject> caretObj = JSRef<JSObject>::New();
+        NG::OffsetF caretOffset = controller->GetCaretPosition();
+        caretObj->SetProperty<int32_t>("index", controller->GetCaretIndex());
+        caretObj->SetProperty<float>("x", caretOffset.GetX());
+        caretObj->SetProperty<float>("y", caretOffset.GetY());
+        JSRef<JSVal> ret = JSRef<JSObject>::Cast(caretObj);
+        info.SetReturnValue(ret);
+    } else {
+        LOGE("GetCaretOffset: The JSTextAreaController is NULL");
     }
 }
 

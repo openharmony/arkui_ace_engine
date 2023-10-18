@@ -36,6 +36,7 @@ constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t DOUBLE = 2;
+constexpr int32_t ERROR = -1;
 
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
@@ -263,11 +264,45 @@ void SearchPattern::InitSearchController()
         return search->HandleTextContentLines();
     });
 
+    searchController_->SetGetCaretIndex([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN(search, ERROR);
+        return search->HandleGetCaretIndex();
+    });
+
+    searchController_->SetGetCaretPosition([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN(search, NG::OffsetF(ERROR, ERROR));
+        return search->HandleGetCaretPosition();
+    });
+
     searchController_->SetStopEditing([weak = WeakClaim(this)]() {
         auto search = weak.Upgrade();
         CHECK_NULL_VOID(search);
         search->StopEditing();
     });
+}
+
+int32_t SearchPattern::HandleGetCaretIndex()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ERROR);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, ERROR);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, ERROR);
+    return textFieldPattern->GetCaretIndex();
+}
+
+NG::OffsetF SearchPattern::HandleGetCaretPosition()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, NG::OffsetF(ERROR, ERROR));
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, NG::OffsetF(ERROR, ERROR));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, NG::OffsetF(ERROR, ERROR));
+    return textFieldPattern->GetCaretOffset();
 }
 
 void SearchPattern::HandleCaretPosition(int32_t caretPosition)

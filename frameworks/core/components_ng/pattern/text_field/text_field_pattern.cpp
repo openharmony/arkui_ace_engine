@@ -5232,6 +5232,11 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+int32_t TextFieldPattern::GetCaretIndex()
+{
+    return textEditingValue_.caretPosition;
+}
+
 void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
 {
     selectionStart = selectionStart < 0 ? 0 : selectionStart;

@@ -75,6 +75,7 @@ public:
 
     void GetTextContentRect(const JSCallbackInfo& info);
     void GetTextContentLinesNum(const JSCallbackInfo& info);
+    void GetCaretOffset(const JSCallbackInfo& info);
 
 private:
     JSRef<JSObject> CreateRectangle(const Rect& info);

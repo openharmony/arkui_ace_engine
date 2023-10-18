@@ -865,6 +865,10 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate012, TestSize.Level1)
     textFieldPattern->UpdateEditingValue("aaa", 0);
     result = pattern->HandleTextContentLines();
     EXPECT_EQ(result, 0);
+    pattern->HandleCaretPosition(3); // 3 is caret index
+    pattern->HandleGetCaretPosition();
+    auto index = pattern->HandleGetCaretIndex();
+    ASSERT_EQ(index, 3); // 3 is caret index
 }
 
 /**
