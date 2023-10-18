@@ -637,6 +637,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             springController_->Stop();
         }
         StopSnapController();
+        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "scrollMotion position is %{public}lf, velocity is %{public}lf",
+            mainPosition, correctVelocity);
         double friction = friction_ > 0 ? friction_ : sFriction_;
         if (motion_) {
             motion_->Reset(friction, mainPosition, correctVelocity, FRICTION_VELOCITY_THRESHOLD);
@@ -821,8 +823,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "ProcessScrollSnapSpringMotion scrollSnapDelta is %{public}f, "
-        "scrollSnapVelocity is %{public}f",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "scrollSnapDelta is %{public}f, scrollSnapVelocity is %{public}f",
         scrollSnapDelta, scrollSnapVelocity);
     if (!snapController_) {
         snapController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
@@ -874,6 +875,8 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
 
 void Scrollable::ProcessScrollSnapMotion(double position)
 {
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
+        currentPos_, position);
     currentVelocity_ = scrollSnapMotion_->GetCurrentVelocity();
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
@@ -941,8 +944,9 @@ void Scrollable::OnAnimateStop()
 void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "[scroll] position(%{public}lf), mainVelocity(%{public}lf), "
-        "minExtent(%{public}lf), maxExtent(%{public}lf), initMinExtent(%{public}lf), initMaxExtent(%{public}lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, mainVelocity is %{public}lf, "
+        "minExtent is %{public}lf, maxExtent is %{public}lf, initMinExtent is %{public}lf, "
+        "initMaxExtent is %{public}lf",
         mainPosition, mainVelocity, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
     scrollMotion_ = AceType::MakeRefPtr<ScrollMotion>(mainPosition, mainVelocity, extent, initExtent, spring_);
     if (!scrollMotion_->IsValid()) {
@@ -1027,6 +1031,9 @@ void Scrollable::ProcessScrollMotion(double position)
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
     }
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, currentVelocity_ is %{public}lf, "
+        "needScrollSnapChange_ is %{public}u",
+        position, currentVelocity_, needScrollSnapChange_);
     if ((NearEqual(currentPos_, position))) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION);
     } else {
