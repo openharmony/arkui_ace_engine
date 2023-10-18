@@ -85,7 +85,8 @@
                 "opencl-headers",
                 "libuv",
                 "egl",
-                "opengles"
+                "opengles",
+                "icu"
             ]
         },
         "build": {
