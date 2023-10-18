@@ -106,6 +106,8 @@ public:
     // will be unaffected by parent's transition.
     virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) {};
 
+    virtual void SetFrameWithoutAnimation(const RectF& paintRect) {};
+
     virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
     virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
 
