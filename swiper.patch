@@ -1,0 +1,12 @@
+diff --git a/frameworks/core/components_ng/base/frame_node.cpp b/frameworks/core/components_ng/base/frame_node.cpp
+index 3c10109fb2..fa48a9b0fc 100644
+--- a/frameworks/core/components_ng/base/frame_node.cpp
++++ b/frameworks/core/components_ng/base/frame_node.cpp
+@@ -1805,6 +1805,7 @@ void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCha
+     pattern_->OnWindowSizeChanged(width, height, type);
+ }
+ 
++/* @deprecated  This func will be deleted, please use GetTransformRelativeOffset() instead. */
+ OffsetF FrameNode::GetOffsetRelativeToWindow() const
+ {
+     auto offset = geometryNode_->GetFrameOffset();
