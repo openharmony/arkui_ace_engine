@@ -544,6 +544,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         notifyEvent->SetResult(DragRet::DRAG_CANCEL);
         NotifyDragRegisterFrameNode(nodesForDragNotify_, DragEventType::DROP, notifyEvent);
         summaryMap_.clear();
+        parentHitNodes_.clear();
         ClearVelocityInfo();
         return;
     }
@@ -574,6 +575,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         notifyEvent->SetResult(DragRet::DRAG_FAIL);
         NotifyDragRegisterFrameNode(nodesForDragNotify_, DragEventType::DROP, notifyEvent);
         summaryMap_.clear();
+        parentHitNodes_.clear();
         return;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -609,6 +611,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     NotifyDragRegisterFrameNode(nodesForDragNotify_, DragEventType::DROP, notifyEvent);
     dragFrameNode->MarkDirtyNode();
     summaryMap_.clear();
+    parentHitNodes_.clear();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
@@ -664,6 +667,7 @@ void DragDropManager::ClearSummary()
 {
     previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_.clear();
+    parentHitNodes_.clear();
     ResetRecordSize();
 }
 #endif // ENABLE_DRAG_FRAMEWORK
