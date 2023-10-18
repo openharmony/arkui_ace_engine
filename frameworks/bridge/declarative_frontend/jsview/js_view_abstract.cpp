@@ -6256,12 +6256,21 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     }
     shadow.SetBlurRadius(radius);
     CalcDimension offsetX;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
+    if (ParseJsonResource(argsPtrItem->GetValue("offsetX"), offsetX)) {
         shadow.SetOffsetX(offsetX.Value());
+    } else {
+        if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
+            shadow.SetOffsetX(offsetX.Value());
+        }
     }
+
     CalcDimension offsetY;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
+    if (ParseJsonResource(argsPtrItem->GetValue("offsetY"), offsetY)) {
         shadow.SetOffsetY(offsetY.Value());
+    } else {
+        if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
+            shadow.SetOffsetY(offsetY.Value());
+        }
     }
     Color color;
     if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
@@ -6273,6 +6282,30 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     bool isFilled = argsPtrItem->GetBool("fill", false);
     shadow.SetIsFilled(isFilled);
     return true;
+}
+
+bool JSViewAbstract::ParseJsonResource(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result)
+{
+    if (!jsonValue->IsObject()) {
+        return false;
+    }
+    auto resourceWrapper = CreateResourceWrapper();
+    CHECK_NULL_RETURN(resourceWrapper, false);
+    if (jsonValue->GetValue("type")->GetInt() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(jsonValue->GetValue("id")->GetInt());
+        return StringUtils::StringToCalcDimensionNG(value, result, false);
+    }
+    if (jsonValue->GetValue("type")->GetInt() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetInt(jsonValue->GetValue("id")->GetInt()));
+        StringUtils::StringToDimensionWithUnitNG(value, result);
+        return true;
+    }
+
+    if (jsonValue->GetValue("type")->GetInt() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = resourceWrapper->GetDimension(jsonValue->GetValue("id")->GetInt());
+        return true;
+    }
+    return false;
 }
 
 void JSViewAbstract::GetAngle(
