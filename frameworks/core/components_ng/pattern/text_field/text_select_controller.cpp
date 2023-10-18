@@ -55,6 +55,7 @@ RectF TextSelectController::CalculateEmptyValueCaretRect() const
     rect.SetLeft(contentRect_.Left());
     rect.SetTop(contentRect_.Top());
     rect.SetHeight(caretInfo_.rect.Height());
+    rect.SetWidth(caretInfo_.rect.Width());
     switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
         case TextAlign::START:
             rect.SetLeft(contentRect_.GetX());
@@ -104,6 +105,9 @@ void TextSelectController::UpdateCaretRectByPositionNearTouchOffset(int32_t posi
     CaretMetricsF caretMetrics;
     CalcCaretMetricsByPositionNearTouchOffset(position, caretMetrics,
         OffsetF(static_cast<float>(touchOffset.GetX()), static_cast<float>(touchOffset.GetY())));
+
+    CaretMetricsF CaretMetrics;
+    paragraph_->CalcCaretMetricsByPosition(position, CaretMetrics, TextAffinity::UPSTREAM);
     caretInfo_.UpdateOffset(caretMetrics.offset);
     UpdateCaretHeight(caretMetrics.height);
 }
@@ -242,17 +246,21 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect)
         }
     }
 
+    auto contentRightBoundary = contentRect_.GetX() + contentRect_.Width();
     if (textRect.Width() > contentRect_.Width()) {
-        auto contentRightBoundary = contentRect_.GetX() + contentRect_.Width();
         if (handleRect.GetX() < contentRect_.GetX()) {
             auto dx = contentRect_.GetX() - handleRect.GetX();
             textRect.SetOffset(OffsetF(textRect.GetX() + dx, textRect.GetY()));
             handleRect.SetOffset(OffsetF(handleRect.GetX() + dx, handleRect.GetY()));
-        } else if (handleRect.GetX() + handleRect.Width() > contentRightBoundary) {
-            auto dx = handleRect.GetX() + handleRect.Width() - contentRightBoundary;
+        } else if (handleRect.GetX() > contentRightBoundary) {
+            auto dx = handleRect.GetX() - contentRightBoundary;
             textRect.SetOffset(OffsetF(textRect.GetX() - dx, textRect.GetY()));
             handleRect.SetOffset(OffsetF(handleRect.GetX() - dx, handleRect.GetY()));
         }
+    }
+    if (GreatNotEqual(handleRect.GetX() + handleRect.Width(), contentRightBoundary) &&
+        LessOrEqual(handleRect.Width(), contentRect_.Width())) {
+        handleRect.SetOffset(OffsetF(contentRightBoundary - handleRect.Width(), handleRect.GetY()));
     }
     textFiled->SetTextRect(textRect);
 }
@@ -298,9 +306,15 @@ void TextSelectController::MoveCaretToContentRect(int32_t index)
     OffsetF CaretOffset = CaretMetrics.offset;
     RectF caretRect;
     caretRect.SetOffset(CaretOffset);
-    caretRect.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), CaretMetrics.height });
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFiled);
+    caretRect.SetSize({ caretInfo_.rect.Width(),
+        LessOrEqual(CaretMetrics.height, 0.0) ? textFiled->PreferredLineHeight() : CaretMetrics.height });
     MoveHandleToContentRect(caretRect);
     caretInfo_.rect = caretRect;
+    caretRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     UpdateRecordCaretIndex(caretInfo_.index);
 }
 
@@ -320,7 +334,7 @@ void TextSelectController::UpdateSecondHandleOffset()
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
 }
 
-void TextSelectController::TextSelectController::UpdateCaretOffset()
+void TextSelectController::UpdateCaretOffset()
 {
     if (contentController_->IsEmpty()) {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
@@ -328,8 +342,22 @@ void TextSelectController::TextSelectController::UpdateCaretOffset()
     }
     CaretMetricsF caretMetrics;
     CalcCaretMetricsByPosition(GetCaretIndex(), caretMetrics, TextAffinity::DOWNSTREAM);
-    caretInfo_.rect.SetOffset(caretMetrics.offset);
-    caretInfo_.rect.SetHeight(caretMetrics.height);
+
+    RectF caretRect;
+    caretRect.SetOffset(caretMetrics.offset);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFiled);
+    caretRect.SetSize(SizeF(caretInfo_.rect.Width(),
+        LessOrEqual(caretMetrics.height, 0.0) ? textFiled->PreferredLineHeight() : caretMetrics.height));
+    MoveHandleToContentRect(caretRect);
+    caretInfo_.rect = caretRect;
+}
+
+void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
+{
+    caretInfo_.rect.SetOffset(offset);
 }
 
 void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset)
@@ -367,7 +395,6 @@ void TextSelectController::FireSelectEvent()
         onAccessibilityCallback_();
         eventHub->FireOnSelectionChange(firstHandleInfo_.index, secondHandleInfo_.index);
     }
-
 }
 
 void TextSelectController::UpdateRecordCaretIndex(int32_t index) const

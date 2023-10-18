@@ -170,7 +170,8 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
     RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
         // add extra clip space for cases such as auto width
-        paintOffset.GetX() + contentSize_->Get().Width() + cursorWidth_->Get() * 2.0f,
+        paintOffset.GetX() + contentSize_->Get().Width() +
+            (LessOrEqual(contentSize_->Get().Width(), 0.0) ? cursorWidth_->Get() : 0.0f),
         clipRectHeight);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);

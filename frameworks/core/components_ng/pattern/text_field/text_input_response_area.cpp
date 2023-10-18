@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/text_field/text_input_response_area.h"
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -23,7 +25,6 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_input_response_area.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -123,12 +124,11 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateImageSourceInfo(currentImageSourceInfo.value());
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize),
-        CalcLength(iconSize)));
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
     imageNode->MarkModifyDone();
     imageNode->MountToParent(stackNode);
     passwordNode_ = imageNode;
-    
+
     return stackNode;
 }
 
@@ -249,7 +249,8 @@ void UnitResponseArea::InitResponseArea(const WeakPtr<Pattern>& hostPattern)
     if (!IsShowUnit()) {
         return;
     }
-    auto unitNode = unitNode_.Upgrade();;
+    auto unitNode = unitNode_.Upgrade();
+    ;
     CHECK_NULL_VOID(unitNode);
     unitNode->MountToParent(host);
 }
@@ -284,7 +285,7 @@ bool UnitResponseArea::IsShowUnit()
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     return layoutProperty->GetShowUnderlineValue(false) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
+           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
 }
 
 void UnitResponseArea::DestoryArea()

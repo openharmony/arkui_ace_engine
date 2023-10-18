@@ -30,6 +30,8 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    float CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper) override;
+
 private:
     void CounterNodeMeasureContent(uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint,
         RefPtr<LayoutWrapper>& layoutWrapper);

@@ -29,9 +29,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     // Construct text style.
     TextStyle textStyle;
-    std::string textContent;
-    bool showPlaceHolder = false;
-    ConstructTextStyles(frameNode, textStyle, textContent, showPlaceHolder);
+    ConstructTextStyles(frameNode, textStyle, textContent_, showPlaceHolder_);
 
     auto isInlineStyle = pattern->IsNormalInlineState();
 
@@ -39,17 +37,14 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
 
     // Create paragraph.
-    auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder && !isInlineStyle;
-    if (pattern->IsDragging() && !showPlaceHolder) {
-        CreateParagraph(textStyle, pattern->GetDragContents(), textContent,
-            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
+    auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
+    if (pattern->IsDragging() && !showPlaceHolder_) {
+        CreateParagraph(textStyle, pattern->GetDragContents(), textContent_,
+            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, disableTextAlign);
     } else {
-        CreateParagraph(textStyle, textContent, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder,
+        CreateParagraph(textStyle, textContent_, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
             pattern->GetNakedCharPosition(), disableTextAlign);
     }
-
-    // constraint size.
-    auto contentIdealSize = CalculateConstraintSize(contentConstraint, layoutWrapper);
 
     autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
 
@@ -70,21 +65,19 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     // Paragraph layout.
     if (isInlineStyle) {
-        return InlineMeasureContent(contentConstraint, layoutWrapper, contentIdealSize);
-    } else if (showPlaceHolder) {
-        return PlaceHolderMeasureContent(contentIdealSize, 0);
+        return InlineMeasureContent(contentConstraint, layoutWrapper);
+    } else if (showPlaceHolder_) {
+        return PlaceHolderMeasureContent(contentConstraint, layoutWrapper, 0);
     } else {
-        return TextInputMeasureConetnt(contentIdealSize, 0);
+        return TextInputMeasureContent(contentConstraint, layoutWrapper, 0);
     }
 }
 
 void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    OptionalSizeF frameSize =
-        CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT_MAIN_AXIS);
+    OptionalSizeF frameSize;
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-    const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -100,42 +93,39 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
-    auto defaultHeight = textFieldTheme->GetHeight().ConvertToPx();
-    if (!frameSize.Height().has_value()) {
-        if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
-            calcLayoutConstraint->maxSize.value().Height().has_value()) {
-            frameSize.SetHeight(std::max(layoutConstraint->maxSize.Height(), layoutConstraint->minSize.Height()));
-        } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
-            auto height = contentHeight + pattern->GetVerticalPaddingSum() < defaultHeight
-                              ? defaultHeight
-                              : contentHeight + pattern->GetVerticalPaddingSum();
-            frameSize.SetHeight(std::min(layoutConstraint->maxSize.Height(), static_cast<float>(height)));
-        } else {
-            frameSize.SetHeight(layoutConstraint->minSize.Height());
-        }
-    }
-    auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textfieldLayoutProperty);
+    auto defaultHeight = static_cast<float>(textFieldTheme->GetHeight().ConvertToPx());
 
-    if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
-        frameSize.SetWidth(std::min(textRect_.Width(), contentWidth) + pattern->GetHorizontalPaddingSum());
-    }
+    frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum());
 
+    auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
+    if (contentConstraint.selfIdealSize.Height().has_value()) {
+        frameSize.SetHeight(contentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
+    } else {
+        auto height = contentHeight + pattern->GetVerticalPaddingAndBorderSum() < defaultHeight
+                          ? defaultHeight
+                          : contentHeight + pattern->GetVerticalPaddingAndBorderSum();
+        frameSize.SetHeight(height);
+    }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     } else {
         auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(frameSize,
             layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
             layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
-        frameSize.SetWidth(finalSize.Width());
         frameSize.SetHeight(finalSize.Height());
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
-
     auto responseArea = pattern->GetResponseArea();
     if (responseArea && content) {
+        auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
         auto childWidth = responseArea->Measure(layoutWrapper).Width();
-        content->SetSize(SizeF(contentWidth - childWidth, contentHeight));
+        if (LessOrEqual(contentWidth + childWidth, contentConstraint.maxSize.Width())) {
+            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + childWidth);
+        } else {
+            content->SetSize(SizeF(contentConstraint.maxSize.Width() - childWidth, contentHeight));
+            frameSize.SetWidth(contentConstraint.maxSize.Width() + pattern->GetHorizontalPaddingAndBorderSum());
+        }
+        layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     }
 }
 
@@ -161,12 +151,13 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
         hasAlign = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().has_value();
     }
+
     // Update content position.
     OffsetF contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
-    content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
+    content->SetOffset(OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(), contentOffset.GetY()));
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (paragraph_->GetLongestLine() <= contentSize.Width()) {
+    if (LessOrEqual(textRect_.Width(), contentSize.Width())) {
         // adjust text rect to the basic padding
         float textRectOffsetX = 0.0f;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {

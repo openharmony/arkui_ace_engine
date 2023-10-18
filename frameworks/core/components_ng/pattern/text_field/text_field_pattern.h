@@ -389,14 +389,16 @@ public:
         return utilPadding_;
     }
 
-    float GetHorizontalPaddingSum() const
+    float GetHorizontalPaddingAndBorderSum() const
     {
-        return utilPadding_.left.value_or(0.0f) + utilPadding_.right.value_or(0.0f);
+        return utilPadding_.left.value_or(0.0f) + utilPadding_.right.value_or(0.0f) + GetBorderLeft() +
+               GetBorderRight();
     }
 
-    float GetVerticalPaddingSum() const
+    float GetVerticalPaddingAndBorderSum() const
     {
-        return utilPadding_.top.value_or(0.0f) + utilPadding_.bottom.value_or(0.0f);
+        return utilPadding_.top.value_or(0.0f) + utilPadding_.bottom.value_or(0.0f) + GetBorderTop() +
+               GetBorderBottom();
     }
 
     float GetBorderLeft() const
@@ -1124,7 +1126,6 @@ private:
     OffsetF lastTouchOffset_;
     PaddingPropertyF utilPadding_;
     OffsetF rightClickOffset_;
-    OffsetF offsetDifference_;
 
     BorderWidthProperty lastBorderWidth_;
 

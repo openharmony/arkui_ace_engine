@@ -173,6 +173,7 @@ public:
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
     void UpdateSelectByOffset(const Offset& localOffset);
     void UpdateCaretOffset();
+    void UpdateCaretOffset(const OffsetF& offset);
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
     void MoveFirstHandleToContentRect(int32_t index);

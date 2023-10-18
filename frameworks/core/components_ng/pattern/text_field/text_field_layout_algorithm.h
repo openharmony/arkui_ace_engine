@@ -69,6 +69,11 @@ public:
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled);
 
+    virtual float CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper)
+    {
+        return 0.0f;
+    }
+
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
@@ -93,18 +98,22 @@ protected:
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
     void UpdateUnitLayout(LayoutWrapper* layoutWrapper);
     ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
-
-    SizeF CalculateConstraintSize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    std::optional<SizeF> InlineMeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, const SizeF& idealSize);
-    SizeF PlaceHolderMeasureContent(const SizeF& idealSize, float imageWidth = 0.0f);
-    SizeF TextInputMeasureConetnt(const SizeF& idealSize, float imageWidth);
-    SizeF TextAreaMeasureContent(const SizeF& idealSize);
+    float ConstraintWithMinWidth(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float removeValue = 0.0f);
+    SizeF GetConstraintSize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> InlineMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    SizeF PlaceHolderMeasureContent(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth = 0.0f);
+    SizeF TextInputMeasureContent(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth);
+    SizeF TextAreaMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
     RectF textRect_;
     OffsetF parentGlobalOffset_;
+    std::string textContent_;
+    bool showPlaceHolder_ = false;
     float preferredHeight_ = 0.0f;
 
     float unitWidth_ = 0.0f;

@@ -333,8 +333,6 @@ void TextFieldPattern::UpdateCaretRect()
     }
 
     selectController_->UpdateCaretOffset();
-    auto caretRect = selectController_->GetCaretRect();
-    selectController_->MoveHandleToContentRect(caretRect);
 }
 
 void TextFieldPattern::AdjustTextInReasonableArea()
@@ -346,7 +344,7 @@ void TextFieldPattern::AdjustTextInReasonableArea()
             textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
         }
     } else {
-        if (textRect_.GetY() < contentRect_.GetY()) {
+        if (textRect_.GetY() != contentRect_.GetY()) {
             auto dy = contentRect_.GetY() - textRect_.GetY();
             textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
         }
@@ -487,10 +485,12 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
             UpdateDoubleHandlePosition();
         } else {
             UpdateSecondHandlePosition();
-            selectController_->UpdateCaretOffset();
+            auto carectOffset = selectController_->GetCaretRect().GetOffset() + OffsetF(0.0f, offset);
+            selectController_->UpdateCaretOffset(carectOffset);
         }
     } else {
-        selectController_->UpdateCaretOffset();
+        auto carectOffset = selectController_->GetCaretRect().GetOffset() + OffsetF(0.0f, offset);
+        selectController_->UpdateCaretOffset(carectOffset);
     }
     UpdateScrollBarOffset();
 }
@@ -514,9 +514,12 @@ void TextFieldPattern::OnTextInputScroll(float offset)
             UpdateDoubleHandlePosition();
         } else {
             UpdateSecondHandlePosition();
+            auto carectOffset = selectController_->GetCaretRect().GetOffset() + OffsetF(offset, 0.0f);
+            selectController_->UpdateCaretOffset(carectOffset);
         }
     } else {
-        selectController_->UpdateCaretOffset();
+        auto carectOffset = selectController_->GetCaretRect().GetOffset() + OffsetF(offset, 0.0f);
+        selectController_->UpdateCaretOffset(carectOffset);
     }
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -598,11 +601,10 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (IsNormalInlineState() && (!contentController_->IsEmpty() || !layoutProperty->GetPlaceholderValue("").empty())) {
+    if (IsNormalInlineState()) {
         ApplyInlineStates(true);
         inlineSelectAllFlag_ = true;
         inlineFocusState_ = true;
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
         StartTwinkling();
     }
@@ -836,7 +838,7 @@ void TextFieldPattern::HandleOnUndoAction()
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+                                                                                    : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::HandleOnRedoAction()
@@ -857,7 +859,7 @@ void TextFieldPattern::HandleOnRedoAction()
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+                                                                                    : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
@@ -1213,7 +1215,8 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         auto contentController = pattern->contentController_;
         auto selectController = pattern->selectController_;
         std::string beforeStr = contentController->GetValueBeforeIndex(selectController->GetStartIndex());
-        std::string selectedStr = contentController->GetSelectedValue(selectController->GetStartIndex(), selectController->GetEndIndex());
+        std::string selectedStr =
+            contentController->GetSelectedValue(selectController->GetStartIndex(), selectController->GetEndIndex());
         std::string afterStr = contentController->GetValueAfterIndex(selectController->GetEndIndex());
         pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
         itemInfo.extraInfo = selectedStr;
@@ -1644,8 +1647,8 @@ void TextFieldPattern::OnModifyDone()
         lastTextRectY_ = textRect_.GetY();
     }
     ProcessInnerPadding();
-    textRect_.SetLeft(textRect_.GetX() + offsetDifference_.GetX());
-    textRect_.SetTop(textRect_.GetY() + offsetDifference_.GetY());
+    textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
+    textRect_.SetTop(GetPaddingTop() + GetBorderTop());
     CalculateDefaultCursor();
     if (renderContext->HasBackgroundColor()) {
         paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
@@ -1832,27 +1835,11 @@ void TextFieldPattern::ProcessInnerPadding()
     auto left = !paddingProperty
                     ? CalcLength(themePadding.Left()).GetDimension().ConvertToPx()
                     : paddingProperty->left.value_or(CalcLength(themePadding.Left())).GetDimension().ConvertToPx();
-    offsetDifference_.SetX(
-        left + (float)currentBorderWidth.leftDimen->ConvertToPx() - GetPaddingLeft() - GetBorderLeft());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) || IsNormalInlineState()) {
-        offsetDifference_.SetX(left - GetPaddingLeft());
-    }
     utilPadding_.left = left;
     auto top = !paddingProperty
                    ? CalcLength(themePadding.Top()).GetDimension().ConvertToPx()
                    : paddingProperty->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
-    offsetDifference_.SetY(top + (float)currentBorderWidth.topDimen->ConvertToPx() - GetPaddingTop() - GetBorderTop());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) || IsNormalInlineState()) {
-        offsetDifference_.SetY(top - GetPaddingTop());
-    }
     utilPadding_.top = top;
-    utilPadding_.bottom =
-        !paddingProperty
-            ? CalcLength(themePadding.Bottom()).GetDimension().ConvertToPx()
-            : paddingProperty->bottom.value_or(CalcLength(themePadding.Bottom())).GetDimension().ConvertToPx();
-    utilPadding_.right =
-        !paddingProperty
-            ? CalcLength(themePadding.Right()).GetDimension().ConvertToPx()
             : paddingProperty->right.value_or(CalcLength(themePadding.Right())).GetDimension().ConvertToPx();
     lastBorderWidth_ = currentBorderWidth;
 }
@@ -4867,7 +4854,6 @@ void TextFieldPattern::UpdateSelectController()
 {
     selectController_->UpdateContentRect(contentRect_);
     selectController_->UpdateParagraph(paragraph_);
-    selectController_->UpdateCaretOffset();
 }
 
 bool TextFieldPattern::IsSingleHandle() const
