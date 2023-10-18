@@ -1802,6 +1802,7 @@ void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCha
     pattern_->OnWindowSizeChanged(width, height, type);
 }
 
+/* @deprecated  This func will be deleted, please use GetTransformRelativeOffset() instead. */
 OffsetF FrameNode::GetOffsetRelativeToWindow() const
 {
     auto offset = geometryNode_->GetFrameOffset();
