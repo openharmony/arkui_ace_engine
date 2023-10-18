@@ -1070,7 +1070,9 @@ void DragDropManager::UpdateNotifyDragEvent(
     notifyEvent->SetScreenX((double)point.GetScreenX());
     notifyEvent->SetScreenY((double)point.GetScreenY());
     if (dragEventType != DragEventType::START) {
-        notifyEvent->SetVelocity(velocityTracker_.GetVelocity());
+        if (dragEventType != DragEventType::DROP) {
+            notifyEvent->SetVelocity(velocityTracker_.GetVelocity());
+        }
 #ifdef ENABLE_DRAG_FRAMEWORK
         notifyEvent->SetSummary(summaryMap_);
         notifyEvent->SetPreviewRect(GetDragWindowRect(point));
