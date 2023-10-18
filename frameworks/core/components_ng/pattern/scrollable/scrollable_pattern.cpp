@@ -102,9 +102,9 @@ bool ScrollablePattern::ProcessNavBarReactOnUpdate(float offset)
     auto minTitle = navBarPattern_ ? navBarPattern_->GetIsMinTitle() : false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
-    auto firstNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_RETURN(firstNode, true);
-    auto firstGeometryNode = firstNode->GetGeometryNode();
+    std::list<RefPtr<FrameNode>> childrens;
+    host->GenerateOneDepthVisibleFrame(childrens);
+    auto firstGeometryNode = (*childrens.begin())->GetGeometryNode();
     CHECK_NULL_RETURN(firstGeometryNode, true);
     auto dragOffsetY = firstGeometryNode->GetFrameOffset().GetY();
     navBarPattern_->OnCoordScrollUpdate(offset, dragOffsetY);
