@@ -1211,11 +1211,20 @@ void JSTimePicker::SetDefaultAttributes()
 
 PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal)
 {
-    auto pickerTime = PickerTime();
+    auto pickerTime = PickerTime::Current();
     if (!timeVal->IsObject()) {
         return pickerTime;
     }
     auto timeObj = JSRef<JSObject>::Cast(timeVal);
+    auto yearFuncJsVal = timeObj->GetProperty("getFullYear");
+    if (yearFuncJsVal->IsFunction()) {
+        auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
+        JSRef<JSVal> year = yearFunc->Call(timeObj);
+        if (year->IsNumber() && LessOrEqual(year->ToNumber<int32_t>(), 0)) {
+            return pickerTime;
+        }
+    }
+
     auto hourFuncJsVal = timeObj->GetProperty("getHours");
     auto minuteFuncJsVal = timeObj->GetProperty("getMinutes");
     auto secondFuncJsVal = timeObj->GetProperty("getSeconds");

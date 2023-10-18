@@ -40,14 +40,14 @@ public:
 
     void OnFinish() const override
     {
-        LOGI("FormPlatformEventCallback OnFinish");
-        CHECK_NULL_VOID_NOLOG(onFinish_);
+        TAG_LOGI(AceLogTag::ACE_FORM, "FormPlatformEventCallback OnFinish");
+        CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
     void OnStatusBarBgColorChanged(uint32_t color) override
     {
-        LOGI("FormPlatformEventCallback OnStatusBarBgColorChanged");
+        TAG_LOGI(AceLogTag::ACE_FORM, "FormPlatformEventCallback OnStatusBarBgColorChanged");
     }
 
 private:
@@ -78,7 +78,7 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     // get asset
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    CHECK_NULL_VOID_NOLOG(moduleInfo);
+    CHECK_NULL_VOID(moduleInfo);
     packagePathStr += "/" + moduleInfo->package + "/";
     std::shared_ptr<AbilityInfo> abilityInfo = GetAbilityInfo();
 
@@ -96,10 +96,11 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     std::vector<std::string> assetBasePathStr;
 
     if (abilityInfo != nullptr && !abilityInfo->srcPath.empty()) {
-        LOGI("AceFormAbility srcPath:%{public}s url:%{public}s", abilityInfo->srcPath.c_str(), parsedUrl.c_str());
+        TAG_LOGD(AceLogTag::ACE_FORM, "AceFormAbility srcPath:%{public}s url:%{public}s", abilityInfo->srcPath.c_str(),
+            parsedUrl.c_str());
         assetBasePathStr = { "assets/js/" + abilityInfo->srcPath + "/", std::string("assets/js/") };
     } else {
-        LOGI("AceFormAbility parsedUrl:%{public}s", parsedUrl.c_str());
+        TAG_LOGD(AceLogTag::ACE_FORM, "AceFormAbility parsedUrl:%{public}s", parsedUrl.c_str());
         assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
     }
 
@@ -111,8 +112,8 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     options.hapPath = moduleInfo->hapPath;
     options.workerPath = workerPath;
 
-    Platform::PaContainer::CreateContainer(instanceId_, this, options,
-        std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
+    Platform::PaContainer::CreateContainer(
+        instanceId_, this, options, std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
     Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
 
     // run form ability
@@ -122,102 +123,102 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
 OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::Want& want)
 {
     std::string formId = want.GetStringParam(AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY);
-    LOGI("AceFormAbility::OnCreate formId = %{public}s.", formId.c_str());
     Platform::PaContainer::OnCreate(instanceId_, want);
     OHOS::AppExecFwk::FormProviderInfo formProviderInfo;
     formProviderInfo.SetFormData(Platform::PaContainer::GetFormData(instanceId_));
     std::string formData = formProviderInfo.GetFormData().GetDataString();
-    LOGI("AceFormAbility::OnCreate return ok, formData: %{public}s", formData.c_str());
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnCreate formId = %{public}s, formData: %{public}s", formId.c_str(),
+        formData.c_str());
     return formProviderInfo;
 }
 
 void AceFormAbility::OnDelete(const int64_t formId)
 {
-    LOGI("AceFormAbility::OnDelete called: %{public}s", std::to_string(formId).c_str());
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnDelete called: %{public}s", std::to_string(formId).c_str());
     Platform::PaContainer::OnDelete(instanceId_, formId);
 }
 
 void AceFormAbility::OnTriggerEvent(const int64_t formId, const std::string& message)
 {
-    LOGI("AceFormAbility::OnTriggerEvent called: %{public}s", std::to_string(formId).c_str());
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnTriggerEvent called: %{public}s", std::to_string(formId).c_str());
     Platform::PaContainer::OnTriggerEvent(instanceId_, formId, message);
 }
 
-AppExecFwk::FormState AceFormAbility::OnAcquireFormState(const OHOS::AAFwk::Want &want)
+AppExecFwk::FormState AceFormAbility::OnAcquireFormState(const OHOS::AAFwk::Want& want)
 {
-    LOGI("AceFormAbility::OnAcquireState called");
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnAcquireState called");
     int32_t formState = Platform::PaContainer::OnAcquireFormState(instanceId_, want);
-    if (formState <= (int32_t) AppExecFwk::FormState::UNKNOWN || formState > (int32_t) AppExecFwk::FormState::READY) {
+    if (formState <= (int32_t)AppExecFwk::FormState::UNKNOWN || formState > (int32_t)AppExecFwk::FormState::READY) {
         return AppExecFwk::FormState::UNKNOWN;
     } else {
-        return (AppExecFwk::FormState) formState;
+        return (AppExecFwk::FormState)formState;
     }
 }
 
 void AceFormAbility::OnUpdate(const int64_t formId)
 {
-    LOGI("AceFormAbility::OnUpdate called: %{public}s", std::to_string(formId).c_str());
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnUpdate called: %{public}s", std::to_string(formId).c_str());
     Platform::PaContainer::OnUpdate(instanceId_, formId);
 }
 
 void AceFormAbility::OnCastTemptoNormal(const int64_t formId)
 {
-    LOGI("AceFormAbility::OnCastTemptoNormal called: %{public}s", std::to_string(formId).c_str());
+    TAG_LOGI(
+        AceLogTag::ACE_FORM, "AceFormAbility OnCastTemptoNormal called: %{public}s", std::to_string(formId).c_str());
     Platform::PaContainer::OnCastTemptoNormal(instanceId_, formId);
 }
 
 void AceFormAbility::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap)
 {
-    LOGI("AceFormAbility::OnVisibilityChanged called");
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnVisibilityChanged called");
     Platform::PaContainer::OnVisibilityChanged(instanceId_, formEventsMap);
 }
 
-bool AceFormAbility::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+bool AceFormAbility::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 {
-    LOGD("AceFormAbility::OnShare called");
+    TAG_LOGD(AceLogTag::ACE_FORM, "AceFormAbility OnShare called");
     return Platform::PaContainer::OnShare(instanceId_, formId, wantParams);
 }
 
 void AceFormAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
-    LOGI("AceFormAbility::OnStart start");
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnStart start");
     Ability::OnStart(want, sessionInfo);
     LoadFormEnv(want);
 }
 
 void AceFormAbility::OnStop()
 {
-    LOGI("AceFormAbility::OnStop start ");
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnStop start ");
     Ability::OnStop();
 }
 
 sptr<IRemoteObject> AceFormAbility::OnConnect(const Want& want)
 {
-    LOGI("AceFormAbility::OnConnect start");
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnConnect start");
     Ability::OnConnect(want);
     return GetFormRemoteObject();
 }
 
 void AceFormAbility::OnDisconnect(const Want& want)
 {
-    LOGI("AceFormAbility::OnDisconnect start");
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnDisconnect start");
     Ability::OnDisconnect(want);
 }
 
 sptr<IRemoteObject> AceFormAbility::GetFormRemoteObject()
 {
-    LOGD("Get form remote object start");
+    TAG_LOGD(AceLogTag::ACE_FORM, "Get form remote object start");
     if (formProviderRemoteObject_ == nullptr) {
         sptr<FormProviderClient> providerClient = new (std::nothrow) FormProviderClient();
         std::shared_ptr<Ability> thisAbility = this->shared_from_this();
         if (thisAbility == nullptr) {
-            LOGE("Get form remote object failed, ability is nullptr");
+            TAG_LOGE(AceLogTag::ACE_FORM, "Get form remote object failed, ability is nullptr");
             return nullptr;
         }
         providerClient->SetOwner(thisAbility);
         formProviderRemoteObject_ = providerClient->AsObject();
     }
-    LOGD("Get form remote object end");
     return formProviderRemoteObject_;
 }
 } // namespace OHOS::Ace

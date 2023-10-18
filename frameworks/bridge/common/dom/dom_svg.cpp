@@ -40,7 +40,6 @@ RefPtr<Component> DOMSvg::GetSpecializedComponent()
 void DOMSvg::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
     if (!child) {
-        LOGE("child is null");
         return;
     }
     if (AceType::InstanceOf<SvgAnimateComponent>(child->GetSpecializedComponent())) {
@@ -54,7 +53,6 @@ void DOMSvg::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
     auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
     if (!declaration) {
-        LOGE("declaration is null");
         return;
     }
     auto svgNode = AceType::DynamicCast<DOMSvg>(parentNode);

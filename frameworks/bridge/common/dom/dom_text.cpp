@@ -39,12 +39,10 @@ void DOMText::CheckAndSetAllSpanStyle()
     for (const auto& child : GetChildList()) {
         auto domSpan = AceType::DynamicCast<DOMSpan>(child);
         if (!domSpan) {
-            LOGW("text only support span child");
             continue;
         }
         auto spanComponent = AceType::DynamicCast<TextSpanComponent>(domSpan->GetSpecializedComponent());
         if (!spanComponent) {
-            LOGW("text only support span child");
             continue;
         }
 
@@ -113,7 +111,6 @@ void DOMText::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
     ACE_DCHECK(child);
     auto spanComponent = AceType::DynamicCast<TextSpanComponent>(child->GetSpecializedComponent());
     if (!spanComponent) {
-        LOGW("text only support span child");
         return;
     }
 

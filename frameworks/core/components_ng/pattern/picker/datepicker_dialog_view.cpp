@@ -124,7 +124,9 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         auto timeNode = CreateTimeNode(settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
         auto timePickerEventHub = timeNode->GetEventHub<TimePickerEventHub>();
         CHECK_NULL_RETURN(timePickerEventHub, nullptr);
-        auto onChangeCallback = [monthDaysNode]() {
+        auto onChangeCallback = [weak = WeakPtr<FrameNode>(monthDaysNode)]() {
+            auto monthDaysNode = weak.Upgrade();
+            CHECK_NULL_VOID(monthDaysNode);
             auto pickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
             CHECK_NULL_VOID(pickerPattern);
             auto str = pickerPattern->GetSelectedObject(true);
@@ -147,7 +149,13 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         SetTitleMouseHoverEvent(buttonTitleNode);
         buttonTitleNode->MarkModifyDone();
         RefPtr<DateTimeAnimationController> animationController = AceType::MakeRefPtr<DateTimeAnimationController>();
-        auto titleSwitchEvent = [contentColumn, pickerStack, animationController]() {
+        auto titleSwitchEvent = [weakContentColumn = AceType::WeakClaim(AceType::RawPtr(contentColumn)),
+                                weakPickerStack = AceType::WeakClaim(AceType::RawPtr(pickerStack)),
+                                animationController]() {
+            auto contentColumn = weakContentColumn.Upgrade();
+            CHECK_NULL_VOID(contentColumn);
+            auto pickerStack = weakPickerStack.Upgrade();
+            CHECK_NULL_VOID(pickerStack);
             // switch picker page.
             auto pickerRow = pickerStack->GetLastChild();
             CHECK_NULL_VOID(pickerRow);
@@ -241,7 +249,9 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     SetDialogDateChange(dateNode, std::move(dateChangeEvent));
     auto contentRow = CreateButtonNode(acceptNode, dateNode, dialogEvent, std::move(dialogCancelEvent));
     CHECK_NULL_RETURN(contentRow, nullptr);
-    auto event = [dialogNode](const GestureEvent& /* info */) {
+    auto event = [weak = WeakPtr<FrameNode>(dialogNode)](const GestureEvent& /* info */) {
+        auto dialogNode = weak.Upgrade();
+        CHECK_NULL_VOID(dialogNode);
         auto pipeline = PipelineContext::GetCurrentContext();
         auto overlayManager = pipeline->GetOverlayManager();
         overlayManager->CloseDialog(dialogNode);
@@ -342,7 +352,9 @@ void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNod
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     auto spinnerNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(spinnerNode);
@@ -467,7 +479,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     CHECK_NULL_RETURN(dateNode, nullptr);
     SetDialogAcceptEvent(dateNode, std::move(acceptEvent));
-    auto clickCallback = [dateNode](const GestureEvent& /* info */) {
+    auto clickCallback = [weak = WeakPtr<FrameNode>(dateNode)](const GestureEvent& /* info */) {
+        auto dateNode = weak.Upgrade();
+        CHECK_NULL_VOID(dateNode);
         auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_VOID(pickerPattern);
         auto datePickerEventHub = pickerPattern->GetEventHub<DatePickerEventHub>();
@@ -966,7 +980,9 @@ void DatePickerDialogView::SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titl
     auto eventHub = titleButtonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
-    auto mouseTask = [titleButtonNode](bool isHover) {
+    auto mouseTask = [weak = WeakPtr<FrameNode>(titleButtonNode)](bool isHover) {
+        auto titleButtonNode = weak.Upgrade();
+        CHECK_NULL_VOID(titleButtonNode);
         HandleMouseEvent(titleButtonNode, isHover);
     };
     auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -993,7 +1009,8 @@ void DatePickerDialogView::PlayHoverAnimation(const RefPtr<FrameNode>& titleButt
     option.SetDuration(HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::FRICTION);
     option.SetFillMode(FillMode::FORWARDS);
-    AnimationUtils::Animate(option, [titleButton, color]() {
+    AnimationUtils::Animate(option, [weak = WeakPtr<FrameNode>(titleButton), color]() {
+        auto titleButton = weak.Upgrade();
         auto buttonTitleNode = AceType::DynamicCast<FrameNode>(titleButton);
         CHECK_NULL_VOID(buttonTitleNode);
         auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();

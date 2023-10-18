@@ -38,9 +38,9 @@ public:
     ~LinePaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
+        CHECK_NULL_RETURN(paintWrapper, nullptr);
         auto linePaintProperty = DynamicCast<LinePaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        CHECK_NULL_RETURN_NOLOG(linePaintProperty, nullptr);
+        CHECK_NULL_RETURN(linePaintProperty, nullptr);
 
         if (propertiesFromAncestor_) {
             linePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);

@@ -106,10 +106,12 @@ public:
     {
         isInitialSubtitle_ = isInitialSubtitle;
     }
+    bool ProcessTitleAssociatedUpdate(float offset);
+    void ProcessTitleDragStart(float offset);
+    void SetTitleStyleByOffset(float offset);
 
-    void ProcessTittleDragStart(float offset);
-    void ProcessTittleDragUpdate(float offset);
-    void ProcessTittleDragEnd();
+    void ProcessTitleDragUpdate(float offset, float dragOffsetY);
+    void ProcessTitleDragEnd();
     
     float GetCurrentOffset()
     {
@@ -163,6 +165,14 @@ public:
         CanOverDrag_ = CanOverDrag;
     }
 
+    void SetTitleScaleChange(bool isTitleScaleChange)
+    {
+        isTitleScaleChange_ = isTitleScaleChange;
+    }
+
+    void ResetAssociatedScroll();
+    bool UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node);
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -173,7 +183,6 @@ private:
     void SpringAnimation(float startPos, float endPos);
     void UpdateScaleByDragOverDragOffset(float overDragOffset);
     void AnimateTo(float offset);
-    void SetTitleStyleByOffset(float offset);
 
     void OnAttachToFrameNode() override;
 
@@ -231,8 +240,16 @@ private:
     bool isInitialSubtitle_ = true;
     float minTitleHeight_ = 0.0f;
     bool CanOverDrag_ = true;
-
+    bool isOverDrag_ = true;
+    bool isTitleScaleChange_ = true;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
+
+    bool enableAssociatedScroll_ = false;
+    float associatedScrollOffset_ = 0.0f;
+    bool dragScrolling_ = false;
+    bool associatedScrollOverSize_ = false;
+    float associatedScrollOffsetMax_ = 0.0f;
+    RefPtr<FrameNode> associatedScrollNode_;
 };
 
 } // namespace OHOS::Ace::NG

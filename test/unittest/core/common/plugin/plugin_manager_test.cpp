@@ -152,7 +152,7 @@ HWTEST_F(PluginManagerTest, GetPluginSubContainerId001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. Get Plugin SubContainerId.
-     * @tc.expected: step3. When the Map is not empty ,get the id by add to the last PluginSubContianerId.
+     * @tc.expected: step3. When the Map is not empty ,get the id by add to the last PluginSubContainerId.
      */
     WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>();
     RefPtr<PluginSubContainer> pluginSubContainer = AceType::MakeRefPtr<PluginSubContainer>(context.Upgrade());

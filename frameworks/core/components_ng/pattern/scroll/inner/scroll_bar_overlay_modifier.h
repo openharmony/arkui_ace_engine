@@ -54,26 +54,17 @@ class ScrollBarOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(ScrollBarOverlayModifier, OverlayModifier)
 
 public:
-    ScrollBarOverlayModifier();
+    ScrollBarOverlayModifier(const OffsetF& barOffset = OffsetF(), const SizeF& barSize = SizeF());
 
     ~ScrollBarOverlayModifier() override = default;
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void StartOpacityAnimation(OpacityAnimationType opacityAnimationType);
+    void SetOffset(const OffsetF& barOffset);
 
-    void SetRect(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset, const OffsetF& bgOffset,
-        HoverAnimationType hoverAnimationType);
+    void SetSize(const SizeF& barSize);
 
-    void SetOffset(OffsetF fgOffset, OffsetF bgOffset);
-
-    void SetFgColor(Color fgColor);
-
-    void SetBgColor(Color bgColor);
-
-    void StopBarOpacityAnimation();
-
-    void StopBarHoverAnimation();
+    void SetRect(const Rect& barRect);
 
     HoverAnimationType GetHoverAnimatingType() const
     {
@@ -97,33 +88,59 @@ public:
 
     void SetOpacity(uint8_t opacity)
     {
-        CHECK_NULL_VOID_NOLOG(opacity_);
+        CHECK_NULL_VOID(opacity_);
         opacity_->Set(opacity);
     }
 
     uint8_t GetOpacity() const
     {
-        CHECK_NULL_RETURN_NOLOG(opacity_, 0);
+        CHECK_NULL_RETURN(opacity_, 0);
         return opacity_->Get();
     }
+
+    void StartBarAnimation(HoverAnimationType hoverAnimationType, OpacityAnimationType opacityAnimationType,
+        bool needAdaptAnimation, const Rect& barRect);
+
+    void StartOpacityAnimation(OpacityAnimationType opacityAnimationType);
+
+    void StartHoverAnimation(const Rect& barRect, HoverAnimationType hoverAnimationType);
+
+    void StartAdaptAnimation(const Rect& barRect, bool needAdaptAnimation);
+
+    void StopOpacityAnimation();
+
+    void StopHoverAnimation();
+
+    void StopAdaptAnimation();
+
+    void SetMainModeSize(const Size& size);
+
+    void SetCrossModeSize(const Size& size);
+
+    void SetMainModeOffset(const Offset& offset);
+
+    void SetCrossModeOffset(const Offset& offset);
+
+    void SetBarColor(Color barColor);
 
 private:
     // Animatable
     RefPtr<AnimatablePropertyUint8> opacity_;
-    RefPtr<AnimatablePropertyOffsetF> fgOffset_;
-    RefPtr<AnimatablePropertySizeF> fgSize_;
-    RefPtr<AnimatablePropertyOffsetF> bgOffset_;
-    RefPtr<AnimatablePropertySizeF> bgSize_;
+    RefPtr<AnimatablePropertyFloat> barWidth_;
+    RefPtr<AnimatablePropertyFloat> barHeight_;
+    RefPtr<AnimatablePropertyFloat> barX_;
+    RefPtr<AnimatablePropertyFloat> barY_;
 
     // no Animatable
-    RefPtr<PropertyColor> fgColor_;
-    RefPtr<PropertyColor> bgColor_;
+    RefPtr<PropertyColor> barColor_;
     ACE_DISALLOW_COPY_AND_MOVE(ScrollBarOverlayModifier);
 
     std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
     std::shared_ptr<AnimationUtils::Animation> opacityAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> adaptAnimation_;
     HoverAnimationType hoverAnimatingType_ = HoverAnimationType::NONE;
     OpacityAnimationType opacityAnimatingType_ = OpacityAnimationType::NONE;
+    PositionMode positionMode_ = PositionMode::RIGHT;
 };
 } // namespace OHOS::Ace::NG
 

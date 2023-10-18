@@ -45,15 +45,10 @@ void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
         }
         colors[trackInfo.gradient.GetColors().size()] = trackInfo.gradient.GetColors()[0].GetColor().GetValue();
         float position[] = { COLOR_STOP, 2.0 * COLOR_STOP, 1.0 };
-#ifdef USE_SYSTEM_SKIA
-        paint.paint()->setShader(
-            SkGradientShader::MakeSweep(trackInfo.center.GetX(), trackInfo.center.GetY(), colors, position, COLOR_NUM,
-                SkShader::kClamp_TileMode, trackInfo.startDegree, trackInfo.startDegree + 360, true, nullptr));
-#else
+
         paint.paint()->setShader(
             SkGradientShader::MakeSweep(trackInfo.center.GetX(), trackInfo.center.GetY(), colors, position, COLOR_NUM,
                 SkTileMode::kClamp, trackInfo.startDegree, trackInfo.startDegree + 360, true, nullptr));
-#endif
     } else {
         paint.paint()->setColor(trackInfo.color.GetValue());
     }

@@ -16,56 +16,46 @@
 #include "ace_forward_compatibility.h"
 
 #include <unordered_set>
+#include "hilog/log.h"
 #ifdef OHOS_PLATFORM
 #include "parameters.h"
-#include "base/log/log_wrapper.h"
-#else
-#define LOGD(fmt, ...) ((void)0)
-#define LOGI(fmt, ...) ((void)0)
 #endif
 
 namespace OHOS {
 namespace Ace {
 namespace {
+    constexpr OHOS::HiviewDFX::HiLogLabel ACE_COMPATIBLITY_LABEL = { LOG_CORE, 0xD003900, "ACE_COMPATIBLITY" };
     constexpr uint32_t ARKUI_NEW_PIPELINE_MIN_VERSION = 9;
 #if defined(WINDOWS_PLATFORM)
+    constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.dll";
     constexpr char ARKUI_LIB_NAME[] = "libace.dll";
 #elif defined(MAC_PLATFORM)
+    constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.dylib";
     constexpr char ARKUI_LIB_NAME[] = "libace.dylib";
 #elif defined(LINUX_PLATFORM)
+    constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.so";
     constexpr char ARKUI_LIB_NAME[] = "libace.so";
 #else
     constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.z.so";
     constexpr char ARKUI_LIB_NAME[] = "libace.z.so";
 #endif
-    const std::unordered_set<std::string> FORCE_OLD_PIPELINE {
-        "com.ohos.launcher",
-        "com.ohos.sceneboard"
-    };
+
+#define LOGD(fmt, ...)            \
+    (void)OHOS::HiviewDFX::HiLog::Debug(ACE_COMPATIBLITY_LABEL, "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
+
+#define LOGI(fmt, ...)            \
+    (void)OHOS::HiviewDFX::HiLog::Info(ACE_COMPATIBLITY_LABEL, "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
 } // namespace
 
-bool AceForwardCompatibility::isForceOldPipeline_ = true;
-bool AceForwardCompatibility::isNewPipeline_ = true;
-bool AceForwardCompatibility::isNewAppspawn_ = true;
-bool AceForwardCompatibility::isInited_ = false;
-
-void AceForwardCompatibility::Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool forceFullUpdate)
+void AceForwardCompatibility::Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool deprecated)
 {
-    if (FORCE_OLD_PIPELINE.find(bundleName) != FORCE_OLD_PIPELINE.end()) {
-        LOGD("AceForwardCompatibility [%{public}s] forced old pipeline", bundleName.c_str());
-        isForceOldPipeline_ = true;
-    } else {
-        LOGD("AceForwardCompatibility [%{public}s] forced old pipeline with param", bundleName.c_str());
 #ifdef OHOS_PLATFORM
-        isForceOldPipeline_ = OHOS::system::GetBoolParameter("persist.arkui.libace.og", true);
+    isForceOldPipeline_ = OHOS::system::GetBoolParameter("persist.arkui.libace.og", true);
 #else
-        isForceOldPipeline_ = true;
+    isForceOldPipeline_ = true;
 #endif
-    }
 
-    isNewPipeline_ = !isForceOldPipeline_
-                     && (apiCompatibleVersion >= ARKUI_NEW_PIPELINE_MIN_VERSION)
-                     && !forceFullUpdate;
+    isNewPipeline_ = (apiCompatibleVersion >= ARKUI_NEW_PIPELINE_MIN_VERSION) && !deprecated;
     isInited_ = true;
     LOGI("AceForwardCompatibility [%{public}s] force:%{public}d newpipe:%{public}d",
          bundleName.c_str(), isForceOldPipeline_, isNewPipeline_);
@@ -86,10 +76,15 @@ bool AceForwardCompatibility::IsForceOldPipeline()
 bool AceForwardCompatibility::IsNewPipeline()
 {
     if (isInited_) {
-        return isNewPipeline_;
+        return isNewPipeline_ && !isForceOldPipeline_;
     }
     isNewAppspawn_ = !IsForceOldPipeline();
     return !IsForceOldPipeline();
+}
+
+bool AceForwardCompatibility::IsUseNG()
+{
+    return isNewPipeline_;
 }
 
 const char* AceForwardCompatibility::GetAceLibName()
@@ -106,7 +101,7 @@ const char* AceForwardCompatibility::GetAceLibName()
 
 bool AceForwardCompatibility::PipelineChanged()
 {
-    return isNewPipeline_ != isNewAppspawn_;
+    return (isNewPipeline_ && !isForceOldPipeline_) != isNewAppspawn_;
 }
 } // namespace Ace
 } // namespace OHOS

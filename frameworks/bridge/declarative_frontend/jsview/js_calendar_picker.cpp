@@ -74,7 +74,7 @@ double GetMSByDate(const std::string& date)
     }
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto local = std::localtime(&now);
-    CHECK_NULL_RETURN_NOLOG(local, 0.0f);
+    CHECK_NULL_RETURN(local, 0.0f);
     dateTime.tm_hour = local->tm_hour;
     dateTime.tm_min = local->tm_min;
     dateTime.tm_sec = local->tm_sec;
@@ -296,7 +296,7 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
     CalcDimension dayRadius;
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
-        if (!ParseJsDimensionVp(obj->GetProperty("hintRadius"), dayRadius)) {
+        if (!ParseJsDimensionVpNG(obj->GetProperty("hintRadius"), dayRadius)) {
             dayRadius = calendarTheme->GetCalendarDayRadius();
         }
         auto selected = obj->GetProperty("selected");
@@ -511,7 +511,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     }
 
     CalcDimension radius;
-    if (ParseJsDimensionVp(paramObj->GetProperty("hintRadius"), radius)) {
+    if (ParseJsDimensionVpNG(paramObj->GetProperty("hintRadius"), radius)) {
         settingData.dayRadius = radius;
     }
 

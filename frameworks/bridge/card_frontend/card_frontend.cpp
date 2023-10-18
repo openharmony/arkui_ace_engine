@@ -48,18 +48,17 @@ bool CardFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& tas
 void CardFrontend::Destroy()
 {
     CHECK_RUN_ON(JS);
-    LOGI("CardFrontend Destroy begin.");
+    TAG_LOGI(AceLogTag::ACE_FORM, "CardFrontend Destroy begin.");
     parseJsCard_.Reset();
     delegate_.Reset();
     eventHandler_.Reset();
-    LOGI("CardFrontend Destroy end.");
 }
 
 void CardFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     auto pipelineContext = DynamicCast<PipelineContext>(context);
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(pipelineContext);
     eventHandler_ = AceType::MakeRefPtr<CardEventHandler>(delegate_);
     pipelineContext->RegisterEventHandler(eventHandler_);
     holder_.Attach(context);
@@ -77,15 +76,14 @@ void CardFrontend::ParseManifest() const
     std::call_once(onceFlag_, [this]() {
         std::string jsonContent;
         if (!Framework::GetAssetContentImpl(assetManager_, MANIFEST_JSON, jsonContent)) {
-            LOGE("RunPage parse manifest.json failed");
-            EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
+            TAG_LOGW(AceLogTag::ACE_FORM, "RunPage parse manifest.json failed");
             return;
         }
         manifestParser_->Parse(jsonContent);
     });
 }
 
-void CardFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void CardFrontend::RunPage(const std::string& url, const std::string& params)
 {
     std::string urlPath;
     if (GetFormSrc().empty()) {
@@ -100,8 +98,7 @@ void CardFrontend::RunPage(int32_t pageId, const std::string& url, const std::st
         urlPath = GetFormSrcPath(GetFormSrc(), FILE_TYPE_JSON);
     }
     if (urlPath.empty()) {
-        LOGE("fail to run page due to path url is empty");
-        EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
+        TAG_LOGW(AceLogTag::ACE_FORM, "fail to run page due to path url is empty");
         return;
     }
     taskExecutor_->PostTask(
@@ -117,7 +114,6 @@ void CardFrontend::RunPage(int32_t pageId, const std::string& url, const std::st
 std::string CardFrontend::GetFormSrcPath(const std::string& uri, const std::string& suffix) const
 {
     if (uri.empty()) {
-        LOGW("page uri is empty");
         return "";
     }
     // the case uri is starts with "/" and "/" is the mainPage
@@ -125,13 +121,12 @@ std::string CardFrontend::GetFormSrcPath(const std::string& uri, const std::stri
         return uri + suffix;
     }
 
-    LOGE("can't find this page %{private}s path", uri.c_str());
     return "";
 }
 
 RefPtr<AcePage> CardFrontend::GetPage(int32_t pageId) const
 {
-    CHECK_NULL_RETURN_NOLOG(delegate_, nullptr);
+    CHECK_NULL_RETURN(delegate_, nullptr);
     return delegate_->GetPage();
 }
 
@@ -139,6 +134,11 @@ WindowConfig& CardFrontend::GetWindowConfig()
 {
     ParseManifest();
     if (GetFormSrc().empty()) {
+        if (!manifestParser_) {
+            static WindowConfig windowConfig;
+            TAG_LOGW(AceLogTag::ACE_FORM, "manifestParser is null, return default config");
+            return windowConfig;
+        }
         return manifestParser_->GetWindowConfig();
     } else {
         return GetCardWindowConfig();
@@ -148,7 +148,7 @@ WindowConfig& CardFrontend::GetWindowConfig()
 void CardFrontend::LoadPage(const std::string& urlPath, const std::string& params)
 {
     CHECK_RUN_ON(JS);
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     auto page = delegate_->CreatePage(0, urlPath);
     page->SetPageParams(params);
     page->SetFlushCallback([weak = WeakClaim(this)](const RefPtr<Framework::JsAcePage>& page) {
@@ -160,8 +160,7 @@ void CardFrontend::LoadPage(const std::string& urlPath, const std::string& param
 
     std::string content;
     if (!Framework::GetAssetContentImpl(assetManager_, urlPath, content)) {
-        LOGE("Failed to load page");
-        EventReport::SendFormException(FormExcepType::LOAD_PAGE_ERR);
+        TAG_LOGW(AceLogTag::ACE_FORM, "Failed to load page");
         return;
     }
     ParsePage(holder_.Get(), content, params, page);
@@ -177,7 +176,7 @@ void CardFrontend::ParsePage(const RefPtr<PipelineBase>& context, const std::str
     const auto& rootTemplate = rootBody->GetValue("template");
     parseJsCard_ = AceType::MakeRefPtr<Framework::JsCardParser>(context, assetManager_, std::move(rootBody));
     if (!parseJsCard_->Initialize()) {
-        LOGE("js card parser initialize fail");
+        TAG_LOGW(AceLogTag::ACE_FORM, "js card parser initialize fail");
         return;
     }
     parseJsCard_->SetColorMode(colorMode_);
@@ -202,7 +201,7 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, jsCommands] {
             auto frontend = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(frontend);
+            CHECK_NULL_VOID(frontend);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -261,7 +260,7 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto frontend = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(frontend);
+            CHECK_NULL_VOID(frontend);
             frontend->FireFormVisiableCallback();
         },
         TaskExecutor::TaskType::UI);
@@ -283,8 +282,7 @@ void CardFrontend::UpdatePageData(const std::string& dataList)
 {
     CHECK_RUN_ON(JS);
     if (!delegate_ || !parseJsCard_) {
-        LOGE("the delegate or parseJsCard is null");
-        EventReport::SendFormException(FormExcepType::UPDATE_PAGE_ERR);
+        TAG_LOGW(AceLogTag::ACE_FORM, "the delegate or parseJsCard is null");
         return;
     }
     parseJsCard_->UpdatePageData(dataList, delegate_->GetPage());
@@ -298,13 +296,10 @@ void CardFrontend::SetColorMode(ColorMode colorMode)
             if (frontend) {
                 frontend->colorMode_ = colorMode;
                 if (!frontend->delegate_ || !frontend->parseJsCard_) {
-                    LOGI("the delegate is null");
                     return;
                 }
                 frontend->parseJsCard_->SetColorMode(frontend->colorMode_);
                 frontend->OnMediaFeatureUpdate();
-            } else {
-                LOGE("card frontend is nullptr");
             }
         },
         TaskExecutor::TaskType::JS);
@@ -317,11 +312,11 @@ void CardFrontend::RebuildAllPages()
     taskExecutor_->PostTask(
         [weakPage = WeakPtr<Framework::JsAcePage>(page)] {
             auto page = weakPage.Upgrade();
-            CHECK_NULL_VOID_NOLOG(page);
+            CHECK_NULL_VOID(page);
             auto domDoc = page->GetDomDocument();
-            CHECK_NULL_VOID_NOLOG(domDoc);
+            CHECK_NULL_VOID(domDoc);
             auto rootNode = domDoc->GetDOMNodeById(domDoc->GetRootNodeId());
-            CHECK_NULL_VOID_NOLOG(rootNode);
+            CHECK_NULL_VOID(rootNode);
             rootNode->UpdateStyleWithChildren();
         },
         TaskExecutor::TaskType::UI);

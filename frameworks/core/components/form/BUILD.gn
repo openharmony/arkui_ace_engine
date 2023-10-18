@@ -17,7 +17,6 @@ import(
 
 build_component("form") {
   sources = [
-    "flutter_render_form.cpp",
     "form_component.cpp",
     "form_element.cpp",
     "form_window.cpp",
@@ -45,9 +44,6 @@ build_component("form") {
       "//foundation/arkui/ace_engine/interfaces/inner_api/form_render/include",
     ]
     deps = [ "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render" ]
-  }
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_form.cpp" ]
   }
   rosen_sources = [ "rosen_render_form.cpp" ]
 }

@@ -52,7 +52,6 @@ namespace {
 constexpr int32_t SM_COLUMN_NUM = 4;
 constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
-const static int32_t PLATFORM_VERSION_TEN = 10;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
 
 JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventInfo)
@@ -75,7 +74,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
-            LOGE("SetOnChange tabsInfo is nullptr");
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onChange callback execute failed.");
             return;
         }
         ACE_SCORING_EVENT("Tabs.onChange");
@@ -97,7 +96,7 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
-            LOGE("SetTabBarClick tabsInfo is nullptr");
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onTabBarClick callback execute failed.");
             return;
         }
         ACE_SCORING_EVENT("Tabs.onTabBarClick");
@@ -116,7 +115,7 @@ void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
-            LOGE("ParseTabsIndexObject tabsInfo is nullptr");
+            TAG_LOGW(AceLogTag::ACE_TABS, "ParseTabsIndexObject execute onChange event failed.");
             return;
         }
         ACE_SCORING_EVENT("Tabs.onChangeEvent");
@@ -233,20 +232,18 @@ void JSTabs::SetBarMode(const JSCallbackInfo& info)
 void JSTabs::SetBarWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVpNG(info[0], width)) {
             width = Dimension(-1.0, DimensionUnit::VP);
             TabsModel::GetInstance()->SetTabBarWidth(width);
             return;
         }
-    } else if (!ParseJsDimensionVp(info[0], width)) {
-        LOGE("The arg is wrong, fail to parse dimension");
+    } else {
+        ParseJsDimensionVp(info[0], width);
     }
 
     TabsModel::GetInstance()->SetTabBarWidth(width);
@@ -255,7 +252,6 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
 void JSTabs::SetBarHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
@@ -263,14 +259,12 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
     if (info[0]->IsString() && info[0]->ToString() == "auto") {
         adaptiveHeight = true;
     } else {
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             if (!ParseJsDimensionVpNG(info[0], height)) {
                 height = Dimension(-1.0, DimensionUnit::VP);
-                LOGD("The arg is wrong, fail to parse dimension");
             }
-        } else if (!ParseJsDimensionVp(info[0], height)) {
-            LOGD("The arg is wrong, fail to parse dimension");
+        } else {
+            ParseJsDimensionVp(info[0], height);
         }
     }
     TabsModel::GetInstance()->SetBarAdaptiveHeight(adaptiveHeight);
@@ -285,7 +279,6 @@ void JSTabs::SetIndex(int32_t index)
 void JSTabs::SetAnimationDuration(float value)
 {
     if (std::isnan(value)) {
-        LOGI("The arg is nan, use default value");
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -299,10 +292,8 @@ void JSTabs::SetAnimationDuration(float value)
 void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
 {
     bool fadingEdge = true;
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
-    } else if (!ParseJsBool(info[0], fadingEdge)) {
-        LOGW("The arg is wrong, fail to parse bool");
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], fadingEdge);
     }
     TabsModel::GetInstance()->SetFadingEdge(fadingEdge);
 }
@@ -310,10 +301,8 @@ void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
 void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
 {
     bool barOverlap = false;
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
-    } else if (!ParseJsBool(info[0], barOverlap)) {
-        LOGW("The arg is wrong, fail to parse bool");
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], barOverlap);
     }
     TabsModel::GetInstance()->SetBarOverlap(barOverlap);
 }
@@ -321,10 +310,8 @@ void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
 void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
 {
     Color backgroundColor = Color::BLACK.BlendOpacity(0.0f);
-    if (info.Length() < 1) {
-        LOGD("Invalid parameters. Use default parameters instead.");
-    } else if (!ConvertFromJSValue(info[0], backgroundColor)) {
-        LOGD("Invalid parameters. Use default parameters instead.");
+    if (info.Length() > 0) {
+        ConvertFromJSValue(info[0], backgroundColor);
     }
     TabsModel::GetInstance()->SetBarBackgroundColor(backgroundColor);
 }
@@ -338,9 +325,7 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
     RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
 
-    if (info.Length() < 1) {
-        LOGW("Invalid params");
-    } else {
+    if (info.Length() > 0) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         if (info[0]->IsNull()) {
             divider.isNull = true;
@@ -407,9 +392,7 @@ void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
 void JSTabs::SetBarGridAlign(const JSCallbackInfo& info)
 {
     BarGridColumnOptions columnOption;
-    if (info.Length() < 1) {
-        LOGD("Invalid parameters. Use default parameters instead.");
-    } else if (info[0]->IsObject()) {
+    if (info.Length() > 0 && info[0]->IsObject()) {
         auto gridParam = JSRef<JSObject>::Cast(info[0]);
         auto sm = gridParam->GetProperty("sm");
         if (sm->IsNumber() && sm->ToNumber<int32_t>() >= 0 && sm->ToNumber<int32_t>() <= SM_COLUMN_NUM &&

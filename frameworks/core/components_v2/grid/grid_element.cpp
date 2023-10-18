@@ -73,7 +73,7 @@ void GridElement::PerformBuild()
     ACE_DCHECK(component); // MUST be GridComponent
     V2::ElementProxyHost::UpdateChildren(component->GetChildren());
     RefPtr<RenderGridScroll> render = AceType::DynamicCast<RenderGridScroll>(renderNode_);
-    CHECK_NULL_VOID_NOLOG(render);
+    CHECK_NULL_VOID(render);
     render->OnDataSourceUpdated(0);
 }
 

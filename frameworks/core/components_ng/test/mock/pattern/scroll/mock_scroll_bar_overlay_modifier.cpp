@@ -16,19 +16,25 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
-ScrollBarOverlayModifier::ScrollBarOverlayModifier() {}
+ScrollBarOverlayModifier::ScrollBarOverlayModifier(const OffsetF& barOffset, const SizeF& barSize) {}
 
 void ScrollBarOverlayModifier::onDraw(DrawingContext& context) {}
 
-void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacityAnimationType) {}
-
-void ScrollBarOverlayModifier::SetRect(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset,
-    const OffsetF& bgOffset, HoverAnimationType hoverAnimationType)
+void ScrollBarOverlayModifier::StartBarAnimation(HoverAnimationType hoverAnimationType,
+    OpacityAnimationType opacityAnimationType, bool needAdaptAnimation, const Rect& fgRect)
 {}
 
-void ScrollBarOverlayModifier::SetOffset(OffsetF fgOffset, OffsetF bgOffset) {}
+void ScrollBarOverlayModifier::StartAdaptAnimation(const Rect& fgRect, bool needAdaptAnimation) {}
 
-void ScrollBarOverlayModifier::SetFgColor(Color fgColor) {}
+void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacityAnimationType) {}
 
-void ScrollBarOverlayModifier::SetBgColor(Color bgColor) {}
+void ScrollBarOverlayModifier::StartHoverAnimation(const Rect& fgRect, HoverAnimationType hoverAnimationType) {}
+
+void ScrollBarOverlayModifier::SetOffset(const OffsetF& barOffset) {}
+
+void ScrollBarOverlayModifier::SetSize(const SizeF& barSize) {}
+
+void ScrollBarOverlayModifier::SetRect(const Rect& barRect) {}
+
+void ScrollBarOverlayModifier::SetBarColor(Color barColor) {}
 } // namespace OHOS::Ace::NG

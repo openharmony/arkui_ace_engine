@@ -66,7 +66,7 @@ void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
     Color qrcodeColor;
     if (!ParseJsColor(info[0], qrcodeColor)) {
         RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
-        CHECK_NULL_VOID_NOLOG(qrcodeTheme);
+        CHECK_NULL_VOID(qrcodeTheme);
         qrcodeColor = qrcodeTheme->GetQrcodeColor();
     }
     QRCodeModel::GetInstance()->SetQRCodeColor(qrcodeColor);
@@ -81,7 +81,7 @@ void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
         RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
-        CHECK_NULL_VOID_NOLOG(qrcodeTheme);
+        CHECK_NULL_VOID(qrcodeTheme);
         backgroundColor = qrcodeTheme->GetBackgroundColor();
     }
 

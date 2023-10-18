@@ -41,9 +41,10 @@ public:
     }
 
     // UI content lifeCycles
-    void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
+    void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override {}
     void Initialize(
-        OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId) override {}
+        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}
     void Background() override {}
     void Focus() override {}
@@ -52,7 +53,7 @@ public:
     void OnNewWant(const OHOS::AAFwk::Want& want) override {}
 
     // distribute
-    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override {}
+    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override {}
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
 
@@ -113,7 +114,7 @@ public:
     void CloseModalUIExtension(int32_t sessionId) override;
 
 private:
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void DestroyCallback() const;
 
 private:

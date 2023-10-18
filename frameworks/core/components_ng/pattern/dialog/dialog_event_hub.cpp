@@ -21,15 +21,15 @@ namespace OHOS::Ace::NG {
 
 void DialogEventHub::FireCancelEvent() const
 {
-    CHECK_NULL_VOID_NOLOG(onCancel_);
+    CHECK_NULL_VOID(onCancel_);
     onCancel_();
 }
 
 void DialogEventHub::FireSuccessEvent(int32_t buttonIdx)
 {
-    CHECK_NULL_VOID_NOLOG(onSuccess_);
+    CHECK_NULL_VOID(onSuccess_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetTaskExecutor()->PostTask(
         [onSuccess = onSuccess_, buttonIdx] { onSuccess(0, buttonIdx); }, TaskExecutor::TaskType::JS);
 }

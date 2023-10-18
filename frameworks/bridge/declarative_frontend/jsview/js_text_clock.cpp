@@ -61,7 +61,6 @@ const std::string DEFAULT_FORMAT = "hms";
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;
-constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 
 bool HoursWestIsValid(int32_t hoursWest)
 {
@@ -146,7 +145,7 @@ void JSTextClock::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         textColor = theme->GetTextStyle().GetTextColor();
     }
@@ -161,9 +160,9 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
@@ -172,9 +171,9 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
 
     if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
     }
 
@@ -245,11 +244,8 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
 
     std::string value;
     auto format = info[0]->ToString();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
-    if ((currentPlatformVersion >= PLATFORM_VERSION_ELEVEN) ? (format.length() == 0)
-                                                            : (format.length() == 0 || !StringUtils::IsAscii(format))) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
+            ? (format.length() == 0) : (format.length() == 0 || !StringUtils::IsAscii(format))) {
         format = DEFAULT_FORMAT;
         TextClockModel::GetInstance()->SetFormat(format);
         return;
@@ -258,7 +254,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     if (!ParseJsString(info[0], value)) {
         return;
     }
-    if (currentPlatformVersion < PLATFORM_VERSION_ELEVEN) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         std::regex pattern(
             R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
         if (!std::regex_match(value, pattern)) {

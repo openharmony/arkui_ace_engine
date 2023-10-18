@@ -38,12 +38,12 @@
 #include "core/common/text_field_manager.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/text_utils.h"
+#include "core/components/text_field/text_field_scroll_bar_controller.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/mouse_event.h"
-#include "core/components/text_field/text_field_scroll_bar_controller.h"
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
 #endif
@@ -472,7 +472,7 @@ void RenderTextField::CalculateMainScrollExtent()
     SetEstimatedHeight(GetLongestLine());
     auto len = GetEditingValue().GetWideText().length();
     if (len != 0) {
-        auto averageItemWidth = GetLongestLine() / len ;
+        auto averageItemWidth = GetLongestLine() / len;
         lastOffset_ = initIndex_ * averageItemWidth - currentOffset_;
     }
     if (scrollBar_) {
@@ -1423,7 +1423,7 @@ void RenderTextField::StopTwinkling()
     }
 }
 
-void RenderTextField::HandleSetSelection(int32_t start, int32_t end)
+void RenderTextField::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
 {
     LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
     UpdateSelection(start, end);
@@ -1984,19 +1984,37 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
             return true;
         }
         if (event.code == KeyCode::KEY_DEL) {
-            int32_t startPos = GetEditingValue().selection.GetStart();
-            int32_t endPos = GetEditingValue().selection.GetEnd();
-            Delete(startPos, startPos == endPos ? startPos - 1 : endPos);
+#if defined(PREVIEW)
+            DeleteRight();
+            return true;
+#endif
+            DeleteLeft();
             return true;
         }
         if (event.code == KeyCode::KEY_FORWARD_DEL) {
-            int32_t startPos = GetEditingValue().selection.GetStart();
-            int32_t endPos = GetEditingValue().selection.GetEnd();
-            Delete(startPos, startPos == endPos ? startPos + 1 : endPos);
+#if defined(PREVIEW)
+            DeleteLeft();
+            return true;
+#endif
+            DeleteRight();
             return true;
         }
     }
     return HandleKeyEvent(event);
+}
+
+void RenderTextField::DeleteLeft()
+{
+    int32_t startPos = GetEditingValue().selection.GetStart();
+    int32_t endPos = GetEditingValue().selection.GetEnd();
+    Delete(startPos, startPos == endPos ? startPos - 1 : endPos);
+}
+
+void RenderTextField::DeleteRight()
+{
+    int32_t startPos = GetEditingValue().selection.GetStart();
+    int32_t endPos = GetEditingValue().selection.GetEnd();
+    Delete(startPos, startPos == endPos ? startPos + 1 : endPos);
 }
 
 void RenderTextField::UpdateFocusStyles()
@@ -2263,10 +2281,10 @@ void RenderTextField::CursorMoveRight(CursorMoveSkip skip)
     MarkNeedLayout();
 }
 
-void RenderTextField::CursorMoveUp()
+bool RenderTextField::CursorMoveUp()
 {
     if (keyboard_ != TextInputType::MULTILINE) {
-        return;
+        return false;
     }
     isValueFromRemote_ = false;
     auto value = GetEditingValue();
@@ -2274,12 +2292,13 @@ void RenderTextField::CursorMoveUp()
     SetEditingValue(std::move(value));
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
+    return true;
 }
 
-void RenderTextField::CursorMoveDown()
+bool RenderTextField::CursorMoveDown()
 {
     if (keyboard_ != TextInputType::MULTILINE) {
-        return;
+        return false;
     }
     isValueFromRemote_ = false;
     auto value = GetEditingValue();
@@ -2287,6 +2306,7 @@ void RenderTextField::CursorMoveDown()
     SetEditingValue(std::move(value));
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
+    return true;
 }
 
 void RenderTextField::HandleOnBlur()
@@ -2636,6 +2656,8 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
                 // normal enter should trigger onSubmit
                 PerformAction(action_, true);
             }
+        } else if (HandleShiftPressedEvent(event)) {
+            return true;
         } else if (event.IsNumberKey()) {
             appendElement = event.ConvertCodeToString();
         } else if (event.IsLetterKey()) {
@@ -2670,13 +2692,50 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     if (appendElement.empty()) {
         return false;
     }
+    InsertValueDone(appendElement);
+    return true;
+}
+
+bool RenderTextField::HandleShiftPressedEvent(const KeyEvent& event)
+{
+    const static size_t maxKeySizes = 2;
+    wchar_t keyChar;
+    auto iterCode = KEYBOARD_SYMBOLS.find(event.code);
+    if (event.pressedCodes.size() == 1 && iterCode != KEYBOARD_SYMBOLS.end()) {
+        if (iterCode != KEYBOARD_SYMBOLS.end()) {
+            keyChar = iterCode->second;
+        } else {
+            return false;
+        }
+    } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
+                                                               event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
+        iterCode = SHIFT_KEYBOARD_SYMBOLS.find(event.code);
+        if (iterCode != SHIFT_KEYBOARD_SYMBOLS.end()) {
+            keyChar = iterCode->second;
+        } else if (KeyCode::KEY_A <= event.code && event.code <= KeyCode::KEY_Z) {
+            keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_A) + UPPER_CASE_A;
+        } else if (KeyCode::KEY_0 <= event.code && event.code <= KeyCode::KEY_9) {
+            keyChar = NUM_SYMBOLS[static_cast<int32_t>(event.code) - static_cast<int32_t>(KeyCode::KEY_0)];
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+    std::wstring wideAppendElement(1, keyChar);
+    auto appendElement = StringUtils::ToString(wideAppendElement);
+    InsertValueDone(appendElement);
+    return true;
+}
+
+void RenderTextField::InsertValueDone(const std::string& appendElement)
+{
     auto editingValue = std::make_shared<TextEditingValue>();
     editingValue->text = GetEditingValue().GetBeforeSelection() + appendElement + GetEditingValue().GetAfterSelection();
     editingValue->UpdateSelection(
         std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
     UpdateEditingValue(editingValue);
     MarkNeedLayout();
-    return true;
 }
 
 void RenderTextField::UpdateAccessibilityAttr()

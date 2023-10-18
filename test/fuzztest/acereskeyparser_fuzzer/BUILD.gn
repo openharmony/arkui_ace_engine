@@ -55,7 +55,7 @@ ohos_fuzztest("AceResKeyParserFuzzTest") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
-    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
 
     # common
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -77,13 +77,14 @@ ohos_fuzztest("AceResKeyParserFuzzTest") {
 
     # mock
     #"$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
 
     #fuzz
-    "$ace_root/test/fuzztest/acereskeyparser_fuzzer/acereskeyparser_fuzzer.cpp",
     "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
     "$ace_root/adapter/ohos/osal/system_properties.cpp",
     "$ace_root/frameworks/base/resource/ace_res_key_parser.cpp",
     "$ace_root/frameworks/core/common/flutter/flutter_asset_manager.cpp",
+    "$ace_root/test/fuzztest/acereskeyparser_fuzzer/acereskeyparser_fuzzer.cpp",
 
     #"$ace_root/frameworks/base/log/ace_trace.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",

@@ -148,7 +148,8 @@ public:
     double MeasureText(const MeasureContext& context) override;
     Size MeasureTextSize(const MeasureContext& context) override;
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode) override;
     void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
@@ -201,10 +202,6 @@ public:
     bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) override;
 
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
-
-    void GetSnapshot(const std::string& componentId,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override
-    {}
 
     void RequestAnimationFrame(const std::string& callbackId) override;
 

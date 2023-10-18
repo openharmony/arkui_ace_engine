@@ -938,7 +938,7 @@ HWTEST_F(PluginFrontendTest, RunPageTest001, TestSize.Level1)
     RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
-    pluginFrontend.RunPage(0, "url", "params");
+    pluginFrontend.RunPage("url", "params");
 }
 
 /**
@@ -958,7 +958,7 @@ HWTEST_F(PluginFrontendTest, RunPageTest002, TestSize.Level1)
      * @tc.expected: step2. Run Page fail.
      */
     EXPECT_TRUE(pluginFrontend.delegate_ == nullptr);
-    pluginFrontend.RunPage(0, "url", "params");
+    pluginFrontend.RunPage("url", "params");
 }
 
 /**

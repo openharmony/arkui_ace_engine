@@ -17,7 +17,6 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -74,8 +73,7 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     CHECK_NULL_VOID(textFieldPattern);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetShowUnderlineValue(false) ||
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::UNSPECIFIED) {
+    if (!(layoutProperty->GetShowUnderlineValue(false) && textFieldPattern->IsUnspecifiedOrTextType())) {
         return;
     }
     auto textRect = textFieldPattern->GetContentRect();
@@ -97,7 +95,7 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
 
 void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
 {
-    auto canvas = context.canvas;
+    auto& canvas = context.canvas;
     canvas.Save();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
@@ -113,12 +111,14 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(selectedColor_->Get()));
     canvas.AttachBrush(brush);
-    auto paintOffset = contentOffset_->Get() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
+    auto contentOffset = textFieldPattern->GetContentRect().GetOffset();
+    auto paintOffset = contentOffset - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
     auto textBoxes = textFieldPattern->GetTextBoxes();
     auto textRect = textFieldPattern->GetTextRect();
     bool isTextArea = textFieldPattern->IsTextArea();
     float clipRectHeight = 0.0f;
-    if (showCounter_->Get() && textFieldPattern->GetCounterParagraph()) {
+    if (showCounter_->Get() && textFieldPattern->GetCounterParagraph() &&
+        !textFieldPattern->GetIsCounterIdealHeight()) {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height() - textFieldPattern->GetCountHeight();
     } else {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
@@ -137,22 +137,22 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     // for default style, selection height is equal to the content height
     for (const auto& textBox : textBoxes) {
 #ifndef USE_GRAPHIC_TEXT_GINE
-        canvas.DrawRect(RSRect(textBox.rect_.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+        canvas.DrawRect(RSRect(textBox.rect_.GetLeft() + (isTextArea ? contentOffset.GetX() : textRect.GetX()),
             inputStyle_ == InputStyle::DEFAULT || isTextArea
-                ? (textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                ? (textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : contentOffset.GetY()))
                 : 0.0f,
-            textBox.rect_.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+            textBox.rect_.GetRight() + (isTextArea ? contentOffset.GetX() : textRect.GetX()),
             inputStyle_ == InputStyle::DEFAULT || isTextArea
-                ? (textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                ? (textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset.GetY()))
                 : textFieldPattern->GetFrameRect().Height()));
 #else
-        canvas.DrawRect(RSRect(textBox.rect.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+        canvas.DrawRect(RSRect(textBox.rect.GetLeft() + (isTextArea ? contentOffset.GetX() : textRect.GetX()),
             inputStyle_ == InputStyle::DEFAULT || isTextArea
-                ? (textBox.rect.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                ? (textBox.rect.GetTop() + (isTextArea ? textRect.GetY() : contentOffset.GetY()))
                 : 0.0f,
-            textBox.rect.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+            textBox.rect.GetRight() + (isTextArea ? contentOffset.GetX() : textRect.GetX()),
             inputStyle_ == InputStyle::DEFAULT || isTextArea
-                ? (textBox.rect.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                ? (textBox.rect.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset.GetY()))
                 : textFieldPattern->GetFrameRect().Height()));
 #endif
     }
@@ -161,7 +161,7 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
 
 void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
 {
-    auto canvas = context.canvas;
+    auto& canvas = context.canvas;
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     if (!cursorVisible_->Get() || textFieldPattern->GetSelectMode() == SelectionMode::SELECT_ALL) {
@@ -174,19 +174,19 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     canvas.AttachBrush(brush);
     auto paintOffset = contentOffset_->Get() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
     float clipRectHeight = 0.0f;
-    if (showCounter_->Get() && textFieldPattern->GetCounterParagraph()) {
+    if (showCounter_->Get() && textFieldPattern->GetCounterParagraph() &&
+        !textFieldPattern->GetIsCounterIdealHeight()) {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height() - textFieldPattern->GetCountHeight();
     } else {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
     }
     RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
         // add extra clip space for cases such as auto width
-        paintOffset.GetX() + contentSize_->Get().Width() + cursorWidth_->Get() * 2.0f, clipRectHeight);
+        paintOffset.GetX() + contentSize_->Get().Width() + cursorWidth_->Get() * 2.0f -
+        textFieldPattern->GetUnitWidth(), clipRectHeight);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetShowUnderlineValue(false)) {
-        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-    }
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto caretRect = textFieldPattern->GetCaretRect();
     canvas.DrawRect(RSRect(cursorOffset_->Get().GetX(), caretRect.GetY(),
         cursorOffset_->Get().GetX() + static_cast<float>(cursorWidth_->Get()), caretRect.GetY() + caretRect.Height()));
@@ -197,7 +197,7 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
 void TextFieldOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas)
 {
     auto edgeEffect = edgeEffect_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(edgeEffect);
+    CHECK_NULL_VOID(edgeEffect);
     edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
 }
 
@@ -205,7 +205,7 @@ void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (textFieldPattern->GetScrollBarVisible()) {
+    if (textFieldPattern->GetScrollBarVisible() && textFieldPattern->IsFocus()) {
         ScrollBarOverlayModifier::onDraw(context);
     }
 }

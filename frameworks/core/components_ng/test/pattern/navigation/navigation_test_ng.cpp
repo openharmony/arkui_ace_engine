@@ -23,6 +23,7 @@
 #define private public
 #include "base/json/json_util.h"
 #include "base/test/mock/mock_task_executor.h"
+#include "core/animation/animator.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -33,6 +34,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -60,6 +62,7 @@
 #include "core/components_ng/pattern/navrouter/navrouter_model.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -80,6 +83,15 @@ constexpr float HEIGHT = 1000.0f;
 constexpr float FLOAT_260 = 260.0f;
 constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+constexpr float DEFAULT_TITLE_BAR_OFFSET = 0.0f;
+constexpr float POSITIVE_TITLE_BAR_OFFSET = 1.0f;
+constexpr float POSITIVE_LARGE_TITLE_BAR_OFFSET = 100.0f;
+constexpr float POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX = 95.0f;
+constexpr float NEGATIVE_TITLE_BAR_OFFSET = -1.0f;
+constexpr float NEGATIVE_LARGE_TITLE_BAR_OFFSET = -100.0f;
+constexpr float MAX_TITLE_BAR_HEIGHT = 230.0f;
+constexpr float DEFAULT_TITLE_BAR_HEIGHT = 395.0f;
+constexpr float NEGATIVE_MAX_TITLE_BAR_HEIGHT = -1230.0f;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH_PER = Dimension(0.2, DimensionUnit::PERCENT);
 constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH_PER = Dimension(0.5, DimensionUnit::PERCENT);
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH_PER = Dimension(0.3, DimensionUnit::PERCENT);
@@ -1609,7 +1621,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
     auto newNavDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
     ASSERT_NE(newNavDestinationPattern, nullptr);
     preNavDestinationPattern->isOnShow_ = true;
-    // newNavDestinationPattern->isOnShow_ = true;
     ASSERT_NE(preTopNavDestination->GetEventHub<NavDestinationEventHub>(), nullptr);
 
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
@@ -2262,7 +2273,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG009, TestSize.Level1)
      * @tc.expected: check whether the properties is correct.
      */
     navigationPattern->UpdateContextRect(preTopNavDestination, navigation);
-    ASSERT_EQ(navBarProperty->propVisibility_.value(), VisibleType::INVISIBLE);
+    ASSERT_EQ(navBarProperty->propVisibility_.value(), VisibleType::VISIBLE);
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
     navigationPattern->UpdateContextRect(preTopNavDestination, navigation);
     ASSERT_EQ(navBarProperty->propVisibility_.value(), VisibleType::VISIBLE);
@@ -2567,7 +2578,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0016, TestSize.Level1)
 
 /**
  * @tc.name: NavigationModelNG0017
- * @tc.desc: Test NavigationModelNG::GetNavDestinationNodeToHandleBack
+ * @tc.desc: Test NavigationModelNG::CheckCanHandleBack
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationTestNg, NavigationModelNG0017, TestSize.Level1)
@@ -2590,15 +2601,15 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0017, TestSize.Level1)
     auto child = FrameNode::CreateFrameNode("navigationContent", 345, AceType::MakeRefPtr<ButtonPattern>());
     navigationContentNode->children_.push_back(child);
 
-    navigation->GetNavDestinationNodeToHandleBack();
+    navigation->CheckCanHandleBack();
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::AUTO);
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    navigation->GetNavDestinationNodeToHandleBack();
+    navigation->CheckCanHandleBack();
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
     auto child2 = FrameNode::CreateFrameNode("navigationContent", 346, AceType::MakeRefPtr<ButtonPattern>());
     navigationContentNode->children_.push_back(child2);
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    navigation->GetNavDestinationNodeToHandleBack();
+    navigation->CheckCanHandleBack();
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
 }
 
@@ -2674,5 +2685,387 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0018, TestSize.Level1)
 
     navigation->UpdateNavDestinationNodeWithoutMarkDirty(temp);
     ASSERT_EQ(navDestination7->eventHub_, nullptr);
+}
+
+/**
+ * @tc.name: NavigationModelNG0019
+ * @tc.desc: Test NavigationLayoutAlgorithm::IsAutoHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+
+    auto property = AceType::MakeRefPtr<LayoutProperty>();
+    std::unique_ptr<MeasureProperty> calcLayoutConstraint = std::make_unique<MeasureProperty>();
+    std::optional<CalcLength> len = CalcLength("auto");
+    calcLayoutConstraint->selfIdealSize = CalcSize(std::nullopt, len);
+    property->calcLayoutConstraint_ = std::move(calcLayoutConstraint);
+
+    auto& test = property->GetCalcLayoutConstraint();
+    ASSERT_NE(test, nullptr);
+    ASSERT_TRUE(test->selfIdealSize.has_value());
+    ASSERT_TRUE(test->selfIdealSize->Height().has_value());
+    ASSERT_NE(test->selfIdealSize->Height().value().ToString().find("auto"), std::string::npos);
+
+    NavigationLayoutAlgorithm algorithm;
+    auto result = algorithm.IsAutoHeight(property);
+    ASSERT_TRUE(result);
+
+    len = CalcLength("");
+    property->calcLayoutConstraint_->selfIdealSize = CalcSize(std::nullopt, len);
+    result = algorithm.IsAutoHeight(property);
+    ASSERT_FALSE(result);
+
+    property->calcLayoutConstraint_->selfIdealSize = CalcSize(std::nullopt, std::nullopt);
+    result = algorithm.IsAutoHeight(property);
+    ASSERT_FALSE(result);
+
+    property->calcLayoutConstraint_->selfIdealSize = std::nullopt;
+    result = algorithm.IsAutoHeight(property);
+    ASSERT_FALSE(result);
+
+    property->calcLayoutConstraint_ = nullptr;
+    result = algorithm.IsAutoHeight(property);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: NavigationModelNG0020
+ * @tc.desc: Test NavigationLayoutAlgorithm::SizeCalculationSplit
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto property = AceType::MakeRefPtr<NavigationLayoutProperty>();
+    property->propHideNavBar_ = true;
+    property->layoutConstraint_ = LayoutConstraintF();
+
+    algorithm->SizeCalculationSplit(property, SizeF());
+    property->propHideNavBar_ = false;
+    algorithm->realNavBarWidth_ = -1.0f;
+    algorithm->SizeCalculationSplit(property, SizeF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: NavigationModelNG0021
+ * @tc.desc: Test NavigationLayoutAlgorithm::CheckSizeInSplit
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto property = AceType::MakeRefPtr<NavigationLayoutProperty>();
+    property->propHideNavBar_ = true;
+    property->layoutConstraint_ = LayoutConstraintF();
+
+    algorithm->userSetMinContentFlag_ = true;
+    algorithm->userSetNavBarRangeFlag_ = false;
+    algorithm->CheckSizeInSplit(0, 0, 0, 0);
+    ASSERT_EQ(algorithm->realNavBarWidth_, 0.0f);
+
+    algorithm->CheckSizeInSplit(50, 0, 0, 0);
+    algorithm->realNavBarWidth_ = 60;
+    algorithm->CheckSizeInSplit(50, 0, 0, 0);
+    ASSERT_FALSE(algorithm->userSetNavBarRangeFlag_);
+
+    algorithm->userSetMinContentFlag_ = false;
+    algorithm->userSetNavBarRangeFlag_ = false;
+    algorithm->userSetNavBarWidthFlag_ = true;
+    algorithm->CheckSizeInSplit(50, 0, 0, 0);
+    ASSERT_FALSE(algorithm->userSetMinContentFlag_);
+
+    algorithm->userSetNavBarWidthFlag_ = false;
+    algorithm->realNavBarWidth_ = 0;
+    algorithm->CheckSizeInSplit(50, 0, 0, 0);
+    ASSERT_FALSE(algorithm->userSetNavBarWidthFlag_);
+
+    algorithm->realNavBarWidth_ = 60;
+    algorithm->userSetNavBarWidthFlag_ = false;
+    algorithm->CheckSizeInSplit(100, 0, 0, 50);
+    ASSERT_FALSE(algorithm->userSetNavBarWidthFlag_);
+
+    algorithm->userSetMinContentFlag_ = true;
+    algorithm->userSetNavBarRangeFlag_ = true;
+    algorithm->realNavBarWidth_ = 40;
+    algorithm->userSetNavBarWidthFlag_ = false;
+    algorithm->CheckSizeInSplit(100, 0, 60, 50);
+    ASSERT_TRUE(algorithm->userSetMinContentFlag_);
+}
+
+/**
+ * @tc.name: NavigationModelNG0022
+ * @tc.desc: Test NavigationLayoutAlgorithm::MeasureContentChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto contentNode = FrameNode::CreateFrameNode("content", 454, AceType::MakeRefPtr<ButtonPattern>());
+    navigation->contentNode_ = contentNode;
+    navigation->children_.push_back(contentNode);
+
+    auto layoutWrapper = navigation->CreateLayoutWrapper();
+    auto navigationLayoutProperty = AceType::MakeRefPtr<NavigationLayoutProperty>();
+
+    layoutWrapper->layoutProperty_ = navigationLayoutProperty;
+    auto contentWrapper = contentNode->CreateLayoutWrapper();
+    layoutWrapper->AppendChild(contentWrapper);
+    contentNode->children_.push_back(FrameNode::CreateFrameNode("content", 456, AceType::MakeRefPtr<ButtonPattern>()));
+
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    algorithm->MeasureContentChild(AceType::RawPtr(layoutWrapper), navigation, navigationLayoutProperty, SizeF());
+    ASSERT_FALSE(contentNode->children_.empty());
+
+    std::unique_ptr<MeasureProperty> calcLayoutConstraint = std::make_unique<MeasureProperty>();
+    std::optional<CalcLength> len = CalcLength("auto");
+    calcLayoutConstraint->selfIdealSize = CalcSize(std::nullopt, len);
+    navigationLayoutProperty->calcLayoutConstraint_ = std::move(calcLayoutConstraint);
+    algorithm->MeasureContentChild(AceType::RawPtr(layoutWrapper), navigation, navigationLayoutProperty, SizeF());
+    algorithm->MeasureNavBar(AceType::RawPtr(layoutWrapper), navigation, navigationLayoutProperty, SizeF());
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSizeF(20, 20);
+    navigationLayoutProperty->layoutConstraint_ = LayoutConstraintF();
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(contentNode->children_.empty());
+}
+
+/**
+ * @tc.name: NavigationModelNG0023
+ * @tc.desc: Test NavigationLayoutAlgorithm::SetNavigationHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto contentNode = FrameNode::CreateFrameNode("content", 454, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto layoutWrapper = navigation->CreateLayoutWrapper();
+
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    SizeF size;
+    algorithm->SetNavigationHeight(AceType::RawPtr(layoutWrapper), size);
+
+    navigationPattern->navigationStack_->Add("11", contentNode);
+    algorithm->SetNavigationHeight(AceType::RawPtr(layoutWrapper), size);
+    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::AUTO);
+
+    algorithm->navigationMode_ = NavigationMode::STACK;
+    algorithm->SetNavigationHeight(AceType::RawPtr(layoutWrapper), size);
+    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::STACK);
+
+    algorithm->navigationMode_ = NavigationMode::SPLIT;
+    algorithm->SetNavigationHeight(AceType::RawPtr(layoutWrapper), size);
+    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
+}
+
+/**
+ * @tc.name: NavigationModelNG0025
+ * @tc.desc: Test NavBarPattern::OnWindowSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto contentNode = FrameNode::CreateFrameNode("content", 454, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBar", 300, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBar, nullptr);
+    auto navBarPattern = navBar->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarPattern, nullptr);
+    navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RESIZE);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 301, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_EQ(titleBarNode->menu_, nullptr);
+    navBar->titleBarNode_ = titleBarNode;
+    navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RESIZE);
+    auto menu = FrameNode::CreateFrameNode("menu", 302, AceType::MakeRefPtr<ButtonPattern>());
+    auto barItem = AceType::MakeRefPtr<BarItemNode>("barItem", 303);
+    menu->children_.push_back(barItem);
+    titleBarNode->menu_ = menu;
+    barItem->isMoreItemNode_ = true;
+    navBarPattern->isTitleMenuNodeShowing_ = false;
+    navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RECOVER);
+    ASSERT_TRUE(barItem->isMoreItemNode_);
+    barItem->isMoreItemNode_ = false;
+    navBarPattern->isTitleMenuNodeShowing_ = true;
+    navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RECOVER);
+    ASSERT_FALSE(barItem->isMoreItemNode_);
+}
+
+/**
+ * @tc.name: TitleBarPatternUpdateAssociatedScrollOffsetTest001
+ * @tc.desc: Test TitleBarPattern::UpdateAssociatedScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
+    titleBarPattern->enableAssociatedScroll_ = true;
+    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET, frameNode);
+    EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
+
+    titleBarPattern->enableAssociatedScroll_ = false;
+    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET, frameNode);
+    EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
+
+    titleBarPattern->enableAssociatedScroll_ = true;
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_LARGE_TITLE_BAR_OFFSET, frameNode);
+    EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
+
+    titleBarPattern->enableAssociatedScroll_ = true;
+    titleBarPattern->dragScrolling_ = true;
+    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
+    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
+    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET, frameNode);
+    EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
+
+    titleBarPattern->enableAssociatedScroll_ = true;
+    titleBarPattern->dragScrolling_ = true;
+    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
+    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET, frameNode);
+    EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
+}
+
+/**
+ * @tc.name: TitleBarPatternUpdateAssociatedScrollOffsetTest002
+ * @tc.desc: Test TitleBarPattern::UpdateAssociatedScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
+
+    titleBarPattern->enableAssociatedScroll_ = true;
+    titleBarPattern->dragScrolling_ = false;
+    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
+    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
+    titleBarPattern->defaultTitleBarHeight_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
+    titleBarPattern->maxTitleBarHeight_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
+    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET, frameNode);
+    EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
+
+    titleBarPattern->enableAssociatedScroll_ = true;
+    titleBarPattern->dragScrolling_ = false;
+    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
+    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
+    titleBarPattern->maxTitleBarHeight_ = MAX_TITLE_BAR_HEIGHT;
+    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET, frameNode);
+    EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
+}
+
+/**
+ * @tc.name: TitleBarPatternUpdateAssociatedScrollOffsetTest003
+ * @tc.desc: Test TitleBarPattern::UpdateAssociatedScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
+
+    titleBarPattern->enableAssociatedScroll_ = true;
+    titleBarPattern->dragScrolling_ = false;
+    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
+    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
+    titleBarPattern->defaultTitleBarHeight_ = DEFAULT_TITLE_BAR_HEIGHT;
+    titleBarPattern->maxTitleBarHeight_ = NEGATIVE_MAX_TITLE_BAR_HEIGHT;
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET, frameNode);
+    EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
+
+    titleBarPattern->enableAssociatedScroll_ = true;
+    titleBarPattern->dragScrolling_ = false;
+    titleBarPattern->associatedScrollOverSize_ = true;
+    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
+    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
+    titleBarPattern->maxTitleBarHeight_ = NEGATIVE_MAX_TITLE_BAR_HEIGHT;
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET, frameNode);
+    EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
+}
+
+/**
+ * @tc.name: TitleBarPatternProcessTitleAssociatedUpdateTest101
+ * @tc.desc: Test TitleBarPattern::ProcessTitleAssociatedUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, TitleBarPatternProcessTitleAssociatedUpdateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    titleBarPattern->AttachToFrameNode(frameNode);
+    titleBarPattern->ProcessTitleAssociatedUpdate(NEGATIVE_TITLE_BAR_OFFSET);
+    EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
 }
 } // namespace OHOS::Ace::NG

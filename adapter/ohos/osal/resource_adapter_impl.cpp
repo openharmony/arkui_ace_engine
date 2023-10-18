@@ -91,15 +91,16 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_FORM,
     THEME_PATTERN_SIDE_BAR,
     THEME_PATTERN_RICH_EDITOR,
-    THEME_PATTERN_PATTERN_LOCK
+    THEME_PATTERN_PATTERN_LOCK,
+    THEME_PATTERN_GAUGE
 };
 
 bool IsDirExist(const std::string& path)
 {
     char realPath[PATH_MAX] = { 0x00 };
-    CHECK_NULL_RETURN_NOLOG(realpath(path.c_str(), realPath), false);
+    CHECK_NULL_RETURN(realpath(path.c_str(), realPath), false);
     DIR* dir = opendir(realPath);
-    CHECK_NULL_RETURN_NOLOG(dir, false);
+    CHECK_NULL_RETURN(dir, false);
     closedir(dir);
     return true;
 }
@@ -134,11 +135,14 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     std::shared_ptr<Global::Resource::ResourceManager> newResMgr(Global::Resource::CreateResourceManager());
     std::string resIndexPath = hapPath.empty() ? (resPath + "resources.index") : hapPath;
     auto resRet = newResMgr->AddResource(resIndexPath.c_str());
-    auto configRet = newResMgr->UpdateResConfig(*resConfig);
-    LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}f, "
-         "device=%{public}d, colorMode=%{public}d, inputDevice=%{public}d",
-        resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
-        resConfig->GetColorMode(), resConfig->GetInputDevice());
+
+    if (resConfig != nullptr) {
+        auto configRet = newResMgr->UpdateResConfig(*resConfig);
+        LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}f, "
+             "device=%{public}d, colorMode=%{public}d, inputDevice=%{public}d",
+            resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
+            resConfig->GetColorMode(), resConfig->GetInputDevice());
+    }
     sysResourceManager_ = newResMgr;
     {
         std::unique_lock<std::shared_mutex> lock(resourceMutex_);
@@ -155,11 +159,13 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
          "colorMode=%{public}d, inputDevice=%{public}d",
         resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(), resConfig->GetColorMode(),
         resConfig->GetInputDevice());
-    if (sysResourceManager_) {
+    if (sysResourceManager_ && resConfig != nullptr) {
         sysResourceManager_->UpdateResConfig(*resConfig);
     }
     for (auto& resMgr : resourceManagers_) {
-        resMgr.second->UpdateResConfig(*resConfig);
+        if (resConfig != nullptr) {
+            resMgr.second->UpdateResConfig(*resConfig);
+        }
     }
     resConfig_ = resConfig;
 }
@@ -204,7 +210,7 @@ Color ResourceAdapterImpl::GetColor(uint32_t resId)
 {
     uint32_t result = 0;
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, Color(result));
+    CHECK_NULL_RETURN(manager, Color(result));
     auto state = manager->GetColorById(resId, result);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetColor error, id=%{public}u", resId);
@@ -217,7 +223,7 @@ Color ResourceAdapterImpl::GetColorByName(const std::string& resName)
     uint32_t result = 0;
     auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, Color(result));
+    CHECK_NULL_RETURN(manager, Color(result));
     auto state = manager->GetColorByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetColor error, resName=%{public}s", resName.c_str());
@@ -252,7 +258,7 @@ Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
     }
 
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, Dimension(static_cast<double>(dimensionFloat)));
+    CHECK_NULL_RETURN(manager, Dimension(static_cast<double>(dimensionFloat)));
     auto state = manager->GetFloatById(resId, dimensionFloat);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetDimension error, id=%{public}u", resId);
@@ -266,7 +272,7 @@ Dimension ResourceAdapterImpl::GetDimensionByName(const std::string& resName)
     float dimensionFloat = 0.0f;
     auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, Dimension());
+    CHECK_NULL_RETURN(manager, Dimension());
     std::string unit;
     auto state = manager->GetFloatByName(actualResName.c_str(), dimensionFloat, unit);
     if (state != Global::Resource::SUCCESS) {
@@ -279,7 +285,7 @@ std::string ResourceAdapterImpl::GetString(uint32_t resId)
 {
     std::string strResult = "";
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, strResult);
+    CHECK_NULL_RETURN(manager, strResult);
     auto state = manager->GetStringById(resId, strResult);
     if (state != Global::Resource::SUCCESS) {
         LOGD("GetString error, id=%{public}u", resId);
@@ -292,7 +298,7 @@ std::string ResourceAdapterImpl::GetStringByName(const std::string& resName)
     std::string strResult = "";
     auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, strResult);
+    CHECK_NULL_RETURN(manager, strResult);
     auto state = manager->GetStringByName(actualResName.c_str(), strResult);
     if (state != Global::Resource::SUCCESS) {
         LOGD("GetString error, resName=%{public}s", resName.c_str());
@@ -304,7 +310,7 @@ std::string ResourceAdapterImpl::GetPluralString(uint32_t resId, int quantity)
 {
     std::string strResult = "";
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, strResult);
+    CHECK_NULL_RETURN(manager, strResult);
     auto state = manager->GetPluralStringById(resId, quantity, strResult);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetPluralString error, id=%{public}u", resId);
@@ -317,7 +323,7 @@ std::string ResourceAdapterImpl::GetPluralStringByName(const std::string& resNam
     std::string strResult = "";
     auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, strResult);
+    CHECK_NULL_RETURN(manager, strResult);
     auto state = manager->GetPluralStringByName(actualResName.c_str(), quantity, strResult);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetPluralString error, resName=%{public}s", resName.c_str());
@@ -329,7 +335,7 @@ std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) con
 {
     std::vector<std::string> strResults;
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, strResults);
+    CHECK_NULL_RETURN(manager, strResults);
     auto state = manager->GetStringArrayById(resId, strResults);
     if (state != Global::Resource::SUCCESS) {
         LOGD("GetStringArray error, id=%{public}u", resId);
@@ -342,7 +348,7 @@ std::vector<std::string> ResourceAdapterImpl::GetStringArrayByName(const std::st
     std::vector<std::string> strResults;
     auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, strResults);
+    CHECK_NULL_RETURN(manager, strResults);
     auto state = manager->GetStringArrayByName(actualResName.c_str(), strResults);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetStringArray error, resName=%{public}s", resName.c_str());
@@ -354,7 +360,7 @@ double ResourceAdapterImpl::GetDouble(uint32_t resId)
 {
     float result = 0.0f;
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, static_cast<double>(result));
+    CHECK_NULL_RETURN(manager, static_cast<double>(result));
     auto state = manager->GetFloatById(resId, result);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetDouble error, id=%{public}u", resId);
@@ -367,7 +373,7 @@ double ResourceAdapterImpl::GetDoubleByName(const std::string& resName)
     float result = 0.0f;
     auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, static_cast<double>(result));
+    CHECK_NULL_RETURN(manager, static_cast<double>(result));
     auto state = manager->GetFloatByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetDouble error, resName=%{public}s", resName.c_str());
@@ -379,7 +385,7 @@ int32_t ResourceAdapterImpl::GetInt(uint32_t resId)
 {
     int32_t result = 0;
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, result);
+    CHECK_NULL_RETURN(manager, result);
     auto state = manager->GetIntegerById(resId, result);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetInt error, id=%{public}u", resId);
@@ -392,7 +398,7 @@ int32_t ResourceAdapterImpl::GetIntByName(const std::string& resName)
     int32_t result = 0;
     auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, result);
+    CHECK_NULL_RETURN(manager, result);
     auto state = manager->GetIntegerByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetInt error, resName=%{public}s", resName.c_str());
@@ -424,7 +430,7 @@ std::vector<uint32_t> ResourceAdapterImpl::GetIntArrayByName(const std::string& 
     std::vector<int> intVectorResult;
     auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, {});
+    CHECK_NULL_RETURN(manager, {});
     auto state = manager->GetIntArrayByName(actualResName.c_str(), intVectorResult);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetIntArray error, resName=%{public}s", resName.c_str());
@@ -440,7 +446,7 @@ bool ResourceAdapterImpl::GetBoolean(uint32_t resId) const
 {
     bool result = false;
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, result);
+    CHECK_NULL_RETURN(manager, result);
     auto state = manager->GetBooleanById(resId, result);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetBoolean error, id=%{public}u", resId);
@@ -453,7 +459,7 @@ bool ResourceAdapterImpl::GetBooleanByName(const std::string& resName) const
     bool result = false;
     auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, result);
+    CHECK_NULL_RETURN(manager, result);
     auto state = manager->GetBooleanByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetBoolean error, resName=%{public}s", resName.c_str());
@@ -465,7 +471,7 @@ std::shared_ptr<Media::PixelMap> ResourceAdapterImpl::GetPixelMap(uint32_t resId
 {
     auto manager = GetResourceManager();
 
-    CHECK_NULL_RETURN_NOLOG(manager, nullptr);
+    CHECK_NULL_RETURN(manager, nullptr);
     Napi::DrawableDescriptor::DrawableType drawableType;
     Global::Resource::RState state;
     auto drawableDescriptor = Napi::DrawableDescriptorFactory::Create(resId, resourceManager_, state, drawableType, 0);
@@ -481,7 +487,7 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
 {
     std::string mediaPath = "";
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, "");
+    CHECK_NULL_RETURN(manager, "");
     auto state = manager->GetMediaById(resId, mediaPath);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetMediaById error, id=%{public}u, errorCode=%{public}u", resId, state);
@@ -504,7 +510,7 @@ std::string ResourceAdapterImpl::GetMediaPathByName(const std::string& resName)
     auto actualResName = GetActualResourceName(resName);
     {
         auto manager = GetResourceManager();
-        CHECK_NULL_RETURN_NOLOG(manager, "");
+        CHECK_NULL_RETURN(manager, "");
         auto state = manager->GetMediaByName(actualResName.c_str(), mediaPath);
         if (state != Global::Resource::SUCCESS) {
             LOGE("GetMediaPathByName error, resName=%{public}s, errorCode=%{public}u", resName.c_str(), state);
@@ -528,7 +534,7 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
     if (!packagePathStr_.empty()) {
         std::string outPath;
         auto manager = GetResourceManager();
-        CHECK_NULL_RETURN_NOLOG(manager, "");
+        CHECK_NULL_RETURN(manager, "");
         // Adapt to the input like: "file:///index.html?a=1", before the new solution comes.
         auto it = std::find_if(fileName.begin(), fileName.end(), [](char c) { return (c == '#') || (c == '?'); });
         std::string params;
@@ -550,7 +556,7 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
 bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
 {
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, false);
+    CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetRawFileFromHap(rawFile, len, dest);
     if (state != Global::Resource::SUCCESS || !dest) {
         LOGW("GetRawFileFromHap error, raw filename:%{public}s, error:%{public}u", rawFile.c_str(), state);
@@ -564,7 +570,7 @@ bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len
 {
     UpdateResourceManager(bundleName, moduleName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, false);
+    CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetRawFileFromHap(rawFile, len, dest);
     if (state != Global::Resource::SUCCESS || !dest) {
         LOGW("GetRawFileFromHap error, raw filename:%{public}s, bundleName:%{public}s, moduleName:%{public}s, "
@@ -578,7 +584,7 @@ bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len
 bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest)
 {
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, false);
+    CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetMediaDataById(resId, len, dest);
     if (state != Global::Resource::SUCCESS) {
         LOGW("GetMediaDataById error, id=%{public}u, error:%{public}u", resId, state);
@@ -592,7 +598,7 @@ bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_
 {
     UpdateResourceManager(bundleName, moduleName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, false);
+    CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetMediaDataById(resId, len, dest);
     if (state != Global::Resource::SUCCESS) {
         LOGW("GetMediaDataById error, id=%{public}u, bundleName:%{public}s, moduleName:%{public}s, error:%{public}u",
@@ -605,7 +611,7 @@ bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_
 bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest)
 {
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, false);
+    CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetMediaDataByName(resName.c_str(), len, dest);
     if (state != Global::Resource::SUCCESS) {
         LOGW("GetMediaDataByName error, res=%{public}s, error:%{public}u", resName.c_str(), state);
@@ -619,7 +625,7 @@ bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, 
 {
     UpdateResourceManager(bundleName, moduleName);
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, false);
+    CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetMediaDataByName(resName.c_str(), len, dest);
     if (state != Global::Resource::SUCCESS) {
         LOGW("GetMediaDataByName error, res=%{public}s, bundleName:%{public}s, moduleName:%{public}s, error:%{public}u",
@@ -650,7 +656,7 @@ void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, c
         CHECK_NULL_VOID(context);
         resourceManagers_[{ bundleName, moduleName }] = context->GetResourceManager();
         resourceManager_ = context->GetResourceManager();
-        if (resourceManager_) {
+        if (resourceManager_ && resConfig_ != nullptr) {
             resourceManager_->UpdateResConfig(*resConfig_);
         }
     }
@@ -661,7 +667,7 @@ bool ResourceAdapterImpl::GetRawFileDescription(
 {
     OHOS::Global::Resource::ResourceManager::RawFileDescriptor descriptor;
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, false);
+    CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetRawFileDescriptorFromHap(rawfileName, descriptor);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetRawfileDescription error, rawfileName=%{public}s, error:%{public}u", rawfileName.c_str(), state);
@@ -676,7 +682,7 @@ bool ResourceAdapterImpl::GetRawFileDescription(
 bool ResourceAdapterImpl::GetMediaById(const int32_t& resId, std::string& mediaPath) const
 {
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN_NOLOG(manager, false);
+    CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetMediaById(resId, mediaPath);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetMediaById error, resId=%{public}d, error:%{public}u", resId, state);

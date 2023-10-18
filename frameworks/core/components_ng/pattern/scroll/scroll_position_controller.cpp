@@ -27,9 +27,9 @@ namespace OHOS::Ace::NG {
 void ScrollPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(pattern);
+    CHECK_NULL_VOID(pattern);
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    CHECK_NULL_VOID_NOLOG(scrollPattern);
+    CHECK_NULL_VOID(scrollPattern);
     LOGW("jumpTo is not supported now");
 }
 
@@ -45,9 +45,9 @@ void ScrollPositionController::ScrollBy(double pixelX, double pixelY, bool smoot
 double ScrollPositionController::GetCurrentPosition() const
 {
     auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(pattern, 0.0);
+    CHECK_NULL_RETURN(pattern, 0.0);
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    CHECK_NULL_RETURN_NOLOG(scrollPattern, 0.0);
+    CHECK_NULL_RETURN(scrollPattern, 0.0);
     return scrollPattern->GetCurrentPosition();
 }
 
@@ -74,7 +74,7 @@ void ScrollPositionController::ScrollPage(bool reverse, bool smooth)
 bool ScrollPositionController::IsAtEnd() const
 {
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scroll_.Upgrade());
-    CHECK_NULL_RETURN_NOLOG(scrollPattern, false);
+    CHECK_NULL_RETURN(scrollPattern, false);
     return scrollPattern->IsAtBottom();
 }
 } // namespace OHOS::Ace::NG

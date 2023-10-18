@@ -55,7 +55,6 @@ SearchModel* SearchModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-const static int32_t PLATFORM_VERSION_TEN = 10;
 namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 } // namespace
@@ -182,7 +181,7 @@ void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SearchTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     std::string buttonValue;
     if (!ParseJsString(info[0], buttonValue)) {
         return;
@@ -220,7 +219,7 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
         auto theme = GetTheme<SearchTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
 
         // set icon size
         CalcDimension size;
@@ -270,7 +269,7 @@ void JSSearch::SetCancelButton(const JSCallbackInfo& info)
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     // set style
     std::string styleStr;
@@ -337,7 +336,7 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
 void JSSearch::SetTextColor(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SearchTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
@@ -352,7 +351,7 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
         auto textFieldTheme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID_NOLOG(textFieldTheme);
+        CHECK_NULL_VOID(textFieldTheme);
 
         // set caret width
         CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
@@ -387,19 +386,22 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(theme);
+    auto themeFontSize = theme->GetFontSize();
     Font font;
     auto fontSize = param->GetProperty("size");
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
-        font.fontSize = Dimension(-1);
+        font.fontSize = themeFontSize;
     } else {
-        auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
-                                  PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
+        auto versionTenOrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
         CalcDimension size;
-        if (versionTenOrLarger ? !ParseJsDimensionVpNG(fontSize, size) : !ParseJsDimensionVp(fontSize, size) ||
-            !ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-            font.fontSize = Dimension(-1);
-        } else {
+        if ((versionTenOrLarger ? ParseJsDimensionVpNG(fontSize, size) : ParseJsDimensionVp(fontSize, size)) &&
+            size.Unit() != DimensionUnit::PERCENT) {
+            ParseJsDimensionFp(fontSize, size);
             font.fontSize = size;
+        } else {
+            font.fontSize = themeFontSize;
         }
     }
 
@@ -434,14 +436,17 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(theme);
+    auto themeFontSize = theme->GetFontSize();
     Font font;
     auto fontSize = param->GetProperty("size");
-    CalcDimension size = Dimension(-1);
+    CalcDimension size = themeFontSize;
     if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
         GreatOrEqual(size.Value(), 0.0)) {
         ParseJsDimensionFp(fontSize, size);
     } else {
-        size = Dimension(-1);
+        size = themeFontSize;
     }
     font.fontSize = size;
 
@@ -580,8 +585,7 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
     CalcDimension value;
-    auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
-                              PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
+    auto versionTenOrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (versionTenOrLarger ? !ParseJsDimensionVpNG(info[0], value) : !ParseJsDimensionVp(info[0], value)) {
         LOGE("The arg is wrong, it is supposed to be a number arguments");
         return;
@@ -616,6 +620,10 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
 void JSSearch::SetCopyOption(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
     auto copyOptions = CopyOptions::None;

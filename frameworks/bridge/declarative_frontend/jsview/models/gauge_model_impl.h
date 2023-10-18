@@ -28,12 +28,20 @@ public:
     void SetEndAngle(float endAngle) override;
     void SetColors(const std::vector<Color>& colors, const std::vector<float>& values) override;
     void SetStrokeWidth(const Dimension& strokeWidth) override;
-    void SetLabelMarkedText(std::string labelTextString) override;
-    void SetMarkedTextColor(const Color color) override;
+    void SetLabelMarkedText(const std::string labelTextString) override;
+    void SetMarkedTextColor(const Color& color) override;
     void SetGradientColors(const std::vector<NG::ColorStopArray>& colors, const std::vector<float>& values,
         const NG::GaugeType& type) override
     {}
+    void SetDescription(const RefPtr<AceType>& customNode) override {}
+    void SetIsShowLimitValue(bool isShowLimitValue) override {}
+    void SetIsShowDescription(bool isShowDescription) override {}
     void SetShadowOptions(const NG::GaugeShadowOptions& shadowOptions) override {}
+    void SetIsShowIndicator(bool isShowIndicator) override {}
+    void SetIndicatorIconPath(
+        const std::string& iconPath, const std::string& bundleName, const std::string& moduleName) override
+    {}
+    void SetIndicatorSpace(const Dimension& space) override {}
 };
 
 } // namespace OHOS::Ace::Framework

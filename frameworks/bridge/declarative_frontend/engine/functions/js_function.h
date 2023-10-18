@@ -123,6 +123,36 @@ protected:
 };
 
 template<class T, int32_t ARGC = 0>
+class ACE_EXPORT JsCitedEventFunction : public JsFunction {
+    DECLARE_ACE_TYPE(JsCitedEventFunction, JsFunction);
+
+public:
+    using ParseFunc = std::function<JSRef<JSVal>(T&)>;
+    JsCitedEventFunction() = delete;
+    JsCitedEventFunction(const JSRef<JSFunc>& jsFunction, ParseFunc parser)
+        : JsFunction(JSRef<JSObject>(), jsFunction), parser_(parser)
+    {}
+    ~JsCitedEventFunction() override = default;
+
+    void Execute() override
+    {
+        JsFunction::ExecuteJS();
+    }
+
+    void Execute(T& eventInfo)
+    {
+        JSRef<JSVal> param;
+        if (parser_) {
+            param = parser_(eventInfo);
+        }
+        JsFunction::ExecuteJS(ARGC, &param);
+    }
+
+private:
+    ParseFunc parser_;
+};
+
+template<class T, int32_t ARGC = 0>
 class ACE_EXPORT JsEventFunction : public JsFunction {
     DECLARE_ACE_TYPE(JsEventFunction, JsFunction);
 

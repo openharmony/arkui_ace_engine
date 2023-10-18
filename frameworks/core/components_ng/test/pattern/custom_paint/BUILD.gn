@@ -29,7 +29,6 @@ ohos_unittest("custom_paint_test_ng") {
   ]
 
   deps = [
-    "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "//third_party/googletest:gmock_main",

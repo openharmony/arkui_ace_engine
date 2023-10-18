@@ -29,7 +29,9 @@ bool FormRenderGroup(const std::string data, size_t size)
 {
     std::shared_ptr<OHOS::AbilityRuntime::Context> context;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime;
-    auto fromGroup = FormRendererGroup::Create(context, runtime);
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create();
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto fromGroup = FormRendererGroup::Create(context, runtime, eventHandler);
     AAFwk::Want want;
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     fromGroup->AddForm(want, formJsInfo);

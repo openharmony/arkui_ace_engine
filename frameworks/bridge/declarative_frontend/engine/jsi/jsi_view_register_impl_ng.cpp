@@ -22,6 +22,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -52,6 +53,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
@@ -70,6 +72,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_indexer.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.h"
@@ -117,6 +120,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
@@ -305,6 +309,32 @@ void JSBindLibs(const std::string moduleName, const std::string exportModuleName
 }
 #endif
 
+void JsUINodeRegisterCleanUp(BindingTarget globalObj)
+{
+    // globalObj is panda::Local<panda::ObjectRef>
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("uiNodeRegisterCleanUpFunction");
+    const JSRef<JSVal> globalCleanUpFunc = globalObject->GetProperty("globalRegisterCleanUpFunction");
+
+    if (globalFuncVal->IsFunction()) {
+        LOGD("JsUINodeRegisterCleanUp NG is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(globalFuncVal);
+        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
+            jsFunc->Call(globalObject);
+        };
+        ElementRegister::GetInstance()->RegisterJSUINodeRegisterCallbackFunc(callback);
+    } else if (globalCleanUpFunc->IsFunction()) {
+        LOGD("globalRegisterCleanUpFunction NG is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(globalCleanUpFunc);
+        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
+            jsFunc->Call(globalObject);
+        };
+        ElementRegister::GetInstance()->RegisterJSUINodeRegisterGlobalFunc(callback);
+    } else {
+        LOGE("Unable to register JS functions for the unregistration of Element ID in NG. Internal error!");
+    }
+}
+
 void JsBindViews(BindingTarget globalObj)
 {
     JSViewAbstract::JSBind(globalObj);
@@ -321,6 +351,7 @@ void JsBindViews(BindingTarget globalObj)
     JSList::JSBind(globalObj);
     JSListItem::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
+    JSStateMgmtProfiler::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
@@ -352,7 +383,10 @@ void JsBindViews(BindingTarget globalObj)
     JSPlugin::JSBind(globalObj);
 #endif
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     JSRichText::JSBind(globalObj);
+#endif
+    JSWeb::JSBind(globalObj);
 #endif
 #ifdef REMOTE_WINDOW_SUPPORTED
     JSRemoteWindow::JSBind(globalObj);
@@ -464,6 +498,9 @@ void JsBindViews(BindingTarget globalObj)
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
+    JSDumpLog::JSBind(globalObj);
+    JSDumpRegister::JSBind(globalObj);
+    JSKeyboardAvoid::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");
@@ -476,6 +513,7 @@ void JsBindViews(BindingTarget globalObj)
     JSPatternLockController::JSBind(globalObj);
 #endif
     // add missing binds to ng build
+#ifndef CROSS_PLATFORM
     JsDragFunction::JSBind(globalObj);
     JSCalendarPicker::JSBind(globalObj);
     JSContextMenu::JSBind(globalObj);
@@ -493,6 +531,7 @@ void JsBindViews(BindingTarget globalObj)
 #ifdef WEB_SUPPORTED
     JSWeb::JSBind(globalObj);
     JSWebController::JSBind(globalObj);
+#endif
 #endif
 }
 

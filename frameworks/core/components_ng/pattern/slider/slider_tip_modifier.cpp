@@ -63,8 +63,7 @@ SliderTipModifier::SliderTipModifier(std::function<OffsetF()> getBubbleVertexFun
     AttachProperty(bubbleVertex_);
 }
 
-SliderTipModifier::~SliderTipModifier()
-{}
+SliderTipModifier::~SliderTipModifier() {}
 
 void SliderTipModifier::PaintTip(DrawingContext& context)
 {
@@ -177,13 +176,8 @@ void SliderTipModifier::PaintBubble(DrawingContext& context)
     auto& canvas = context.canvas;
     canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
-#ifdef NEW_SKIA
     canvas.ClipPath(path, RSClipOp::INTERSECT, true);
     canvas.DrawPath(path);
-#else
-    canvas.DrawPath(path);
-    canvas.ClipPath(path, RSClipOp::INTERSECT, true);
-#endif
 }
 
 void SliderTipModifier::onDraw(DrawingContext& context)
@@ -301,7 +295,8 @@ bool SliderTipModifier::CreateParagraph(const TextStyle& textStyle, std::string 
 OffsetF SliderTipModifier::GetBubbleVertex()
 {
     CHECK_NULL_RETURN(getBubbleVertexFunc_, bubbleVertex_->Get());
-    return getBubbleVertexFunc_();
+    auto bubbleVertexInBlock = getBubbleVertexFunc_();
+    return bubbleVertexInBlock + contentOffset_->Get();
 }
 
 void SliderTipModifier::UpdateBubbleSize()

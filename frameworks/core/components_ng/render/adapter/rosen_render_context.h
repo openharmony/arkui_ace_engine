@@ -63,9 +63,11 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
-    void SyncGeometryProperties(GeometryNode* geometryNode) override;
+    void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) override;
 
     void SyncGeometryProperties(const RectF& paintRect) override;
+
+    void SetBorderRadius(const BorderRadiusProperty& value) override;
 
     void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
 
@@ -190,6 +192,7 @@ public:
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
     void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
+    void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
 
@@ -205,6 +208,8 @@ public:
     // append translate value and return origin value.
     void UpdateTranslateInXY(const OffsetF& offset) override;
     OffsetF GetShowingTranslateProperty() override;
+
+    void GetPointWithRevert(PointF& point) override;
 
     void GetPointWithTransform(PointF& point) override;
 
@@ -241,6 +246,7 @@ public:
     void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
 
     void OnBackgroundColorUpdate(const Color& value) override;
+    void OnOpacityUpdate(double opacity) override;
 
     void MarkContentChanged(bool isChanged) override;
     void MarkDrivenRender(bool flag) override;
@@ -253,6 +259,10 @@ public:
     bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
 #else
     bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
+#endif
+#ifndef USE_ROSEN_DRAWING
+    bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr, SkRect* rect = nullptr);
 #endif
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
@@ -285,7 +295,6 @@ private:
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
-    void OnOpacityUpdate(double opacity) override;
 
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
@@ -349,6 +358,8 @@ private:
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);
 
     void PaintBackground();
+    void PaintClipShape(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize);
+    void PaintClipMask(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize);
     void PaintClip(const SizeF& frameSize);
     void PaintProgressMask();
     void PaintGradient(const SizeF& frameSize);
@@ -421,6 +432,9 @@ private:
 
     void SetContentRectToFrame(RectF rect) override;
 
+    float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
+    void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
@@ -435,6 +449,8 @@ private:
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;
     bool hasDefaultTransition_ = false;
+    bool measureTriggered_ = false;
+    bool particleAnimationPlaying_ = false;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
@@ -449,6 +465,8 @@ private:
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     RefPtr<MoonProgressModifier> moonProgressModifier_;
+    std::shared_ptr<Rosen::RSClipBoundsModifier> clipBoundModifier_;
+    std::shared_ptr<Rosen::RSMaskModifier> clipMaskModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;

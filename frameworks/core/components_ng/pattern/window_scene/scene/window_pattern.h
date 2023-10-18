@@ -35,6 +35,8 @@ public:
     std::vector<Rosen::Rect> GetHotAreas();
     sptr<Rosen::Session> GetSession();
 
+    static int32_t CalculateTranslateDegree(int32_t hostId);
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -67,7 +69,7 @@ protected:
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
     std::function<void()> callback_;
-    std::function<void(const Rosen::Vector4f&)> sizeChangedCallback_;
+    std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
 
 private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);

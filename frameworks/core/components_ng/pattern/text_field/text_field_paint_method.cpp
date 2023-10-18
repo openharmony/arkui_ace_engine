@@ -107,9 +107,10 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
-    textFieldContentModifier_->SetShowCounter(
-        layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength());
-    textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false));
+    textFieldContentModifier_->SetShowCounter(layoutProperty->GetShowCounterValue(false) &&
+        layoutProperty->HasMaxLength() && !textFieldPattern->IsNormalInlineState());
+    textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false) &&
+        paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE);
     textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
     textFieldContentModifier_->SetShowPasswordIcon(textFieldPattern->GetShowResultImageSrc());
@@ -171,8 +172,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    textFieldOverlayModifier_->SetShowCounter(
-        layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength());
+    textFieldOverlayModifier_->SetShowCounter(layoutProperty->GetShowCounterValue(false) &&
+        layoutProperty->HasMaxLength() && !textFieldPattern->IsNormalInlineState());
     if (textFieldPattern->GetSelectMode() != SelectionMode::NONE) {
         textFieldPattern->MarkRedrawOverlay();
     }
@@ -187,15 +188,10 @@ void TextFieldPaintMethod::UpdateScrollBar()
         return;
     }
     OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
-    OffsetF bgOffset(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top());
-    textFieldOverlayModifier_->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
-        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()), fgOffset, bgOffset,
-        scrollBar->GetHoverAnimationType());
-    textFieldOverlayModifier_->SetOffset(fgOffset, bgOffset);
+    textFieldOverlayModifier_->StartBarAnimation(scrollBar->GetHoverAnimationType(),
+        scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    textFieldOverlayModifier_->SetFgColor(scrollBar->GetForegroundColor());
-    textFieldOverlayModifier_->SetBgColor(scrollBar->GetBackgroundColor());
-    textFieldOverlayModifier_->StartOpacityAnimation(scrollBar->GetOpacityAnimationType());
+    textFieldOverlayModifier_->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

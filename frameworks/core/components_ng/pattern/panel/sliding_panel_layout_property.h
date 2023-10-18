@@ -48,6 +48,7 @@ public:
         value->propIsShow_ = CloneIsShow();
         value->propShowCloseIcon_ = CloneShowCloseIcon();
         value->propBackgroundColor_ = CloneBackgroundColor();
+        value->propBackgroundMask_ = CloneBackgroundMask();
         return value;
     }
 
@@ -64,6 +65,7 @@ public:
         ResetIsShow();
         ResetShowCloseIcon();
         ResetBackgroundColor();
+        ResetBackgroundMask();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PanelType, PanelType, PROPERTY_UPDATE_MEASURE);
@@ -76,6 +78,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCloseIcon, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundMask, Color, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelLayoutProperty);

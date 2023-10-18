@@ -600,8 +600,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
 
     auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
         auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsView);
-        CHECK_NULL_VOID_NOLOG(jsView->jsViewFunction_);
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         {
             ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
@@ -620,7 +620,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
 
     auto updateViewNodeFunction = [weak = AceType::WeakClaim(this)](const RefPtr<AceType>& node) {
         auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsView);
+        CHECK_NULL_VOID(jsView);
         jsView->viewNode_ = node;
     };
 
@@ -657,6 +657,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         jsView->jsViewFunction_->ExecuteSetActive(active);
     };
 
+    auto onDumpInfoFunc = [weak = AceType::WeakClaim(this)](const std::vector<std::string>& params) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteOnDumpInfo(params);
+    };
+
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),
@@ -670,6 +677,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .setActiveFunc = std::move(setActiveFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
+        .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName() };
 
@@ -878,6 +886,12 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     }
 }
 
+void JSViewPartialUpdate::OnDumpInfo(const std::vector<std::string>& params)
+{
+    CHECK_NULL_VOID(jsViewFunction_);
+    jsViewFunction_->ExecuteOnDumpInfo(params);
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     LOGD("JSViewPartialUpdate::Bind");
@@ -894,9 +908,6 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("finishUpdateFunc", &JSViewPartialUpdate::JsFinishUpdateFunc);
     JSClass<JSViewPartialUpdate>::Method("setCardId", &JSViewPartialUpdate::JsSetCardId);
     JSClass<JSViewPartialUpdate>::CustomMethod("getCardId", &JSViewPartialUpdate::JsGetCardId);
-    JSClass<JSViewPartialUpdate>::CustomMethod("getDeletedElemtIds", &JSViewPartialUpdate::JsGetDeletedElemtIds);
-    JSClass<JSViewPartialUpdate>::CustomMethod(
-        "deletedElmtIdsHaveBeenPurged", &JSViewPartialUpdate::JsDeletedElmtIdsHaveBeenPurged);
     JSClass<JSViewPartialUpdate>::Method("elmtIdExists", &JSViewPartialUpdate::JsElementIdExists);
     JSClass<JSViewPartialUpdate>::CustomMethod("isLazyItemRender", &JSViewPartialUpdate::JSGetProxiedItemRenderState);
     JSClass<JSViewPartialUpdate>::CustomMethod("isFirstRender", &JSViewPartialUpdate::IsFirstRender);
@@ -954,39 +965,6 @@ void JSViewPartialUpdate::JsFinishUpdateFunc(int32_t elmtId)
                 jsView->pendingUpdateTasks_.push_back(task);
             }
         });
-}
-
-void JSViewPartialUpdate::JsGetDeletedElemtIds(const JSCallbackInfo& info)
-{
-    LOGD("JSView, getting elmtIds of all deleted Elements from ElementRegister:");
-    if (!info[0]->IsArray()) {
-        LOGE("info[0] is not array.");
-        return;
-    }
-    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
-    if (isRecycleRerender_) {
-        return;
-    }
-    std::unordered_set<int32_t>& removedElements = ElementRegister::GetInstance()->GetRemovedItems();
-    size_t index = jsArr->Length();
-    for (const auto& rmElmtId : removedElements) {
-        LOGD("  array removed elmtId %{public}d", rmElmtId);
-        JSRef<JSVal> jsRmElmtId = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(rmElmtId)));
-        jsArr->SetValueAt(index++, jsRmElmtId);
-    }
-}
-
-void JSViewPartialUpdate::JsDeletedElmtIdsHaveBeenPurged(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsArray()) {
-        LOGE("info[0] is not array.");
-        return;
-    }
-    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
-    for (size_t i = 0; i < jsArr->Length(); i++) {
-        const JSRef<JSVal> strId = jsArr->GetValueAt(i);
-        ElementRegister::GetInstance()->ClearRemovedItems(strId->ToNumber<int32_t>());
-    }
 }
 
 bool JSViewPartialUpdate::JsElementIdExists(int32_t elmtId)

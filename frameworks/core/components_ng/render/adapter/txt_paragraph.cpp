@@ -18,7 +18,9 @@
 #include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -46,11 +48,15 @@ void TxtParagraph::CreateBuilder()
     style.text_direction = Constants::ConvertTxtTextDirection(paraStyle_.direction);
     style.text_align = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.max_lines = paraStyle_.maxLines;
+    style.font_size = paraStyle_.fontSize; // libtxt style.font_size
+    style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
 #else
     Rosen::TypographyStyle style;
     style.textDirection = Constants::ConvertTxtTextDirection(paraStyle_.direction);
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.maxLines = paraStyle_.maxLines;
+    style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
+    style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
 #endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
@@ -130,12 +136,16 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 
 void TxtParagraph::Build()
 {
-    CHECK_NULL_VOID_NOLOG(builder_);
+    CHECK_NULL_VOID(builder_);
 #ifndef USE_GRAPHIC_TEXT_GINE
     paragraph_ = builder_->Build();
 #else
     paragraph_ = builder_->CreateTypography();
 #endif
+
+    if (paraStyle_.leadingMargin) {
+        SetIndents( { paraStyle_.leadingMargin->size.Width() });
+    }
 }
 
 void TxtParagraph::Reset()
@@ -220,18 +230,36 @@ size_t TxtParagraph::GetLineCount()
 #endif
 }
 
-void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
+void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
 {
     CHECK_NULL_VOID(paragraph_);
+#ifndef USE_ROSEN_DRAWING
     SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
+#else
+    paragraph_->Paint(&canvas, x, y);
+#endif
+    if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
+        auto canvasImage = PixelMapImage::Create(paraStyle_.leadingMargin->pixmap);
+        auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
+        CHECK_NULL_VOID(pixelMapImage);
+        auto& rsCanvas = const_cast<RSCanvas&>(canvas);
+        auto size = paraStyle_.leadingMargin->size;
+        auto width = size.Width();
+        auto height = size.Height();
+        pixelMapImage->DrawRect(rsCanvas, ToRSRect(RectF(x, y, width, height)));
+    }
 }
 
 void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
 {
     CHECK_NULL_VOID(skCanvas);
+#ifndef USE_ROSEN_DRAWING
     paragraph_->Paint(skCanvas, x, y);
+#else
+    LOGE("Drawing is not supported");
+#endif
 }
 
 int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
@@ -297,7 +325,10 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
     }
 
     const auto& textBox = *boxes.begin();
-
+    // when text_ ends with a \n, return the top position of the next line.
+    auto last = extent - placeHolderIndex_ - 1;
+    auto index = static_cast<size_t>(last) == text_.length() ? last : extent;
+    prevChar = text_[std::max(0, index - 1)];
     if (prevChar == NEWLINE_CODE) {
         // Return the start of next line.
         result.offset.SetX(0.0);
@@ -318,7 +349,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
 #ifndef USE_GRAPHIC_TEXT_GINE
     double caretStart = isLtr ? textBox.rect.fRight : textBox.rect.fLeft;
 #else
-    double caretStart = isLtr ? textBox.rect.GetLeft() : textBox.rect.GetRight();
+    double caretStart = isLtr ? textBox.rect.GetRight() : textBox.rect.GetLeft();
 #endif
     double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
     result.offset.SetX(offsetX);

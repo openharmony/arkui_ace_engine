@@ -36,8 +36,9 @@ RosenRenderSurface::~RosenRenderSurface()
     if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
         surfaceDelegate_->ReleaseSurface();
     } else {
-        CHECK_NULL_VOID_NOLOG(producerSurface_);
+        CHECK_NULL_VOID(producerSurface_);
         auto* surfaceUtils = SurfaceUtils::GetInstance();
+        CHECK_NULL_VOID(surfaceUtils);
         auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
         if (ret != SurfaceError::SURFACE_ERROR_OK) {
             LOGE("remove surface error: %{public}d", ret);
@@ -89,7 +90,7 @@ void RosenRenderSurface::InitSurface()
             consumerSurface_->RegisterConsumerListener(drawBufferListener_);
         } else {
             auto surfaceNode = OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rsNode);
-            CHECK_NULL_VOID_NOLOG(surfaceNode);
+            CHECK_NULL_VOID(surfaceNode);
             producerSurface_ = surfaceNode->GetSurface();
         }
     }
@@ -100,6 +101,7 @@ void RosenRenderSurface::UpdateXComponentConfig()
     CHECK_NULL_VOID(producerSurface_);
 
     auto* surfaceUtils = SurfaceUtils::GetInstance();
+    CHECK_NULL_VOID(surfaceUtils);
     auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);
     if (ret != SurfaceError::SURFACE_ERROR_OK) {
         LOGE("add surface error: %{public}d", ret);
@@ -122,7 +124,7 @@ void RosenRenderSurface::SetRenderContext(const RefPtr<RenderContext>& renderCon
 
 void RosenRenderSurface::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
 {
-    CHECK_NULL_VOID_NOLOG(producerSurface_);
+    CHECK_NULL_VOID(producerSurface_);
     producerSurface_->SetUserData("SURFACE_WIDTH", std::to_string(surfaceWidth));
     producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
 }
@@ -145,6 +147,10 @@ void RosenRenderSurface::AdjustNativeWindowSize(uint32_t width, uint32_t height)
 
 std::string RosenRenderSurface::GetUniqueId() const
 {
+    if (!producerSurface_) {
+        LOGE("producerSurface_ is nullptr");
+        return "";
+    }
     return std::to_string(producerSurface_->GetUniqueId());
 }
 

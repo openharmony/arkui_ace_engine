@@ -37,6 +37,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
@@ -89,6 +90,9 @@ const SizeF TEST_FRAME_SIZE1 { 20, 50 };
 const SizeF TEST_FRAME_SIZE2 { 0, 0 };
 const std::string SELECTED_DATE_STRING = "{\"year\":2000,\"month\":5,\"day\":6,\"hour\":1,\"minute\":1,\"status\":-1}";
 constexpr double COLUMN_VELOCITY = 2000.0;
+constexpr double COLUMN_WIDTH = 200.0;
+constexpr double SECLECTED_TEXTNODE_HEIGHT = 84.0;
+constexpr double OTHER_TEXTNODE_HEIGHT = 54.0;
 } // namespace
 
 class DatePickerTestNg : public testing::Test {
@@ -889,6 +893,52 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest004, TestSize.Level1)
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->FireChangeEvent(true);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest019
+ * @tc.desc: Test OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPatternTest019, TestSize.Level1)
+{
+    const std::string language = "en";
+    const std::string countryOrRegion = "US";
+    const std::string script = "Latn";
+    const std::string keywordsAndValues = "";
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    ASSERT_NE(pickerStack, nullptr);
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    datePickerNode->MountToParent(pickerStack);
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NG::ButtonPattern>(); });
+    auto textConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textConfirmNode->MountToParent(buttonConfirmNode);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->SetConfirmNode(buttonConfirmNode);
+
+    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonCancelNode, nullptr);
+    auto textCancelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textCancelNode, nullptr);
+    auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
+    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    ASSERT_NE(textCancelLayoutProperty, nullptr);
+    textCancelNode->MountToParent(buttonCancelNode);
+    datePickerPattern->SetCancelNode(buttonCancelNode);
+    datePickerPattern->OnLanguageConfigurationUpdate();
+    AceApplicationInfo::GetInstance().SetLocale(language, countryOrRegion, script, keywordsAndValues);
+    std::string nodeInfo = "";
+    auto cancel = Localization::GetInstance()->GetEntryLetters("common.cancel");
+    EXPECT_EQ(cancel, nodeInfo);
 }
 
 /**
@@ -2131,7 +2181,6 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest012, TestSize.Level1)
      */
     auto allChildNode = pickerPattern->GetAllChildNode();
     auto yearNode = allChildNode["year"];
-    yearNode->pattern_.Reset();
     pickerPattern->HandleSolarDayChange(false, 0);
 }
 
@@ -2330,6 +2379,78 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest016, TestSize.Level1)
     dataPickerRowLayoutProperty->UpdateStartDate(startDate);
     dataPickerRowLayoutProperty->UpdateEndDate(endDate);
     pickerPattern->AdjustLunarStartEndDate();
+}
+
+/**
+ * @tc.name: DatePickerPatternTest017
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerTest017, TestSize.Level1)
+{
+    DatePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->disappearOptionStyle_.textColor_ = Color::RED;
+    pickerTheme->normalOptionStyle_.textColor_ = Color::RED;
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData.datePickerProperty,
+        settingData.properties, settingData.isLunar, false);
+    ASSERT_NE(datePickerNode, nullptr);
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(
+        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    datePickerNode->MountToParent(pickerStack);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto contentRow = DatePickerDialogView::CreateButtonNode(monthDaysNode, datePickerNode,
+        dialogEvent, std::move(dialogCancelEvent));
+    contentRow->AddChild(DatePickerDialogView::CreateDividerNode(datePickerNode), 1);
+    auto buttonTitleNode = DatePickerDialogView::CreateTitleButtonNode(datePickerNode);
+    datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
+    buttonTitleNode->MountToParent(contentColumn);
+    datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
+    datePickerPattern->SetContentRowNode(contentRow);
+    contentRow->MountToParent(contentColumn);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PickerTheme>()));
+    auto context = datePickerNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    datePickerPattern->OnColorConfigurationUpdate();
+    auto pickerProperty = datePickerNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    EXPECT_EQ(pickerProperty->GetColor(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetDisappearColor(), Color::RED);
 }
 
 /**
@@ -2722,13 +2843,17 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest001, TestSize.Level1)
     auto dateTimeAnimationController = AceType::MakeRefPtr<DateTimeAnimationController>();
     dateTimeAnimationController->SetMonthDays(monthDaysNode);
     dateTimeAnimationController->SetTimePicker(timeNode);
-    auto monthDaysRender = dateTimeAnimationController->monthDays_->GetRenderContext();
+    auto monthDays = dateTimeAnimationController->monthDays_.Upgrade();
+    ASSERT_NE(monthDays, nullptr);
+    auto monthDaysRender = monthDays->GetRenderContext();
     ASSERT_NE(monthDaysRender, nullptr);
-    auto timePickerRender = dateTimeAnimationController->timePicker_->GetRenderContext();
+    auto timePicker = dateTimeAnimationController->timePicker_.Upgrade();
+    ASSERT_NE(timePicker, nullptr);
+    auto timePickerRender = timePicker->GetRenderContext();
     ASSERT_NE(timePickerRender, nullptr);
     dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
-    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 1.0f);
-    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 1.0f);
+    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 0);
+    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 0);
 
     /**
      * @tc.steps: step3. Set datePicker.
@@ -2738,7 +2863,9 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest001, TestSize.Level1)
     dateTimeAnimationController->SetDatePicker(dateNode);
     dateNode->children_ = tempChildren;
     dateTimeAnimationController->SetDatePicker(dateNode);
-    auto datePickerLayoutProperty = dateTimeAnimationController->datePicker_->GetLayoutProperty<LayoutProperty>();
+    auto datePicker = dateTimeAnimationController->datePicker_.Upgrade();
+    ASSERT_NE(datePicker, nullptr);
+    auto datePickerLayoutProperty = datePicker->GetLayoutProperty<LayoutProperty>();
     ASSERT_NE(datePickerLayoutProperty, nullptr);
 
     /**
@@ -2748,20 +2875,20 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest001, TestSize.Level1)
     monthDaysRender->UpdateOpacity(0.0f);
     timePickerRender->UpdateOpacity(0.0f);
     dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
-    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 1.0f);
-    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 1.0f);
+    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 0);
+    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 0);
     EXPECT_EQ(datePickerLayoutProperty->GetVisibilityValue(), VisibleType::VISIBLE);
 
     /**
      * @tc.steps: step5. PlayOldColumnOpacityInAnimation without datePicker layoutProperty.
      * @tc.expected: datePicker's visibility is not set.
      */
-    dateTimeAnimationController->datePicker_->layoutProperty_ = nullptr;
+    datePicker->layoutProperty_ = nullptr;
     monthDaysRender->UpdateOpacity(0.0f);
     timePickerRender->UpdateOpacity(0.0f);
     dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
-    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 1.0f);
-    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 1.0f);
+    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 0);
+    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 0);
 }
 
 /**
@@ -2815,10 +2942,10 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest002, TestSize.Level1)
     dateTimeAnimationController->created_ = false;
     dateTimeAnimationController->Play(true);
     EXPECT_TRUE(dateTimeAnimationController->created_);
-    EXPECT_TRUE(dateTimeAnimationController->isInAnimationPlaying_);
+    EXPECT_FALSE(dateTimeAnimationController->isInAnimationPlaying_);
     dateTimeAnimationController->isInAnimationPlaying_ = false;
     dateTimeAnimationController->Play(false);
-    EXPECT_TRUE(dateTimeAnimationController->isOutAnimationPlaying_);
+    EXPECT_FALSE(dateTimeAnimationController->isOutAnimationPlaying_);
 }
 
 /**
@@ -3348,5 +3475,74 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
     columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
     columnPattern_->PlayRestAnimation();
     EXPECT_FLOAT_EQ(columnPattern_->scrollDelta_, OFFSET_X - 2.0);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest020
+ * @tc.desc: Test DatePickerColumnPattern AddHotZoneRectToText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnPattern and Set text node height.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    ASSERT_NE(columnNode_, nullptr);
+    auto childSize = static_cast<int32_t>(columnNode_->GetChildren().size());
+    auto midSize = childSize / MIDDLE_OF_COUNTS;
+    columnPattern_->optionProperties_[midSize].height = SECLECTED_TEXTNODE_HEIGHT;
+    columnPattern_->optionProperties_[midSize-1].height = OTHER_TEXTNODE_HEIGHT;
+
+    /**
+     * @tc.steps: step2. Set height 50.0 for column and call AddHotZoneRectToText.
+     * @tc.expected: The middle textnode hot zone set is correct.
+     */
+    float height = 50.0f;
+    columnPattern_->size_.SetWidth(COLUMN_WIDTH);
+    columnPattern_->size_.SetHeight(height);
+    columnPattern_->AddHotZoneRectToText();
+    auto childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(midSize));
+    ASSERT_NE(childNode, nullptr);
+    auto gestureEventHub = childNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
+    auto responseRegion = gestureEventHub->GetResponseRegion().back();
+    EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
+    EXPECT_EQ(responseRegion.GetHeight().Value(), height);
+
+    /**
+     * @tc.steps: step3. Set height 100.0 for column and call AddHotZoneRectToText.
+     * @tc.expected: The candidate textnode hot zone set is correct.
+     */
+    height = 100.0f;
+    columnPattern_->size_.SetHeight(height);
+    columnPattern_->AddHotZoneRectToText();
+    childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(midSize - 1));
+    ASSERT_NE(childNode, nullptr);
+    gestureEventHub = childNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
+    responseRegion = gestureEventHub->GetResponseRegion().back();
+    EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
+    EXPECT_EQ(responseRegion.GetHeight().Value(), (height - SECLECTED_TEXTNODE_HEIGHT) / MIDDLE_OF_COUNTS);
+
+    /**
+     * @tc.steps: step4. Set height 200.0 for column and call AddHotZoneRectToText.
+     * @tc.expected: The disappear textnode hot zone set is correct.
+     */
+    height = 200.0f;
+    columnPattern_->size_.SetHeight(height);
+    columnPattern_->AddHotZoneRectToText();
+    childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(midSize - MIDDLE_OF_COUNTS));
+    ASSERT_NE(childNode, nullptr);
+    gestureEventHub = childNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
+    responseRegion = gestureEventHub->GetResponseRegion().back();
+    EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
+    EXPECT_EQ(responseRegion.GetHeight().Value(),
+        (height - SECLECTED_TEXTNODE_HEIGHT - MIDDLE_OF_COUNTS * OTHER_TEXTNODE_HEIGHT) / MIDDLE_OF_COUNTS);
 }
 } // namespace OHOS::Ace::NG

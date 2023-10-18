@@ -65,10 +65,12 @@ public:
 
     void UpdateOnDisappear(std::function<void()>&& onDisappear) {
         onDisappear_ = std::move(onDisappear);
+        isExecuteOnDisappear_ = false;
     }
 
     void OnDisappear() {
         if (onDisappear_) {
+            isExecuteOnDisappear_ = true;
             onDisappear_();
         }
     }
@@ -78,12 +80,18 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    bool IsExecuteOnDisappear() const
+    {
+        return isExecuteOnDisappear_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     int32_t targetId_ = -1;
     ModalTransition type_ = ModalTransition::DEFAULT;
     std::function<void(const std::string&)> callback_;
     std::function<void()> onDisappear_;
+    bool isExecuteOnDisappear_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ModalPresentationPattern);
 };

@@ -106,6 +106,16 @@ public:
         return predictSnapOffset_;
     }
 
+    void SetPredictSnapEndPosition(float predictSnapEndPos)
+    {
+        predictSnapEndPos_ = predictSnapEndPos;
+    }
+
+    std::optional<float> GetPredictSnapEndPosition()
+    {
+        return predictSnapEndPos_;
+    }
+
     void SetIndexInGroup(int32_t index)
     {
         jumpIndexInGroup_ = index;
@@ -152,7 +162,7 @@ public:
         return itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
     }
 
-    int32_t GetMidIndex(LayoutWrapper* layoutWrapper);
+    int32_t GetMidIndex(LayoutWrapper* layoutWrapper, bool usePreContentMainSize = false);
 
     int32_t GetMaxListItemIndex() const
     {
@@ -334,10 +344,17 @@ private:
     static void PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param);
     static void PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
 
+    float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign);
+    int32_t FindPredictSnapEndIndexInItemPositions(float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign);
+    bool IsUniformHeightProbably();
+    float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
+    void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
+
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
     std::optional<float> predictSnapOffset_;
+    std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
     ScrollAutoType scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
 

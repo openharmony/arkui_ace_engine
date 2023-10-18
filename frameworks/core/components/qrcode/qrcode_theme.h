@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_QRCODE_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_QRCODE_THEME_H
 
+#include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -45,8 +47,11 @@ public:
             theme->qrcodeType_ = QrcodeType(themeConstants->GetInt(THEME_QRCODE_TYPE));
             theme->qrcodeWidth_ = themeConstants->GetDimension(THEME_QRCODE_SIZE);
             theme->qrcodeHeight_ = themeConstants->GetDimension(THEME_QRCODE_SIZE);
-
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(pipeline, theme);
+            if (pipeline->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+                ParsePattern(themeConstants->GetThemeStyle(), theme);
+            }
             return theme;
         }
 

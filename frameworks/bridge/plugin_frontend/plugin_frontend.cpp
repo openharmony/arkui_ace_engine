@@ -182,7 +182,7 @@ bool PluginFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& t
     taskExecutor->PostSyncTask(
         [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_] {
             auto jsEngine = weakEngine.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsEngine);
+            CHECK_NULL_VOID(jsEngine);
             jsEngine->Initialize(delegate);
         },
         TaskExecutor::TaskType::JS);
@@ -192,7 +192,7 @@ bool PluginFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& t
 
 void PluginFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     handler_ = AceType::MakeRefPtr<PluginEventHandler>(delegate_);
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
     if (pipelineContext) {
@@ -213,69 +213,69 @@ void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& task
     const auto& loadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
                                    const RefPtr<Framework::JsAcePage>& jsPage, bool isMainPage) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->LoadJs(url, jsPage, isMainPage);
     };
 
     const auto& setPluginMessageTransferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                        const RefPtr<JsMessageDispatcher>& dispatcher) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->SetJsMessageDispatcher(dispatcher);
     };
 
     const auto& asyncEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                          const std::string& eventId, const std::string& param) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->FireAsyncEvent(eventId, param);
     };
 
     const auto& syncEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                         const std::string& eventId, const std::string& param) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->FireSyncEvent(eventId, param);
     };
 
     const auto& updatePageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                          const RefPtr<Framework::JsAcePage>& jsPage) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->UpdateRunningPage(jsPage);
         jsEngine->UpdateStagingPage(jsPage);
     };
 
     const auto& resetStagingPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->ResetStagingPage();
     };
 
     const auto& destroyPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t pageId) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->DestroyPageInstance(pageId);
     };
 
     const auto& destroyApplicationCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                  const std::string& packageName) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->DestroyApplication(packageName);
     };
 
     const auto& updateApplicationStateCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                      const std::string& packageName, Frontend::State state) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->UpdateApplicationState(packageName, state);
     };
 
     const auto& onWindowDisplayModeChangedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                          bool isShownInMultiWindow, const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->OnWindowDisplayModeChanged(isShownInMultiWindow, data);
     };
 
@@ -298,81 +298,81 @@ void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& task
     };
     const auto& onActiveCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->OnActive();
     };
 
     const auto& onInactiveCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->OnInactive();
     };
 
     const auto& onConfigurationUpdatedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                      const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->OnConfigurationUpdated(data);
     };
 
     const auto& timerCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                     const std::string& callbackId, const std::string& delay, bool isInterval) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->TimerCallback(callbackId, delay, isInterval);
     };
 
     const auto& mediaQueryCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                          const std::string& callbackId, const std::string& args) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->MediaQueryCallback(callbackId, args);
     };
 
     const auto& requestAnimationCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                const std::string& callbackId, uint64_t timeStamp) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->RequestAnimationCallback(callbackId, timeStamp);
     };
 
     const auto& jsCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                  const std::string& callbackId, const std::string& args) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->JsCallback(callbackId, args);
     };
 
     const auto& onMemoryLevelCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const int32_t level) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->OnMemoryLevel(level);
     };
 
     const auto& onStartContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> bool {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(jsEngine, false);
+        CHECK_NULL_RETURN(jsEngine, false);
         return jsEngine->OnStartContinuation();
     };
     const auto& onCompleteContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t code) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->OnCompleteContinuation(code);
     };
     const auto& onRemoteTerminatedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->OnRemoteTerminated();
     };
     const auto& onSaveDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& savedData) {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsEngine);
+        CHECK_NULL_VOID(jsEngine);
         jsEngine->OnSaveData(savedData);
     };
     const auto& onRestoreDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                             const std::string& data) -> bool {
         auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(jsEngine, false);
+        CHECK_NULL_RETURN(jsEngine, false);
         return jsEngine->OnRestoreData(data);
     };
     delegate_ = AceType::MakeRefPtr<Framework::PluginFrontendDelegate>(taskExecutor, loadCallback,
@@ -393,29 +393,29 @@ void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& task
     }
 }
 
-void PluginFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void PluginFrontend::RunPage(const std::string& url, const std::string& params)
 {
     // Not use this pageId from backend, manage it in PluginFrontendDelegate.
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->RunPage(url, params);
 }
 
 void PluginFrontend::ReplacePage(const std::string& url, const std::string& params)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->Replace(url, params);
 }
 
 void PluginFrontend::PushPage(const std::string& url, const std::string& params)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->Push(url, params);
 }
 
 // navigator component call router
 void PluginFrontend::NavigatePage(uint8_t type, const PageTarget& target, const std::string& params)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     switch (static_cast<NavigatorType>(type)) {
         case NavigatorType::PUSH:
             delegate_->Push(target, params);
@@ -434,25 +434,25 @@ void PluginFrontend::NavigatePage(uint8_t type, const PageTarget& target, const 
 
 void PluginFrontend::SendCallbackMessage(const std::string& callbackId, const std::string& data) const
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnJSCallback(callbackId, data);
 }
 
 void PluginFrontend::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->SetJsMessageDispatcher(dispatcher);
 }
 
 void PluginFrontend::TransferComponentResponseData(int callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->TransferComponentResponseData(callbackId, code, std::move(data));
 }
 
 void PluginFrontend::TransferJsResponseData(int callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->TransferJsResponseData(callbackId, code, std::move(data));
 }
 
@@ -465,31 +465,31 @@ void PluginFrontend::TransferJsResponseDataPreview(int callbackId, int32_t code,
 
 void PluginFrontend::TransferJsPluginGetError(int callbackId, int32_t errorCode, std::string&& errorMessage) const
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->TransferJsPluginGetError(callbackId, errorCode, std::move(errorMessage));
 }
 
 void PluginFrontend::TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->TransferJsEventData(callbackId, code, std::move(data));
 }
 
 void PluginFrontend::LoadPluginJsCode(std::string&& jsCode) const
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->LoadPluginJsCode(std::move(jsCode));
 }
 
 void PluginFrontend::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->LoadPluginJsByteCode(std::move(jsCode), std::move(jsCodeLen));
 }
 
 void PluginFrontend::UpdateState(Frontend::State state)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     switch (state) {
         case Frontend::State::ON_CREATE:
             break;
@@ -508,25 +508,25 @@ void PluginFrontend::UpdateState(Frontend::State state)
 
 void PluginFrontend::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnWindowDisplayModeChanged(isShownInMultiWindow, data);
 }
 
 void PluginFrontend::OnSaveAbilityState(std::string& data)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnSaveAbilityState(data);
 }
 
 void PluginFrontend::OnRestoreAbilityState(const std::string& data)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnRestoreAbilityState(data);
 }
 
 void PluginFrontend::OnNewWant(const std::string& data)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnNewWant(data);
 }
 
@@ -554,26 +554,26 @@ bool PluginFrontend::OnBackPressed()
 
 void PluginFrontend::OnShow()
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnForeground();
 }
 
 void PluginFrontend::OnHide()
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnBackGround();
     foregroundFrontend_ = false;
 }
 
 void PluginFrontend::OnConfigurationUpdated(const std::string& data)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnConfigurationUpdated(data);
 }
 
 void PluginFrontend::OnActive()
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     foregroundFrontend_ = true;
     delegate_->OnActive();
     delegate_->InitializeAccessibilityCallback();
@@ -581,7 +581,7 @@ void PluginFrontend::OnActive()
 
 void PluginFrontend::OnInactive()
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnInactive();
     delegate_->OnSuspended();
 }
@@ -594,25 +594,25 @@ bool PluginFrontend::OnStartContinuation()
 
 void PluginFrontend::OnCompleteContinuation(int32_t code)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnCompleteContinuation(code);
 }
 
 void PluginFrontend::OnMemoryLevel(const int32_t level)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnMemoryLevel(level);
 }
 
 void PluginFrontend::OnSaveData(std::string& data)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnSaveData(data);
 }
 
 void PluginFrontend::GetPluginsUsed(std::string& data)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->GetPluginsUsed(data);
 }
 
@@ -624,13 +624,13 @@ bool PluginFrontend::OnRestoreData(const std::string& data)
 
 void PluginFrontend::OnRemoteTerminated()
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnRemoteTerminated();
 }
 
 void PluginFrontend::OnNewRequest(const std::string& data)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnNewRequest(data);
 }
 
@@ -646,23 +646,23 @@ void PluginFrontend::CallRouterBack()
 
 void PluginFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnSurfaceChanged();
 }
 
 void PluginFrontend::OnLayoutCompleted(const std::string& componentId)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
 }
 
 void PluginFrontend::OnDrawCompleted(const std::string& componentId)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
 }
 
 void PluginFrontend::DumpFrontend() const
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     int32_t routerIndex = 0;
     std::string routerName;
     std::string routerPath;
@@ -678,7 +678,7 @@ void PluginFrontend::DumpFrontend() const
 
 std::string PluginFrontend::GetPagePath() const
 {
-    CHECK_NULL_RETURN_NOLOG(delegate_, "");
+    CHECK_NULL_RETURN(delegate_, "");
     int32_t routerIndex = 0;
     std::string routerName;
     std::string routerPath;
@@ -688,25 +688,25 @@ std::string PluginFrontend::GetPagePath() const
 
 void PluginFrontend::TriggerGarbageCollection()
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     jsEngine_->RunGarbageCollection();
 }
 
 void PluginFrontend::SetColorMode(ColorMode colorMode)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->SetColorMode(colorMode);
 }
 
 void PluginFrontend::RebuildAllPages()
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->RebuildAllPages();
 }
 
 void PluginFrontend::NotifyAppStorage(const std::string& key, const std::string& value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->NotifyAppStorage(jsEngine_, key, value);
 }
 
@@ -850,7 +850,7 @@ void PluginEventHandler::HandleSyncEvent(const EventMarker& eventMarker, bool& r
 
 void PluginEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const std::shared_ptr<BaseEventInfo>& info)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->GetUiTask().PostSyncTask([eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); });
 }
 

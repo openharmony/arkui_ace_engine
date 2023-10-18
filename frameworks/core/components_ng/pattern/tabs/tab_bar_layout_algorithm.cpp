@@ -99,7 +99,6 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
     if (childCount <= 0) {
-        LOGI("ChildCount is illegal.");
         return;
     }
     
@@ -150,7 +149,6 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (int32_t index = 0; index < childCount; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
-            LOGI("Child %{public}d is null.", index);
             continue;
         }
         if (static_cast<int32_t>(itemWidths_.size()) == childCount && useItemWidth_) {
@@ -166,6 +164,21 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childrenMainSize_ += childWrapper->GetGeometryNode()->GetMarginFrameSize().MainSize(axis);
     }
     MeasureMask(layoutWrapper, childCount);
+}
+
+void TabBarLayoutAlgorithm::CheckMarqueeForScrollable(LayoutWrapper* layoutWrapper, int32_t childCount) const
+{
+    for (int32_t index = 0; index < childCount; ++index) {
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_VOID(childWrapper);
+        auto textWrapper = childWrapper->GetOrCreateChildByIndex(1);
+        CHECK_NULL_VOID(textWrapper);
+        auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (textLayoutProperty->GetTextOverflow().value_or(TextOverflow::NONE) == TextOverflow::MARQUEE) {
+            textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+        }
+    }
 }
 
 void TabBarLayoutAlgorithm::MeasureMask(LayoutWrapper* layoutWrapper, int32_t childCount) const
@@ -200,7 +213,7 @@ void TabBarLayoutAlgorithm::ConfigHorizontal(LayoutWrapper* layoutWrapper, const
         // Handle scrollable mode
         auto layoutStyle = layoutProperty->GetScrollableBarModeOptions().value_or(ScrollableBarModeOptions());
         scrollMargin_ = layoutStyle.margin.ConvertToPx();
-
+        CheckMarqueeForScrollable(layoutWrapper, childCount);
         MeasureItemWidths(layoutWrapper, childCount);
 
         if (layoutStyle.nonScrollableLayoutStyle == LayoutStyle::ALWAYS_AVERAGE_SPLIT) {

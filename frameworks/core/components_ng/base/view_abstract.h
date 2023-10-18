@@ -51,15 +51,27 @@ namespace OHOS::Ace::NG {
 struct OptionParam {
     std::string value;
     std::string icon;
+    bool enabled = true;
     std::function<void()> action;
 
     OptionParam() = default;
-    OptionParam(const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
-        : value(valueParam), icon(iconParam), action(actionParam)
-    {}
+    OptionParam(
+        const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
+        : value(valueParam),
+          icon(iconParam),
+          enabled(true),
+          action(actionParam) {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam, bool enabledParam,
+        const std::function<void()>& actionParam)
+        : value(valueParam),
+          icon(iconParam),
+          enabled(enabledParam),
+          action(actionParam) {}
     OptionParam(const std::string& valueParam, const std::function<void()>& actionParam)
-        : value(valueParam), icon(""), action(actionParam)
-    {}
+        : value(valueParam),
+          icon(""),
+          enabled(true),
+          action(actionParam) {}
 
     ~OptionParam() = default;
 };
@@ -73,6 +85,9 @@ struct MenuParam {
     std::optional<bool> enableArrow;
     std::optional<Dimension> arrowOffset;
     bool isAboveApps = false;
+    MenuType type = MenuType::MENU;
+    MenuPreviewMode previewMode = MenuPreviewMode::NONE;
+    std::optional<EffectOption> backgroundEffectOption;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -236,7 +251,7 @@ public:
     static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
         const NG::OffsetF& offset, const MenuParam& menuParam);
     static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-        MenuType menuType, const NG::OffsetF& offset, const MenuParam& menuParam);
+        const NG::OffsetF& offset, const MenuParam& menuParam, const RefPtr<UINode>& previewCustomNode = nullptr);
     static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);

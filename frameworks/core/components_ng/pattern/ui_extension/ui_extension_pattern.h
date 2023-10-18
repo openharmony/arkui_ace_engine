@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-
 #include <refbase.h>
 
 #include "base/memory/referenced.h"
@@ -33,6 +32,7 @@
 namespace OHOS::Rosen {
 class Session;
 class ILifecycleListener;
+enum class WSError;
 } // namespace OHOS::Rosen
 
 namespace OHOS::MMI {
@@ -50,9 +50,13 @@ class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
 
 public:
-    explicit UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
-    explicit UIExtensionPattern(const AAFwk::Want& want);
+    UIExtensionPattern();
     ~UIExtensionPattern() override;
+
+    void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
+    void UpdateWant(const AAFwk::Want& want);
+
+    void DestorySession();
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -77,6 +81,7 @@ public:
     void OnConnect();
     void OnDisconnect();
     void OnExtensionDied();
+    bool OnBackPressed();
 
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
@@ -117,10 +122,10 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void UnregisterAbilityResultListener();
-    void OnConnectInner();
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    void DispatchBackpressedEventForConsumed(bool& isConsumed);
     void DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     void DisPatchFocusActiveEvent(bool isFocusActive);
     void TransferFocusState(bool focusState);
@@ -128,6 +133,10 @@ private:
     void RegisterVisibleAreaChange();
     void UpdateTextFieldManager(const Offset& offset, float height);
     bool IsCurrentFocus() const;
+
+    void ProcessUIExtensionSessionActivationResult(OHOS::Rosen::WSError errcode);
+    void ProcessUIExtensionSessionBackgroundResult(OHOS::Rosen::WSError errcode);
+    void ProcessUIExtensionSessionDestructionResult(OHOS::Rosen::WSError errcode);
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

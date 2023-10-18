@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
@@ -34,6 +35,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/property/property.h"
+#include "core/common/container.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -125,7 +127,7 @@ void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
 }
 
@@ -162,7 +164,8 @@ void NavigationPattern::OnModifyDone()
     }
 
     navigationStack_->SetNavPathList(navPathList);
-    hostNode->UpdateNavDestinationNodeWithoutMarkDirty(preTopNavPath.has_value() ? preTopNavPath->second : nullptr);
+    hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
+        preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
     auto newTopNavPath = navigationStack_->GetTopNavPath();
     auto size = navigationStack_->Size();
     CheckTopNavPathChange(preTopNavPath, newTopNavPath, preSize > size);
@@ -210,6 +213,7 @@ void NavigationPattern::CheckTopNavPathChange(
             if (navDestinationPattern->GetIsOnShow()) {
                 auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
                 CHECK_NULL_VOID(eventHub);
+                NotifyPageHide(preTopNavPath->first);
                 eventHub->FireOnHiddenEvent();
                 navDestinationPattern->SetIsOnShow(false);
             }
@@ -257,6 +261,7 @@ void NavigationPattern::CheckTopNavPathChange(
             if (!navDestinationPattern->GetIsOnShow()) {
                 auto eventHub = newTopNavDestination->GetEventHub<NavDestinationEventHub>();
                 CHECK_NULL_VOID(eventHub);
+                NotifyPageShow(newTopNavPath->first);
                 eventHub->FireOnShownEvent();
                 navDestinationPattern->SetIsOnShow(true);
             }
@@ -288,6 +293,28 @@ void NavigationPattern::CheckTopNavPathChange(
         });
     }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+}
+
+void NavigationPattern::NotifyPageHide(const std::string& pageName)
+{
+    auto container = Container::Current();
+    if (container) {
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        if (pageUrlChecker != nullptr) {
+            pageUrlChecker->NotifyPageHide(pageName);
+        }
+    }
+}
+
+void NavigationPattern::NotifyPageShow(const std::string& pageName)
+{
+    auto container = Container::Current();
+    if (container) {
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        if (pageUrlChecker != nullptr) {
+            pageUrlChecker->NotifyPageShow(pageName);
+        }
+    }
 }
 
 void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -354,7 +381,7 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
                 eventHub->FireNavBarStateChangeEvent(true);
             }
         } else {
-            if (navigationStack_->Empty()) {
+            if (navigationStack_->Empty() && !layoutProperty->GetHideNavBarValue(false)) {
                 eventHub->FireNavBarStateChangeEvent(true);
             } else {
                 eventHub->FireNavBarStateChangeEvent(false);
@@ -364,7 +391,7 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
         return;
     }
 
-    if (GetNavBarVisibilityChange() && (currentNavigationMode == NavigationMode::SPLIT)) {
+    if (GetNavBarVisibilityChange()) {
         if (!layoutProperty->GetHideNavBarValue(false)) {
             eventHub->FireNavBarStateChangeEvent(true);
         } else {
@@ -382,6 +409,19 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
     }
 }
 
+void NavigationPattern::OnNavigationModeChange(bool modeChange)
+{
+    if (!modeChange) {
+        LOGD("navigation mode doesn't change");
+        return;
+    }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireNavigationModeChangeEvent(navigationMode_);
+}
+
 bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -396,7 +436,8 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(hostNode, false);
     auto oldMode = navigationMode_;
     navigationMode_ = navigationLayoutAlgorithm->GetNavigationMode();
-    OnNavBarStateChange(oldMode == navigationMode_);
+    OnNavBarStateChange(oldMode != navigationMode_);
+    OnNavigationModeChange(oldMode != navigationMode_);
     auto curTopNavPath = navigationStack_->GetTopNavPath();
     if (curTopNavPath.has_value()) {
         auto context = PipelineContext::GetCurrentContext();
@@ -406,14 +447,29 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     auto pattern = weak.Upgrade();
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
+                    auto navigationLayoutProperty =
+                        AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
                     if (pattern->navigationStack_->Size() == 1 &&
-                        pattern->GetNavigationMode() == NavigationMode::SPLIT) {
-                        // set backButton gone for the first level page in SPLIT mode
+                        (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
+                            navigationLayoutProperty->GetHideNavBar().value_or(false))) {
+                        // cases that backButton of navDestination is gone when there's only one child and
+                        // 1. In SPLIT mode, it's the first level page
+                        // 2. In STACK mode, the navBar is hidden
                         hostNode->SetBackButtonVisible(curTopNavDestination, false);
                     } else {
                         hostNode->SetBackButtonVisible(curTopNavDestination, true);
                     }
                     pattern->UpdateContextRect(curTopNavDestination, hostNode);
+                    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+                    CHECK_NULL_VOID(navBarNode);
+                    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+                    CHECK_NULL_VOID(navBarLayoutProperty);
+                    if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
+                        (pattern->GetNavigationMode() == NavigationMode::STACK && hostNode->GetNeedSetInvisible())) {
+                        navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+                    } else {
+                        navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+                    }
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -430,31 +486,32 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 void NavigationPattern::UpdateContextRect(
     const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& hostNode)
 {
-    CHECK_NULL_VOID_NOLOG(curDestination);
-    CHECK_NULL_VOID_NOLOG(hostNode);
+    CHECK_NULL_VOID(curDestination);
+    CHECK_NULL_VOID(hostNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-    CHECK_NULL_VOID_NOLOG(hostNode);
+    CHECK_NULL_VOID(hostNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     CHECK_NULL_VOID(navigationPattern);
     auto size = curDestination->GetGeometryNode()->GetFrameSize();
     curDestination->GetRenderContext()->ClipWithRRect(
         RectF(0.0f, 0.0f, size.Width(), size.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
     curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
-    if (navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
-        auto navBarProperty = navBarNode->GetLayoutProperty();
-        navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
-        curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+
+    if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
         curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
-        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-        auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
-        CHECK_NULL_VOID_NOLOG(titleNode);
-        titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
         return;
     }
+    auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
     auto navBarProperty = navBarNode->GetLayoutProperty();
-    navBarProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    navBarProperty->UpdateVisibility(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE));
+    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
     curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
-    navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+    auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
+    CHECK_NULL_VOID(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
 }
 
 bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode)
@@ -488,7 +545,7 @@ RefPtr<UINode> NavigationPattern::GenerateUINodeByIndex(int32_t index)
 void NavigationPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub)
 {
     CHECK_NULL_VOID(inputHub);
-    CHECK_NULL_VOID_NOLOG(!hoverEvent_);
+    CHECK_NULL_VOID(!hoverEvent_);
 
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
@@ -569,25 +626,25 @@ void NavigationPattern::HandleDragEnd()
 
 void NavigationPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!dragEvent_);
+    CHECK_NULL_VOID(!dragEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart();
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragUpdate(static_cast<float>(info.GetOffsetX()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
     };
     dragEvent_ = MakeRefPtr<DragEvent>(
@@ -641,7 +698,11 @@ void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgor
                                                  DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneSize.SetHeight(layoutAlgorithm->GetRealNavBarHeight());
     DimensionRect hotZoneRegion;
-    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+    if (navigationMode_ == NavigationMode::STACK) {
+        hotZoneRegion.SetSize(DimensionSize(Dimension(0.0f), Dimension(0.0f)));
+    } else {
+        hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+    }
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
 
     std::vector<DimensionRect> mouseRegion;
@@ -656,8 +717,12 @@ void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgor
     auto dragRectOffset = layoutAlgorithm->GetNavBarOffset();
     dragRectOffset.SetX(-DEFAULT_DRAG_REGION.ConvertToPx());
     dragRect_.SetOffset(dragRectOffset);
-    dragRect_.SetSize(SizeF(
-        DEFAULT_DRAG_REGION.ConvertToPx() * DEFAULT_HALF + realDividerWidth_, layoutAlgorithm->GetRealNavBarHeight()));
+    if (navigationMode_ == NavigationMode::STACK) {
+        dragRect_.SetSize(SizeF(0.0f, 0.0f));
+    } else {
+        dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * DEFAULT_HALF + realDividerWidth_,
+            layoutAlgorithm->GetRealNavBarHeight()));
+    }
 
     std::vector<DimensionRect> responseRegion;
     DimensionOffset responseOffset(dragRectOffset);
@@ -671,15 +736,17 @@ void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgor
 void NavigationPattern::OnWindowHide()
 {
     auto curTopNavPath = navigationStack_->GetTopNavPath();
-    CHECK_NULL_VOID_NOLOG(curTopNavPath.has_value());
+    CHECK_NULL_VOID(curTopNavPath.has_value());
     CHECK_NULL_VOID(curTopNavPath->second);
     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
+    CHECK_NULL_VOID(curTopNavDestination);
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(curTopNavDestination->GetPattern());
     CHECK_NULL_VOID(navDestinationPattern);
-    CHECK_NULL_VOID_NOLOG(navDestinationPattern->GetIsOnShow());
+    CHECK_NULL_VOID(navDestinationPattern->GetIsOnShow());
     auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
+    NotifyPageHide(curTopNavPath->first);
     eventHub->FireOnHiddenEvent();
     navDestinationPattern->SetIsOnShow(false);
 }
@@ -687,14 +754,16 @@ void NavigationPattern::OnWindowHide()
 void NavigationPattern::OnWindowShow()
 {
     auto curTopNavPath = navigationStack_->GetTopNavPath();
-    CHECK_NULL_VOID_NOLOG(curTopNavPath.has_value());
+    CHECK_NULL_VOID(curTopNavPath.has_value());
     CHECK_NULL_VOID(curTopNavPath->second);
     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
+    CHECK_NULL_VOID(curTopNavDestination);
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(curTopNavDestination->GetPattern());
     CHECK_NULL_VOID(navDestinationPattern);
-    CHECK_NULL_VOID_NOLOG(!(navDestinationPattern->GetIsOnShow()));
+    CHECK_NULL_VOID(!(navDestinationPattern->GetIsOnShow()));
     auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
+    NotifyPageShow(curTopNavPath->first);
     eventHub->FireOnShownEvent();
     navDestinationPattern->SetIsOnShow(true);
 }

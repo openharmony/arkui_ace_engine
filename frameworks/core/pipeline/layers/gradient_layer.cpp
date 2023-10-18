@@ -50,11 +50,8 @@ void GradientLayer::AddToScene(SceneBuilder& builder, double x, double y)
             colorStops[i] = (points_[i].GetX() + points_[i].GetY()) / endPositionTotal;
         }
         tonic::Float64List matrix;
-#ifdef USE_SYSTEM_SKIA
-        gradientShader->initLinear(endPoints, colorList, colorStops, SkShader::kClamp_TileMode, matrix);
-#else
+
         gradientShader->initLinear(endPoints, colorList, colorStops, SkTileMode::kClamp, matrix);
-#endif
         builder.PushShaderMask(gradientShader, x + x_ + rect_.Left(), x + x_ + rect_.Right(), y + y_ + rect_.Top(),
             y + y_ + rect_.Bottom(), static_cast<int32_t>(blendMode_));
         pushSuccess = true;

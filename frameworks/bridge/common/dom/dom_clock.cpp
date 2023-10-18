@@ -33,7 +33,6 @@ void DOMClock::PrepareSpecializedComponent()
 {
     const auto& declaration = AceType::DynamicCast<ClockDeclaration>(declaration_);
     if (!declaration) {
-        LOGE("clock declaration is null!");
         return;
     }
     declaration->SetClockConfig(clockConfig_);
@@ -44,7 +43,6 @@ void DOMClock::InitializeStyle()
 {
     auto declaration = AceType::DynamicCast<ClockDeclaration>(declaration_);
     if (!declaration) {
-        LOGE("clock declaration is null!");
         return;
     }
     declaration->InitializeStyle();

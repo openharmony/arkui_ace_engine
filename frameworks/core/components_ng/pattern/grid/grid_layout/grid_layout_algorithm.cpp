@@ -14,15 +14,14 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+
 #include <cstdint>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
-#include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
@@ -234,6 +233,26 @@ float GridLayoutAlgorithm::GetItemSize(int32_t row, int32_t col, bool height) co
     return 0.0;
 }
 
+GridItemRect GridLayoutAlgorithm::GetItemRect(const RefPtr<GridLayoutProperty>& gridLayoutProperty,
+    const RefPtr<GridItemLayoutProperty>& childLayoutProperty, int32_t index) const
+{
+    GridItemRect rect;
+    if (gridLayoutProperty->GetLayoutOptions().has_value()) {
+        auto options = gridLayoutProperty->GetLayoutOptions().value();
+        if (options.getRectByIndex) {
+            rect = options.getRectByIndex(index);
+        }
+    } else {
+        if (childLayoutProperty) {
+            rect.rowStart = childLayoutProperty->GetRowStart().value_or(-1);
+            rect.columnStart = childLayoutProperty->GetColumnStart().value_or(-1);
+            rect.rowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - rect.rowStart + 1, 1);
+            rect.columnSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - rect.columnStart + 1, 1);
+        }
+    }
+    return rect;
+}
+
 void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -256,6 +275,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     itemsPosition_.clear();
     gridLayoutInfo_.gridMatrix_.clear();
     gridLayoutInfo_.startIndex_ = 0;
+    gridLayoutInfo_.hasBigItem_  = false;
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childLayoutWrapper) {
@@ -265,17 +285,15 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (!layoutProperty) {
             break;
         }
-        auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(layoutProperty);
-        int32_t itemRowStart = -1;
-        int32_t itemColStart = -1;
-        int32_t itemRowSpan = 1;
-        int32_t itemColSpan = 1;
 
-        if (childLayoutProperty) {
-            itemRowStart = childLayoutProperty->GetRowStart().value_or(-1);
-            itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
-            itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
-            itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
+        auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(layoutProperty);
+        auto rect = GetItemRect(gridLayoutProperty, childLayoutProperty, index);
+        int32_t itemRowStart = rect.rowStart;
+        int32_t itemColStart = rect.columnStart;
+        int32_t itemRowSpan = rect.rowSpan;
+        int32_t itemColSpan = rect.columnSpan;
+        if (itemRowSpan > 1 || itemColSpan > 1) {
+            gridLayoutInfo_.hasBigItem_ = true;
         }
 
         if (itemRowStart >= 0 && itemRowStart < mainCount_ && itemColStart >= 0 && itemColStart < crossCount_ &&

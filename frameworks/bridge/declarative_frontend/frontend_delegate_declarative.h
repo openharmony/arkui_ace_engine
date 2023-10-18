@@ -26,6 +26,7 @@
 #include "base/utils/measure_util.h"
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
@@ -80,7 +81,8 @@ public:
     void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
     // JSFrontend delegate functions.
-    void RunPage(const std::string& url, const std::string& params, const std::string& profile);
+    void RunPage(
+        const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter = false);
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const;
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data);
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
@@ -182,7 +184,8 @@ public:
     double MeasureText(const MeasureContext& context) override;
     Size MeasureTextSize(const MeasureContext& context) override;
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
@@ -252,9 +255,10 @@ public:
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
     void GetSnapshot(const std::string& componentId,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override;
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback) override;
     void CreateSnapshot(std::function<void()>&& customBuilder,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override;
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        bool enableInspector) override;
 
     void RequestAnimationFrame(const std::string& callbackId) override;
 
@@ -306,7 +310,8 @@ public:
         std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap);
 
     void InitializeRouterManager(
-        NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback);
+        NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
+        NG::UpdateRootComponentCallback&& updateRootComponentCallback);
 
     const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const
     {

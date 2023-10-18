@@ -147,7 +147,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
 
     auto property = host->GetLayoutProperty();
-    CHECK_NULL_RETURN_NOLOG(host, false);
+    CHECK_NULL_RETURN(host, false);
     return property->GetPaddingProperty() != nullptr;
 }
 
@@ -214,21 +214,21 @@ void WaterFlowPattern::SetAccessibilityAction()
     accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID_NOLOG(pattern->IsScrollable());
+        CHECK_NULL_VOID(pattern->IsScrollable());
         pattern->ScrollPage(false);
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID_NOLOG(pattern->IsScrollable());
+        CHECK_NULL_VOID(pattern->IsScrollable());
         pattern->ScrollPage(true);
     });
 }
 
 void WaterFlowPattern::ScrollPage(bool reverse)
 {
-    CHECK_NULL_VOID_NOLOG(IsScrollable());
+    CHECK_NULL_VOID(IsScrollable());
 
     auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -248,5 +248,25 @@ void WaterFlowPattern::ScrollPage(bool reverse)
 void WaterFlowPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("friction", GetFriction());
+}
+
+std::string WaterFlowPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("beginIndex", GetBeginIndex());
+    Dimension dimension(GetStoredOffset());
+    jsonObj->Put("offset", dimension.ConvertToVp());
+    return jsonObj->ToString();
+}
+
+void WaterFlowPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    UpdateStartIndex(info->GetInt("beginIndex"));
+    Dimension dimension(info->GetDouble("offset"), DimensionUnit::VP);
+    SetRestoreOffset(dimension.ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

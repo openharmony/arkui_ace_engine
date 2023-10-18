@@ -148,6 +148,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
 
 void SwitchModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& offset) const
 {
+    CHECK_NULL_VOID(showHoverEffect_);
     RSBrush brush;
     brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);

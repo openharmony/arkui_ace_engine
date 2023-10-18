@@ -94,7 +94,7 @@ public:
             auto right = weakRight.Upgrade();
             if (left && right) {
                 return left->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE) <
-                    right->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
+                       right->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
             }
             return false;
         }
@@ -130,7 +130,7 @@ public:
     RefPtr<LayoutWrapperNode> UpdateLayoutWrapper(
         RefPtr<LayoutWrapperNode> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
 
-    std::optional<UITask> CreateLayoutTask(bool forceUseMainThread = false);
+    void CreateLayoutTask(bool forceUseMainThread = false);
 
     std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
 
@@ -230,7 +230,7 @@ public:
     static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
-    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override;
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
@@ -352,7 +352,7 @@ public:
 
     bool HasPositionProp() const
     {
-        CHECK_NULL_RETURN_NOLOG(renderContext_, false);
+        CHECK_NULL_RETURN(renderContext_, false);
         return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
     }
 
@@ -387,6 +387,11 @@ public:
     bool IsDraggable() const
     {
         return draggable_;
+    }
+
+    bool IsLayoutComplete() const
+    {
+        return isLayoutComplete_;
     }
 
     bool IsUserSet() const
@@ -517,7 +522,7 @@ public:
 
     void ForceSyncGeometryNode()
     {
-        CHECK_NULL_VOID_NOLOG(renderContext_);
+        CHECK_NULL_VOID(renderContext_);
         oldGeometryNode_.Reset();
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
     }
@@ -579,9 +584,9 @@ private:
 
     // dump self info.
     void DumpInfo() override;
-
     void DumpOverlayInfo();
-
+    void DumpCommonInfo();
+    void DumpAdvanceInfo() override;
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -599,6 +604,11 @@ private:
 
     // set costom background layoutConstraint
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
+
+    void GetPercentSensitive();
+    void UpdatePercentSensitive();
+
+    void UpdateParentAbsoluteOffset();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -639,6 +649,7 @@ private:
     bool isActive_ = false;
     bool isResponseRegion_ = false;
     bool bypass_ = false;
+    bool isLayoutComplete_ = false;
 
     double lastVisibleRatio_ = 0.0;
 

@@ -56,7 +56,7 @@ void DialogContainer::InitializeTouchEventCallback()
             [context, event, markProcess, id]() {
                 context->OnTouchEvent(event);
                 context->NotifyDispatchTouchEventDismiss(event);
-                CHECK_NULL_VOID_NOLOG(markProcess);
+                CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
             TaskExecutor::TaskType::UI);
@@ -73,7 +73,7 @@ void DialogContainer::InitializeMouseEventCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess, id]() {
                 context->OnMouseEvent(event);
-                CHECK_NULL_VOID_NOLOG(markProcess);
+                CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
             TaskExecutor::TaskType::UI);
@@ -90,7 +90,7 @@ void DialogContainer::InitializeAxisEventCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess, id]() {
                 context->OnAxisEvent(event);
-                CHECK_NULL_VOID_NOLOG(markProcess);
+                CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
             TaskExecutor::TaskType::UI);
@@ -208,14 +208,14 @@ void DialogContainer::InitializeCallback()
 RefPtr<DialogContainer> DialogContainer::GetContainer(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN_NOLOG(container, nullptr);
+    CHECK_NULL_RETURN(container, nullptr);
     auto dialogContainer = AceType::DynamicCast<DialogContainer>(container);
     return dialogContainer;
 }
 
 void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
 {
-    LOGI("DialogContainer::DestroyContainer begin %{public}d", instanceId);
+    LOGI("DialogContainer DestroyContainer begin %{public}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     container->Destroy();
@@ -226,19 +226,18 @@ void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<v
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     taskExecutor->PostTask(
         [instanceId, destroyCallback] {
-            LOGI("DialogContainer::DestroyContainer Remove on Platform thread...");
+            LOGI("DialogContainer DestroyContainer Remove on Platform thread...");
             EngineHelper::RemoveEngine(instanceId);
             AceEngine::Get().RemoveContainer(instanceId);
-            CHECK_NULL_VOID_NOLOG(destroyCallback);
+            CHECK_NULL_VOID(destroyCallback);
             destroyCallback();
         },
         TaskExecutor::TaskType::PLATFORM);
-    LOGI("DialogContainer::DestroyContainer end");
 }
 
 void DialogContainer::Destroy()
 {
-    LOGI("DialogContainer::Destroy begin");
+    LOGI("DialogContainer Destroy begin");
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
@@ -264,20 +263,18 @@ void DialogContainer::Destroy()
     }
     resRegister_.Reset();
     assetManager_.Reset();
-    LOGI("DialogContainer::Destroy end");
 }
 
 void DialogContainer::DestroyView()
 {
-    LOGI("DialogContainer::DestroyView begin");
+    LOGI("DialogContainer DestroyView begin");
     ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID_NOLOG(aceView_);
+    CHECK_NULL_VOID(aceView_);
     auto* aceView = static_cast<AceViewOhos*>(aceView_);
     if (aceView) {
         aceView->DecRefCount();
     }
     aceView_ = nullptr;
-    LOGI("DialogContainer::DestroyView end");
 }
 
 void DialogContainer::SetView(
@@ -404,23 +401,23 @@ void DialogContainer::DumpHeapSnapshot(bool isPrivate)
     taskExecutor_->PostTask(
         [isPrivate, frontend = WeakPtr<Frontend>(frontend_)] {
             auto sp = frontend.Upgrade();
-            CHECK_NULL_VOID_NOLOG(sp);
+            CHECK_NULL_VOID(sp);
             sp->DumpHeapSnapshot(isPrivate);
         },
         TaskExecutor::TaskType::JS);
 }
 void DialogContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window>& uiWindow)
 {
-    CHECK_NULL_VOID_NOLOG(uiWindow);
+    CHECK_NULL_VOID(uiWindow);
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     container->SetUIWindowInner(uiWindow);
 }
 
 sptr<OHOS::Rosen::Window> DialogContainer::GetUIWindow(int32_t instanceId)
 {
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_RETURN_NOLOG(container, nullptr);
+    CHECK_NULL_RETURN(container, nullptr);
     return container->GetUIWindowInner();
 }
 
@@ -437,7 +434,7 @@ sptr<OHOS::Rosen::Window> DialogContainer::GetUIWindowInner() const
 void DialogContainer::ShowToast(
     int32_t instanceId, const std::string& message, int32_t duration, const std::string& bottom)
 {
-    LOGI("DialogContainer::ShowToast begin");
+    LOGI("DialogContainer ShowToast begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
     auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
@@ -450,15 +447,14 @@ void DialogContainer::ShowToast(
             DialogContainer::HideWindow(instanceId);
         }
     });
-    delegate->ShowToast(message, duration, bottom);
-    LOGI("DialogContainer::ShowToast end");
+    delegate->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT);
 }
 
 void DialogContainer::ShowDialog(int32_t instanceId, const std::string& title, const std::string& message,
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
-    LOGI("DialogContainer::ShowDialog begin");
+    LOGI("DialogContainer ShowDialog begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
     auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
@@ -467,19 +463,18 @@ void DialogContainer::ShowDialog(int32_t instanceId, const std::string& title, c
     CHECK_NULL_VOID(delegate);
     delegate->ShowDialog(
         title, message, buttons, autoCancel, std::move(callback), callbacks, [instanceId = instanceId](bool isShow) {
-            LOGI("DialogContainer::ShowDialog HideWindow instanceId = %{public}d", instanceId);
+            LOGI("DialogContainer ShowDialog HideWindow instanceId = %{public}d", instanceId);
             if (!isShow) {
                 DialogContainer::HideWindow(instanceId);
             }
         });
-    LOGI("DialogContainer::ShowDialog end");
 }
 
 void DialogContainer::ShowDialog(int32_t instanceId, const PromptDialogAttr& dialogAttr,
     const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
-    LOGI("DialogContainer::ShowDialog begin");
+    LOGI("DialogContainer ShowDialog begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
     auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
@@ -488,37 +483,35 @@ void DialogContainer::ShowDialog(int32_t instanceId, const PromptDialogAttr& dia
     CHECK_NULL_VOID(delegate);
     delegate->ShowDialog(
         dialogAttr, buttons, std::move(callback), callbacks, [instanceId = instanceId](bool isShow) {
-            LOGI("DialogContainer::ShowDialog HideWindow instanceId = %{public}d", instanceId);
+            LOGI("DialogContainer ShowDialog HideWindow instanceId = %{public}d", instanceId);
             if (!isShow) {
                 DialogContainer::HideWindow(instanceId);
             }
         });
-    LOGI("DialogContainer::ShowDialog end");
 }
 
 void DialogContainer::ShowActionMenu(int32_t instanceId, const std::string& title,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
-    LOGI("DialogContainer::ShowActionMenu begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
     auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
     CHECK_NULL_VOID(frontend);
     auto delegate = frontend->GetDelegate();
     CHECK_NULL_VOID(delegate);
+    LOGI("show action menu begin");
     delegate->ShowActionMenu(title, button, std::move(callback), [instanceId = instanceId](bool isShow) {
-        LOGI("DialogContainer::ShowActionMenu HideWindow instanceId = %{public}d", instanceId);
+        LOGI("DialogContainer ShowActionMenu HideWindow instanceId = %{public}d", instanceId);
         if (!isShow) {
             DialogContainer::HideWindow(instanceId);
         }
     });
-    LOGI("DialogContainer::ShowActionMenu end");
 }
 
 bool DialogContainer::ShowToastDialogWindow(
     int32_t instanceId, int32_t posX, int32_t posY, int32_t width, int32_t height, bool isToast)
 {
-    LOGI("DialogContainer::ShowToastDialogWindow begin");
+    LOGI("DialogContainer ShowToastDialogWindow begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_RETURN(container, false);
     auto window = container->GetUIWindowInner();
@@ -530,66 +523,58 @@ bool DialogContainer::ShowToastDialogWindow(
     window->SetNeedDefaultAnimation(false);
     OHOS::Rosen::WMError ret = window->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DialogContainer::ShowToastDialogWindow Show window failed code: %{public}d", static_cast<int32_t>(ret));
+        LOGE("DialogContainer ShowToastDialogWindow Show window failed code: %{public}d", static_cast<int32_t>(ret));
         return false;
     }
     ret = window->MoveTo(posX, posY);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DialogContainer::ShowToastDialogWindow MoveTo window failed code: %{public}d", static_cast<int32_t>(ret));
+        LOGE("DialogContainer ShowToastDialogWindow MoveTo window failed code: %{public}d", static_cast<int32_t>(ret));
         return false;
     }
     ret = window->Resize(width, height);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DialogContainer::ShowToastDialogWindow Resize window failed code: %{public}d", static_cast<int32_t>(ret));
+        LOGE("DialogContainer ShowToastDialogWindow Resize window failed code: %{public}d", static_cast<int32_t>(ret));
         return false;
     }
-    LOGI("DialogContainer::ShowToastDialogWindow end");
     return true;
 }
 
 bool DialogContainer::HideWindow(int32_t instanceId)
 {
-    LOGI("DialogContainer::HideWindow begin");
+    LOGI("DialogContainer HideWindow begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_RETURN(container, false);
     auto window = container->GetUIWindowInner();
     CHECK_NULL_RETURN(window, false);
     OHOS::Rosen::WMError ret = window->Hide();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DialogContainer::HideWindow Failed to hide the window.");
+        LOGE("DialogContainer HideWindow Failed to hide the window.");
         return false;
     }
     sptr<OHOS::Rosen::Window> uiWindow = nullptr;
     DialogContainer::SetUIWindow(instanceId, uiWindow);
-    LOGI("DialogContainer::HideWindow end");
     return true;
 }
 
 bool DialogContainer::CloseWindow(int32_t instanceId)
 {
-    LOGI("DialogContainer::CloseWindow begin");
+    LOGI("DialogContainer CloseWindow begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_RETURN(container, false);
     auto window = container->GetUIWindowInner();
     CHECK_NULL_RETURN(window, false);
     OHOS::Rosen::WMError ret = window->Close();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DialogContainer::CloseWindow Failed to close the window.");
+        LOGE("DialogContainer CloseWindow Failed to close the window.");
         return false;
     }
     sptr<OHOS::Rosen::Window> uiWindow = nullptr;
     DialogContainer::SetUIWindow(instanceId, uiWindow);
-    LOGI("DialogContainer::CloseWindow end");
     return true;
 }
 
 bool DialogContainer::OnBackPressed(int32_t instanceId)
 {
-    LOGI("DialogContainer::OnBackPressed");
-    bool ret = DialogContainer::CloseWindow(instanceId);
-    if (!ret) {
-        LOGE("DialogContainer::OnBackPressed close window faied.");
-    }
-    return ret;
+    return DialogContainer::CloseWindow(instanceId);
 }
 } // namespace OHOS::Ace::Platform

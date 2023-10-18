@@ -82,7 +82,7 @@ public:
             CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
             auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
             paintMethod->SetAxis(swiperPattern->GetDirection());
-            paintMethod->SetCurrentIndex(swiperPattern->GetCurrentFirstIndex());
+            paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
             paintMethod->SetItemCount(swiperPattern->TotalCount());
             paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
             paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
@@ -90,6 +90,9 @@ public:
             paintMethod->SetIsHover(isHover_);
             paintMethod->SetIsPressed(isPressed_);
             paintMethod->SetHoverPoint(hoverPoint_);
+            if (mouseClickIndex_) {
+                mouseClickIndex_ = swiperPattern->GetLoopIndex(mouseClickIndex_.value());
+            }
             paintMethod->SetMouseClickIndex(mouseClickIndex_);
             paintMethod->SetIsTouchBottom(touchBottomType_);
             paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
@@ -101,17 +104,16 @@ public:
             CHECK_NULL_RETURN(host, nullptr);
             auto indicatorGeometryNode = host->GetGeometryNode();
             CHECK_NULL_RETURN(indicatorGeometryNode, nullptr);
-            auto indicatorFrameOffset = indicatorGeometryNode->GetFrameOffset();
             auto boundsValue =
                 (geometryNode->GetFrameSize().Width() - indicatorGeometryNode->GetFrameSize().Width()) * 0.5f;
             auto boundsRectOriginX = -boundsValue;
-            auto boundsRectOriginY = indicatorFrameOffset.GetY();
+            auto boundsRectOriginY = 0.0f;
             auto boundsRectWidth = geometryNode->GetFrameSize().Width();
             auto boundsRectHeight = indicatorGeometryNode->GetFrameSize().Height();
             if (swiperPattern->GetDirection() == Axis::VERTICAL) {
                 boundsValue =
                     (geometryNode->GetFrameSize().Height() - indicatorGeometryNode->GetFrameSize().Height()) * 0.5f;
-                boundsRectOriginX = indicatorFrameOffset.GetX();
+                boundsRectOriginX = 0.0f;
                 boundsRectOriginY = -boundsValue;
                 boundsRectWidth = indicatorGeometryNode->GetFrameSize().Width();
                 boundsRectHeight = geometryNode->GetFrameSize().Height();
@@ -187,6 +189,8 @@ private:
     PointF hoverPoint_;
     PointF dragStartPoint_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
+    bool isClicked_ = false;
+    bool isRepeatClicked_ = false;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;

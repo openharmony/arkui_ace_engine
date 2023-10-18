@@ -39,7 +39,7 @@ bool ScrollableController::AnimateTo(
 Offset ScrollableController::GetCurrentOffset() const
 {
     auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(pattern, Offset::Zero());
+    CHECK_NULL_RETURN(pattern, Offset::Zero());
     auto axis = pattern->GetAxis();
     if (axis == Axis::NONE) {
         return Offset::Zero();
@@ -52,7 +52,7 @@ Offset ScrollableController::GetCurrentOffset() const
 Axis ScrollableController::GetScrollDirection() const
 {
     auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(pattern, Axis::NONE);
+    CHECK_NULL_RETURN(pattern, Axis::NONE);
     return pattern->GetAxis();
 }
 } // namespace OHOS::Ace::NG

@@ -847,21 +847,21 @@ size_t FrontendDelegateDeclarativeNG::GetComponentsCount()
     return pageNode->GetAllDepthChildrenCount();
 }
 
-void FrontendDelegateDeclarativeNG::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void FrontendDelegateDeclarativeNG::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
     LOGD("FrontendDelegateDeclarativeNG ShowToast.");
 
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto task = [durationTime, message, bottom, isRightToLeft, containerId = Container::CurrentId()](
+    auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
                     const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
         LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
-        overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
+        overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
     };
     MainWindowOverlay(std::move(task));
-    return;
 }
 
 void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProperties,
@@ -966,7 +966,7 @@ std::string FrontendDelegateDeclarativeNG::GetContentInfo()
 }
 
 void FrontendDelegateDeclarativeNG::CreateSnapshot(
-    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback)
+    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     ViewStackModel::GetInstance()->NewScope();
@@ -974,7 +974,7 @@ void FrontendDelegateDeclarativeNG::CreateSnapshot(
     customBuilder();
     auto customNode = ViewStackModel::GetInstance()->Finish();
 
-    NG::ComponentSnapshot::Create(customNode, std::move(callback));
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector);
 #endif
 }
 

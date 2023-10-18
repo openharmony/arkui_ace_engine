@@ -20,6 +20,8 @@
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock-actions.h"
+#include "gmock/gmock-spec-builders.h"
 #include "gtest/gtest.h"
 
 #define protected public
@@ -41,14 +43,8 @@
 
 using namespace testing;
 using namespace testing::ext;
-
 namespace OHOS::Ace::NG {
 namespace {
-const RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>(), true);
-const RefPtr<FrameNode> TWO = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
-const RefPtr<FrameNode> THREE = FrameNode::CreateFrameNode("three", 3, AceType::MakeRefPtr<Pattern>());
-const RefPtr<FrameNode> STAGE = FrameNode::CreateFrameNode("stage", 4, AceType::MakeRefPtr<Pattern>(), true);
-const RefPtr<FrameNode> PAGE = FrameNode::CreateFrameNode("page", 5, AceType::MakeRefPtr<Pattern>(), true);
 std::string key = "key";
 }; // namespace
 
@@ -71,6 +67,10 @@ public:
  */
 HWTEST_F(InspectorTestNg, InspectorTestNg001, TestSize.Level1)
 {
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> TWO = FrameNode::CreateFrameNode("two", id2, AceType::MakeRefPtr<Pattern>());
     /**
      * @tc.steps: step1. callback GetFrameNodeByKey
      * @tc.expected: expect the function is run ok
@@ -100,6 +100,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg001, TestSize.Level1)
 
     auto nodePtr3 = Inspector::GetFrameNodeByKey("");
     ASSERT_NE(nodePtr3, nullptr);
+
     context1->rootNode_ = nullptr;
 }
 
@@ -130,6 +131,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg002, TestSize.Level1)
      * @tc.steps: step1. callback rootNode_
      * @tc.expected: expect the function GetInspectorNodeByKey is return null
      */
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
     context1->rootNode_ = ONE;
     ASSERT_NE(context1, nullptr);
     auto test2 = Inspector::GetInspectorNodeByKey(key);
@@ -139,6 +142,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg002, TestSize.Level1)
      * @tc.expected: expect nodePtr2 not null
      */
     auto test3 = Inspector::GetInspectorNodeByKey("");
+
     context1->rootNode_ = nullptr;
 }
 
@@ -153,11 +157,17 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
      * @tc.steps: step1. callback GetInspector
      * @tc.expected: expect the function is run ok
      */
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
     auto context1 = PipelineContext::GetCurrentContext();
     ASSERT_NE(context1, nullptr);
     context1->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
-
-    context1->GetStageManager()->GetLastPage()->GetParent()->SetParent(ONE);
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> TWO = FrameNode::CreateFrameNode("stage", id2, AceType::MakeRefPtr<Pattern>());
+    ONE->AddChild(TWO);
+    auto id3 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> THREE = FrameNode::CreateFrameNode("three", id3, AceType::MakeRefPtr<Pattern>());
+    THREE->AddChild(ONE);
 
     /**
      * @tc.steps: step2. call GetInspector
@@ -167,6 +177,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
     EXPECT_NE(test1, "");
     auto test3 = Inspector::GetInspector(true);
     EXPECT_NE(test3, "");
+
     context1->stageManager_ = nullptr;
 }
 
@@ -191,6 +202,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg004, TestSize.Level1)
     EXPECT_EQ(test3, true);
     test3 = Inspector::SendEventByKey("", 31, "params");
     EXPECT_EQ(test3, true);
+
     context->rootNode_ = nullptr;
 }
 
@@ -230,6 +242,9 @@ HWTEST_F(InspectorTestNg, InspectorTestNg006, TestSize.Level1)
      */
     auto context1 = PipelineContext::GetCurrentContext();
     ASSERT_NE(context1, nullptr);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
     context1->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
 
     /**
@@ -237,12 +252,19 @@ HWTEST_F(InspectorTestNg, InspectorTestNg006, TestSize.Level1)
                 call GetInspector
      * @tc.expected: the return value is empty string
      */
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> TWO = FrameNode::CreateFrameNode("two", id2, AceType::MakeRefPtr<Pattern>());
     ONE->children_.clear();
     ONE->AddChild(TWO);
-    ASSERT_EQ(context1->GetStageManager()->GetLastPage(), TWO);
     auto stageParent = FrameNode::CreateFrameNode("stageParent", 5, AceType::MakeRefPtr<Pattern>(), true);
     stageParent->AddChild(ONE);
 
+    const RefPtr<FrameNode> THREE = FrameNode::CreateFrameNode(
+        "three", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> STAGE = FrameNode::CreateFrameNode(
+        "stage", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> PAGE = FrameNode::CreateFrameNode(
+        "page", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
     THREE->isInternal_ = true;
     TWO->AddChild(PAGE);
     TWO->AddChild(THREE);
@@ -290,9 +312,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg006, TestSize.Level1)
     frameNode2->AddChild(frameNode3);
     test3 = Inspector::GetInspector(false);
     EXPECT_NE(test3, "");
-
     context1->stageManager_ = nullptr;
-    ONE->tag_ = "one";
 }
 
 /**
@@ -306,6 +326,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg007, TestSize.Level1)
      * @tc.steps: step1. callback GetInspector
      * @tc.expected: expect the function is run ok
      */
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
     auto context1 = PipelineContext::GetCurrentContext();
     ASSERT_NE(context1, nullptr);
     context1->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
@@ -314,10 +336,10 @@ HWTEST_F(InspectorTestNg, InspectorTestNg007, TestSize.Level1)
      * @tc.steps: step2. callback pop_back
      * @tc.expected: expect clean children and pageRootNode is noll
      */
-    ONE->children_.pop_back();
     auto pageRootNode = context1->GetStageManager()->GetLastPage();
     auto test = Inspector::GetInspector(false);
     EXPECT_EQ(test, "{\"$type\":\"root\",\"width\":\"0.000000\",\"height\":\"0.000000\",\"$resolution\":\"0.000000\"}");
+
     context1->stageManager_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

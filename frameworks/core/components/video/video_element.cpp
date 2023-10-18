@@ -310,7 +310,7 @@ void VideoElement::CreateMediaPlayer()
 void VideoElement::PreparePlayer()
 {
     SetVolume(isMute_ ? 0.0f : 1.0f);
-    CHECK_NULL_VOID_NOLOG(hasSrcChanged_);
+    CHECK_NULL_VOID(hasSrcChanged_);
     CHECK_NULL_VOID(mediaPlayer_);
     (void)mediaPlayer_->Reset();
     std::string filePath = src_;

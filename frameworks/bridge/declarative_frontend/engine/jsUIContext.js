@@ -12,6 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+var KeyboardAvoidMode;
+(function (KeyboardAvoidMode) {
+  KeyboardAvoidMode[KeyboardAvoidMode["OFFSET"] = 0] = "OFFSET";
+  KeyboardAvoidMode[KeyboardAvoidMode["RESIZE"] = 1] = "RESIZE";
+})(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
 class Font {
     /**
      * Construct new instance of Font.
@@ -161,6 +167,19 @@ class UIContext {
         }
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    setKeyboardAvoidMode(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        __KeyboardAvoid__.setKeyboardAvoid(value);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getKeyboardAvoidMode() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let keyBoardAvoidMode = __KeyboardAvoid__.getKeyboardAvoid();
+        __JSScopeUtil__.restoreInstanceId();
+        return keyBoardAvoidMode;
+    }
 }
 class ComponentUtils {
     /**
@@ -171,7 +190,7 @@ class ComponentUtils {
      */
     constructor(instanceId) {
         this.instanceId_ = instanceId;
-        this.ohos_componentUtils = globalThis.requireNapi('componentUtils');
+        this.ohos_componentUtils = globalThis.requireNapi('arkui.componentUtils');
     }
     getRectangleById(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);

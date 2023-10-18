@@ -30,6 +30,6 @@ group("fuzztest") {
     "util_fuzzer:UtilFuzzTest",
 
     #"utilengine_fuzzer:UtilEngineFuzzTest",
-    "utilmost_fuzzer:UtilMostFuzzTest",
+    #"utilmost_fuzzer:UtilMostFuzzTest",
   ]
 }

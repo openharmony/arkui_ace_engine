@@ -243,6 +243,7 @@ public:
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
     void PostJsTask(std::function<void()>&& task) override;
+    void PostUITask(std::function<void()>&& task) override;
 
     const std::string& GetAppID() const override;
     const std::string& GetAppName() const override;
@@ -256,7 +257,8 @@ public:
     double MeasureText(const MeasureContext& context) override;
     Size MeasureTextSize(const MeasureContext& context) override;
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
@@ -313,10 +315,6 @@ public:
     SingleTaskExecutor GetAnimationJsTask() override;
 
     SingleTaskExecutor GetUiTask() override;
-
-    void GetSnapshot(const std::string& componentId,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override
-    {}
 
     void LoadResourceConfiguration(std::map<std::string, std::string>& sortedResourcePath,
         std::unique_ptr<JsonValue>& currentResourceData) override;

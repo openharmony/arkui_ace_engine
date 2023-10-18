@@ -248,7 +248,7 @@ void CheckBoxPattern::CheckPageNode()
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     auto pageNode = stageManager->GetPageById(host->GetPageId());
-    CHECK_NULL_VOID_NOLOG(pageNode);
+    CHECK_NULL_VOID(pageNode);
     if (pageNode->GetId() != prePageId) {
         auto eventHub = host->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
@@ -368,6 +368,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBo
     CHECK_NULL_VOID(groupPaintProperty);
     auto pattern = checkBoxGroupNode->GetPattern<CheckBoxGroupPattern>();
     CHECK_NULL_VOID(pattern);
+    auto preStatus = groupPaintProperty->GetSelectStatus();
     if (isSameAsSelf) {
         if (select) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
@@ -387,6 +388,10 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBo
     }
 
     auto status = groupPaintProperty->GetSelectStatus();
+    if (preStatus != status && (preStatus == CheckBoxGroupPaintProperty::SelectStatus::ALL ||
+                                   status == CheckBoxGroupPaintProperty::SelectStatus::ALL)) {
+        pattern->SetSkipFlag(true);
+    }
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -424,11 +429,12 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* check
             isAllCheckBoxSelected = false;
         }
     }
-    CHECK_NULL_VOID_NOLOG(checkBoxGroupNode);
+    CHECK_NULL_VOID(checkBoxGroupNode);
     auto groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(groupPaintProperty);
     auto pattern = checkBoxGroupNode->GetPattern<CheckBoxGroupPattern>();
     CHECK_NULL_VOID(pattern);
+    auto preStatus = groupPaintProperty->GetSelectStatus();
     if (haveCheckBoxSelected) {
         if (isAllCheckBoxSelected) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
@@ -443,6 +449,10 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* check
     }
     checkBoxGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto status = groupPaintProperty->GetSelectStatus();
+    if (preStatus != status && (preStatus == CheckBoxGroupPaintProperty::SelectStatus::ALL ||
+                                   status == CheckBoxGroupPaintProperty::SelectStatus::ALL)) {
+        pattern->SetSkipFlag(true);
+    }
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -490,7 +500,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         }
     }
 
-    CHECK_NULL_VOID_NOLOG(checkBoxGroupNode);
+    CHECK_NULL_VOID(checkBoxGroupNode);
     auto groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     if (groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
         return;

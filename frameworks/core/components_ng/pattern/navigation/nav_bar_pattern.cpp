@@ -66,7 +66,7 @@ void UpdateTitleFontSize(const RefPtr<NavBarNode>& hostNode, const Dimension& fo
     auto titleNode = AceType::DynamicCast<FrameNode>(hostNode->GetTitle());
     CHECK_NULL_VOID(titleNode);
     auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID_NOLOG(titleLayoutProperty);
+    CHECK_NULL_VOID(titleLayoutProperty);
     titleLayoutProperty->UpdateFontSize(fontSize);
     titleNode->MarkModifyDone();
 }
@@ -143,9 +143,8 @@ void InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode, bool isMoreBut
 void UpdateBarItemNodeWithItem(
     const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem, const bool isButtonEnabled)
 {
-    if (PipelineContext::GetCurrentContext()->GetMinPlatformVersion() <
-            static_cast<int32_t>(PlatformVersion::VERSION_TEN) &&
-        barItem.text.has_value() && !barItem.text.value().empty()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) && barItem.text.has_value() &&
+        !barItem.text.value().empty()) {
         auto textNode = CreateBarItemTextNode(barItem.text.value());
         barItemNode->SetTextNode(textNode);
         barItemNode->AddChild(textNode);
@@ -267,6 +266,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_RETURN(menuNode, nullptr);
     menuNode->Clean();
+    menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     auto rowProperty = menuNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(rowProperty, nullptr);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
@@ -378,7 +378,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
 
 void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    CHECK_NULL_VOID_NOLOG(navBarNode->GetTitle());
+    CHECK_NULL_VOID(navBarNode->GetTitle());
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto theme = NavigationGetTheme();
@@ -402,7 +402,7 @@ void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>
 
 void BuildSubtitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    CHECK_NULL_VOID_NOLOG(navBarNode->GetSubtitle());
+    CHECK_NULL_VOID(navBarNode->GetSubtitle());
     if (navBarNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }
@@ -505,7 +505,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
 
 void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 {
-    CHECK_NULL_VOID_NOLOG(hostNode->GetToolBarNode());
+    CHECK_NULL_VOID(hostNode->GetToolBarNode());
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto toolBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolBarNode());
@@ -528,29 +528,29 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 
 void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!panEvent_);
+    CHECK_NULL_VOID(!panEvent_);
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleOnDragStart(info.GetOffsetY());
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this), this](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleOnDragUpdate(info.GetOffsetY());
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleOnDragEnd();
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleOnDragEnd();
     };
 
@@ -573,7 +573,8 @@ void NavBarPattern::HandleOnDragStart(float offset)
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     titlePattern->SetCanOverDrag(false);
-    titlePattern->ProcessTittleDragStart(offset);
+    titlePattern->SetTitleScaleChange(true);
+    titlePattern->ProcessTitleDragStart(offset);
 }
 
 void NavBarPattern::HandleOnDragUpdate(float offset)
@@ -584,7 +585,7 @@ void NavBarPattern::HandleOnDragUpdate(float offset)
     CHECK_NULL_VOID(titleNode);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
-    titlePattern->ProcessTittleDragUpdate(offset);
+    titlePattern->SetTitleStyleByOffset(offset);
 }
 
 void NavBarPattern::HandleOnDragEnd()
@@ -595,19 +596,7 @@ void NavBarPattern::HandleOnDragEnd()
     CHECK_NULL_VOID(titleNode);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
-    titlePattern->ProcessTittleDragEnd();
-}
-
-bool NavBarPattern::GetDraggedDown()
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_RETURN(hostNode, false);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleNode, false);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, false);
-    auto isDraggedDown = titlePattern->IsTitleDraggedDown();
-    return isDraggedDown;
+    titlePattern->ProcessTitleDragEnd();
 }
 
 void NavBarPattern::OnCoordScrollStart()
@@ -620,10 +609,11 @@ void NavBarPattern::OnCoordScrollStart()
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     titlePattern->SetCanOverDrag(true);
-    titlePattern->ProcessTittleDragStart(offset_);
+    titlePattern->SetTitleScaleChange(false);
+    titlePattern->ProcessTitleDragStart(offset_);
 }
 
-void NavBarPattern::OnCoordScrollUpdate(float offset)
+void NavBarPattern::OnCoordScrollUpdate(float offset, float dragOffsetY)
 {
     offset_ += offset;
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
@@ -632,7 +622,7 @@ void NavBarPattern::OnCoordScrollUpdate(float offset)
     CHECK_NULL_VOID(titleNode);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
-    titlePattern->ProcessTittleDragUpdate(offset_);
+    titlePattern->ProcessTitleDragUpdate(offset_, dragOffsetY);
 }
 
 void NavBarPattern::OnCoordScrollEnd()
@@ -642,46 +632,7 @@ void NavBarPattern::OnCoordScrollEnd()
     auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleNode);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    titlePattern->ProcessTittleDragEnd();
-    offset_ = 0.0f;
-}
-
-void NavBarPattern::OnScrollStart()
-{
-    offset_ = 0.0f;
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->SetCanOverDrag(false);
-    titlePattern->ProcessTittleDragStart(offset_);
-}
-
-void NavBarPattern::OnScrollUpdate(float offset)
-{
-    offset_ += offset;
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->ProcessTittleDragUpdate(offset_);
-    if (GetFullStatus()) {
-        StopNavBarMotion();
-    }
-}
-
-void NavBarPattern::OnScrollEnd()
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    titlePattern->ProcessTittleDragEnd();
+    titlePattern->ProcessTitleDragEnd();
     offset_ = 0.0f;
 }
 
@@ -697,6 +648,18 @@ bool NavBarPattern::GetFullStatus()
     return isFullStatus;
 }
 
+bool NavBarPattern::GetDraggedDown()
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, false);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, false);
+    auto isDraggedDown = titlePattern->IsTitleDraggedDown();
+    return isDraggedDown;
+}
+
 bool NavBarPattern::GetIsMinTitle() const
 {
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
@@ -708,36 +671,6 @@ bool NavBarPattern::GetIsMinTitle() const
     return titlePattern->IsMinTitle();
 }
 
-RefPtr<FrameNode> NavBarPattern::FindScrollableChild()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    std::queue<RefPtr<FrameNode>> frameNodeQueue;
-    frameNodeQueue.push(host);
-    while (!frameNodeQueue.empty()) {
-        auto size = frameNodeQueue.size();
-        while (size > 0) {
-            auto node = frameNodeQueue.front();
-            CHECK_NULL_RETURN(node, nullptr);
-            if ((AceType::InstanceOf<ScrollablePattern>(node->GetPattern())) &&
-                ((AceType::InstanceOf<ListPattern>(node->GetPattern())) ||
-                    (AceType::InstanceOf<GridPattern>(node->GetPattern())))) {
-                return node;
-            }
-            frameNodeQueue.pop();
-            auto children = node->GetChildren();
-            for (auto const& child : children) {
-                auto childNode = DynamicCast<FrameNode>(child);
-                if (childNode) {
-                    frameNodeQueue.push(childNode);
-                }
-            }
-            size--;
-        }
-    }
-    return nullptr;
-}
-
 void NavBarPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -745,9 +678,6 @@ void NavBarPattern::OnModifyDone()
     CHECK_NULL_VOID(hostNode);
     MountTitleBar(hostNode);
     MountToolBar(hostNode);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    controller_ = CREATE_ANIMATOR(context);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBar().value_or(false);
@@ -807,36 +737,34 @@ void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     isOritationListenerRegisted_ = false;
 }
 
-void NavBarPattern::NavBarMotion(double velocity, double friction)
+void NavBarPattern::ResetAssociatedScroll()
 {
-    float mainPosition = 0.0f;
-    if (!motion_) {
-        motion_ = AceType::MakeRefPtr<FrictionMotion>(friction, mainPosition, velocity);
-    } else {
-        motion_->Reset(friction, mainPosition, velocity);
-    }
-    motionOffset_ = 0.0f;
-    motion_->AddListener([weak = AceType::WeakClaim(this)](double value) {
-        auto navBar = weak.Upgrade();
-        if (navBar) {
-            navBar->OnScrollUpdate(value - navBar->motionOffset_);
-            navBar->motionOffset_ = value;
-        }
-    });
-    controller_->ClearStopListeners();
-    controller_->AddStopListener([weak = AceType::WeakClaim(this)]() {
-        auto navBar = weak.Upgrade();
-        if (navBar) {
-            navBar->OnScrollEnd();
-        }
-    });
-    OnScrollStart();
-    controller_->PlayMotion(motion_);
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    titlePattern->ResetAssociatedScroll();
 }
-void NavBarPattern::StopNavBarMotion()
+
+bool NavBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node)
 {
-    if (controller_->IsRunning()) {
-        controller_->Stop();
-    }
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, true);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, true);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, true);
+    return titlePattern->UpdateAssociatedScrollOffset(offset, node);
+}
+
+bool NavBarPattern::IsTitleModeFree()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_RETURN(navBarLayoutProperty, false);
+    return navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE;
 }
 } // namespace OHOS::Ace::NG

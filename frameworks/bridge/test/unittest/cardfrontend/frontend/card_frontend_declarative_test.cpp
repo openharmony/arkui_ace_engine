@@ -149,10 +149,10 @@ HWTEST_F(CardFrontendDeclarativeTest, RunPage001, TestSize.Level1)
     ASSERT_NE(cardFrontend->delegate_, nullptr);
     ASSERT_NE(cardFrontend->manifestParser_, nullptr);
     ASSERT_EQ(cardFrontend->type_, FrontendType::JS_CARD);
-    cardFrontend->RunPage(1, "", "");
-    cardFrontend->RunPage(1, "test", "test");
-    cardFrontend->RunPage(1, "", "test");
-    cardFrontend->RunPage(1, "test", "");
+    cardFrontend->RunPage("", "");
+    cardFrontend->RunPage("test", "test");
+    cardFrontend->RunPage("", "test");
+    cardFrontend->RunPage("test", "");
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
     ASSERT_NE(cardFrontend->manifestParser_, nullptr);

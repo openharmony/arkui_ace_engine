@@ -35,7 +35,7 @@ public:
             LOGE("form remove vsync callback fail due to null context");
             return;
         }
-        context->RemoveSubWindowVsyncCallback(formWindowId_);
+        context->RemoveJsFormVsyncCallback(formWindowId_);
     };
 
     void RequestFrame() override;
@@ -51,10 +51,17 @@ public:
         formWindowId_ = formWindowId;
     };
 
+    void SetId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    };
+
 private:
     WeakPtr<PipelineBase> outSidePipelineContext_;
     int64_t formWindowId_ = -1;
+    int32_t instanceId_ = -1;
 
+    AceVsyncCallback callback_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(FormWindow);
 };
 

@@ -66,6 +66,7 @@ ace_napi_frameworks = "//foundation/arkui/ace_engine/frameworks"
 ace_napi = "//foundation/arkui/napi"
 ace_graphic = "//foundation/graphic/graphic_2d"
 ace_hitrace = "//base/hiviewdfx/hitrace"
+c_utils_root = "//commonlibrary/c_utils"
 
 if (!defined(aosp_libs_dir)) {
   aosp_libs_dir = "//prebuilts/aosp_prebuilt_libs/asdk_libs"
@@ -170,11 +171,7 @@ if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
 }
 
-ace_use_new_skia = false
-if (defined(use_new_skia) && use_new_skia) {
-  ace_use_new_skia = true
-  ace_common_defines += [ "NEW_SKIA" ]
-}
+ace_use_new_skia = true
 
 ace_use_rosen_drawing = false
 if (defined(use_rosen_drawing) && use_rosen_drawing) {
@@ -209,7 +206,7 @@ if (defined(global_parts_info)) {
 }
 
 if (!defined(global_parts_info) ||
-    defined(global_parts_info.security_security_component)) {
+    defined(global_parts_info.security_security_component_manager)) {
   security_component_enable = true
   ace_common_defines += [ "SECURITY_COMPONENT_ENABLE" ]
 } else {

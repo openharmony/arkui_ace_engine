@@ -16,9 +16,7 @@
 #include "core/common/font_manager.h"
 
 #ifndef NG_BUILD
-#ifndef NEW_SKIA
-#include "core/components/font/flutter_font_manager.h"
-#endif
+
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/font/rosen_font_manager.h"
@@ -39,11 +37,8 @@ RefPtr<FontManager> FontManager::Create()
         // TODO: adapt to flutter fontmanager for ng
         return nullptr;
 #else
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterFontManager>();
-#else
+
         return nullptr;
-#endif
 #endif
     }
 }

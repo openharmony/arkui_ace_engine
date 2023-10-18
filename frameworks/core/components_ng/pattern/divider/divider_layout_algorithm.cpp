@@ -21,9 +21,7 @@
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const int32_t PLATFORM_VERSION_TEN = 10;
-}
+namespace {}
 DividerLayoutAlgorithm::DividerLayoutAlgorithm() = default;
 
 std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
@@ -37,16 +35,19 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     auto theme = pipeline->GetTheme<DividerTheme>();
     CHECK_NULL_RETURN(theme, std::nullopt);
     auto defaultStrokeWidth =
-        pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ? 1.0_px : theme->GetStokeWidth();
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) ? 1.0_px : theme->GetStokeWidth();
     Dimension strokeWidth = dividerLayoutProperty->GetStrokeWidth().value_or(defaultStrokeWidth);
     constrainStrokeWidth_ = Positive(strokeWidth.ConvertToPx()) ? static_cast<float>(strokeWidth.ConvertToPx())
                                                                 : static_cast<float>(defaultStrokeWidth.ConvertToPx());
     vertical_ = dividerLayoutProperty->GetVertical().value_or(false);
     SizeF constrainSize;
+    strokeWidthLimitation_ = dividerLayoutProperty->GetStrokeWidthLimitation().value_or(true);
     if (!vertical_) {
         dividerLength_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()
                                                                    : contentConstraint.percentReference.Width();
-        constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
+        if (strokeWidthLimitation_) {
+            constrainStrokeWidth_ = std::min(constrainStrokeWidth_, dividerLength_);
+        }
         constrainStrokeWidth_ = (contentConstraint.selfIdealSize.Height())
                                     ? std::min(contentConstraint.selfIdealSize.Height().value(), constrainStrokeWidth_)
                                     : constrainStrokeWidth_;
@@ -55,7 +56,9 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     } else {
         dividerLength_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
                                                                     : contentConstraint.percentReference.Height();
-        constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
+        if (strokeWidthLimitation_) {
+            constrainStrokeWidth_ = std::min(constrainStrokeWidth_, dividerLength_);
+        }
         constrainStrokeWidth_ = (contentConstraint.selfIdealSize.Width())
                                     ? std::min(contentConstraint.selfIdealSize.Width().value(), constrainStrokeWidth_)
                                     : constrainStrokeWidth_;
@@ -75,5 +78,9 @@ float DividerLayoutAlgorithm::GetDividerLength() const
 bool DividerLayoutAlgorithm::GetVertical() const
 {
     return vertical_;
+}
+bool DividerLayoutAlgorithm::GetStrokeWidthLimitation() const
+{
+    return strokeWidthLimitation_;
 }
 } // namespace OHOS::Ace::NG

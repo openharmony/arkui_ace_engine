@@ -189,6 +189,7 @@ void Animator::Stop()
 {
     status_ = Status::STOPPED;
     isBothBackwards = false;
+    elapsedTime_ = 0;
 }
 
 void Animator::Finish() {}
@@ -262,4 +263,14 @@ void Animator::UpdateIteration(int32_t iteration)
 }
 
 void Animator::Copy(const RefPtr<Animator>& controller) {}
+
+FillMode Animator::GetFillMode() const
+{
+    return fillMode_;
+}
+
+int32_t Animator::GetIteration() const
+{
+    return iteration_;
+}
 } // namespace OHOS::Ace

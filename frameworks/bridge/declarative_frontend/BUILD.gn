@@ -27,7 +27,7 @@ template("declarative_frontend") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
 
-    if (platform == "ohos_ng") {
+    if (platform == "ohos_ng" || is_cross_platform_build) {
       sources = [
         "ng/declarative_frontend_ng.cpp",
         "ng/frontend_delegate_declarative_ng.cpp",
@@ -183,6 +183,7 @@ template("declarative_js_engine") {
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
       "jsview/js_divider.cpp",
+      "jsview/js_dump_log.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_environment.cpp",
       "jsview/js_flex.cpp",
@@ -203,6 +204,7 @@ template("declarative_js_engine") {
       "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
       "jsview/js_interactable_view.cpp",
+      "jsview/js_keyboard_avoid.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -262,6 +264,7 @@ template("declarative_js_engine") {
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
+      "jsview/js_state_mgmt_profiler.cpp",
       "jsview/js_stepper.cpp",
       "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
@@ -444,13 +447,20 @@ template("declarative_js_engine") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      sources += [
-        "jsview/js_richtext.cpp",
-        "jsview/js_web.cpp",
-        "jsview/js_web_controller.cpp",
-        "jsview/models/richtext_model_impl.cpp",
-        "jsview/models/web_model_impl.cpp",
-      ]
+      if (is_cross_platform_build) {
+        sources += [
+          "jsview/js_web.cpp",
+          "jsview/models/web_model_impl.cpp",
+        ]
+      } else {
+        sources += [
+          "jsview/js_richtext.cpp",
+          "jsview/js_web.cpp",
+          "jsview/js_web_controller.cpp",
+          "jsview/models/richtext_model_impl.cpp",
+          "jsview/models/web_model_impl.cpp",
+        ]
+      }
     }
 
     if (defined(config.form_components_support) &&
@@ -607,14 +617,15 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",
+      "jsview/js_dump_log.cpp",
       "jsview/js_environment.cpp",
       "jsview/js_local_storage.cpp",
       "jsview/js_persistent.cpp",
+      "jsview/js_state_mgmt_profiler.cpp",
       "jsview/js_view_functions.cpp",
       "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
       "sharedata/js_share_data.cpp",
-      "view_stack_processor.cpp",
 
       # jsviews
       "interfaces/profiler/js_profiler.cpp",
@@ -665,6 +676,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
       "jsview/js_interactable_view.cpp",
+      "jsview/js_keyboard_avoid.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -800,11 +812,15 @@ template("declarative_js_engine_ng") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      sources += [
-        "jsview/js_richtext.cpp",
-        "jsview/js_web.cpp",
-        "jsview/js_web_controller.cpp",
-      ]
+      if (!is_cross_platform_build) {
+        sources += [
+          "jsview/js_richtext.cpp",
+          "jsview/js_web.cpp",
+          "jsview/js_web_controller.cpp",
+        ]
+      } else {
+        sources += [ "jsview/js_web.cpp" ]
+      }
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
@@ -850,6 +866,15 @@ template("declarative_js_engine_ng") {
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {
+      sources -= [
+        "interfaces/profiler/js_profiler.cpp",
+        "jsview/js_location_button.cpp",
+        "jsview/js_paste_button.cpp",
+        "jsview/js_richeditor.cpp",
+        "jsview/js_save_button.cpp",
+        "jsview/js_sec_button_base.cpp",
+        "jsview/menu/js_context_menu.cpp",
+      ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
       if (defined(config.pixel_map_support) && config.pixel_map_support) {

@@ -47,7 +47,7 @@ public:
     }
 
 private:
-    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const final
+    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& callerInfo) const final
     {
         switch (type) {
             case TaskType::PLATFORM:

@@ -90,6 +90,7 @@ const char TEXT_ATTRS_MAX_LINES[] = "maxLines";
 
 // rich editor
 const char RICH_EDITOR_ETS_TAG[] = "RichEditor";
+const char RICH_EDITOR_DRAG_ETS_TAG[] = "RichEditorDRAG";
 
 // stack
 const char STACK_COMPONENT_TAG[] = "StackComponent";
@@ -382,6 +383,8 @@ const char RADIO_ETS_TAG[] = "Radio";
 // gauge
 const char GAUGE_COMPONENT_TAG[] = "Gauge";
 const char GAUGE_ETS_TAG[] = "Gauge";
+const char GAUGE_DESCRIPTION_TAG[] = "GaugeDescription";
+const char GAUGE_INDICATOR_TAG[] = "GaugeIndicator";
 
 // gridContainer
 const char GRIDCONTAINER_COMPONENT_TAG[] = "GridContainer";
@@ -406,6 +409,7 @@ const char MENU_ETS_TAG[] = "Menu";
 const char MENU_ITEM_ETS_TAG[] = "MenuItem";
 const char MENU_ITEM_GROUP_ETS_TAG[] = "MenuItemGroup";
 const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
+const char MENU_PREVIEW_ETS_TAG[] = "MenuPreview";
 
 // textarea
 const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";

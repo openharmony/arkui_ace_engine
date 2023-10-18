@@ -47,6 +47,11 @@ public:
         return radius_;
     }
 
+    bool operator==(const PointParticleParameter& other) const
+    {
+        return NearEqual(radius_, other.GetRadius());
+    }
+
     std::string ToString() const
     {
         std::string str;
@@ -90,6 +95,12 @@ public:
         imageFit_ = imageFit;
     }
 
+    bool operator==(const ImageParticleParameter& other) const
+    {
+        return (imageSource_ == other.GetImageSource()) && (size_ == other.GetSize()) &&
+               (imageFit_ == other.GetImageFit());
+    }
+
     std::string ToString() const
     {
         std::string str;
@@ -124,6 +135,12 @@ public:
     const ImageParticleParameter& GetImageParticleParameter() const
     {
         return imageParameter_;
+    }
+
+    bool operator==(const ParticleConfig& other) const
+    {
+        return (pointParameter_ == other.GetPointParticleParameter()) &&
+               (imageParameter_ == other.GetImageParticleParameter());
     }
 
     std::string ToString() const
@@ -173,6 +190,12 @@ public:
     const std::optional<int64_t>& GetLifeTime() const
     {
         return lifeTime_;
+    }
+
+    bool operator==(const Particle& other) const
+    {
+        return (particleType_ == other.GetParticleType()) && (config_ == other.GetConfig()) &&
+               (count_ == other.GetCount()) && (lifeTime_ == other.GetLifeTime());
     }
 
     std::string ToString() const
@@ -242,6 +265,12 @@ public:
         return shape_;
     }
 
+    bool operator==(const EmitterOption& other) const
+    {
+        return particle_ == other.GetParticle() && emitterRate_ == other.GetEmitterRate() &&
+               position_ == other.GetPosition() && size_ == other.GetSize() && shape_ == other.GetShape();
+    }
+
     std::string ToString() const
     {
         std::string str;
@@ -308,9 +337,16 @@ public:
         noneValue_ = noneValue;
     }
 
-    const std::string& GetNullStr()
+    const std::string& GetNullStr() const
     {
         return noneValue_;
+    }
+
+    bool operator==(const ParticleFloatPropertyUpdaterConfig& other) const
+    {
+        return (noneValue_ == other.GetNullStr()) && NearEqual(randomConfig_.first, other.GetRandomConfig().first) &&
+               NearEqual(randomConfig_.second, other.GetRandomConfig().second) &&
+               (animations_ == other.GetAnimations());
     }
 
     std::string ToString() const
@@ -362,6 +398,11 @@ public:
         config_ = config;
     }
 
+    bool operator==(const ParticleFloatPropertyUpdater& other) const
+    {
+        return (updaterType_ == other.GetUpdaterType()) && (config_ == other.GetConfig());
+    }
+
     std::string ToString() const
     {
         std::string str;
@@ -397,6 +438,12 @@ public:
         updater_ = updater;
     }
 
+    bool operator==(const ParticleFloatPropertyOption& other) const
+    {
+        return NearEqual(range_.first, other.GetRange().first) && NearEqual(range_.second, other.GetRange().second) &&
+               (updater_ == other.GetUpdater());
+    }
+
     std::string ToString() const
     {
         std::string str;
@@ -421,7 +468,7 @@ public:
         return redRandom_;
     }
 
-    void SetRedRandom(std::pair<float, float>& redRandom)
+    void SetRedRandom(const std::pair<float, float>& redRandom)
     {
         redRandom_ = redRandom;
     }
@@ -431,7 +478,7 @@ public:
         return greenRandom_;
     }
 
-    void SetGreenRandom(std::pair<float, float>& greenRandom)
+    void SetGreenRandom(const std::pair<float, float>& greenRandom)
     {
         greenRandom_ = greenRandom;
     }
@@ -441,7 +488,7 @@ public:
         return blueRandom_;
     }
 
-    void SetBlueRandom(std::pair<float, float>& blueRandom)
+    void SetBlueRandom(const std::pair<float, float>& blueRandom)
     {
         blueRandom_ = blueRandom;
     }
@@ -451,9 +498,21 @@ public:
         return alphaRandom_;
     }
 
-    void SetAlphaRandom(std::pair<float, float>& alphaRandom)
+    void SetAlphaRandom(const std::pair<float, float>& alphaRandom)
     {
         alphaRandom_ = alphaRandom;
+    }
+
+    bool operator==(const ColorParticleRandomUpdateConfig& other) const
+    {
+        return NearEqual(redRandom_.first, other.GetRedRandom().first) &&
+               NearEqual(redRandom_.second, other.GetRedRandom().second) &&
+               NearEqual(greenRandom_.first, other.GetGreenRandom().first) &&
+               NearEqual(greenRandom_.second, other.GetGreenRandom().second) &&
+               NearEqual(blueRandom_.first, other.GetBlueRandom().first) &&
+               NearEqual(blueRandom_.second, other.GetBlueRandom().second) &&
+               NearEqual(alphaRandom_.first, other.GetAlphaRandom().first) &&
+               NearEqual(alphaRandom_.second, other.GetAlphaRandom().second);
     }
 
     std::string ToString() const
@@ -521,6 +580,12 @@ public:
         return animationArray_;
     }
 
+    bool operator==(const ParticleColorPropertyUpdaterConfig& other) const
+    {
+        return (inValid_ == other.GetInValid()) && (random_ == other.GetRandomConfig()) &&
+               (animationArray_ == other.GetAnimationArray());
+    }
+
     std::string ToString() const
     {
         std::string str;
@@ -564,6 +629,11 @@ public:
         config_ = config;
     }
 
+    bool operator==(const ParticleColorPropertyUpdater& other) const
+    {
+        return (type_ == other.GetUpdateType()) && (config_ == other.GetConfig());
+    }
+
     std::string ToString() const
     {
         std::string str;
@@ -594,6 +664,11 @@ public:
     void SetUpdater(ParticleColorPropertyUpdater& updater)
     {
         updater_ = updater;
+    }
+
+    bool operator==(const ParticleColorPropertyOption& other) const
+    {
+        return (range_ == other.GetRange()) && (updater_ == other.GetUpdater());
     }
 
     std::string ToString() const
@@ -630,6 +705,14 @@ public:
     void SetAngleRange(std::pair<float, float>& angle)
     {
         angle_ = angle;
+    }
+
+    bool operator==(const VelocityProperty& other) const
+    {
+        return NearEqual(speed_.first, other.GetSpeedRange().first) &&
+               NearEqual(speed_.second, other.GetSpeedRange().second) &&
+               NearEqual(angle_.first, other.GetAngleRange().first) &&
+               NearEqual(angle_.second, other.GetAngleRange().second);
     }
 
     std::string ToString() const
@@ -675,6 +758,11 @@ public:
         angle_ = angle;
     }
 
+    bool operator==(const AccelerationProperty& other) const
+    {
+        return (speed_ == other.GetSpeed()) && (angle_ == other.GetAngle());
+    }
+
     std::string ToString() const
     {
         std::string str;
@@ -690,10 +778,6 @@ private:
 
 struct ParticleOption {
 public:
-    bool operator==(const ParticleOption& other) const
-    {
-        return false;
-    }
 
     const EmitterOption& GetEmitterOption() const
     {
@@ -763,6 +847,16 @@ public:
     void SetParticleSpinOption(ParticleFloatPropertyOption& spinOption)
     {
         spinOption_ = spinOption;
+    }
+
+    bool operator==(const ParticleOption& other) const
+    {
+        return (emitter_ == other.GetEmitterOption()) && (colorOption_ == other.GetParticleColorOption()) &&
+               (opacityOption_ == other.GetParticleOpacityOption()) &&
+               (scaleOption_ == other.GetParticleScaleOption()) &&
+               (velocityOption_ == other.GetParticleVelocityOption()) &&
+               (accelerationOption_ == other.GetParticleAccelerationOption()) &&
+               (spinOption_ == other.GetParticleSpinOption());
     }
 
     std::string ToString() const

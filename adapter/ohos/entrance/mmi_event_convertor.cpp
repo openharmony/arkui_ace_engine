@@ -406,8 +406,8 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
         float yRelative = item.GetDisplayY();
         float windowX = xRelative;
         float windowY = yRelative;
-        int32_t deviceWidth = SystemProperties::GetDeviceWidth();
-        int32_t deviceHeight = SystemProperties::GetDeviceHeight();
+        int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
+        int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
 
         if (udegree == 0) {
             windowX = xRelative - offsetF.GetX();

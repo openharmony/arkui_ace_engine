@@ -164,7 +164,7 @@ ThreadWatcher::ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type, bo
     AnrThread::PostTaskToTaskRunner(
         [weak = Referenced::WeakClaim(this)]() {
             auto sp = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(sp);
+            CHECK_NULL_VOID(sp);
             sp->Check();
         },
         NORMAL_CHECK_PERIOD);
@@ -186,7 +186,7 @@ void ThreadWatcher::BuriedBomb(uint64_t bombId)
 void ThreadWatcher::DefusingBomb()
 {
     auto taskExecutor = taskExecutor_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [weak = Referenced::WeakClaim(this)]() {
             auto sp = weak.Upgrade();
@@ -291,7 +291,7 @@ void ThreadWatcher::Check()
     AnrThread::PostTaskToTaskRunner(
         [weak = Referenced::WeakClaim(this)]() {
             auto sp = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(sp);
+            CHECK_NULL_VOID(sp);
             sp->Check();
         },
         period);
@@ -385,7 +385,7 @@ void ThreadWatcher::PostCheckTask()
         taskExecutor->PostTask(
             [weak = Referenced::WeakClaim(this)]() {
                 auto sp = weak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(sp);
+                CHECK_NULL_VOID(sp);
                 sp->TagIncrease();
             },
             type_);

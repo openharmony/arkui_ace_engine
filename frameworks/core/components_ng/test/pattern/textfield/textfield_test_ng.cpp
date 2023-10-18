@@ -32,7 +32,9 @@
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/test/mock/pattern/text_field/mock_text_input_connection.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -96,6 +98,10 @@ public:
     RefPtr<TextFieldLayoutProperty> GetLayoutProperty();
     RefPtr<FrameNode> CreatTextFieldNode(const std::optional<std::string>& placeholder = PLACEHOLDER,
         const std::optional<std::string>& value = EMPTY_TEXT_VALUE, bool isTextArea = false);
+    void RunSetUp();
+    RefPtr<FrameNode> host_;
+    RefPtr<TextFieldPattern> pattern_;
+    RefPtr<TextFieldLayoutProperty> layoutProperty_;
 };
 
 void TextFieldPatternTestNg::SetUpTestSuite()
@@ -108,6 +114,21 @@ void TextFieldPatternTestNg::SetUpTestSuite()
 void TextFieldPatternTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void TextFieldPatternTestNg::RunSetUp()
+{
+    host_ = CreatTextFieldNode();
+    ASSERT_NE(host_, nullptr);
+    pattern_ = host_->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern_, nullptr);
+    layoutProperty_ = host_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    pattern_->clipboard_ = clipboard;
+    pattern_->paragraph_ = std::make_shared<RSParagraph>();
 }
 
 RefPtr<FrameNode> TextFieldPatternTestNg::CreatTextFieldNode(
@@ -656,9 +677,9 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextRectOffset, TestSize.Level2)
     pattern->caretRect_.SetTop(10);
     pattern->contentRect_.SetTop(8);
     pattern->contentRect_.SetHeight(4);
-    EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 0.0f);
+    EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 2.0f);
     pattern->caretRect_.SetTop(5);
-    EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 3.0f);
+    EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 7.0f);
     pattern->caretRect_.SetTop(13);
     EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), -1.0f);
 
@@ -668,7 +689,7 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextRectOffset, TestSize.Level2)
      */
     layoutProperty->UpdateMaxLines(1);
     EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 0.0f);
-    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), 1.5f);
+    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), 0.0f);
     pattern->caretRect_.SetLeft(10);
     pattern->contentRect_.SetLeft(8);
     pattern->contentRect_.SetWidth(4);
@@ -676,7 +697,7 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextRectOffset, TestSize.Level2)
     pattern->caretRect_.SetLeft(7);
     EXPECT_EQ(pattern->AdjustTextRectOffsetX(), 1.0f);
     pattern->caretRect_.SetLeft(15);
-    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), -4.5f);
+    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), -3.0f);
 }
 
 /**
@@ -1630,6 +1651,7 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor001, TestSize.Level1)
     TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     textFieldOverlayModifier.cursorVisible_ = AceType::MakeRefPtr<PropertyBool>(true);
     textFieldOverlayModifier.PaintCursor(context);
@@ -3094,6 +3116,8 @@ HWTEST_F(TextFieldPatternTestNg, HandleFocusEvent, TestSize.Level1)
      * @tc.steps: step2. Set showUnderLine. Call function HandleFocusEvent.
      * @tc.expected: Check the showUnderLine set successfully.
      */
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     textFieldPattern->HandleFocusEvent();
     EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
     layoutProperty->UpdateShowUnderline(true);
@@ -3616,6 +3640,7 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor002, TestSize.Level1)
     TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
 
     /**
@@ -4264,7 +4289,6 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     layoutAlgorithm->errorParagraph_ = std::make_shared<RSParagraph>();
     layoutAlgorithm->errorParagraph_ = std::make_shared<RSParagraph>();
     textFieldPattern->needToRefreshSelectOverlay_ = true;
-    textFieldPattern->setSelectionFlag_ = true;
     textFieldPattern->mouseStatus_ = MouseStatus::RELEASED;
     auto focusHub = frameNode->GetOrCreateFocusHub();
     if (focusHub) {
@@ -4419,6 +4443,161 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldLayoutAlgorithmMeasure, TestSize.Level
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 40);
     EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 20);
+
+    auto childrenNode = CreatTextFieldNode();
+    ASSERT_NE(childrenNode, nullptr);
+    frameNode->children_.push_back(childrenNode);
+
+    layoutConstraint.maxSize.SetHeight(30);
+    layoutConstraint.minSize.SetHeight(40);
+    layoutConstraint.maxSize.SetWidth(30);
+    layoutConstraint.minSize.SetWidth(40);
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    auto contentConstraint = LayoutConstraintF();
+    contentConstraint.maxSize.SetHeight(30);
+    contentConstraint.minSize.SetHeight(40);
+    contentConstraint.maxSize.SetWidth(30);
+    contentConstraint.minSize.SetWidth(40);
+    cloneLayoutProperty->contentConstraint_ = contentConstraint;
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 40);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 40);
+    cloneLayoutProperty->UpdateShowUnderline(true);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 40);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 40);
+    cloneLayoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 40);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 40);
+}
+
+/**
+ * @tc.name: TFLayoutAlgorithmMeasureContent
+ * @tc.desc: test TextFieldLayoutAlgorithm.MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TFLayoutAlgorithmMeasureContent, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldLayoutProperty and MockThemeManager, TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([this, textFieldTheme = textFieldTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == ScrollBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<ScrollBarTheme>();
+            }
+            return textFieldTheme;
+        });
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and call MeasureContent.
+     * @tc.expected: Check frame size of GeometryNode.
+     */
+    auto cloneLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutProperty->Clone());
+    auto cloneGeometryNode = geometryNode->Clone();
+    auto layoutConstraint = LayoutConstraintF();
+    layoutConstraint.maxSize.SetHeight(40);
+    layoutConstraint.minSize.SetHeight(30);
+    layoutConstraint.maxSize.SetWidth(40);
+    layoutConstraint.minSize.SetWidth(30);
+    auto contentConstraint = LayoutConstraintF();
+    contentConstraint.maxSize.SetHeight(40);
+    contentConstraint.minSize.SetHeight(30);
+    contentConstraint.maxSize.SetWidth(40);
+    contentConstraint.minSize.SetWidth(30);
+    cloneLayoutProperty->contentConstraint_ = contentConstraint;
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    LayoutWrapperNode layoutWrapper(
+        AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+    pattern->dragStatus_ = DragStatus::ON_DROP;
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+    cloneLayoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+    layoutProperty->UpdateMaxLines(1);
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+
+    /**
+     * @tc.steps: step3. set pattern to TextArea and call MeasureContent.
+     * @tc.expected: Check frame size of GeometryNode.
+     */
+    cloneLayoutProperty->UpdateValue(TEXT_CONTENT);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    pattern->dragStatus_ = DragStatus::DRAGGING;
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 0);
+    layoutProperty->UpdateMaxLines(1);
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    cloneLayoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    if (focusHub) {
+        focusHub->currentFocus_ = true;
+    }
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 0);
+
+    layoutProperty->UpdateMaxLines(2);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 0);
+
+    /**
+     * @tc.steps: step4. Set pattern not be TextArea and call Measure.
+     * @tc.expected: Check frame size of GeometryNode.
+     */
+    auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
+    pattern->textFieldContentModifier_ = textFieldContentModifier;
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+
+    cloneLayoutProperty->UpdateShowCounter(true);
+    cloneLayoutProperty->UpdateMaxLength(10);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+    pattern->counterParagraph_ = std::make_shared<RSParagraph>();
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+    cloneLayoutProperty->UpdateShowErrorText(true);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+    cloneLayoutProperty->UpdateWidthAuto(true);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0);
+
+    focusHub->currentFocus_ = false;
 }
 
 /**
@@ -4902,11 +5081,14 @@ HWTEST_F(TextFieldPatternTestNg, SetShowError, TestSize.Level2)
      */
     layoutProperty->UpdateShowUnderline(false);
     layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(Dimension(10.0));
+    pattern->passwordModeStyle_.borderwidth = borderWidth;
     pattern->SetShowError();
     EXPECT_EQ(pattern->GetUnderlineWidth(), 1.0);
     borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
     ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
-    EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 1.0);
+    EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 10.0);
 
     /**
      * @tc.steps: step4. test scense - error text is invisible and in password mode and show underline.
@@ -4915,7 +5097,7 @@ HWTEST_F(TextFieldPatternTestNg, SetShowError, TestSize.Level2)
     layoutProperty->UpdateShowErrorText(false);
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     layoutProperty->UpdateShowUnderline(true);
-    BorderWidthProperty borderWidth;
+
     borderWidth.SetBorderWidth(Dimension(5.0));
     pattern->passwordModeStyle_.borderwidth = borderWidth;
     pattern->SetShowError();
@@ -5159,39 +5341,6 @@ HWTEST_F(TextFieldPatternTestNg, CaretMoveToLastNewLineChar, TestSize.Level2)
     pattern->UpdateEditingValue("New\nLine\nChar", 10);
     pattern->CaretMoveToLastNewLineChar();
     EXPECT_EQ(pattern->textEditingValue_.caretPosition, 8);
-}
-
-/**
- * @tc.name: SetSelectionFlag.
- * @tc.desc: test SetSelectionFlag.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, SetSelectionFlag, TestSize.Level2)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern.
-     * @tc.expected: Check it is not nullptr.
-     */
-    auto frameNode = CreatTextFieldNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call SetSelectionFlag with expectd parameters.
-     * @tc.expected: Check the value of the updated property.
-     */
-    pattern->selectionStart_ = 0;
-    pattern->selectionEnd_ = 0;
-    pattern->SetSelectionFlag(5, 8);
-    EXPECT_EQ(pattern->selectionStart_, 0);
-    EXPECT_EQ(pattern->selectionEnd_, 0);
-
-    auto focusHub = frameNode->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-    pattern->SetSelectionFlag(5, 8);
-    EXPECT_EQ(pattern->selectionStart_, 5);
-    EXPECT_EQ(pattern->selectionEnd_, 8);
 }
 
 /**
@@ -5779,11 +5928,11 @@ HWTEST_F(TextFieldPatternTestNg, CursorMove, TestSize.Level2)
 }
 
 /**
- * @tc.name: HandleMouseEvent
+ * @tc.name: HandleMouseEvent001
  * @tc.desc: Verify that the HandleMouseEvent interface calls normally and exits without exception.
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, HandleMouseEvent, TestSize.Level2)
+HWTEST_F(TextFieldPatternTestNg, HandleMouseEvent001, TestSize.Level2)
 {
     /**
      * @tc.steps: step1. Create TextFieldPattern.
@@ -5815,6 +5964,38 @@ HWTEST_F(TextFieldPatternTestNg, HandleMouseEvent, TestSize.Level2)
     layoutProperty->UpdateShowPasswordIcon(true);
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     pattern->HandleMouseEvent(mouseInfo);
+}
+
+/**
+ * @tc.name: HandleMouseEvent002
+ * @tc.desc: Verify that the HandleMouseEvent interface calls normally when isDoubleClick_ is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleMouseEvent002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleMouseEvent.
+     * @tc.expected: Check pattern->isMousePressed_ is false.
+     */
+    pattern->isDoubleClick_ = true;
+    pattern->isMousePressed_ = true;
+    MouseAction action = MouseAction::RELEASE;
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::NONE_BUTTON);
+    mouseInfo.SetAction(action);
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(pattern->isMousePressed_);
 }
 
 /**
@@ -6045,8 +6226,8 @@ HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
     pipeline->GetSafeAreaManager()->UpdateKeyboardSafeArea(0.0f);
     pattern->caretRect_ = CARE_RECT_DANGEROUS;
     dy = pattern->AdjustTextAreaOffsetY();
-    EXPECT_EQ(dy, 0.0f);
-    EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS);
+    EXPECT_EQ(dy, 195.0f);
+    EXPECT_EQ(pattern->caretRect_.GetX(), CARE_RECT_DANGEROUS.GetX());
     int32_t charPosition[3] = {-1, 0, 2};
     auto content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[1], true);;
     for (int i = 0; i < 3; i++) {
@@ -6329,11 +6510,11 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternApplyInlineState002, TestSize.L
 }
 
 /**
- * @tc.name: BeforeCreateLayoutWrapper
+ * @tc.name: BeforeCreateLayoutWrapper001
  * @tc.desc: test BeforeCreateLayoutWrapper
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, BeforeCreateLayoutWrapper, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create TextFieldPattern.
@@ -6374,6 +6555,45 @@ HWTEST_F(TextFieldPatternTestNg, BeforeCreateLayoutWrapper, TestSize.Level1)
     textFieldPattern->BeforeCreateLayoutWrapper();
     textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     EXPECT_FALSE(textFieldPattern->UpdateCaretPositionByMouseMovement());
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper002
+ * @tc.desc: test BeforeCreateLayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, BeforeCreateLayoutWrapper002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step2. set clipboard avoid nullptr and call BeforeCreateLayoutWrapper.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    textFieldPattern->clipboard_ = clipboard;
+
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
+    textFieldPattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
+    EXPECT_FALSE(textFieldPattern->isDoubleClick_);
+
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::EVENT;
+    textFieldPattern->isMousePressed_ = true;
+    textFieldPattern->isDoubleClick_ = true;
+    textFieldPattern->BeforeCreateLayoutWrapper();
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPositionByMouseMovement());
+    EXPECT_FALSE(textFieldPattern->isDoubleClick_);
 }
 
 /**
@@ -6466,6 +6686,1057 @@ HWTEST_F(TextFieldPatternTestNg, CalcCursorOffsetByPosition, TestSize.Level1)
     EXPECT_FALSE(textFieldPattern->AdjustTextRectOffsetX());
     layoutProperty->UpdateMaxLines(2);
     EXPECT_TRUE(textFieldPattern->IsTextArea());
+}
+
+/**
+ * @tc.name: GetDragUpperLeftCoordinates
+ * @tc.desc: test GetDragUpperLeftCoordinates
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetDragUpperLeftCoordinates, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    layoutProperty_->UpdateMaxLines(1);
+
+    /**
+     * @tc.steps: step2. call GetDragUpperLeftCoordinates.
+     * @tc.expected: Check result.
+     */
+    pattern_->textBoxes_.clear();
+    EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
+
+    RSTextRect front = {};
+    front.rect.top_ = 0;
+    front.rect.left_ = 0;
+    pattern_->textBoxes_.push_back(front);
+    RSTextRect back = {};
+    back.rect.top_ = 10;
+    pattern_->textBoxes_.push_back(back);
+    EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
+
+    pattern_->textBoxes_.clear();
+    front.rect.top_ = -100;
+    front.rect.left_ = -100;
+    pattern_->textBoxes_.push_back(front);
+    back.rect.top_ = -100;
+    pattern_->textBoxes_.push_back(back);
+    EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: ProcessOverlay
+ * @tc.desc: test ProcessOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ProcessOverlay, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call ProcessOverlay.
+     * @tc.expected: Check result.
+     */
+    pattern_->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    pattern_->UpdateEditingValue("", 0);
+    pattern_->isSingleHandle_ = false;
+    pattern_->ProcessOverlay(false);
+    EXPECT_TRUE(pattern_->isSingleHandle_) << "create single handle";
+
+    pattern_->UpdateEditingValue("X", 0);
+    pattern_->textRect_.SetLeft(50);
+    pattern_->lastTouchOffset_.SetX(25);
+    pattern_->isSingleHandle_ = false;
+    pattern_->ProcessOverlay(false);
+    EXPECT_TRUE(pattern_->isSingleHandle_) << "create single handle";
+    EXPECT_EQ(pattern_->textSelector_.GetStart(), 0) << "update selection to 0";
+    EXPECT_EQ(pattern_->textSelector_.GetEnd(), 0) << "update selection to 0";
+
+    pattern_->UpdateEditingValue("X", 1);
+    pattern_->textRect_.SetLeft(25);
+    pattern_->lastTouchOffset_.SetX(50);
+    pattern_->isSingleHandle_ = false;
+    pattern_->ProcessOverlay(false);
+    EXPECT_TRUE(pattern_->isSingleHandle_) << "create single handle";
+    EXPECT_EQ(pattern_->textSelector_.GetStart(), 1) << "update selection to caretPosition";
+    EXPECT_EQ(pattern_->textSelector_.GetEnd(), 1) << "update selection to caretPosition";
+
+    pattern_->UpdateEditingValue("XXX", 1);
+    pattern_->isSingleHandle_ = false;
+    pattern_->textRect_.SetLeft(25);
+    pattern_->lastTouchOffset_.SetX(25);
+    pattern_->ProcessOverlay(false);
+    EXPECT_FALSE(pattern_->isSingleHandle_) << "create handles";
+    EXPECT_EQ(pattern_->textSelector_.GetStart(), 1);
+    EXPECT_EQ(pattern_->textSelector_.GetEnd(), 2);
+}
+
+/**
+ * @tc.name: UpdateRectByAlignment
+ * @tc.desc: test UpdateRectByAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateRectByAlignment, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call UpdateRectByAlignment.
+     * @tc.expected: Check result.
+     */
+    pattern_->contentRect_.SetHeight(25);
+    pattern_->frameRect_.SetHeight(200);
+    RectF rect(0, 0, 100, 100);
+    pattern_->UpdateRectByAlignment(rect);
+    EXPECT_EQ(rect.Top(), 0);
+
+    struct TestItem {
+        Alignment alignment;
+        float expectedTop;
+        std::string message;
+    };
+    pattern_->contentRect_.SetHeight(150);
+    layoutProperty_->positionProperty_ = std::make_unique<PositionProperty>();
+    std::vector<TestItem> testItems = {
+        { .alignment = Alignment::CENTER_LEFT, .expectedTop = 50, .message = "Alignment::CENTER_LEFT" },
+        { .alignment = Alignment::CENTER, .expectedTop = 50, .message = "Alignment::CENTER" },
+        { .alignment = Alignment::CENTER_RIGHT, .expectedTop = 50, .message = "Alignment::CENTER_RIGHT" },
+        { .alignment = Alignment::BOTTOM_LEFT, .expectedTop = 100, .message = "Alignment::BOTTOM_LEFT" },
+        { .alignment = Alignment::BOTTOM_CENTER, .expectedTop = 100, .message = "Alignment::BOTTOM_CENTER" },
+        { .alignment = Alignment::BOTTOM_RIGHT, .expectedTop = 100, .message = "Alignment::BOTTOM_RIGHT" },
+        { .alignment = Alignment::TOP_LEFT, .expectedTop = 0, .message = "Alignment::TOP_LEFT" },
+        { .alignment = Alignment::TOP_CENTER, .expectedTop = 0, .message = "Alignment::TOP_CENTER" },
+        { .alignment = Alignment::TOP_RIGHT, .expectedTop = 0, .message = "Alignment::TOP_RIGHT" },
+        { .alignment = Alignment(2, 2), .expectedTop = 0, .message = "Alignment(2, 2)" },
+    };
+    for (auto testItem : testItems) {
+        layoutProperty_->GetPositionProperty()->UpdateAlignment(testItem.alignment);
+        pattern_->UpdateRectByAlignment(rect);
+        EXPECT_EQ(rect.Top(), testItem.expectedTop) << testItem.message;
+    }
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate
+ * @tc.desc: test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextAreaInputRectUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call TextAreaInputRectUpdate.
+     * @tc.expected: Check result.
+     */
+    RectF rect (0, 0, 100, 100);
+    layoutProperty_->UpdateMaxLines(1);
+    pattern_->TextAreaInputRectUpdate(rect);
+    EXPECT_EQ(rect.Left(), 0);
+    EXPECT_EQ(rect.Width(), 100);
+
+    layoutProperty_->UpdateMaxLines(10);
+    pattern_->UpdateEditingValue("", 0);
+    pattern_->TextAreaInputRectUpdate(rect);
+    EXPECT_EQ(rect.Left(), 0);
+    EXPECT_EQ(rect.Width(), 100);
+
+    layoutProperty_->UpdateMaxLines(10);
+    pattern_->UpdateEditingValue("XXX", 0);
+
+    struct TestItem {
+        TextAlign align;
+        float contentWidth;
+        float expectedLeft;
+        float expectedWidth;
+        float textIsEmptyRectExpectedLeft;
+    };
+    std::vector<TestItem> testItems = {
+        { TextAlign::START, 10, 0, 1, 0 },
+        { TextAlign::START, 0, 0, 10, 0 },
+        { TextAlign::CENTER, 10, 4.5, 1, 5 },
+        {TextAlign::CENTER, 0, 0, 10, 0 },
+        { TextAlign::END, 10, 7.5, 1, 8.5 },
+        { TextAlign::END, 0, 0, 10, -1.5 },
+        { TextAlign::LEFT, 0, 0, 10, 0 },
+    };
+
+    for (auto testItem : testItems) {
+        rect.SetLeft(0);
+        rect.SetWidth(10);
+        layoutProperty_->UpdateTextAlign(testItem.align);
+        pattern_->contentRect_.SetWidth(testItem.contentWidth);
+        pattern_->TextAreaInputRectUpdate(rect);
+        EXPECT_EQ(rect.Left(), testItem.expectedLeft);
+        EXPECT_EQ(rect.Width(), testItem.expectedWidth);
+        pattern_->TextIsEmptyRect(rect);
+    }
+    pattern_->UpdateEditingValue("", 0);
+    for (auto testItem : testItems) {
+        rect.SetLeft(0);
+        rect.SetWidth(10);
+        layoutProperty_->UpdateTextAlign(testItem.align);
+        pattern_->contentRect_.SetWidth(testItem.contentWidth);
+        pattern_->TextIsEmptyRect(rect);
+        EXPECT_EQ(rect.Left(), testItem.textIsEmptyRectExpectedLeft);
+    }
+}
+
+/**
+ * @tc.name: GetNakedCharPosition
+ * @tc.desc: test GetNakedCharPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetNakedCharPosition, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call GetNakedCharPosition.
+     * @tc.expected: Check result.
+     */
+    layoutProperty_->UpdateMaxLines(2);
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), -1);
+    layoutProperty_->UpdateMaxLines(1);
+    layoutProperty_->UpdateTextInputType(TextInputType::TEXT);
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), -1);
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern_->obscureTickCountDown_ = 0;
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), -1);
+    pattern_->obscureTickCountDown_ = 1;
+    pattern_->textObscured_ = false;
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), -1);
+    pattern_->textObscured_ = true;
+    pattern_->UpdateEditingValue("", 0);
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), -1);
+    layoutProperty_->UpdateValue("xxx");
+    pattern_->nakedCharPosition_ = 1;
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), 1);
+}
+
+/**
+ * @tc.name: OnBackPressed
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnBackPressed, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call OnBackPressed.
+     * @tc.expected: Check result.
+     */
+    struct TestItem {
+        bool attached;
+        bool imeShow;
+        bool customKeyboardAttached;
+        bool expected;
+        std::string message;
+    };
+    std::vector<TestItem> testItems = {
+        { false, false, false, false, "A" },
+        { false, false, true, true, "B" },
+        { false, true, false, false, "C" },
+        { false, true, true, true, "D" },
+        { true, false, false, false, "E" },
+        { true, false, true, true, "F" },
+        { true, true, false, true, "G" },
+        { true, true, true, true, "H" },
+    };
+
+    for (auto testItem : testItems) {
+        pattern_->imeAttached_ = testItem.attached;
+        pattern_->imeShown_ = testItem.imeShow;
+        pattern_->isCustomKeyboardAttached_ = testItem.customKeyboardAttached;
+        pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>();
+        EXPECT_EQ(pattern_->OnBackPressed(), testItem.expected) << testItem.message;
+    }
+    pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>();
+}
+
+/**
+ * @tc.name: HandleSelection001
+ * @tc.desc: test HandleSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleSelectionEnd.
+     * @tc.expected: Check result.
+     */
+    auto switchSelectMode = [pattern = pattern_](int32_t start, int32_t end) {
+        pattern->selectionMode_ = SelectionMode::SELECT;
+        pattern->textSelector_.baseOffset = start;
+        pattern->textSelector_.destinationOffset = end;
+    };
+
+    auto switchNormalMode = [pattern = pattern_]() {
+        pattern->selectionMode_ = SelectionMode::NONE;
+    };
+
+    pattern_->UpdateEditingValue("ABCD", 4);
+    pattern_->HandleSelectionEnd();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchNormalMode();
+    pattern_->HandleSelectionEnd();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(0, 2);
+    pattern_->HandleSelectionEnd();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 4);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(4, 2);
+    pattern_->HandleSelectionEnd();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+}
+
+/**
+ * @tc.name: HandleSelection002
+ * @tc.desc: test HandleSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelection002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleSelectionEnd.
+     * @tc.expected: Check result.
+     */
+    auto switchSelectMode = [pattern = pattern_](int32_t start, int32_t end) {
+        pattern->selectionMode_ = SelectionMode::SELECT;
+        pattern->textSelector_.baseOffset = start;
+        pattern->textSelector_.destinationOffset = end;
+    };
+
+    auto switchNormalMode = [pattern = pattern_]() {
+        pattern->selectionMode_ = SelectionMode::NONE;
+    };
+
+    /**
+     * @tc.steps: step1. call HandleSelectionLineEnd.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    pattern_->HandleSelectionLineEnd();
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchNormalMode();
+    pattern_->HandleSelectionLineEnd();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchSelectMode(0, 2);
+    pattern_->HandleSelectionLineEnd();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 4);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(4, 2);
+    pattern_->HandleSelectionLineEnd();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+
+    /**
+     * @tc.steps: step2. call HandleSelectionRightWord.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    pattern_->HandleSelectionRightWord();
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchNormalMode();
+    pattern_->HandleSelectionRightWord();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchSelectMode(0, 4);
+    pattern_->HandleSelectionRightWord();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 4);
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchSelectMode(4, 2);
+    pattern_->HandleSelectionRightWord();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+}
+
+/**
+ * @tc.name: HandleSelection003
+ * @tc.desc: test HandleSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelection003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleSelectionEnd.
+     * @tc.expected: Check result.
+     */
+    auto switchSelectMode = [pattern = pattern_](int32_t start, int32_t end) {
+        pattern->selectionMode_ = SelectionMode::SELECT;
+        pattern->textSelector_.baseOffset = start;
+        pattern->textSelector_.destinationOffset = end;
+    };
+
+    auto switchNormalMode = [pattern = pattern_]() {
+        pattern->selectionMode_ = SelectionMode::NONE;
+    };
+
+    /**
+     * @tc.steps: step3. call HandleSelectionHome.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 0);
+    pattern_->HandleSelectionHome();
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchNormalMode();
+    pattern_->HandleSelectionHome();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(1, 3);
+    pattern_->HandleSelectionHome();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(0, 3);
+    pattern_->HandleSelectionHome();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+}
+
+/**
+ * @tc.name: HandleSelection004
+ * @tc.desc: test HandleSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelection004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleSelectionEnd.
+     * @tc.expected: Check result.
+     */
+    auto switchSelectMode = [pattern = pattern_](int32_t start, int32_t end) {
+        pattern->selectionMode_ = SelectionMode::SELECT;
+        pattern->textSelector_.baseOffset = start;
+        pattern->textSelector_.destinationOffset = end;
+    };
+
+    auto switchNormalMode = [pattern = pattern_]() {
+        pattern->selectionMode_ = SelectionMode::NONE;
+    };
+
+     /**
+     * @tc.steps: step3. call HandleSelectionLineBegin.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 0);
+    pattern_->HandleSelectionLineBegin();
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchNormalMode();
+    pattern_->HandleSelectionLineBegin();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(1, 3);
+    pattern_->HandleSelectionLineBegin();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(0, 3);
+    pattern_->HandleSelectionLineBegin();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+
+    /**
+     * @tc.steps: step4. call HandleSelectionLeftWord.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 0);
+    pattern_->HandleSelectionLeftWord();
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchNormalMode();
+    pattern_->HandleSelectionLeftWord();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(1, 3);
+    pattern_->HandleSelectionLeftWord();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(0, 3);
+    pattern_->HandleSelectionLeftWord();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+}
+
+/**
+ * @tc.name: GetTextOfCursor
+ * @tc.desc: test GetRightTextOfCursor and GetLeftTextOfCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetTextOfCursor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call GetRightTextOfCursor.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 0);
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    pattern_->textSelector_.baseOffset = 0;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_EQ(pattern_->GetRightTextOfCursor(1), u"D");
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    EXPECT_EQ(pattern_->GetRightTextOfCursor(1), u"B");
+
+    /**
+     * @tc.steps: step3. call GetLeftTextOfCursor.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 1);
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_EQ(pattern_->GetLeftTextOfCursor(1), u"A");
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    EXPECT_EQ(pattern_->GetLeftTextOfCursor(1), u"A");
+}
+
+/**
+ * @tc.name: CursorMove001
+ * @tc.desc: test method of cursor movement
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CursorMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call CursorMoveEnd.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    EXPECT_TRUE(pattern_->CursorMoveEnd());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    EXPECT_TRUE(pattern_->CursorMoveEnd());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    /**
+     * @tc.steps: step3. call CursorMoveToParagraphEnd.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    EXPECT_TRUE(pattern_->CursorMoveToParagraphEnd());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    EXPECT_TRUE(pattern_->CursorMoveToParagraphEnd());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    /**
+     * @tc.steps: step4. call CursorMoveLineEnd.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    EXPECT_TRUE(pattern_->CursorMoveLineEnd());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT_ALL;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_TRUE(pattern_->CursorMoveLineEnd());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    layoutProperty_->UpdateMaxLines(2);
+    pattern_->CursorMoveLineEnd();
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    layoutProperty_->UpdateMaxLines(1);
+    pattern_->CursorMoveLineEnd();
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = -1;
+    EXPECT_FALSE(pattern_->CursorMoveLineEnd());
+
+    pattern_->textEditingValue_.caretPosition = 5;
+    EXPECT_FALSE(pattern_->CursorMoveLineEnd());
+}
+
+/**
+ * @tc.name: CursorMove002
+ * @tc.desc: test method of cursor movement
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CursorMove002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call CursorMoveRightWord.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    EXPECT_TRUE(pattern_->CursorMoveRightWord());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT_ALL;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_TRUE(pattern_->CursorMoveRightWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    EXPECT_TRUE(pattern_->CursorMoveRightWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    EXPECT_TRUE(pattern_->CursorMoveRightWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = 5;
+    EXPECT_FALSE(pattern_->CursorMoveRightWord());
+
+    /**
+     * @tc.steps: step3. call CursorMoveHome.
+     * @tc.expected: Check result.
+     */
+    pattern_->textEditingValue_.caretPosition = 0;
+    EXPECT_TRUE(pattern_->CursorMoveHome());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    EXPECT_TRUE(pattern_->CursorMoveHome());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+
+    /**
+     * @tc.steps: step4. call CursorMoveToParagraphBegin.
+     * @tc.expected: Check result.
+     */
+    pattern_->textEditingValue_.caretPosition = 0;
+    EXPECT_TRUE(pattern_->CursorMoveToParagraphBegin());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    EXPECT_TRUE(pattern_->CursorMoveToParagraphBegin());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+}
+
+/**
+ * @tc.name: CursorMove003
+ * @tc.desc: test method of cursor movement
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CursorMove003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call CursorMoveLineBegin.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 0);
+    EXPECT_TRUE(pattern_->CursorMoveLineBegin());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT_ALL;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_TRUE(pattern_->CursorMoveLineBegin());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    layoutProperty_->UpdateMaxLines(2);
+    EXPECT_TRUE(pattern_->CursorMoveLineBegin());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    layoutProperty_->UpdateMaxLines(1);
+    EXPECT_TRUE(pattern_->CursorMoveLineBegin());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+
+    /**
+     * @tc.steps: step3. call CursorMoveLeftWord.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("AB CD", 0);
+    EXPECT_TRUE(pattern_->CursorMoveLeftWord());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT_ALL;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_TRUE(pattern_->CursorMoveLeftWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    EXPECT_FALSE(pattern_->CursorMoveLeftWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 1);
+
+    pattern_->textEditingValue_.caretPosition = 4;
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    layoutProperty_->UpdateMaxLines(1);
+    EXPECT_TRUE(pattern_->CursorMoveLeftWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 3);
+}
+
+/**
+ * @tc.name: TextFilter
+ * @tc.desc: test method of line position
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFilter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call FilterWithEmail and FilterWithAscii.
+     * @tc.expected: Check result.
+     */
+    std::string result = "wyz@@xx.com";
+    EXPECT_TRUE(pattern_->FilterWithEmail(result));
+    result = "wyz@xx.com";
+    EXPECT_FALSE(pattern_->FilterWithEmail(result));
+
+    std::string valueToUpdate = "wyz测试";
+    result = "";
+    EXPECT_TRUE(pattern_->FilterWithAscii(valueToUpdate, result));
+    EXPECT_STREQ(result.c_str(), "wyz");
+}
+
+/**
+ * @tc.name: ProcessPasswordIcon
+ * @tc.desc: test method of ProcessPasswordIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ProcessPasswordIcon, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call ProcessPasswordIcon.
+     * @tc.expected: Check result.
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    layoutProperty_->UpdateShowPasswordIcon(false);
+    pattern_->ProcessPasswordIcon();
+
+    layoutProperty_->UpdateShowPasswordIcon(true);
+    ImageSourceInfo imageSourceInfo;
+    layoutProperty_->UpdateHidePasswordSourceInfo(imageSourceInfo);
+    pattern_->textObscured_ = true;
+    pattern_->hideUserDefinedIcon_ = true;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        }
+        return AceType::MakeRefPtr<TextFieldTheme>();
+    });
+
+    pattern_->ProcessPasswordIcon();
+    ASSERT_NE(pattern_->hidePasswordImageLoadingCtx_, nullptr);
+    auto loadSuccessTask = pattern_->CreateLoadSuccessCallback(pattern_->textObscured_);
+    loadSuccessTask(imageSourceInfo);
+    EXPECT_NE(pattern_->hidePasswordCanvasImage_, nullptr);
+    auto loadFailTask = pattern_->CreateLoadFailCallback(pattern_->textObscured_);
+    loadFailTask(imageSourceInfo, "tdd error");
+    auto dataReadyTask = pattern_->CreateDataReadyCallback(pattern_->textObscured_);
+    dataReadyTask(imageSourceInfo);
+
+    pattern_->hideUserDefinedIcon_ = false;
+    imageSourceInfo.SetSrc("/pages/media/test.jpg");
+    pattern_->ProcessPasswordIcon();
+    loadFailTask(imageSourceInfo, "tdd error");
+
+    pattern_->textObscured_ = false;
+    pattern_->showUserDefinedIcon_ = true;
+    layoutProperty_->UpdateShowPasswordSourceInfo(imageSourceInfo);
+    pattern_->ProcessPasswordIcon();
+    ASSERT_NE(pattern_->showPasswordImageLoadingCtx_, nullptr);
+    loadSuccessTask = pattern_->CreateLoadSuccessCallback(pattern_->textObscured_);
+    loadSuccessTask(imageSourceInfo);
+    loadFailTask = pattern_->CreateLoadFailCallback(pattern_->textObscured_);
+    loadFailTask(imageSourceInfo, "tdd error");
+
+    pattern_->showUserDefinedIcon_ = false;
+    pattern_->ProcessPasswordIcon();
+    loadFailTask(imageSourceInfo, "tdd error");
+    EXPECT_NE(pattern_->showPasswordCanvasImage_, nullptr);
+}
+
+/**
+ * @tc.name: OnCursorTwinkling
+ * @tc.desc: test method of OnCursorTwinkling
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnCursorTwinkling, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call OnCursorTwinkling.
+     * @tc.expected: Check result.
+     */
+    pattern_->cursorVisible_ = true;
+    pattern_->obscureTickCountDown_ = 5;
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern_->textObscured_ = true;
+    pattern_->OnCursorTwinkling();
+    EXPECT_EQ(pattern_->obscureTickCountDown_, 4);
+    EXPECT_FALSE(pattern_->cursorVisible_);
+
+    pattern_->obscureTickCountDown_ = 0;
+    pattern_->OnCursorTwinkling();
+    EXPECT_EQ(pattern_->obscureTickCountDown_, 0);
+    EXPECT_TRUE(pattern_->cursorVisible_);
+
+    pattern_->obscureTickCountDown_ = 1;
+    pattern_->textObscured_ = false;
+    pattern_->OnCursorTwinkling();
+    EXPECT_FALSE(pattern_->cursorVisible_);
+    EXPECT_EQ(pattern_->obscureTickCountDown_, 1);
+
+    layoutProperty_->UpdateTextInputType(TextInputType::TEXT);
+    pattern_->OnCursorTwinkling();
+    EXPECT_TRUE(pattern_->cursorVisible_);
+    EXPECT_EQ(pattern_->obscureTickCountDown_, 1);
+
+    layoutProperty_->UpdateMaxLines(1);
+    pattern_->textObscured_ = true;
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern_->obscureTickCountDown_ = 1;
+    pattern_->OnCursorTwinkling();
+    EXPECT_FALSE(pattern_->cursorVisible_);
+    EXPECT_EQ(pattern_->obscureTickCountDown_, 0);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test on color configuration update
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<TextTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->textStyle_.textColor_ = Color::BLACK;
+    pattern->OnColorConfigurationUpdate();
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextColor(), Color::BLACK);
+}
+
+/**
+ * @tc.name: HandleClickEvent
+ * @tc.desc: test method of HandleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleClickEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleClickEvent.
+     * @tc.expected: Check result.
+     */
+    auto renderContext = host_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF()));
+
+    auto focusHub = host_->GetOrCreateFocusHub();
+    focusHub->eventHub_.Upgrade()->SetEnabled(true);
+    focusHub->focusType_ = FocusType::NODE;
+    layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    focusHub->focusable_ = true;
+    focusHub->parentFocusable_ = true;
+    GestureEvent info;
+    pattern_->HandleClickEvent(info);
+
+    focusHub->currentFocus_ = true;
+    pattern_->hasClicked_ = false;
+    pattern_->HandleClickEvent(info);
+
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->isFocusOnTouch_ = false;
+    pattern_->hasClicked_ = false;
+    pattern_->HandleClickEvent(info);
+
+    pattern_->isMousePressed_ = true;
+    pattern_->hasClicked_ = false;
+    pattern_->HandleClickEvent(info);
+    EXPECT_FALSE(pattern_->isMousePressed_);
+
+    info.SetLocalLocation(Offset(90, 90));
+    pattern_->imageRect_.SetWidth(20);
+    pattern_->frameRect_.SetWidth(100);
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    layoutProperty_->UpdateShowPasswordIcon(true);
+    pattern_->hasClicked_ = false;
+    pattern_->HandleClickEvent(info);
+    EXPECT_EQ(pattern_->caretUpdateType_, CaretUpdateType::ICON_PRESSED);
+
+    layoutProperty_->UpdateShowPasswordIcon(false);
+    pattern_->hasClicked_ = false;
+    pattern_->HandleClickEvent(info);
+
+    info.SetLocalLocation(Offset(10, 90));
+    pattern_->hasClicked_ = false;
+    pattern_->HandleClickEvent(info);
+}
+
+/**
+ * @tc.name: HandleDoubleClickEvent
+ * @tc.desc: test method of HandleDoubleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleDoubleClickEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleClickEvent function quickly to trigger doubleClick.
+     * @tc.expected: Check result.
+     */
+    auto renderContext = host_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF()));
+
+    auto focusHub = host_->GetOrCreateFocusHub();
+    focusHub->eventHub_.Upgrade()->SetEnabled(true);
+    focusHub->focusType_ = FocusType::NODE;
+    layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    focusHub->focusable_ = true;
+    focusHub->parentFocusable_ = true;
+    GestureEvent info;
+    pattern_->HandleClickEvent(info);
+
+    focusHub->currentFocus_ = true;
+    pattern_->hasClicked_ = false;
+    pattern_->HandleClickEvent(info);
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->isFocusOnTouch_ = false;
+    pattern_->hasClicked_ = false;
+
+    // test gesture doubleClick
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
+    pattern_->isUsingMouse_ = false;
+    pattern_->HandleClickEvent(info);
+    EXPECT_FALSE(pattern_->hasClicked_);
+
+    // test mouse doubleClick
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
+    pattern_->isUsingMouse_ = true;
+    pattern_->HandleClickEvent(info);
+    EXPECT_FALSE(pattern_->hasClicked_);
+
+    // test timeout > 300 ms
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
+    pattern_->lastClickTimeStamp_ = pattern_->lastClickTimeStamp_ - std::chrono::seconds(1);
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(pattern_->hasClicked_);
 }
 
 } // namespace OHOS::Ace::NG

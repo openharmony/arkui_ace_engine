@@ -64,7 +64,7 @@ void PixelMapImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& /* srcRect */, const RSRect& /* dstRect */, const BorderRadiusArray& radiusXY)
 {
     auto pixmap = GetPixelMap();
-    CHECK_NULL_VOID_NOLOG(pixmap);
+    CHECK_NULL_VOID(pixmap);
 
 #ifdef ENABLE_ROSEN_BACKEND
 #ifndef USE_ROSEN_DRAWING
@@ -76,12 +76,9 @@ void PixelMapImage::DrawToRSCanvas(
     CHECK_NULL_VOID(recordingCanvas);
     SkPaint paint;
     auto config = GetPaintConfig();
-#ifndef NEW_SKIA
-    ImagePainterUtils::AddFilter(paint, config);
-#else
+
     SkSamplingOptions options;
     ImagePainterUtils::AddFilter(paint, options, config);
-#endif
     auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
     recordingCanvas->ClipAdaptiveRRect(radii.get());
     recordingCanvas->scale(config.scaleX_, config.scaleY_);
@@ -89,11 +86,7 @@ void PixelMapImage::DrawToRSCanvas(
     Rosen::RsImageInfo rsImageInfo(
         static_cast<int>(config.imageFit_), static_cast<int>(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
 
-#ifndef NEW_SKIA
-    recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, paint);
-#else
     recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
-#endif
 #else
     RSBrush brush;
     auto config = GetPaintConfig();
@@ -109,14 +102,14 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas.ClipAdaptiveRoundRect(radius);
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
-    CHECK_NULL_VOID_NOLOG(pixmap->GetPixelMapSharedPtr());
+    CHECK_NULL_VOID(pixmap->GetPixelMapSharedPtr());
     RSPoint pointRadius[4] = {};
     for (int i = 0; i < 4; i++) {
         pointRadius[i] = radius[i];
     }
-    Rosen::Drawing::AdaptiveImageInfo rsImageInfo =
-        {static_cast<int32_t>(config.imageFit_), static_cast<int32_t>(config.imageRepeat_),
-         {pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3]}, 1.0, 0, 0, 0};
+    Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
+        static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
+        1.0, 0, 0, 0 };
     RSSamplingOptions smapling;
     recordingCanvas.AttachBrush(brush);
     recordingCanvas.DrawPixelMap(pixmap->GetPixelMapSharedPtr(), rsImageInfo, smapling);
@@ -129,7 +122,6 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 {
 #ifndef USE_ROSEN_DRAWING
 #ifdef ENABLE_ROSEN_BACKEND
-#ifdef NEW_SKIA
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_VOID(rsCanvas);
     auto skCanvas = rsCanvas->ExportSkCanvas();
@@ -142,7 +134,6 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
     recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
-#endif
 #else
     LOGE("Drawing is not supported");
 #endif
@@ -168,7 +159,7 @@ RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
     auto data = DynamicCast<PixmapData>(cache->GetCacheImageData(key));
-    CHECK_NULL_RETURN_NOLOG(data, nullptr);
+    CHECK_NULL_RETURN(data, nullptr);
     LOGD("pixelMap cache found %{public}s", key.c_str());
     return MakeRefPtr<PixelMapImage>(data->GetPixmap());
 }

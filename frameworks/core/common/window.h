@@ -129,6 +129,11 @@ public:
 
     virtual void SetKeepScreenOn(bool keepScreenOn) {};
 
+    virtual int64_t GetVSyncPeriod() const
+    {
+        return 0;
+    };
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

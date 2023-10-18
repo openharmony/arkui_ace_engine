@@ -16,17 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_LAYERS_CLIP_LAYER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_LAYERS_CLIP_LAYER_H
 
+#include "include/core/SkData.h"
+#include "include/core/SkPaint.h"
+#include "modules/svg/include/SkSVGDOM.h"
+
 #include "base/geometry/rrect.h"
 #include "core/pipeline/layers/layer.h"
 #include "core/pipeline/layers/offset_layer.h"
 #include "core/pipeline/layers/scene_builder.h"
-#ifdef NEW_SKIA
-#include "modules/svg/include/SkSVGDOM.h"
-#else
-#include "experimental/svg/model/SkSVGDOM.h"
-#endif
-#include "include/core/SkPaint.h"
-#include "include/core/SkData.h"
 
 namespace OHOS::Ace::Flutter {
 

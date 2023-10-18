@@ -40,14 +40,14 @@ void StorageProxy::SetDistributedDelegate(std::unique_ptr<StorageInterface>&& de
 
 RefPtr<Storage> StorageProxy::GetStorage(const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    CHECK_NULL_RETURN_NOLOG(delegate_, nullptr);
+    CHECK_NULL_RETURN(delegate_, nullptr);
     return delegate_->GetStorage(taskExecutor);
 }
 
 RefPtr<Storage> StorageProxy::GetStorage(const std::string& sessionId,
     std::function<void(const std::string&)>&& notifier, const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    CHECK_NULL_RETURN_NOLOG(distributedDelegate_, nullptr);
+    CHECK_NULL_RETURN(distributedDelegate_, nullptr);
     return distributedDelegate_->GetStorage(sessionId, std::move(notifier), taskExecutor);
 }
 

@@ -91,11 +91,12 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto childWrapper = idNodeMap_[nodeName];
+        auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
         if (!childWrapper->IsActive()) {
+            childWrapper->Measure(childConstraint);
             continue;
         }
         if (!childWrapper->GetLayoutProperty() || !childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
-            auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
             childWrapper->Measure(childConstraint);
             recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
             continue;
@@ -103,7 +104,6 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
         // if child has no align rules, measure it with container constraint and place it at top left corner
         if (!flexItem->HasAlignRules()) {
-            auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
             childWrapper->Measure(childConstraint);
             recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
             continue;
@@ -461,7 +461,7 @@ void RelativeContainerLayoutAlgorithm::CalcHorizontalLayoutParam(AlignDirection 
 {
     auto childWrapper = idNodeMap_[nodeName];
     auto childLayoutProperty = childWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID_NOLOG(childLayoutProperty);
+    CHECK_NULL_VOID(childLayoutProperty);
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
     auto parentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     MinusPaddingToSize(padding_, parentSize);
@@ -495,7 +495,7 @@ void RelativeContainerLayoutAlgorithm::CalcVerticalLayoutParam(AlignDirection al
 {
     auto childWrapper = idNodeMap_[nodeName];
     auto childLayoutProperty = childWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID_NOLOG(childLayoutProperty);
+    CHECK_NULL_VOID(childLayoutProperty);
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
     auto parentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     MinusPaddingToSize(padding_, parentSize);

@@ -35,6 +35,7 @@ struct MagicLayoutNode {
     RefPtr<LayoutWrapper> layoutWrapper;
     OptionalSizeF calcSize;
     bool needSecondMeasure = false;
+    bool needKeepMinCalcSize = false;
 };
 
 struct BaselineProperties {
@@ -82,6 +83,7 @@ private:
     float GetStretchCrossAxisLimit() const;
     void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
     void MeasureAndCleanMagicNodes(LayoutWrapper* containerLayoutWrapper, FlexItemProperties& flexItemProperties);
+    bool HandleBlankFirstTimeMeasure(const MagicLayoutNode& child, FlexItemProperties& flexItemProperties);
     void UpdateFlexProperties(FlexItemProperties& flexItemProperties, const RefPtr<LayoutWrapper>& layoutWrapper);
     void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties, LayoutWrapper* layoutWrapper);
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
@@ -90,6 +92,10 @@ private:
     void CheckIsGrowOrShrink(std::function<float(const RefPtr<LayoutWrapper>&)>& getFlex, float remainSpace,
         float& spacePerFlex, FlexItemProperties& flexItemProperties, RefPtr<LayoutWrapper>& lastChild);
     void CheckBlankAndKeepMin(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
+    float MainAxisMinValue(LayoutWrapper* layoutWrapper);
+    bool MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper);
+    bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
+    bool UserDefinedCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;

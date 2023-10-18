@@ -54,7 +54,7 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
         OffsetF offsetY = OffsetF(0.0f, downLine);
         dividerPainter.DrawLine(canvas, offsetY);
         auto picker = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(picker);
+        CHECK_NULL_VOID(picker);
         if (enabled) {
             picker->PaintGradient(canvas, frameRect);
         } else {
@@ -84,6 +84,9 @@ void DatePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     topEndPoint.SetY(frameRect.Height());
     Color endColor = backgroundColor_;
     Color middleColor = endColor.ChangeAlpha(0);
+    if (NearZero(frameRect.Bottom())) {
+        return;
+    }
     std::vector<float> topPos { 0.0f, gradientHeight / frameRect.Bottom(),
         (frameRect.Bottom() - gradientHeight) / frameRect.Bottom(), 1.0f };
     std::vector<RSColorQuad> topColors { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(),

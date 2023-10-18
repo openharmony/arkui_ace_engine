@@ -61,7 +61,7 @@ class DatePickerEventParam : public virtual AceType {
     DECLARE_ACE_TYPE(DatePickerEventParam, AceType)
 
 public:
-    RefPtr<FrameNode> instance_;
+    WeakPtr<FrameNode> instance_;
     int32_t itemIndex_ = 0;
     int32_t itemTotalCounts_ = 0;
 };
@@ -140,12 +140,12 @@ public:
         deltaSize_ = deltaSize;
     }
 
-    const std::map<RefPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
+    const std::map<WeakPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
     {
         return options_;
     }
 
-    void SetOptions(const std::map<RefPtr<FrameNode>, std::vector<std::string>>& value)
+    void SetOptions(const std::map<WeakPtr<FrameNode>, std::vector<std::string>>& value)
     {
         options_ = value;
     }
@@ -330,10 +330,11 @@ private:
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void SetAccessibilityAction();
+    void AddHotZoneRectToText();
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
-    std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
+    std::map<WeakPtr<FrameNode>, std::vector<std::string>> options_;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
     uint32_t currentIndex_ = 0;
@@ -363,6 +364,8 @@ private:
     bool hoverd_ = false;
     double scrollDelta_ = 0.0;
     bool animationCreated_ = false;
+    OffsetF offset_;
+    SizeF size_;
     RefPtr<Animator> toController_;
     RefPtr<Animator> fromController_;
     RefPtr<CurveAnimation<double>> fromBottomCurve_;

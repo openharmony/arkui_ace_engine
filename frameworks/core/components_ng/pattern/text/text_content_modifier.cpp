@@ -56,7 +56,7 @@ inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle)
 {
-    contentChange_ = MakeRefPtr<PropertyBool>(false);
+    contentChange_ = MakeRefPtr<PropertyInt>(0);
     AttachProperty(contentChange_);
     contentOffset_ = MakeRefPtr<PropertyOffsetF>(OffsetF());
     contentSize_ = MakeRefPtr<PropertySizeF>(SizeF());
@@ -186,8 +186,8 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
-        CHECK_NULL_VOID_NOLOG(paragraph_);
-        auto canvas = drawingContext.canvas;
+        CHECK_NULL_VOID(paragraph_);
+        auto& canvas = drawingContext.canvas;
         canvas.Save();
         if (!textRacing_) {
             auto contentSize = contentSize_->Get();
@@ -225,7 +225,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 
 void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
 {
-    RSCanvas canvas = drawingContext.canvas;
+    RSCanvas& canvas = drawingContext.canvas;
     RSBrush brush;
     std::vector<RSPoint> radiusXY(POINT_COUNT);
     Dimension borderRadius = Dimension(2.0, DimensionUnit::VP);
@@ -581,7 +581,7 @@ float TextContentModifier::GetTextRacePercent()
 void TextContentModifier::ContentChange()
 {
     CHECK_NULL_VOID(contentChange_);
-    contentChange_->Set(!contentChange_->Get());
+    contentChange_->Set(contentChange_->Get()+ 1);
 }
 
 void TextContentModifier::AddDefaultShadow()

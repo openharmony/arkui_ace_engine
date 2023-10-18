@@ -154,7 +154,8 @@ int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
     return manifestParser_->GetMinPlatformVersion();
 }
 
-void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::string& params, const std::string& profile)
+void FrontendDelegateDeclarative::RunPage(
+    const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarative::RunPage");
 
@@ -188,10 +189,14 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
         CHECK_NULL_VOID(pageRouterManager_);
         pageRouterManager_->SetManifestParser(manifestParser_);
         taskExecutor_->PostTask(
-            [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params]() {
+            [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter]() {
                 auto pageRouterManager = weakPtr.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
-                pageRouterManager->RunPage(url, params);
+                if (isNamedRouter) {
+                    pageRouterManager->RunPageByNamedRouter(url, params);
+                } else {
+                    pageRouterManager->RunPage(url, params);
+                }
             },
             TaskExecutor::TaskType::JS);
         return;
@@ -793,11 +798,13 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
 }
 
 void FrontendDelegateDeclarative::InitializeRouterManager(
-    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback)
+    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
+    NG::UpdateRootComponentCallback&& updateRootComponentCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
     pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
     pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
+    pageRouterManager_->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 }
 
 // Start FrontendDelegate overrides.
@@ -1354,18 +1361,19 @@ Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void FrontendDelegateDeclarative::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft, containerId = Container::CurrentId()](
+        auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
                         const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
             LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
-            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
+            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
         };
         MainWindowOverlay(std::move(task));
         return;
@@ -2836,7 +2844,7 @@ void FrontendDelegateDeclarative::GetSnapshot(
 }
 
 void FrontendDelegateDeclarative::CreateSnapshot(
-    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback)
+    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     ViewStackModel::GetInstance()->NewScope();
@@ -2844,7 +2852,7 @@ void FrontendDelegateDeclarative::CreateSnapshot(
     customBuilder();
     auto customNode = ViewStackModel::GetInstance()->Finish();
 
-    NG::ComponentSnapshot::Create(customNode, std::move(callback));
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector);
 #endif
 }
 } // namespace OHOS::Ace::Framework

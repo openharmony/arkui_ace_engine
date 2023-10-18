@@ -23,6 +23,7 @@
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -48,8 +49,6 @@ constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 constexpr Dimension listPaddingHeight = 48.0_vp;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
-
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -309,7 +308,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 }
 
 OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
-    const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& selfSize) const
+    const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& selfSize)
 {
     OffsetF topLeftPoint;
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -327,11 +326,15 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
                            layoutConstraint->maxSize.Height() - childSize.Height()) /
                        2.0;
     }
-    return AdjustChildPosition(topLeftPoint, dialogOffset, childSize);
+    const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();
+    bool needAvoidKeyboard = true;
+    if (expandSafeAreaOpts && (expandSafeAreaOpts->type | SAFE_AREA_TYPE_KEYBOARD)) {
+        needAvoidKeyboard = false;
+    }
+    return AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
 }
 
-bool DialogLayoutAlgorithm::SetAlignmentSwitch(
-    const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint) const
+bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint)
 {
     if (alignment_ != DialogAlignment::DEFAULT) {
         switch (alignment_) {
@@ -372,7 +375,7 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(
         }
         return true;
     }
-    bool version10OrLarger = PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
+    bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (version10OrLarger && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
             topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
@@ -398,12 +401,12 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
     CHECK_NULL_RETURN(pipelineContext, 0);
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, 0);
-    auto bottom = dialogTheme->GetDefaultPaddingBottomFixed();
+    auto bottom = dialogTheme->GetDefaultDialogMarginBottom();
     return pipelineContext->NormalizeToPx(bottom);
 }
 
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
-    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize) const
+    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
@@ -416,8 +419,9 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
     auto childBottom = childOffset.GetY() + childSize.Height();
-    if (keyboardInsert.Length() > 0 && childBottom > keyboardInsert.start) {
-        childOffset.SetY(childOffset.GetY() - (childBottom - keyboardInsert.start));
+    auto paddingBottom = static_cast<float>(GetPaddingBottom());
+    if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
+        childOffset.SetY(childOffset.GetY() - (childBottom - (keyboardInsert.start - paddingBottom)));
     }
     return childOffset;
 }

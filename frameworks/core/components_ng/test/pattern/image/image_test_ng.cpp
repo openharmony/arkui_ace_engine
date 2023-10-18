@@ -13,19 +13,35 @@
  * limitations under the License.
  */
 
+#include <optional>
+#include <utility>
+#include <vector>
 #include "gtest/gtest.h"
-
-#include "core/components/common/layout/constants.h"
 
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "core/common/container.h"
+
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/image/pixel_map.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/input_event.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -33,7 +49,10 @@
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/mouse_event.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -99,11 +118,14 @@ public:
 void ImageTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void ImageTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+    MockContainer::TearDown();
 }
 
 RefPtr<FrameNode> ImageTestNg::CreateImageNode(const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
@@ -278,7 +300,7 @@ HWTEST_F(ImageTestNg, UpdateInternalResource001, TestSize.Level1)
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<IconTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IconTheme>()));
     /**
     //     case1 : imageSource is not internal resource, and it can not load correct resource Icon.
     */
@@ -299,11 +321,9 @@ HWTEST_F(ImageTestNg, UpdateInternalResource001, TestSize.Level1)
     sourceInfo.SetResourceId(InternalResource::ResourceId::PLAY_SVG);
     imagePattern->UpdateInternalResource(sourceInfo);
     EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc(), RESOURCE_URL);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
-/**
+/** CalcImageContentPaintSize
  * @tc.name: SetImagePaintConfig001
  * @tc.desc: When Image upload successfully, ImagePattern will set ImagePaintConfig to CanvasImage.
  * @tc.type: FUNC
@@ -1617,6 +1637,15 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
 
     pattern->OnVisibleChange(false);
     EXPECT_FALSE(pattern->selectOverlay_);
+
+    pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    pattern->OnVisibleChange(true);
+    EXPECT_FALSE(pattern->selectOverlay_);
+
+    pattern->image_ = nullptr;
+    pattern->altImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    pattern->OnVisibleChange(true);
+    EXPECT_FALSE(pattern->selectOverlay_);
 }
 
 /**
@@ -1635,5 +1664,202 @@ HWTEST_F(ImageTestNg, Resource001, TestSize.Level1)
     EXPECT_FALSE(pattern->loadingCtx_);
     frameNode->MarkModifyDone();
     EXPECT_TRUE(pattern->loadingCtx_);
+}
+
+/**
+ * @tc.name: OnAttachToFrameNode001
+ * @tc.desc: Test OnAttachToFrameNode Func.
+ */
+HWTEST_F(ImageTestNg, OnAttachToFrameNode001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(pattern->loadingCtx_);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ImageTheme>()));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->GetTheme<ImageTheme>()->draggable_ = false;
+    frameNode->draggable_ = false;
+    pattern->OnAttachToFrameNode();
+    EXPECT_FALSE(frameNode->draggable_);
+
+    pipeline->GetTheme<ImageTheme>()->draggable_ = false;
+    frameNode->draggable_ = true;
+    pattern->OnAttachToFrameNode();
+    EXPECT_FALSE(frameNode->draggable_);
+
+    pipeline->GetTheme<ImageTheme>()->draggable_ = true;
+    frameNode->draggable_ = true;
+    pattern->OnAttachToFrameNode();
+    EXPECT_TRUE(frameNode->draggable_);
+
+    pipeline->GetTheme<ImageTheme>()->draggable_ = true;
+    frameNode->draggable_ = false;
+    pattern->OnAttachToFrameNode();
+    EXPECT_TRUE(frameNode->draggable_);
+}
+
+/**
+ * @tc.name: InitCopy001
+ * @tc.desc: Test InitCopy Func.
+ */
+HWTEST_F(ImageTestNg, InitCopy001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(pattern->loadingCtx_);
+
+    auto callback1 = [](GestureEvent& info) {
+        return ;
+    };
+
+    auto callback2 = [](MouseInfo& info) {
+        return ;
+    };
+
+    auto callback3 = [](GestureEvent& info) {
+        return ;
+    };
+
+    for (int status = 0; status < 8; ++status) {
+        if (status >> 0 & 1) {
+            pattern->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>(std::move(callback1));
+        } else {
+            pattern->longPressEvent_ = nullptr;
+        }
+        if (status >> 1 & 1) {
+            pattern->mouseEvent_ = AceType::MakeRefPtr<InputEvent>(std::move(callback2));
+        } else {
+            pattern->mouseEvent_ = nullptr;
+        }
+        if (status >> 2 & 1) {
+            pattern->clickEvent_ = AceType::MakeRefPtr<ClickEvent>(std::move(callback3));
+        } else {
+            pattern->clickEvent_ = nullptr;
+        }
+        pattern->InitCopy();
+        EXPECT_NE(pattern->longPressEvent_, nullptr);
+        EXPECT_NE(pattern->mouseEvent_, nullptr);
+        EXPECT_NE(pattern->clickEvent_, nullptr);
+    }
+}
+
+/**
+ * @tc.name: HandleCopy001
+ * @tc.desc: Test HandleCopy Func.
+ */
+HWTEST_F(ImageTestNg, HandleCopy001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(pattern->loadingCtx_);
+
+    pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+}
+
+/**
+ * @tc.name: GetMaxSize001
+ * @tc.desc: Verify GetMaxSize Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, GetMaxSize001, TestSize.Level1)
+{
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, Dimension(0), IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    // 300 * 200
+    ASSERT_NE(loadingCtx, nullptr);
+    auto altloadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    // 100 * 200
+    ASSERT_NE(altloadingCtx, nullptr);
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.width_ = std::nullopt;
+    layoutConstraintSize.selfIdealSize.height_ = std::nullopt;
+
+    /**
+    //     corresponding ets code:
+    //         Image(IMAGE_SRC_URL).width(400).height(500)
+    */
+    auto imageLayoutAlgorithm = AceType::MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx, altloadingCtx);
+    ASSERT_NE(imageLayoutAlgorithm, nullptr);
+    auto size = imageLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
+    EXPECT_EQ(size, std::nullopt);
+
+    loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    // 300 / 200 = 1.5
+    std::vector<SizeF> cases = {
+        {1, 1}, {1, Infinity<float>()},
+        {Infinity<float>(), 1}, {Infinity<float>(), Infinity<float>()}
+    };
+    std::vector<SizeF> expectedRes {
+        {1, 1}, {1, 2}, {0.5, 1}, {0, 0}
+    };
+    for (int i = 0; i < 4; ++i) {
+        layoutConstraintSize.maxSize.SetSizeT(cases[i]);
+        size = imageLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
+        EXPECT_EQ(size.value(), expectedRes[i]);
+    }
+}
+
+/**
+ * @tc.name: MeasureContent001
+ * @tc.desc: Verify MeasureContent Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, MeasureContent001, TestSize.Level1)
+{
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+
+    std::vector<RefPtr<OHOS::Ace::NG::ImageLoadingContext>> loadingCtx = {
+        nullptr,
+        AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr)),
+        AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, Dimension(-1), Dimension(-1)),
+        LoadNotifier(nullptr, nullptr, nullptr))
+    };
+
+    std::vector<RefPtr<OHOS::Ace::NG::ImageLoadingContext>> altloadingCtx = {
+        nullptr,
+        AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr)),
+        AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(ALT_SRC_URL, Dimension(-1), Dimension(-1)),
+        LoadNotifier(nullptr, nullptr, nullptr))
+    };
+
+    LayoutConstraintF layoutConstraintSize;
+
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            auto imageLayoutAlgorithm = AceType::MakeRefPtr<ImageLayoutAlgorithm>(
+                loadingCtx[i], altloadingCtx[j]
+            );
+            auto size = imageLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
+            
+            int status = i * 3 + j;
+            if (status == 0 || status == 2 || status == 6 || status == 8) {
+                EXPECT_EQ(size, std::nullopt);
+            } else {
+                EXPECT_EQ(size.value(), SizeF(0, 0));
+            }
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

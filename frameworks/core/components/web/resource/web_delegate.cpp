@@ -20,6 +20,7 @@
 #include <optional>
 #include <sstream>
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "base/log/ace_trace.h"
@@ -91,6 +92,16 @@ const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
+
+static bool IsDeviceTabletOr2in1()
+{
+    return OHOS::system::GetDeviceType() == "tablet" || OHOS::system::GetDeviceType() == "2in1";
+}
+
+static bool GetWebOptimizationValue()
+{
+    return OHOS::system::GetBoolParameter("web.optimization", true);
+}
 } // namespace
 
 #define EGLCONFIG_VERSION 3
@@ -624,7 +635,7 @@ void WebDelegateObserver::NotifyDestory()
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
-    if (OHOS::system::GetDeviceType() == "tablet" || OHOS::system::GetDeviceType() == "2in1") {
+    if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
         OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
     }
     if (nweb_) {
@@ -1601,6 +1612,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     bundlePath_ = bundlePath;
     bundleDataPath_ = dataPath;
     hapPath_ = container->GetWebHapPath();
+    // get app temp dir
+    tempDir_ = container->GetTempDir();
     // load webview so
     OHOS::NWeb::NWebHelper::Instance().SetBundlePath(bundlePath_);
     if (!OHOS::NWeb::NWebHelper::Instance().Init()) {
@@ -2417,6 +2430,7 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
 {
     CHECK_NULL_VOID(nweb_);
     auto setting = nweb_->GetPreference();
+    CHECK_NULL_VOID(setting);
 #ifdef NG_BUILD
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
@@ -2513,6 +2527,7 @@ void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
         return;
     }
     surfaceOcclusion_ = occlusion;
+
     if (surfaceOcclusion_) {
         nweb_->OnUnoccluded();
     } else {
@@ -2533,7 +2548,11 @@ void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
 
 void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 {
-    if (OHOS::system::GetDeviceType() != "tablet" && OHOS::system::GetDeviceType() != "2in1") {
+    if (!GetWebOptimizationValue()) {
+        LOGD("web optimization switch is closed.");
+        return;
+    }
+    if (!IsDeviceTabletOr2in1()) {
         LOGD("only pad and pc will RegisterSurfaceOcclusionChangeCallback");
         return;
     }
@@ -2585,6 +2604,13 @@ void WebDelegate::InitWebViewWithSurface()
                 initArgs.web_engine_args_to_add.push_back(
                     std::string("--user-hap-path=").append(delegate->hapPath_));
             }
+
+            if (!delegate->tempDir_.empty()) {
+                initArgs.web_engine_args_to_add.push_back(
+                    std::string("--ohos-temp-dir=").append(delegate->tempDir_));
+                LOGI("Init --ohos-temp-dir:%{public}s", delegate->tempDir_.c_str());
+            }
+
             std::string customScheme = delegate->GetCustomScheme();
             if (!customScheme.empty()) {
                 LOGI("custome scheme %{public}s", customScheme.c_str());
@@ -2643,6 +2669,7 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(upgradeContext);
             auto window_id = upgradeContext->GetWindowId();
             delegate->nweb_->SetWindowId(window_id);
+            delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -2668,6 +2695,7 @@ void WebDelegate::UpdateUserAgent(const std::string& userAgent)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutUserAgent(userAgent);
             }
         },
@@ -2708,7 +2736,7 @@ void WebDelegate::UpdateInitialScale(float scale)
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::Resize(const double& width, const double& height)
+void WebDelegate::Resize(const double& width, const double& height, bool isKeyboard)
 {
     if (width <= 0 || height <= 0) {
         return;
@@ -2719,10 +2747,11 @@ void WebDelegate::Resize(const double& width, const double& height)
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), width, height]() {
+        [weak = WeakClaim(this), width, height, isKeyboard]() {
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_ && !delegate->window_) {
-                delegate->nweb_->Resize(width, height);
+                // Sur need int value, greater than this value in case show black line.
+                delegate->nweb_->Resize(std::ceil(width), std::ceil(height), isKeyboard);
                 double offsetX = 0;
                 double offsetY = 0;
                 delegate->UpdateScreenOffSet(offsetX, offsetY);
@@ -2743,6 +2772,7 @@ void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutJavaScriptEnabled(isJsEnabled);
             }
         },
@@ -2760,6 +2790,7 @@ void WebDelegate::UpdateAllowFileAccess(const bool& isFileAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutEnableRawFileAccess(isFileAccessEnabled);
             }
         },
@@ -2777,6 +2808,7 @@ void WebDelegate::UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutLoadImageFromNetworkDisabled(onLineImageAccessEnabled);
             }
         },
@@ -2794,6 +2826,7 @@ void WebDelegate::UpdateLoadsImagesAutomatically(const bool& isImageAccessEnable
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutImageLoadingAllowed(isImageAccessEnabled);
             }
         },
@@ -2811,6 +2844,7 @@ void WebDelegate::UpdateMixedContentMode(const MixedModeContent& mixedMode)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutAccessModeForSecureOriginLoadFromInsecure(
                     static_cast<OHOS::NWeb::NWebPreference::AccessMode>(mixedMode));
             }
@@ -2829,6 +2863,7 @@ void WebDelegate::UpdateSupportZoom(const bool& isZoomAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutZoomingFunctionEnabled(isZoomAccessEnabled);
             }
         },
@@ -2845,6 +2880,7 @@ void WebDelegate::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutDomStorageEnabled(isDomStorageAccessEnabled);
             }
         },
@@ -2861,6 +2897,7 @@ void WebDelegate::UpdateGeolocationEnabled(const bool& isGeolocationAccessEnable
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutGeolocationAllowed(isGeolocationAccessEnabled);
             }
         },
@@ -2878,6 +2915,7 @@ void WebDelegate::UpdateCacheMode(const WebCacheMode& mode)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutCacheMode(static_cast<OHOS::NWeb::NWebPreference::CacheModeFlag>(mode));
             }
         },
@@ -2906,6 +2944,7 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            CHECK_NULL_VOID(setting);
             if (mode == WebDarkMode::On) {
                 delegate->UnRegisterConfigObserver();
                 setting->PutDarkSchemeEnabled(true);
@@ -2938,6 +2977,7 @@ void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate,
     appMgrClient->GetConfiguration(systemConfig);
     std::string colorMode =
         systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    CHECK_NULL_VOID(setting);
     if (colorMode == "dark") {
         setting->PutDarkSchemeEnabled(true);
         if (delegate->GetForceDarkMode()) {
@@ -2963,6 +3003,7 @@ void WebDelegate::UpdateForceDarkAccess(const bool& access)
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            CHECK_NULL_VOID(setting);
             delegate->forceDarkMode_ = access;
             if (setting->DarkSchemeEnabled()) {
                 setting->PutForceDarkModeEnabled(access);
@@ -3016,6 +3057,7 @@ void WebDelegate::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnab
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutLoadWithOverviewMode(isOverviewModeAccessEnabled);
             }
         },
@@ -3033,6 +3075,7 @@ void WebDelegate::UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnable
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutEnableRawFileAccessFromFileURLs(isFileFromUrlAccessEnabled);
             }
         },
@@ -3050,6 +3093,7 @@ void WebDelegate::UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutDatabaseAllowed(isDatabaseAccessEnabled);
             }
         },
@@ -3067,6 +3111,7 @@ void WebDelegate::UpdateTextZoomRatio(const int32_t& textZoomRatioNum)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutZoomingForTextFactor(textZoomRatioNum);
             }
         },
@@ -3084,6 +3129,7 @@ void WebDelegate::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutWebDebuggingAccess(isWebDebuggingAccessEnabled);
             }
         },
@@ -3101,6 +3147,7 @@ void WebDelegate::UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutPinchSmoothMode(isPinchSmoothModeEnabled);
             }
         },
@@ -3137,6 +3184,7 @@ void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutMultiWindowAccess(isMultiWindowAccessEnabled);
             }
         },
@@ -3582,6 +3630,14 @@ void WebDelegate::NotifyMemoryLevel(int32_t level)
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::SetAudioMuted(bool muted)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetAudioMuted(muted);
+    }
 }
 
 void WebDelegate::Zoom(float factor)
@@ -5151,7 +5207,7 @@ sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
     return surfaceDelegate_;
 }
 
-void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset)
+void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard)
 {
     if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
         LOGE("WebDelegate::SetBoundsOrResize width and height error");
@@ -5164,14 +5220,14 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset)
                 (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
             if (needResizeAtFirst_) {
                 LOGI("WebDelegate::SetBounds: resize at first");
-                Resize(drawSize.Width(), drawSize.Height());
+                Resize(drawSize.Width(), drawSize.Height(), isKeyboard);
                 needResizeAtFirst_ = false;
             }
             Size webSize = GetEnhanceSurfaceSize(drawSize);
             surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), webSize.Width(), webSize.Height());
         }
     } else {
-        Resize(drawSize.Width(), drawSize.Height());
+        Resize(drawSize.Width(), drawSize.Height(), isKeyboard);
     }
 }
 
@@ -5183,7 +5239,7 @@ Offset WebDelegate::GetWebRenderGlobalPos()
 Size WebDelegate::GetEnhanceSurfaceSize(const Size& drawSize)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(pipeline, Size());
+    CHECK_NULL_RETURN(pipeline, Size());
     double dipScale = pipeline->GetDipScale();
     if (NearZero(dipScale)) {
         return Size();
@@ -5221,6 +5277,7 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
     CHECK_NULL_VOID(rosenRenderContext);
     rsNode_ = rosenRenderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode_);
     surfaceNodeId_ = rsNode_->GetId();
 }
 #endif
@@ -5396,5 +5453,15 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset)
             }
         },
         TaskExecutor::TaskType::JS);
+}
+
+void WebDelegate::SetToken()
+{
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_VOID(container);
+    auto token = container->GetToken();
+    if (nweb_) {
+        nweb_->SetToken(static_cast<void*>(token));
+    }
 }
 } // namespace OHOS::Ace

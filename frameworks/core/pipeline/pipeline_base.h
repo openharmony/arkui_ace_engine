@@ -448,7 +448,9 @@ public:
 
     int32_t GetMinPlatformVersion() const
     {
-        return minPlatformVersion_;
+        // Since API10, the platform version data format has changed.
+        // Use the last three digits of data as platform version. For example (4000000010).
+        return minPlatformVersion_ % 1000;
     }
 
     void SetMinPlatformVersion(int32_t minPlatformVersion)
@@ -762,6 +764,12 @@ public:
 
     virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
 
+    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+
+    virtual bool IsEnableKeyBoardAvoidMode() {
+        return false;
+    }
+
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;
@@ -855,7 +863,11 @@ public:
 
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
+    void SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
+
     void RemoveSubWindowVsyncCallback(int32_t subWindowId);
+
+    void RemoveJsFormVsyncCallback(int32_t subWindowId);
 
     virtual void SetIsLayoutFullScreen(bool isLayoutFullScreen) {}
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
@@ -870,14 +882,34 @@ public:
         return isAppWindow_;
     }
 
-    void SetEnableImplicitAnimation(bool enableImplicitAnimation)
+    void SetFormAnimationStartTime(int64_t time)
     {
-        enableImplicitAnimation_ = enableImplicitAnimation;
+        formAnimationStartTime_ = time;
     }
 
-    bool GetEnableImplicitAnimation() const
+    int64_t GetFormAnimationStartTime() const
     {
-        return enableImplicitAnimation_;
+        return formAnimationStartTime_;
+    }
+
+    void SetIsFormAnimation(bool isFormAnimation)
+    {
+        isFormAnimation_ = isFormAnimation;
+    }
+
+    bool IsFormAnimation() const
+    {
+        return isFormAnimation_;
+    }
+
+    void SetFormAnimationFinishCallback(bool isFormAnimationFinishCallback)
+    {
+        isFormAnimationFinishCallback_ = isFormAnimationFinishCallback;
+    }
+
+    bool IsFormAnimationFinishCallback() const
+    {
+        return isFormAnimationFinishCallback_;
     }
 
     // restore
@@ -902,6 +934,16 @@ public:
     virtual bool IsLayouting() const
     {
         return false;
+    }
+
+    void SetHalfLeading(bool halfLeading)
+    {
+        halfLeading_ = halfLeading;
+    }
+
+    bool GetHalfLeading() const
+    {
+        return halfLeading_;
     }
 
 protected:
@@ -949,6 +991,7 @@ protected:
     bool isJsPlugin_ = false;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
+    std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;
     int32_t minPlatformVersion_ = 0;
     uint32_t windowId_ = 0;
     // UIExtensionAbility need component windowID
@@ -1031,8 +1074,11 @@ private:
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
-    bool enableImplicitAnimation_ = true;
+    bool isFormAnimationFinishCallback_ = false;
+    int64_t formAnimationStartTime_ = 0;
+    bool isFormAnimation_ = false;
     bool isReloading_ = false;
+    bool halfLeading_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

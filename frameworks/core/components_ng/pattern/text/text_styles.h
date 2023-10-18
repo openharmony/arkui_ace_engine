@@ -19,6 +19,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -51,6 +52,8 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HeightAdaptivePolicy, TextHeightAdaptivePolicy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextIndent, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LeadingMargin, LeadingMargin);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WordBreak, WordBreak);
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,

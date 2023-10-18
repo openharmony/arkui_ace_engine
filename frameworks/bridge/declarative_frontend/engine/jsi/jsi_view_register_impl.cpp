@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <array>
 #include <utility>
 
 #include "base/geometry/ng/size_t.h"
@@ -23,6 +24,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #ifdef NG_BUILD
@@ -75,6 +77,7 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
+#include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
@@ -132,6 +135,7 @@
 #include "bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "bridge/declarative_frontend/jsview/js_span.h"
 #include "bridge/declarative_frontend/jsview/js_stack.h"
+#include "bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_stepper.h"
 #include "bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
@@ -159,6 +163,9 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
 
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -317,6 +324,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             return false;
         });
         auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(pageRootNode);
+
         pagePattern->SetPageTransitionFunc(
             [weakCustom = WeakPtr<NG::CustomNodeBase>(customNode), weakPage = WeakPtr<NG::FrameNode>(pageNode)]() {
                 auto custom = weakCustom.Upgrade();
@@ -326,6 +334,15 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
                     NG::ViewStackProcessor::GetInstance()->SetPageNode(page);
                     custom->CallPageTransitionFunction();
                     NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
+                }
+            });
+        auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
+        CHECK_NULL_VOID(context);
+        context->RegisterDumpInfoListener(
+            [weakView = Referenced::WeakClaim(view)](const std::vector<std::string>& params) {
+                auto view = weakView.Upgrade();
+                if (view) {
+                    view->OnDumpInfo(params);
                 }
             });
         return;
@@ -391,6 +408,8 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> formBindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
     { "Text", JSText::JSBind },
+    { "TextClock", JSTextClock::JSBind },
+    { "TextClockController", JSTextClockController::JSBind },
     { "Animator", JSAnimator::JSBind },
     { "SpringProp", JSAnimator::JSBind },
     { "SpringMotion", JSAnimator::JSBind },
@@ -540,6 +559,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PasteButton", JSPasteButton::JSBind },
     { "Particle", JSParticle::JSBind },
     { "SaveButton", JSSaveButton::JSBind },
+    { "__KeyboardAvoid__", JSKeyboardAvoid::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
@@ -555,9 +575,11 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PluginComponent", JSPlugin::JSBind },
 #endif
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     { "RichText", JSRichText::JSBind },
-    { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
+#endif
+    { "Web", JSWeb::JSBind },
 #endif
 #ifdef REMOTE_WINDOW_SUPPORTED
     { "RemoteWindow", JSRemoteWindow::JSBind },
@@ -690,7 +712,9 @@ void RegisterAllModule(BindingTarget globalObj)
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     JSWebController::JSBind(globalObj);
+#endif
 #endif
     JSRichEditorController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
@@ -791,6 +815,32 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     (*func).second(globalObj);
 }
 
+void JsUINodeRegisterCleanUp(BindingTarget globalObj)
+{
+    // globalObj is panda::Local<panda::ObjectRef>
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("uiNodeRegisterCleanUpFunction");
+    const JSRef<JSVal> globalCleanUpFunc = globalObject->GetProperty("globalRegisterCleanUpFunction");
+
+    if (globalFuncVal->IsFunction()) {
+        LOGD("JsUINodeRegisterCleanUp is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(globalFuncVal);
+        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
+            jsFunc->Call(globalObject);
+        };
+        ElementRegister::GetInstance()->RegisterJSUINodeRegisterCallbackFunc(callback);
+    } else if (globalCleanUpFunc->IsFunction()) {
+        LOGD("globalRegisterCleanUpFunction is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(globalCleanUpFunc);
+        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
+            jsFunc->Call(globalObject);
+        };
+        ElementRegister::GetInstance()->RegisterJSUINodeRegisterGlobalFunc(callback);
+    } else {
+        LOGE("Unable to register JS functions for the unregistration of Element ID. Internal error!");
+    }
+}
+
 void JsRegisterModules(BindingTarget globalObj, std::string modules)
 {
     std::stringstream input(modules);
@@ -798,6 +848,8 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     while (std::getline(input, moduleName, ',')) {
         RegisterModuleByName(globalObj, moduleName);
     }
+    JsUINodeRegisterCleanUp(globalObj);
+    
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
@@ -815,7 +867,10 @@ void JsBindFormViews(
         JSContainerBase::JSBind(globalObj);
         JSShapeAbstract::JSBind(globalObj);
         JSView::JSBind(globalObj);
+        JSDumpLog::JSBind(globalObj);
+        JSDumpRegister::JSBind(globalObj);
         JSLocalStorage::JSBind(globalObj);
+        JSStateMgmtProfiler::JSBind(globalObj);
 
         JSEnvironment::JSBind(globalObj);
         JSViewContext::JSBind(globalObj);
@@ -846,7 +901,10 @@ void JsBindViews(BindingTarget globalObj)
     JSContainerBase::JSBind(globalObj);
     JSShapeAbstract::JSBind(globalObj);
     JSView::JSBind(globalObj);
+    JSDumpLog::JSBind(globalObj);
+    JSDumpRegister::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
+    JSStateMgmtProfiler::JSBind(globalObj);
 
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);

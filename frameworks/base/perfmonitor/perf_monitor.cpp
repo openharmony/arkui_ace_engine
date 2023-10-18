@@ -28,6 +28,7 @@ using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
+constexpr double JANK_SKIPPED_THRESHOLD = 15;
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -88,7 +89,7 @@ void ConvertToRsData(OHOS::Rosen::DataBaseRs &dataRs, DataBase& data)
     dataRs.eventType = static_cast<int32_t>(data.eventType);
     dataRs.sceneId = data.sceneId;
     dataRs.appPid = data.baseInfo.pid;
-    dataRs.uniqueId = data.inputTime / NS_TO_MS;
+    dataRs.uniqueId = data.beginVsyncTime / NS_TO_MS;
     dataRs.inputTime = data.inputTime;
     dataRs.beginVsyncTime = data.beginVsyncTime;
     dataRs.endVsyncTime = data.endVsyncTime;
@@ -302,6 +303,17 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank)
             }
         }
         it++;
+    }
+}
+
+void PerfMonitor::ReportJankFrameApp(double jank)
+{
+    if (jank >= JANK_SKIPPED_THRESHOLD) {
+        JankInfo jankInfo;
+        jankInfo.skippedFrameTime = static_cast<int64_t>(jank * SINGLE_FRAME_TIME);
+        RecordBaseInfo(nullptr);
+        jankInfo.baseInfo = baseInfo;
+        EventReport::ReportJankFrameApp(jankInfo);
     }
 }
 

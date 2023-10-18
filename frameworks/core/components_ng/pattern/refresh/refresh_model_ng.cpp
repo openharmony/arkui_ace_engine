@@ -24,6 +24,7 @@
 #include "frameworks/core/components/refresh/refresh_theme.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
+#include "frameworks/core/components_ng/event/event_hub.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
@@ -59,7 +60,6 @@ void RefreshModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, TriggerRefreshDistance, Dimension(0.0, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshDistance, Dimension(0.0, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefresh, true);
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsCustomBuilderExist, false);
 }
 
 void RefreshModelNG::Pop()
@@ -70,7 +70,9 @@ void RefreshModelNG::Pop()
     CHECK_NULL_VOID(layoutProperty);
     auto refreshRenderProperty = refreshNode->GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(refreshRenderProperty);
-    if (!layoutProperty->GetIsCustomBuilderExistValue()) {
+    auto pattern = refreshNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetIsCustomBuilderExist()) {
         if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
             LOGI("%{public}s have %{public}d child", refreshNode->GetTag().c_str(), refreshNode->TotalChildCount());
             return;
@@ -103,6 +105,10 @@ void RefreshModelNG::Pop()
         auto loadingProgressChild = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
         CHECK_NULL_VOID(loadingProgressChild);
+        auto gestureHub = loadingProgressChild->GetEventHub<EventHub>();
+        if (gestureHub) {
+            gestureHub->SetEnabled(false);
+        }
         auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
         progressLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));
@@ -116,7 +122,7 @@ void RefreshModelNG::Pop()
         CHECK_NULL_VOID(paintProperty);
         paintProperty->UpdateColor(theme->GetProgressColor());
         auto progressContext = loadingProgressChild->GetRenderContext();
-        CHECK_NULL_VOID_NOLOG(progressContext);
+        CHECK_NULL_VOID(progressContext);
         progressContext->UpdateOpacity(0.0);
         refreshNode->AddChild(loadingProgressChild);
         loadingProgressChild->MarkDirtyNode();

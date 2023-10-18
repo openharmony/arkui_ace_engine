@@ -88,10 +88,11 @@ void LazyForEachNode::PostIdleTask()
             auto preBuildResult = node->builder_->PreBuild(deadline, node->itemConstraint_, canRunLongPredictTask);
             if (!preBuildResult) {
                 node->PostIdleTask();
+            } else {
+                node->requestLongPredict_ = false;
+                node->itemConstraint_.reset();
             }
         }
-        node->requestLongPredict_ = false;
-        node->itemConstraint_.reset();
     });
 }
 
@@ -241,6 +242,7 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
         }
         for (auto& [index, item] : items) {
             if (item.second) {
+                const_cast<LazyForEachNode*>(this)->RemoveDisappearingChild(item.second);
                 children_.push_back(item.second);
             }
         }

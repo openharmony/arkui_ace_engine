@@ -236,8 +236,37 @@ public:
         userSetNavBarWidthFlag_ = userSetNavBarWidthFlag;
     }
 
-    void UpdateContextRect(const RefPtr<NavDestinationGroupNode>& curDestination,
-        const RefPtr<NavigationGroupNode>& navigation);
+    void UpdateContextRect(
+        const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& navigation);
+
+    void OnNavBarStateChange(bool modeChange);
+
+    bool GetNavigationModeChange() const
+    {
+        return navigationModeChange_;
+    }
+
+    void SetNavigationModeChange(bool modeChange)
+    {
+        navigationModeChange_ = modeChange;
+    }
+
+    void AddOnStateChangeItem(int32_t nodeId, std::function<void(bool)> callback)
+    {
+        onStateChangeMap_.emplace(nodeId, callback);
+    }
+
+    void DeleteOnStateChangeItem(int32_t nodeId)
+    {
+        onStateChangeMap_.erase(nodeId);
+    }
+
+    const std::map<int32_t, std::function<void(bool)>>& GetOnStateChangeMap()
+    {
+        return onStateChangeMap_;
+    }
+
+    void OnNavigationModeChange(bool modeChange);
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
@@ -256,7 +285,6 @@ private:
     void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
-    void OnNavBarStateChange(bool modeChange);
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -277,6 +305,10 @@ private:
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
+    bool navigationModeChange_ = false;
+    std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
+    void NotifyPageHide(const std::string& pageName);
+    void NotifyPageShow(const std::string& pageName);
 };
 
 } // namespace OHOS::Ace::NG

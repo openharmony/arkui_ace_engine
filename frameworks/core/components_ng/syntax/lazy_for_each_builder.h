@@ -273,6 +273,9 @@ public:
     bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
+        if (itemConstraint && !canRunLongPredictTask) {
+            return false;
+        }
         auto count = OnGetTotalCount();
         std::unordered_map<std::string, LazyForEachCacheChild> cache;
         std::unordered_set<int32_t> idleIndexes;
@@ -301,8 +304,9 @@ public:
         bool result = true;
         for (auto index : idleIndexes) {
             if (GetSysTimestamp() > deadline) {
-                result = false;
-                continue;
+                cache.merge(expiringItem_);
+                expiringItem_.swap(cache);
+                return false;
             }
             auto uiNode = CacheItem(index, cache, itemConstraint);
             if (!canRunLongPredictTask && itemConstraint) {
@@ -312,7 +316,8 @@ public:
             if (canRunLongPredictTask && uiNode && itemConstraint) {
                 RefPtr<FrameNode> frameNode = DynamicCast<FrameNode>(uiNode);
                 while (!frameNode) {
-                    uiNode = uiNode->GetFirstChild();
+                    auto tempNode = uiNode;
+                    uiNode = tempNode->GetFirstChild();
                     if (!uiNode) {
                         break;
                     }

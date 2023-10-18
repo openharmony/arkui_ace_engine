@@ -132,6 +132,16 @@ public:
         return height_ && height_->GetDimension().Unit() != DimensionUnit::PERCENT;
     }
 
+    bool PercentWidth() const
+    {
+        return width_ && width_->GetDimension().Unit() == DimensionUnit::PERCENT;
+    }
+
+    bool PercentHeight() const
+    {
+        return height_ && height_->GetDimension().Unit() == DimensionUnit::PERCENT;
+    }
+
     std::string ToString() const
     {
         static const int32_t precision = 2;
@@ -212,6 +222,34 @@ struct MeasureProperty {
         return true;
     }
 
+    bool PercentWidth() const
+    {
+        if (selfIdealSize.has_value()) {
+            return selfIdealSize->PercentWidth();
+        }
+        if (maxSize.has_value()) {
+            return maxSize->PercentWidth();
+        }
+        if (minSize.has_value()) {
+            return minSize->PercentWidth();
+        }
+        return false;
+    }
+
+    bool PercentHeight() const
+    {
+        if (selfIdealSize.has_value()) {
+            return selfIdealSize->PercentHeight();
+        }
+        if (maxSize.has_value()) {
+            return maxSize->PercentHeight();
+        }
+        if (minSize.has_value()) {
+            return minSize->PercentHeight();
+        }
+        return false;
+    }
+
     std::string ToString() const
     {
         std::string str;
@@ -224,23 +262,6 @@ struct MeasureProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
         // this may affect XTS, check later.
-#if !defined(PREVIEW)
-        std::string width =
-            selfIdealSize.has_value()
-                ? (selfIdealSize.value().Width().has_value() ? selfIdealSize.value().Width().value().ToString() : "-")
-                : "-";
-        std::string height =
-            selfIdealSize.has_value()
-                ? (selfIdealSize.value().Height().has_value() ? selfIdealSize.value().Height().value().ToString() : "-")
-                : "-";
-        json->Put("width", width.c_str());
-        json->Put("height", height.c_str());
-
-        auto jsonSize = JsonUtil::Create(true);
-        jsonSize->Put("width", width.c_str());
-        jsonSize->Put("height", height.c_str());
-        json->Put("size", jsonSize);
-#else
         auto jsonSize = JsonUtil::Create(true);
         if (selfIdealSize.has_value()) {
             if (selfIdealSize.value().Width().has_value()) {
@@ -255,7 +276,6 @@ struct MeasureProperty {
             }
         }
         json->Put("size", jsonSize);
-#endif
 
         auto jsonConstraintSize = JsonUtil::Create(true);
         jsonConstraintSize->Put("minWidth",

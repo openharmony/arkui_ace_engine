@@ -108,7 +108,7 @@ void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     GestureEventFunc task = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleClick(info);
     };
     onClick_ = MakeRefPtr<ClickEvent>(std::move(task));
@@ -203,7 +203,8 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 {
     LOGI("build dialog child");
     // append customNode
-    if (customNode_) {
+    auto customNode = customNode_.Upgrade();
+    if (customNode) {
         // wrap custom node to set background color and round corner
         auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -211,7 +212,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         if (!props.customStyle) {
             UpdateContentRenderContext(contentWrapper, props);
         }
-        customNode_->MountToParent(contentWrapper);
+        customNode->MountToParent(contentWrapper);
         auto dialog = GetHost();
         contentWrapper->MountToParent(dialog);
         return;
@@ -830,7 +831,7 @@ void DialogPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
@@ -862,26 +863,27 @@ void DialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     if (!GetDialogProperties().customStyle) {
         auto context = host->GetContext();
-        CHECK_NULL_VOID_NOLOG(context);
+        CHECK_NULL_VOID(context);
         auto dialogTheme = context->GetTheme<DialogTheme>();
-        CHECK_NULL_VOID_NOLOG(dialogTheme);
+        CHECK_NULL_VOID(dialogTheme);
         auto col = DynamicCast<FrameNode>(host->GetChildAtIndex(START_CHILD_INDEX));
-        CHECK_NULL_VOID_NOLOG(col);
+        CHECK_NULL_VOID(col);
         auto colContext = col->GetContext();
-        CHECK_NULL_VOID_NOLOG(colContext);
+        CHECK_NULL_VOID(colContext);
         auto colRenderContext = col->GetRenderContext();
-        CHECK_NULL_VOID_NOLOG(colRenderContext);
+        CHECK_NULL_VOID(colRenderContext);
         colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
     }
-    CHECK_NULL_VOID_NOLOG(menuNode_);
-    for (const auto& buttonNode : menuNode_->GetChildren()) {
+    auto menuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(menuNode);
+    for (const auto& buttonNode : menuNode->GetChildren()) {
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
         }
         auto buttonFrameNode = DynamicCast<FrameNode>(buttonNode);
-        CHECK_NULL_VOID_NOLOG(buttonFrameNode);
+        CHECK_NULL_VOID(buttonFrameNode);
         auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->SetSkipColorConfigurationUpdate();
     }
     OnModifyDone();

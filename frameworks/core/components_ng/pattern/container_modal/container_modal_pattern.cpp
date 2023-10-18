@@ -32,7 +32,7 @@ constexpr int32_t MINIMIZE_BUTTON_INDEX = 4;
 constexpr int32_t CLOSE_BUTTON_INDEX = 5;
 constexpr int32_t TITLE_POPUP_DURATION = 200;
 constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
-constexpr double MOVE_POPUP_DISTANCE_X = 10.0;    // 10.0px
+constexpr double MOVE_POPUP_DISTANCE_X = 40.0;    // 40.0px
 constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
@@ -177,9 +177,9 @@ void ContainerModalPattern::InitContainerEvent()
             [floatingLayoutProperty, id = Container::CurrentId()]() {
                 ContainerScope scope(id);
                 auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID_NOLOG(pipeline);
+                CHECK_NULL_VOID(pipeline);
                 auto taskExecutor = pipeline->GetTaskExecutor();
-                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
                     [floatingLayoutProperty, id]() {
                         ContainerScope scope(id);
@@ -206,6 +206,9 @@ void ContainerModalPattern::InitContainerEvent()
             AnimationUtils::Animate(option, [context]() { context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f }); });
         }
 
+        if (!container->CanHideFloatingTitle()) {
+            return;
+        }
         if ((info.GetLocalLocation().GetY() >= titlePopupDistance || action == MouseAction::WINDOW_LEAVE) &&
             floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
             AnimationUtils::Animate(
@@ -216,9 +219,9 @@ void ContainerModalPattern::InitContainerEvent()
                 [floatingLayoutProperty, id = Container::CurrentId()]() {
                     ContainerScope scope(id);
                     auto pipeline = PipelineBase::GetCurrentContext();
-                    CHECK_NULL_VOID_NOLOG(pipeline);
+                    CHECK_NULL_VOID(pipeline);
                     auto taskExecutor = pipeline->GetTaskExecutor();
-                    CHECK_NULL_VOID_NOLOG(taskExecutor);
+                    CHECK_NULL_VOID(taskExecutor);
                     taskExecutor->PostTask(
                         [floatingLayoutProperty, id]() {
                             ContainerScope scope(id);

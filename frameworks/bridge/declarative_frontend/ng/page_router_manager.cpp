@@ -117,7 +117,16 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
         info.path = manifestParser_->GetRouter()->GetEntry();
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
-    LOGD("router.Push pagePath = %{private}s", info.url.c_str());
+    LOGD("router.RunPage pagePath = %{private}s", info.url.c_str());
+    RouterOptScope scope(this);
+    LoadPage(GenerateNextPageId(), info);
+}
+
+void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std::string& params)
+{
+    LOGD("router.RunPage pagePath = %{private}s", info.url.c_str());
+    RouterPageInfo info { name, params };
+    info.isNamedRouterMode = true;
     RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info);
 }
@@ -907,22 +916,27 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
-    auto result = loadJs_(target.path, target.errorCallback);
-    if (pageNode->GetChildren().empty()) {
-        // try to load named route
-        result = loadNamedRouter_(target.url, target.isNamedRouterMode);
-        if (!result && target.isNamedRouterMode && target.errorCallback) {
+
+    loadJs_(target.path, target.errorCallback);
+    auto result = loadNamedRouter_(target.url, target.isNamedRouterMode);
+    if (!result) {
+        if (!target.isNamedRouterMode) {
+            result = updateRootComponent_();
+        } else if (target.errorCallback) {
             target.errorCallback("The named route is not exist.", Framework::ERROR_CODE_NAMED_ROUTE_ERROR);
         }
     }
-    if (target.errorCallback != nullptr) {
-        target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
-    }
+
     if (!result) {
         LOGE("fail to load page file");
         pageRouterStack_.pop_back();
         return;
     }
+
+    if (target.errorCallback != nullptr) {
+        target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
+    }
+
     if (!OnPageReady(pageNode, needHideLast, needTransition)) {
         LOGE("fail to mount page");
         pageRouterStack_.pop_back();
@@ -1171,7 +1185,7 @@ void PageRouterManager::CleanPageOverlay()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     auto sharedManager = context->GetSharedOverlayManager();
     if (sharedManager) {
         sharedManager->StopSharedTransition();

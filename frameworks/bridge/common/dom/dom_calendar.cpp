@@ -69,7 +69,7 @@ bool DomCalendar::SetSpecializedAttr(const std::pair<std::string, std::string>& 
               } else if (value == "horizontal") {
                   calendar.calendarComponent_->SetAxis(Axis::HORIZONTAL);
               } else {
-                  LOGE("input do not match any direction");
+                  LOGW("input do not match any direction");
               }
               return true;
             } },
@@ -150,22 +150,18 @@ bool DomCalendar::ParseDataAdapter(const std::string& value)
 {
     std::unique_ptr<JsonValue> dataAdapterValue = JsonUtil::ParseJsonString(value);
     if (!dataAdapterValue) {
-        LOGE("data adapter format is error");
         return false;
     }
     std::unique_ptr<JsonValue> bundleNameValue = dataAdapterValue->GetValue("bundleName");
     if (!bundleNameValue || !bundleNameValue->IsString()) {
-        LOGE("get bundleName failed");
         return false;
     }
     std::unique_ptr<JsonValue> abilityNameValue = dataAdapterValue->GetValue("abilityName");
     if (!abilityNameValue || !abilityNameValue->IsString()) {
-        LOGE("get abilityName failed");
         return false;
     }
     std::unique_ptr<JsonValue> messageCodeValue = dataAdapterValue->GetValue("messageCode");
     if (!messageCodeValue || !messageCodeValue->IsNumber()) {
-        LOGE("get messageCode failed");
         return false;
     }
     std::string bundleName = bundleNameValue->GetString();
@@ -182,24 +178,22 @@ void DomCalendar::HandleGoTo(const std::string& args)
 {
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
     if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != METHOD_GO_TO_ARGS_SIZE) {
-        LOGE("parse args error: %{private}s", args.c_str());
+        LOGD("parse args error: %{private}s", args.c_str());
         return;
     }
     auto gotoArg = argsValue->GetArrayItem(0);
     if (!gotoArg || !gotoArg->Contains(GO_TO_ARG_KEY_YEAR) || !gotoArg->Contains(GO_TO_ARG_KEY_MONTH)) {
-        LOGE("calendar goto arg no year or month");
+        LOGD("calendar goto arg no year or month");
         return;
     }
 
     std::unique_ptr<JsonValue> yearValue = gotoArg->GetValue(GO_TO_ARG_KEY_YEAR);
     if (!yearValue || !yearValue->IsNumber()) {
-        LOGE("get year failed");
         return;
     }
 
     std::unique_ptr<JsonValue> monthValue = gotoArg->GetValue(GO_TO_ARG_KEY_MONTH);
     if (!monthValue || !monthValue->IsNumber()) {
-        LOGE("get month failed");
         return;
     }
     int32_t year = yearValue->GetInt();

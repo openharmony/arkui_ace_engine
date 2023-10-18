@@ -28,8 +28,9 @@ constexpr double MOVE_DURATION = 500;
 } // namespace
 void DateTimeAnimationController::PlayTitleInAnimation()
 {
-    CHECK_NULL_VOID(buttonIcon_);
-    auto renderContext = buttonIcon_->GetRenderContext();
+    auto buttonIcon = buttonIcon_.Upgrade();
+    CHECK_NULL_VOID(buttonIcon);
+    auto renderContext = buttonIcon->GetRenderContext();
     AnimationOption animationOption;
     animationOption.SetDuration(TRIANGLE_DURATION);
     animationOption.SetCurve(Curves::SHARP);
@@ -37,15 +38,16 @@ void DateTimeAnimationController::PlayTitleInAnimation()
     renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0, 0));
     AnimationUtils::Animate(animationOption,
         [renderContext]() {
-            CHECK_NULL_VOID_NOLOG(renderContext);
+            CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0 - SEMI_CIRCLE_ANGEL, 0));
         });
 }
 
 void DateTimeAnimationController::PlayTitleOutAnimation()
 {
-    CHECK_NULL_VOID(buttonIcon_);
-    auto renderContext = buttonIcon_->GetRenderContext();
+    auto buttonIcon = buttonIcon_.Upgrade();
+    CHECK_NULL_VOID(buttonIcon);
+    auto renderContext = buttonIcon->GetRenderContext();
     AnimationOption animationOption;
     animationOption.SetDuration(TRIANGLE_DURATION);
     animationOption.SetCurve(Curves::SHARP);
@@ -53,19 +55,22 @@ void DateTimeAnimationController::PlayTitleOutAnimation()
     renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0 - SEMI_CIRCLE_ANGEL, 0));
     AnimationUtils::Animate(animationOption,
         [renderContext]() {
-            CHECK_NULL_VOID_NOLOG(renderContext);
+            CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0, 0));
         });
 }
 
 void DateTimeAnimationController::PlayMovingInAnimation()
 {
-    CHECK_NULL_VOID(year_);
-    CHECK_NULL_VOID(month_);
-    CHECK_NULL_VOID(day_);
-    auto yearRenderContext = year_->GetRenderContext();
-    auto monthRenderContext = month_->GetRenderContext();
-    auto dayRenderContext = day_->GetRenderContext();
+    auto year = year_.Upgrade();
+    CHECK_NULL_VOID(year);
+    auto month = month_.Upgrade();
+    CHECK_NULL_VOID(month);
+    auto day = day_.Upgrade();
+    CHECK_NULL_VOID(day);
+    auto yearRenderContext = year->GetRenderContext();
+    auto monthRenderContext = month->GetRenderContext();
+    auto dayRenderContext = day->GetRenderContext();
     AnimationOption animationOption;
     animationOption.SetDuration(MOVE_DURATION);
     animationOption.SetCurve(Curves::FRICTION);
@@ -77,9 +82,9 @@ void DateTimeAnimationController::PlayMovingInAnimation()
         [yearRenderContext, monthRenderContext, dayRenderContext, weak = AceType::WeakClaim(this)]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
-            CHECK_NULL_VOID_NOLOG(yearRenderContext);
-            CHECK_NULL_VOID_NOLOG(monthRenderContext);
-            CHECK_NULL_VOID_NOLOG(dayRenderContext);
+            CHECK_NULL_VOID(yearRenderContext);
+            CHECK_NULL_VOID(monthRenderContext);
+            CHECK_NULL_VOID(dayRenderContext);
             yearRenderContext->UpdateTransformTranslate({ ref->yearEnd_, 0.0f, 0.0f });
             monthRenderContext->UpdateTransformTranslate({ ref->monthEnd_, 0.0f, 0.0f });
             dayRenderContext->UpdateTransformTranslate({ ref->dayEnd_, 0.0f, 0.0f });
@@ -88,12 +93,15 @@ void DateTimeAnimationController::PlayMovingInAnimation()
 
 void DateTimeAnimationController::PlayMovingOutAnimation()
 {
-    CHECK_NULL_VOID(year_);
-    CHECK_NULL_VOID(month_);
-    CHECK_NULL_VOID(day_);
-    auto yearRenderContext = year_->GetRenderContext();
-    auto monthRenderContext = month_->GetRenderContext();
-    auto dayRenderContext = day_->GetRenderContext();
+    auto year = year_.Upgrade();
+    CHECK_NULL_VOID(year);
+    auto month = month_.Upgrade();
+    CHECK_NULL_VOID(month);
+    auto day = day_.Upgrade();
+    CHECK_NULL_VOID(day);
+    auto yearRenderContext = year->GetRenderContext();
+    auto monthRenderContext = month->GetRenderContext();
+    auto dayRenderContext = day->GetRenderContext();
     AnimationOption animationOption;
     animationOption.SetDuration(MOVE_DURATION);
     animationOption.SetCurve(Curves::FRICTION);
@@ -105,9 +113,9 @@ void DateTimeAnimationController::PlayMovingOutAnimation()
         [yearRenderContext, monthRenderContext, dayRenderContext, weak = AceType::WeakClaim(this)]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
-            CHECK_NULL_VOID_NOLOG(yearRenderContext);
-            CHECK_NULL_VOID_NOLOG(monthRenderContext);
-            CHECK_NULL_VOID_NOLOG(dayRenderContext);
+            CHECK_NULL_VOID(yearRenderContext);
+            CHECK_NULL_VOID(monthRenderContext);
+            CHECK_NULL_VOID(dayRenderContext);
             yearRenderContext->UpdateTransformTranslate({ ref->yearStart_, 0.0f, 0.0f });
             monthRenderContext->UpdateTransformTranslate({ ref->monthStart_, 0.0f, 0.0f });
             dayRenderContext->UpdateTransformTranslate({ ref->dayStart_, 0.0f, 0.0f });
@@ -116,14 +124,17 @@ void DateTimeAnimationController::PlayMovingOutAnimation()
 
 void DateTimeAnimationController::PlayOldColumnOpacityInAnimation()
 {
-    CHECK_NULL_VOID(monthDays_);
-    CHECK_NULL_VOID(timePicker_);
-    auto monthDaysRender = monthDays_->GetRenderContext();
-    auto timePickerRender = timePicker_->GetRenderContext();
+    auto monthDays = monthDays_.Upgrade();
+    CHECK_NULL_VOID(monthDays);
+    auto timePicker = timePicker_.Upgrade();
+    CHECK_NULL_VOID(timePicker);
+    auto monthDaysRender = monthDays->GetRenderContext();
+    auto timePickerRender = timePicker->GetRenderContext();
     CHECK_NULL_VOID(monthDaysRender);
     CHECK_NULL_VOID(timePickerRender);
-    if (datePicker_) {
-        auto layoutProperty = datePicker_->GetLayoutProperty<LayoutProperty>();
+    auto datePicker = datePicker_.Upgrade();
+    if (datePicker) {
+        auto layoutProperty = datePicker->GetLayoutProperty<LayoutProperty>();
         if (layoutProperty) {
             layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         }
@@ -138,13 +149,13 @@ void DateTimeAnimationController::PlayOldColumnOpacityInAnimation()
             ref->isInAnimationPlaying_ = false;
             return;
         }
-        auto monthDaysNode = ref->monthDays_;
+        auto monthDaysNode = ref->monthDays_.Upgrade();
         CHECK_NULL_VOID(monthDaysNode);
         auto layoutProperty = monthDaysNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::GONE);
 
-        auto timePickerNode = ref->timePicker_;
+        auto timePickerNode = ref->timePicker_.Upgrade();
         CHECK_NULL_VOID(timePickerNode);
         layoutProperty = timePickerNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -155,8 +166,8 @@ void DateTimeAnimationController::PlayOldColumnOpacityInAnimation()
     timePickerRender->UpdateOpacity(1);
     oldColumnOpacityInAnimation_ = AnimationUtils::StartAnimation(animationOption,
         [monthDaysRender, timePickerRender]() {
-            CHECK_NULL_VOID_NOLOG(monthDaysRender);
-            CHECK_NULL_VOID_NOLOG(timePickerRender);
+            CHECK_NULL_VOID(monthDaysRender);
+            CHECK_NULL_VOID(timePickerRender);
             monthDaysRender->UpdateOpacity(0);
             timePickerRender->UpdateOpacity(0);
         }, animationOption.GetOnFinishEvent());
@@ -164,10 +175,12 @@ void DateTimeAnimationController::PlayOldColumnOpacityInAnimation()
 
 void DateTimeAnimationController::PlayNewColumnOpacityInAnimation()
 {
-    CHECK_NULL_VOID(month_);
-    CHECK_NULL_VOID(day_);
-    auto monthRender = month_->GetRenderContext();
-    auto dayRender = day_->GetRenderContext();
+    auto month = month_.Upgrade();
+    CHECK_NULL_VOID(month);
+    auto day = day_.Upgrade();
+    CHECK_NULL_VOID(day);
+    auto monthRender = month->GetRenderContext();
+    auto dayRender = day->GetRenderContext();
     CHECK_NULL_VOID(monthRender);
     CHECK_NULL_VOID(dayRender);
 
@@ -179,8 +192,8 @@ void DateTimeAnimationController::PlayNewColumnOpacityInAnimation()
     dayRender->UpdateOpacity(0);
     AnimationUtils::Animate(animationOption,
         [monthRender, dayRender]() {
-            CHECK_NULL_VOID_NOLOG(monthRender);
-            CHECK_NULL_VOID_NOLOG(dayRender);
+            CHECK_NULL_VOID(monthRender);
+            CHECK_NULL_VOID(dayRender);
             monthRender->UpdateOpacity(1);
             dayRender->UpdateOpacity(1);
         });
@@ -188,8 +201,9 @@ void DateTimeAnimationController::PlayNewColumnOpacityInAnimation()
 
 void DateTimeAnimationController::PlayYearColumnOpacityInAnimation()
 {
-    CHECK_NULL_VOID(year_);
-    auto yearRender = year_->GetRenderContext();
+    auto year = year_.Upgrade();
+    CHECK_NULL_VOID(year);
+    auto yearRender = year->GetRenderContext();
     CHECK_NULL_VOID(yearRender);
 
     AnimationOption animationOption;
@@ -202,8 +216,9 @@ void DateTimeAnimationController::PlayYearColumnOpacityInAnimation()
 
 void DateTimeAnimationController::PlayButtonOpacityInAnimation()
 {
-    CHECK_NULL_VOID(buttonRow_);
-    auto buttonRender = buttonRow_->GetRenderContext();
+    auto buttonRow = buttonRow_.Upgrade();
+    CHECK_NULL_VOID(buttonRow);
+    auto buttonRender = buttonRow->GetRenderContext();
     CHECK_NULL_VOID(buttonRender);
 
     AnimationOption animationOption;
@@ -213,7 +228,7 @@ void DateTimeAnimationController::PlayButtonOpacityInAnimation()
     animationOption.SetOnFinishEvent([weak = AceType::WeakClaim(this)] {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
-        auto buttonNode = ref->buttonRow_;
+        auto buttonNode = ref->buttonRow_.Upgrade();
         CHECK_NULL_VOID(buttonNode);
         auto layoutProperty = buttonNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -227,15 +242,17 @@ void DateTimeAnimationController::PlayButtonOpacityInAnimation()
 
 void DateTimeAnimationController::PlayOldColumnOpacityOutAnimation()
 {
-    CHECK_NULL_VOID(monthDays_);
-    auto monthDaysRender = monthDays_->GetRenderContext();
-    CHECK_NULL_VOID(timePicker_);
-    auto timePickerRender = timePicker_->GetRenderContext();
+    auto monthDays = monthDays_.Upgrade();
+    CHECK_NULL_VOID(monthDays);
+    auto monthDaysRender = monthDays->GetRenderContext();
+    auto timePicker = timePicker_.Upgrade();
+    CHECK_NULL_VOID(timePicker);
+    auto timePickerRender = timePicker->GetRenderContext();
 
-    auto layoutProperty = monthDays_->GetLayoutProperty<LayoutProperty>();
+    auto layoutProperty = monthDays->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    layoutProperty = timePicker_->GetLayoutProperty<LayoutProperty>();
+    layoutProperty = timePicker->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 
@@ -250,7 +267,7 @@ void DateTimeAnimationController::PlayOldColumnOpacityOutAnimation()
             ref->isOutAnimationPlaying_ = false;
             return;
         }
-        auto datePickerNode = ref->datePicker_;
+        auto datePickerNode = ref->datePicker_.Upgrade();
         CHECK_NULL_VOID(datePickerNode);
         auto layoutProperty = datePickerNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -262,8 +279,8 @@ void DateTimeAnimationController::PlayOldColumnOpacityOutAnimation()
     timePickerRender->UpdateOpacity(0);
     oldColumnOpacityOutAnimation_ = AnimationUtils::StartAnimation(animationOption,
         [monthDaysRender, timePickerRender]() {
-            CHECK_NULL_VOID_NOLOG(monthDaysRender);
-            CHECK_NULL_VOID_NOLOG(timePickerRender);
+            CHECK_NULL_VOID(monthDaysRender);
+            CHECK_NULL_VOID(timePickerRender);
             monthDaysRender->UpdateOpacity(1);
             timePickerRender->UpdateOpacity(1);
         }, animationOption.GetOnFinishEvent());
@@ -271,10 +288,12 @@ void DateTimeAnimationController::PlayOldColumnOpacityOutAnimation()
 
 void DateTimeAnimationController::PlayNewColumnOpacityOutAnimation()
 {
-    CHECK_NULL_VOID(month_);
-    CHECK_NULL_VOID(day_);
-    auto monthRender = month_->GetRenderContext();
-    auto dayRender = day_->GetRenderContext();
+    auto month = month_.Upgrade();
+    CHECK_NULL_VOID(month);
+    auto day = day_.Upgrade();
+    CHECK_NULL_VOID(day);
+    auto monthRender = month->GetRenderContext();
+    auto dayRender = day->GetRenderContext();
     CHECK_NULL_VOID(monthRender);
     CHECK_NULL_VOID(dayRender);
 
@@ -287,8 +306,8 @@ void DateTimeAnimationController::PlayNewColumnOpacityOutAnimation()
     dayRender->UpdateOpacity(1);
     AnimationUtils::Animate(animationOption,
         [monthRender, dayRender]() {
-            CHECK_NULL_VOID_NOLOG(monthRender);
-            CHECK_NULL_VOID_NOLOG(dayRender);
+            CHECK_NULL_VOID(monthRender);
+            CHECK_NULL_VOID(dayRender);
             monthRender->UpdateOpacity(0);
             dayRender->UpdateOpacity(0);
         });
@@ -296,8 +315,9 @@ void DateTimeAnimationController::PlayNewColumnOpacityOutAnimation()
 
 void DateTimeAnimationController::PlayYearColumnOpacityOutAnimation()
 {
-    CHECK_NULL_VOID(year_);
-    auto yearRender = year_->GetRenderContext();
+    auto year = year_.Upgrade();
+    CHECK_NULL_VOID(year);
+    auto yearRender = year->GetRenderContext();
     CHECK_NULL_VOID(yearRender);
 
     AnimationOption animationOption;
@@ -309,8 +329,9 @@ void DateTimeAnimationController::PlayYearColumnOpacityOutAnimation()
 
 void DateTimeAnimationController::PlayButtonOpacityOutAnimation()
 {
-    CHECK_NULL_VOID(buttonRow_);
-    auto buttonRender = buttonRow_->GetRenderContext();
+    auto buttonRow = buttonRow_.Upgrade();
+    CHECK_NULL_VOID(buttonRow);
+    auto buttonRender = buttonRow->GetRenderContext();
     CHECK_NULL_VOID(buttonRender);
 
     AnimationOption animationOption;
@@ -320,7 +341,7 @@ void DateTimeAnimationController::PlayButtonOpacityOutAnimation()
     animationOption.SetOnFinishEvent([weak = AceType::WeakClaim(this)] {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
-        auto buttonNode = ref->buttonRow_;
+        auto buttonNode = ref->buttonRow_.Upgrade();
         CHECK_NULL_VOID(buttonNode);
         auto layoutProperty = buttonNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -379,9 +400,13 @@ void DateTimeAnimationController::InitMoveRange()
     monthEnd_ = 0.0;
     dayEnd_ = 0.0;
 
-    auto yearGeometry = year_->GetGeometryNode();
+    auto year = year_.Upgrade();
+    CHECK_NULL_VOID(year);
+    auto yearGeometry = year->GetGeometryNode();
     CHECK_NULL_VOID(yearGeometry);
-    auto monthGeometry = month_->GetGeometryNode();
+    auto month = month_.Upgrade();
+    CHECK_NULL_VOID(month);
+    auto monthGeometry = month->GetGeometryNode();
     CHECK_NULL_VOID(monthGeometry);
     yearStart_ = 0;
     monthStart_ = 0 - yearGeometry->GetFrameSize().Width();
@@ -392,7 +417,7 @@ void DateTimeAnimationController::InitMoveRange()
 void DateTimeAnimationController::SetDatePicker(const RefPtr<FrameNode>& value)
 {
     datePicker_ = value;
-    auto children = datePicker_->GetChildren();
+    auto children = value->GetChildren();
     if (children.size() != CHILD_SIZE) {
         return;
     }

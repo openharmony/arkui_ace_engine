@@ -113,6 +113,7 @@ private:
     // the time when gesture recognition is successful
     TimeStamp time_;
     Offset focusPoint_;
+    TimeStamp touchDownTime_;
 
     ClickCallback onClick_;
     ClickCallback remoteMessage_;

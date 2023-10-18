@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,23 +16,35 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_LAYOUT_ALGORITHM_H
 
+#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT GaugeLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(GaugeLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
     GaugeLayoutAlgorithm();
+    explicit GaugeLayoutAlgorithm(const RefPtr<ImageLoadingContext>& indicatorIconLoadingCtx)
+        : indicatorIconLoadingCtx_(indicatorIconLoadingCtx)
+    {}
+
     ~GaugeLayoutAlgorithm() override = default;
 
     void OnReset() override;
+
+    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
 private:
+    void MeasureLimitValueText(LayoutWrapper* layoutWrapper, const SizeF& parentSize, const bool isMin);
+    void MeasureDescription(LayoutWrapper* layoutWrapper, const SizeF& parentSize);
+    void MeasureTitleChild(LayoutWrapper* layoutWrapper, const SizeF& parentSize);
+    bool CheckDescriptionIsImageNode(const RefPtr<LayoutWrapper>& layoutWrapper) const;
+
+    RefPtr<ImageLoadingContext> indicatorIconLoadingCtx_;
     ACE_DISALLOW_COPY_AND_MOVE(GaugeLayoutAlgorithm);
 };
 

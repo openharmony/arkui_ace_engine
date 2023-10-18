@@ -18,7 +18,6 @@
 namespace OHOS::Ace {
 bool Frontend::MaybeRelease()
 {
-    CHECK_RUN_ON(JS);
     CHECK_NULL_RETURN(taskExecutor_, true);
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
         LOGI("Destroy Frontend on JS thread.");

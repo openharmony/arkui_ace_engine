@@ -14,18 +14,6 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("data_panel_test_ng") {
-  ace_animation = true
-  sources = [
-    "$ace_root/frameworks/core/animation/spring_curve.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
-
-    # self
-    "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_modifier.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_paint_method.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_pattern.cpp",
-    "data_panel_test_ng.cpp",
-  ]
+  type = "new"
+  sources = [ "data_panel_test_ng.cpp" ]
 }

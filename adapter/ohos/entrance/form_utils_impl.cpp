@@ -32,7 +32,7 @@ int32_t FormUtilsImpl::RouterEvent(
     auto container = Container::Current();
     auto ace_container = AceType::DynamicCast<Platform::AceContainer>(container);
     auto token_ = ace_container->GetToken();
-    CHECK_NULL_RETURN_NOLOG(token_, -1);
+    CHECK_NULL_RETURN(token_, -1);
     AAFwk::Want want;
     auto eventAction = JsonUtil::ParseJsonString(action);
     auto uri = eventAction->GetValue("uri");
@@ -80,9 +80,9 @@ int32_t FormUtilsImpl::BackgroundEvent(
     ContainerScope scope(containerId);
     auto container = Container::Current();
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
-    CHECK_NULL_RETURN_NOLOG(aceContainer, -1);
+    CHECK_NULL_RETURN(aceContainer, -1);
     auto token = aceContainer->GetToken();
-    CHECK_NULL_RETURN_NOLOG(token, -1);
+    CHECK_NULL_RETURN(token, -1);
     AAFwk::Want want;
     auto eventAction = JsonUtil::ParseJsonString(action);
     auto bundleName = eventAction->GetValue("bundleName");

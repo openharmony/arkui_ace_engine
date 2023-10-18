@@ -62,7 +62,7 @@ public:
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
-    ~AceContainer() override;
+    ~AceContainer() override = default;
 
     void Initialize() override;
 
@@ -82,6 +82,7 @@ public:
 
     RefPtr<Frontend> GetFrontend() const override
     {
+        std::lock_guard<std::mutex> lock(frontendMutex_);
         return frontend_;
     }
 
@@ -142,6 +143,7 @@ public:
 
     RefPtr<PipelineBase> GetPipelineContext() const override
     {
+        std::lock_guard<std::mutex> lock(pipelineMutex_);
         return pipelineContext_;
     }
 
@@ -314,7 +316,8 @@ public:
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
 
     static void DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback = nullptr);
-    static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params);
+    static bool RunPage(
+        int32_t instanceId, const std::string& content, const std::string& params, bool isNamedRouter = false);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);
     static bool OnBackPressed(int32_t instanceId);
     static void OnShow(int32_t instanceId);
@@ -425,7 +428,7 @@ public:
     // ArkTSCard
     void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
-    void ReloadForm();
+    void UpdateResource();
 
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
     void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
@@ -442,6 +445,7 @@ public:
         StopDragCallback&& stopDragCallback) override;
 
 private:
+    virtual bool MaybeRelease() override;
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask();
@@ -486,6 +490,9 @@ private:
     bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
+
+    mutable std::mutex frontendMutex_;
+    mutable std::mutex pipelineMutex_;
 
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;

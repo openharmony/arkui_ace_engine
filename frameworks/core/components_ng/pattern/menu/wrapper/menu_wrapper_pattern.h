@@ -80,6 +80,15 @@ public:
         return menuPattern->IsContextMenu();
     }
 
+    MenuPreviewMode GetPreviewMode() const
+    {
+        auto menu = GetMenu();
+        CHECK_NULL_RETURN(menu, MenuPreviewMode::NONE);
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, MenuPreviewMode::NONE);
+        return menuPattern->GetPreviewMode();
+    }
+
     bool IsSelectMenu() const
     {
         auto menu = GetMenu();
@@ -99,6 +108,16 @@ public:
         CHECK_NULL_RETURN(menu, nullptr);
         return menu;
     }
+
+    RefPtr<FrameNode> GetPreview() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+        CHECK_NULL_RETURN(preview, nullptr);
+        return preview;
+    }
+
     OffsetT<Dimension> GetAnimationOffset();
     void SetAniamtinOption(const AnimationOption& animationOption);
 
@@ -111,12 +130,13 @@ public:
     {
         isFirstShow_ = true;
     }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
 
 private:
-    bool ShouldAvoidKeyboard() const override
+    bool AvoidKeyboard() const override
     {
         return false;
     }

@@ -16,13 +16,9 @@ import(
 
 build_component("proxy") {
   sources = [
-    "flutter_render_item_proxy.cpp",
     "proxy_component.cpp",
     "render_item_proxy.cpp",
     "render_item_proxy_creator.cpp",
     "render_proxy.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_item_proxy.cpp" ]
-  }
 }

@@ -236,7 +236,7 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
         CHECK_NULL_VOID(pluginPattern);
         pipelineContext_->SetDrawDelegate(pluginPattern->GetDrawDelegate());
         frontend_->SetInstanceName(module);
-        frontend_->RunPage(0, source, data);
+        frontend_->RunPage(source, data);
         return;
     }
 
@@ -249,7 +249,7 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
     pipelineContext_->SetDrawDelegate(pluginRender->GetDrawDelegate());
 
     frontend_->SetInstanceName(module);
-    frontend_->RunPage(0, source, data);
+    frontend_->RunPage(source, data);
 }
 
 void PluginSubContainer::RunPlugin(const std::string& path, const std::string& module, const std::string& source,
@@ -299,7 +299,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
         CHECK_NULL_VOID(pluginPattern);
         pipelineContext_->SetDrawDelegate(pluginPattern->GetDrawDelegate());
         frontend_->SetInstanceName(module);
-        frontend_->RunPage(0, source, data);
+        frontend_->RunPage(source, data);
         return;
     }
 
@@ -321,7 +321,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
     pipelineContext_->SetDrawDelegate(pluginRender->GetDrawDelegate());
 
     frontend_->SetInstanceName(module);
-    frontend_->RunPage(0, source, data);
+    frontend_->RunPage(source, data);
 }
 
 void PluginSubContainer::SetPluginComponentTheme(

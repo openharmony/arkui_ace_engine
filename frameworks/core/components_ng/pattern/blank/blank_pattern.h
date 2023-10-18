@@ -19,6 +19,8 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/blank/blank_layout_property.h"
+#include "core/components_ng/pattern/blank/blank_paint_method.h"
+#include "core/components_ng/pattern/blank/blank_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 namespace OHOS::Ace::NG {
 
@@ -36,6 +38,16 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<BlankLayoutProperty>();
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<BlankPaintProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<BlankPaintMethod>();
     }
 
 private:

@@ -17,6 +17,7 @@
 
 #include "base/perf/socperf_client.h"
 #include "base/thread/frame_trace_adapter.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -112,6 +113,19 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     LOGI("long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
     int32_t curDuration = duration_;
+#ifndef PREVIEW
+    int64_t currentTimeStamp = GetSysTimestamp();
+    int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
+    if (currentTimeStamp > eventTimeStamp) {
+        LOGI("currentTimeStamp is larger than eventTimeStamp, need to minus time spent waiting");
+        // nanoseconds to millisceond.
+        curDuration = curDuration - static_cast<int32_t>((currentTimeStamp - eventTimeStamp) / (1000 * 1000));
+        if (curDuration < 0) {
+            curDuration = 0;
+        }
+    }
+#endif
+
     if (isForDrag_ && event.sourceType == SourceType::MOUSE) {
         curDuration = 0;
     }
@@ -145,7 +159,9 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
     }
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onActionUpdate_, false);
-        SendCallbackMsg(onActionEnd_, false);
+        if (currentFingers_ == fingers_) {
+            SendCallbackMsg(onActionEnd_, false);
+        }
     } else {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
@@ -285,7 +301,9 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
             info.SetTiltY(trackPoint.tiltY.value());
         }
         info.SetSourceTool(trackPoint.sourceTool);
-        (*callback)(info);
+        // callback may be overwritten in its invoke so we copy it first
+        auto callbackFunction = *callback;
+        callbackFunction(info);
     }
 }
 

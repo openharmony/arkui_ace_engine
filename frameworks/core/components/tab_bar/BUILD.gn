@@ -31,13 +31,7 @@ build_component("tab_bar") {
     "tab_content_element.cpp",
     "tab_controller.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [
-      "flutter_render_tab_bar.cpp",
-      "flutter_render_tab_bar_item.cpp",
-      "flutter_render_tab_content.cpp",
-    ]
-  }
+
   rosen_sources = [
     "rosen_render_tab_bar.cpp",
     "rosen_render_tab_bar_item.cpp",

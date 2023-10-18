@@ -53,7 +53,7 @@ namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::AlignStyle::RIGHT };
 const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT };
-constexpr Dimension DEFAULT_ITEM_SIZE = 24.0_vp;
+constexpr Dimension DEFAULT_ITEM_SIZE = 16.0_vp;
 }; // namespace
 
 void JSIndexer::ParseIndexerSelectedObject(

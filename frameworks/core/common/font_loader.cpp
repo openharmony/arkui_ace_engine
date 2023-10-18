@@ -29,7 +29,7 @@ const std::string& FontLoader::GetFamilyName() const
 
 void FontLoader::SetOnLoaded(const WeakPtr<RenderNode>& node, const std::function<void()>& callback)
 {
-    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID(callback);
     if (isLoaded_) {
         callback();
     } else {
@@ -54,7 +54,7 @@ void FontLoader::RemoveCallbackNG(const WeakPtr<NG::UINode>& node)
 
 void FontLoader::SetOnLoadedNG(const WeakPtr<NG::UINode>& node, const std::function<void()>& callback)
 {
-    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID(callback);
     if (isLoaded_) {
         return;
     } else {

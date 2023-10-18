@@ -33,6 +33,7 @@
 #include "base/geometry/shape.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_scoring_log.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -52,12 +53,15 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
@@ -105,19 +109,19 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
 constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
+const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr double ROUND_UNIT = 360.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
-constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
@@ -232,17 +236,7 @@ void GetDefaultRotateVector(double& dx, double& dy, double& dz)
     dx = 0.0;
     dy = 0.0;
     dz = 0.0;
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return;
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGE("pipelineContext is null!");
-        return;
-    }
-    if (pipelineContext->GetMinPlatformVersion() >= MIN_ROTATE_VECTOR_Z) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_NINE)) {
         dz = 1.0;
     }
 }
@@ -525,6 +519,12 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedAsymmetricTransition(
     return nullptr;
 }
 
+int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
+{
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+}
+
 using ChainedTransitionEffectCreator = RefPtr<NG::ChainedTransitionEffect> (*)(
     const JSRef<JSVal>&, const JSExecutionContext&);
 
@@ -566,9 +566,26 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
         return nullptr;
     }
     if (propAnimationOption->IsObject()) {
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto animationOptionArgs = JsonUtil::ParseJsonString(propAnimationOption->ToString());
-        auto animationOptionResult =
-            std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(animationOptionArgs, nullptr));
+        auto animationOptionResult = std::make_shared<AnimationOption>(
+            JSViewContext::CreateAnimation(animationOptionArgs, nullptr, pipelineContext->IsFormRender()));
+        // The maximum of the form-animation-playback duration value is 1000 ms.
+        if (pipelineContext->IsFormRender() && pipelineContext->IsFormAnimation()) {
+            auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
+            // If the duration exceeds 1000ms, init it to 0 ms.
+            if (formAnimationTimeInterval > DEFAULT_DURATION) {
+                animationOptionResult->SetDuration(0);
+            } else if (animationOptionResult->GetDuration() > (DEFAULT_DURATION - formAnimationTimeInterval)) {
+                // If remaining time is less than 1000ms, check for update duration.
+                animationOptionResult->SetDuration(DEFAULT_DURATION - formAnimationTimeInterval);
+                LOGW("[Form animation]  Form Transition SetDuration: %{public}lld ms",
+                    static_cast<long long>(DEFAULT_DURATION - formAnimationTimeInterval));
+            }
+        }
         auto animationOptionObj = JSRef<JSObject>::Cast(propAnimationOption);
         JSRef<JSVal> onFinish = animationOptionObj->GetProperty("onFinish");
         if (onFinish->IsFunction()) {
@@ -990,6 +1007,85 @@ void ParseCustomPopupParam(
 
 } // namespace
 
+RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
+{
+    auto id = jsObj->GetProperty("id")->ToNumber<uint32_t>();
+    auto type = jsObj->GetProperty("type")->ToNumber<uint32_t>();
+    auto args = jsObj->GetProperty("params");
+
+    std::string bundleName;
+    std::string moduleName;
+    auto bundle = jsObj->GetProperty("bundleName");
+    auto module = jsObj->GetProperty("moduleName");
+    if (bundle->IsString() && module->IsString()) {
+        bundleName = bundle->ToString();
+        moduleName = module->ToString();
+    }
+
+    JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+    std::vector<ResourceObjectParams> resObjParamsList;
+    auto size = static_cast<int32_t>(params->Length());
+    for (int32_t i = 0; i < size; i++) {
+        auto item = params->GetValueAt(i);
+        ResourceObjectParams resObjParams { .value = item->ToString().c_str() };
+        if (item->IsString()) {
+            resObjParams.type = ResourceObjectParamType::STRING;
+        } else if (item->IsNumber()) {
+            if (std::regex_match(item->ToString(), FLOAT_PATTERN)) {
+                resObjParams.type = ResourceObjectParamType::FLOAT;
+            } else {
+                resObjParams.type = ResourceObjectParamType::INT;
+            }
+        }
+        resObjParamsList.push_back(resObjParams);
+    }
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(id, type, resObjParamsList, bundleName, moduleName);
+    return resourceObject;
+}
+
+RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject)
+{
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return nullptr;
+        }
+    } else {
+        themeConstants = JSViewAbstract::GetThemeConstants(jsObj);
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return nullptr;
+        }
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    return resourceWrapper;
+}
+
+RefPtr<ResourceWrapper> CreateResourceWrapper()
+{
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        LOGI("Resource decoupling");
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        if (!resourceAdapter) {
+            LOGW("resourceAdapter is nullptr");
+            return nullptr;
+        }
+    } else {
+        themeConstants = JSViewAbstract::GetThemeConstants();
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return nullptr;
+        }
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    return resourceWrapper;
+}
+
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     uint32_t result = origin;
@@ -1003,13 +1099,7 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsScale", info, checkList)) {
-        auto scaleX = 1.0f;
-        auto scaleY = 1.0f;
-        auto scaleZ = 1.0f;
-        CalcDimension centerX = 0.5_pct;
-        CalcDimension centerY = 0.5_pct;
-        ViewAbstractModel::GetInstance()->SetScale(scaleX, scaleY, scaleZ);
-        ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY, 0.0_vp);
+        SetDefaultScale();
         return;
     }
 
@@ -1030,12 +1120,20 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
             ViewAbstractModel::GetInstance()->SetScale(scaleX, scaleY, scaleZ);
             ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY, 0.0_vp);
             return;
+        } else {
+            SetDefaultScale();
         }
     }
     double scale = 0.0;
     if (ParseJsDouble(info[0], scale)) {
         ViewAbstractModel::GetInstance()->SetScale(scale, scale, 1.0f);
     }
+}
+
+void JSViewAbstract::SetDefaultScale()
+{
+    ViewAbstractModel::GetInstance()->SetScale(1.0f, 1.0f, 1.0f);
+    ViewAbstractModel::GetInstance()->SetPivot(0.5_pct, 0.5_pct, 0.0_vp);
 }
 
 void JSViewAbstract::JsScaleX(const JSCallbackInfo& info)
@@ -1101,10 +1199,7 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsTranslate", info, checkList)) {
-        auto translateX = CalcDimension(0.0);
-        auto translateY = CalcDimension(0.0);
-        auto translateZ = CalcDimension(0.0);
-        ViewAbstractModel::GetInstance()->SetTranslate(translateX, translateY, translateZ);
+        SetDefaultTranslate();
         return;
     }
 
@@ -1124,11 +1219,18 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
             ParseJsTranslate(argsPtrItem, translateX, translateY, translateZ);
             ViewAbstractModel::GetInstance()->SetTranslate(translateX, translateY, translateZ);
             return;
+        } else {
+            SetDefaultTranslate();
         }
     }
     if (ParseJsDimensionVp(info[0], value)) {
         ViewAbstractModel::GetInstance()->SetTranslate(value, value, value);
     }
+}
+
+void JSViewAbstract::SetDefaultTranslate()
+{
+    ViewAbstractModel::GetInstance()->SetTranslate(CalcDimension(0.0), CalcDimension(0.0), CalcDimension(0.0));
 }
 
 void JSViewAbstract::JsTranslateX(const JSCallbackInfo& info)
@@ -1164,17 +1266,14 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
     LOGD("JsRotate");
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsRotate", info, checkList)) {
-        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
-        ViewAbstractModel::GetInstance()->SetRotate(
-            rotate.xDirection, rotate.yDirection, rotate.zDirection, 0.0f, rotate.perspective);
-        ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
+        SetDefaultRotate();
         return;
     }
 
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+            SetDefaultRotate();
             return;
         }
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
@@ -1185,7 +1284,7 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
                 rotate.xDirection, rotate.yDirection, rotate.zDirection, angle.value(), rotate.perspective);
             ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
         } else {
-            LOGE("Js JsRotate failed, not specify angle");
+            SetDefaultRotate();
         }
         return;
     }
@@ -1193,6 +1292,14 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
     if (ParseJsDouble(info[0], rotateZ)) {
         ViewAbstractModel::GetInstance()->SetRotate(0.0f, 0.0f, 1.0f, rotateZ);
     }
+}
+
+void JSViewAbstract::SetDefaultRotate()
+{
+    NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
+    ViewAbstractModel::GetInstance()->SetRotate(
+        rotate.xDirection, rotate.yDirection, rotate.zDirection, 0.0f, rotate.perspective);
+    ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
 }
 
 void JSViewAbstract::JsRotateX(const JSCallbackInfo& info)
@@ -1230,14 +1337,7 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
     LOGD("JsTransform");
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsTransform", info, checkList)) {
-        const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
-        std::vector<float> matrix(matrix4Len);
-        const int32_t initPosition = 5;
-        for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
-            double value = 1.0;
-            matrix[i] = static_cast<float>(value);
-        }
-        ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
+        SetDefaultTransform();
         return;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -1255,6 +1355,18 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
     for (int32_t i = 0; i < matrix4Len; i++) {
         double value = 0.0;
         ParseJsonDouble(array->GetArrayItem(i), value);
+        matrix[i] = static_cast<float>(value);
+    }
+    ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
+}
+
+void JSViewAbstract::SetDefaultTransform()
+{
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    std::vector<float> matrix(matrix4Len);
+    const int32_t initPosition = 5;
+    for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+        double value = 1.0;
         matrix[i] = static_cast<float>(value);
     }
     ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
@@ -1352,8 +1464,7 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return true;
     }
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
             return false;
@@ -1382,8 +1493,7 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return true;
     }
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
             return false;
@@ -1551,7 +1661,7 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
     CalcDimension minHeight;
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
     CalcDimension maxHeight;
-    bool version10OrLarger = PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
+    bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
         ViewAbstractModel::GetInstance()->SetMinWidth(minWidth);
     } else if (version10OrLarger) {
@@ -1615,8 +1725,8 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsAlign", info, checkList) && PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+    if (!CheckJSCallbackInfo("JsAlign", info, checkList) &&
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         ViewAbstractModel::GetInstance()->SetAlign(Alignment::CENTER);
         return;
     }
@@ -1684,11 +1794,10 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     }
 
     double value = 0.0;
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     if (!ParseJsDouble(info[0], value)) {
         // add version protection, undefined use default value
-        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && (info[0]->IsNull() || info[0]->IsUndefined())) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
+            (info[0]->IsNull() || info[0]->IsUndefined())) {
             ViewAbstractModel::GetInstance()->ResetAspectRatio();
             return;
         } else {
@@ -1698,7 +1807,7 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
 
     // negative use default value.
     if (LessOrEqual(value, 0.0)) {
-        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             ViewAbstractModel::GetInstance()->ResetAspectRatio();
             return;
         } else {
@@ -2093,17 +2202,8 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
 }
 
-void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
+void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOption& effectOption)
 {
-    if (info.Length() == 0) {
-        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have 1 argument");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGW("failed to set background effect.");
-        return;
-    }
-    JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
     CalcDimension radius;
     if (!ParseJsDimensionVp(jsOption->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);
@@ -2122,7 +2222,22 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
     if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
-    EffectOption option = { radius, saturation, brightness, color };
+    effectOption = { radius, saturation, brightness, color };
+}
+
+void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have 1 argument");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGW("failed to set background effect.");
+        return;
+    }
+    JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
+    EffectOption option;
+    ParseEffectOption(jsOption, option);
     ViewAbstractModel::GetInstance()->SetBackgroundEffect(option);
 }
 
@@ -2391,6 +2506,10 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
         if (JSViewAbstract::ParseJsMedia(indexObject->GetProperty("icon"), iconPath)) {
             params[i].icon = iconPath;
         }
+        auto enabled = indexObject->GetProperty("enabled");
+        if (enabled->IsBoolean()) {
+            params[i].enabled = enabled->ToBoolean();
+        }
     }
     return params;
 }
@@ -2464,7 +2583,13 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         };
         menuParam.onDisappear = std::move(onDisappear);
     }
-
+    auto effectOptionVal = menuOptions->GetProperty("effectOption");
+    if (effectOptionVal->IsObject()) {
+        auto effectOptionJson = JSRef<JSObject>::Cast(effectOptionVal);
+        EffectOption option;
+        JSViewAbstract::ParseEffectOption(effectOptionJson, option);
+        menuParam.backgroundEffectOption = option;
+    }
     ParseMenuArrowParam(menuOptions, menuParam);
 }
 
@@ -2475,20 +2600,42 @@ void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
     ParseMenuParam(info, menuOptions, menuParam);
 }
 
-void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam)
+void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam,
+    std::function<void()>& previewBuildFunc)
 {
     auto menuContentOptions = JSRef<JSObject>::Cast(args);
     ParseMenuParam(info, menuContentOptions, menuParam);
+    RefPtr<JsFunction> previewBuilderFunc;
+    auto preview = menuContentOptions->GetProperty("preview");
+    if (!preview->IsObject() && !preview->IsNumber()) {
+        return;
+    }
+
+    if (preview->IsNumber()) {
+        if (preview->ToNumber<int32_t>() == 1) {
+            menuParam.previewMode = MenuPreviewMode::IMAGE;
+        }
+    } else {
+        auto previewObj = JSRef<JSObject>::Cast(preview);
+        auto previewBuilder = previewObj->GetProperty("builder");
+        if (!previewBuilder->IsFunction()) {
+            return;
+        }
+        previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(previewBuilder));
+        CHECK_NULL_VOID(previewBuilderFunc);
+        previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("BuildContextMenuPreviwer");
+            func->Execute();
+        };
+        menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    }
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
     if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
@@ -2541,29 +2688,14 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         }
         return;
     }
-    if (info[0]->IsObject()) {
+    auto tmpInfo = info[0];
+    if (tmpInfo->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
         std::optional<CalcDimension> top;
         std::optional<CalcDimension> bottom;
-        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
-
-        CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
-            left = leftDimen;
-        }
-        CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
-            right = rightDimen;
-        }
-        CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
-            top = topDimen;
-        }
-        CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
-            bottom = bottomDimen;
-        }
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(tmpInfo);
+        ParseMarginOrPaddingCorner(paddingObj, top, bottom, left, right);
         if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
             if (isMargin) {
                 ViewAbstractModel::GetInstance()->SetMargins(top, bottom, left, right);
@@ -2575,7 +2707,7 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
     }
 
     CalcDimension length;
-    if (!ParseJsDimensionVp(info[0], length)) {
+    if (!ParseJsDimensionVp(tmpInfo, length)) {
         // use default value.
         length.Reset();
     }
@@ -2583,6 +2715,27 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         ViewAbstractModel::GetInstance()->SetMargin(length);
     } else {
         ViewAbstractModel::GetInstance()->SetPadding(length);
+    }
+}
+
+void JSViewAbstract::ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
+    std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right)
+{
+    CalcDimension leftDimen;
+    if (ParseJsDimensionVp(obj->GetProperty("left"), leftDimen)) {
+        left = leftDimen;
+    }
+    CalcDimension rightDimen;
+    if (ParseJsDimensionVp(obj->GetProperty("right"), rightDimen)) {
+        right = rightDimen;
+    }
+    CalcDimension topDimen;
+    if (ParseJsDimensionVp(obj->GetProperty("top"), topDimen)) {
+        top = topDimen;
+    }
+    CalcDimension bottomDimen;
+    if (ParseJsDimensionVp(obj->GetProperty("bottom"), bottomDimen)) {
+        bottom = bottomDimen;
     }
 }
 
@@ -3018,7 +3171,6 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderRadius", info, checkList)) {
-        LOGW("args need a string or number or object");
         ViewAbstractModel::GetInstance()->SetBorderRadius({});
         return;
     }
@@ -3028,7 +3180,6 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
     CalcDimension borderRadius;
@@ -3040,17 +3191,11 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension topLeft;
-        GetBorderRadius("topLeft", object, topLeft);
         CalcDimension topRight;
-        GetBorderRadius("topRight", object, topRight);
         CalcDimension bottomLeft;
-        GetBorderRadius("bottomLeft", object, bottomLeft);
         CalcDimension bottomRight;
-        GetBorderRadius("bottomRight", object, bottomRight);
+        ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
-    } else {
-        LOGE("args format error. %{public}s", args->ToString().c_str());
-        return;
     }
 }
 
@@ -3061,6 +3206,15 @@ void JSViewAbstract::GetBorderRadius(const char* key, JSRef<JSObject>& object, C
             radius.Reset();
         }
     }
+}
+
+void JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
+    CalcDimension& bottomLeft, CalcDimension& bottomRight)
+{
+    GetBorderRadius("topLeft", object, topLeft);
+    GetBorderRadius("topRight", object, topRight);
+    GetBorderRadius("bottomLeft", object, bottomLeft);
+    GetBorderRadius("bottomRight", object, bottomRight);
 }
 
 void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)
@@ -3144,6 +3298,11 @@ void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
         return;
     }
     Color colorBlend;
+    if (info[0]->IsUndefined()) {
+        colorBlend = Color::TRANSPARENT;
+        SetColorBlend(colorBlend);
+        return;
+    }
     if (!ParseJsColor(info[0], colorBlend)) {
         return;
     }
@@ -3331,10 +3490,14 @@ bool JSViewAbstract::ParseJsDimensionNG(
     if (!resId->IsNumber()) {
         return false;
     }
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
+
+    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
+
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
@@ -3346,26 +3509,26 @@ bool JSViewAbstract::ParseJsDimensionNG(
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result = themeConstants->GetDimensionByName(param->ToString());
+        result = resourceWrapper->GetDimensionByName(param->ToString());
         return true;
     }
 
     JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!type->IsNull() && type->IsNumber() &&
-        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
+    if (type->IsNull() || !type->IsNumber()) {
+        return false;
+    }
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
-    if (!type->IsNull() && type->IsNumber() &&
-        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
         StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
         return true;
     }
 
-    if (!type->IsNull() && type->IsNumber() &&
-        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = themeConstants->GetDimension(resId->ToNumber<uint32_t>()); // float return true pixel value
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = resourceWrapper->GetDimension(resId->ToNumber<uint32_t>()); // float return true pixel value
         return true;
     }
 
@@ -3392,11 +3555,14 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         LOGD("resId is not number");
         return false;
     }
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
-        LOGE("themeConstants is nullptr");
+
+    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
+
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
@@ -3409,24 +3575,25 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result = themeConstants->GetDimensionByName(param->ToString());
+        result = resourceWrapper->GetDimensionByName(param->ToString());
         return true;
     }
 
     JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!type->IsNull() && type->IsNumber() &&
-        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
+    if (type->IsNull() || !type->IsNumber()) {
+        return false;
+    }
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
         return true;
     }
-    if (!type->IsNull() && type->IsNumber() &&
-        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
         return true;
     }
-    result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
+    result = resourceWrapper->GetDimension(resId->ToNumber<uint32_t>());
     return true;
 }
 
@@ -3466,13 +3633,17 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         LOGW("at least one of id and type is not number");
         return false;
     }
-    auto themeConstants = GetThemeConstants(jsObj);
+
     auto resId = id->ToNumber<int32_t>();
     auto resType = type->ToNumber<uint32_t>();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
+
+    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
+
     if (resId == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
@@ -3484,29 +3655,29 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
-            auto numberString = themeConstants->GetStringByName(param->ToString());
+            auto numberString = resourceWrapper->GetStringByName(param->ToString());
             return StringUtils::StringToDouble(numberString, result);
         }
         if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
-            result = themeConstants->GetIntByName(param->ToString());
+            result = resourceWrapper->GetIntByName(param->ToString());
             return true;
         }
         if (resType == static_cast<uint32_t>(ResourceType::FLOAT)) {
-            result = themeConstants->GetDoubleByName(param->ToString());
+            result = resourceWrapper->GetDoubleByName(param->ToString());
             return true;
         }
         return false;
     }
-    if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto numberString = themeConstants->GetString(resId);
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto numberString = resourceWrapper->GetString(resId);
         return StringUtils::StringToDouble(numberString, result);
     }
-    if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        result = themeConstants->GetInt(resId);
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        result = resourceWrapper->GetInt(resId);
         return true;
     }
-    if (resType == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = themeConstants->GetDouble(resId);
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = resourceWrapper->GetDouble(resId);
         return true;
     }
     return false;
@@ -3547,11 +3718,13 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
         return false;
     }
 
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
+    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
+
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
@@ -3563,10 +3736,10 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result = themeConstants->GetIntByName(param->ToString());
+        result = resourceWrapper->GetIntByName(param->ToString());
         return true;
     }
-    result = themeConstants->GetInt(resId->ToNumber<uint32_t>());
+    result = resourceWrapper->GetInt(resId->ToNumber<uint32_t>());
     return true;
 }
 
@@ -3579,11 +3752,13 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         return false;
     }
 
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
+    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
+
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
@@ -3595,22 +3770,23 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result = themeConstants->GetColorByName(param->ToString());
+        result = resourceWrapper->GetColorByName(param->ToString());
         return true;
     }
     JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!type->IsNull() && type->IsNumber() &&
-        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
+    if (type->IsNull() || !type->IsNumber()) {
+        return false;
+    }
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         return Color::ParseColorString(value, result);
     }
-    if (!type->IsNull() && type->IsNumber() &&
-        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = themeConstants->GetInt(resId->ToNumber<uint32_t>());
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = resourceWrapper->GetInt(resId->ToNumber<uint32_t>());
         result = Color(ColorAlphaAdapt(value));
         return true;
     }
-    result = themeConstants->GetColor(resId->ToNumber<uint32_t>());
+    result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
     return true;
 }
 
@@ -3665,11 +3841,13 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
 
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
+    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
+
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
@@ -3681,10 +3859,10 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result.emplace_back(themeConstants->GetStringByName(param->ToString()));
+        result.emplace_back(resourceWrapper->GetStringByName(param->ToString()));
         return true;
     }
-    result.emplace_back(themeConstants->GetString(resId->ToNumber<uint32_t>()));
+    result.emplace_back(resourceWrapper->GetString(resId->ToNumber<uint32_t>()));
     return true;
 }
 
@@ -3714,27 +3892,28 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         return false;
     }
 
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
-
     JSRef<JSVal> args = jsObj->GetProperty("params");
     if (!args->IsArray()) {
         LOGW("args is not array");
         return false;
     }
 
+    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
+    }
+
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
-    auto resIdNum = resId->ToNumber<int32_t>();
+    auto resIdNum = resourceObject->GetId();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
         }
         auto param = params->GetValueAt(0);
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
-            auto originStr = themeConstants->GetStringByName(param->ToString());
+            auto originStr = resourceWrapper->GetStringByName(param->ToString());
             ReplaceHolder(originStr, params, 0);
             result = originStr;
         } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::PLURAL)) {
@@ -3745,7 +3924,7 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
                 return false;
             }
             count = countJsVal->ToNumber<int>();
-            auto pluralStr = themeConstants->GetPluralStringByName(param->ToString(), count);
+            auto pluralStr = resourceWrapper->GetPluralStringByName(param->ToString(), count);
             ReplaceHolder(pluralStr, params, 2);
             result = pluralStr;
         } else {
@@ -3753,11 +3932,12 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         }
         return true;
     }
-    if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto originStr = themeConstants->GetString(resId->ToNumber<uint32_t>());
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto originStr = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         ReplaceHolder(originStr, params, 0);
         result = originStr;
-    } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::PLURAL)) {
+        LOGI("Get resource string %{public}s", result.c_str());
+    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::PLURAL)) {
         auto countJsVal = params->GetValueAt(0);
         int count = 0;
         if (!countJsVal->IsNumber()) {
@@ -3765,13 +3945,14 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
             return false;
         }
         count = countJsVal->ToNumber<int>();
-        auto pluralStr = themeConstants->GetPluralString(resId->ToNumber<uint32_t>(), count);
+        auto pluralStr = resourceWrapper->GetPluralString(resId->ToNumber<uint32_t>(), count);
         ReplaceHolder(pluralStr, params, 1);
         result = pluralStr;
-    } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = std::to_string(themeConstants->GetDouble(resId->ToNumber<uint32_t>()));
-    } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        result = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
+        LOGI("Get resource PLURAL %{public}s", result.c_str());
+    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = std::to_string(resourceWrapper->GetDouble(resId->ToNumber<uint32_t>()));
+    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        result = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
     } else {
         return false;
     }
@@ -3792,12 +3973,14 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     JSRef<JSVal> type = jsObj->GetProperty("type");
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNull() && !type->IsNull() && type->IsNumber() && resId->IsNumber()) {
-        auto themeConstants = GetThemeConstants(jsObj);
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
+        auto resourceObject = GetResourceObject(jsObj);
+        auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+        if (!resourceWrapper) {
+            LOGD("resourceWrapper is null");
             return false;
         }
-        if (type->ToNumber<int32_t>() == static_cast<int32_t>(ResourceType::RAWFILE)) {
+
+        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
             JSRef<JSVal> args = jsObj->GetProperty("params");
             if (!args->IsArray()) {
                 LOGW("args is not Array");
@@ -3809,7 +3992,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
                 LOGW("fileName is not String");
                 return false;
             }
-            result = themeConstants->GetRawfile(fileName->ToString());
+            result = resourceWrapper->GetRawfile(fileName->ToString());
             return true;
         }
         auto resIdNum = resId->ToNumber<int32_t>();
@@ -3823,15 +4006,15 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             }
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
-            if (type->ToNumber<int32_t>() == static_cast<int32_t>(ResourceType::MEDIA)) {
-                result = themeConstants->GetMediaPathByName(param->ToString());
+            if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+                result = resourceWrapper->GetMediaPathByName(param->ToString());
                 return true;
             }
             LOGE("JSImage::Create ParseJsMedia type is wrong");
             return false;
         }
-        if (type->ToNumber<int32_t>() == static_cast<int32_t>(ResourceType::MEDIA)) {
-            result = themeConstants->GetMediaPath(resId->ToNumber<uint32_t>());
+        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+            result = resourceWrapper->GetMediaPath(resId->ToNumber<uint32_t>());
             return true;
         }
         LOGE("JSImage::Create ParseJsMedia type is wrong");
@@ -3867,9 +4050,10 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
         return false;
     }
 
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
+    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
 
@@ -3885,15 +4069,15 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::BOOLEAN)) {
-            result = themeConstants->GetBooleanByName(param->ToString());
+        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::BOOLEAN)) {
+            result = resourceWrapper->GetBooleanByName(param->ToString());
             return true;
         }
         return false;
     }
 
-    if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::BOOLEAN)) {
-        result = themeConstants->GetBoolean(resId->ToNumber<uint32_t>());
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::BOOLEAN)) {
+        result = resourceWrapper->GetBoolean(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;
@@ -3949,9 +4133,10 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
 
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
+    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
 
@@ -3966,15 +4151,15 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
-            result = themeConstants->GetIntArrayByName(param->ToString());
+        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
+            result = resourceWrapper->GetIntArrayByName(param->ToString());
             return true;
         }
         return false;
     }
 
-    if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
-        result = themeConstants->GetIntArray(resId->ToNumber<uint32_t>());
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
+        result = resourceWrapper->GetIntArray(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;
@@ -4020,9 +4205,10 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         return false;
     }
 
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
+    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
 
@@ -4037,15 +4223,15 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
-            result = themeConstants->GetStringArrayByName(param->ToString());
+        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
+            result = resourceWrapper->GetStringArrayByName(param->ToString());
             return true;
         }
         return false;
     }
 
-    if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
-        result = themeConstants->GetStringArray(resId->ToNumber<uint32_t>());
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
+        result = resourceWrapper->GetStringArray(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;
@@ -4334,7 +4520,8 @@ void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
                          const RefPtr<OHOS::Ace::DragEvent>& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnd");
-        func->Execute(info);
+        auto extraParams = JsonUtil::Create(true);
+        func->Execute(info, extraParams->ToString());
     };
 
     ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(onDragEnd));
@@ -4567,7 +4754,7 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsRadialGradient", info, checkList)) {
         NG::Gradient newGradient;
         newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
-        ViewAbstractModel::GetInstance()->SetSweepGradient(newGradient);
+        ViewAbstractModel::GetInstance()->SetRadialGradient(newGradient);
         return;
     }
 
@@ -4716,6 +4903,9 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsShadow", info, checkList)) {
+        Shadow shadow;
+        std::vector<Shadow> shadows { shadow };
+        ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
         return;
     }
     Shadow shadow;
@@ -4737,6 +4927,8 @@ void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(0.0);
+        ViewAbstractModel::GetInstance()->SetGrayScale(value);
         return;
     }
 
@@ -4760,6 +4952,8 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(1.0);
+        ViewAbstractModel::GetInstance()->SetBrightness(value);
         return;
     }
 
@@ -4775,6 +4969,8 @@ void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(1.0);
+        ViewAbstractModel::GetInstance()->SetContrast(value);
         return;
     }
 
@@ -4793,6 +4989,8 @@ void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(1.0);
+        ViewAbstractModel::GetInstance()->SetSaturate(value);
         return;
     }
 
@@ -4812,6 +5010,8 @@ void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(0.0);
+        ViewAbstractModel::GetInstance()->SetSepia(value);
         return;
     }
 
@@ -4830,6 +5030,8 @@ void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(0.0);
+        ViewAbstractModel::GetInstance()->SetInvert(value);
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -4852,6 +5054,8 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
         degree = static_cast<float>(info[0]->ToNumber<int32_t>());
     } else {
         LOGE("Invalid value type");
+        ViewAbstractModel::GetInstance()->SetHueRotate(0.0);
+        return;
     }
     float deg = 0.0f;
     if (degree) {
@@ -4868,17 +5072,13 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
 void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined()) {
-        auto shape = AceType::MakeRefPtr<BasicShape>();
-        shape->SetColor(Color::TRANSPARENT);
-        // const RefPtr<BasicShape> shape;
-        ViewAbstractModel::GetInstance()->SetClipShape(shape);
         ViewAbstractModel::GetInstance()->SetClipEdge(false);
         return;
     }
     if (info[0]->IsObject()) {
         JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (clipShape == nullptr) {
-            LOGE("clipShape is null");
+            LOGD("clipShape is null");
             return;
         }
         ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
@@ -4897,9 +5097,6 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
         auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
         progressMask->SetColor(Color::TRANSPARENT);
         ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
-        auto shape = AceType::MakeRefPtr<BasicShape>();
-        shape->SetColor(Color::TRANSPARENT);
-        ViewAbstractModel::GetInstance()->SetMask(shape);
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -5084,7 +5281,6 @@ void JSViewAbstract::JsRestoreId(int32_t restoreId)
     ViewAbstractModel::GetInstance()->SetRestoreId(restoreId);
 }
 
-#if defined(PREVIEW)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
@@ -5094,7 +5290,6 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 
     ViewAbstractModel::GetInstance()->SetDebugLine(info[0]->ToString());
 }
-#endif
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 {
@@ -5226,11 +5421,16 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     };
 
     NG::MenuParam menuParam;
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    std::function<void()> previewBuildFunc = nullptr;
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
-        ParseBindContentOptionParam(info, info[2], menuParam);
+        ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
-
-    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam);
+    if (responseType != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+    }
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
 }
 
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
@@ -5370,6 +5570,11 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;
     }
+    // parse maskColor
+    Color parseMaskColor;
+    if (!maskColor->IsNull() && !maskColor->IsUndefined() && JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
+        sheetStyle.maskColor = std::move(parseMaskColor);
+    }
     CalcDimension sheetHeight;
     if (height->IsString()) {
         std::string heightStr = height->ToString();
@@ -5410,11 +5615,6 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     } else {
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
-    }
-    // parse maskColor
-    Color parseMaskColor;
-    if (!maskColor->IsNull() && !maskColor->IsUndefined() && JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
-        sheetStyle.maskColor = std::move(parseMaskColor);
     }
 }
 
@@ -5685,9 +5885,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
-#if defined(PREVIEW)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
-#endif
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);
@@ -5933,20 +6131,20 @@ bool JSViewAbstract::ParseJsonDimension(
         LOGE("invalid resource id");
         return false;
     }
-    auto themeConstants = GetThemeConstants();
-    if (!themeConstants) {
-        LOGE("themeConstants is nullptr");
+
+    auto resourceWrapper = CreateResourceWrapper();
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
-    result = themeConstants->GetDimension(resId->GetUInt());
+    result = resourceWrapper->GetDimension(resId->GetUInt());
     return true;
 }
 
 bool JSViewAbstract::ParseJsonDimensionVp(
     const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, bool checkIllegal)
 {
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         return ParseJsonDimension(jsonValue, result, DimensionUnit::VP, true);
     }
     return ParseJsonDimension(jsonValue, result, DimensionUnit::VP, checkIllegal);
@@ -5979,18 +6177,21 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
     CHECK_NULL_RETURN(resType && resType->IsNumber(), false);
     auto type = resType->GetUInt();
 
-    auto themeConstants = GetThemeConstants();
-    CHECK_NULL_RETURN(themeConstants, false);
+    auto resourceWrapper = CreateResourceWrapper();
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
+        return false;
+    }
     if (type == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto numberString = themeConstants->GetString(id);
+        auto numberString = resourceWrapper->GetString(id);
         return StringUtils::StringToDouble(numberString, result);
     }
     if (type == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        result = themeConstants->GetInt(id);
+        result = resourceWrapper->GetInt(id);
         return true;
     }
     if (type == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = themeConstants->GetDouble(id);
+        result = resourceWrapper->GetDouble(id);
         return true;
     }
     return false;
@@ -6010,7 +6211,14 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         result = Color(ColorAlphaAdapt(jsonValue->GetUInt()));
         return true;
     }
-    if (jsonValue->IsString()) {
+
+    bool isSetColor = false;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        isSetColor = jsonValue->IsString();
+    } else {
+        isSetColor = jsonValue->IsString() && jsonValue->GetString() != "";
+    }
+    if (isSetColor) {
         result = Color::FromString(jsonValue->GetString());
         return true;
     }
@@ -6020,12 +6228,12 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         LOGE("invalid resource id");
         return false;
     }
-    auto themeConstants = GetThemeConstants();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
+    auto resourceWrapper = CreateResourceWrapper();
+    if (!resourceWrapper) {
+        LOGD("resourceWrapper is null");
         return false;
     }
-    result = themeConstants->GetColor(resId->GetUInt());
+    result = resourceWrapper->GetColor(resId->GetUInt());
     return true;
 }
 
@@ -6062,6 +6270,8 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
     type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(type));
+    bool isFilled = argsPtrItem->GetBool("fill", false);
+    shadow.SetIsFilled(isFilled);
     return true;
 }
 
@@ -6176,8 +6386,7 @@ void JSViewAbstract::SetDirection(const std::string& dir)
         direction = TextDirection::RTL;
     } else if (dir == "Auto") {
         direction = TextDirection::AUTO;
-    } else if (dir == "undefined" && PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    } else if (dir == "undefined" && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         direction = TextDirection::AUTO;
     }
     ViewAbstractModel::GetInstance()->SetLayoutDirection(direction);
@@ -6520,8 +6729,7 @@ bool JSViewAbstract::CheckLength(
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
         return false;
     }
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         return ParseJsDimensionVpNG(jsValue, result);
     }
     // Correct type, incorrect value parsing

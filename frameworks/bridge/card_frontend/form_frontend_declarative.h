@@ -43,7 +43,7 @@ public:
     void UpdatePageData(const std::string& dataList);
     void OnMediaFeatureUpdate();
 
-    void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
+    void RunPage(const std::string& url, const std::string& params) override;
 
     void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
@@ -56,13 +56,11 @@ public:
         const auto& loadCallback = [outSidePipelineContext](const std::string& url, int64_t cardId) -> bool {
             auto context = outSidePipelineContext.Upgrade();
             if (!context) {
-                LOGE("Load card callback failed, host pipeline nullptr");
                 return false;
             }
 
             auto outSidefrontend = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
             if (!outSidefrontend) {
-                LOGE("Load card callback failed, host frontend nullptr");
                 return false;
             }
 

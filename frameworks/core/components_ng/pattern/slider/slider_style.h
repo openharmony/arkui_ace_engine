@@ -48,6 +48,8 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockSize, SizeT<Dimension>)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockType, SliderModel::BlockStyleType)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockImage, std::string)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockImageBundleName, std::string)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockImageModuleName, std::string)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockShape, RefPtr<BasicShape>)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StepSize, Dimension)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderMode, SliderModel::SliderMode)

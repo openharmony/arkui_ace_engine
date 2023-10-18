@@ -243,7 +243,7 @@ public:
 
     void SetScrollable(bool isScrollable)
     {
-        CHECK_NULL_VOID_NOLOG(isScrollable_ != isScrollable);
+        CHECK_NULL_VOID(isScrollable_ != isScrollable);
         isScrollable_ = isScrollable;
     }
 
@@ -273,14 +273,18 @@ public:
 
     void SetDisplayMode(DisplayMode displayMode)
     {
-        CHECK_NULL_VOID_NOLOG(displayMode_ != displayMode);
+        CHECK_NULL_VOID(displayMode_ != displayMode);
         displayMode_ = displayMode;
     }
 
     void SetOutBoundary(double outBoundary)
     {
-        inSpring_ = !NearEqual(outBoundary_, outBoundary, 0.000001f) && !NearZero(outBoundary_);
         outBoundary_ = outBoundary;
+    }
+
+    void SetIsOutOfBoundary(bool isOutOfBoundary)
+    {
+        isOutOfBoundary_ = isOutOfBoundary;
     }
 
     void SetPosition(const Dimension& position)
@@ -318,7 +322,7 @@ public:
         return opacity_;
     }
 
-    void PlayScrollBarEndAnimation()
+    void PlayScrollBarDisappearAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
             opacityAnimationType_ = OpacityAnimationType::DISAPPEAR;
@@ -326,10 +330,10 @@ public:
         }
     }
 
-    void PlayScrollBarStartAnimation()
+    void PlayScrollBarAppearAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
-            disapplearDelayTask_.Cancel();
+            disappearDelayTask_.Cancel();
             opacityAnimationType_ = OpacityAnimationType::APPEAR;
             MarkNeedRender();
         }
@@ -354,11 +358,11 @@ public:
     {
         hoverAnimationType_ = hoverAnimationType;
     }
-    
+
 
     void PlayScrollBarGrowAnimation()
     {
-        PlayScrollBarStartAnimation();
+        PlayScrollBarAppearAnimation();
         normalWidth_ = activeWidth_;
         FlushBarWidth();
         hoverAnimationType_ = HoverAnimationType::GROW;
@@ -371,6 +375,17 @@ public:
         FlushBarWidth();
         hoverAnimationType_ = HoverAnimationType::SHRINK;
         MarkNeedRender();
+    }
+
+    void PlayScrollBarAdaptAnimation()
+    {
+        needAdaptAnimation_ = true;
+        MarkNeedRender();
+    }
+
+    bool GetNeedAdaptAnimation() const
+    {
+        return needAdaptAnimation_;
     }
 
     void MarkNeedRender()
@@ -439,7 +454,7 @@ public:
     {
         return hostBorderRadius_;
     }
-    
+
     void SetScrollPositionCallback(ScrollPositionCallback&& callback)
     {
         scrollPositionCallback_ = std::move(callback);
@@ -460,15 +475,34 @@ public:
         return scrollEndCallback_;
     }
 
+    void SetCalePredictSnapOffsetCallback(CalePredictSnapOffsetCallback&& calePredictSnapOffsetCallback)
+    {
+        calePredictSnapOffsetCallback_ = std::move(calePredictSnapOffsetCallback);
+    }
+
+    const CalePredictSnapOffsetCallback& GetCalePredictSnapOffsetCallback() const
+    {
+        return calePredictSnapOffsetCallback_;
+    }
+
+    void SetStartScrollSnapMotionCallback(StartScrollSnapMotionCallback&& startScrollSnapMotionCallback)
+    {
+        startScrollSnapMotionCallback_ = std::move(startScrollSnapMotionCallback);
+    }
+
+    const StartScrollSnapMotionCallback& GetStartScrollSnapMotionCallback() const
+    {
+        return startScrollSnapMotionCallback_;
+    }
+
     void SetGestureEvent();
     void SetMouseEvent();
     void SetHoverEvent();
     void FlushBarWidth();
-    void PlayAdaptAnimation(double activeSize, double activeMainOffset, double inactiveSize, double inactiveMainOffset);
     void CalcReservedHeight();
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result);
-    void ScheduleDisapplearDelayTask();
+    void ScheduleDisappearDelayTask();
 
 protected:
     void InitTheme();
@@ -527,10 +561,11 @@ private:
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
     bool isHover_ = false;
-    bool inSpring_ = false; // whether bar in the spring state
+    bool isOutOfBoundary_ = false; // whether bar in the spring state
     bool positionModeUpdate_ = false;
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;
+    bool needAdaptAnimation_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;
@@ -541,15 +576,16 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanRecognizer> panRecognizer_;
-    RefPtr<Animator> adaptAnimator_;
     RefPtr<Animator> frictionController_;
     RefPtr<FrictionMotion> frictionMotion_;
     std::function<void()> markNeedRenderFunc_;
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
+    CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
+    StartScrollSnapMotionCallback startScrollSnapMotionCallback_;
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
-    CancelableCallback<void()> disapplearDelayTask_;
+    CancelableCallback<void()> disappearDelayTask_;
 };
 
 } // namespace OHOS::Ace::NG

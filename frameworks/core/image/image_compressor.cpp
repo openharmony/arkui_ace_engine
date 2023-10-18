@@ -29,7 +29,7 @@
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/system_properties.h"
-#include "core/image/image_cache.h"
+#include "core/image/image_file_cache.h"
 #include "core/image/image_compressor.h"
 
 namespace OHOS::Ace {
@@ -337,7 +337,7 @@ void ImageCompressor::WriteToFile(std::string srcKey, std::shared_ptr<RSData> co
                 return;
             }
 
-            ImageCache::WriteCacheFile(srcKey, toWritePtr, fileSize, ".astc");
+            ImageFileCache::GetInstance().WriteCacheFile(srcKey, toWritePtr, fileSize, ".astc");
         }, BgTaskPriority::LOW);
 #endif
 }
@@ -562,7 +562,7 @@ bool ImageCompressor::IsFailedImage(std::string key)
 
 void ImageCompressor::InitRecords()
 {
-    recordsPath_ = ImageCache::GetImageCacheFilePath("record") + ".txt";
+    recordsPath_ = ImageFileCache::GetInstance().GetImageCacheFilePath("record") + ".txt";
     std::ifstream openFile(recordsPath_);
     if (!openFile.is_open()) {
         return;

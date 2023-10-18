@@ -76,6 +76,7 @@ void SelectPattern::OnModifyDone()
 
 void SelectPattern::ShowSelectMenu()
 {
+    CHECK_NULL_VOID(!options_.empty());
     if (menuWrapper_) {
         LOGI("start executing click callback %d", menuWrapper_->GetId());
     }
@@ -103,7 +104,7 @@ void SelectPattern::RegisterOnClick()
 
     GestureEventFunc callback = [weak = WeakClaim(this)](GestureEvent& /* info */) mutable {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
 
         auto selected = pattern->GetSelected();
         if (selected > -1 && selected < pattern->GetOptions().size()) {
@@ -136,11 +137,11 @@ void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
 
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
-        CHECK_NULL_VOID_NOLOG(host);
+        CHECK_NULL_VOID(host);
         auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID_NOLOG(renderContext);
+        CHECK_NULL_VOID(renderContext);
         renderContext->BlendBgColor(pattern->GetBgBlendColor());
     });
 }
@@ -253,7 +254,7 @@ void SelectPattern::RegisterOnKeyEvent()
     CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
@@ -525,7 +526,7 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 void SelectPattern::SetSelectedOptionBgColor(const Color& color)
 {
     selectedBgColor_ = color;
-    if (selected_ != -1) {
+    if (selected_ >= 0 && selected_ < options_.size()) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetBgColor(color);
@@ -535,7 +536,7 @@ void SelectPattern::SetSelectedOptionBgColor(const Color& color)
 void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
 {
     selectedFont_.FontSize = value;
-    if (selected_ != -1) {
+    if (selected_ >= 0 && selected_ < options_.size()) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetFontSize(value);
@@ -545,7 +546,7 @@ void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
 void SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     selectedFont_.FontStyle = value;
-    if (selected_ != -1) {
+    if (selected_ >= 0 && selected_ < options_.size()) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetItalicFontStyle(value);
@@ -555,7 +556,7 @@ void SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value
 void SelectPattern::SetSelectedOptionFontWeight(const FontWeight& value)
 {
     selectedFont_.FontWeight = value;
-    if (selected_ != -1) {
+    if (selected_ >= 0 && selected_ < options_.size()) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetFontWeight(value);
@@ -565,7 +566,7 @@ void SelectPattern::SetSelectedOptionFontWeight(const FontWeight& value)
 void SelectPattern::SetSelectedOptionFontFamily(const std::vector<std::string>& value)
 {
     selectedFont_.FontFamily = value;
-    if (selected_ != -1) {
+    if (selected_ >= 0 && selected_ < options_.size()) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetFontFamily(value);
@@ -575,7 +576,7 @@ void SelectPattern::SetSelectedOptionFontFamily(const std::vector<std::string>& 
 void SelectPattern::SetSelectedOptionFontColor(const Color& color)
 {
     selectedFont_.FontColor = color;
-    if (selected_ != -1) {
+    if (selected_ >= 0 && selected_ < options_.size()) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetFontColor(color);
@@ -613,7 +614,7 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(newSelected);
     // set lastSelected option props back to default (unselected) values
-    if (selected_ > -1) {
+    if (selected_ >= 0 && selected_ < options_.size()) {
         CHECK_NULL_VOID(options_[selected_]);
         auto lastSelected = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(lastSelected);
@@ -689,6 +690,9 @@ void SelectPattern::UpdateText(int32_t index)
     CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
+    if (index >= options_.size() || index < 0) {
+        return;
+    }
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(newSelected);
     textProps->UpdateContent(newSelected->GetText());

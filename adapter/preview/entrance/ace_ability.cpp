@@ -38,10 +38,6 @@
 namespace OHOS::Ace::Platform {
 namespace {
 
-// JS frontend maintain the page ID self, so it's useless to pass page ID from platform
-// layer, neither Android/OpenHarmony or Windows, we should delete here usage when Java delete it.
-constexpr int32_t UNUSED_PAGE_ID = 1;
-
 constexpr char ASSET_PATH_SHARE[] = "share";
 #ifdef WINDOWS_PLATFORM
 constexpr char DELIMITER[] = "\\";
@@ -162,6 +158,16 @@ AceAbility::~AceAbility()
     AceContainer::DestroyContainer(ACE_INSTANCE_ID);
 }
 
+void AceAbility::SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo)
+{
+    // only support the stage model
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+        CHECK_NULL_VOID(container);
+        container->SetMockModuleList(mockJsonInfo);
+    }
+}
+
 std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 {
     DumpAceRunArgs(runArgs);
@@ -234,9 +240,9 @@ void AceAbility::InitEnv()
     if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
         AceContainer::SetView(
             view, window, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, callback);
-        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
+        AceContainer::RunPage(ACE_INSTANCE_ID, runArgs_.url, "");
     } else {
-        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
+        AceContainer::RunPage(ACE_INSTANCE_ID, runArgs_.url, "");
         AceContainer::SetView(
             view, window, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, callback);
     }
@@ -247,8 +253,7 @@ void AceAbility::InitEnv()
         LOGI("Set MinPlatformVersion to %{public}d", compatibleVersion_);
         pipelineContext->SetMinPlatformVersion(compatibleVersion_);
     }
-    container->InitializeStageAppConfig(
-        runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
+    container->InitializeAppConfig(runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
@@ -321,6 +326,10 @@ void AceAbility::InitializeAppInfo()
         CHECK_NULL_VOID(faContext);
         auto appInfo = faContext->GetAppInfo();
         CHECK_NULL_VOID(appInfo);
+        auto hapModuleInfo = faContext->GetHapModuleInfo();
+        CHECK_NULL_VOID(hapModuleInfo);
+        bundleName_ = appInfo->GetBundleName();
+        moduleName_ = hapModuleInfo->GetModuleName();
         compatibleVersion_ = appInfo->GetMinAPIVersion();
         auto targetVersion = appInfo->GetTargetAPIVersion();
         auto releaseType = appInfo->GetApiReleaseType();

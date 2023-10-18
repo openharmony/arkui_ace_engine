@@ -49,7 +49,7 @@ void TimePickerRowPattern::OnAttachToFrameNode()
 
 bool TimePickerRowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
+    CHECK_NULL_RETURN(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
     return true;
@@ -98,12 +98,12 @@ void TimePickerRowPattern::OnModifyDone()
     InitDisabled();
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(refPtr);
+        CHECK_NULL_VOID(refPtr);
         refPtr->HandleColumnChange(tag, add, index, notify);
     });
     SetEventCallback([weak = WeakClaim(this)](bool refresh) {
         auto refPtr = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(refPtr);
+        CHECK_NULL_VOID(refPtr);
         refPtr->FireChangeEvent(refresh);
     });
     auto focusHub = host->GetFocusHub();
@@ -279,9 +279,9 @@ PickerTime TimePickerRowPattern::GetCurrentTime()
 {
     PickerTime time;
     UpdateAllChildNode();
-    auto amPmColumn = allChildNode_["amPm"];
-    auto hourColumn = allChildNode_["hour"];
-    auto minuteColumn = allChildNode_["minute"];
+    auto amPmColumn = allChildNode_["amPm"].Upgrade();
+    auto hourColumn = allChildNode_["hour"].Upgrade();
+    auto minuteColumn = allChildNode_["minute"].Upgrade();
     CHECK_NULL_RETURN(hourColumn, time);
     CHECK_NULL_RETURN(minuteColumn, time);
     auto hourPickerColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
@@ -302,7 +302,7 @@ PickerTime TimePickerRowPattern::GetCurrentTime()
 
     time.SetMinute(minutePickerColumnPattern->GetCurrentIndex()); // minute from 0 to 59, index from 0 to 59
     if (hasSecond_) {
-        auto secondColumn = allChildNode_["second"];
+        auto secondColumn = allChildNode_["second"].Upgrade();
         CHECK_NULL_RETURN(secondColumn, time);
         auto secondPickerColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_RETURN(secondPickerColumnPattern, time);
@@ -329,10 +329,14 @@ void TimePickerRowPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool
 {
     std::vector<RefPtr<FrameNode>> tags;
     for (const auto& tag : tags) {
-        auto iter = std::find_if(timePickerColumns_.begin(), timePickerColumns_.end(),
-            [&tag](const RefPtr<FrameNode>& column) { return column->GetId() == tag->GetId(); });
+        auto iter = std::find_if(timePickerColumns_.begin(), timePickerColumns_.end(), [&tag](const auto& c) {
+                auto column = c.Upgrade();
+                return column && column->GetId() == tag->GetId();
+            });
         if (iter != timePickerColumns_.end()) {
-            auto timePickerColumnPattern = (*iter)->GetPattern<TimePickerColumnPattern>();
+            auto timePickerColumn = (*iter).Upgrade();
+            CHECK_NULL_VOID(timePickerColumn);
+            auto timePickerColumnPattern = timePickerColumn->GetPattern<TimePickerColumnPattern>();
             CHECK_NULL_VOID(timePickerColumnPattern);
             timePickerColumnPattern->FlushCurrentOptions();
         }
@@ -391,8 +395,8 @@ void TimePickerRowPattern::SetChangeCallback(ColumnChangeCallback&& value)
 void TimePickerRowPattern::FlushColumn()
 {
     UpdateAllChildNode();
-    auto amPmColumn = allChildNode_["amPm"];
-    auto hourColumn = allChildNode_["hour"];
+    auto amPmColumn = allChildNode_["amPm"].Upgrade();
+    auto hourColumn = allChildNode_["hour"].Upgrade();
     if (GetHour24()) {
         CHECK_NULL_VOID(hourColumn);
         auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
@@ -414,14 +418,14 @@ void TimePickerRowPattern::FlushColumn()
         hourColumnPattern->FlushCurrentOptions();
     }
 
-    auto minuteColumn = allChildNode_["minute"];
+    auto minuteColumn = allChildNode_["minute"].Upgrade();
     CHECK_NULL_VOID(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
     minuteColumnPattern->SetShowCount(GetShowCount());
     minuteColumnPattern->FlushCurrentOptions();
     if (hasSecond_) {
-        auto secondColumn = allChildNode_["second"];
+        auto secondColumn = allChildNode_["second"].Upgrade();
         CHECK_NULL_VOID(secondColumn);
         auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(secondColumnPattern);
@@ -435,7 +439,7 @@ void TimePickerRowPattern::OnDataLinking(
     const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags)
 {
     CHECK_NULL_VOID(tag);
-    auto hourNode = allChildNode_["hour"];
+    auto hourNode = allChildNode_["hour"].Upgrade();
     CHECK_NULL_VOID(hourNode);
     if (tag->GetId() != hourNode->GetId()) {
         return;
@@ -469,7 +473,7 @@ void TimePickerRowPattern::OnColumnsBuilding()
     HandleHourColumnBuilding();
 
     UpdateAllChildNode();
-    auto minuteColumn = allChildNode_["minute"];
+    auto minuteColumn = allChildNode_["minute"].Upgrade();
     CHECK_NULL_VOID(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
@@ -484,7 +488,7 @@ void TimePickerRowPattern::OnColumnsBuilding()
     minuteColumnPattern->SetOptions(GetOptionsCount());
     minuteColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
 
-    auto secondColumn = allChildNode_["second"];
+    auto secondColumn = allChildNode_["second"].Upgrade();
     CHECK_NULL_VOID(secondColumn);
     auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(secondColumnPattern);
@@ -498,14 +502,14 @@ void TimePickerRowPattern::OnColumnsBuilding()
     }
     secondColumnPattern->SetOptions(GetOptionsCount());
     secondColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
-    
+
 }
 
 void TimePickerRowPattern::HandleHourColumnBuilding()
 {
     UpdateAllChildNode();
-    auto amPmColumn = allChildNode_["amPm"];
-    auto hourColumn = allChildNode_["hour"];
+    auto amPmColumn = allChildNode_["amPm"].Upgrade();
+    auto hourColumn = allChildNode_["hour"].Upgrade();
     optionsTotalCount_[hourColumn] = 0;
     if (GetHour24()) {
         CHECK_NULL_VOID(hourColumn);
@@ -672,7 +676,7 @@ void TimePickerRowPattern::GetAllChildNodeWithSecond()
 void TimePickerRowPattern::HandleHour12Change(bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags)
 {
     UpdateAllChildNode();
-    auto amPm = allChildNode_["amPm"];
+    auto amPm = allChildNode_["amPm"].Upgrade();
     CHECK_NULL_VOID(amPm);
     auto amPmPickerColumnPattern = amPm->GetPattern<TimePickerColumnPattern>();
 
@@ -950,19 +954,21 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
-    CHECK_NULL_VOID(buttonTitleNode_);
-    auto buttonTitleRenderContext = buttonTitleNode_->GetRenderContext();
+    auto buttonTitleNode = buttonTitleNode_.Upgrade();
+    CHECK_NULL_VOID(buttonTitleNode);
+    auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_VOID(buttonTitleRenderContext);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto childText = buttonTitleNode_->GetFirstChild();
+    auto childText = buttonTitleNode->GetFirstChild();
     CHECK_NULL_VOID(childText);
     auto textTitleNode = DynamicCast<FrameNode>(childText);
     CHECK_NULL_VOID(textTitleNode);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-    CHECK_NULL_VOID(contentRowNode_);
-    auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    auto contentRowNode = contentRowNode_.Upgrade();
+    CHECK_NULL_VOID(contentRowNode);
+    auto layoutRenderContext = contentRowNode->GetRenderContext();
     CHECK_NULL_VOID(layoutRenderContext);
     layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     host->MarkModifyDone();

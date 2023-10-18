@@ -44,7 +44,6 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT();
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
-        LOGW("Size is infinity.");
         geometryNode->SetFrameSize(SizeF());
         return;
     }
@@ -109,7 +108,6 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
     if (!frameSize.IsPositive()) {
-        LOGW("Frame size is not positive.");
         return;
     }
 
@@ -162,9 +160,9 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
                 tabBarFrameSize.MainSize(Axis::VERTICAL) + dividerStrokeWidth + padding.Offset().GetY());
         } else {
             tabBarOffset = OffsetF(barPosX, frameSize.MainSize(Axis::VERTICAL) -
-                tabBarFrameSize.MainSize(Axis::VERTICAL) - padding.Offset().GetY());
+                tabBarFrameSize.MainSize(Axis::VERTICAL) - padding.bottom.value_or(0.0f));
             dividerOffset = OffsetF(dividerStartMargin + padding.Offset().GetX(), frameSize.MainSize(Axis::VERTICAL) -
-                tabBarFrameSize.MainSize(Axis::VERTICAL) - padding.Offset().GetY() - dividerStrokeWidth);
+                tabBarFrameSize.MainSize(Axis::VERTICAL) - padding.bottom.value_or(0.0f) - dividerStrokeWidth);
             swiperOffset = padding.Offset();
         }
     } else {
@@ -177,9 +175,9 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
                 padding.Offset().GetX() + dividerStrokeWidth, padding.Offset().GetY());
         } else {
             tabBarOffset = OffsetF(frameSize.MainSize(Axis::HORIZONTAL) - tabBarFrameSize.MainSize(Axis::HORIZONTAL) -
-                padding.Offset().GetX(), barPosY);
+                padding.right.value_or(0.0f), barPosY);
             dividerOffset = OffsetF(frameSize.MainSize(Axis::HORIZONTAL) - tabBarFrameSize.MainSize(Axis::HORIZONTAL) -
-                padding.Offset().GetX() - dividerStrokeWidth, dividerStartMargin + padding.Offset().GetY());
+                padding.right.value_or(0.0f) - dividerStrokeWidth, dividerStartMargin + padding.Offset().GetY());
             swiperOffset = padding.Offset();
         }
     }

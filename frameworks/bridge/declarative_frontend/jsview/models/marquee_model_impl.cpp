@@ -76,9 +76,9 @@ void MarqueeModelImpl::SetTextColor(const std::optional<Color>& textColor)
     CHECK_NULL_VOID(component);
     auto textStyle = component->GetTextStyle();
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     textStyle.SetTextColor(textColor.value_or(theme->GetTextStyle().GetTextColor()));
     component->SetTextStyle(textStyle);
 }
@@ -89,9 +89,9 @@ void MarqueeModelImpl::SetFontSize(const std::optional<Dimension>& fontSize)
     CHECK_NULL_VOID(component);
     auto textStyle = component->GetTextStyle();
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     textStyle.SetFontSize(fontSize.value_or(theme->GetTextStyle().GetFontSize()));
     component->SetTextStyle(textStyle);
 }

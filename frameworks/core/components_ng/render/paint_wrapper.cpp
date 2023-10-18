@@ -48,11 +48,11 @@ void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintIm
 
 void PaintWrapper::FlushOverlayModifier()
 {
-    CHECK_NULL_VOID_NOLOG(nodePaintImpl_);
+    CHECK_NULL_VOID(nodePaintImpl_);
     auto overlayModifier = nodePaintImpl_->GetOverlayModifier(this);
-    CHECK_NULL_VOID_NOLOG(overlayModifier);
+    CHECK_NULL_VOID(overlayModifier);
     auto renderContext = renderContext_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(renderContext);
+    CHECK_NULL_VOID(renderContext);
     renderContext->FlushOverlayModifier(overlayModifier);
 }
 

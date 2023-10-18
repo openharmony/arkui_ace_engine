@@ -73,7 +73,7 @@ OHOS::Media::PlaybackRateMode ConvertToMediaPlaybackSpeed(float speed)
 
 RosenMediaPlayer::~RosenMediaPlayer()
 {
-    CHECK_NULL_VOID_NOLOG(mediaPlayer_);
+    CHECK_NULL_VOID(mediaPlayer_);
     mediaPlayer_->Release();
 }
 
@@ -84,7 +84,6 @@ void RosenMediaPlayer::CreateMediaPlayer()
         return;
     }
     mediaPlayer_ = OHOS::Media::PlayerFactory::CreatePlayer();
-    CHECK_NULL_VOID(mediaPlayer_);
 }
 
 void RosenMediaPlayer::ResetMediaPlayer()
@@ -99,6 +98,7 @@ bool RosenMediaPlayer::IsMediaPlayerValid()
 
 void RosenMediaPlayer::SetVolume(float leftVolume, float rightVolume)
 {
+    CHECK_NULL_VOID(mediaPlayer_);
     mediaPlayer_->SetVolume(leftVolume, rightVolume);
 }
 
@@ -127,30 +127,34 @@ bool RosenMediaPlayer::SetSource(const std::string& src)
             return false;
         }
         auto size = statBuf.st_size;
-        if (mediaPlayer_->SetSource(fd, 0, size) != 0) {
+        if (mediaPlayer_ && mediaPlayer_->SetSource(fd, 0, size) != 0) {
             LOGE("Video media player etSource failed");
             close(fd);
             return false;
         }
         close(fd);
         return true;
-    } else {
-        LOGE("Video source fd is invalid.");
-        return false;
     }
+    LOGE("Video source fd is invalid.");
+    return false;
 }
 
 // Interim programme
 bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
 {
-    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto assetManager = pipelineContext->GetAssetManager();
+    CHECK_NULL_RETURN(assetManager, false);
     uint32_t resId = 0;
     auto state1 = GetResourceId(filePath, resId);
     if (!state1) {
         return false;
     }
-    auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, false);
     auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, false);
     std::string mediaPath;
     auto state2 = themeConstants->GetMediaById(resId, mediaPath);
     if (!state2) {
@@ -169,7 +173,7 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
         LOGE("Open hap file failed");
         return false;
     }
-    if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
+    if (mediaPlayer_ && mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
         close(hapFd);
         return false;
@@ -180,7 +184,10 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
 
 bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
 {
-    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto assetManager = pipelineContext->GetAssetManager();
+    CHECK_NULL_RETURN(assetManager, false);
     auto path = "resources/rawfile/" + filePath.substr(RAWFILE_PREFIX_LENGTH);
     MediaFileInfo fileInfo;
     auto state1 = assetManager->GetFileInfo(path, fileInfo);
@@ -188,13 +195,15 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
         LOGE("GetMediaFileInfo failed");
         return false;
     }
-    auto hapPath = Container::Current()->GetHapPath();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto hapPath = container->GetHapPath();
     auto hapFd = open(hapPath.c_str(), O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
         return false;
     }
-    if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
+    if (mediaPlayer_ && mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
         close(hapFd);
         return false;
@@ -206,20 +215,25 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
 bool RosenMediaPlayer::RelativePathPlay(const std::string& filePath)
 {
     // relative path
-    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto assetManager = pipelineContext->GetAssetManager();
+    CHECK_NULL_RETURN(assetManager, false);
     MediaFileInfo fileInfo;
     auto state = assetManager->GetFileInfo(assetManager->GetAssetPath(filePath, false), fileInfo);
     if (!state) {
         LOGE("GetMediaFileInfo failed");
         return false;
     }
-    auto hapPath = Container::Current()->GetHapPath();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto hapPath = container->GetHapPath();
     auto hapFd = open(hapPath.c_str(), O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
         return false;
     }
-    if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
+    if (mediaPlayer_ && mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
         close(hapFd);
         return false;
@@ -251,7 +265,9 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& 
         StringUtils::StartWith(filePath, "file://media")) {
         // dataability:// or datashare://
         auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
         auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
+        CHECK_NULL_RETURN(dataProvider, false);
         fd = dataProvider->GetDataProviderFile(filePath, "r");
         useFd = true;
     } else if (StringUtils::StartWith(filePath, "file://")) {
@@ -266,7 +282,7 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& 
         return RawFilePlay(filePath);
     } else if (StringUtils::StartWith(filePath, "http")) {
         // http or https
-        if (mediaPlayer_->SetSource(filePath) != 0) {
+        if (mediaPlayer_ && mediaPlayer_->SetSource(filePath) != 0) {
             LOGE("Player SetSource failed");
             return false;
         }
@@ -289,6 +305,7 @@ void RosenMediaPlayer::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionU
     StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
     CommonEvent&& startRenderFrameEvent)
 {
+    CHECK_NULL_VOID(mediaPlayer_);
     mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>(ContainerScope::CurrentId());
     mediaPlayerCallback_->SetPositionUpdatedEvent(std::move(positionUpdatedEvent));
     mediaPlayerCallback_->SetStateChangedEvent(std::move(stateChangedEvent));
@@ -306,26 +323,31 @@ int32_t RosenMediaPlayer::GetDuration(int32_t& duration)
 
 int32_t RosenMediaPlayer::GetVideoWidth()
 {
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->GetVideoWidth();
 }
 
 int32_t RosenMediaPlayer::GetVideoHeight()
 {
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->GetVideoHeight();
 }
 
 int32_t RosenMediaPlayer::SetLooping(bool loop)
 {
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->SetLooping(loop);
 }
 
 int32_t RosenMediaPlayer::SetPlaybackSpeed(float speed)
 {
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->SetPlaybackSpeed(ConvertToMediaPlaybackSpeed(static_cast<float>(speed)));
 }
 
 int32_t RosenMediaPlayer::SetSurface()
 {
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
     auto renderSurface = renderSurface_.Upgrade();
     CHECK_NULL_RETURN(renderSurface, -1);
     return mediaPlayer_->SetVideoSurface(renderSurface->GetSurface());
@@ -333,35 +355,41 @@ int32_t RosenMediaPlayer::SetSurface()
 
 int32_t RosenMediaPlayer::PrepareAsync()
 {
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->PrepareAsync();
 }
 
 bool RosenMediaPlayer::IsPlaying()
 {
+    CHECK_NULL_RETURN(mediaPlayer_, false);
     return mediaPlayer_->IsPlaying();
 }
 
 int32_t RosenMediaPlayer::Play()
 {
     LOGI("Media player start to play.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->Play();
 }
 
 int32_t RosenMediaPlayer::Pause()
 {
     LOGI("Media player start to pause.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->Pause();
 }
 
 int32_t RosenMediaPlayer::Stop()
 {
     LOGI("Media player start to stop.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->Stop();
 }
 
 int32_t RosenMediaPlayer::Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode)
 {
     LOGI("Media player start to seek.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->Seek(mSeconds, ConvertToMediaSeekMode(mode));
 }
 

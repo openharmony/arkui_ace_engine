@@ -87,9 +87,27 @@ bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
     if (refereeState_ == RefereeState::READY) {
         refereeState_ = RefereeState::DETECTING;
     }
+    auto size = recognizers_.size();
     for (const auto& recognizer : recognizers_) {
         if (recognizer && recognizer->CheckTouchId(point.id)) {
             recognizer->HandleEvent(point);
+            if (recognizers_.size() < size) {
+                LOGD("remove recognizer while handle event!");
+                break;
+            }
+        }
+    }
+    return true;
+}
+
+bool ParallelRecognizer::HandleEvent(const AxisEvent& event)
+{
+    if (refereeState_ == RefereeState::READY) {
+        refereeState_ = RefereeState::DETECTING;
+    }
+    for (const auto& recognizer : recognizers_) {
+        if (recognizer) {
+            recognizer->HandleEvent(event);
         }
     }
     return true;

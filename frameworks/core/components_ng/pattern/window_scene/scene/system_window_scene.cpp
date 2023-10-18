@@ -23,14 +23,14 @@
 namespace OHOS::Ace::NG {
 SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : session_(session)
 {
-    sizeChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
+    boundsChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        self->OnBoundsSizeChanged(bounds);
+        self->OnBoundsChanged(bounds);
     };
 }
 
-void SystemWindowScene::OnBoundsSizeChanged(const Rosen::Vector4f& bounds)
+void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 {
     Rosen::WSRect windowRect {
         .posX_ = std::round(bounds.x_),
@@ -55,7 +55,7 @@ void SystemWindowScene::OnAttachToFrameNode()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
-    surfaceNode->SetBoundsSizeChangedCallback(sizeChangedCallback_);
+    surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
     auto gestureHub = host->GetOrCreateGestureEventHub();
     auto touchCallback = [weakSession = wptr(session_)](TouchEventInfo& info) {
@@ -78,6 +78,8 @@ void SystemWindowScene::OnAttachToFrameNode()
         auto host = self->GetHost();
         if (host != nullptr) {
             DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
+                host->GetId(), session, pointerEvent);
+            DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowDragEvent(
                 host->GetId(), session, pointerEvent);
         }
         session->TransferPointerEvent(pointerEvent);

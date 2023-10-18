@@ -30,7 +30,7 @@
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
 #include "core/components_ng/image_provider/image_utils.h"
-#include "core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
@@ -167,7 +167,7 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
 bool AnimatedImage::GetCachedFrame(uint32_t idx)
 {
     auto image = GetCachedFrameImpl(cacheKey_ + std::to_string(idx));
-    CHECK_NULL_RETURN_NOLOG(image, false);
+    CHECK_NULL_RETURN(image, false);
 
     if (!decodeMtx_.try_lock()) {
         // last frame still decoding, skip this frame to avoid blocking UI thread

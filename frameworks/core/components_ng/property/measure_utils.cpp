@@ -130,6 +130,19 @@ PaddingPropertyF ConvertToPaddingPropertyF(
     auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
+    if (left.has_value()) {
+        left = Round(left.value());
+    }
+    if (right.has_value()) {
+        right = Round(right.value());
+    }
+    if (top.has_value()) {
+        top = Round(top.value());
+    }
+    if (bottom.has_value()) {
+        bottom = Round(bottom.value());
+    }
+
     return PaddingPropertyF { left, right, top, bottom };
 }
 
@@ -161,6 +174,18 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
     auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
     auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
+    if (left.has_value()) {
+        left = Round(left.value());
+    }
+    if (right.has_value()) {
+        right = Round(right.value());
+    }
+    if (top.has_value()) {
+        top = Round(top.value());
+    }
+    if (bottom.has_value()) {
+        bottom = Round(bottom.value());
+    }
 
     return BorderWidthPropertyF { left, top, right, bottom };
 }
@@ -316,6 +341,47 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
     return idealSize;
 }
 
+OptionalSizeF UpdateOptionSizeByCalcLayoutConstraint(const OptionalSize<float>& frameSize,
+    const std::unique_ptr<MeasureProperty>& calcLayoutConstraint, const SizeT<float> percentReference)
+{
+    OptionalSizeF finalSize(frameSize.Width(), frameSize.Height());
+    if (!calcLayoutConstraint) {
+        return finalSize;
+    } else {
+        UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(
+            finalSize, calcLayoutConstraint->maxSize, percentReference, true);
+        UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(
+            finalSize, calcLayoutConstraint->minSize, percentReference, false);
+    }
+    return finalSize;
+}
+
+void UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
+    const std::optional<CalcSize>& calcLayoutConstraintMaxMinSize, const SizeT<float> percentReference, bool IsMaxSize)
+{
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    if (!calcLayoutConstraintMaxMinSize.has_value()) {
+        return;
+    }
+    if (calcLayoutConstraintMaxMinSize->Width().has_value()) {
+        auto maxWidthPx = ConvertToPx(calcLayoutConstraintMaxMinSize->Width(), scaleProperty, percentReference.Width());
+        if (IsMaxSize) {
+            frameSize.SetWidth(std::min(maxWidthPx.value(), frameSize.Width().value_or(maxWidthPx.value())));
+        } else {
+            frameSize.SetWidth(std::max(maxWidthPx.value(), frameSize.Width().value_or(maxWidthPx.value())));
+        }
+    }
+    if (calcLayoutConstraintMaxMinSize->Height().has_value()) {
+        auto maxHeightPx =
+            ConvertToPx(calcLayoutConstraintMaxMinSize->Height(), scaleProperty, percentReference.Height());
+        if (IsMaxSize) {
+            frameSize.SetHeight(std::min(maxHeightPx.value(), frameSize.Height().value_or(maxHeightPx.value())));
+        } else {
+            frameSize.SetHeight(std::max(maxHeightPx.value(), frameSize.Height().value_or(maxHeightPx.value())));
+        }
+    }
+}
+
 OptionalSizeF CreateIdealSizeByPercentRef(
     const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain)
 {
@@ -383,5 +449,45 @@ void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding)
 
     size.SetHeight(size.Height() - height);
     size.SetWidth(size.Width() - width);
+}
+
+PaddingProperty ConvertToCalcPaddingProperty(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
+{
+    PaddingProperty paddings;
+    if (top.has_value()) {
+        if (top.value().Unit() == DimensionUnit::CALC) {
+            paddings.top =
+                NG::CalcLength(top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : CalcDimension());
+        }
+    }
+    if (bottom.has_value()) {
+        if (bottom.value().Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(
+                bottom.value().IsNonNegative() ? bottom.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
+        }
+    }
+    if (left.has_value()) {
+        if (left.value().Unit() == DimensionUnit::CALC) {
+            paddings.left =
+                NG::CalcLength(left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
+        }
+    }
+    if (right.has_value()) {
+        if (right.value().Unit() == DimensionUnit::CALC) {
+            paddings.right =
+                NG::CalcLength(right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
+        }
+    }
+    return paddings;
 }
 } // namespace OHOS::Ace::NG

@@ -15,29 +15,15 @@
 
 #include "core/image/image_cache.h"
 
-#include <dirent.h>
-#include <fstream>
-#include <sys/stat.h>
 
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace {
-
-std::shared_mutex ImageCache::cacheFilePathMutex_;
-std::string ImageCache::cacheFilePath_;
-
-std::atomic<size_t> ImageCache::fileLimit_ = 100 * 1024 * 1024; // the capacity is 100MB
-
-std::atomic<float> ImageCache::clearCacheFileRatio_ = 0.5f; // default clear ratio is 0.5
-
-bool ImageCache::hasSetCacheFileInfo_ = false;
-
-std::mutex ImageCache::cacheFileSizeMutex_;
-int64_t ImageCache::cacheFileSize_ = 0;
-
-std::mutex ImageCache::cacheFileInfoMutex_;
-std::list<FileInfo> ImageCache::cacheFileInfo_;
+RefPtr<ImageCache> ImageCache::Create()
+{
+    return MakeRefPtr<ImageCache>();
+}
 
 // TODO: Create a real ImageCache later
 #ifdef FLUTTER_2_5
@@ -88,24 +74,6 @@ T ImageCache::GetCacheObjWithCountLimitLRU(const std::string& key, std::list<Cac
         return iter->second->cacheObj;
     }
     return nullptr;
-}
-
-bool ImageCache::GetFromCacheFile(const std::string& filePath)
-{
-    std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
-    return GetFromCacheFileInner(filePath);
-}
-
-bool ImageCache::GetFromCacheFileInner(const std::string& filePath)
-{
-    auto iter = std::find_if(cacheFileInfo_.begin(), cacheFileInfo_.end(),
-        [&filePath](const FileInfo& fileInfo) { return fileInfo.filePath == filePath; });
-    if (iter == cacheFileInfo_.end()) {
-        return false;
-    }
-    iter->accessTime = time(nullptr);
-    cacheFileInfo_.splice(cacheFileInfo_.end(), cacheFileInfo_, iter);
-    return true;
 }
 
 void ImageCache::CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image)
@@ -212,68 +180,6 @@ RefPtr<NG::ImageData> ImageCache::GetCacheImageData(const std::string& key)
     return nullptr;
 }
 
-void ImageCache::WriteCacheFile(const std::string& url, const void* const data, size_t size, const std::string& suffix)
-{
-    if (size > fileLimit_) {
-        LOGW("file size is %{public}d, greater than limit %{public}d, cannot cache", static_cast<int32_t>(size),
-            static_cast<int32_t>(fileLimit_));
-        return;
-    }
-    std::vector<std::string> removeVector;
-    std::string cacheNetworkFilePath = GetImageCacheFilePath(url) + suffix;
-
-    std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
-    // 1. first check if file has been cached.
-    if (ImageCache::GetFromCacheFileInner(cacheNetworkFilePath)) {
-        LOGI("file has been wrote %{private}s", cacheNetworkFilePath.c_str());
-        return;
-    }
-
-    // 2. if not in dist, write file into disk.
-#ifdef WINDOWS_PLATFORM
-    std::ofstream outFile(cacheNetworkFilePath, std::ios::binary);
-#else
-    std::ofstream outFile(cacheNetworkFilePath, std::fstream::out);
-#endif
-    if (!outFile.is_open()) {
-        LOGW("open cache file failed, cannot write.");
-        return;
-    }
-    outFile.write(reinterpret_cast<const char*>(data), size);
-    LOGI("write image cache: %{public}s %{private}s", url.c_str(), cacheNetworkFilePath.c_str());
-
-    cacheFileSize_ += size;
-    cacheFileInfo_.emplace_back(cacheNetworkFilePath, size, time(nullptr));
-    // check if cache files too big.
-    if (cacheFileSize_ > static_cast<int32_t>(fileLimit_)) {
-        auto removeCount = static_cast<int32_t>(cacheFileInfo_.size() * clearCacheFileRatio_);
-        int32_t removeSize = 0;
-        auto iter = cacheFileInfo_.begin();
-        int32_t count = 0;
-        while (count < removeCount) {
-            removeSize += static_cast<int32_t>(iter->fileSize);
-            removeVector.push_back(iter->filePath);
-            ++iter;
-            ++count;
-        }
-        cacheFileInfo_.erase(cacheFileInfo_.begin(), iter);
-        cacheFileSize_ -= static_cast<int32_t>(removeSize);
-    }
-    // 3. clear files removed from cache list.
-    ClearCacheFile(removeVector);
-}
-
-void ImageCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
-{
-    LOGD("begin to clear %{public}zu files: ", removeFiles.size());
-    for (auto&& iter : removeFiles) {
-        if (remove(iter.c_str()) != 0) {
-            LOGW("remove file %{private}s failed.", iter.c_str());
-            continue;
-        }
-    }
-}
-
 void ImageCache::ClearCacheImage(const std::string& key)
 {
     {
@@ -293,40 +199,6 @@ void ImageCache::ClearCacheImage(const std::string& key)
             imageDataCache_.erase(iter);
         }
     }
-}
-
-void ImageCache::SetCacheFileInfo()
-{
-    std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
-    // Set cache file information only once.
-    if (hasSetCacheFileInfo_) {
-        return;
-    }
-    std::string cacheFilePath = GetImageCacheFilePath();
-    std::unique_ptr<DIR, decltype(&closedir)> dir(opendir(cacheFilePath.c_str()), closedir);
-    if (dir == nullptr) {
-        LOGW("cache file path wrong! maybe it is not set.");
-        return;
-    }
-    int64_t cacheFileSize = 0;
-    dirent* filePtr = readdir(dir.get());
-    while (filePtr != nullptr) {
-        // skip . or ..
-        if (filePtr->d_name[0] != '.') {
-            std::string filePath = cacheFilePath + "/" + std::string(filePtr->d_name);
-            struct stat fileStatus;
-            if (stat(filePath.c_str(), &fileStatus) == -1) {
-                filePtr = readdir(dir.get());
-                continue;
-            }
-            cacheFileInfo_.emplace_back(filePath, fileStatus.st_size, fileStatus.st_atime);
-            cacheFileSize += static_cast<int64_t>(fileStatus.st_size);
-        }
-        filePtr = readdir(dir.get());
-    }
-    cacheFileInfo_.sort();
-    cacheFileSize_ = cacheFileSize;
-    hasSetCacheFileInfo_ = true;
 }
 
 void ImageCache::Clear()

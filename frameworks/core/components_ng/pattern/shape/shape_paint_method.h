@@ -36,23 +36,27 @@ public:
 
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
     {
-        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
-        CHECK_NULL_RETURN_NOLOG(shapeOverlayModifier_, nullptr);
+        CHECK_NULL_RETURN(paintWrapper, nullptr);
+        CHECK_NULL_RETURN(shapeOverlayModifier_, nullptr);
         auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        CHECK_NULL_RETURN_NOLOG(shapePaintProperty, nullptr);
+        CHECK_NULL_RETURN(shapePaintProperty, nullptr);
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, nullptr);
 
         auto offset = paintWrapper->GetContentOffset();
         float width = paintWrapper->GetContentSize().Width();
         float height = paintWrapper->GetContentSize().Height();
-        float deltaWidth = shapePaintProperty->HasStrokeWidth() ?
-            ShapeOverlayModifier::SHAPE_OVERLAY_SIZE_FACTOR * shapePaintProperty->GetStrokeWidthValue().ConvertToPx() :
-            ShapeOverlayModifier::SHAPE_OVERLAY_SIZE_DEFAULT;
-
-        auto rect = RectF(offset.GetX() - deltaWidth,
-                          offset.GetY() - deltaWidth,
-                          width + deltaWidth * 2,
-                          height + deltaWidth * 2);
-
+        float deltaWidth = shapePaintProperty->HasStrokeWidth()
+                               ? ShapeOverlayModifier::SHAPE_OVERLAY_SIZE_FACTOR *
+                                     shapePaintProperty->GetStrokeWidthValue().ConvertToPx()
+                               : ShapeOverlayModifier::SHAPE_OVERLAY_SIZE_DEFAULT;
+        auto scale = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
+        RectF rect { 0.0f, 0.0f, 0.0f, 0.0f };
+        static const double diff = 1e-10;
+        if (!NearZero(scale.x, diff) && !NearZero(scale.y, diff)) {
+            rect = { offset.GetX() - deltaWidth, offset.GetY() - deltaWidth, (width + deltaWidth * 2) / scale.x,
+                (height + deltaWidth * 2) / scale.y };
+        }
         shapeOverlayModifier_->SetBoundsRect(rect);
         return shapeOverlayModifier_;
     }

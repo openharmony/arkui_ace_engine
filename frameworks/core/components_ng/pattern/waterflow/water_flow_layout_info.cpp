@@ -179,6 +179,14 @@ void WaterFlowLayoutInfo::Reset()
     waterFlowItems_.clear();
 }
 
+void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
+{
+    if (resetFrom >= endIndex_) {
+        return;
+    }
+    Reset();
+}
+
 int32_t WaterFlowLayoutInfo::GetCrossCount() const
 {
     return static_cast<int32_t>(waterFlowItems_.size());

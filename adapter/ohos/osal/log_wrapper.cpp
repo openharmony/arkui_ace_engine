@@ -16,6 +16,8 @@
 #include "base/log/log_wrapper.h"
 
 #include <cstring>
+#include <map>
+#include <unordered_map>
 
 #include "hilog/log.h"
 
@@ -39,10 +41,19 @@ const ::LogLevel LOG_LEVELS[] = {
     LOG_FATAL,
 };
 
-const char* LOG_TAGS[] = {
-    "Ace",
-    "JSApp",
+const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
+    { AceLogTag::DEFAULT, "Ace" },
+    { AceLogTag::ACE_SUB_WINDOW, "AceSubWindow" },
+    { AceLogTag::ACE_FORM, "AceForm" },
+    { AceLogTag::ACE_DRAG, "AceDrag" },
+    { AceLogTag::ACE_VIDEO, "AceVideo" },
+    { AceLogTag::ACE_FONT, "AceFont" },
+    { AceLogTag::ACE_TEXTINPUT, "AceTextInput" },
+    { AceLogTag::ACE_SWIPER, "AceSwiper" },
+    { AceLogTag::ACE_TABS, "AceTabs" },
 };
+
+const char* APP_DOMAIN_CONTENT = "JSApp";
 
 constexpr uint32_t LOG_DOMAINS[] = {
     0xD003900,
@@ -64,16 +75,18 @@ char LogWrapper::GetSeparatorCharacter()
     return '/';
 }
 
-void LogWrapper::PrintLog(LogDomain domain, LogLevel level, const char* fmt, va_list args)
+void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args)
 {
+    uint32_t hilogDomain = LOG_DOMAINS[static_cast<uint32_t>(domain)] + static_cast<uint32_t>(tag);
+    const char* domainContent = domain == LogDomain::FRAMEWORK ? DOMAIN_CONTENTS_MAP.at(tag) : APP_DOMAIN_CONTENT;
 #ifdef ACE_PRIVATE_LOG
     std::string newFmt(fmt);
     ReplaceFormatString("{private}", "{public}", newFmt);
     HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
-        LOG_DOMAINS[static_cast<uint32_t>(domain)], LOG_TAGS[static_cast<uint32_t>(domain)], newFmt.c_str(), args);
+        hilogDomain, domainContent, newFmt.c_str(), args);
 #else
     HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
-        LOG_DOMAINS[static_cast<uint32_t>(domain)], LOG_TAGS[static_cast<uint32_t>(domain)], fmt, args);
+        hilogDomain, domainContent, fmt, args);
 #endif
 }
 

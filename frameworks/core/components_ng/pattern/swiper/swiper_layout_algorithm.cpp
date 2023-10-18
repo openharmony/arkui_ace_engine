@@ -149,7 +149,6 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
-        LOGI("child size is empty");
     }
 
     auto crossSize = contentIdealSize.CrossSize(axis);
@@ -158,6 +157,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                 ? contentCrossSize_
                                 : GetChildMaxSize(layoutWrapper, axis, false);
         contentIdealSize.SetCrossSize(contentCrossSize_, axis);
+        crossMatchChild_ = true;
     }
 
     if (!mainSizeIsDefined_ && isSingleCase) {
@@ -180,9 +180,6 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // set swiper cache info.
     layoutWrapper->SetCacheCount(swiperLayoutProperty->GetCachedCount().value_or(1), childLayoutConstraint);
     layoutWrapper->SetLongPredictTask();
-
-    LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f, mainSize is %{public}f",
-        GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
 
     // Measure swiper indicator
     if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
@@ -276,8 +273,6 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
     }
     layoutWrapper->RemoveAllChildInRenderTree();
     if (jumpIndex_) {
-        LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
-            jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         startPos = (jumpIndex_.value() == 0) && Negative(startMainPos_) ? startMainPos_ : 0;
         LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startPos);
         auto prevMarginMontage = Positive(prevMargin_) ? prevMargin_ + spaceWidth_ : 0.0f;
@@ -306,12 +301,12 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             targetIsSameWithStartFlag_ = true;
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
             if (Positive(prevMargin_)) {
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
+                float startPosition =
+                    itemPosition_.empty() ? 0.0f : itemPosition_.begin()->second.startPos - spaceWidth_;
+                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, startPosition);
             }
         }
     } else {
-        LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
-            startIndex, currentOffset_, startMainPos_, endMainPos_);
         bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_);
         if ((!overScrollFeature_ && NonNegative(currentOffset_)) || (overScrollFeature_ && overScrollTop)) {
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
@@ -439,17 +434,13 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             ((swiperLayoutProperty->GetDisplayCount().has_value() &&
                  swiperLayoutProperty->GetDisplayCountValue() == 1) ||
                 (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
-        if (isSingleCase && jumpIndex_) {
-            if (!mainSizeIsDefined_) {
-                endMainPos = startPos + itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-                endMainPos_ = endMainPos;
-            }
+        if (isSingleCase && !mainSizeIsDefined_) {
+            endMainPos = startPos + itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+            endMainPos_ = endMainPos;
         }
         if ((currentIndex >= 0 && currentIndex < (totalItemCount_ - 1)) || isLoop_) {
             currentEndPos += spaceWidth_;
         }
-        LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
-            currentStartPos, currentEndPos);
         // reach the valid target index
         if (targetIndex_ && GreatOrEqual(currentIndex, targetIndex_.value())) {
             if (!targetIsSameWithStartFlag_) {
@@ -468,7 +459,6 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
     } while (LessNotEqual(currentEndPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos));
 
     if (overScrollFeature_ && canOverScroll_) {
-        LOGD("during over scroll, just return in LayoutForward");
         return;
     }
 
@@ -482,7 +472,6 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             startMainPos_ = currentOffset_;
             if (!mainSizeIsDefined_) {
                 // adapt child size.
-                LOGD("LayoutForward: adapt child total size");
                 contentMainSize_ = itemTotalSize;
             }
         } else {
@@ -491,7 +480,6 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
                 auto prevMarginMontage = Positive(prevMargin_) ? prevMargin_ + spaceWidth_ : 0.0f;
                 auto nextMarginMontage = Positive(nextMargin_) ? nextMargin_ + spaceWidth_ : 0.0f;
                 currentOffset_ = currentEndPos - contentMainSize_ + prevMarginMontage + nextMarginMontage;
-                LOGD("LayoutForward: adjust offset to %{public}f", currentOffset_);
             }
             startMainPos_ = currentEndPos - contentMainSize_;
             endMainPos_ = currentEndPos;
@@ -504,6 +492,9 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
                 pos->second.endPos, prevMargin_ != 0.0f ? startMainPos_ - prevMargin_ - spaceWidth_ : startMainPos_)) {
             break;
         }
+
+        ResetOffscreenItemPosition(layoutWrapper, GetLoopIndex(pos->first), true, axis);
+
         layoutWrapper->RemoveChildInRenderTree(GetLoopIndex(pos->first));
         itemPosition_.erase(pos++);
     }
@@ -557,8 +548,6 @@ void SwiperLayoutAlgorithm::LayoutBackward(
         if (currentIndex > 0 || isLoop_) {
             currentStartPos = currentStartPos - spaceWidth_;
         }
-        LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
-            currentStartPos, currentEndPos);
         // reach the valid target index
         if (targetIndex_ && LessOrEqual(currentIndex, targetIndex_.value())) {
             startMainPos = currentStartPos;
@@ -585,7 +574,6 @@ void SwiperLayoutAlgorithm::LayoutBackward(
     }
 
     if (overScrollFeature_) {
-        LOGD("during over scroll, just return in LayoutBackward");
         return;
     }
 
@@ -596,6 +584,9 @@ void SwiperLayoutAlgorithm::LayoutBackward(
                 pos->second.startPos, nextMargin_ != 0.0f ? endMainPos_ + nextMargin_ + spaceWidth_ : endMainPos_)) {
             break;
         }
+
+        ResetOffscreenItemPosition(layoutWrapper, GetLoopIndex(pos->first), false, axis);
+
         layoutWrapper->RemoveChildInRenderTree(GetLoopIndex(pos->first));
         removeIndexes.emplace_back(pos->first);
     }
@@ -620,7 +611,6 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto offset = paddingOffset;
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetLoopIndex(index));
         if (!wrapper) {
-            LOGI("wrapper is out of boundary");
             continue;
         }
         if (wrapper->GetHostTag() == V2::SWIPER_INDICATOR_ETS_TAG ||
@@ -703,9 +693,9 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
     }
 
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+    CHECK_NULL_VOID(swiperIndicatorTheme);
     if (LessNotEqual(indicatorHeight, swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx())) {
         indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
     }
@@ -775,9 +765,9 @@ void SwiperLayoutAlgorithm::MeasureArrow(
     CHECK_NULL_VOID(arrowGeometryNode);
 
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+    CHECK_NULL_VOID(swiperIndicatorTheme);
 
     arrowGeometryNode->SetFrameSize(
         SizeF { static_cast<float>(
@@ -913,6 +903,29 @@ void SwiperLayoutAlgorithm::ArrowLayout(
     }
     arrowGeometryNode->SetMarginFrameOffset(arrowOffset);
     arrowWrapper->Layout();
+}
+
+void SwiperLayoutAlgorithm::ResetOffscreenItemPosition(
+    LayoutWrapper* layoutWrapper, int32_t index, bool isForward, Axis axis) const
+{
+    auto swiperGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(swiperGeometryNode);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(childWrapper);
+    auto childGeometryNode = childWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(childGeometryNode);
+    auto swiperFrameRect = swiperGeometryNode->GetFrameRect();
+    auto childFrameRect = childGeometryNode->GetFrameRect();
+
+    OffsetF offset(0.0f, 0.0f);
+    if (axis == Axis::HORIZONTAL) {
+        offset.SetX(isForward ? -childFrameRect.Width() : swiperFrameRect.Width());
+    } else {
+        offset.SetY(isForward ? -childFrameRect.Height() : swiperFrameRect.Height());
+    }
+
+    childGeometryNode->SetMarginFrameOffset(offset);
+    childWrapper->Layout();
 }
 
 } // namespace OHOS::Ace::NG

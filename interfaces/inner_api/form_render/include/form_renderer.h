@@ -23,10 +23,12 @@
 #include "js_runtime.h"
 #include "runtime.h"
 #include "ui_content.h"
+#include "event_handler.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 class Configuration;
+class EventHandler;
 }
 namespace Ace {
 /**
@@ -35,7 +37,8 @@ namespace Ace {
 class FormRenderer : public std::enable_shared_from_this<FormRenderer> {
 public:
     FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
-        const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
+        const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime,
+        std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler);
     ~FormRenderer() = default;
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
@@ -56,17 +59,19 @@ public:
     void AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
 private:
-    void InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void ParseWant(const OHOS::AAFwk::Want& want);
     void SetRenderDelegate(const sptr<IRemoteObject>& renderRemoteObj);
-    void AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
     bool allowUpdate_ = true;
     float width_ = 0.0f;
     float height_ = 0.0f;
+    std::string backgroundColor_;
     std::vector<std::string> cachedInfos_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
+    std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     sptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
     sptr<IFormRendererDelegate> formRendererDelegate_;
     std::shared_ptr<UIContent> uiContent_;

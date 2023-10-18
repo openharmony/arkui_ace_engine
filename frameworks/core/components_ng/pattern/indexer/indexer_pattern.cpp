@@ -81,7 +81,6 @@ void IndexerPattern::OnModifyDone()
     if (propSelect != lastSelectProp_) {
         selected_ = propSelect;
         lastSelectProp_ = propSelect;
-        selectChanged_ = true;
         ResetStatus();
     }
     auto itemSize =
@@ -89,8 +88,7 @@ void IndexerPattern::OnModifyDone()
     auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
     lastItemSize_ = itemSize;
     auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
-    ApplyIndexChanged(needMarkDirty,
-        initialized_ && selectChanged_, false, indexerSizeChanged);
+    ApplyIndexChanged(needMarkDirty, false, false, indexerSizeChanged);
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
         InitPanEvent(gesture);
@@ -144,7 +142,7 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto onActionUpdate = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
             if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
                 pattern->MoveIndexByStep(-1);
@@ -427,8 +425,6 @@ void IndexerPattern::OnSelect(bool changed)
 void IndexerPattern::ApplyIndexChanged(
     bool isTextNodeInTree, bool selectChanged, bool fromTouchUp, bool indexerSizeChanged)
 {
-    initialized_ = true;
-    selectChanged_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
@@ -933,7 +929,7 @@ void IndexerPattern::InitOnKeyEvent()
     CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     isKeyEventRegisted_ = true;
@@ -1250,6 +1246,7 @@ void IndexerPattern::RemoveBubble()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemoveIndexerPopupById(host->GetId());
+    popupNode_ = nullptr;
 }
 
 bool IndexerPattern::IsMeasureBoundary() const

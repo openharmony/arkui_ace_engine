@@ -149,13 +149,21 @@ template("declarative_js_engine_ark") {
     }
 
     include_dirs += [ "${ace_root}/interfaces/inner_api/ace" ]
-    deps = [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]
 
-    if (platform == "ohos_ng") {
+    deps = []
+    if (!is_cross_platform_build) {
+      deps +=
+          [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]
+    }
+
+    if (platform == "ohos_ng" || is_cross_platform_build) {
       sources += [
         "jsi_animator_model_ng_build_impl.cpp",
         "jsi_view_register_impl_ng.cpp",
       ]
+      if (is_cross_platform_build) {
+        defines += [ "CROSS_PLATFORM" ]
+      }
     } else {
       sources += [
         "jsi_animator_model_ng_impl.cpp",
@@ -175,12 +183,7 @@ template("declarative_js_engine_ark") {
       external_deps += [
         "ets_runtime:libark_jsruntime",
         "napi:ace_napi",
-        "napi:ace_napi_ark",
       ]
-    }
-
-    if (is_cross_platform_build) {
-      deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
     }
 
     if (defined(config.build_for_preview) && config.build_for_preview) {
@@ -188,7 +191,7 @@ template("declarative_js_engine_ark") {
       sources += [ "utils/jsi_module_searcher.cpp" ]
     } else if (defined(config.use_build_in_js_engine) &&
                config.use_build_in_js_engine) {
-      if (platform == "ohos_ng") {
+      if (platform == "ohos_ng" || is_cross_platform_build) {
         sources += [
           "$ace_root/frameworks/bridge/js_frontend/engine/common/js_api_perf.cpp",
           "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp",

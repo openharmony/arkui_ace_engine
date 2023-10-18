@@ -403,7 +403,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest009, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     buttonPattern->AnimateTouchAndHover(context, 0.0f, HOVER_OPACITY, TOUCH_DURATION, Curves::FRICTION);
     buttonPattern->AnimateTouchAndHover(context, HOVER_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION);
-    EXPECT_EQ(buttonPattern->isOn_, false);
+    EXPECT_TRUE(buttonPattern->isOn_);
 }
 
 /**

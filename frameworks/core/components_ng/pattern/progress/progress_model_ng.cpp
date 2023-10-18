@@ -42,6 +42,9 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        return;
+    }
     RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
     auto progressFocusNode = frameNode->GetFocusHub();
     CHECK_NULL_VOID(progressFocusNode);

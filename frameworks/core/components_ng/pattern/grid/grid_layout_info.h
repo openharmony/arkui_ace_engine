@@ -139,6 +139,8 @@ struct GridLayoutInfo {
     // Grid has GridItem whose columnEnd - columnStart > 0
     bool hasBigItem_;
 
+    bool offsetUpdated_ = false;
+
 private:
     int32_t GetItemIndexByPosition(int32_t position);
     int32_t GetPositionByItemIndex(int32_t itemIndex);

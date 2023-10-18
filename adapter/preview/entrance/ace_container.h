@@ -71,7 +71,7 @@ public:
         int32_t height, UIEnvCallback callback);
 #endif
 
-    static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params);
+    static bool RunPage(int32_t instanceId, const std::string& url, const std::string& params);
     static RefPtr<AceContainer> GetContainerInstance(int32_t instanceId);
     static void AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback);
     static void NativeOnConfigurationUpdated(int32_t instanceId);
@@ -220,7 +220,7 @@ public:
         pageProfile_ = pageProfile;
     }
 
-    void InitializeStageAppConfig(const std::string& assetPath, const std::string& bundleName,
+    void InitializeAppConfig(const std::string& assetPath, const std::string& bundleName,
         const std::string& moduleName, const std::string& compileMode);
 
     void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) override
@@ -286,9 +286,28 @@ public:
 
     void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange) override;
 
+    // Support to execute the ets code mocked by developer
+    void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo)
+    {
+        mockJsonInfo_ = mockJsonInfo;
+    }
+
+    void SetBundleName(const std::string& bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+
+    void SetModuleName(const std::string& moduleName)
+    {
+        moduleName_ = moduleName;
+    }
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
+    void SetHspBufferTrackerCallback();
+    // Support to execute the ets code mocked by developer
+    void SetMockModuleListToJsEngine();
 
 #ifndef ENABLE_ROSEN_BACKEND
     void AttachView(
@@ -317,6 +336,11 @@ private:
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
     void* sharedRuntime_ = nullptr;
+    std::string bundleName_;
+    std::string moduleName_;
+
+    // Support to execute the ets code mocked by developer
+    std::map<std::string, std::string> mockJsonInfo_;
 
     // app bar to use
     bool installationFree_ = false;

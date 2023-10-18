@@ -46,7 +46,6 @@ public:
 
     void AddTaskObserver(Task&& callback) override;
     void RemoveTaskObserver() override;
-    void Destory() override;
     bool WillRunOnCurrentThread(TaskType type) const final;
 
     int32_t GetTid(TaskType type) final
@@ -60,7 +59,7 @@ public:
     }
 
 private:
-    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const final;
+    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& callerInfo) const final;
     Task WrapTaskWithTraceId(Task&& task, int32_t id) const final;
 
 #ifdef ACE_DEBUG

@@ -46,14 +46,14 @@ RefPtr<GeometryNode> FocusHub::GetGeometryNode() const
 std::optional<std::string> FocusHub::GetInspectorKey() const
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN_NOLOG(frameNode, std::nullopt);
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
     return frameNode->GetInspectorId();
 }
 
 RefPtr<FocusHub> FocusHub::GetParentFocusHub() const
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN_NOLOG(frameNode, nullptr);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto parentNode = frameNode->GetFocusParent();
     return parentNode ? parentNode->GetFocusHub() : nullptr;
 }
@@ -292,7 +292,7 @@ void FocusHub::SetFocusable(bool focusable)
         return;
     }
     focusable_ = focusable;
-    RefreshParentFocusable(IsFocusable());
+    RefreshParentFocusable(IsFocusableNode());
     RefreshFocus();
     MarkRootFocusNeedUpdate();
 }
@@ -454,7 +454,7 @@ void FocusHub::SetIsDefaultFocus(bool isDefaultFocus)
     CHECK_NULL_VOID(mainFocusHub);
 
     auto defaultFocusNode = mainFocusHub->GetChildFocusNodeByType();
-    CHECK_NULL_VOID_NOLOG(defaultFocusNode);
+    CHECK_NULL_VOID(defaultFocusNode);
     mainFocusHub->SetDefaultFocusNode(AceType::WeakClaim(AceType::RawPtr(defaultFocusNode)));
 }
 void FocusHub::SetIsDefaultGroupFocus(bool isDefaultGroupFocus)
@@ -725,7 +725,7 @@ bool FocusHub::OnClick(const KeyEvent& event)
         auto info = GestureEvent();
         info.SetTimeStamp(event.timeStamp);
         auto geometryNode = GetGeometryNode();
-        CHECK_NULL_RETURN_NOLOG(geometryNode, false);
+        CHECK_NULL_RETURN(geometryNode, false);
         auto rect = geometryNode->GetFrameRect();
         info.SetGlobalLocation(Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
         info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
@@ -925,7 +925,7 @@ void FocusHub::OnBlur()
 
 void FocusHub::OnFocusNode()
 {
-    LOGD("FocusHub: Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
+    LOGI("FocusHub: Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
     if (onFocusInternal_) {
         onFocusInternal_();
     }
@@ -940,18 +940,18 @@ void FocusHub::OnFocusNode()
     HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
     PaintFocusState();
     auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID_NOLOG(frameNode);
+    CHECK_NULL_VOID(frameNode);
     frameNode->OnAccessibilityEvent(AccessibilityEventType::FOCUS);
 }
 
 void FocusHub::OnBlurNode()
 {
-    LOGD("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
+    LOGI("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
     if (onBlurInternal_) {
         onBlurInternal_();
     }
     if (onBlurReasonInternal_) {
-        LOGI("FocusHub: Node(%{public}s/%{public}d) 's blur reason is %{public}d", GetFrameName().c_str(), GetFrameId(),
+        LOGD("FocusHub: Node(%{public}s/%{public}d) 's blur reason is %{public}d", GetFrameName().c_str(), GetFrameId(),
             blurReason_);
         onBlurReasonInternal_(blurReason_);
     }
@@ -973,6 +973,13 @@ void FocusHub::CheckFocusStateStyle(bool onFocus)
     } else {
         eventHub->ResetCurrentUIState(UI_STATE_FOCUSED);
     }
+}
+
+bool FocusHub::HasFocusStateStyle()
+{
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_RETURN(eventHub, false);
+    return eventHub->HasStateStyle(UI_STATE_FOCUSED);
 }
 
 void FocusHub::OnFocusScope()
@@ -1020,16 +1027,23 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
-    if (isNeedStateStyles && context->GetIsFocusActive()) {
-        // check focus state style.
-        CheckFocusStateStyle(true);
-    }
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     if (!context->GetIsFocusActive() || !IsNeedPaintFocusState()) {
         return false;
+    }
+
+    bool stateStylesResult = false;
+    if (isNeedStateStyles) {
+        // do focus state style.
+        CheckFocusStateStyle(true);
+        stateStylesResult = true;
+    }
+
+    if (focusStyleType_ == FocusStyleType::NONE) {
+        return stateStylesResult;
     }
 
     if (focusStyleType_ == FocusStyleType::CUSTOM_REGION) {
@@ -1163,7 +1177,7 @@ void FocusHub::ClearAllFocusState()
 
 bool FocusHub::IsNeedPaintFocusState()
 {
-    if (focusType_ == FocusType::DISABLE || focusStyleType_ == FocusStyleType::NONE) {
+    if (focusType_ == FocusType::DISABLE || (focusStyleType_ == FocusStyleType::NONE && !HasFocusStateStyle())) {
         return false;
     }
     if (focusType_ == FocusType::NODE) {
@@ -1337,7 +1351,7 @@ bool FocusHub::IsFocusableByTab()
 bool FocusHub::IsFocusableNodeByTab()
 {
     auto parent = GetParentFocusHub();
-    CHECK_NULL_RETURN_NOLOG(parent, GetTabIndex() == 0);
+    CHECK_NULL_RETURN(parent, GetTabIndex() == 0);
     return (GetTabIndex() == 0) && (parent->GetTabIndex() == 0);
 }
 
@@ -1539,6 +1553,9 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHu
     TabIndexNodeList tabIndexNodes;
     tabIndexNodes.clear();
     mainFocusHub->CollectTabIndexNodes(tabIndexNodes);
+    if (tabIndexNodes.empty()) {
+        return false;
+    }
     tabIndexNodes.sort([](std::pair<int32_t, WeakPtr<FocusHub>>& a, std::pair<int32_t, WeakPtr<FocusHub>>& b) {
         return a.first < b.first;
     });
@@ -1571,30 +1588,30 @@ double FocusHub::GetProjectAreaOnRect(const RectF& rect, const RectF& projectRec
     float areaHeight = 0.0;
     switch (step) {
         case FocusStep::UP:
-            if (rect.Top() < projectRect.Top() && rect.Right() > projectRect.Left() &&
+            if (rect.Top() < projectRect.Bottom() && rect.Right() > projectRect.Left() &&
                 rect.Left() < projectRect.Right()) {
                 areaWidth = std::min(rect.Right(), projectRect.Right()) - std::max(rect.Left(), projectRect.Left());
-                areaHeight = std::min(rect.Bottom(), projectRect.Top()) - rect.Top();
+                areaHeight = std::min(rect.Bottom(), projectRect.Bottom()) - rect.Top();
             }
             break;
         case FocusStep::DOWN:
-            if (rect.Bottom() > projectRect.Bottom() && rect.Right() > projectRect.Left() &&
+            if (rect.Bottom() > projectRect.Top() && rect.Right() > projectRect.Left() &&
                 rect.Left() < projectRect.Right()) {
                 areaWidth = std::min(rect.Right(), projectRect.Right()) - std::max(rect.Left(), projectRect.Left());
-                areaHeight = rect.Bottom() - std::max(rect.Top(), projectRect.Bottom());
+                areaHeight = rect.Bottom() - std::max(rect.Top(), projectRect.Top());
             }
             break;
         case FocusStep::LEFT:
-            if (rect.Left() < projectRect.Left() && rect.Bottom() > projectRect.Top() &&
+            if (rect.Left() < projectRect.Right() && rect.Bottom() > projectRect.Top() &&
                 rect.Top() < projectRect.Bottom()) {
-                areaWidth = std::min(rect.Right(), projectRect.Left()) - rect.Left();
+                areaWidth = std::min(rect.Right(), projectRect.Right()) - rect.Left();
                 areaHeight = std::min(rect.Bottom(), projectRect.Bottom()) - std::max(rect.Top(), projectRect.Top());
             }
             break;
         case FocusStep::RIGHT:
-            if (rect.Right() > projectRect.Right() && rect.Bottom() > projectRect.Top() &&
+            if (rect.Right() > projectRect.Left() && rect.Bottom() > projectRect.Top() &&
                 rect.Top() < projectRect.Bottom()) {
-                areaWidth = rect.Right() - std::max(rect.Left(), projectRect.Right());
+                areaWidth = rect.Right() - std::max(rect.Left(), projectRect.Left());
                 areaHeight = std::min(rect.Bottom(), projectRect.Bottom()) - std::max(rect.Top(), projectRect.Top());
             }
             break;
@@ -1646,6 +1663,10 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
         if (Positive(projectArea)) {
             OffsetF vec = frameRect.Center() - curFrameRect.Center();
             double val = (vec.GetX() * vec.GetX()) + (vec.GetY() * vec.GetY());
+            if ((step == FocusStep::TAB && Positive(vec.GetX())) ||
+                (step == FocusStep::SHIFT_TAB && Negative(vec.GetX()))) {
+                val *= -1.0;
+            }
             if ((!isTabStep && val < resDistance) || (isTabStep && val > resDistance)) {
                 resDistance = val;
                 nextNode = node;

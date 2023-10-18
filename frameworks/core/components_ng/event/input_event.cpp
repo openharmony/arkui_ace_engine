@@ -41,13 +41,15 @@ void InputEventActuator::OnCollectMouseEvent(
     auto onMouseCallback = [weak = WeakClaim(this)](MouseInfo& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        for (const auto& callback : actuator->inputEvents_) {
+        auto innerEvents = actuator->inputEvents_;
+        for (const auto& callback : innerEvents) {
             if (callback) {
                 (*callback)(info);
             }
         }
-        if (actuator->userCallback_) {
-            (*actuator->userCallback_)(info);
+        auto userEvent = actuator->userCallback_;
+        if (userEvent) {
+            (*userEvent)(info);
         }
     };
     mouseEventTarget_->SetCallback(onMouseCallback);
@@ -66,13 +68,16 @@ void InputEventActuator::OnCollectHoverEvent(
     auto onHoverCallback = [weak = WeakClaim(this)](bool info, HoverInfo& hoverInfo) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        for (const auto& callback : actuator->inputEvents_) {
+        auto innerEvents = actuator->inputEvents_;
+        for (const auto& callback : innerEvents) {
             if (callback) {
                 (*callback)(info);
+                (*callback)(info, hoverInfo);
             }
         }
-        if (actuator->userCallback_) {
-            (*actuator->userCallback_)(info, hoverInfo);
+        auto userEvent = actuator->userCallback_;
+        if (userEvent) {
+            (*userEvent)(info, hoverInfo);
         }
     };
     hoverEventTarget_->SetCallback(onHoverCallback);
@@ -110,13 +115,15 @@ void InputEventActuator::OnCollectAxisEvent(
     auto onAxisCallback = [weak = WeakClaim(this)](AxisInfo& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        for (const auto& callback : actuator->inputEvents_) {
+        auto innerEvents = actuator->inputEvents_;
+        for (const auto& callback : innerEvents) {
             if (callback) {
                 (*callback)(info);
             }
         }
-        if (actuator->userCallback_) {
-            (*actuator->userCallback_)(info);
+        auto userEvent = actuator->userCallback_;
+        if (userEvent) {
+            (*userEvent)(info);
         }
     };
     axisEventTarget_->SetOnAxisCallback(onAxisCallback);

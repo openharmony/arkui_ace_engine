@@ -56,9 +56,9 @@ void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+    CHECK_NULL_VOID(swiperIndicatorTheme);
 
     if (LessNotEqual(indicatorHeight, swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx())) {
         indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
@@ -78,7 +78,6 @@ void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto children = frameNode->GetChildren();
     if (children.empty()) {
-        LOGW("text has no child node.");
         return;
     }
     auto textWrapperList = layoutWrapper->GetAllChildrenWithBuild();

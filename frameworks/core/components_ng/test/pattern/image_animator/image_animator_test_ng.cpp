@@ -881,4 +881,141 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest011, TestSize.Level1)
     EXPECT_EQ(idealSize->Width().value(), CalcLength(100));
     EXPECT_EQ(idealSize->Height().value(), CalcLength(DEVICE_HEIGHT));
 }
+
+/**
+ * @tc.name: ImageAnimatorTest012
+ * @tc.desc: Set duration and check duration is correct assign
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageAnimator
+     * @tc.expected: pipeline and animator is not nullptr
+     */
+    CreateImageAnimator(0);
+    auto pipeline = MockPipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto animator = pattern_->animator_;
+    ASSERT_NE(animator, nullptr);
+    /**
+     * @tc.steps: step2. set is form render and set duration
+     * @tc.expected: check duration is correct assign
+     */
+    pipeline->SetIsFormRender(true);
+    pattern_->SetDuration(1500);
+    EXPECT_EQ(animator->GetDuration(), DURATION_DEFAULT);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest013
+ * @tc.desc: Set iteration and check iteration is correct assign
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageAnimator
+     * @tc.expected: pipeline and animator is not nullptr
+     */
+    CreateImageAnimator(0);
+    auto pipeline = MockPipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto animator = pattern_->animator_;
+    ASSERT_NE(animator, nullptr);
+    /**
+     * @tc.steps: step2. set is form render and iteration
+     * @tc.expected: check iteration is correct assign
+     */
+    pipeline->SetIsFormRender(true);
+    pattern_->SetIteration(5);
+    EXPECT_EQ(animator->GetIteration(), ITERATION_DEFAULT);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest014
+ * @tc.desc: Update duration By Remainder and check duration is correct assign
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageAnimator
+     * @tc.expected: pipeline and animator is not nullptr
+     */
+    CreateImageAnimator(0);
+    auto pipeline = MockPipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto animator = pattern_->animator_;
+    ASSERT_NE(animator, nullptr);
+    /**
+     * @tc.steps: step2. set is form render and set duration
+     * @tc.expected: check duration is correct assign
+     */
+    pipeline->SetIsFormRender(true);
+    pattern_->SetDuration(DURATION_DEFAULT);
+    pattern_->UpdateFormDurationByRemainder();
+    EXPECT_EQ(animator->GetDuration(), DURATION_DEFAULT);
+    /**
+     * @tc.steps: step3. reset form animation start time and duration
+     * @tc.expected: check duration is correct assign
+     */
+    pattern_->ResetFormAnimationStartTime();
+    EXPECT_TRUE(!pattern_->isFormAnimationStart_);
+    pattern_->UpdateFormDurationByRemainder();
+    EXPECT_EQ(animator->GetDuration(), pattern_->formAnimationRemainder_);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest015
+ * @tc.desc: Reset remainder and check remainder is correct assign
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageAnimator
+     * @tc.expected: pipeline and animator is not nullptr
+     */
+    CreateImageAnimator(0);
+    auto pipeline = MockPipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto animator = pattern_->animator_;
+    ASSERT_NE(animator, nullptr);
+    /**
+     * @tc.steps: step2. set is form render and reset remainder
+     * @tc.expected: check remainder is correct assign
+     */
+    pipeline->SetIsFormRender(true);
+    pattern_->ResetFormAnimationFlag();
+    EXPECT_EQ(pattern_->formAnimationRemainder_, DURATION_DEFAULT);
+    EXPECT_TRUE(pattern_->isFormAnimationStart_);
+    EXPECT_TRUE(!pattern_->isFormAnimationEnd_);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest016
+ * @tc.desc: get whether is form render and value is correct
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageAnimator
+     * @tc.expected: pipeline and animator is not nullptr
+     */
+    CreateImageAnimator(0);
+    auto pipeline = MockPipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto animator = pattern_->animator_;
+    ASSERT_NE(animator, nullptr);
+    /**
+     * @tc.steps: step2. set whether is form render
+     * @tc.expected: check get form render value is correct
+     */
+    pipeline->SetIsFormRender(false);
+    EXPECT_EQ(pattern_->IsFormRender(), false);
+    pipeline->SetIsFormRender(true);
+    EXPECT_EQ(pattern_->IsFormRender(), true);
+}
 } // namespace OHOS::Ace::NG

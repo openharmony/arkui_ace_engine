@@ -23,8 +23,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t PREVIEW_IMAGE_INDEX = 0;
-constexpr int32_t CONTROLLER_ROW_INDEX = 1;
+constexpr int32_t PREVIEW_IMAGE_INDEX = 1;
+constexpr int32_t CONTROLLER_ROW_INDEX = 2;
+constexpr int32_t MEDIA_COLUMN_INDEX = 0;
 } // namespace
 
 class ACE_EXPORT VideoNode : public FrameNode {
@@ -46,6 +47,11 @@ public:
         return previewImageId_.has_value();
     }
 
+    bool HasMediaColumnNode() const
+    {
+        return mediaColumnId_.has_value();
+    }
+
     int32_t GetControllerRowId()
     {
         if (!controllerRowId_.has_value()) {
@@ -62,6 +68,14 @@ public:
         return previewImageId_.value();
     }
 
+    int32_t GetMediaColumnId()
+    {
+        if (!mediaColumnId_.has_value()) {
+            mediaColumnId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return mediaColumnId_.value();
+    }
+
     // Get the preview image node, please check null first.
     RefPtr<UINode> GetPreviewImage()
     {
@@ -76,11 +90,18 @@ public:
         return GetChildAtIndex(CONTROLLER_ROW_INDEX);
     }
 
+    RefPtr<UINode> GetMediaColumn()
+    {
+        return GetChildAtIndex(MEDIA_COLUMN_INDEX);
+    }
+
     static RefPtr<VideoNode> GetOrCreateVideoNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+
 private:
     std::optional<int32_t> previewImageId_;
     std::optional<int32_t> controllerRowId_;
+    std::optional<int32_t> mediaColumnId_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_NODE_H

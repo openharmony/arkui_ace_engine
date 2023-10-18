@@ -37,6 +37,7 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "js_native_api_types.h"
 
+#include "base/image/file_uri_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/udmf/unified_data.h"
 namespace OHOS::Ace {
@@ -51,14 +52,14 @@ RefPtr<UnifiedData> UdmfClientImpl::CreateUnifiedData()
     return AceType::DynamicCast<UnifiedData>(AceType::MakeRefPtr<UnifiedDataImpl>());
 }
 
-RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(NativeValue* nativeValue)
+RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(napi_value napiValue)
 {
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, nullptr);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     void* native = nullptr;
-    napi_unwrap(env, reinterpret_cast<napi_value>(nativeValue), &native);
+    napi_unwrap(env, napiValue, &native);
     auto* unifiedData = reinterpret_cast<UDMF::UnifiedDataNapi*>(native);
     CHECK_NULL_RETURN(unifiedData, nullptr);
     CHECK_NULL_RETURN(unifiedData->value_, nullptr);
@@ -67,7 +68,7 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(NativeValue* nativeValu
     return udData;
 }
 
-NativeValue* UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData)
+napi_value UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData)
 {
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, nullptr);
@@ -78,10 +79,10 @@ NativeValue* UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& Unifi
     napi_value dataVal = nullptr;
     UDMF::UnifiedDataNapi::NewInstance(env, unifiedData, dataVal);
     CHECK_NULL_RETURN(dataVal, nullptr);
-    return reinterpret_cast<NativeValue*>(dataVal);
+    return dataVal;
 }
 
-NativeValue* UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summary)
+napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summary)
 {
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, nullptr);
@@ -97,7 +98,7 @@ NativeValue* UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& su
     napi_value dataVal = nullptr;
     UDMF::SummaryNapi::NewInstance(env, udmfSummary, dataVal);
     CHECK_NULL_RETURN(dataVal, nullptr);
-    return reinterpret_cast<NativeValue*>(dataVal);
+    return dataVal;
 }
 
 int32_t UdmfClientImpl::SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key)
@@ -229,10 +230,16 @@ void UdmfClientImpl::GetHtmlRecord(
     }
 }
 
-void UdmfClientImpl::AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data)
+void UdmfClientImpl::AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data,
+    PixelMapRecordDetails& details)
 {
     auto record = std::make_shared<UDMF::SystemDefinedPixelMap>(data);
-
+    UDMF::UDDetails uDetails = {
+        { "width", details.width },
+        { "height", details.height },
+        { "pixel-format", static_cast<int32_t>(details.pixelFormat) },
+        { "alpha-type", static_cast<int32_t>(details.alphaType) } };
+    record->SetDetails(uDetails);
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_VOID(udData);
     CHECK_NULL_VOID(udData->GetUnifiedData());
@@ -271,6 +278,44 @@ std::string UdmfClientImpl::GetSinglePlainTextRecord(const RefPtr<UnifiedData>& 
         str = plainText->GetContent();
     }
     return str;
+}
+
+bool UdmfClientImpl::AddFileUriRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_RETURN(udData, false);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), false);
+
+    for (std::string u : uri) {
+        LOGI("DragDrop event AddFileUriRecord, uri:%{public}s", u.c_str());
+        auto record = std::make_shared<UDMF::Image>(u);
+        udData->GetUnifiedData()->AddRecord(record);
+    }
+
+    return true;
+}
+
+bool UdmfClientImpl::GetFileUriRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_RETURN(udData, false);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), false);
+    auto records = udData->GetUnifiedData()->GetRecords();
+
+    for (auto record : records) {
+        UDMF::UDType type = record->GetType();
+        if (type == UDMF::UDType::IMAGE ||
+            type == UDMF::UDType::FILE) {
+            UDMF::File* file = reinterpret_cast<UDMF::File*>(record.get());
+            if (file) {
+                uri.emplace_back(file->GetUri());
+                LOGI("DragDrop event GetFileUri, uri:%{public}s", file->GetUri().c_str());
+            } else {
+                LOGE("DragDrop event GetFileUri file is null");
+            }
+        }
+    }
+    return true;
 }
 
 std::vector<std::string> UdmfClientImpl::GetPlainTextRecords(const RefPtr<UnifiedData>& unifiedData)

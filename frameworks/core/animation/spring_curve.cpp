@@ -14,6 +14,7 @@
  */
 
 #include "core/animation/spring_curve.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -25,6 +26,8 @@ constexpr float DEFAULT_END_POSITION = 1.0f;
 constexpr int32_t DEFAULT_ESTIMATE_STEPS = 100;
 constexpr float FRACTION_PARAMETER_MAX = 1.0f;
 constexpr float FRACTION_PARAMETER_MIN = 0.0f;
+constexpr float MAX_ESTIMATE_DURATION = 1000.0f;
+constexpr float HALF = 0.5f;
 
 } // namespace
 
@@ -43,7 +46,11 @@ void SpringCurve::SetEndPosition(float endPosition, float startVelocity)
     currentVelocity_ = startVelocity;
     currentPosition_ = startPosition_;
     velocityThreshold_ = valueThreshold_ * VELOCITY_THRESHOLD_RATIO;
-    solution_ = SpringModel::Build(startPosition_ - endPosition_, startVelocity, property_);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        solution_ = SpringModel::Build(endPosition_, startVelocity, property_);
+    } else {
+        solution_ = SpringModel::Build(startPosition_ - endPosition_, startVelocity, property_);
+    }
     if (!solution_) {
         LOGW("Create springCurve error, %{public}s", ToString().c_str());
         return;
@@ -53,17 +60,35 @@ void SpringCurve::SetEndPosition(float endPosition, float startVelocity)
 
 void SpringCurve::InitEstimateDuration()
 {
-    float position = 0.0f;
     float velocity = 0.0f;
     float time = 1.0f / DEFAULT_ESTIMATE_STEPS;
-    for (int32_t i = 1; i < DEFAULT_ESTIMATE_STEPS; ++i) {
-        position = endPosition_ + solution_->Position(time * i);
-        velocity = solution_->Velocity(time * i);
-        if (NearEqual(position, endPosition_, valueThreshold_) && NearZero(velocity, velocityThreshold_)) {
-            estimateDuration_ = time * i;
-            break;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        float position = 0.0f;
+        for (int32_t i = 1; i < DEFAULT_ESTIMATE_STEPS; ++i) {
+            position = endPosition_ - solution_->Position(time * i);
+            velocity = solution_->Velocity(time * i);
+            if (NearEqual(position, endPosition_, valueThreshold_) && NearZero(velocity, velocityThreshold_)) {
+                estimateDuration_ = time * i;
+                break;
+            }
+        }
+        return;
+    }
+    // Binary search to estimate duration
+    float minDuration = 0.0f;
+    float maxDuration = MAX_ESTIMATE_DURATION;
+    float positionChange = 0.0f;
+    while (maxDuration - minDuration >= time) {
+        auto duration = (minDuration + maxDuration) * HALF;
+        positionChange = solution_->Position(duration);
+        velocity = solution_->Velocity(duration);
+        if (NearZero(positionChange, valueThreshold_) && NearZero(velocity, velocityThreshold_)) {
+            maxDuration = duration;
+        } else {
+            minDuration = duration;
         }
     }
+    estimateDuration_ = maxDuration;
 }
 
 float SpringCurve::MoveInternal(float time)
@@ -73,7 +98,11 @@ float SpringCurve::MoveInternal(float time)
         return FRACTION_PARAMETER_MAX;
     }
     CHECK_NULL_RETURN(solution_, endPosition_);
-    currentPosition_ = endPosition_ + solution_->Position(time * estimateDuration_);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        currentPosition_ = endPosition_ - solution_->Position(time * estimateDuration_);
+    } else {
+        currentPosition_ = endPosition_ + solution_->Position(time * estimateDuration_);
+    }
     currentVelocity_ = solution_->Velocity(time * estimateDuration_);
     if (NearEqual(currentPosition_, endPosition_, valueThreshold_) &&
         NearZero(currentVelocity_, velocityThreshold_)) {

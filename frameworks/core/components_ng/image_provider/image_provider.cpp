@@ -38,7 +38,7 @@
 #else
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
-#include "core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -237,7 +237,7 @@ void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadin
     std::scoped_lock<std::mutex> lock(taskMtx_);
     LOGD("try cancel bgTask %{public}s", key.c_str());
     auto it = tasks_.find(key);
-    CHECK_NULL_VOID_NOLOG(it != tasks_.end());
+    CHECK_NULL_VOID(it != tasks_.end());
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());
     // only one LoadingContext waiting for this task, can just cancel
     if (it->second.ctxs_.size() == 1) {

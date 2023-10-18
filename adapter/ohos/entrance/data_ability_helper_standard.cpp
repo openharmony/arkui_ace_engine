@@ -52,7 +52,7 @@ void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::str
 
 int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std::string& mode)
 {
-    LOGD("DataAbilityHelperStandard::OpenFile start uri: %{private}s, mode: %{private}s", uriStr.c_str(), mode.c_str());
+    LOGD("DataAbilityHelperStandard OpenFile start uri: %{private}s, mode: %{private}s", uriStr.c_str(), mode.c_str());
     // FA model always uses DataAbility
     if (!useStageModel_ || StringUtils::StartWith(uriStr, "dataability://")) {
         return OpenFileWithDataAbility(uriStr, mode);
@@ -60,7 +60,7 @@ int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std
     if (StringUtils::StartWith(uriStr, "datashare://") || StringUtils::StartWith(uriStr, "file://")) {
         return OpenFileWithDataShare(uriStr, mode);
     }
-    LOGE("DataAbilityHelperStandard::OpenFile uri is not support.");
+    LOGE("DataAbilityHelperStandard OpenFile uri is not support.");
     return -1;
 }
 

@@ -45,7 +45,7 @@ public:
 
     bool ParseCondition(std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) const
     {
-        CHECK_NULL_RETURN_NOLOG(parser_, false);
+        CHECK_NULL_RETURN(parser_, false);
         if (matchResults.size() != matchResultSize_) {
             failReason = MediaError::SYNTAX;
             return false;

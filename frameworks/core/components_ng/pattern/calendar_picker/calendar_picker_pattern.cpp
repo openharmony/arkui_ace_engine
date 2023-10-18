@@ -356,7 +356,7 @@ void CalendarPickerPattern::InitOnKeyEvent()
 
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(std::move(blurTask));
@@ -860,12 +860,10 @@ OffsetF CalendarPickerPattern::CalculateDialogOffset()
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
 
-    if (!IsContainerModal() && hostTop + (DIALOG_HEIGHT).ConvertToPx() > windowGlobalRect.Height()) {
+    if (!IsContainerModal() && hostTop + (DIALOG_HEIGHT).ConvertToPx() > pipelineContext->GetRootHeight()) {
         y = std::max(static_cast<float>(hostTop - (DIALOG_HEIGHT).ConvertToPx()), 0.0f);
     } else {
         y = hostBottom + (theme->GetDialogMargin()).ConvertToPx();
@@ -873,11 +871,12 @@ OffsetF CalendarPickerPattern::CalculateDialogOffset()
 
     CalendarEdgeAlign align = layoutProperty->GetDialogAlignType().value_or(CalendarEdgeAlign::EDGE_ALIGN_END);
     if (align == CalendarEdgeAlign::EDGE_ALIGN_START) {
-        x = std::min(hostRect.Left(), static_cast<float>(windowGlobalRect.Width() - (DIALOG_WIDTH).ConvertToPx()));
+        x = std::min(
+            hostRect.Left(), static_cast<float>(pipelineContext->GetRootWidth() - (DIALOG_WIDTH).ConvertToPx()));
     } else if (align == CalendarEdgeAlign::EDGE_ALIGN_CENTER) {
         auto hostCenterX = (hostRect.Left() + hostRect.Right()) / 2;
         x = std::max(0.0f, static_cast<float>(hostCenterX - (DIALOG_WIDTH).ConvertToPx() / 2));
-        x = std::min(x, static_cast<float>(windowGlobalRect.Width() - (DIALOG_WIDTH).ConvertToPx()));
+        x = std::min(x, static_cast<float>(pipelineContext->GetRootWidth() - (DIALOG_WIDTH).ConvertToPx()));
     } else {
         x = std::max(0.0f, static_cast<float>(hostRect.Right() - (DIALOG_WIDTH).ConvertToPx()));
     }

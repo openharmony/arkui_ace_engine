@@ -88,7 +88,7 @@ public:
     shared_ptr<JsValue> NewNativePointer(void* ptr) override;
     void ThrowError(const std::string& msg, int32_t code) override;
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override;
-    void HandleUncaughtException(
+    void HandleUncaughtException(panda::TryCatch& tryCatch,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     bool HasPendingException() override;
     void ExecutePendingJob() override;

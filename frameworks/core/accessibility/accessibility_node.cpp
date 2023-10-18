@@ -464,7 +464,7 @@ void AccessibilityNode::SetFocusChangeEventMarker(const EventMarker& eventId)
 
 void AccessibilityNode::OnFocusChange(bool isFocus)
 {
-    CHECK_NULL_VOID_NOLOG(focusChangeEventId_);
+    CHECK_NULL_VOID(focusChangeEventId_);
     auto json = JsonUtil::Create(true);
     json->Put("eventType", isFocused_ ? "1" : "2");
     focusChangeEventId_(json->ToString());

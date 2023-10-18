@@ -70,10 +70,14 @@ void CustomNodeBase::FireRecycleSelf()
             q.push(child);
         }
     }
-    needRebuild_ = true;
 
     if (recycleCustomNodeFunc_) {
         recycleCustomNodeFunc_(AceType::Claim<CustomNodeBase>(this));
     }
+}
+
+void CustomNodeBase::SetOnDumpInfoFunc(std::function<void(const std::vector<std::string>&)>&& func)
+{
+    onDumpInfoFunc_ = func;
 }
 } // namespace OHOS::Ace::NG

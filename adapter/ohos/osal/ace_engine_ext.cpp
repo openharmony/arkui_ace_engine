@@ -18,6 +18,7 @@
 #include <dlfcn.h>
 
 #include "base/log/log.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -35,11 +36,11 @@ void CallDragExtFunc()
     CHECK_NULL_VOID(handle);
     auto dragFunc = reinterpret_cast<DragExtFunc>(dlsym(handle, "StartDragService"));
     if (dragFunc == nullptr) {
-        LOGE("Failed to get drag extension func");
+        TAG_LOGE(AceLogTag::ACE_DRAG, "Failed to get drag extension func");
         dlclose(handle);
         return;
     }
-    LOGI("Call drag extension func");
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Call drag extension func");
     dragFunc();
     dlclose(handle);
 }

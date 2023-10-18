@@ -107,7 +107,7 @@ bool DOMChart::SetSpecializedAttr(const std::pair<std::string, std::string>& att
                 } else if (val == DOM_CHART_TYPE_LOADING) {
                     chart.chartType_ = ChartType::LOADING;
                 } else {
-                    LOGI("chart type error %{public}s, now using loading", val.c_str());
+                    LOGD("chart type error %{public}s, now using loading", val.c_str());
                     chart.chartType_ = ChartType::LINE;
                 }
             } },
@@ -250,7 +250,6 @@ void DOMChart::SetChart(MainChart& chartDataset)
 
     auto points = chartDataset.GetData();
     if (points.empty()) {
-        LOGD("points is empty, chart has no data to set.");
         return;
     }
 
@@ -359,7 +358,6 @@ void DOMChart::PrepareSpecializedComponent()
         }
         dataPanelChild_->SetAutoScale(autoScale_);
         if (segments_.empty()) {
-            LOGI("progress chart hasn't set segment");
             return;
         }
         auto progressDataPanel = AceType::DynamicCast<ProgressDataPanelComponent>(dataPanelChild_);
@@ -388,7 +386,6 @@ void DOMChart::PrepareSpecializedComponent()
         percentageDataPanel->SetSweepDegree(totalAngle_.second ? totalAngle_.first : 360.0);
         percentageDataPanel->ClearSegment();
         if (segments_.empty()) {
-            LOGI("progress chart hasn't set segment");
             return;
         }
         for (const auto& segment : segments_) {
@@ -412,27 +409,24 @@ void DOMChart::CallSpecializedMethod(const std::string& method, const std::strin
     }
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
     if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != METHOD_APPEND_ARGS_SIZE) {
-        LOGE("parse args error");
         return;
     }
 
     std::unique_ptr<JsonValue> serialValue = argsValue->GetArrayItem(0)->GetValue("serial");
     if (!serialValue || !serialValue->IsNumber()) {
-        LOGE("get serial failed");
         return;
     }
     seriesNum_ = serialValue->GetInt();
 
     std::unique_ptr<JsonValue> dataValue = argsValue->GetArrayItem(0)->GetValue("data");
     if (!dataValue || !dataValue->IsArray()) {
-        LOGE("get data failed");
         return;
     }
     int32_t arraySize = dataValue->GetArraySize();
     auto chartDatas = chartChild_->GetMainCharts();
 
     if (seriesNum_ < 0 || (static_cast<size_t>(seriesNum_) >= chartDatas.size())) {
-        LOGE("series number is greater or equal to the size of chart");
+        LOGW("series number is greater or equal to the size of chart");
         return;
     }
 
@@ -450,7 +444,6 @@ void DOMChart::CallSpecializedMethod(const std::string& method, const std::strin
     for (int32_t i = 0; i < arraySize; i++) {
         std::unique_ptr<JsonValue> coorVal = dataValue->GetArrayItem(i);
         if (!coorVal || !coorVal->IsNumber()) {
-            LOGE("get coorVal failed");
             return;
         }
         int32_t coorY = coorVal->GetInt();
@@ -470,7 +463,6 @@ void DOMChart::CallSpecializedMethod(const std::string& method, const std::strin
     node->MarkNeedUpdate();
     auto pipelineContext = pipelineContext_.Upgrade();
     if (!pipelineContext) {
-        LOGE("pipelineContext_ is nullptr");
         return;
     }
     pipelineContext->ScheduleUpdate(node);

@@ -343,12 +343,12 @@ inline FlexAlign ConvertStringToItemAlign(const std::string& str)
     inline std::string ConvertWrapTextAlignToString(TextAlign textAlign)
     {
         static const LinearEnumMapNode<TextAlign, std::string> textAlignTable[] = {
+            { TextAlign::START, "TextAlign.Start" },
+            { TextAlign::CENTER, "TextAlign.Center" },
+            { TextAlign::END, "TextAlign.End" },
+            { TextAlign::JUSTIFY, "TextAlign.Justify" },
             { TextAlign::LEFT, "TextAlign.Left" },
             { TextAlign::RIGHT, "TextAlign.Right" },
-            { TextAlign::CENTER, "TextAlign.Center" },
-            { TextAlign::JUSTIFY, "TextAlign.Justify" },
-            { TextAlign::START, "TextAlign.Start" },
-            { TextAlign::END, "TextAlign.End" },
         };
 
         auto index = BinarySearchFindIndex(textAlignTable, ArraySize(textAlignTable), textAlign);
@@ -464,6 +464,18 @@ inline FontWeight ConvertWrapStringToFontWeight(const std::string& str)
         return index < 0 ? "CopyOptions::None" : copyOptionsTable[index].value;
     }
 
+    inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
+    {
+        static const LinearEnumMapNode<WordBreak, std::string> wordBreakTable[] = {
+            { WordBreak::NORMAL, "normal" },
+            { WordBreak::BREAK_ALL, "break-all" },
+            { WordBreak::BREAK_WORD, "break-word" },
+        };
+
+        auto index = BinarySearchFindIndex(wordBreakTable, ArraySize(wordBreakTable), wordBreak);
+        return index < 0 ? "break-word" : wordBreakTable[index].value;
+    }
+
     inline std::string ConvertColorToString(Color color)
     {
         return color.ColorToString();
@@ -497,6 +509,7 @@ inline FontWeight ConvertWrapStringToFontWeight(const std::string& str)
 
     inline std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
     {
+        CHECK_NULL_RETURN(!fontFamily.empty(), "");
         std::string result;
         for (const auto& item : fontFamily) {
             result += item;

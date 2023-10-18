@@ -44,15 +44,27 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     }
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    selectOverlayItem_ = selectOverlayNode;
 
     auto taskExecutor = Container::CurrentTaskExecutor();
     taskExecutor->PostTask(
         [weakRoot = rootNodeWeak_, weakNode = AceType::WeakClaim(AceType::RawPtr(selectOverlayNode)), animation,
-        isUsingMouse = infoPtr->isUsingMouse] {
-            auto rootNode = weakRoot.Upgrade();
-            CHECK_NULL_VOID(rootNode);
+            isUsingMouse = infoPtr->isUsingMouse, weak = WeakClaim(this), weakCaller = infoPtr->callerFrameNode] {
+            auto selectOverlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(selectOverlayManager);
             auto selectOverlayNode = weakNode.Upgrade();
             CHECK_NULL_VOID(selectOverlayNode);
+            if (weakNode != selectOverlayManager->GetSelectOverlayItem()) {
+                LOGD("current selectOverlayItem not is %{public}d", selectOverlayNode->GetId());
+                return;
+            }
+            auto rootNode = weakRoot.Upgrade();
+            auto container = Container::Current();
+            if (container && container->IsScenceBoardWindow()) {
+                auto root = selectOverlayManager->FindWindowScene(weakCaller.Upgrade());
+                rootNode = DynamicCast<FrameNode>(root);
+            }
+            CHECK_NULL_VOID(rootNode);
 
             // get keyboard index to put selet_overlay before keyboard node
             int32_t slot = DEFAULT_NODE_SLOT;
@@ -76,8 +88,29 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
         TaskExecutor::TaskType::UI);
 
     auto proxy = MakeRefPtr<SelectOverlayProxy>(selectOverlayNode->GetId());
-    selectOverlayItem_ = selectOverlayNode;
     return proxy;
+}
+
+// This function will be used in SceneBoard Thread only.
+// if need to show the select-overlay component,
+//   it expects to receive the target component bound by the select-overlay component to find the windowScene component.
+// if need to hide the select-overlay component,
+//   it expects to receive the the select-overlay component to return the parent component.
+//   And the parent component will be the windowScene component exactly.
+RefPtr<UINode> SelectOverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
+{
+    auto container = Container::Current();
+    if (!container || !container->IsScenceBoardWindow()) {
+        return rootNodeWeak_.Upgrade();
+    }
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto parent = targetNode->GetParent();
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, nullptr);
+    LOGI("FindWindowScene success");
+    return parent;
 }
 
 void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy, bool animation)
@@ -133,7 +166,7 @@ void SelectOverlayManager::DestroyHelper(const RefPtr<FrameNode>& overlay, bool 
 
 void SelectOverlayManager::Destroy(const RefPtr<FrameNode>& overlay)
 {
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = overlay->GetParent();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(overlay);
     rootNode->MarkNeedSyncRenderTree();
@@ -143,7 +176,7 @@ void SelectOverlayManager::Destroy(const RefPtr<FrameNode>& overlay)
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
 {
     auto current = selectOverlayItem_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(current, false);
+    CHECK_NULL_RETURN(current, false);
     return current->GetId() == overlayId;
 }
 
@@ -154,7 +187,7 @@ bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
         return true;
     }
     auto current = selectOverlayItem_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(current, false);
+    CHECK_NULL_RETURN(current, false);
     auto selectOverlayNode = DynamicCast<SelectOverlayNode>(current);
     if (selectOverlayNode) {
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
@@ -199,7 +232,7 @@ bool SelectOverlayManager::IsSameSelectOverlayInfo(const SelectOverlayInfo& info
 
 void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset)
 {
-    CHECK_NULL_VOID_NOLOG(!selectOverlayItem_.Invalid());
+    CHECK_NULL_VOID(!selectOverlayItem_.Invalid());
     NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     // handle global touch event.
     if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::TOUCH) {

@@ -19,7 +19,7 @@
 
 #include "base/image/pixel_map.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
-#include "frameworks/core/image/flutter_image_cache.h"
+#include "frameworks/core/image/sk_image_cache.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
 #endif
@@ -133,7 +133,7 @@ RefPtr<CanvasImage> DrawingImage::QueryFromCache(const std::string& key)
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
     auto cacheImage = cache->GetCacheImage(key);
-    CHECK_NULL_RETURN_NOLOG(cacheImage, nullptr);
+    CHECK_NULL_RETURN(cacheImage, nullptr);
     LOGD("rsImage found in cache: %{public}s", key.c_str());
 
     auto rosenImage = MakeRefPtr<DrawingImage>(cacheImage->imagePtr);

@@ -78,11 +78,13 @@ public:
     void UpdateOnDisappear(std::function<void()>&& onDisappear)
     {
         onDisappear_ = std::move(onDisappear);
+        isExecuteOnDisappear_ = false;
     }
 
     void OnDisappear()
     {
         if (onDisappear_) {
+            isExecuteOnDisappear_ = true;
             onDisappear_();
         }
     }
@@ -108,6 +110,11 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    bool IsExecuteOnDisappear() const
+    {
+        return isExecuteOnDisappear_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -123,6 +130,7 @@ private:
     float height_ = 0.0f;
     float heightBoundary_ = 0.0f;
     float pageHeight_ = 0.0f;
+    bool isExecuteOnDisappear_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 };

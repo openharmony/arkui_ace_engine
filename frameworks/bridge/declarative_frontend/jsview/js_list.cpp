@@ -58,6 +58,10 @@ namespace OHOS::Ace::Framework {
 const std::vector<V2::ScrollSnapAlign> SCROLL_SNAP_ALIGN = { V2::ScrollSnapAlign::NONE, V2::ScrollSnapAlign::START,
     V2::ScrollSnapAlign::CENTER, V2::ScrollSnapAlign::END };
 
+namespace {
+    const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
+}
+
 void JSList::SetDirection(int32_t direction)
 {
     ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
@@ -270,9 +274,12 @@ void JSList::SetDivider(const JSCallbackInfo& args)
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     V2::ItemDivider divider;
-    if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+
+    bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
+        !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
+    if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
         LOGW("Invalid strokeWidth of divider");
-        divider.strokeWidth.Reset();
+        divider.strokeWidth = 0.0_vp;
     }
     if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
         // Failed to get color from param, using default color defined in theme
@@ -281,8 +288,19 @@ void JSList::SetDivider(const JSCallbackInfo& args)
             divider.color = listTheme->GetDividerColor();
         }
     }
-    ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
-    ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
+
+    needReset = obj->GetProperty("startMargin")->IsString() &&
+        !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
+    if (needReset || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)) {
+        divider.startMargin = 0.0_vp;
+    }
+
+    needReset = obj->GetProperty("endMargin")->IsString() &&
+        !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
+    if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)) {
+        divider.endMargin = 0.0_vp;
+    }
+
     ListModel::GetInstance()->SetDivider(divider);
 
     args.ReturnSelf();

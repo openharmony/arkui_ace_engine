@@ -131,8 +131,9 @@ bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const 
 #else
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
     bool ret = JSNApi::ExecuteModuleBuffer(vm_, data, size, filename, needUpdate);
-    HandleUncaughtException();
+    HandleUncaughtException(trycatch);
     return ret;
 #endif
 }
@@ -146,8 +147,9 @@ bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
     bool ret = JSNApi::Execute(vm_, buffer, size, PANDA_MAIN_FUNCTION, filePath, needUpdate);
-    HandleUncaughtException();
+    HandleUncaughtException(trycatch);
     return ret;
 }
 
@@ -156,8 +158,9 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName,
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
     bool ret = JSNApi::Execute(vm_, fileName, PANDA_MAIN_FUNCTION);
-    HandleUncaughtException(errorCallback);
+    HandleUncaughtException(trycatch, errorCallback);
     return ret;
 }
 
@@ -271,7 +274,7 @@ bool ArkJSRuntime::HasPendingException()
     return JSNApi::HasPendingException(vm_);
 }
 
-void ArkJSRuntime::HandleUncaughtException(
+void ArkJSRuntime::HandleUncaughtException(panda::TryCatch& trycatch,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     if (uncaughtErrorHandler_ == nullptr) {
@@ -279,7 +282,7 @@ void ArkJSRuntime::HandleUncaughtException(
         return;
     }
 
-    Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm_);
+    Local<ObjectRef> exception = trycatch.GetAndClearException();
     if (!exception.IsEmpty() && !exception->IsHole() && errorCallback != nullptr) {
         errorCallback("loading js file has crash or the uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
     }

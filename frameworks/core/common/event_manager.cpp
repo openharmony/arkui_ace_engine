@@ -96,7 +96,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         NG::NGGestureRecognizer::ResetGlobalTransCfg();
     }
     // For root node, the parent local point is the same as global point.
-    frameNode->TouchTest(point, point, touchRestrict, hitTestResult, touchPoint.id);
+    frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id);
     if (needAppend) {
 #ifdef OHOS_STANDARD_SYSTEM
         for (const auto& entry : hitTestResult) {
@@ -129,7 +129,7 @@ void EventManager::TouchTest(
     }
     // For root node, the parent local point is the same as global point.
     TouchTestResult hitTestResult;
-    frameNode->TouchTest(point, point, touchRestrict, hitTestResult, event.id);
+    frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
 }
 
@@ -141,11 +141,11 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     auto coordinateOffset = textOverlayManager->GetCoordinateOffset();
     const Point point { touchPoint.x - coordinateOffset.GetX(), touchPoint.y - coordinateOffset.GetY(),
         touchPoint.sourceType };
-    CHECK_NULL_VOID_NOLOG(textOverlayManager);
+    CHECK_NULL_VOID(textOverlayManager);
     auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
-    CHECK_NULL_VOID_NOLOG(textOverlayBase);
+    CHECK_NULL_VOID(textOverlayBase);
     auto targetNode = textOverlayManager->GetTargetNode();
-    CHECK_NULL_VOID_NOLOG(targetNode);
+    CHECK_NULL_VOID(targetNode);
     for (auto& rect : textOverlayManager->GetTextOverlayRect()) {
         if (rect.IsInRegion(point)) {
             inSelectedRect_ = true;
@@ -168,7 +168,7 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
 void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
     const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
-    CHECK_NULL_VOID_NOLOG(selectOverlayManager);
+    CHECK_NULL_VOID(selectOverlayManager);
     if (touchPoint.type == TouchType::DOWN &&
         touchTestResults_.find(touchPoint.id) != touchTestResults_.end()) {
         std::vector<std::string> touchTestIds;
@@ -265,10 +265,12 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (point.type == TouchType::PULL_MOVE) {
-        point.type = TouchType::MOVE;
+    if (isDragging_ && point.type == TouchType::PULL_MOVE) {
+        isDragging_ = false;
+        point.type = TouchType::CANCEL;
     }
-    if (point.type == TouchType::PULL_UP) {
+    if (point.type == TouchType::PULL_UP || point.type == TouchType::UP) {
+        isDragging_ = false;
         point.type = TouchType::UP;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -577,7 +579,7 @@ void EventManager::MouseTest(
         std::vector<NG::RectF> rect;
         frameNode->CheckSecurityComponentStatus(rect);
     }
-    frameNode->TouchTest(point, point, touchRestrict, testResult, event.GetId());
+    frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetId());
     if (testResult.empty()) {
         LOGD("mouse hover test result is empty");
     }
@@ -1123,7 +1125,12 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
         std::vector<std::vector<KeyCode>> keyCodes;
         std::vector<uint8_t> permutation;
         AddKeyboardShortcutKeys(keyboardShortcut.keys, keyCodes, permutation);
-        if (event.ConvertInputCodeToString().find(keyboardShortcut.value) == std::string::npos) {
+        // FunctionKey
+        if (event.IsFunctionKey() || event.IsEscapeKey()) {
+            if (event.ConvertInputCodeToString() != keyboardShortcut.value) {
+                continue;
+            }
+        } else if (event.ConvertInputCodeToString().find(keyboardShortcut.value) == std::string::npos) {
             continue;
         }
         // Handle left and right the keys problem.

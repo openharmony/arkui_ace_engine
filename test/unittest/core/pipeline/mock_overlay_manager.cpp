@@ -19,14 +19,16 @@
 namespace OHOS::Ace::NG {
 namespace {
 bool removeOverlayFlag = false;
-}
-void OverlayManager::ShowToast(
-    const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
+} // namespace
+void OverlayManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+    bool isRightToLeft, const ToastShowMode& showMode)
 {}
+
+void OverlayManager::ClearToast() {}
 
 void OverlayManager::PopToast(int32_t toastId) {}
 
-void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo) {}
+void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo) {}
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo) {}
 
@@ -105,5 +107,5 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag) {}
 
 void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId) {}
 void OverlayManager::DestroyKeyboard() {}
-
+void OverlayManager::CloseKeyboard(int32_t targetId) {}
 } // namespace OHOS::Ace::NG

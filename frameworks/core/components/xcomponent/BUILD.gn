@@ -26,9 +26,7 @@ build_component("xcomponent") {
     "xcomponent_component.cpp",
     "xcomponent_element.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_xcomponent.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_xcomponent.cpp" ]
 
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {

@@ -56,6 +56,9 @@ void PinchRecognizer::OnAccepted()
 
 void PinchRecognizer::OnRejected()
 {
+    if (refereeState_ == RefereeState::SUCCEED) {
+        return;
+    }
     LOGD("pinch gesture has been rejected!");
     refereeState_ = RefereeState::FAIL;
 }
@@ -103,12 +106,8 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch up event");
-    if (currentFingers_ < fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         LOGW("PinchGesture current finger number is less than requiried finger number.");
-        return;
-    }
-
-    if (isPinchEnd_) {
         return;
     }
 
@@ -118,9 +117,8 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED) {
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         SendCallbackMsg(onActionEnd_);
-        isPinchEnd_ = true;
     }
 }
 
@@ -144,7 +142,7 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch move event");
-    if (currentFingers_ < fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         LOGW("PinchGesture current finger number is less than requiried finger number.");
         return;
     }
@@ -253,21 +251,25 @@ double PinchRecognizer::ComputeAverageDeviation()
     double sumOfX = 0.0;
     double sumOfY = 0.0;
     for (auto& element : touchPoints_) {
-        sumOfX = sumOfX + element.second.x;
-        sumOfY = sumOfY + element.second.y;
+        if (element.first < fingers_) {
+            sumOfX = sumOfX + element.second.x;
+            sumOfY = sumOfY + element.second.y;
+        }
     }
-    double focalX = sumOfX / touchPoints_.size();
-    double focalY = sumOfY / touchPoints_.size();
+    double focalX = sumOfX / fingers_;
+    double focalY = sumOfY / fingers_;
 
     // compute average deviation
     double devX = 0.0;
     double devY = 0.0;
     for (auto& element : touchPoints_) {
-        devX = devX + fabs(element.second.x - focalX);
-        devY = devY + fabs(element.second.y - focalY);
+        if (element.first < fingers_) {
+            devX = devX + fabs(element.second.x - focalX);
+            devY = devY + fabs(element.second.y - focalY);
+        }
     }
-    double aveDevX = devX / touchPoints_.size();
-    double aveDevY = devY / touchPoints_.size();
+    double aveDevX = devX / fingers_;
+    double aveDevY = devY / fingers_;
 
     // compute zoom distance
     double zoomDistance = sqrt(pow(aveDevX, 2) + pow(aveDevY, 2));
@@ -320,7 +322,9 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
         info.SetSourceTool(lastTouchEvent_.sourceTool);
-        (*callback)(info);
+        // callback may be overwritten in its invoke so we copy it first
+        auto callbackFunction = *callback;
+        callbackFunction(info);
     }
 }
 

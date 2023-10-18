@@ -16,12 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PAINT_METHOD_H
 
-#ifdef NEW_SKIA
 #include "include/core/SkSamplingOptions.h"
 #include "modules/svg/include/SkSVGDOM.h"
-#else
-#include "experimental/svg/model/SkSVGDOM.h"
-#endif
+
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph.h"
 #else
@@ -386,13 +383,9 @@ protected:
     double BlurStrToDouble(const std::string& str);
     bool CheckNumberAndPercentage(const std::string& param, bool isClamped, float& result);
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-    void InitImagePaint(SkPaint& paint);
-    void GetStrokePaint(SkPaint& paint);
-#else
+
     void InitImagePaint(SkPaint& paint, SkSamplingOptions& options);
     void GetStrokePaint(SkPaint& paint, SkSamplingOptions& options);
-#endif
 #else
     void InitImagePaint(RSPen* pen, RSBrush* brush, RSSamplingOptions& options);
     void GetStrokePaint(RSPen& pen, RSSamplingOptions& options);
@@ -465,17 +458,13 @@ protected:
     SkPath skPath_;
     SkPath skPath2d_;
     SkPaint imagePaint_;
-#ifdef NEW_SKIA
     SkSamplingOptions sampleOptions_;
-#endif
-    SkBitmap canvasCache_;
     std::shared_ptr<SkCanvas> skCanvas_;
 #else
     RSPath rsPath_;
     RSPath rsPath2d_;
     RSBrush imageBrush_;
     RSSamplingOptions sampleOptions_;
-    RSBitmap canvasCache_;
     std::shared_ptr<RSCanvas> rsCanvas_;
 #endif
 

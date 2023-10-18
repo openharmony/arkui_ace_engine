@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "base/log/event_report.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -68,8 +69,8 @@ void CardFrontendDeclarative::Destroy()
 void CardFrontendDeclarative::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(pipelineContext);
     eventHandler_ = AceType::MakeRefPtr<CardEventHandlerDeclarative>(delegate_);
 
     holder_.Attach(context);
@@ -84,7 +85,7 @@ void CardFrontendDeclarative::SetAssetManager(const RefPtr<AssetManager>& assetM
     }
 }
 
-void CardFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void CardFrontendDeclarative::RunPage(const std::string& url, const std::string& params)
 {
     std::string urlPath;
     if (GetFormSrc().empty()) {
@@ -99,16 +100,12 @@ void CardFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, co
         urlPath = GetFormSrcPath(GetFormSrc(), FILE_TYPE_BIN);
     }
     if (urlPath.empty()) {
-        LOGE("fail to eTS Card run page due to path url is empty");
-        EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
         return;
     }
 
     if (delegate_) {
         auto container = Container::Current();
         if (!container) {
-            LOGE("RunPage host container null");
-            EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
             return;
         }
         container->SetCardFrontend(AceType::WeakClaim(this), cardId_);
@@ -126,7 +123,7 @@ void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& p
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, jsCommands] {
             auto frontend = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(frontend);
+            CHECK_NULL_VOID(frontend);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -197,8 +194,6 @@ void CardFrontendDeclarative::UpdatePageData(const std::string& dataList)
 {
     CHECK_RUN_ON(UI); // eTSCard UI == Main JS/UI/PLATFORM
     if (!delegate_) {
-        LOGE("the delegate is null");
-        EventReport::SendFormException(FormExcepType::UPDATE_PAGE_ERR);
         return;
     }
     delegate_->UpdatePageData(dataList);
@@ -212,12 +207,9 @@ void CardFrontendDeclarative::SetColorMode(ColorMode colorMode)
             if (frontend) {
                 frontend->colorMode_ = colorMode;
                 if (!frontend->delegate_) {
-                    LOGE("the delegate is null");
                     return;
                 }
                 frontend->OnMediaFeatureUpdate();
-            } else {
-                LOGE("eTS Card frontend is nullptr");
             }
         },
         TaskExecutor::TaskType::JS);

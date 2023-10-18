@@ -60,4 +60,6 @@ void EventReport::SendEventInner(const EventInfo& eventInfo) {}
 void EventReport::ReportEventComplete(DataBase& data) {}
 
 void EventReport::ReportEventJankFrame(DataBase& data) {}
+
+void EventReport::ReportJankFrameApp(JankInfo& info) {}
 } // namespace OHOS::Ace

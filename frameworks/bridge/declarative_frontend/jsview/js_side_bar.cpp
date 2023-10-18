@@ -63,7 +63,6 @@ static Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
 
 void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
 {
@@ -73,14 +72,12 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
     }
 
     CalcDimension value;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
         DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
     }
 
-    auto isValid = pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN
+    auto isValid = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)
                        ? JSViewAbstract::ParseJsDimensionVpNG(info[0], value)
                        : JSViewAbstract::ParseJsDimensionVp(info[0], value);
 
@@ -146,7 +143,6 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::Declare("SideBarContainer");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSideBar>::StaticMethod("create", &JSSideBar::Create, opt);
-    JSClass<JSSideBar>::StaticMethod("pop", &JSSideBar::Pop);
     JSClass<JSSideBar>::StaticMethod("showSideBar", &JSSideBar::JsShowSideBar);
     JSClass<JSSideBar>::StaticMethod("controlButton", &JSSideBar::JsControlButton);
     JSClass<JSSideBar>::StaticMethod("showControlButton", &JSSideBar::SetShowControlButton);
@@ -278,9 +274,7 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
 
     if (!info[0]->IsNull() && info[0]->IsObject()) {
         JSRef<JSObject> value = JSRef<JSObject>::Cast(info[0]);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             ParseControlButtonOG(value);
         } else {
             ParseControlButtonNG(value);
@@ -364,12 +358,6 @@ void JSSideBar::JsAutoHide(bool autoHide)
 {
     SideBarContainerModel::GetInstance()->SetAutoHide(autoHide);
 }
-
-void JSSideBar::Pop()
-{
-    SideBarContainerModel::GetInstance()->Pop();
-}
-
 
 void JSSideBar::ParseControlButtonOG(JSRef<JSObject> value)
 {

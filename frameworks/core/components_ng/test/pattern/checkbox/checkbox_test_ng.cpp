@@ -1414,6 +1414,34 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test on color configuration update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    ASSERT_NE(checkBoxTheme, nullptr);
+    checkBoxTheme->activeColor_ = Color::BLACK;
+    checkBoxTheme->inactiveColor_ = Color::BLACK;
+    checkBoxTheme->pointColor_ = Color::BLACK;
+    pattern->OnColorConfigurationUpdate();
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelectedColor(), Color::BLACK);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxUnSelectedColor(), Color::BLACK);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkColor(), Color::BLACK);
+}
+
+/**
  * @tc.name: CheckBoxPatternTest033
  * @tc.desc: Test the distributed capability of CheckBox.
  * @tc.type: FUNC

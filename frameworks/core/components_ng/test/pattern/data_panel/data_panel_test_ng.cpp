@@ -56,10 +56,6 @@ const Color TRUE_COLOR = Color(0x00000000);
 const Color ERROR_COLOR = Color();
 constexpr double DEFAULT_SHADOW_VALUE = 5.0;
 
-constexpr float FACTOR = 1.0f;
-constexpr float OVER_FULL = 150.0f;
-constexpr float BELOW_EDGE = 10.0f;
-constexpr float BELOW_ZERO = -10.0f;
 const Color START_COLOR = Color::BLUE;
 const Color END_COLOR = Color::GREEN;
 const OffsetF OFFSET = { 1.0f, 1.0f };
@@ -68,12 +64,8 @@ constexpr float TOTAL_WIDTH = 100.0f;
 constexpr float XSPACE = 10.0f;
 constexpr float SEGMENTWIDTH = 20.0f;
 constexpr float SPACEWIDTH = 5.0f;
-constexpr bool USE_EFFECT = false;
-constexpr bool USE_ANIMATOR = false;
-constexpr float PERCENT = 1.0f;
 constexpr float ROOT_WIDTH = 1000.0f;
 constexpr float ROOT_HEIGHT = 1000.0f;
-constexpr float COLOR_SIZE = 2.0f;
 } // namespace
 
 class DataPanelTestNg : public testing::Test {
@@ -821,14 +813,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest001, TestSize.Level1)
     gradientColorEnd.SetDimension(Dimension(1.0));
     arcData.shadowColor = gradient;
 
-    arcData.progress = 0.0f;
-    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData, COLOR_SIZE, arcData.progress);
-    arcData.progress = OVER_FULL;
-    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData, COLOR_SIZE, arcData.progress);
-    arcData.progress = BELOW_EDGE;
-    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData, COLOR_SIZE, arcData.progress);
-    arcData.progress = BELOW_ZERO;
-    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData, COLOR_SIZE, arcData.progress);
+    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, arcData);
 }
 
 /**
@@ -861,14 +846,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest002, TestSize.Level1)
     gradientColorEnd.SetDimension(Dimension(1.0));
     arcData.progressColors = gradient;
 
-    arcData.progress = 0.0f;
-    dataPanelModifier.PaintProgress(rsCanvas, arcData, USE_EFFECT, USE_ANIMATOR, PERCENT);
-    arcData.progress = OVER_FULL;
-    dataPanelModifier.PaintProgress(rsCanvas, arcData, USE_EFFECT, USE_ANIMATOR, PERCENT);
-    arcData.progress = BELOW_EDGE;
-    dataPanelModifier.PaintProgress(rsCanvas, arcData, USE_EFFECT, USE_ANIMATOR, PERCENT);
-    arcData.progress = BELOW_ZERO;
-    dataPanelModifier.PaintProgress(rsCanvas, arcData, USE_EFFECT, USE_ANIMATOR, PERCENT);
+    dataPanelModifier.PaintProgress(rsCanvas, arcData);
 }
 
 /**
@@ -907,7 +885,9 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest004, TestSize.Level1)
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
-    dataPanelModifier.PaintSpace(rsCanvas, OFFSET, SPACEWIDTH, XSPACE, TOTAL_HEIGHT);
+
+    LinearData linearData;
+    dataPanelModifier.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
 }
 
 /**
@@ -985,7 +965,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest007, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    dataPanelModifier.PaintCircle(context, OFFSET, 0.0f);
+    dataPanelModifier.PaintCircle(context, OFFSET);
 }
 
 /**
@@ -1011,7 +991,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest008, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    dataPanelModifier.PaintCircle(context, OFFSET, 0.0f);
+    dataPanelModifier.PaintCircle(context, OFFSET);
 }
 
 /**
@@ -1043,7 +1023,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest009, TestSize.Level1)
     dataPanelModifier.SetEffect(false);
     std::vector<double> VALUES = { 1.0f, 2.0f, 3.0f };
     dataPanelModifier.SetValues(VALUES);
-    dataPanelModifier.PaintCircle(context, OFFSET, 0.0);
+    dataPanelModifier.PaintCircle(context, OFFSET);
 }
 
 /**
@@ -1075,7 +1055,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest010, TestSize.Level1)
     dataPanelModifier.SetEffect(true);
     std::vector<double> VALUES = { 100.0f, 200.0f, 300.0f };
     dataPanelModifier.SetValues(VALUES);
-    dataPanelModifier.PaintCircle(context, OFFSET, 0.0);
+    dataPanelModifier.PaintCircle(context, OFFSET);
 }
 
 /**
@@ -1107,7 +1087,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest011, TestSize.Level1)
     dataPanelModifier.SetEffect(true);
     std::vector<double> VALUES = { -10.0f, 10.0f };
     dataPanelModifier.SetValues(VALUES);
-    dataPanelModifier.PaintCircle(context, OFFSET, 0.0);
+    dataPanelModifier.PaintCircle(context, OFFSET);
 }
 
 /**
@@ -1138,15 +1118,15 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest012, TestSize.Level1)
     dataPanelModifier.SetEffect(false);
     std::vector<double> VALUES = { -10.0f, 10.0f };
     dataPanelModifier.SetValues(VALUES);
-    dataPanelModifier.PaintCircle(context, OFFSET, 0.0);
+    dataPanelModifier.PaintCircle(context, OFFSET);
 }
 
 /**
- * @tc.name: DataPanelPaintMethodTest13
+ * @tc.name: DataPanelPaintLinearProgressTest001
  * @tc.desc: Test DataPanel PaintMethod PaintLineProgress
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest013, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level1)
 {
     /**
      * case 1:sum of value = max ,max > 0
@@ -1172,11 +1152,11 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: DataPanelPaintMethodTest14
+ * @tc.name: DataPanelPaintLinearProgressTest002
  * @tc.desc: Test DataPanel PaintMethod PaintLineProgress
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest014, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level1)
 {
     /**
      * case 2:sum of value != max, max < 0
@@ -1202,11 +1182,11 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: DataPanelPaintMethodTest15
+ * @tc.name: DataPanelPaintLinearProgressTest003
  * @tc.desc: Test DataPanel PaintMethod PaintLineProgress
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest015, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level1)
 {
     /**
      * case 3:one of value nearequael 0 and > 0
@@ -1232,18 +1212,18 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: DataPanelPaintMethodTest16
- * @tc.desc: Test DataPanel PaintMethod PaintLineProgress
+ * @tc.name: DataPanelPaintColorSegmentFilterMaskTest001
+ * @tc.desc: Test DataPanel PaintMethod PaintColorSegmentFilterMask
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest016, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
     DataPanelModifier dataPanelModifier;
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
@@ -1256,10 +1236,157 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest016, TestSize.Level1)
     dataPanelModifier.SetValues(VALUES);
     dataPanelModifier.PaintLinearProgress(context, OFFSET);
     LinearData segmentLinearData;
+
+    /**
+     * @tc.cases: case. cover isEndData is true.
+     */
+    segmentLinearData.isEndData = true;
     segmentLinearData.offset = OFFSET;
     segmentLinearData.xSegment = 5.0;
     segmentLinearData.segmentWidth = 5.0;
     segmentLinearData.height = 5.0;
     dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
+
+    /**
+     * @tc.cases: case. cover branch segmentLinearData isFirstData is true.
+     */
+    segmentLinearData.isFirstData = true;
+    dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+
+    /**
+     * @tc.cases: case. cover branch segmentLinearData isEndData is true.
+     */
+    segmentLinearData.isFirstData = false;
+    segmentLinearData.isEndData = true;
+    dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+}
+
+/**
+ * @tc.name: DataPanelUpdateDateTest001
+ * @tc.desc: Test DataPanel PaintMethod UpdateDate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+
+    /**
+     * @tc.cases: case. cover branch isEffect_.
+     */
+    DataPanelModifier dataPanelModifier;
+    dataPanelModifier.isEffect_->Set(true);
+    dataPanelModifier.date_->Set(0.0f);
+    dataPanelModifier.UpdateDate();
+    EXPECT_EQ(1.0f, dataPanelModifier.date_->Get());
+
+    dataPanelModifier.isEffect_->Set(false);
+    dataPanelModifier.date_->Set(0.0f);
+    dataPanelModifier.UpdateDate();
+    EXPECT_EQ(0.0f, dataPanelModifier.date_->Get());
+}
+
+/**
+ * @tc.name: DataPanelOnDrawTest001
+ * @tc.desc: Test DataPanel PaintMethod OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. statement dataPanelModifier.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    DataPanelModifier dataPanelModifier;
+
+    /**
+     * @tc.steps: step2. construct context and call onDraw().
+     * @tc.expected: call onDraw and result is expected.
+     */
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 10.0f, 10.0f };
+
+    dataPanelModifier.onDraw(context);
+    EXPECT_EQ(0, dataPanelModifier.dataPanelType_);
+
+    dataPanelModifier.dataPanelType_ = 1;
+    dataPanelModifier.onDraw(context);
+    EXPECT_EQ(1, dataPanelModifier.dataPanelType_);
+}
+
+/**
+ * @tc.name: UpdateContentModifier001
+ * @tc.desc: Test DataPanel PaintMethod UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, UpdateContentModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto dataPanelPattern = frameNode->GetPattern<DataPanelPattern>();
+    EXPECT_NE(dataPanelPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. construct paintWrapper and call UpdateContentModifier().
+     * @tc.expected: call UpdateContentModifier and HasShadowOption is expected.
+     */
+    auto dataPanelPaintMethod = AceType::DynamicCast<DataPanelPaintMethod>(dataPanelPattern->CreateNodePaintMethod());
+    ASSERT_NE(dataPanelPaintMethod, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    auto renderContext = frameNode->GetRenderContext();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, dataPanelPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    dataPanelPaintMethod->UpdateContentModifier(paintWrapper);
+    EXPECT_FALSE(dataPanelPaintProperty->HasShadowOption());
+
+    /**
+     * @tc.steps: step3. construct valueColors and call UpdateContentModifier().
+     * @tc.expected: call UpdateContentModifier and HasValueColors is expected.
+     */
+    int length = 3;
+    std::vector<Gradient> valueColors;
+    GradientColorSet(valueColors, length);
+    dataPanelPaintProperty->UpdateValueColors(valueColors);
+
+    DataPanelShadow shadowOption { true, DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE,
+        valueColors };
+    dataPanel.SetShadowOption(shadowOption);
+    dataPanelPaintMethod->UpdateContentModifier(paintWrapper);
+    EXPECT_TRUE(dataPanelPaintProperty->HasValueColors());
+
+    /**
+     * @tc.steps: step4. construct paintWrapper2 and call UpdateContentModifier().
+     * @tc.expected: cover branch shadowOption colors size more than 0 and call UpdateContentModifier
+     */
+    DataPanelModelNG dataPanelModelNG2;
+    dataPanelModelNG2.Create(VALUES, MAX, TYPE_CYCLE);
+    std::vector<Gradient> valueColors2;
+    GradientColorSet(valueColors2, length);
+    DataPanelShadow shadowOption2 { true, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE,
+        valueColors2 };
+    dataPanelModelNG2.SetShadowOption(shadowOption2);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode2, nullptr);
+
+    auto renderContext2 = frameNode2->GetRenderContext();
+    auto dataPanelPaintProperty2 = frameNode2->GetPaintProperty<DataPanelPaintProperty>();
+    RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper2 = new PaintWrapper(renderContext2, geometryNode2, dataPanelPaintProperty2);
+    ASSERT_NE(paintWrapper2, nullptr);
+    dataPanelPaintMethod->UpdateContentModifier(paintWrapper2);
+    EXPECT_EQ(dataPanelPaintProperty2->GetShadowOptionValue(), shadowOption2);
 }
 } // namespace OHOS::Ace::NG

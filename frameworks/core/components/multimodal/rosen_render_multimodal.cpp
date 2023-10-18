@@ -40,11 +40,7 @@
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/font/constants_converter.h"
-#ifndef NEW_SKIA
-#include "core/components/font/flutter_font_collection.h"
-#else
 #include "core/components/font/rosen_font_collection.h"
-#endif
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -102,14 +98,12 @@ void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
     canvas->drawRRect(rrect, paint);
 #else
     std::vector<RSPoint> radii = { { corner, corner }, { 0, 0 }, { corner, corner }, { 0, 0 } };
-    RSRoundRect rrect(
-        RSRect(offset.GetX(), offset.GetY(), offset.GetX() + width, offset.GetY() + height), radii);
+    RSRoundRect rrect(RSRect(offset.GetX(), offset.GetY(), offset.GetX() + width, offset.GetY() + height), radii);
     canvas->AttachBrush(brush);
     canvas->DrawRoundRect(rrect);
     canvas->DetachBrush();
 #endif
 
-#ifndef USE_ROSEN_DRAWING
 #ifndef USE_GRAPHIC_TEXT_GINE
     auto leftOffset = paragraph_->GetLongestLine() / 2;
 #else
@@ -118,9 +112,6 @@ void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
     auto centerX = offset.GetX() + width / 2;
     auto centerY = offset.GetY() + height / 2;
     paragraph_->Paint(canvas, centerX - leftOffset, centerY - paragraph_->GetHeight() / 2);
-#else
-    LOGE("Drawing is not supported");
-#endif
 }
 
 void RosenRenderMultimodal::UpdateParagraph(const Offset& offset, const std::string& text)
@@ -133,25 +124,20 @@ void RosenRenderMultimodal::UpdateParagraph(const Offset& offset, const std::str
 #else
     Rosen::TypographyStyle style;
     style.maxLines = 1;
-    style.ellipsis= StringUtils::Str8ToStr16(ELLIPSIS);
+    style.ellipsis = StringUtils::Str8ToStr16(ELLIPSIS);
 #endif
-#ifndef NEW_SKIA
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
-#else
+
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-#endif
     if (!fontCollection) {
         LOGW("UpdateParagraph: fontCollection is null");
         return;
     }
 #ifndef USE_GRAPHIC_TEXT_GINE
-    std::unique_ptr<txt::ParagraphBuilder> builder =
-        txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     txtStyle.font_size = NormalizeToPx(Dimension(FONT_SIZE, DimensionUnit::FP));
 #else
-    std::unique_ptr<Rosen::TypographyCreate> builder =
-        Rosen::TypographyCreate::Create(style, fontCollection);
+    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
     Rosen::TextStyle txtStyle;
     txtStyle.fontSize = NormalizeToPx(Dimension(FONT_SIZE, DimensionUnit::FP));
 #endif

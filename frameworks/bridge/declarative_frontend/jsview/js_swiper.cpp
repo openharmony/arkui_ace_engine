@@ -24,6 +24,7 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
@@ -32,6 +33,7 @@
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
@@ -71,7 +73,6 @@ const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::D
 const static int32_t DEFAULT_INTERVAL = 3000;
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
-const static int32_t PLATFORM_VERSION_TEN = 10;
 
 JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 {
@@ -139,6 +140,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("width", &JSSwiper::SetWidth);
     JSClass<JSSwiper>::StaticMethod("size", &JSSwiper::SetSize);
     JSClass<JSSwiper>::StaticMethod("displayArrow", &JSSwiper::SetDisplayArrow);
+    JSClass<JSSwiper>::StaticMethod("nestedScroll", &JSSwiper::SetNestedScroll);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -151,12 +153,10 @@ void JSSwiper::SetEnabled(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsEnabled(info);
     if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
     if (!info[0]->IsBoolean()) {
-        LOGE("info is not bool.");
         return;
     }
 
@@ -171,18 +171,15 @@ void JSSwiper::SetDisableSwipe(bool disableSwipe)
 void JSSwiper::SetEffectMode(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsNumber()) {
-        LOGE("info is not a  number ");
         return;
     }
 
     auto edgeEffect = info[0]->ToNumber<int32_t>();
     if (edgeEffect < 0 || edgeEffect >= static_cast<int32_t>(EDGE_EFFECT.size())) {
-        LOGE("Edge effect: %{public}d illegal value", edgeEffect);
         return;
     }
 
@@ -192,13 +189,10 @@ void JSSwiper::SetEffectMode(const JSCallbackInfo& info)
 void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (info[0]->IsString() && info[0]->ToString() == "auto") {
             SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
             SwiperModel::GetInstance()->ResetDisplayCount();
@@ -208,7 +202,6 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
             JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
             auto minSizeParam = jsObj->GetProperty("minSize");
             if (minSizeParam->IsNull()) {
-                LOGW("minSize param is invalid");
                 return;
             }
             CalcDimension minSizeValue;
@@ -237,20 +230,14 @@ void JSSwiper::SetDuration(const JSCallbackInfo& info)
     int32_t duration = DEFAULT_DURATION;
 
     if (info.Length() < 1) { // user do not set any value
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     // undefined value turn to default 400
-    if (!info[0]->IsUndefined()) {
-        if (!info[0]->IsNumber()) { // user set value type not Number
-            LOGE("info is not a number, set to default 400.");
-        } else { // Number type
-            duration = info[0]->ToNumber<int32_t>();
-            if (duration < 0) {
-                LOGE("duration is not valid: %{public}d, set to default 400.", duration);
-                duration = DEFAULT_DURATION;
-            }
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
+        duration = info[0]->ToNumber<int32_t>();
+        if (duration < 0) {
+            duration = DEFAULT_DURATION;
         }
     }
 
@@ -267,7 +254,6 @@ void ParseSwiperIndexObject(const JSCallbackInfo& args, const JSRef<JSVal>& chan
         ACE_SCORING_EVENT("Swiper.onChangeEvent");
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
-            LOGE("ParseSwiperIndexObject swiperInfo is nullptr");
             return;
         }
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(swiperInfo->GetIndex()));
@@ -279,7 +265,6 @@ void ParseSwiperIndexObject(const JSCallbackInfo& args, const JSRef<JSVal>& chan
 void JSSwiper::SetIndex(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
@@ -288,14 +273,11 @@ void JSSwiper::SetIndex(const JSCallbackInfo& info)
         index = info[0]->ToNumber<int32_t>();
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         index = index < 0 ? 0 : index;
     }
 
     if (index < 0) {
-        LOGE("index is not valid: %{public}d", index);
         return;
     }
     SwiperModel::GetInstance()->SetIndex(index);
@@ -310,20 +292,14 @@ void JSSwiper::SetInterval(const JSCallbackInfo& info)
     int32_t interval = DEFAULT_INTERVAL;
 
     if (info.Length() < 1) { // user do not set any value
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     // undefined value turn to default 3000
-    if (!info[0]->IsUndefined()) {
-        if (!info[0]->IsNumber()) { // user set value type not Number
-            LOGE("info is not a number, set to default 3000.");
-        } else { // Number type
-            interval = info[0]->ToNumber<int32_t>();
-            if (interval < 0) {
-                LOGE("interval is not valid: %{public}d, set to default 3000.", interval);
-                interval = DEFAULT_INTERVAL;
-            }
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
+        interval = info[0]->ToNumber<int32_t>();
+        if (interval < 0) {
+            interval = DEFAULT_INTERVAL;
         }
     }
 
@@ -336,9 +312,7 @@ void JSSwiper::SetLoop(const JSCallbackInfo& info)
         return;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         SwiperModel::GetInstance()->SetLoop(info[0]->ToBoolean());
         return;
     }
@@ -727,16 +701,11 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
 void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (!ParseJsDimensionVp(info[0], value) || LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
 
@@ -746,7 +715,6 @@ void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
 void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -761,7 +729,6 @@ void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
 void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -776,7 +743,6 @@ void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
 void JSSwiper::SetDisplayMode(int32_t index)
 {
     if (index < 0 || index >= static_cast<int32_t>(DISPLAY_MODE.size())) {
-        LOGE("display mode is not valid: %{public}d", index);
         return;
     }
 
@@ -786,7 +752,6 @@ void JSSwiper::SetDisplayMode(int32_t index)
 void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -815,9 +780,6 @@ void JSSwiper::SetCurve(const JSCallbackInfo& info)
                 params[0] = JSRef<JSVal>::Make(ToJSValue(time));
                 auto result = func->ExecuteJS(1, params);
                 auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
-                if (resultValue < 0 || resultValue > 1) {
-                    LOGI("The interpolate return  value error = %{public}f ", resultValue);
-                }
                 return resultValue;
             };
         }
@@ -847,7 +809,7 @@ void JSSwiper::SetOnChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
-            LOGE("HandleChangeEvent swiperInfo == nullptr");
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper onChange callback execute failed.");
             return;
         }
         ACE_SCORING_EVENT("Swiper.OnChange");
@@ -884,7 +846,7 @@ void JSSwiper::SetOnAnimationStart(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
-            LOGE("onAnimationStart swiperInfo is nullptr");
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper onAnimationStart callback execute failed.");
             return;
         }
         ACE_SCORING_EVENT("Swiper.onAnimationStart");
@@ -920,7 +882,7 @@ void JSSwiper::SetOnAnimationEnd(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
-            LOGE("onAnimationEnd swiperInfo is nullptr");
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper onAnimationEnd callback execute failed.");
             return;
         }
         ACE_SCORING_EVENT("Swiper.onAnimationEnd");
@@ -955,7 +917,6 @@ void JSSwiper::SetOnClick(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsFunction()) {
-        LOGW("JSSwiper::SetOnClick the info is not click function");
         return;
     }
 
@@ -978,7 +939,6 @@ void JSSwiper::SetOnClick(const JSCallbackInfo& info)
 void JSSwiper::SetWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -1010,7 +970,6 @@ void JSSwiper::SetHeight(const JSRef<JSVal>& jsValue)
 void JSSwiper::SetHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -1020,12 +979,10 @@ void JSSwiper::SetHeight(const JSCallbackInfo& info)
 void JSSwiper::SetSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -1069,7 +1026,7 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
         auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Swiper.finishAnimation");
-            LOGI("Swiper finish callback execute.");
+            TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController finishAnimation callback execute.");
             func->Execute();
         };
 
@@ -1081,4 +1038,27 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
     controller_->FinishAnimation();
 }
 
+void JSSwiper::SetNestedScroll(const JSCallbackInfo& args)
+{
+    // default value
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
+        return;
+    }
+    int32_t value = -1;
+    JSViewAbstract::ParseJsInt32(args[0], value);
+    auto mode = static_cast<NestedScrollMode>(value);
+    if (mode < NestedScrollMode::SELF_ONLY || mode > NestedScrollMode::SELF_FIRST) {
+        SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
+        return;
+    }
+    nestedOpt.forward = mode;
+    nestedOpt.backward = mode;
+    SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
+    args.ReturnSelf();
+}
 } // namespace OHOS::Ace::Framework

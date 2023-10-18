@@ -39,9 +39,11 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
 
 void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) {}
 
-void SubwindowManager::HideMenuNG() {}
+void SubwindowManager::HideMenuNG(bool showPreviewAnimation) {}
 
 void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId) {}
+
+void SubwindowManager::HideSubWindowNG() {}
 
 const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 {

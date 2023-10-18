@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
@@ -62,4 +62,22 @@ void ScrollablePattern::MarkSelectedItems() {}
 void ScrollablePattern::ClearInvisibleItemsSelectedStatus() {}
 
 void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selectedZone) {}
+
+void ScrollablePattern::CreateScrollBarOverlayModifier() {}
+
+void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent) {}
+
+ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, NestedState state)
+{
+    return {};
+}
+
+bool ScrollablePattern::HandleScrollVelocity(float velocity)
+{
+    return false;
+}
+
+void ScrollablePattern::OnScrollStartRecursive(float position) {}
+
+void ScrollablePattern::OnScrollEndRecursive() {}
 } // namespace OHOS::Ace::NG

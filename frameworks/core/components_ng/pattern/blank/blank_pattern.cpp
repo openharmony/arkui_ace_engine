@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
@@ -45,19 +46,18 @@ FlexDirection GetFlexDirection(const RefPtr<UINode>& node)
         return FlexDirection::ROW;
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(node);
-    CHECK_NULL_RETURN_NOLOG(frameNode, FlexDirection::ROW);
+    CHECK_NULL_RETURN(frameNode, FlexDirection::ROW);
     auto layoutProperty = frameNode->GetLayoutProperty<FlexLayoutProperty>();
-    CHECK_NULL_RETURN_NOLOG(layoutProperty, FlexDirection::ROW);
+    CHECK_NULL_RETURN(layoutProperty, FlexDirection::ROW);
     return layoutProperty->GetFlexDirection().value_or(FlexDirection::ROW);
 }
 } // namespace
 
 std::string BlankPattern::GetColorString() const
 {
-    std::string color;
-    auto renderContext = GetHost()->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, "NA");
-    return renderContext->GetBackgroundColor().value_or(Color::WHITE).ColorToString();
+    auto paintProperty = GetPaintProperty<BlankPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, "NA");
+    return paintProperty->GetColorValue(Color::TRANSPARENT).ColorToString();
 }
 
 void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -76,12 +76,12 @@ void BlankPattern::DumpInfo()
 void BlankPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto parent = host->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID_NOLOG(parent);
+    CHECK_NULL_VOID(parent);
     auto layoutProp = host->GetLayoutProperty<BlankLayoutProperty>();
-    CHECK_NULL_VOID_NOLOG(layoutProp);
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+    CHECK_NULL_VOID(layoutProp);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
     }
     auto& calcConstraint = layoutProp->GetCalcLayoutConstraint();
@@ -105,7 +105,7 @@ void BlankPattern::BeforeCreateLayoutWrapper()
         layoutProp->UpdateFlexGrow(1.0f);
         layoutProp->UpdateFlexShrink(1.0f);
     }
-    CHECK_NULL_VOID_NOLOG(layoutProp->GetMinSize().has_value());
+    CHECK_NULL_VOID(layoutProp->GetMinSize().has_value());
     auto blankMin = layoutProp->GetMinSize().value_or(Dimension());
     if (isParentRow) {
         if (!(calcConstraint && calcConstraint->minSize.has_value() &&

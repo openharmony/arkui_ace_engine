@@ -55,7 +55,6 @@ ToggleModel* ToggleModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 int32_t JSToggle::toggleType_ = 1;
-const static int32_t PLATFORM_VERSION_TEN = 10;
 void JSToggle::JSBind(BindingTarget globalObj)
 {
     JSClass<JSToggle>::Declare("Toggle");
@@ -69,6 +68,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
     JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
+    JSClass<JSToggle>::StaticMethod("hoverEffect", &JSToggle::JsHoverEffect);
 
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -181,8 +181,7 @@ void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
     auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
     auto height = defaultHeight - verticalPadding * 2;
     CalcDimension value(height);
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
             value = height;
         }
@@ -414,4 +413,10 @@ void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)
     ToggleModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
+void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        ToggleModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
+    }
+}
 } // namespace OHOS::Ace::Framework

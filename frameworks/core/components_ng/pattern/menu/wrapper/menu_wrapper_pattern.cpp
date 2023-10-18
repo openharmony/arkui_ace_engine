@@ -115,7 +115,7 @@ void MenuWrapperPattern::HideSubMenu()
 void MenuWrapperPattern::RegisterOnTouch()
 {
     // if already initialized touch event
-    CHECK_NULL_VOID_NOLOG(!onTouch_);
+    CHECK_NULL_VOID(!onTouch_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
@@ -123,7 +123,7 @@ void MenuWrapperPattern::RegisterOnTouch()
     // hide menu when touched outside the menu region
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->OnTouchEvent(info);
     };
     onTouch_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -132,10 +132,10 @@ void MenuWrapperPattern::RegisterOnTouch()
 
 void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
 {
-    CHECK_NULL_VOID_NOLOG(!info.GetTouches().empty());
+    CHECK_NULL_VOID(!info.GetTouches().empty());
     auto touch = info.GetTouches().front();
     // filter out other touch types
-    if (touch.GetTouchType() != TouchType::DOWN && touch.GetTouchType() != TouchType::UP) {
+    if (touch.GetTouchType() != TouchType::DOWN) {
         return;
     }
     if (IsHided()) {
@@ -218,15 +218,21 @@ void MenuWrapperPattern::StartShowAnimation()
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateOpacity(0.0);
-    context->UpdateOffset(GetAnimationOffset());
+    if (GetPreviewMode() == MenuPreviewMode::NONE) {
+        context->UpdateOffset(GetAnimationOffset());
+        context->UpdateOpacity(0.0);
+    }
 
     AnimationUtils::Animate(
         animationOption_,
-        [context]() {
+        [context, weak = WeakClaim(this)]() {
             if (context) {
-                context->UpdateOpacity(1.0);
-                context->UpdateOffset(OffsetT<Dimension>());
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (pattern->GetPreviewMode() == MenuPreviewMode::NONE) {
+                    context->UpdateOffset(OffsetT<Dimension>());
+                    context->UpdateOpacity(1.0);
+                }
             }
         },
         animationOption_.GetOnFinishEvent());

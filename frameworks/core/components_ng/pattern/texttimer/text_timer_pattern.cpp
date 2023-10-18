@@ -45,35 +45,12 @@ void TextTimerPattern::FireChangeEvent()
 {
     auto textTimerEventHub = GetEventHub<TextTimerEventHub>();
     CHECK_NULL_VOID(textTimerEventHub);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto format = layoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
-    char lastWord = format.back();
-    auto millSeconds = GetMilliseconds();
-    auto utcTime = millSeconds;
-    auto elapsedTime = elapsedTime_;
-    switch (lastWord) {
-        case 's':
-            utcTime = millSeconds / SECONDS_OF_MILLISECOND;
-            elapsedTime = elapsedTime_ / SECONDS_OF_MILLISECOND;
-            break;
-        case 'm':
-            utcTime = millSeconds / (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
-            elapsedTime = elapsedTime_ / (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
-            break;
-        case 'h':
-            utcTime = millSeconds / (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
-            elapsedTime = elapsedTime_ / (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
-            break;
-        default:
-            break;
-    }
-    if (utcTime - lastReportingTime_ >= 1) {
+    auto utcTime = GetFormatDuration(GetMilliseconds());
+    auto elapsedTime = GetFormatDuration(elapsedTime_);
+    if (elapsedTime - lastElapsedTime_ >= 1) {
         textTimerEventHub->FireChangeEvent(std::to_string(utcTime), std::to_string(elapsedTime));
+        lastElapsedTime_ = elapsedTime;
     }
-    lastReportingTime_ = utcTime;
 }
 
 void TextTimerPattern::InitTextTimerController()
@@ -136,8 +113,9 @@ void TextTimerPattern::Tick(uint64_t duration)
 
     auto tmpValue = static_cast<double>(elapsedTime_);
     if (isCountDown_) {
+        auto elapsedTime = GetMillisecondsDuration(GetFormatDuration(elapsedTime_));
         tmpValue =
-            (inputCount_ >= static_cast<double>(elapsedTime_)) ? (inputCount_ - static_cast<double>(elapsedTime_)) : 0;
+            (inputCount_ >= static_cast<double>(elapsedTime_)) ? (inputCount_ - static_cast<double>(elapsedTime)) : 0;
     }
     if (isCountDown_ && tmpValue <= 0) {
         UpdateTextTimer(0);
@@ -166,6 +144,15 @@ void TextTimerPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetItalicFontStyle().has_value()) {
         textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetItalicFontStyle().value());
     }
+}
+
+void TextTimerPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textTimerProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(textTimerProperty);
+    textTimerProperty->UpdateAlignment(Alignment::CENTER_LEFT);
 }
 
 void TextTimerPattern::OnModifyDone()
@@ -307,6 +294,7 @@ void TextTimerPattern::HandleReset()
         scheduler_->Stop();
     }
     elapsedTime_ = 0;
+    lastElapsedTime_ = 0;
     auto count = isCountDown_ ? inputCount_ : 0;
     UpdateTextTimer(static_cast<uint32_t>(count));
 }
@@ -321,5 +309,53 @@ RefPtr<FrameNode> TextTimerPattern::GetTextNode()
         return nullptr;
     }
     return textNode;
+}
+
+uint64_t TextTimerPattern::GetFormatDuration(uint64_t duration) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, duration);
+    auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, duration);
+    auto format = layoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
+    char lastWord = format.back();
+    switch (lastWord) {
+        case 's':
+            duration = duration / SECONDS_OF_MILLISECOND;
+            break;
+        case 'm':
+            duration = duration / (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
+            break;
+        case 'h':
+            duration = duration / (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
+            break;
+        default:
+            break;
+    }
+    return duration;
+}
+
+uint64_t TextTimerPattern::GetMillisecondsDuration(uint64_t duration) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, duration);
+    auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, duration);
+    auto format = layoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
+    char lastWord = format.back();
+    switch (lastWord) {
+        case 's':
+            duration = duration * SECONDS_OF_MILLISECOND;
+            break;
+        case 'm':
+            duration = duration * (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
+            break;
+        case 'h':
+            duration = duration * (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
+            break;
+        default:
+            break;
+    }
+    return duration;
 }
 } // namespace OHOS::Ace::NG

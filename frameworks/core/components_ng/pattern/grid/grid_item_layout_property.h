@@ -81,6 +81,8 @@ public:
     int32_t GetCrossSpan(Axis axis) const;
     int32_t GetMainStart(Axis axis) const;
     int32_t GetCrossStart(Axis axis) const;
+    int32_t GetMainEnd(Axis axis) const;
+    int32_t GetCrossEnd(Axis axis) const;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridItemLayoutProperty);

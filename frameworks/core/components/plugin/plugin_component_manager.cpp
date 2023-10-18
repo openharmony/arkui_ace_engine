@@ -24,6 +24,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace {
 constexpr int64_t FOO_MAX_LEN = 20 * 1024 * 1024;
@@ -86,6 +87,14 @@ void PluginComponentManager::RegisterCallBack(
     }
 }
 
+void PluginComponentManager::UnregisterCallBack(const std::shared_ptr<PluginComponentCallBack>& callback)
+{
+    LOGD("PluginComponentManager::UnregisterCallBack");
+    if (listener_) {
+        listener_->UnresgisterListener(callback);
+    }
+}
+
 void PluginComponentManager::UnregisterCallBack(const AAFwk::Want& want)
 {
     Ace::UIServiceMgrClient::GetInstance()->UnregisterCallBack(want);
@@ -106,6 +115,17 @@ sptr<AppExecFwk::IBundleMgr> PluginComponentManager::GetBundleManager()
     }
 
     return iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
+}
+
+void PluginComponentManager::UIServiceListener::UnresgisterListener(
+    const std::shared_ptr<PluginComponentCallBack>& callback)
+{
+    LOGD("PluginComponentManager::UIServiceListener::UnresgisterListener");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = callbacks_.find(callback);
+    if (iter != callbacks_.end()) {
+        callbacks_.erase(iter);
+    }
 }
 
 void PluginComponentManager::UIServiceListener::ResgisterListener(
@@ -158,31 +178,42 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
     const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
 {
     LOGD("PluginComponentManager::UIServiceListener::OnReturnRequest");
-
-    std::vector<std::shared_ptr<PluginComponentCallBack>> callbacks;
-
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {
             if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
-                callbacks.emplace_back(iter->first);
+                auto container = AceEngine::Get().GetContainer(iter->first->GetContainerId());
+                if (!container) {
+                    LOGE("%{public}s called, container is null. %{public}d", __func__,
+                        iter->first->GetContainerId());
+                    return;
+                }
+                auto taskExecutor = container->GetTaskExecutor();
+                if (!taskExecutor) {
+                    LOGE("%{public}s called, taskExecutor is null.", __func__);
+                    return;
+                }
+                taskExecutor->PostTask(
+                    [callback = iter->first, want, source, data, extraData]() {
+                        PluginComponentTemplate pluginTemplate;
+
+                        if (source.empty()) {
+                            pluginTemplate.SetSource("{}");
+                        } else {
+                            pluginTemplate.SetSource(source);
+                        }
+                        pluginTemplate.SetAbility(
+                            want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
+                        callback->OnRequestCallBack(pluginTemplate, data, extraData);
+                        PluginComponentManager::GetInstance()->UnregisterCallBack(callback);
+                    },
+                    TaskExecutor::TaskType::JS);
+                callbacks_.emplace(iter->first);
                 callbackVec_.erase(iter++);
             } else {
                 iter++;
             }
         }
-    }
-
-    PluginComponentTemplate pluginTemplate;
-    if (source.empty()) {
-        pluginTemplate.SetSource("{}");
-    } else {
-        pluginTemplate.SetSource(source);
-    }
-    pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
-
-    for (const auto& item : callbacks) {
-        item->OnRequestCallBack(pluginTemplate, data, extraData);
     }
 }
 

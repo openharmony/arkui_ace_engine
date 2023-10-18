@@ -21,12 +21,16 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/animation/animation_pub.h"
+#include "core/animation/spring_curve.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
@@ -40,6 +44,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float PAN_MAX_VELOCITY = 2000.0f;
+
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
 {
@@ -122,6 +128,22 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<Men
         label->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
+
+void ShowMenuOpacityAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(menuTheme);
+    CHECK_NULL_VOID(renderContext);
+
+    renderContext->UpdateOpacity(0.0);
+    AnimationOption option = AnimationOption();
+    option.SetCurve(Curves::FRICTION);
+    option.SetDuration(menuTheme->GetContextMenuAppearDuration());
+    AnimationUtils::Animate(option, [renderContext]() {
+        if (renderContext) {
+            renderContext->UpdateOpacity(1.0);
+        }
+    });
+}
 } // namespace
 
 void MenuPattern::OnAttachToFrameNode()
@@ -155,6 +177,18 @@ void MenuPattern::OnModifyDone()
         CopyMenuAttr(menuFirstNode);
     }
     SetAccessibilityAction();
+
+    if (previewMode_ != MenuPreviewMode::NONE) {
+        auto node = host->GetChildren().front();
+        CHECK_NULL_VOID(node);
+        auto scroll = AceType::DynamicCast<FrameNode>(node);
+        CHECK_NULL_VOID(scroll);
+        auto hub = scroll->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitPanEvent(gestureHub);
+    }
 }
 
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
@@ -184,14 +218,14 @@ void InnerMenuPattern::OnModifyDone()
 // close menu on touch up
 void MenuPattern::RegisterOnTouch()
 {
-    CHECK_NULL_VOID_NOLOG(!onTouch_);
+    CHECK_NULL_VOID(!onTouch_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->OnTouchEvent(info);
     };
     onTouch_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -200,7 +234,7 @@ void MenuPattern::RegisterOnTouch()
 
 void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
 {
-    if (GetInnerMenuCount() > 0 || IsMultiMenu() || IsSelectOverlayCustomMenu()) {
+    if (GetInnerMenuCount() > 0 || IsMultiMenu() || IsDesktopMenu()|| IsSelectOverlayCustomMenu()) {
         // not click hide menu for multi menu or select overlay custom menu
         return;
     }
@@ -225,7 +259,7 @@ void MenuPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
@@ -233,7 +267,7 @@ void MenuPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
 {
-    if (event.action != KeyAction::DOWN || IsMultiMenu()) {
+    if (event.action != KeyAction::DOWN || IsMultiMenu() || IsDesktopMenu()) {
         return false;
     }
     if ((event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_ESCAPE) &&
@@ -492,7 +526,7 @@ RefPtr<FrameNode> MenuPattern::GetMenuColumn() const
 
 void MenuPattern::DisableTabInMenu()
 {
-    if (IsMultiMenu()) {
+    if (IsMultiMenu() || IsDesktopMenu()) {
         // multi menu not has scroll and column
         return;
     }
@@ -622,8 +656,103 @@ void MenuPattern::SetAccessibilityAction()
     });
 }
 
+Offset MenuPattern::GetTransformCenter() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Offset());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, Offset());
+    auto size = geometryNode->GetFrameSize();
+    auto layoutAlgorithmWrapper = host->GetLayoutAlgorithm();
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, Offset());
+    auto layoutAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithm, Offset());
+    auto placement = layoutAlgorithm->GetPlacement();
+    switch (placement) {
+        case Placement::BOTTOM_LEFT:
+        case Placement::RIGHT_TOP:
+        case Placement::BOTTOM:
+        case Placement::RIGHT:
+            return Offset();
+        case Placement::BOTTOM_RIGHT:
+        case Placement::LEFT_TOP:
+        case Placement::LEFT:
+            return Offset(size.Width(), 0.0f);
+        case Placement::TOP_LEFT:
+        case Placement::RIGHT_BOTTOM:
+        case Placement::TOP:
+            return Offset(0.0f, size.Height());
+        case Placement::TOP_RIGHT:
+        case Placement::LEFT_BOTTOM:
+            return Offset(size.Width(), size.Height());
+        default:
+            return Offset();
+    }
+}
+
+void MenuPattern::ShowPreviewMenuAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isFirstShow_ && previewMode_ != MenuPreviewMode::NONE) {
+        auto menuWrapper = GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto preview = menuWrapperPattern->GetPreview();
+        CHECK_NULL_VOID(preview);
+        auto previewRenderContext = preview->GetRenderContext();
+        CHECK_NULL_VOID(previewRenderContext);
+        auto previewGeometryNode = preview->GetGeometryNode();
+        CHECK_NULL_VOID(previewGeometryNode);
+        auto previewPosition = previewGeometryNode->GetFrameOffset();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
+        auto menuPosition = host->GetPaintRectOffset();
+        OffsetF previewOriginPosition = GetPreviewOriginOffset();
+
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        auto menuAnimationScale = menuTheme->GetMenuAnimationScale();
+        auto springMotionResponse = menuTheme->GetSpringMotionResponse();
+        auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
+
+        renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
+
+        previewRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
+        renderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(originOffset_.GetX()), Dimension(originOffset_.GetY())));
+
+        ShowMenuOpacityAnimation(menuTheme, renderContext);
+
+        AnimationOption scaleOption = AnimationOption();
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
+        scaleOption.SetCurve(motion);
+        AnimationUtils::Animate(scaleOption, [renderContext, menuPosition, previewRenderContext, previewPosition]() {
+            if (renderContext) {
+                renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+                renderContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+            }
+            
+            if (previewRenderContext) {
+                previewRenderContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
+            }
+        });
+    }
+    isFirstShow_ = false;
+}
+
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    ShowPreviewMenuAnimation();
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
@@ -747,6 +876,65 @@ void MenuPattern::OnColorConfigurationUpdate()
     }
     host->SetNeedCallChildrenUpdate(false);
 }
+
+void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID(gestureHub);
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto offsetX = static_cast<float>(info.GetOffsetX());
+        auto offsetY = static_cast<float>(info.GetOffsetY());
+        auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
+        auto offsetPerSecondY = info.GetVelocity().GetOffsetPerSecond().GetY();
+        auto velocity =
+            static_cast<float>(std::sqrt(offsetPerSecondX * offsetPerSecondX + offsetPerSecondY * offsetPerSecondY));
+        pattern->HandleDragEnd(offsetX, offsetY, velocity);
+    };
+    auto actionScrollEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto offsetX = static_cast<float>(info.GetOffsetX());
+        auto offsetY = static_cast<float>(info.GetOffsetY());
+        auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
+        auto offsetPerSecondY = info.GetVelocity().GetOffsetPerSecond().GetY();
+        auto velocity =
+            static_cast<float>(std::sqrt(offsetPerSecondX * offsetPerSecondX + offsetPerSecondY * offsetPerSecondY));
+        pattern->HandleScrollDragEnd(offsetX, offsetY, velocity);
+    };
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    gestureHub->AddPreviewMenuHandleDragEnd(std::move(actionScrollEndTask));
+}
+
+void MenuPattern::HandleDragEnd(float offsetX, float offsetY, float velocity)
+{
+    if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || LessOrEqual(offsetY, 0.0f)) &&
+        LessOrEqual(velocity, PAN_MAX_VELOCITY)) {
+        return;
+    }
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->HideMenu();
+}
+
+void MenuPattern::HandleScrollDragEnd(float offsetX, float offsetY, float velocity)
+{
+    if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || !NearZero(offsetY)) &&
+        LessOrEqual(velocity, PAN_MAX_VELOCITY)) {
+        return;
+    }
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->HideMenu();
+}
+
 void MenuPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(

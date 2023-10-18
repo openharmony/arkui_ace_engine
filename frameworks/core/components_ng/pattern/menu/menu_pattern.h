@@ -102,6 +102,16 @@ public:
         return type_ == MenuType::CONTEXT_MENU;
     }
 
+    void SetPreviewMode(MenuPreviewMode mode)
+    {
+        previewMode_ = mode;
+    }
+
+    MenuPreviewMode GetPreviewMode() const
+    {
+        return previewMode_;
+    }
+
     bool IsNavigationMenu() const
     {
         return type_ == MenuType::NAVIGATION_MENU;
@@ -110,6 +120,11 @@ public:
     bool IsMultiMenu() const
     {
         return type_ == MenuType::MULTI_MENU;
+    }
+
+    bool IsDesktopMenu() const
+    {
+        return type_ == MenuType::DESKTOP_MENU;
     }
 
     bool IsMenu() const
@@ -218,6 +233,36 @@ public:
     RefPtr<FrameNode> GetFirstInnerMenu() const;
     void DumpInfo() override;
 
+    void SetFirstShow()
+    {
+        isFirstShow_ = true;
+    }
+
+    void SetOriginOffset(OffsetF offset)
+    {
+        originOffset_ = offset;
+    }
+
+    void SetEndOffset(OffsetF offset)
+    {
+        endOffset_ = offset;
+    }
+
+    OffsetF GetEndOffset() const
+    {
+        return endOffset_;
+    }
+
+    void SetPreviewOriginOffset(OffsetF offset)
+    {
+        previewOriginOffset_ = offset;
+    }
+
+    OffsetF GetPreviewOriginOffset() const
+    {
+        return previewOriginOffset_;
+    }
+
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -244,6 +289,13 @@ private:
 
     void DisableTabInMenu();
 
+    Offset GetTransformCenter() const;
+    void ShowPreviewMenuAnimation();
+
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragEnd(float offsetX, float offsetY, float velocity);
+    void HandleScrollDragEnd(float offsetX, float offsetY, float velocity);
+
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
@@ -256,6 +308,11 @@ private:
     std::vector<RefPtr<FrameNode>> options_;
 
     bool isSelectMenu_ = false;
+    MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
+    bool isFirstShow_ = false;
+    OffsetF originOffset_;
+    OffsetF endOffset_;
+    OffsetF previewOriginOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

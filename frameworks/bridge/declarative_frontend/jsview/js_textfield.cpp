@@ -111,7 +111,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else {
+        } else if (paramObject->HasProperty("text")) {
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
@@ -159,7 +159,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else {
+        } else if (paramObject->HasProperty("text")) {
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
@@ -227,11 +227,10 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         if (fontSize->IsString()) {
             auto result = StringUtils::StringToDimensionWithThemeValue(fontSize->ToString(), true, Dimension(-1));
             font.fontSize = result;
-        } else if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-            font.fontSize = Dimension(-1);
-            LOGW("Parse to dimension FP failed.");
-        } else {
+        } else if (ParseJsDimensionFp(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
             font.fontSize = size;
+        } else {
+            font.fontSize = Dimension(-1);
         }
     }
 
@@ -326,7 +325,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
         caretStyle.caretWidth = theme->GetCursorWidth();
     } else {
@@ -371,7 +370,7 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         selectedColor = theme->GetSelectedColor();
     }
     TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
@@ -430,7 +429,7 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         auto theme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         textColor = theme->GetTextColor();
     }
     TextFieldModel::GetInstance()->SetTextColor(textColor);

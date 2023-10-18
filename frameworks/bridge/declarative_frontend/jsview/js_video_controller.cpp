@@ -90,7 +90,7 @@ void JSVideoController::SetCurrentTime(const JSCallbackInfo& args)
 {
     float value = 0;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], value)) {
-        LOGE("JSVideoController::SetCurrentTime: Invalid params");
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "JSVideoController set current time with invalid params");
         return;
     }
 
@@ -108,7 +108,7 @@ void JSVideoController::RequestFullscreen(const JSCallbackInfo& args)
 {
     bool landscape = true;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], landscape)) {
-        LOGE("JSVideoController::RequestFullscreen: Invalid params");
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "JSVideoController request full screen with invalid params");
         return;
     }
 

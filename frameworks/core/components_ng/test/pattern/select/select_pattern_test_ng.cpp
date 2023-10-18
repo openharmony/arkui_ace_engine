@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
@@ -779,6 +780,36 @@ HWTEST_F(SelectPropertyTestNg, CreateMenu001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test on color configuration update
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->backgroundColor_ = Color::BLACK;
+    selectPattern->OnColorConfigurationUpdate();
+    EXPECT_TRUE(selectPattern->isColorConfigurationUpdate_);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::BLACK);
+}
+
+/**
  * @tc.name: SelectModel001
  * @tc.desc: Test Select Model
  * @tc.type: FUNC
@@ -921,5 +952,31 @@ HWTEST_F(SelectPropertyTestNg, SelectModel004, TestSize.Level1)
     ASSERT_NE(menu, nullptr);
     EXPECT_EQ(width.Value(), 0.0);
     EXPECT_EQ(height.Value(), 0.0);
+}
+
+/**
+ * @tc.name: SelectPattern001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectPattern001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto options = pattern->GetOptions();
+    auto optionPattern = options.front()->GetPattern<OptionPattern>();
+    ASSERT_NE(optionPattern, nullptr);
+    pattern->SetSelectedOptionBgColor(Color::BLACK);
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnColorConfigurationUpdate();
+    auto selectColor = optionPattern->GetBgColor();
+    EXPECT_EQ(selectColor, Color::BLACK);
 }
 } // namespace OHOS::Ace::NG

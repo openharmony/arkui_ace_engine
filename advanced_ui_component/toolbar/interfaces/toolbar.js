@@ -70,8 +70,9 @@ export class ToolBar extends ViewPU {
     super(e, o, r);
     this.__toolBarList = new SynchedPropertyNesedObjectPU(t.toolBarList, this, 'toolBarList');
     this.controller = void 0;
-    this.__activateIndex = new SynchedPropertySimpleOneWayPU(t.activateIndex, this, 'activateIndex');
-    this.__menuContent = new ObservedPropertyObjectPU([], this, 'menuContent');
+    this.__activateIndex = new SynchedPropertySimpleOneWayPU(t.activateIndex, this, "activateIndex");
+    this.__moreText = new SynchedPropertySimpleOneWayPU(t.moreText, this, "moreText");
+    this.__menuContent = new ObservedPropertyObjectPU([], this, "menuContent");
     this.toolBarItemBackground = [];
     this.__itemBackground = new ObservedPropertyObjectPU({
       id: -1,
@@ -87,6 +88,7 @@ export class ToolBar extends ViewPU {
     this.__toolBarList.set(e.toolBarList);
     void 0 !== e.controller && (this.controller = e.controller);
     void 0 !== e.activateIndex ? this.__activateIndex.set(e.activateIndex) : this.__activateIndex.set(-1);
+    void 0 !== e.moreText ? this.__moreText.set(e.moreText) : this.__moreText.set("更多");
     void 0 !== e.menuContent && (this.menuContent = e.menuContent);
     void 0 !== e.toolBarItemBackground && (this.toolBarItemBackground = e.toolBarItemBackground);
     void 0 !== e.itemBackground && (this.itemBackground = e.itemBackground);
@@ -95,11 +97,13 @@ export class ToolBar extends ViewPU {
   updateStateVars(e) {
     this.__toolBarList.set(e.toolBarList);
     this.__activateIndex.reset(e.activateIndex);
+    this.__moreText.reset(e.moreText)
   }
 
   purgeVariableDependenciesOnElmtId(e) {
     this.__toolBarList.purgeDependencyOnElmtId(e);
     this.__activateIndex.purgeDependencyOnElmtId(e);
+    this.__moreText.purgeDependencyOnElmtId(e);
     this.__menuContent.purgeDependencyOnElmtId(e);
     this.__itemBackground.purgeDependencyOnElmtId(e);
   }
@@ -107,6 +111,7 @@ export class ToolBar extends ViewPU {
   aboutToBeDeleted() {
     this.__toolBarList.aboutToBeDeleted();
     this.__activateIndex.aboutToBeDeleted();
+    this.__moreText.aboutToBeDeleted();
     this.__menuContent.aboutToBeDeleted();
     this.__itemBackground.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
@@ -123,6 +128,14 @@ export class ToolBar extends ViewPU {
 
   set activateIndex(e) {
     this.__activateIndex.set(e);
+  }
+
+  get moreText() {
+    return this.__moreText.get()
+  }
+
+  set moreText(e) {
+    this.__moreText.set(e)
   }
 
   get menuContent() {
@@ -178,13 +191,7 @@ export class ToolBar extends ViewPU {
     }));
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Text.create({
-        id: -1,
-        type: 10003,
-        params: ['app.string.id_string_more'],
-        bundleName: '',
-        moduleName: ''
-      });
+      Text.create(this.moreText);
       Text.fontColor({
         id: -1,
         type: 10001,

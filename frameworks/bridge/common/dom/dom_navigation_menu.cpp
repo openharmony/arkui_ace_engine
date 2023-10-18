@@ -90,7 +90,6 @@ void DOMNavigationMenu::UpdateNavigationBar()
     navigationBar_->MarkNeedUpdate();
     auto pipelineContext = pipelineContext_.Upgrade();
     if (!pipelineContext) {
-        LOGE("pipelineContext_ is nullptr");
         return;
     }
     pipelineContext->ScheduleUpdate(GetParentNode()->GetRootComponent());

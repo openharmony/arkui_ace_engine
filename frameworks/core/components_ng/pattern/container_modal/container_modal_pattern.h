@@ -69,6 +69,15 @@ public:
 
     void SetCloseButtonStatus(bool isEnabled);
 
+    bool GetIsFocus() const
+    {
+        return isFocus_;
+    }
+
+    void SetIsFocus(bool isFocus)
+    {
+        isFocus_ = isFocus;
+    }
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& titleNode, int32_t originIndex)
     {
@@ -81,6 +90,11 @@ protected:
 
     virtual void ChangeTitleButtonIcon(
         const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus);
+
+    virtual bool CanHideFloatingTitle()
+    {
+        return true;
+    }
 
     WindowMode windowMode_;
 

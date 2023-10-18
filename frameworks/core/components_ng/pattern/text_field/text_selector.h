@@ -22,6 +22,11 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 
+// avoid windows build error about macro defined in wincon.h
+#ifdef DOUBLE_CLICK
+#undef DOUBLE_CLICK
+#endif
+
 namespace OHOS::Ace::NG {
 
 using OnAccessibilityCallback = std::function<void()>;
@@ -37,7 +42,8 @@ enum class CaretUpdateType {
     INPUT,
     NONE,
     RIGHT_CLICK,
-    VISIBLE_PASSWORD_ICON
+    VISIBLE_PASSWORD_ICON,
+    DOUBLE_CLICK
 };
 /**
  * Stands for selection indexes

@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -42,7 +43,7 @@ namespace OHOS::Ace::NG {
 namespace {
 void BuildTitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    CHECK_NULL_VOID_NOLOG(navDestinationNode->GetTitle());
+    CHECK_NULL_VOID(navDestinationNode->GetTitle());
     if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }
@@ -62,7 +63,7 @@ void BuildSubtitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, co
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
-    CHECK_NULL_VOID_NOLOG(navDestinationNode->GetSubtitle());
+    CHECK_NULL_VOID(navDestinationNode->GetSubtitle());
     if (navDestinationNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }
@@ -92,12 +93,6 @@ void BuildTitleBar(const RefPtr<NavDestinationGroupNode>& navDestinationNode, co
 
     BuildTitle(navDestinationNode, titleBarNode);
     BuildSubtitle(navDestinationNode, titleBarNode);
-    if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
-        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    } else {
-        titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    }
-    titleBarNode->MarkModifyDone();
 }
 
 void MountTitleBar(const RefPtr<NavDestinationGroupNode>& hostNode)
@@ -110,6 +105,35 @@ void MountTitleBar(const RefPtr<NavDestinationGroupNode>& hostNode)
 }
 
 } // namespace
+
+void NavDestinationPattern::OnActive()
+{
+    Pattern::OnActive();
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navDestinationContext = hostNode->GetRenderContext();
+    CHECK_NULL_VOID(navDestinationContext);
+    if (!(navDestinationContext->GetBackgroundColor().has_value())) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<AppTheme>();
+        if (theme) {
+            navDestinationContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+        }
+    }
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
+        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    } else {
+        titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    }
+    titleBarNode->MarkModifyDone();
+}
 
 void NavDestinationPattern::OnModifyDone()
 {
@@ -126,15 +150,5 @@ void NavDestinationPattern::OnModifyDone()
         }
     }
     MountTitleBar(hostNode);
-    auto navDestinationContext = hostNode->GetRenderContext();
-    CHECK_NULL_VOID(navDestinationContext);
-    if (!(navDestinationContext->GetBackgroundColor().has_value())) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<AppTheme>();
-        if (theme) {
-            navDestinationContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-        }
-    }
 }
 } // namespace OHOS::Ace::NG

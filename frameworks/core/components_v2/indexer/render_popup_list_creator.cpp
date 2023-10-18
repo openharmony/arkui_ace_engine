@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "core/components_v2/indexer/flutter_render_popup_list.h"
-#endif
 #include "core/components_v2/indexer/rosen_render_popup_list.h"
 
 namespace OHOS::Ace::V2 {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderPopupList::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderPopupList>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace::V2

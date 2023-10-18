@@ -232,7 +232,7 @@ void AccessibilityNodeManager::SetRunningPage(const RefPtr<JsAcePage>& page)
     if (GetVersion() == AccessibilityVersion::JS_DECLARATIVE_VERSION) {
         auto domDocument = page ? page->GetDomDocument() : nullptr;
         if (domDocument) {
-            return SetRootNodeId(domDocument->GetRootNodeId());
+            SetRootNodeId(domDocument->GetRootNodeId());
         } else {
             LOGE("domDocument is null");
         }
@@ -711,7 +711,6 @@ std::unique_ptr<JsonValue> AccessibilityNodeManager::DumpComposedElementToJson(N
     auto composedElement = GetComposedElementFromPage(nodeId);
     auto inspector = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement.Upgrade());
     if (!inspector) {
-        LOGE("this is not Inspector composed element");
         return nullptr;
     }
     return inspector->ToJsonObject();
@@ -738,7 +737,7 @@ void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
     auto composedElement = GetComposedElementFromPage(id);
     auto inspector = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement.Upgrade());
     if (!inspector) {
-        LOGE("this is not Inspector composed element");
+        LOGW("this is not Inspector composed element");
         return;
     }
     auto rectInLocal = inspector->GetRenderRectInLocal();

@@ -148,6 +148,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         builder->PushStyle(themeTextStyle);
     }
     UpdateTextStyle(builder, textStyle);
+    textStyle_ = textStyle;
     for (const auto& child : children) {
         if (child) {
             child->UpdateParagraph(frameNode, builder);
@@ -213,7 +214,8 @@ void SpanItem::UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::opti
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (!IsDragging()) {
 #endif // ENABLE_DRAG_FRAMEWORK
-        updateTextAction(content, textStyle);
+        auto data = GetSpanContent();
+        updateTextAction(data, textStyle);
 #ifdef ENABLE_DRAG_FRAMEWORK
     } else {
         if (content.empty()) {
@@ -242,6 +244,17 @@ void SpanItem::UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::opti
         }
     }
 #endif // ENABLE_DRAG_FRAMEWORK
+}
+
+std::string SpanItem::GetSpanContent()
+{
+    std::string data;
+    if (needRemoveNewLine) {
+        data = content.substr(0, content.length() - 1);
+    } else {
+        data = content;
+    }
+    return data;
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -298,5 +311,12 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;
+}
+
+void SpanItem::GetIndex(int32_t& start, int32_t& end) const
+{
+    auto contentLen = StringUtils::ToWstring(content).length();
+    start = position - contentLen;
+    end = position;
 }
 } // namespace OHOS::Ace::NG

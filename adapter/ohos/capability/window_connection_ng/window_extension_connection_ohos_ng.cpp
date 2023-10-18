@@ -73,7 +73,7 @@ public:
         auto task = [weak = originNode_, rsNode = rsOriginNode_, instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(node);
+            CHECK_NULL_VOID(node);
             UpdateFrameNodeTree(node, rsNode);
             auto pattern = AceType::DynamicCast<NG::AbilityComponentPattern>(node->GetPattern());
             if (pattern) {
@@ -181,8 +181,6 @@ void WindowExtensionConnectionAdapterOhosNG::ConnectExtension(const RefPtr<NG::F
     } else {
         windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), windowId, callback);
     }
-#else
-    LOGI("unrosen engine doesn't support ability component");
 #endif
 }
 
@@ -191,8 +189,6 @@ void WindowExtensionConnectionAdapterOhosNG::RemoveExtension()
     if (windowExtension_) {
         LOGI("remove extension");
         windowExtension_->DisconnectExtension();
-    } else {
-        LOGI("ability doesn't connect to window extension. remove extension fail");
     }
 }
 
@@ -201,8 +197,6 @@ void WindowExtensionConnectionAdapterOhosNG::Show()
     LOGI("show WindowExtensionConnectionAdapterOhos");
     if (windowExtension_) {
         windowExtension_->Show();
-    } else {
-        LOGI("ability doesn't connect to window extension. show extension fail");
     }
 }
 
@@ -211,8 +205,6 @@ void WindowExtensionConnectionAdapterOhosNG::Hide()
     LOGI("hide WindowExtensionConnectionAdapterOhos");
     if (windowExtension_) {
         windowExtension_->Hide();
-    } else {
-        LOGI("ability doesn't connect to window extension. show extension fail");
     }
 }
 
@@ -223,8 +215,6 @@ void WindowExtensionConnectionAdapterOhosNG::UpdateRect(const Rect& rect)
         RectConverterNG(rect, rosenRect);
         LOGI("UpdateRect rect: %{public}s", rect.ToString().c_str());
         windowExtension_->SetBounds(rosenRect);
-    } else {
-        LOGI("ability doesn't connect to window extension.cannot update rect region ");
     }
 }
 } // namespace OHOS::Ace

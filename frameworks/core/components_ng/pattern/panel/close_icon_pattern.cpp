@@ -75,7 +75,7 @@ void CloseIconPattern::InitButtonEvent()
     auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
     auto clickButtonCallback = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->ButtonClickEvent();
     };
     if (buttonClickListenr_) {

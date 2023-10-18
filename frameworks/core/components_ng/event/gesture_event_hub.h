@@ -41,6 +41,11 @@ namespace OHOS::Ace {
 class UnifiedData;
 }
 #endif
+enum class MenuPreviewMode {
+    NONE,
+    IMAGE,
+    CUSTOM,
+};
 namespace OHOS::Ace::NG {
 
 enum class HitTestMode {
@@ -110,6 +115,8 @@ constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
 constexpr float PIXELMAP_DRAG_WGR_TEXT_SCALE = 2.0f;
 constexpr float PIXELMAP_DRAG_WGR_SCALE = 3.0f;
+constexpr float DEFALUT_DRAG_PPIXELMAP_SCALE = 1.05f;
+constexpr float PIXELMAP_DRAG_DEFAULT_HEIGHT = -28.0f;
 #endif
 class EventHub;
 
@@ -158,6 +165,14 @@ public:
             return;
         }
         scrollableActuator_->RemoveScrollEdgeEffect(scrollEffect);
+    }
+
+    void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
+    {
+        if (!scrollableActuator_) {
+            scrollableActuator_ = MakeRefPtr<ScrollableActuator>(WeakClaim(this));
+        }
+        scrollableActuator_->AddPreviewMenuHandleDragEnd(std::move(actionEnd));
     }
 
     // Set by user define, which will replace old one.
@@ -411,6 +426,16 @@ public:
     {
         return isTextDraggable_;
     }
+
+    void SetPreviewMode(MenuPreviewMode mode)
+    {
+        previewMode_ = mode;
+    }
+
+    MenuPreviewMode GetPreviewMode()
+    {
+        return previewMode_;
+    }
 #endif // ENABLE_DRAG_FRAMEWORK
 
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
@@ -433,16 +458,7 @@ public:
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallback GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 
-    void SetThumbnailPixelMapCallback(std::function<void()>&& callback)
-    {
-        callback_ = std::move(callback);
-    }
-
-    bool HasThumbnailCallback() const
-    {
-        return static_cast<bool>(callback_);
-    }
-
+    std::function<void()> GetMousePixelMapCallback(const GestureEvent& info);
     OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f) const;
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -509,9 +525,9 @@ private:
     bool isReceivedDragGestureInfo_ = false;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
+    MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
-    std::function<void()> callback_;
 #endif
 };
 

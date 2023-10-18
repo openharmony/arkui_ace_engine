@@ -45,8 +45,8 @@
 namespace OHOS::Ace::NG {
 class UIExtensionLifecycleListener : public Rosen::ILifecycleListener {
 public:
-    explicit UIExtensionLifecycleListener(const WeakPtr<UIExtensionPattern>& uiExtensionPattern_)
-        : uiExtensionPattern_(uiExtensionPattern_) {}
+    UIExtensionLifecycleListener(int32_t instanceId, const WeakPtr<UIExtensionPattern>& uiExtensionPattern_)
+        : instanceId_(instanceId), uiExtensionPattern_(uiExtensionPattern_) {}
     virtual ~UIExtensionLifecycleListener() = default;
 
     void OnActivation() override {}
@@ -55,59 +55,85 @@ public:
 
     void OnConnect() override
     {
-        auto uiExtensionPattern = uiExtensionPattern_.Upgrade();
-        CHECK_NULL_VOID(uiExtensionPattern);
-        uiExtensionPattern->OnConnect();
+        ContainerScope scope(instanceId_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([weak = uiExtensionPattern_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnConnect();
+        }, TaskExecutor::TaskType::UI);
     }
 
     void OnDisconnect() override
     {
-        auto uiExtensionPattern = uiExtensionPattern_.Upgrade();
-        CHECK_NULL_VOID(uiExtensionPattern);
-        uiExtensionPattern->OnDisconnect();
+        ContainerScope scope(instanceId_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([weak = uiExtensionPattern_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnDisconnect();
+        }, TaskExecutor::TaskType::UI);
     }
 
     void OnExtensionDied() override
     {
-        auto uiExtensionPattern = uiExtensionPattern_.Upgrade();
-        CHECK_NULL_VOID(uiExtensionPattern);
-        uiExtensionPattern->OnExtensionDied();
+        ContainerScope scope(instanceId_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([weak = uiExtensionPattern_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnExtensionDied();
+        }, TaskExecutor::TaskType::UI);
     }
 
 private:
+    int32_t instanceId_;
     WeakPtr<UIExtensionPattern> uiExtensionPattern_;
 };
 
-UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
+UIExtensionPattern::UIExtensionPattern() = default;
+
+UIExtensionPattern::~UIExtensionPattern()
 {
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_VOID_NOLOG(container);
-    auto callerToken = container->GetToken();
-    auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
-    if (want.GetElement().GetBundleName() == "AbilityComp") {
-        return;
-    }
-    Rosen::SessionInfo extensionSessionInfo = {
-        .bundleName_ = want.GetElement().GetBundleName(),
-        .abilityName_ = want.GetElement().GetAbilityName(),
-        .callerToken_ = callerToken,
-        .want = std::make_shared<Want>(want),
-    };
-    session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
-    CHECK_NULL_VOID(session_);
-    RegisterLifecycleListener();
-    LOGI("UIExtension request UIExtensionAbility start");
-    RequestExtensionSessionActivation();
-    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    sptr<Rosen::ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback =
-        new (std::nothrow) Rosen::ExtensionSession::ExtensionSessionEventCallback();
-    extensionSession->RegisterExtensionSessionEventCallback(extSessionEventCallback);
+    DestorySession();
 }
 
-UIExtensionPattern::UIExtensionPattern(const AAFwk::Want& want)
+void UIExtensionPattern::DestorySession()
 {
+    UnregisterLifecycleListener();
+    UnregisterAbilityResultListener();
+    RequestExtensionSessionDestruction();
+    // Native modal page destroy callback
+    if (onModalDestroy_) {
+        onModalDestroy_();
+    }
+}
+
+void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
+{
+    auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
+    UpdateWant(want);
+}
+
+void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
+{
+    // Prohibit rebuilding the session unless the Want is updated.
+    if (session_ && (!session_->GetSessionInfo().want->IsEquals(want))) {
+        DestorySession();
+        session_ = nullptr;
+    }
+    CHECK_NULL_VOID(!session_);
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     auto callerToken = container->GetToken();
     Rosen::SessionInfo extensionSessionInfo = {
         .bundleName_ = want.GetElement().GetBundleName(),
@@ -126,48 +152,22 @@ UIExtensionPattern::UIExtensionPattern(const AAFwk::Want& want)
     extensionSession->RegisterExtensionSessionEventCallback(extSessionEventCallback);
 }
 
-UIExtensionPattern::~UIExtensionPattern()
-{
-    UnregisterLifecycleListener();
-    UnregisterAbilityResultListener();
-    RequestExtensionSessionDestruction();
-    // Native modal page destroy callback
-    if (onModalDestroy_) {
-        onModalDestroy_();
-    }
-}
-
 void UIExtensionPattern::OnConnect()
 {
+    CHECK_RUN_ON(UI);
     LOGI("UIExtension OnConnect called");
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)]() {
-            auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(extensionPattern);
-            extensionPattern->OnConnectInner();
-        },
-        TaskExecutor::TaskType::UI);
-}
-
-void UIExtensionPattern::OnConnectInner()
-{
-    CHECK_NULL_VOID_NOLOG(session_);
+    CHECK_NULL_VOID(session_);
     ContainerScope scope(instanceId_);
     contentNode_ = FrameNode::CreateFrameNode(
         V2::UI_EXTENSION_SURFACE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-    CHECK_NULL_VOID_NOLOG(context);
+    CHECK_NULL_VOID(context);
     auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID_NOLOG(surfaceNode);
+    CHECK_NULL_VOID(surfaceNode);
     context->SetRSNode(surfaceNode);
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -179,54 +179,51 @@ void UIExtensionPattern::OnConnectInner()
     if (onModalRemoteReadyCallback_) {
         onModalRemoteReadyCallback_(std::make_shared<ModalUIExtensionProxyImpl>(session_));
     }
+    bool isFocused = IsCurrentFocus();
     RegisterVisibleAreaChange();
-    TransferFocusState(IsCurrentFocus());
+    TransferFocusState(isFocused);
+    if (isFocused) {
+        auto context = AceType::DynamicCast<PipelineContext>(pipeline);
+        auto uiExtensionManager = context->GetUIExtensionManager();
+        uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
+    }
 }
 
 void UIExtensionPattern::OnDisconnect()
 {
+    CHECK_RUN_ON(UI);
     LOGI("UIExtension OnDisconnect called");
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
     state_ = AbilityState::DESTRUCTION;
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)]() {
-            auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(extensionPattern);
-            if (extensionPattern->onReleaseCallback_) {
-                extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
-            }
-        },
-        TaskExecutor::TaskType::UI);
+    if (onReleaseCallback_) {
+        onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
+    }
 }
 
 void UIExtensionPattern::OnExtensionDied()
 {
+    CHECK_RUN_ON(UI);
     LOGI("UIExtension OnExtensionDied called");
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(contentNode_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     state_ = AbilityState::DESTRUCTION;
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)]() {
-            auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(extensionPattern);
-            if (extensionPattern->onReleaseCallback_) {
-                extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
-            }
-        },
-        TaskExecutor::TaskType::UI);
+    if (onReleaseCallback_) {
+        onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
+    }
+}
+
+bool UIExtensionPattern::OnBackPressed()
+{
+    bool isConsumed = false;
+    DispatchBackpressedEventForConsumed(isConsumed);
+    return isConsumed;
 }
 
 void UIExtensionPattern::RegisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
-    lifecycleListener_ = std::make_shared<UIExtensionLifecycleListener>(WeakClaim(this));
+    lifecycleListener_ = std::make_shared<UIExtensionLifecycleListener>(instanceId_, WeakClaim(this));
     session_->RegisterLifecycleListener(lifecycleListener_);
 }
 
@@ -272,65 +269,72 @@ void UIExtensionPattern::RequestExtensionSessionActivation()
 {
     LOGI("UIExtension request UIExtensionAbility foreground, AbilityState=%{public}d", static_cast<int>(state_));
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
     LOGI("UIExtension request host windowId %{public}u", hostWindowId);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
-        extensionSession, hostWindowId);
-    if (errcode != OHOS::Rosen::WSError::WS_OK) {
-        int32_t code = static_cast<int32_t>(errcode);
-        std::string name = "start_ability_fail";
-        std::string message = "Start ui extension ability failed, please check the want of UIextensionAbility.";
-        lastError_ = { code, name, message };
-        if (onErrorCallback_) {
-            ErrorMsg error;
-            std::swap(lastError_, error);
-            onErrorCallback_(error.code, error.name, error.message);
-        }
-    } else {
-        state_ = AbilityState::FOREGROUND;
-    }
+    auto&& resultCallback =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor] (OHOS::Rosen::WSError errcode) {
+        taskExecutor->PostTask([weak, instanceId, errcode] {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ProcessUIExtensionSessionActivationResult(errcode);
+        }, TaskExecutor::TaskType::UI);
+    };
+    state_ = AbilityState::FOREGROUND;
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
+        extensionSession, hostWindowId, resultCallback);
 }
 
 void UIExtensionPattern::RequestExtensionSessionBackground()
 {
     LOGI("UIExtension request UIExtensionAbility background, AbilityState=%{public}d", static_cast<int>(state_));
-    if (state_ == AbilityState::FOREGROUND) {
-        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-        auto errcode =
-            Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession);
-        if (errcode != OHOS::Rosen::WSError::WS_OK) {
-            if (onErrorCallback_) {
-                int32_t code = static_cast<int32_t>(errcode);
-                std::string name = "background_fail";
-                std::string message = "background ui extension ability failed, please check AMS log.";
-                onErrorCallback_(code, name, message);
-            }
-        } else {
-            state_ = AbilityState::BACKGROUND;
-        }
+    if (state_ != AbilityState::FOREGROUND) {
+        return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto&& resultCallback =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor] (OHOS::Rosen::WSError errcode) {
+        taskExecutor->PostTask([weak, instanceId, errcode] {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ProcessUIExtensionSessionBackgroundResult(errcode);
+        }, TaskExecutor::TaskType::UI);
+    };
+    state_ = AbilityState::BACKGROUND;
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession, resultCallback);
 }
 
 void UIExtensionPattern::RequestExtensionSessionDestruction()
 {
     LOGI("UIExtension request UIExtensionAbility destroy, AbilityState=%{public}d", static_cast<int>(state_));
-    if (state_ != AbilityState::DESTRUCTION && state_ != AbilityState::NONE) {
-        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-        auto errcode =
-            Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession);
-        if (errcode != OHOS::Rosen::WSError::WS_OK) {
-            if (onErrorCallback_) {
-                int32_t code = static_cast<int32_t>(errcode);
-                std::string name = "terminate_fail";
-                std::string message = "terminate ui extension ability failed, please check AMS log.";
-                onErrorCallback_(code, name, message);
-            }
-        } else {
-            state_ = AbilityState::DESTRUCTION;
-        }
+    if (state_ == AbilityState::DESTRUCTION || state_ == AbilityState::NONE) {
+        return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto&& resultCallback =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor] (OHOS::Rosen::WSError errcode) {
+        taskExecutor->PostTask([weak, instanceId, errcode] {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ProcessUIExtensionSessionDestructionResult(errcode);
+        }, TaskExecutor::TaskType::UI);
+    };
+    state_ = AbilityState::DESTRUCTION;
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession, resultCallback);
 }
 
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
@@ -342,7 +346,7 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (textFieldManager) {
@@ -402,18 +406,22 @@ void UIExtensionPattern::HandleFocusEvent()
         DisPatchFocusActiveEvent(true);
     }
     TransferFocusState(true);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
 }
 
 void UIExtensionPattern::HandleBlurEvent()
 {
     DisPatchFocusActiveEvent(false);
     TransferFocusState(false);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField();
     }
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    uiExtensionManager->RegisterUIExtensionInFocus(nullptr);
 }
 
 bool UIExtensionPattern::KeyEventConsumed(const KeyEvent& event)
@@ -477,14 +485,15 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID_NOLOG(pointerEvent);
+    CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
-    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
+    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
+    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID_NOLOG(focusHub);
+    CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
@@ -503,9 +512,9 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID_NOLOG(pointerEvent);
+    CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
@@ -527,17 +536,17 @@ void UIExtensionPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID_NOLOG(hub);
+    CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID_NOLOG(gestureHub);
+    CHECK_NULL_VOID(gestureHub);
     InitTouchEvent(gestureHub);
     auto inputHub = hub->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID_NOLOG(inputHub);
+    CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID_NOLOG(focusHub);
+    CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
 }
 
@@ -551,9 +560,9 @@ void UIExtensionPattern::SetOnRemoteReadyCallback(const std::function<void(const
     onRemoteReadyCallback_ = std::move(callback);
 
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->notifyRemoteReadyFunc_ =
@@ -575,9 +584,9 @@ void UIExtensionPattern::SetModalOnRemoteReadyCallback(
     onModalRemoteReadyCallback_ = std::move(callback);
 
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->notifyRemoteReadyFunc_ =
@@ -620,20 +629,20 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
     onResultCallback_ = std::move(callback);
 
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->transferAbilityResultFunc_ =
         [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor](int32_t code, const AAFwk::Want& want) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
-            pattern->state_ = AbilityState::DESTRUCTION;
-            taskExecutor->PostTask([pattern, instanceId, code, want]() {
+            taskExecutor->PostTask([weak, instanceId, code, want]() {
                 ContainerScope scope(instanceId);
-                LOGI("UIExtension OnResult called");
-                if (pattern && pattern->onResultCallback_) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (pattern && (pattern->state_ != AbilityState::DESTRUCTION) && pattern->onResultCallback_) {
+                    LOGI("UIExtension OnResult called");
+                    pattern->state_ = AbilityState::DESTRUCTION;
                     pattern->onResultCallback_(code, want);
                 }
             }, TaskExecutor::TaskType::UI);
@@ -645,9 +654,9 @@ void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAF
     onReceiveCallback_ = std::move(callback);
 
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->transferExtensionDataFunc_ =
@@ -675,14 +684,14 @@ void UIExtensionPattern::OnVisibleChange(bool visible)
 void UIExtensionPattern::RegisterVisibleAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(uiExtension);
+        CHECK_NULL_VOID(uiExtension);
         uiExtension->OnVisibleChange(visible);
     };
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
 }
 
@@ -703,9 +712,9 @@ void UIExtensionPattern::UpdateTextFieldManager(const Offset& offset, float heig
 bool UIExtensionPattern::IsCurrentFocus() const
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, false);
+    CHECK_NULL_RETURN(host, false);
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_RETURN_NOLOG(focusHub, false);
+    CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsCurrentFocus();
 }
 
@@ -713,6 +722,12 @@ int32_t UIExtensionPattern::GetSessionId()
 {
     CHECK_NULL_RETURN(session_, 0);
     return session_->GetPersistentId();
+}
+
+void UIExtensionPattern::DispatchBackpressedEventForConsumed(bool& isConsumed)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferBackPressedEventForConsumed(isConsumed);
 }
 
 void UIExtensionPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -745,5 +760,47 @@ void UIExtensionPattern::TransferFocusState(bool focusState)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFocusStateEvent(focusState);
+}
+
+void UIExtensionPattern::ProcessUIExtensionSessionActivationResult(OHOS::Rosen::WSError errcode)
+{
+    if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        int32_t code = static_cast<int32_t>(errcode);
+        std::string name = "start_ability_fail";
+        std::string message = "Start ui extension ability failed, please check the want of UIextensionAbility.";
+        lastError_ = { code, name, message };
+        state_ = AbilityState::NONE;
+        if (onErrorCallback_) {
+            ErrorMsg error;
+            std::swap(lastError_, error);
+            onErrorCallback_(error.code, error.name, error.message);
+        }
+    }
+}
+
+void UIExtensionPattern::ProcessUIExtensionSessionBackgroundResult(OHOS::Rosen::WSError errcode)
+{
+    if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        state_ = AbilityState::NONE;
+        if (onErrorCallback_) {
+            int32_t code = static_cast<int32_t>(errcode);
+            std::string name = "background_fail";
+            std::string message = "background ui extension ability failed, please check AMS log.";
+            onErrorCallback_(code, name, message);
+        }
+    }
+}
+
+void UIExtensionPattern::ProcessUIExtensionSessionDestructionResult(OHOS::Rosen::WSError errcode)
+{
+    if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        state_ = AbilityState::NONE;
+        if (onErrorCallback_) {
+            int32_t code = static_cast<int32_t>(errcode);
+            std::string name = "terminate_fail";
+            std::string message = "terminate ui extension ability failed, please check AMS log.";
+            onErrorCallback_(code, name, message);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

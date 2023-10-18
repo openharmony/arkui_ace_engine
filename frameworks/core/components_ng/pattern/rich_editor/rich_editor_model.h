@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <mutex>
+#include <optional>
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
@@ -26,6 +27,8 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/property/border_property.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
 struct ImageSpanSize {
@@ -37,6 +40,8 @@ struct ImageSpanAttribute {
     std::optional<ImageSpanSize> size;
     std::optional<VerticalAlign> verticalAlign;
     std::optional<ImageFit> objectFit;
+    std::optional<OHOS::Ace::NG::MarginProperty> marginProp;
+    std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
 };
 struct ImageSpanOptions {
     std::optional<int32_t> offset;
@@ -66,12 +71,6 @@ struct SpanPositionInfo {
     int32_t spanOffset_ = 0;
 };
 
-struct TextSpanOptions {
-    std::optional<int32_t> offset;
-    std::string value;
-    std::optional<TextStyle> style;
-};
-
 struct UpdateSpanStyle {
     void ResetStyle()
     {
@@ -87,6 +86,8 @@ struct UpdateSpanStyle {
         updateImageHeight.reset();
         updateImageVerticalAlign.reset();
         updateImageFit.reset();
+        marginProp.reset();
+        borderRadius.reset();
     }
 
     std::optional<Color> updateTextColor = std::nullopt;
@@ -101,6 +102,18 @@ struct UpdateSpanStyle {
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
     std::optional<VerticalAlign> updateImageVerticalAlign = std::nullopt;
     std::optional<ImageFit> updateImageFit = std::nullopt;
+    std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
+    std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
+};
+
+struct UpdateParagraphStyle {
+    void Reset()
+    {
+        textAlign.reset();
+        leadingMargin.reset();
+    }
+    std::optional<TextAlign> textAlign;
+    std::optional<NG::LeadingMargin> leadingMargin;
 };
 
 struct RangeOptions {
@@ -113,6 +126,13 @@ struct SelectMenuParam {
     std::function<void()> onDisappear;
 };
 
+struct TextSpanOptions {
+    std::optional<int32_t> offset;
+    std::string value;
+    std::optional<TextStyle> style;
+    std::optional<UpdateParagraphStyle> paraStyle;
+};
+
 class ACE_EXPORT RichEditorControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorControllerBase, AceType);
 
@@ -121,9 +141,12 @@ public:
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
+    virtual void UpdateParagraphStyle(int32_t start, int32_t end, const UpdateParagraphStyle& style) = 0;
     virtual void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;
+    virtual void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) = 0;
     virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
     virtual RichEditorSelection GetSpansInfo(int32_t start, int32_t end) = 0;
+    virtual std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual void CloseSelectionMenu() = 0;
 };
@@ -144,7 +167,7 @@ public:
     virtual void SetCopyOption(CopyOptions& copyOptions) = 0;
     virtual void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) = 0;
-    virtual void SetOnPaste(std::function<bool()>&& func) = 0;
+    virtual void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

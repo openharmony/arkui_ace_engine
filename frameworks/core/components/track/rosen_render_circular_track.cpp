@@ -53,13 +53,9 @@ void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
         }
         colors[trackInfo.gradient.GetColors().size()] = trackInfo.gradient.GetColors()[0].GetColor().GetValue();
         float position[] = { COLOR_STOP, 2.0 * COLOR_STOP, 1.0 };
-#ifdef USE_SYSTEM_SKIA
-        paint.setShader(SkGradientShader::MakeSweep(trackInfo.center.GetX(), trackInfo.center.GetY(), colors, position,
-            COLOR_NUM, SkShader::kClamp_TileMode, trackInfo.startDegree, trackInfo.startDegree + 360, true, nullptr));
-#else
+
         paint.setShader(SkGradientShader::MakeSweep(trackInfo.center.GetX(), trackInfo.center.GetY(), colors, position,
             COLOR_NUM, SkTileMode::kClamp, trackInfo.startDegree, trackInfo.startDegree + 360, true, nullptr));
-#endif
     } else {
         paint.setColor(trackInfo.color.GetValue());
     }
@@ -72,8 +68,8 @@ void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
                         trackInfo.center.GetY() + (thickness / 2) - trackInfo.radius,
                         trackInfo.center.GetX() + trackInfo.radius - (thickness / 2),
                         trackInfo.center.GetY() + trackInfo.radius - (thickness / 2) },
-        trackInfo.clockwise * trackInfo.startDegree + degreeOffset,
-        trackInfo.clockwise * trackInfo.sweepDegree, false, paint);
+        trackInfo.clockwise * trackInfo.startDegree + degreeOffset, trackInfo.clockwise * trackInfo.sweepDegree, false,
+        paint);
 #else
     RSPen pen;
     pen.SetAntiAlias(true);
@@ -98,11 +94,10 @@ void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
 
     canvas->AttachPen(pen);
-    canvas->DrawArc(
-        RSRect(trackInfo.center.GetX() + (thickness / 2) - trackInfo.radius,
-            trackInfo.center.GetY() + (thickness / 2) - trackInfo.radius,
-            trackInfo.center.GetX() + trackInfo.radius - (thickness / 2),
-            trackInfo.center.GetY() + trackInfo.radius - (thickness / 2)),
+    canvas->DrawArc(RSRect(trackInfo.center.GetX() + (thickness / 2) - trackInfo.radius,
+                        trackInfo.center.GetY() + (thickness / 2) - trackInfo.radius,
+                        trackInfo.center.GetX() + trackInfo.radius - (thickness / 2),
+                        trackInfo.center.GetY() + trackInfo.radius - (thickness / 2)),
         trackInfo.clockwise * trackInfo.startDegree, trackInfo.clockwise * trackInfo.sweepDegree);
     canvas->DetachPen();
 #endif

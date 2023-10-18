@@ -247,7 +247,7 @@ void ListItemGroupLayoutAlgorithm::LayoutListItemAll(LayoutWrapper* layoutWrappe
         if (currentIndex < (totalItemCount_ - 1)) {
             currentEndPos += spaceWidth_;
         }
-        
+
     }
 }
 
@@ -572,7 +572,7 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
 void ListItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
     float crossSize, float startPos)
 {
-    CHECK_NULL_VOID_NOLOG(wrapper);
+    CHECK_NULL_VOID(wrapper);
     auto offset = paddingOffset;
     float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     float laneCrossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
@@ -632,15 +632,15 @@ void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLa
     const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup)
 {
     auto host = itemLayoutWrapper->GetHostNode();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto listItem = host->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID_NOLOG(listItem);
+    CHECK_NULL_VOID(listItem);
     listItem->SetIndexInListItemGroup(indexInGroup);
 
     host = groupLayoutWrapper->GetHostNode();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto listItemGroup = host->GetPattern<ListItemGroupPattern>();
-    CHECK_NULL_VOID_NOLOG(listItemGroup);
+    CHECK_NULL_VOID(listItemGroup);
     listItem->SetIndexInList(listItemGroup->GetIndexInList());
 }
 

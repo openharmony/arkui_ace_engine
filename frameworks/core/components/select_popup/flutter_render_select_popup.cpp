@@ -104,13 +104,9 @@ void FlutterRenderSelectPopup::PaintGradient(RenderContext& context, bool isTop)
         colors[1] = tvBackColor_.ChangeAlpha(0).GetValue();
     }
     const float stopPositions[2] = { 0.0f, 0.85f };
-#ifdef USE_SYSTEM_SKIA
-    paintGradient.paint()->setShader(
-        SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkShader::kMirror_TileMode));
-#else
+
     paintGradient.paint()->setShader(
         SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kMirror));
-#endif
     canvas->drawRect(gradientRect.Left(), gradientRect.Top(), gradientRect.Right(), gradientRect.Bottom(),
         paintGradient, paintDataGradient);
 }

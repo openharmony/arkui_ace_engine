@@ -23,53 +23,51 @@
 #define private public
 #define protected public
 
-#include "base/utils/utils.h"
+#include "test/mock/base/mock_task_executor.h"
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
-#include "base/test/mock/mock_task_executor.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_algorithm.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_property.h"
-
+#include "base/utils/utils.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_algorithm.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_property.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
-#include "core/components_ng/pattern/flex/flex_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-
+#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
-#include "core/components_ng/test/mock/render/mock_render_context.h"
 
 #undef private
 #undef protected
@@ -128,8 +126,7 @@ void CalendarPickerTestNg::CreateCalendarPicker(RefPtr<OHOS::Ace::MockThemeManag
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())); // SetTextStyle
     PickerTextStyle textStyle;
     calendarPickerModel.SetTextStyle(textStyle);
-    auto onChange = [](const std::string& /* info */) {
-    };
+    auto onChange = [](const std::string& /* info */) {};
     calendarPickerModel.SetOnChange(onChange);
     calendarPickerModel.SetChangeEvent(onChange);
 }
@@ -295,16 +292,16 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest002, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-        EXPECT_CALL(*themeManager, GetTheme(_))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     CalendarSettingData settingData;
     CalendarPickerModelNG calendarPickerModel;
 
@@ -332,16 +329,16 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest003, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-        EXPECT_CALL(*themeManager, GetTheme(_))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-            .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     CalendarSettingData settingData;
     CalendarPickerModelNG calendarPickerModel;
 
@@ -774,8 +771,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest012, TestSize.Level1)
     EXPECT_TRUE(pickerPattern->HandleFocusEvent(keyEventOne));
 
     KeyEvent keyEventTwo;
-    keyEventTwo.code = KeyCode::KEY_TAB,
-    pickerPattern->isFirtFocus_ = true;
+    keyEventTwo.code = KeyCode::KEY_TAB, pickerPattern->isFirtFocus_ = true;
     pickerPattern->SetDialogShow(false);
     EXPECT_TRUE(pickerPattern->HandleFocusEvent(keyEventTwo));
 
@@ -2040,8 +2036,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest047, TestSize.Level1)
 
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
     KeyEvent keyEvent;
-    keyEvent.code = KeyCode::KEY_TAB,
-    pickerPattern->isFirtFocus_ = false;
+    keyEvent.code = KeyCode::KEY_TAB, pickerPattern->isFirtFocus_ = false;
     pickerPattern->SetDialogShow(false);
     EXPECT_FALSE(pickerPattern->HandleFocusEvent(keyEvent));
 
@@ -2117,7 +2112,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest001, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2207,7 +2202,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest002, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2300,7 +2295,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest004, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
@@ -2366,7 +2361,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest006, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2378,7 +2373,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest006, TestSize.Level1)
     json->Put("day", 20);
     auto info = json->ToString();
     CalendarDialogView calendarDialogView;
-    auto changeEvent = [](const std::string& /* info */) {  };
+    auto changeEvent = [](const std::string& /* info */) {};
     CalendarSettingData settingData;
     calendarDialogView.OnSelectedChangeEvent(1, info, changeEvent, settingData);
 
@@ -2407,7 +2402,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest007, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2415,7 +2410,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest007, TestSize.Level1)
 
     const std::string callbackInfo;
     CalendarDialogView calendarDialogView;
-    auto changeEvent = [](const std::string& /* info */) {  };
+    auto changeEvent = [](const std::string& /* info */) {};
     CalendarSettingData settingData;
     calendarDialogView.OnSelectedChangeEvent(1, callbackInfo, changeEvent, settingData);
 
@@ -2447,9 +2442,9 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerEventHubTest001, TestSize.Level1)
     calendarpickerEventHub->UpdateOnChangeEvent(info);
     calendarpickerEventHub->FireLayoutChangeEvent();
 
-    auto changeEvent1 = [](const std::string& /* info */) {  };
-    auto changeEvent2 = [](const std::string& /* info */) {  };
-    auto changeEvent3 = [](const std::string& /* info */) {  };
+    auto changeEvent1 = [](const std::string& /* info */) {};
+    auto changeEvent2 = [](const std::string& /* info */) {};
+    auto changeEvent3 = [](const std::string& /* info */) {};
     calendarpickerEventHub->SetInputChangeEvent(std::move(changeEvent1));
     calendarpickerEventHub->SetChangeEvent(std::move(changeEvent2));
     calendarpickerEventHub->SetOnChangeEvent(std::move(changeEvent3));
@@ -2482,7 +2477,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest001, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2548,7 +2543,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest002, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2610,7 +2605,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest003, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2640,7 +2635,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest004, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2685,7 +2680,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest005, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2717,7 +2712,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest006, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2725,7 +2720,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest006, TestSize.Level1)
 
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));;
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    ;
 
     dialogPattern->HandleEntryLayoutChange();
     EXPECT_FALSE(dialogPattern->isFirstAddhotZoneRect_);
@@ -2755,13 +2751,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest007, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
 
-    dialogPattern->GetEntryNode();
     dialogPattern->GetDialogOffset();
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
@@ -2791,7 +2786,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest008, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -2880,7 +2875,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest009, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
@@ -2918,14 +2913,14 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest010, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto contentNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto contentNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(contentNode, nullptr);
-    auto columnNode =  AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(0));
+    auto columnNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(columnNode, nullptr);
 
-    auto operationsNode =  AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
+    auto operationsNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
     ASSERT_NE(operationsNode, nullptr);
-    auto buttonConfirmNode =  AceType::DynamicCast<FrameNode>(operationsNode->GetLastChild());
+    auto buttonConfirmNode = AceType::DynamicCast<FrameNode>(operationsNode->GetLastChild());
     ASSERT_NE(buttonConfirmNode, nullptr);
 
     auto gesture = buttonConfirmNode->GetOrCreateGestureEventHub();
@@ -2958,7 +2953,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest011, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -3005,7 +3000,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest012, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -3074,7 +3069,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest013, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -3152,7 +3147,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest014, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -3220,7 +3215,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest015, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -3260,7 +3255,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest016, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -3295,7 +3290,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest017, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -3373,19 +3368,18 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest018, TestSize.Level1)
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
 
-    const RefPtr<FrameNode> buttonNode;
     auto currentMonthData = dialogPattern->GetCalendarPattern()->GetCurrentMonthData();
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 0);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 1);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 2);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 3);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 4);
+    dialogPattern->HandleTitleArrowsClickEvent(0);
+    dialogPattern->HandleTitleArrowsClickEvent(1);
+    dialogPattern->HandleTitleArrowsClickEvent(2);
+    dialogPattern->HandleTitleArrowsClickEvent(3);
+    dialogPattern->HandleTitleArrowsClickEvent(4);
 }
 
 /**
@@ -3423,7 +3417,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest020, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -3459,7 +3453,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest021, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -3529,19 +3523,18 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest022, TestSize.Level1)
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
 
-    const RefPtr<FrameNode> buttonNode;
     auto currentMonthData = dialogPattern->GetCalendarPattern()->GetCurrentMonthData();
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 0);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 1);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 2);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 3);
-    dialogPattern->HandleTitleArrowsClickEvent(buttonNode, 4);
+    dialogPattern->HandleTitleArrowsClickEvent(0);
+    dialogPattern->HandleTitleArrowsClickEvent(1);
+    dialogPattern->HandleTitleArrowsClickEvent(2);
+    dialogPattern->HandleTitleArrowsClickEvent(3);
+    dialogPattern->HandleTitleArrowsClickEvent(4);
 }
 
 /**
@@ -3564,7 +3557,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest023, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
@@ -3604,7 +3597,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest024, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
@@ -3640,7 +3633,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest025, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 
@@ -3673,7 +3666,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest026, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
@@ -3710,7 +3703,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest027, TestSize.Level1)
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
-    auto calendarDialogNode =  AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
 
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
@@ -3870,40 +3863,40 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutAlgorithmTest001, TestSize.Le
     auto dayNode = AceType::DynamicCast<FrameNode>(contentFrameNode->GetOrCreateChildByIndex(4));
     auto dayContentLayoutProperty = dayNode->GetLayoutProperty<TextLayoutProperty>();
     RefPtr<GeometryNode> dayContentFrameNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> dayContentNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        dayNode, dayContentFrameNodeGeometryNode, dayNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> dayContentNodeLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dayNode, dayContentFrameNodeGeometryNode, dayNode->GetLayoutProperty());
     ASSERT_NE(dayContentNodeLayoutWrapper, nullptr);
     contentNodeLayoutWrapper->AppendChild(dayContentNodeLayoutWrapper);
 
     auto buttonNode1 = AceType::DynamicCast<FrameNode>(flexFrameNode->GetOrCreateChildByIndex(0));
     auto button1LayoutProperty = buttonNode1->GetLayoutProperty<ButtonLayoutProperty>();
     RefPtr<GeometryNode> button1NodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> button1NodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        buttonNode1, button1NodeGeometryNode, buttonNode1->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> button1NodeLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(buttonNode1, button1NodeGeometryNode, buttonNode1->GetLayoutProperty());
     ASSERT_NE(button1NodeLayoutWrapper, nullptr);
     flexNodeLayoutWrapper->AppendChild(button1NodeLayoutWrapper);
 
     auto buttonNode2 = AceType::DynamicCast<FrameNode>(flexFrameNode->GetOrCreateChildByIndex(1));
     auto button2LayoutProperty = buttonNode2->GetLayoutProperty<ButtonLayoutProperty>();
     RefPtr<GeometryNode> button2NodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> button2NodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        buttonNode2, button2NodeGeometryNode, buttonNode2->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> button2NodeLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(buttonNode2, button2NodeGeometryNode, buttonNode2->GetLayoutProperty());
     ASSERT_NE(button2NodeLayoutWrapper, nullptr);
     flexNodeLayoutWrapper->AppendChild(button2NodeLayoutWrapper);
 
     auto imageNode1 = AceType::DynamicCast<FrameNode>(buttonNode1->GetOrCreateChildByIndex(0));
     auto image1LayoutProperty = imageNode1->GetLayoutProperty<ImageLayoutProperty>();
     RefPtr<GeometryNode> image1NodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> image1NodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        imageNode1, image1NodeGeometryNode, imageNode1->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> image1NodeLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(imageNode1, image1NodeGeometryNode, imageNode1->GetLayoutProperty());
     ASSERT_NE(image1NodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(image1NodeLayoutWrapper);
 
     auto imageNode2 = AceType::DynamicCast<FrameNode>(buttonNode2->GetOrCreateChildByIndex(0));
     auto image2LayoutProperty = imageNode2->GetLayoutProperty<ImageLayoutProperty>();
     RefPtr<GeometryNode> image2NodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> image2NodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        imageNode2, image2NodeGeometryNode, imageNode2->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> image2NodeLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(imageNode2, image2NodeGeometryNode, imageNode2->GetLayoutProperty());
     ASSERT_NE(image2NodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(image2NodeLayoutWrapper);
 
@@ -4001,8 +3994,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutAlgorithmTest002, TestSize.Le
     auto dayNode = AceType::DynamicCast<FrameNode>(contentFrameNode->GetOrCreateChildByIndex(4));
     auto dayContentLayoutProperty = dayNode->GetLayoutProperty<TextLayoutProperty>();
     RefPtr<GeometryNode> dayContentFrameNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> dayContentNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        dayNode, dayContentFrameNodeGeometryNode, dayNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> dayContentNodeLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dayNode, dayContentFrameNodeGeometryNode, dayNode->GetLayoutProperty());
     ASSERT_NE(dayContentNodeLayoutWrapper, nullptr);
     contentNodeLayoutWrapper->AppendChild(dayContentNodeLayoutWrapper);
 

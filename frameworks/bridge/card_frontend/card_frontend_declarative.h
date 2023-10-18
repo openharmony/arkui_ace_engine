@@ -28,8 +28,8 @@
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/common/utils/page_id_pool.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
-#include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 
 namespace OHOS::Ace {
@@ -67,7 +67,7 @@ public:
         }
     }
 
-    void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
+    void RunPage(const std::string& url, const std::string& params) override;
 
     void OnSurfaceChanged(int32_t width, int32_t height) override;
     void UpdateData(const std::string& dataList) override;
@@ -82,7 +82,6 @@ public:
         const auto& loadCallback = [outSidePipelineContext](const std::string& url, int64_t cardId) -> bool {
             auto context = outSidePipelineContext.Upgrade();
             if (!context) {
-                LOGE("Load card callback failed, host pipeline nullptr");
                 return false;
             }
 #ifdef NG_BUILD
@@ -91,7 +90,6 @@ public:
             auto outSidefrontend = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
 #endif
             if (!outSidefrontend) {
-                LOGE("Load card callback failed, host frontend nullptr");
                 return false;
             }
 
@@ -118,7 +116,8 @@ private:
 
 class CardEventHandlerDeclarative : public AceEventHandler {
 public:
-    explicit CardEventHandlerDeclarative(const RefPtr<Framework::CardFrontendDelegateDeclarative>& delegate) : delegate_(delegate)
+    explicit CardEventHandlerDeclarative(const RefPtr<Framework::CardFrontendDelegateDeclarative>& delegate)
+        : delegate_(delegate)
     {
         ACE_DCHECK(delegate_);
     }
@@ -127,60 +126,40 @@ public:
 
     void HandleAsyncEvent(const EventMarker& eventMarker) override
     {
-        LOGI("HandleAsyncEvent cardId: %{public}d, eventId: %{public}s", eventMarker.GetData().pageId,
-            eventMarker.GetData().eventId.c_str());
+        TAG_LOGD(AceLogTag::ACE_FORM, "HandleAsyncEvent cardId: %{public}d, eventId: %{public}s",
+            eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str());
         delegate_->FireCardEvent(eventMarker);
     }
 
-    void HandleAsyncEvent(const EventMarker& eventMarker, int32_t param) override
-    {
-        LOGW("card event handler does not support this event type!");
-    }
+    void HandleAsyncEvent(const EventMarker& eventMarker, int32_t param) override {}
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info) override
     {
-        LOGI("HandleAsyncEvent cardId: %{public}d, eventId: %{public}s", eventMarker.GetData().pageId,
-            eventMarker.GetData().eventId.c_str());
+        TAG_LOGD(AceLogTag::ACE_FORM, "HandleAsyncEvent cardId: %{public}d, eventId: %{public}s",
+            eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str());
         delegate_->FireCardEvent(eventMarker);
     }
 
-    void HandleAsyncEvent(const EventMarker& eventMarker, const KeyEvent& info) override
-    {
-        LOGW("card event handler does not support this event type!");
-    }
+    void HandleAsyncEvent(const EventMarker& eventMarker, const KeyEvent& info) override {}
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param) override
     {
-        LOGI("HandleAsyncEvent cardId: %{public}d, eventId: %{public}s", eventMarker.GetData().pageId,
-            eventMarker.GetData().eventId.c_str());
+        TAG_LOGD(AceLogTag::ACE_FORM, "HandleAsyncEvent cardId: %{public}d, eventId: %{public}s",
+            eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str());
         delegate_->FireCardEvent(eventMarker, param);
     }
 
-    void HandleSyncEvent(const EventMarker& eventMarker, bool& result) override
-    {
-        LOGW("card event handler does not support this event type!");
-    }
+    void HandleSyncEvent(const EventMarker& eventMarker, bool& result) override {}
 
-    void HandleSyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info, bool& result) override
-    {
-        LOGW("card event handler does not support this event type!");
-    }
+    void HandleSyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info, bool& result) override {}
 
-    void HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& info, bool& result) override
-    {
-        LOGW("card event handler does not support this event type!");
-    }
+    void HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& info, bool& result) override {}
 
-    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) override
-    {
-        LOGW("card event handler does not support this event type!");
-    }
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) override {}
 
     void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId,
         const bool isDestroy) override
-    {
-        LOGW("card event handler does not support this event type!");
-    }
+    {}
 
 private:
     RefPtr<Framework::CardFrontendDelegateDeclarative> delegate_;

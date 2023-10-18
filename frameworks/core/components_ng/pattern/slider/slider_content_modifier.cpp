@@ -30,8 +30,9 @@ constexpr float HALF = 0.5f;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 } // namespace
-SliderContentModifier::SliderContentModifier(const Parameters& parameters, std::function<void()> updateImageFunc)
-    : updateImageFunc_(std::move(updateImageFunc)),
+SliderContentModifier::SliderContentModifier(const Parameters& parameters,
+    std::function<void(float)> updateImageCenterX, std::function<void(float)> updateImageCenterY)
+    : updateImageCenterX_(std::move(updateImageCenterX)), updateImageCenterY_(std::move(updateImageCenterY)),
       boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT)))
 {
     // animatable property
@@ -150,43 +151,38 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
     auto& canvas = context.canvas;
     auto stepSize = stepSize_->Get();
     auto stepColor = stepColor_->Get();
-    auto direction = static_cast<Axis>(directionAxis_->Get());
     auto backStart = backStart_->Get();
     auto backEnd = backEnd_->Get();
     auto stepRatio = stepRatio_->Get();
     if (NearEqual(stepRatio, .0f)) {
         return;
     }
+    float startX = backStart.GetX();
+    float endX = backEnd.GetX();
+    float startY = backStart.GetY();
+    float endY = backEnd.GetY();
+    if (NearEqual(startX, endX) && NearEqual(startY, endY)) {
+        return;
+    }
+    auto stepsLengthX = (endX - startX) * stepRatio;
+    auto stepsLengthY = (endY - startY) * stepRatio;
 
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(stepColor));
-
     canvas.AttachBrush(brush);
-    // Distance between slide track and Content boundary
-    auto centerWidth = direction == Axis::HORIZONTAL ? context.height : context.width;
-    centerWidth *= HALF;
-    if (direction == Axis::HORIZONTAL) {
-        auto stepsLength = (backEnd.GetX() - backStart.GetX()) * stepRatio;
-        float dyOffset = backEnd.GetY();
-        float start = backStart.GetX();
-        float end = backEnd.GetX();
-        float current = start;
-        while (LessOrEqual(current, end)) {
-            float dxOffset = std::clamp(current, start, end);
-            canvas.DrawCircle(RSPoint(dxOffset, dyOffset), stepSize * HALF);
-            current += stepsLength;
+
+    if (reverse_) {
+        while (GreatOrEqual(endX, startX) && GreatOrEqual(endY, startY)) {
+            canvas.DrawCircle(RSPoint(endX, endY), stepSize * HALF);
+            endX -= stepsLengthX;
+            endY -= stepsLengthY;
         }
     } else {
-        auto stepsLength = (backEnd.GetY() - backStart.GetY()) * stepRatio;
-        float dxOffset = backEnd.GetX();
-        float start = backStart.GetY();
-        float end = backEnd.GetY();
-        float current = start;
-        while (LessOrEqual(current, end)) {
-            float dyOffset = std::clamp(current, start, end);
-            canvas.DrawCircle(RSPoint(dxOffset, dyOffset), stepSize * HALF);
-            current += stepsLength;
+        while (LessOrEqual(startX, endX) && LessOrEqual(startY, endY)) {
+            canvas.DrawCircle(RSPoint(startX, startY), stepSize * HALF);
+            startX += stepsLengthX;
+            startY += stepsLengthY;
         }
     }
 
@@ -196,7 +192,8 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
 void SliderContentModifier::DrawSelect(DrawingContext& context)
 {
     auto& canvas = context.canvas;
-    if (selectStart_->Get() != selectEnd_->Get()) {
+    if (!NearEqual(selectStart_->Get().GetX(), selectEnd_->Get().GetX(), HALF) ||
+        !NearEqual(selectStart_->Get().GetY(), selectEnd_->Get().GetY(), HALF)) {
         auto trackBorderRadius = trackBorderRadius_->Get();
         auto direction = static_cast<Axis>(directionAxis_->Get());
         auto blockCenter = GetBlockCenter();
@@ -399,6 +396,24 @@ void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end
     targetSelectEnd_ = end - PointF();
 }
 
+void SliderContentModifier::UpdateBlockCenterX(float x)
+{
+    auto blockType = static_cast<SliderModelNG::BlockStyleType>(blockType_->Get());
+    blockCenterX_->Set(x);
+    if (blockType == SliderModelNG::BlockStyleType::IMAGE && updateImageCenterX_) {
+        updateImageCenterX_(x);
+    }
+}
+
+void SliderContentModifier::UpdateBlockCenterY(float y)
+{
+    auto blockType = static_cast<SliderModelNG::BlockStyleType>(blockType_->Get());
+    blockCenterY_->Set(y);
+    if (blockType == SliderModelNG::BlockStyleType::IMAGE && updateImageCenterY_) {
+        updateImageCenterY_(y);
+    }
+}
+
 void SliderContentModifier::StopCircleCenterAnimation(const PointF& center)
 {
     bool stop = false;
@@ -419,9 +434,9 @@ void SliderContentModifier::StopCircleCenterAnimation(const PointF& center)
         AnimationOption option = AnimationOption();
         AnimationUtils::Animate(option, [this]() {
             if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
-                blockCenterX_->Set(blockCenterX_->Get());
+                UpdateBlockCenterX(blockCenterX_->Get());
             } else {
-                blockCenterY_->Set(blockCenterY_->Get());
+                UpdateBlockCenterY(blockCenterY_->Get());
             }
         });
     }
@@ -443,19 +458,19 @@ void SliderContentModifier::SetCircleCenter(const PointF& center)
         option.SetCurve(motion);
         AnimationUtils::Animate(option, [this, center]() {
             if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
-                blockCenterX_->Set(center.GetX());
+                UpdateBlockCenterX(center.GetX());
             } else {
-                blockCenterY_->Set(center.GetY());
+                UpdateBlockCenterY(center.GetY());
             }
         });
         if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
-            blockCenterY_->Set(center.GetY());
+            UpdateBlockCenterY(center.GetY());
         } else {
-            blockCenterX_->Set(center.GetX());
+            UpdateBlockCenterX(center.GetX());
         }
     } else {
-        blockCenterX_->Set(center.GetX());
-        blockCenterY_->Set(center.GetY());
+        UpdateBlockCenterX(center.GetX());
+        UpdateBlockCenterY(center.GetY());
     }
     targetCenter_ = center;
 }
@@ -482,10 +497,6 @@ void SliderContentModifier::DrawBlock(DrawingContext& context)
         DrawDefaultBlock(context);
     } else if (blockType == SliderModelNG::BlockStyleType::SHAPE) {
         DrawBlockShape(context);
-    } else if (blockType == SliderModelNG::BlockStyleType::IMAGE) {
-        if (updateImageFunc_ != nullptr) {
-            updateImageFunc_();
-        }
     }
 }
 

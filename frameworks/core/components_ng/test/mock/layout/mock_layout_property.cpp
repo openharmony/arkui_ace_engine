@@ -181,4 +181,20 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder()
 {
     return PaddingPropertyF();
 }
+
+std::pair<bool, bool> LayoutProperty::GetPercentSensitive()
+{
+    return { false, false };
+}
+
+std::pair<bool, bool> LayoutProperty::UpdatePercentSensitive(bool width, bool height)
+{
+    return { widthPercentSensitive_, heightPercentSensitive_ };
+}
+
+bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& preLayoutConstraint,
+    const std::optional<LayoutConstraintF>& preContentConstraint)
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

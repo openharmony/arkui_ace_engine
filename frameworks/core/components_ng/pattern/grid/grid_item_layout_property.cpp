@@ -29,7 +29,7 @@ void GridItemLayoutProperty::ResetGridLayoutInfoAndMeasure() const
     auto uiNode = DynamicCast<UINode>(host);
     while (uiNode->GetTag() != V2::GRID_ETS_TAG) {
         uiNode = uiNode->GetParent();
-        CHECK_NULL_VOID_NOLOG(uiNode);
+        CHECK_NULL_VOID(uiNode);
     }
     auto grid = DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_VOID(grid);
@@ -88,5 +88,21 @@ int32_t GridItemLayoutProperty::GetCrossStart(Axis axis) const
         return propColumnStart_.value_or(-1);
     }
     return propRowStart_.value_or(-1);
+}
+
+int32_t GridItemLayoutProperty::GetMainEnd(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propRowEnd_.value_or(-1);
+    }
+    return propColumnEnd_.value_or(-1);
+}
+
+int32_t GridItemLayoutProperty::GetCrossEnd(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propColumnEnd_.value_or(-1);
+    }
+    return propRowEnd_.value_or(-1);
 }
 } // namespace OHOS::Ace::NG

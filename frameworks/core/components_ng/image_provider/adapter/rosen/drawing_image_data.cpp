@@ -39,8 +39,8 @@ RefPtr<ImageData> ImageData::MakeFromDataWithCopy(const void* data, size_t lengt
 RefPtr<ImageData> ImageData::MakeFromDataWrapper(void* dataWrapper)
 {
     std::shared_ptr<RSData>* rsDataPtr = reinterpret_cast<std::shared_ptr<RSData>*>(dataWrapper);
-    CHECK_NULL_RETURN_NOLOG(rsDataPtr, nullptr);
-    CHECK_NULL_RETURN_NOLOG(*rsDataPtr, nullptr);
+    CHECK_NULL_RETURN(rsDataPtr, nullptr);
+    CHECK_NULL_RETURN(*rsDataPtr, nullptr);
     return MakeRefPtr<DrawingImageData>(*rsDataPtr);
 }
 
@@ -94,7 +94,7 @@ std::pair<SizeF, int32_t> DrawingImageData::Parse() const
     CHECK_NULL_RETURN(GetRSData(), {});
     auto skData = GetRSData()->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
     auto codec = SkCodec::MakeFromData(skData);
-    CHECK_NULL_RETURN_NOLOG(codec, {});
+    CHECK_NULL_RETURN(codec, {});
     SizeF imageSize;
     switch (codec->getOrigin()) {
         case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:

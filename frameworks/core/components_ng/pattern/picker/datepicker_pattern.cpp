@@ -62,7 +62,7 @@ void DatePickerPattern::OnAttachToFrameNode()
 
 bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
+    CHECK_NULL_RETURN(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -102,12 +102,12 @@ void DatePickerPattern::OnModifyDone()
     ShowTitle(GetTitleId());
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(refPtr);
+        CHECK_NULL_VOID(refPtr);
         refPtr->HandleColumnChange(tag, add, index, notify);
     });
     SetEventCallback([weak = WeakClaim(this), titleId = GetTitleId()](bool refresh) {
         auto refPtr = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(refPtr);
+        CHECK_NULL_VOID(refPtr);
         refPtr->FireChangeEvent(refresh);
         if (refresh) {
             refPtr->ShowTitle(titleId);
@@ -155,10 +155,14 @@ void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool is
         OnDataLinking(tag, isAdd, index, tags);
     }
     for (const auto& tag : tags) {
-        auto iter = std::find_if(datePickerColumns_.begin(), datePickerColumns_.end(),
-            [&tag](const RefPtr<FrameNode>& column) { return column->GetId() == tag->GetId(); });
+        auto iter = std::find_if(datePickerColumns_.begin(), datePickerColumns_.end(), [&tag](const auto& c) {
+                auto column = c.Upgrade();
+                return column && column->GetId() == tag->GetId();
+            });
         if (iter != datePickerColumns_.end()) {
-            auto datePickerColumnPattern = (*iter)->GetPattern<DatePickerColumnPattern>();
+            auto datePickerColumn = (*iter).Upgrade();
+            CHECK_NULL_VOID(datePickerColumn);
+            auto datePickerColumnPattern = datePickerColumn->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
             datePickerColumnPattern->FlushCurrentOptions(isAdd, true, false);
         }
@@ -218,11 +222,12 @@ void DatePickerPattern::OnColorConfigurationUpdate()
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
-    CHECK_NULL_VOID(buttonTitleNode_);
-    auto titleLayoutRenderContext = buttonTitleNode_->GetRenderContext();
+    auto buttonTitleNode = buttonTitleNode_.Upgrade();
+    CHECK_NULL_VOID(buttonTitleNode);
+    auto titleLayoutRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_VOID(titleLayoutRenderContext);
     titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
-    auto childButton = buttonTitleNode_->GetFirstChild();
+    auto childButton = buttonTitleNode->GetFirstChild();
     CHECK_NULL_VOID(childButton);
     auto ButtonNode = DynamicCast<FrameNode>(childButton);
     CHECK_NULL_VOID(ButtonNode);
@@ -236,8 +241,9 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-    CHECK_NULL_VOID(contentRowNode_);
-    auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    auto contentRowNode = contentRowNode_.Upgrade();
+    CHECK_NULL_VOID(contentRowNode);
+    auto layoutRenderContext = contentRowNode->GetRenderContext();
     CHECK_NULL_VOID(layoutRenderContext);
     layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     OnModifyDone();
@@ -247,7 +253,7 @@ void DatePickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
@@ -1093,9 +1099,9 @@ LunarDate DatePickerPattern::GetCurrentLunarDate(uint32_t lunarYear) const
     auto monthColumn = DynamicCast<FrameNode>(stackMonth->GetChildAtIndex(1));
     auto stackDay = DynamicCast<FrameNode>(day);
     auto dayColumn = DynamicCast<FrameNode>(stackDay->GetChildAtIndex(1));
-    CHECK_NULL_RETURN_NOLOG(yearColumn, lunarResult);
-    CHECK_NULL_RETURN_NOLOG(monthColumn, lunarResult);
-    CHECK_NULL_RETURN_NOLOG(dayColumn, lunarResult);
+    CHECK_NULL_RETURN(yearColumn, lunarResult);
+    CHECK_NULL_RETURN(monthColumn, lunarResult);
+    CHECK_NULL_RETURN(dayColumn, lunarResult);
 
     auto yearDatePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
@@ -1175,9 +1181,9 @@ PickerDate DatePickerPattern::GetCurrentDateByYearMonthDayColumn() const
     auto monthColumn = DynamicCast<FrameNode>(stackMonth->GetChildAtIndex(1));
     auto stackDay = DynamicCast<FrameNode>(day);
     auto dayColumn = DynamicCast<FrameNode>(stackDay->GetChildAtIndex(1));
-    CHECK_NULL_RETURN_NOLOG(yearColumn, currentDate);
-    CHECK_NULL_RETURN_NOLOG(monthColumn, currentDate);
-    CHECK_NULL_RETURN_NOLOG(dayColumn, currentDate);
+    CHECK_NULL_RETURN(yearColumn, currentDate);
+    CHECK_NULL_RETURN(monthColumn, currentDate);
+    CHECK_NULL_RETURN(dayColumn, currentDate);
     auto yearDatePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
     auto dayDatePickerColumnPattern = dayColumn->GetPattern<DatePickerColumnPattern>();
@@ -1218,8 +1224,8 @@ PickerDate DatePickerPattern::GetCurrentDateByMonthDaysColumn() const
     auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
     auto stackYear = DynamicCast<FrameNode>(year);
     auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
-    CHECK_NULL_RETURN_NOLOG(monthDaysNode, currentDate);
-    CHECK_NULL_RETURN_NOLOG(yearDaysNode, currentDate);
+    CHECK_NULL_RETURN(monthDaysNode, currentDate);
+    CHECK_NULL_RETURN(yearDaysNode, currentDate);
 
     auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
     auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
@@ -1270,8 +1276,8 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
     auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
     auto stackYear = DynamicCast<FrameNode>(year);
     auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
-    CHECK_NULL_RETURN_NOLOG(monthDaysNode, lunarResult);
-    CHECK_NULL_RETURN_NOLOG(yearDaysNode, lunarResult);
+    CHECK_NULL_RETURN(monthDaysNode, lunarResult);
+    CHECK_NULL_RETURN(yearDaysNode, lunarResult);
 
     auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
     auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
@@ -1837,7 +1843,7 @@ PickerDate DatePickerPattern::LunarToSolar(const LunarDate& date) const
 
 void DatePickerPattern::Init()
 {
-    CHECK_NULL_VOID_NOLOG(!inited_);
+    CHECK_NULL_VOID(!inited_);
     years_.resize(201);      // year from 1900 to 2100,count is 201
     solarMonths_.resize(12); // solar month from 1 to 12,count is 12
     solarDays_.resize(31);   // solar day from 1 to 31, count is 31

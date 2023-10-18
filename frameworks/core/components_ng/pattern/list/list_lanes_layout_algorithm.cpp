@@ -271,14 +271,14 @@ int32_t ListLanesLayoutAlgorithm::GetLazyForEachIndex(const RefPtr<FrameNode>& h
 {
     CHECK_NULL_RETURN(host, -1);
     auto lazyForEach = AceType::DynamicCast<LazyForEachNode>(host->GetParent());
-    CHECK_NULL_RETURN_NOLOG(lazyForEach, -1);
+    CHECK_NULL_RETURN(lazyForEach, -1);
     return lazyForEach->GetIndexByUINode(host);
 }
 
 int32_t ListLanesLayoutAlgorithm::FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index)
 {
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, false);
-    CHECK_NULL_RETURN_NOLOG(wrapper, index);
+    CHECK_NULL_RETURN(wrapper, index);
     if (wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
         return index;
     }
@@ -288,7 +288,7 @@ int32_t ListLanesLayoutAlgorithm::FindLanesStartIndex(LayoutWrapper* layoutWrapp
     }
     for (int32_t idx = index; idx > startIndex; idx--) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(idx - 1, false);
-        CHECK_NULL_RETURN_NOLOG(wrapper, idx);
+        CHECK_NULL_RETURN(wrapper, idx);
         if (wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
             return idx;
         }

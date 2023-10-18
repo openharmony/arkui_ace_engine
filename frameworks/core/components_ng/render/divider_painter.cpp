@@ -28,11 +28,26 @@ void DividerPainter::DrawLine(RSCanvas& canvas, const OffsetF& offset) const
     canvas.AttachPen(pen);
 
     auto dividerWidth = constrainStrokeWidth_ / 2;
-    auto startPointX = offset.GetX() + dividerWidth;
-    auto startPointY = offset.GetY() + dividerWidth;
-    PointF start = PointF(startPointX, startPointY);
-    PointF end = vertical_ ? PointF(startPointX, startPointY + dividerLength_ - constrainStrokeWidth_)
-                           : PointF(startPointX + dividerLength_ - constrainStrokeWidth_, startPointY);
+    PointF start;
+    PointF end;
+    if (lineCap_.value_or(LineCap::SQUARE) == LineCap::BUTT) {
+        auto startPointX = offset.GetX();
+        auto startPointY = offset.GetY();
+        start = vertical_ ? PointF(startPointX + dividerWidth, startPointY)
+                          : PointF(startPointX, startPointY + dividerWidth);
+        end = vertical_ ? PointF(startPointX + dividerWidth, startPointY + dividerLength_)
+                        : PointF(startPointX + dividerLength_, startPointY + dividerWidth);
+    } else {
+        auto startPointX = offset.GetX() + dividerWidth;
+        auto startPointY = offset.GetY() + dividerWidth;
+        start = PointF(startPointX, startPointY);
+        end = vertical_ ? PointF(startPointX, startPointY + dividerLength_ - constrainStrokeWidth_)
+                        : PointF(startPointX + dividerLength_ - constrainStrokeWidth_, startPointY);
+    }
+
     canvas.DrawLine(ToRSPoint(start), ToRSPoint(end));
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachPen();
+#endif
 }
 } // namespace OHOS::Ace::NG

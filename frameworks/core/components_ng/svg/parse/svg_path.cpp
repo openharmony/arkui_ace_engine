@@ -45,11 +45,7 @@ SkPath SvgPath::AsPath(const Size& /* viewPort */) const
     if (!pathD.empty()) {
         SkParsePath::FromSVGString(pathD.c_str(), &out);
         if (declaration->GetFillState().IsEvenodd()) {
-#ifndef NEW_SKIA
-            out.setFillType(SkPath::FillType::kEvenOdd_FillType);
-#else
             out.setFillType(SkPathFillType::kEvenOdd);
-#endif
         }
     }
     return out;

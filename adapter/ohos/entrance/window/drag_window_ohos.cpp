@@ -21,10 +21,8 @@
 #include "rosen_text/typography.h"
 #endif
 
-#ifdef NEW_SKIA
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSamplingOptions.h"
-#endif
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
@@ -166,19 +164,11 @@ void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width,
     CHECK_NULL_VOID(skImage);
     SkPaint paint;
     sk_sp<SkColorSpace> colorSpace = skImage->refColorSpace();
-#ifdef USE_SYSTEM_SKIA
-    paint.setColor4f(paint.getColor4f(), colorSpace.get());
-#else
     paint.setColor(paint.getColor4f(), colorSpace.get());
-#endif
     auto skSrcRect = SkRect::MakeXYWH(0, 0, skImage->width(), skImage->height());
     auto skDstRect = SkRect::MakeXYWH(0, 0, width, height);
-#ifndef NEW_SKIA
-    canvas->drawImageRect(skImage, skSrcRect, skDstRect, &paint);
-#else
     canvas->drawImageRect(
         skImage, skSrcRect, skDstRect, SkSamplingOptions(), &paint, SkCanvas::kFast_SrcRectConstraint);
-#endif
 }
 #else
 void DrawDrawingImage(RSCanvas* canvas, const std::shared_ptr<RSImage>& drawingImage, int32_t width, int32_t height)
@@ -243,7 +233,7 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(
 
     OHOS::Rosen::WMError ret = dragWindow->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::CreateDragWindow, drag window Show() failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow CreateDragWindow, drag window Show() failed, ret: %d", ret);
     }
 
     auto window = AceType::MakeRefPtr<DragWindowOhos>(dragWindow);
@@ -269,7 +259,7 @@ RefPtr<DragWindow> DragWindow::CreateTextDragWindow(
 
     OHOS::Rosen::WMError ret = dragWindow->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::CreateTextDragWindow, drag window Show() failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow CreateTextDragWindow, drag window Show() failed, ret: %d", ret);
     }
 
     auto window = AceType::MakeRefPtr<DragWindowOhos>(dragWindow);
@@ -283,13 +273,13 @@ void DragWindowOhos::MoveTo(int32_t x, int32_t y) const
 
     OHOS::Rosen::WMError ret = dragWindow_->MoveTo(x + offsetX_ - width_ / 2, y + offsetY_ - height_ / 2);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::MoveTo, drag window move failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow MoveTo, drag window move failed, ret: %d", ret);
         return;
     }
 
     ret = dragWindow_->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::CreateDragWindow, drag window Show() failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow CreateDragWindow, drag window Show() failed, ret: %d", ret);
     }
 }
 
@@ -299,13 +289,13 @@ void DragWindowOhos::TextDragWindowMove(double x, double y) const
     OHOS::Rosen::WMError ret =
         dragWindow_->MoveTo(x - Window_EXTERN.ConvertToPx() + offsetX_, y + offsetY_ - Window_EXTERN.ConvertToPx());
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::TextDragWindowMove, drag window move failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow TextDragWindowMove, drag window move failed, ret: %d", ret);
         return;
     }
 
     ret = dragWindow_->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::TextDragWindowMove, drag window Show() failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow TextDragWindowMove, drag window Show() failed, ret: %d", ret);
     }
 }
 
@@ -315,7 +305,7 @@ void DragWindowOhos::Destroy() const
 
     OHOS::Rosen::WMError ret = dragWindow_->Destroy();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::Destroy, drag window destroy failed, ret: %d", ret);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow Destroy, drag window destroy failed, ret: %d", ret);
     }
 }
 
@@ -527,13 +517,11 @@ void DragWindowOhos::DrawText(
     }
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
-    LOGE("Drawing is not supported");
+    TAG_LOGE(AceLogTag::ACE_DRAG, "Drawing is not supported");
 #endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 #endif
-#else
-    LOGE("not supported in new pipeline");
 #endif
 }
 

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "gtest/gtest.h"
+#include "gmock/gmock-actions.h"
 
 #define protected public
 #define private public
@@ -91,14 +92,14 @@ void SearchTestNg::SetThemeInCreate()
     auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
     auto iconTheme = AceType::MakeRefPtr<IconTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(textFieldTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(iconTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(textFieldTheme));
+        .WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+            if (type == SearchTheme::TypeId()) {
+                return searchTheme;
+            } else if (type == IconTheme::TypeId()) {
+                return iconTheme;
+            }
+            return textFieldTheme;
+        });
 }
 
 void SearchTestNg::SetSearchTheme()
@@ -663,6 +664,210 @@ HWTEST_F(SearchTestNg, Pattern008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PatternOnColorConfigurationUpdate009
+ * @tc.desc: Test pttern OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate009, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Set theme.
+     */
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
+
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(searchTheme))
+        .WillOnce(Return(textFieldTheme))
+        .WillOnce(Return(searchTheme))
+        .WillOnce(Return(searchTheme))
+        .WillOnce(Return(searchTheme))
+        .WillOnce(Return(searchTheme))
+        .WillOnce(Return(textFieldTheme));
+
+    /**
+     * @tc.step: step2. create frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    Testing::MockCanvas rsCanvas;
+    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
+    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
+
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    canvasDrawFunction(rsCanvas);
+
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.step: step3. call OnColorConfigurationUpdate.
+     * @tc.expected: cover branch cancelButtonNode_、buttonNode_ and textField_ not null and call
+     * OnColorConfigurationUpdate.
+     */
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_TRUE(pattern->cancelButtonNode_);
+}
+
+/**
+ * @tc.name: PatternOnColorConfigurationUpdate010
+ * @tc.desc: Test pttern OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate010, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Set theme.
+     */
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
+
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(searchTheme))
+        .WillOnce(Return(textFieldTheme))
+        .WillOnce(Return(searchTheme))
+        .WillOnce(Return(searchTheme))
+        .WillOnce(Return(searchTheme))
+        .WillOnce(Return(searchTheme))
+        .WillOnce(Return(textFieldTheme));
+
+    /**
+     * @tc.step: step2. create frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    Testing::MockCanvas rsCanvas;
+    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
+    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
+
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    canvasDrawFunction(rsCanvas);
+
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.step: step3. call OnColorConfigurationUpdate.
+     * @tc.expected: cover branch cancelButtonNode_、buttonNode_ and textField_ all null and call
+     * OnColorConfigurationUpdate.
+     */
+    pattern->SetButtonNode(nullptr);
+    pattern->SetTextFieldNode(nullptr);
+    pattern->SetCancelButtonNode(nullptr);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(pattern->cancelButtonNode_, nullptr);
+}
+
+/**
+ * @tc.name: PatternOnColorConfigurationUpdate011
+ * @tc.desc: Test pttern HandleTextContentRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate011, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and textFieldFrameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+
+    /**
+     * @tc.step: step2. create textFieldPattern and set TextRect.
+     */
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    textFieldPattern->InitCaretPosition("");
+    auto textRect = textFieldPattern->GetTextRect();
+    textRect.SetTop(0.0);
+    textFieldPattern->SetTextRect(textRect);
+
+    /**
+     * @tc.step: step3. create search pattern and call HandleTextContentRect.
+     * @tc.expected: cover branch textFieldPattern IsOperation is false and call HandleTextContentRect.
+     */
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->HandleTextContentRect();
+    EXPECT_FALSE(textFieldPattern->IsOperation());
+
+    /**
+     * @tc.step: step4. set textRect and call HandleTextContentRect.
+     * @tc.expected: cover branch textFieldPattern IsOperation is true and call HandleTextContentRect.
+     */
+    textRect.SetTop(10.0);
+    textRect.SetLeft(0.0);
+    textFieldPattern->SetTextRect(textRect);
+    textFieldPattern->UpdateEditingValue("aaa", 0);
+    pattern->HandleTextContentRect();
+    EXPECT_TRUE(textFieldPattern->IsOperation());
+}
+
+/**
+ * @tc.name: PatternOnColorConfigurationUpdate012
+ * @tc.desc: Test pttern HandleTextContentLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate012, TestSize.Level1)
+{
+    /**
+     * @tc.step: step2. create frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+
+    /**
+     * @tc.step: create textFieldPattern and searchPattern.
+     */
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->UpdateEditingValue("", 0);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.step: step3. call HandleTextContentLines.
+     * @tc.expected: cover branch IsOperation is false and call HandleTextContentLines
+     */
+    int32_t result = pattern->HandleTextContentLines();
+    EXPECT_EQ(result, 0);
+
+    /**
+     * @tc.step: step4. call HandleTextContentLines.
+     * @tc.expected: cover branch IsOperation is true and GetLineHeight value is 0.
+     */
+    textFieldPattern->SetCaretOffsetX(0.0);
+    textFieldPattern->UpdateEditingValue("aaa", 0);
+    result = pattern->HandleTextContentLines();
+    EXPECT_EQ(result, 0);
+}
+
+/**
  * @tc.name: SetCaretWidth001
  * @tc.desc: Set caretwidth and CursorColor
  * @tc.type: FUNC
@@ -742,8 +947,10 @@ HWTEST_F(SearchTestNg, SetSearchSrcPath001, TestSize.Level1)
     SearchModelNG searchModelInstance;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    SetIconTheme();
-    SetSearchTheme();
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<SearchTheme>()));
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetSearchSrcPath("");
@@ -777,8 +984,10 @@ HWTEST_F(SearchTestNg, SetRightIconSrcPath001, TestSize.Level1)
     SearchModelNG searchModelInstance;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    SetIconTheme();
-    SetSearchTheme();
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<SearchTheme>()));
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetRightIconSrcPath("");
@@ -1381,5 +1590,41 @@ HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
     EXPECT_EQ(textFieldPattern->selectionMode_, SelectionMode::NONE);
     GestureEvent gestureEvent;
     pattern->clickListener_->GetGestureEventFunc()(gestureEvent);
+}
+
+    /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test Oncolorconfigurationupdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
+{
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    SearchModelNG searchModelInstance;
+    SetThemeInCreate();
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetThemeManager(themeManager);
+    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(textFieldTheme)).WillOnce(Return(searchTheme));
+    textFieldTheme->bgColor_ = Color::RED;
+    searchTheme->searchButtonTextColor_ = Color::RED;
+    searchTheme->placeholderColor_ = Color::RED;
+    pattern->OnColorConfigurationUpdate();
+    ASSERT_NE(pattern->cancelButtonNode_, nullptr);
+    auto textFieldLayoutProperty = pattern->textField_->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor(), Color::RED);
+    auto cancelButtonTextNode = AceType::DynamicCast<FrameNode>(pattern->cancelButtonNode_->GetChildren().front());
+    ASSERT_NE(cancelButtonTextNode, nullptr);
+    auto cancelButtonTextLayout = cancelButtonTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(cancelButtonTextLayout, nullptr);
+    EXPECT_EQ(cancelButtonTextLayout->GetTextColor(), Color::RED);
 }
 } // namespace OHOS::Ace::NG

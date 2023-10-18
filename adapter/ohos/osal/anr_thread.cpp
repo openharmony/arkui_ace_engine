@@ -30,7 +30,7 @@ void AnrThread::Stop() {}
 
 bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime)
 {
-    CHECK_NULL_RETURN_NOLOG(task, false);
+    CHECK_NULL_RETURN(task, false);
     if (delayTime > 0) {
         OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask(
             ARKUI_WATCH_DOG, std::move(task), delayTime * SECOND_TO_MILLISECOND);

@@ -47,7 +47,6 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childConstraint.maxSize.SetWidth(maxChildWidth);
     // set self size based on childNode size;
     auto minOptionHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
-    childConstraint.minSize.SetHeight(minOptionHeight);
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
     MeasureRow(child, childConstraint);
@@ -60,6 +59,7 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (idealWidth.has_value()) {
         idealSize.SetWidth(idealWidth.value());
     }
+    idealSize.SetHeight(std::max(minOptionHeight, idealSize.Height()));
     LOGD("option frame size set to %{public}s", idealSize.ToString().c_str());
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 }
@@ -95,7 +95,7 @@ std::optional<float> OptionLayoutAlgorithm::GetIdealWidth(LayoutWrapper* layoutW
 void OptionLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint)
 {
     auto children = row->GetAllChildrenWithBuild();
-    CHECK_NULL_VOID_NOLOG(!children.empty());
+    CHECK_NULL_VOID(!children.empty());
 
     float spaceWidth = constraint.maxSize.Width();
     float rowWidth = 0.0f;

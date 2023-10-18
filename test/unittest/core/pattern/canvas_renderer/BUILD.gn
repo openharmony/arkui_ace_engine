@@ -48,6 +48,7 @@ ohos_unittest("canvas_renderer_test_ng") {
     "$ace_root/test/mock/adapter/mock_ace_container.cpp",
     "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
   ]
 
   if (is_ohos_standard_system) {
@@ -68,6 +69,10 @@ ohos_unittest("canvas_renderer_test_ng") {
     "window_manager:scene_session",
     "window_manager:scene_session_manager",
   ]
+
+  if (enable_graphic_text_gine) {
+    external_deps += [ "graphic_2d:rosen_text" ]
+  }
 }
 
 config("config_canvas_renderer_test") {

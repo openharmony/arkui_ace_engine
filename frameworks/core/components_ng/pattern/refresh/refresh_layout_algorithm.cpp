@@ -16,6 +16,7 @@
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 
 #include "frameworks/base/utils/utils.h"
+#include "frameworks/core/common/container.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
@@ -29,6 +30,60 @@ constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
 } // namespace
 
 RefreshLayoutAlgorithm::RefreshLayoutAlgorithm() = default;
+
+void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
+    int32_t index = 0;
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            child->Measure(layoutConstraint);
+            ++index;
+            continue;
+        }
+        if (HasCustomBuilderIndex() && index == customBuilderIndex_.value_or(0)) {
+            auto builderLayoutConstraint = layoutConstraint;
+            auto customBaseHeight = layoutProperty->GetBuilderMeasureBaseHeight().value_or(0.0f);
+            builderLayoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(
+                CalculateBuilderSize(child, builderLayoutConstraint, customBaseHeight));
+            child->Measure(builderLayoutConstraint);
+            ++index;
+            continue;
+        }
+        child->Measure(layoutConstraint);
+        ++index;
+    }
+    PerformMeasureSelf(layoutWrapper);
+}
+
+OptionalSizeF RefreshLayoutAlgorithm::CalculateBuilderSize(
+    RefPtr<LayoutWrapper> childLayoutWrapper, LayoutConstraintF& constraint, float customBaseHeight)
+{
+    OptionalSizeF defaultSize;
+    CHECK_NULL_RETURN(childLayoutWrapper, defaultSize);
+    auto layoutProperty = childLayoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, defaultSize);
+    std::optional<CalcLength> width = std::nullopt;
+    auto&& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (!calcLayoutConstraint) {
+        return defaultSize;
+    }
+    std::optional<float> reSetHeight = customBaseHeight;
+    if (calcLayoutConstraint->selfIdealSize.has_value() &&
+        calcLayoutConstraint->selfIdealSize.value().Height().has_value()) {
+        reSetHeight = ConvertToPx(
+            calcLayoutConstraint->selfIdealSize.value().Height().value(), constraint.scaleProperty, customBaseHeight)
+                          .value_or(-1.0f);
+    }
+    if (calcLayoutConstraint->selfIdealSize.has_value()) {
+        width = calcLayoutConstraint->selfIdealSize->Width();
+    }
+    auto reSetWidth = ConvertToPx(width, constraint.scaleProperty, constraint.percentReference.Width());
+    return { reSetWidth, reSetHeight };
+}
 
 void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
@@ -46,20 +101,20 @@ void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 // Called to perform layout render node and child.
 void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
     // update child position.
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     auto align = Alignment::TOP_LEFT;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    if (layoutProperty->GetPositionProperty()) {
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
-    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<RefreshPattern>();
@@ -75,7 +130,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         }
         auto paddingOffsetChild = paddingOffset;
         auto alignChild = align;
-        if (!layoutProperty->GetIsCustomBuilderExistValue(false)) {
+        if (!HasCustomBuilderIndex()) {
             if (index == layoutWrapper->GetTotalChildCount() - 2) {
                 paddingOffsetChild += layoutProperty->GetShowTimeOffsetValue();
                 alignChild = Alignment::TOP_CENTER;
@@ -83,9 +138,32 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                 alignChild = Alignment::TOP_CENTER;
             }
         } else {
-            if (index == layoutProperty->GetCustomBuilderIndexValue(-1)) {
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                auto builderChild = layoutWrapper->GetOrCreateChildByIndex(customBuilderIndex_.value_or(0));
+                CHECK_NULL_VOID(builderChild);
+                auto geometryNode = builderChild->GetGeometryNode();
+                CHECK_NULL_VOID(geometryNode);
+                auto builderHeight = geometryNode->GetMarginFrameSize().Height();
+                auto customBaseHeight = layoutProperty->GetBuilderMeasureBaseHeight().value_or(0.0f);
                 alignChild = Alignment::TOP_CENTER;
-                paddingOffsetChild += layoutProperty->GetCustomBuilderOffsetValue();
+                if (index == customBuilderIndex_.value_or(0)) {
+                    auto builderOffset =
+                        NearEqual(builderHeight, customBaseHeight) ? 0.0f : (customBaseHeight - builderHeight);
+                    paddingOffsetChild += OffsetF(0.0f, builderOffset);
+                } else {
+                    auto scrollOffset = NearEqual(builderHeight, customBaseHeight) ? builderHeight : customBaseHeight;
+                    paddingOffsetChild += OffsetF(0.0f, scrollOffset);
+                }
+                auto translate =
+                    Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), alignChild) +
+                    paddingOffsetChild;
+                child->GetGeometryNode()->SetMarginFrameOffset(translate);
+                index++;
+                continue;
+            }
+            if (index == customBuilderIndex_.value_or(0)) {
+                alignChild = Alignment::TOP_CENTER;
+                paddingOffsetChild += OffsetF(0.0f, customBuilderOffset_);
                 auto geometryNode = child->GetGeometryNode();
                 CHECK_NULL_VOID(geometryNode);
                 customBuilderHeight = geometryNode->GetMarginFrameSize().Height();
@@ -98,7 +176,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                     auto refreshingPosition = Positive(customBuilderHeight) ? distance + customBuilderHeight : 0.0f;
                     paddingOffsetChild += OffsetF(0.0f, refreshingPosition);
                 } else {
-                    paddingOffsetChild += pattern->GetScrollOffsetValue();
+                    paddingOffsetChild += OffsetF(0.0f, scrollOffset_);
                 }
             }
         }
@@ -110,4 +188,3 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 }
 
 } // namespace OHOS::Ace::NG
-

@@ -33,7 +33,7 @@ public:
 
     bool CheckArgs(napi_valuetype firstArgType);
 
-    std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)> CreateCallback(napi_value* result);
+    auto CreateCallback(napi_value* result);
 
     napi_value GetArgv(int32_t idx);
 

@@ -20,6 +20,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
 // SafeAreaManager stores layout information to apply SafeArea correctly.
@@ -48,9 +49,9 @@ public:
     {
         keyboardOffset_ = offset;
     }
-    float GetKeyboardOffset() const
-    {
-        return keyboardOffset_;
+    float GetKeyboardOffset() const;
+    bool KeyboardSafeAreaEnabled() const {
+        return keyboardSafeAreaEnabled_;
     }
 
     SafeAreaInsets GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const;
@@ -77,11 +78,15 @@ public:
 
     bool SetIsFullScreen(bool value);
     bool SetIgnoreSafeArea(bool value);
+    bool SetKeyBoardAvoidMode(bool value);
 
 private:
     // app window is full screen 
     bool isFullScreen_ = false;
     bool ignoreSafeArea_ = false;
+
+    // when keyboard is up, compress page instead of offsetting.
+    bool keyboardSafeAreaEnabled_ = false;
 
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;
@@ -90,6 +95,7 @@ private:
     std::set<WeakPtr<FrameNode>> geoRestoreNodes_;
     // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
+
     static constexpr float SAFE_AREA_VELOCITY = 0.0f;
     static constexpr float SAFE_AREA_MASS = 1.0f;
     static constexpr float SAFE_AREA_STIFFNESS = 228.0f;

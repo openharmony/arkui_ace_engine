@@ -26,7 +26,7 @@ void SvgGraphic::UpdateGradient(const Size& viewPort)
 {
     fillState_ = declaration_->GetFillState();
     auto& gradient = fillState_.GetGradient();
-    CHECK_NULL_VOID_NOLOG(gradient);
+    CHECK_NULL_VOID(gradient);
     auto bounds = AsBounds(viewPort);
     auto width = bounds.Width();
     auto height = bounds.Height();
@@ -117,29 +117,15 @@ void SvgGraphic::SetGradientStyle(double opacity)
         auto info = gradient->GetLinearGradientInfo();
         std::array<SkPoint, 2> pts = { SkPoint::Make(static_cast<SkScalar>(info.x1), static_cast<SkScalar>(info.y1)),
             SkPoint::Make(static_cast<SkScalar>(info.x2), static_cast<SkScalar>(info.y2)) };
-#ifdef USE_SYSTEM_SKIA
-        fillPaint_.setShader(SkGradientShader::MakeLinear(pts.data(), colors.data(), pos.data(), gradientColors.size(),
-            static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-#else
+
         fillPaint_.setShader(SkGradientShader::MakeLinear(pts.data(), colors.data(), pos.data(), gradientColors.size(),
             static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-#endif
     }
     if (gradient->GetType() == GradientType::RADIAL) {
         auto info = gradient->GetRadialGradientInfo();
         auto center = SkPoint::Make(static_cast<SkScalar>(info.cx), static_cast<SkScalar>(info.cy));
         auto focal = SkPoint::Make(static_cast<SkScalar>(info.fx), static_cast<SkScalar>(info.fx));
-#ifdef USE_SYSTEM_SKIA
-        if (center == focal) {
-            fillPaint_.setShader(
-                SkGradientShader::MakeRadial(center, static_cast<SkScalar>(info.r), colors.data(), pos.data(),
-                    gradientColors.size(), static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-        } else {
-            fillPaint_.setShader(SkGradientShader::MakeTwoPointConical(focal, 0, center, static_cast<SkScalar>(info.r),
-                colors.data(), pos.data(), gradientColors.size(),
-                static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-        }
-#else
+
         if (center == focal) {
             fillPaint_.setShader(SkGradientShader::MakeRadial(center, static_cast<SkScalar>(info.r), colors.data(),
                 pos.data(), gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
@@ -148,7 +134,6 @@ void SvgGraphic::SetGradientStyle(double opacity)
                 colors.data(), pos.data(), gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()),
                 0, nullptr));
         }
-#endif
     }
 #else
     std::vector<RSScalar> pos;
@@ -162,8 +147,8 @@ void SvgGraphic::SetGradientStyle(double opacity)
         auto info = gradient->GetLinearGradientInfo();
         std::array<RSPoint, 2> pts = { RSPoint(static_cast<RSScalar>(info.x1), static_cast<RSScalar>(info.y1)),
             RSPoint(static_cast<RSScalar>(info.x2), static_cast<RSScalar>(info.y2)) };
-        fillBrush_.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(pts[0], pts[1], colors, pos,
-            static_cast<RSTileMode>(gradient->GetSpreadMethod())));
+        fillBrush_.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(
+            pts[0], pts[1], colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
     }
     if (gradient->GetType() == GradientType::RADIAL) {
         auto info = gradient->GetRadialGradientInfo();
@@ -252,8 +237,7 @@ void SvgGraphic::UpdateLineDash()
             intervals[i] = static_cast<RSScalar>(lineDashState[i]);
         }
         RSScalar phase = static_cast<RSScalar>(strokeState.GetLineDash().dashOffset);
-        strokePen_.SetPathEffect(
-            RSRecordingPathEffect::CreateDashPathEffect(intervals, phase));
+        strokePen_.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, phase));
 #endif
     }
 }

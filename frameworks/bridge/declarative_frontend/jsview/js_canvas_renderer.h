@@ -137,17 +137,9 @@ public:
     void JsGetDirection(const JSCallbackInfo& info);
     void JsSetDirection(const JSCallbackInfo& info);
 
-    void SetCanvasPattern(const RefPtr<AceType>& canvas)
-    {
-        canvasPattern_ = canvas;
-        isOffscreen_ = false;
-    }
+    void SetCanvasPattern(const RefPtr<AceType>& canvas);
 
-    void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas)
-    {
-        offscreenPattern_ = offscreenCanvas;
-        isOffscreen_ = true;
-    }
+    void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas);
 
     std::vector<uint32_t> GetLineDash() const
     {
@@ -187,8 +179,6 @@ protected:
 
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
-    std::unique_ptr<ImageData> GetImageDataFromCanvas(
-        const double& left, const double& top, const double& width, const double& height);
     PaintState paintState_;
     TextStyle style_;
     static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;

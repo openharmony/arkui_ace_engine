@@ -44,12 +44,11 @@ protected:
     void OnActivation() override;
     void OnConnect() override;
     void OnForeground() override;
-    void OnBackground() override;
     void OnDisconnect() override;
 
 private:
     void BufferAvailableCallback();
-    void OnBoundsSizeChanged(const Rosen::Vector4f& bounds);
+    void OnBoundsChanged(const Rosen::Vector4f& bounds);
 
     bool destroyed_ = false;
 

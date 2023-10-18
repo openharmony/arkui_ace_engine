@@ -95,8 +95,8 @@ common_bin = [
   },
   {
     label = "//third_party/flutter/glfw:glfw"
-    subsystem_name = "graphic"
-    part_name = "graphic_2d"
+    subsystem_name = "thirdparty"
+    part_name = "flutter"
   },
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/texgine:libtexgine"
@@ -117,11 +117,6 @@ common_bin = [
     label = "//third_party/flutter/build/skia:skia_shared"
     subsystem_name = "thirdparty"
     part_name = "flutter"
-  },
-  {
-    label = "//foundation/arkui/napi:ace_napi_ark"
-    subsystem_name = "arkui"
-    part_name = "napi"
   },
   {
     label = "//arkcompiler/ets_runtime:libark_jsruntime"

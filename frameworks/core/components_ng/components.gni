@@ -105,17 +105,15 @@ template("build_component_ng") {
       if (enable_graphic_text_gine) {
         include_dirs += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export" ]
       }
-      if (ace_use_new_skia) {
-        configs += [ "$ace_flutter_engine_root:flutter_config" ]
-        deps += [
-          "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
-          "$skia_root_new:skia_$platform",
-        ]
-      } else {
-        deps += [
-          "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-          "$ace_flutter_engine_root/skia:ace_skia_$platform",
-        ]
+      configs += [ "$ace_flutter_engine_root:flutter_config" ]
+      deps += [
+        "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
+        "$skia_root_new:skia_$platform",
+      ]
+      if (enable_graphic_text_gine) {
+        deps -=
+            [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform" ]
+        deps += [ "$ace_flutter_engine_root:flutter_engine_fml_$platform" ]
       }
       if (!is_cross_platform_build && defined(config.enable_drag_framework) &&
           config.enable_drag_framework) {
@@ -151,7 +149,16 @@ template("build_component_ng") {
           external_deps += [ "graphic_2d:rosen_text" ]
         }
       } else {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
+        if (!is_cross_platform_build && defined(use_rosen_drawing) &&
+            use_rosen_drawing) {
+          external_deps += [ "graphic_2d:2d_graphics" ]
+        } else {
+          if (enable_graphic_text_gine) {
+            external_deps += [ "graphic_2d:2d_graphics_new" ]
+          } else {
+            deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
+          }
+        }
       }
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {

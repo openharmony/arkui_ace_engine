@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "core/event/mouse_event.h"
@@ -30,8 +31,6 @@ namespace {
 
 constexpr std::size_t DEFAULT_DRAG_INDEX = -1;
 constexpr std::size_t SPLIT_INDEX_INC_TWO = 2;
-constexpr int32_t API10 = 10;
-
 } // namespace
 
 void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -41,17 +40,17 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandlePanStart(info);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandlePanUpdate(info);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandlePanEnd(info);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {};
@@ -68,7 +67,7 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         HandlePanStartBeforeAPI10(info);
         return;
     }
@@ -180,7 +179,7 @@ void LinearSplitPattern::ConstrainDragRange()
 {
     auto min = GetMinPosFromIndex(dragedSplitIndex_);
     auto max = GetMaxPosFromIndex(dragedSplitIndex_);
-    auto &offset = childrenDragPos_[dragedSplitIndex_ + 1];
+    auto& offset = childrenDragPos_[dragedSplitIndex_ + 1];
     if (offset < min) {
         offset = min;
     } else if (offset > max) {
@@ -226,7 +225,7 @@ void LinearSplitPattern::GetdragedSplitIndexOrIsMoving(const Point& point)
 
 void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         HandlePanUpdateBeforeAPI10(info);
         return;
     }
@@ -362,7 +361,7 @@ void LinearSplitPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     if (!mouseEvent_) {
         auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
+            CHECK_NULL_VOID(pattern);
             pattern->HandleMouseEvent(info);
         };
         mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -371,7 +370,7 @@ void LinearSplitPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     if (!hoverEvent_) {
         auto hoverTask = [weak = WeakClaim(this)](bool isHovered) {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
+            CHECK_NULL_VOID(pattern);
             pattern->HandleHoverEvent(isHovered);
         };
         hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -443,7 +442,7 @@ void LinearSplitPattern::HandleHoverEvent(bool isHovered)
 
 MouseFormat LinearSplitPattern::GetMouseFormat()
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return GetMouseFormatBeforeAPI10();
     }
     MouseFormat format = MouseFormat::DEFAULT;
@@ -511,7 +510,10 @@ void LinearSplitPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<LinearSplitLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     resizeable_ = layoutProperty->GetResizeable().value_or(false);
-    childrenDragPos_.clear();
+    auto layoutFlag = layoutProperty->GetPropertyChangeFlag();
+    if (!CheckNoChanged(layoutFlag)) {
+        childrenDragPos_.clear();
+    }
 
     InitPanEvent(gestureHub);
 
@@ -522,7 +524,7 @@ void LinearSplitPattern::OnModifyDone()
 
 bool LinearSplitPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
-    CHECK_NULL_RETURN_NOLOG(!skipMeasure, false);
+    CHECK_NULL_RETURN(!skipMeasure, false);
     if (dirty->SkipMeasureContent()) {
         return false;
     }

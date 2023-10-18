@@ -27,10 +27,10 @@ namespace OHOS::Ace::Framework {
 using ErrorPos = std::pair<uint32_t, uint32_t>;
 int32_t GetLineOffset(const AceType* data);
 RefPtr<JsAcePage> GetRunningPage(const AceType* data);
-NativeValue* AppDebugLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info);
-NativeValue* AppInfoLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info);
-NativeValue* AppWarnLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info);
-NativeValue* AppErrorLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info);
+napi_value AppDebugLogPrint(napi_env env, napi_callback_info info);
+napi_value AppInfoLogPrint(napi_env env, napi_callback_info info);
+napi_value AppWarnLogPrint(napi_env env, napi_callback_info info);
+napi_value AppErrorLogPrint(napi_env env, napi_callback_info info);
 int PrintLog(int id, int level, const char* tag, const char* fmt, const char* message);
 
 class JsiBaseUtils {

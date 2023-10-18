@@ -51,6 +51,7 @@ void MarqueePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetUsingContentRectForRenderFrame(true);
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
@@ -83,9 +84,9 @@ void MarqueePattern::OnModifyDone()
     auto src = layoutProperty->GetSrc().value_or(" ");
     textLayoutProperty->UpdateContent(src);
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     auto fontSize = layoutProperty->GetFontSize().value_or(theme->GetTextStyle().GetFontSize());
     textLayoutProperty->UpdateFontSize(fontSize);
     textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL));
@@ -129,7 +130,12 @@ void MarqueePattern::StartMarqueeAnimation()
     }
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto repeatCount = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
+    if (pipeline->IsFormRender()) {
+        repeatCount = 1;
+    }
     FireStartEvent();
     bool needSecondPlay = repeatCount != 1 ? true : false;
     PlayMarqueeAnimation(0.0f, repeatCount, needSecondPlay);

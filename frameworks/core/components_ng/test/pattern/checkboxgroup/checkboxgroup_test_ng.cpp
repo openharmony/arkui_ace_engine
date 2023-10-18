@@ -1494,21 +1494,21 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest023, TestSize.Level1)
      */
     checkBoxGroupPattern->preGroup_ = std::make_optional<std::string>(NAME);
     eventHub->SetGroupName(NAME);
-    checkBoxGroupPattern->isClick_ = true;
+    checkBoxGroupPattern->updateFlag_ = true;
     checkBoxGroupPattern->SetIsAddToMap(true);
     checkBoxGroupPattern->UpdateState();
     EXPECT_EQ(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
-    EXPECT_FALSE(checkBoxGroupPattern->isClick_);
+    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
 
     paintProperty->UpdateCheckBoxGroupSelect(true);
     checkBoxGroupPattern->SetIsAddToMap(false);
     checkBoxGroupPattern->UpdateState();
     EXPECT_EQ(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
-    EXPECT_FALSE(checkBoxGroupPattern->isClick_);
+    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
 
     paintProperty->UpdateCheckBoxGroupSelect(false);
     checkBoxGroupPattern->UpdateState();
-    EXPECT_FALSE(checkBoxGroupPattern->isClick_);
+    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
 }
 
 /**
@@ -1615,6 +1615,34 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest025, TestSize.Level1)
     EXPECT_FLOAT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).y, BORDER_RADIUS);
     EXPECT_FLOAT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x, BORDER_RADIUS);
     EXPECT_FLOAT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y, BORDER_RADIUS);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test on color configuration update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    CheckBoxGroupModelNG CheckBoxGroupModelNG;
+    CheckBoxGroupModelNG.Create(GROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxGroupPattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(checkBoxGroupPattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    ASSERT_NE(checkBoxTheme, nullptr);
+    checkBoxTheme->activeColor_ = Color::BLACK;
+    checkBoxTheme->inactiveColor_ = Color::BLACK;
+    checkBoxTheme->pointColor_ = Color::BLACK;
+    checkBoxGroupPattern->OnColorConfigurationUpdate();
+    auto checkBoxGroupPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxGroupPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxGroupPaintProperty->GetCheckBoxGroupSelectedColor(), Color::BLACK);
+    EXPECT_EQ(checkBoxGroupPaintProperty->GetCheckBoxGroupUnSelectedColor(), Color::BLACK);
+    EXPECT_EQ(checkBoxGroupPaintProperty->GetCheckBoxGroupCheckMarkColor(), Color::BLACK);
 }
 
 /**

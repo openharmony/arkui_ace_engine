@@ -627,7 +627,7 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
         auto eventHub = GetEventHub<ListItemEventHub>();
         eventHub->FireSelectChangeEvent(isSelected);
         auto host = GetHost();
-        CHECK_NULL_VOID_NOLOG(host);
+        CHECK_NULL_VOID(host);
         if (isSelected) {
             eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
             host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);

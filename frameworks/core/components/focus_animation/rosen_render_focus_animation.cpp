@@ -129,11 +129,7 @@ void RosenRenderFocusAnimation::PaintGlow(SkCanvas* skCanvas, SkPaint& paint, in
     SkColor glowColor = SkColorSetARGB(MAX_ALPHA, red, green, blue);
     SkColor colors[ARRAY_LENGTH] = { boundaryColor, boundaryColor, glowColor, glowColor, boundaryColor, boundaryColor };
 
-#ifdef USE_SYSTEM_SKIA
-    paint.setShader(SkGradientShader::MakeLinear(points, colors, pos, ARRAY_LENGTH, SkShader::kClamp_TileMode));
-#else
     paint.setShader(SkGradientShader::MakeLinear(points, colors, pos, ARRAY_LENGTH, SkTileMode::kClamp));
-#endif
 
     skCanvas->drawRect(
         SkRect::MakeXYWH(0 - (maxHeight / MULTIPLE_FACTOR + padding), 0 - (maxHeight / MULTIPLE_FACTOR + padding),
@@ -148,15 +144,14 @@ void RosenRenderFocusAnimation::PaintGlow(RSCanvas* canvas, RSBrush& brush, int3
 
     brush.SetBlendMode(RSBlendMode::SRC_IN);
 
-    RSPoint points[2] = { RSPoint(0 - width_ / MULTIPLE_FACTOR, 0.0f),
-        RSPoint(width_ / MULTIPLE_FACTOR, 0.0f) };
+    RSPoint points[2] = { RSPoint(0 - width_ / MULTIPLE_FACTOR, 0.0f), RSPoint(width_ / MULTIPLE_FACTOR, 0.0f) };
     canvas->Translate(width_ / MULTIPLE_FACTOR, height_ / MULTIPLE_FACTOR);
 
     // Calculate the angle that each frame moves based on the total number of frames
     canvas->Rotate(progress_);
 
-    std::vector<RSScalar> pos = { LEFTEDGE_START_PERCENT, LEFTGLOWEDGE_START_PERCENT,
-        MIDGLOWEDGE_START_PERCENT, RIGHTGLOWEDGE_START_PERCENT, RIGHTEDGE_START_PERCENT, RIGHTEDGE_END_PERCENT };
+    std::vector<RSScalar> pos = { LEFTEDGE_START_PERCENT, LEFTGLOWEDGE_START_PERCENT, MIDGLOWEDGE_START_PERCENT,
+        RIGHTGLOWEDGE_START_PERCENT, RIGHTEDGE_START_PERCENT, RIGHTEDGE_END_PERCENT };
 
     if (!NearZero(height_)) {
         if (width_ / height_ > DOUBLE_FACTOR) {
@@ -181,16 +176,14 @@ void RosenRenderFocusAnimation::PaintGlow(RSCanvas* canvas, RSBrush& brush, int3
     }
     RSColorQuad boundaryColor = RSColor::ColorQuadSetARGB(red, green, blue, mAlpha);
     RSColorQuad glowColor = RSColor::ColorQuadSetARGB(red, green, blue, MAX_ALPHA);
-    std::vector<RSColorQuad> colors = { boundaryColor, boundaryColor,
-        glowColor, glowColor, boundaryColor, boundaryColor };
+    std::vector<RSColorQuad> colors = { boundaryColor, boundaryColor, glowColor, glowColor, boundaryColor,
+        boundaryColor };
 
-    brush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
-        points[0], points[1], colors, pos, RSTileMode::CLAMP));
+    brush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(points[0], points[1], colors, pos, RSTileMode::CLAMP));
     canvas->AttachBrush(brush);
-    canvas->DrawRect(
-        RSRect(0 - (maxHeight / MULTIPLE_FACTOR + padding), 0 - (maxHeight / MULTIPLE_FACTOR + padding),
-            (maxHeight + MULTIPLE_FACTOR * padding) - (maxHeight / MULTIPLE_FACTOR + padding),
-            (maxHeight + MULTIPLE_FACTOR * padding) - (maxHeight / MULTIPLE_FACTOR + padding)));
+    canvas->DrawRect(RSRect(0 - (maxHeight / MULTIPLE_FACTOR + padding), 0 - (maxHeight / MULTIPLE_FACTOR + padding),
+        (maxHeight + MULTIPLE_FACTOR * padding) - (maxHeight / MULTIPLE_FACTOR + padding),
+        (maxHeight + MULTIPLE_FACTOR * padding) - (maxHeight / MULTIPLE_FACTOR + padding)));
     canvas->DetachBrush();
 }
 #endif
@@ -209,8 +202,7 @@ void RosenRenderFocusAnimation::PaintClipRect(RSCanvas* canvas, double offset) c
 {
     offset += (NormalizeToPx(blurMaskRadius_) * DOUBLE_FACTOR);
     RSRoundRect rrect;
-    rrect.SetRect(RSRect(
-        clipRect_.GetOffset().GetX() - offset / DOUBLE_FACTOR,
+    rrect.SetRect(RSRect(clipRect_.GetOffset().GetX() - offset / DOUBLE_FACTOR,
         clipRect_.GetOffset().GetY() - offset / DOUBLE_FACTOR,
         clipRect_.Width() + offset + clipRect_.GetOffset().GetX() - offset / DOUBLE_FACTOR,
         clipRect_.Height() + offset + clipRect_.GetOffset().GetY() - offset / DOUBLE_FACTOR));
@@ -266,7 +258,7 @@ void RosenRenderFocusAnimation::PaintTVFocus(RSCanvas* canvas)
     }
 
     std::unique_ptr<RSRect> rect = std::make_unique<RSRect>(RSRect(0 - padding, 0 - padding,
-		width_ + MULTIPLE_FACTOR * padding - padding, height_ + MULTIPLE_FACTOR * padding - padding));
+        width_ + MULTIPLE_FACTOR * padding - padding, height_ + MULTIPLE_FACTOR * padding - padding));
     canvas->Translate(offset_.GetX() - offsetValue / MULTIPLE_FACTOR, offset_.GetY() - offsetValue / MULTIPLE_FACTOR);
 
     int32_t depthOfSavedStack = canvas->GetSaveCount();
@@ -284,8 +276,8 @@ void RosenRenderFocusAnimation::PaintTVFocus(RSCanvas* canvas)
     pen.SetWidth(NormalizeToPx(Dimension(BOUNDARY_WIDTH, DimensionUnit::VP)));
 
     RSFilter filter;
-    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
-        RSBlurType::SOLID, NormalizeToPx(blurMaskRadius_) * BLUR_SIGMA_FACTOR));
+    filter.SetMaskFilter(
+        RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, NormalizeToPx(blurMaskRadius_) * BLUR_SIGMA_FACTOR));
     pen.SetFilter(filter);
     pen.SetColor(RSColor(pathColor_.GetRed(), pathColor_.GetGreen(), pathColor_.GetBlue(), pathColor_.GetAlpha()));
     pen.SetAlpha(MAX_ALPHA);
@@ -367,11 +359,11 @@ void RosenRenderFocusAnimation::PaintPhoneFocus(RSCanvas* canvas)
         radiusX = NormalizeToPx(rrect_.GetCorner().bottomLeftRadius.GetX());
         radiusY = NormalizeToPx(rrect_.GetCorner().bottomLeftRadius.GetY());
         radiusX = NearZero(radiusX)
-            ? 0.0
-            : radiusX - NormalizeToPx(Dimension(PHONE_INDENTED_FOCUS_OFFSET, DimensionUnit::VP));
+                      ? 0.0
+                      : radiusX - NormalizeToPx(Dimension(PHONE_INDENTED_FOCUS_OFFSET, DimensionUnit::VP));
         radiusY = NearZero(radiusX)
-            ? 0.0
-            : radiusY - NormalizeToPx(Dimension(PHONE_INDENTED_FOCUS_OFFSET, DimensionUnit::VP));
+                      ? 0.0
+                      : radiusY - NormalizeToPx(Dimension(PHONE_INDENTED_FOCUS_OFFSET, DimensionUnit::VP));
         width_ = rrect_.Width() - offsetValue;
         height_ = rrect_.Height() - offsetValue;
         canvas->Translate(

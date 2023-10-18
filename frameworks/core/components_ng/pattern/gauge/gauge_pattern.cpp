@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,12 @@
 
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
+#include "core/components_ng/pattern/gauge/gauge_theme.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-void GaugePattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
-}
-
 bool GaugePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
 {
     if (skipMeasure || dirty->SkipMeasureContent()) {
@@ -48,6 +44,183 @@ void GaugePattern::OnModifyDone()
     } else {
         layoutProperty->UpdateAlignment(Alignment::CENTER);
     }
+
+    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if ((host->TotalChildCount() > 0) && (!titleChildId_.has_value())) {
+            auto firstChild = host->GetFirstChild();
+            CHECK_NULL_VOID(firstChild);
+            titleChildId_ = firstChild->GetId();
+        }
+
+        auto gaugePaintProperty = GetPaintProperty<GaugePaintProperty>();
+        CHECK_NULL_VOID(gaugePaintProperty);
+        if (gaugePaintProperty->GetIsShowIndicatorValue(false) && gaugePaintProperty->HasIndicatorIconSourceInfo()) {
+            InitIndicatorImage();
+        }
+
+        auto gaugeLayoutProperty = GetLayoutProperty<GaugeLayoutProperty>();
+        CHECK_NULL_VOID(gaugeLayoutProperty);
+
+        if (gaugeLayoutProperty->GetIsShowLimitValueValue(false)) {
+            InitLimitValueText(GetMinValueTextId(), true);
+            InitLimitValueText(GetMaxValueTextId(), false);
+        }
+        if (gaugeLayoutProperty->GetIsShowDescriptionValue(false)) {
+            InitDescriptionNode();
+        }
+    }
 }
 
+void GaugePattern::InitDescriptionNode()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto linearNode = FrameNode::GetOrCreateFrameNode(V2::GAUGE_DESCRIPTION_TAG, GetDescriptionNodeId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto descriptionRenderContext = linearNode->GetRenderContext();
+    CHECK_NULL_VOID(descriptionRenderContext);
+    descriptionRenderContext->UpdateClipEdge(true);
+    CHECK_NULL_VOID(descriptionNode_);
+    descriptionNode_->MountToParent(linearNode);
+    auto property = linearNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    linearNode->MountToParent(frameNode);
+    linearNode->MarkModifyDone();
+}
+
+void GaugePattern::InitLimitValueText(const int32_t valueTextId, const bool isMin)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto gaugePaintProperty = GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(gaugePaintProperty);
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(textNode);
+
+    auto limitValue =
+        isMin ? gaugePaintProperty->GetMinValue(DEFAULT_MIN_VALUE) : gaugePaintProperty->GetMaxValue(DEFAULT_MAX_VALUE);
+    auto limitValueColor = Color::BLACK;
+    if (gaugePaintProperty->HasGradientColors()) {
+        limitValueColor = isMin ? gaugePaintProperty->GetGradientColorsValue().at(0).at(0).first
+                                : GetMaxValueColor(gaugePaintProperty);
+    } else {
+        limitValueColor = isMin ? (*GAUGE_DEFAULT_COLOR.begin()) : (*GAUGE_DEFAULT_COLOR.rbegin());
+    }
+    std::ostringstream out;
+    out << std::setiosflags(std::ios::fixed) << std::setprecision(0) << limitValue;
+
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<GaugeTheme>();
+
+    auto limitValueTextProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(limitValueTextProperty);
+    limitValueTextProperty->UpdateContent(out.str());
+    limitValueTextProperty->UpdateTextColor(limitValueColor);
+    limitValueTextProperty->UpdateMaxLines(1);
+    limitValueTextProperty->UpdateAdaptMaxFontSize(LIMIT_VALUE_MAX_FONTSIZE);
+    limitValueTextProperty->UpdateAdaptMinFontSize(theme->GetLimitValueMinFontSize());
+    limitValueTextProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    limitValueTextProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    auto textAlign = isMin ? TextAlign::LEFT : TextAlign::RIGHT;
+    limitValueTextProperty->UpdateTextAlign(textAlign);
+
+    textNode->MountToParent(frameNode);
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    textNode->MarkModifyDone();
+}
+
+Color GaugePattern::GetMaxValueColor(const RefPtr<GaugePaintProperty>& gaugePaintProperty) const
+{
+    Color color(Color::BLACK);
+    CHECK_NULL_RETURN(gaugePaintProperty, color);
+    switch (gaugePaintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT)) {
+        case GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT: {
+            color = gaugePaintProperty->GetGradientColorsValue().rbegin()->rbegin()->first;
+            break;
+        }
+        case GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT: {
+            color = gaugePaintProperty->GetGradientColorsValue().at(0).rbegin()->first;
+            break;
+        }
+        case GaugeType::TYPE_CIRCULAR_MONOCHROME: {
+            color = gaugePaintProperty->GetGradientColorsValue().at(0).at(0).first;
+            break;
+        }
+        default:
+            // do nothing.
+            break;
+    }
+    return color;
+}
+
+void GaugePattern::InitIndicatorImage()
+{
+    auto gaugePaintProperty = GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(gaugePaintProperty);
+
+    ImageSourceInfo sourceInfo = gaugePaintProperty->GetIndicatorIconSourceInfo().value_or(ImageSourceInfo(""));
+    LoadNotifier iconLoadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
+    indicatorIconLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(sourceInfo, std::move(iconLoadNotifier), true);
+    indicatorIconLoadingCtx_->LoadImageData();
+}
+
+LoadSuccessNotifyTask GaugePattern::CreateLoadSuccessCallback()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& /* sourceInfo */) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnImageLoadSuccess();
+    };
+    return task;
+}
+
+DataReadyNotifyTask GaugePattern::CreateDataReadyCallback()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& /* sourceInfo */) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnImageDataReady();
+    };
+    return task;
+}
+
+LoadFailNotifyTask GaugePattern::CreateLoadFailCallback()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& /* sourceInfo */, const std::string& msg) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnImageLoadFail();
+    };
+    return task;
+}
+
+void GaugePattern::OnImageLoadFail()
+{
+    LOGW("Image data load fail.");
+}
+
+void GaugePattern::OnImageDataReady()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void GaugePattern::OnImageLoadSuccess()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
+
+    LOGD("Load show icon successfully");
+    ImagePaintConfig config;
+    config.srcRect_ = indicatorIconLoadingCtx_->GetSrcRect();
+    config.dstRect_ = indicatorIconLoadingCtx_->GetDstRect();
+    config.isSvg_ = indicatorIconLoadingCtx_->GetSourceInfo().IsSvg();
+    indicatorIconCanvasImage_ = indicatorIconLoadingCtx_->MoveCanvasImage();
+    indicatorIconCanvasImage_->SetPaintConfig(config);
+}
 } // namespace OHOS::Ace::NG

@@ -28,7 +28,7 @@ RefPtr<NavToolbarNode> NavToolbarNode::GetOrCreateToolbarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavToolbarNode>(frameNode));
+    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<NavToolbarNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto toolbarNode = AceType::MakeRefPtr<NavToolbarNode>(tag, nodeId, pattern);
     toolbarNode->InitializePatternAndContext();

@@ -89,9 +89,9 @@ public:
         return message_;
     }
 
-    const RefPtr<UINode>& GetCustomNode()
+    RefPtr<UINode> GetCustomNode()
     {
-        return customNode_;
+        return customNode_.Upgrade();
     }
 
     void SetOpenAnimation(const std::optional<AnimationOption>& openAnimation)
@@ -125,7 +125,7 @@ public:
     void OnColorConfigurationUpdate() override;
 
 private:
-    bool ShouldAvoidKeyboard() const override
+    bool AvoidKeyboard() const override
     {
         return false;
     }
@@ -170,7 +170,7 @@ private:
     RefPtr<FrameNode> BuildMenu(const std::vector<ButtonInfo>& buttons);
 
     RefPtr<DialogTheme> dialogTheme_;
-    RefPtr<UINode> customNode_;
+    WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
 
     std::optional<AnimationOption> openAnimation_;
@@ -182,7 +182,7 @@ private:
     std::string subtitle_;
 
     DialogProperties dialogProperties_;
-    RefPtr<FrameNode> menuNode_;
+    WeakPtr<FrameNode> menuNode_;
     bool isFirstDefaultFocus_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);

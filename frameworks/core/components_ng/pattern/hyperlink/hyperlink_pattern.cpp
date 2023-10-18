@@ -86,6 +86,8 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(theme);
     if (!enabled) {
         hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextDisabledColor());
+    } else {
+        hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor());
     }
     if (host->IsDraggable()) {
         EnableDrag();
@@ -108,6 +110,7 @@ void HyperlinkPattern::LinkToAddress()
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
     hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(theme->GetTextLinkedColor()));
+    hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     pipeline->HyperlinkStartAbility(address_);
 #endif
@@ -144,7 +147,7 @@ void HyperlinkPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->OnTouchEvent(info);
     };
     gestureHub->RemoveTouchEvent(onTouchEvent_);
@@ -180,13 +183,16 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (touchType == TouchType::UP) {
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+        if (!isLinked_) {
+            hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor());
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
 void HyperlinkPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!longPressEvent_);
+    CHECK_NULL_VOID(!longPressEvent_);
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -214,7 +220,7 @@ void HyperlinkPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));

@@ -53,7 +53,7 @@ public:
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
-    void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
+    void RunPage(const std::string& url, const std::string& params) override;
 
     void ReplacePage(const std::string& url, const std::string& params) override;
 
@@ -64,11 +64,13 @@ public:
 
     RefPtr<AcePage> GetPage(int32_t pageId) const override
     {
+        CHECK_NULL_RETURN(delegate_, nullptr);
         return delegate_->GetPage(pageId);
     }
 
     WeakPtr<AcePage> GetCurrentReadyPage() const
     {
+        CHECK_NULL_RETURN(delegate_, nullptr);
         return delegate_->GetCurrentReadyPage();
     }
 

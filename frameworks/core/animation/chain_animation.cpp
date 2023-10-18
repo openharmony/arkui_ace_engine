@@ -65,7 +65,7 @@ ChainAnimation::ChainAnimation(float space, float maxSpace, float minSpace, RefP
     }
     auto&& callback = [weak = AceType::WeakClaim(this)](uint64_t duration) {
         auto chain = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(chain);
+        CHECK_NULL_VOID(chain);
         if (!chain->isOverDrag_) {
             chain->TickAnimation();
         }

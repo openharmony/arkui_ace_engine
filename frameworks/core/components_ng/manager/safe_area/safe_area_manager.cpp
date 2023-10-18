@@ -20,11 +20,8 @@
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
 {
-    if (cutoutSafeArea_ == safeArea) {
-        return false;
-    }
-    cutoutSafeArea_ = safeArea;
-    return true;
+    // cutout regions currently not adjacent to edges, so ignore it.
+    return false;
 }
 
 bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
@@ -61,6 +58,9 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
         res = res.Combine(systemSafeArea_);
     }
+    if (keyboardSafeAreaEnabled_ && (opts.type & SAFE_AREA_TYPE_KEYBOARD)) {
+        res.bottom_ = res.bottom_.Combine(keyboardInset_);
+    }
     return res;
 }
 
@@ -79,6 +79,16 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
         return false;
     }
     ignoreSafeArea_ = value;
+    return true;
+}
+
+bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
+{
+    if (keyboardSafeAreaEnabled_ == value) {
+        return false;
+    }
+    keyboardSafeAreaEnabled_ = value;
+    LOGD("setKeyBoardAvoidMode %{public}d", value);
     return true;
 }
 
@@ -104,5 +114,13 @@ SafeAreaInsets SafeAreaManager::GetSafeArea() const
         return {};
     }
     return systemSafeArea_.Combine(cutoutSafeArea_);
+}
+
+float SafeAreaManager::GetKeyboardOffset() const
+{
+    if (keyboardSafeAreaEnabled_) {
+        return 0.0f;
+    }
+    return keyboardOffset_;
 }
 } // namespace OHOS::Ace::NG

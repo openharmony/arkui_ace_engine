@@ -110,6 +110,22 @@ struct BorderRadiusPropertyT<Dimension> {
     bool UpdateWithCheck(const BorderRadiusPropertyT<Dimension>& value);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson) const;
+
+    std::string ToString() const
+    {
+        std::string str;
+        str.append("radiusTopLeft: [").append(radiusTopLeft.has_value() ? radiusTopLeft->ToString() : "NA").append("]");
+        str.append("radiusTopRight: [")
+            .append(radiusTopRight.has_value() ? radiusTopRight->ToString() : "NA")
+            .append("]");
+        str.append("radiusBottomLeft: [")
+            .append(radiusBottomLeft.has_value() ? radiusBottomLeft->ToString() : "NA")
+            .append("]");
+        str.append("radiusBottomRight: [")
+            .append(radiusBottomRight.has_value() ? radiusBottomRight->ToString() : "NA")
+            .append("]");
+        return str;
+    }
 };
 
 template<>

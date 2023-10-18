@@ -80,17 +80,7 @@ sk_sp<SkShader> BlendSkShader(SkScalar cx, SkScalar cy, const SkColor colors[], 
         scanColors[1] =
             HIGHLIGHT.ChangeAlpha(((drawAngle - scanEndDegree) / (0.1 * drawAngle)) * HIGHLIGHT.GetAlpha()).GetValue();
     }
-#ifdef USE_SYSTEM_SKIA
-    backgroundShader =
-        SkGradientShader::MakeSweep(cx, cy, colors, pos, 2, SkShader::kDecal_TileMode, 0.0, drawAngle, 0, nullptr);
-    scanShader = SkGradientShader::MakeSweep(
-        cx, cy, scanColors, scanPos, 3, SkShader::kDecal_TileMode, scanStartDegree, scanEndDegree, 0, nullptr);
-    if (useAnimator) {
-        blendShader = SkShader::MakeCompose(backgroundShader, scanShader, SkBlendMode::kSrcOver);
-    } else {
-        blendShader = backgroundShader;
-    }
-#else
+
     backgroundShader =
         SkGradientShader::MakeSweep(cx, cy, colors, pos, 2, SkTileMode::kDecal, 0.0, drawAngle, 0, nullptr);
     scanShader = SkGradientShader::MakeSweep(
@@ -100,7 +90,6 @@ sk_sp<SkShader> BlendSkShader(SkScalar cx, SkScalar cy, const SkColor colors[], 
     } else {
         blendShader = backgroundShader;
     }
-#endif
     return blendShader;
 }
 
@@ -178,8 +167,9 @@ void PaintProgress(
     } else {
         // this component contains three parts two edge circle and a path region.
         if (progress < START_COLOR_TRANSITION_EDGE) {
-            startCirclePaint.setColor(Color::LineColorTransition(
-                arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE).GetValue());
+            startCirclePaint.setColor(
+                Color::LineColorTransition(arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE)
+                    .GetValue());
         } else {
             startCirclePaint.setColor(arcData.startColor.GetValue());
         }
@@ -201,8 +191,9 @@ void PaintProgress(
         canvas->canvas()->save();
         canvas->canvas()->rotate(startAngle - QUARTER_CIRCLE, center.GetX(), center.GetY());
         if (progress < START_COLOR_TRANSITION_EDGE) {
-            colors[0] = Color::LineColorTransition(
-                arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE).GetValue();
+            colors[0] =
+                Color::LineColorTransition(arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE)
+                    .GetValue();
             gradientPaint.setShader(BlendSkShader(center.GetX(), center.GetY(), colors, pos, 2, percent * drawAngle,
                 drawAngle, nullptr, useAnimator, useEffect));
         } else {
@@ -260,13 +251,9 @@ void PaintProgressFilterMask(ScopedCanvas& canvas, ArcData arcData)
         arcData.endColor.ChangeAlpha(101).GetValue() };
     SkScalar pos[2] = { 0.0, 1.0 };
     // kClamp_TileMode
-#ifdef USE_SYSTEM_SKIA
-    filterPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2,
-        SkShader::kDecal_TileMode, startAngle, startAngle + sweepAngle, 0, nullptr));
-#else
+
     filterPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2, SkTileMode::kDecal,
         startAngle, startAngle + sweepAngle, 0, nullptr));
-#endif
     canvas->canvas()->drawPath(rainbowFilterPath, filterPaint);
     startAngle += sweepAngle;
 
@@ -336,13 +323,9 @@ void PaintRainbowFilterMask(ScopedCanvas& canvas, double factor, const std::vect
         SkColor colors[2] = { segment.GetStartColor().ChangeAlpha(101).GetValue(),
             segment.GetEndColor().ChangeAlpha(101).GetValue() };
         SkScalar pos[2] = { 0.0, 1.0 };
-#ifdef USE_SYSTEM_SKIA
-        filterPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2,
-            SkShader::kClamp_TileMode, startAngle, startAngle + sweepAngle, 0, nullptr));
-#else
+
         filterPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2,
             SkTileMode::kClamp, startAngle, startAngle + sweepAngle, 0, nullptr));
-#endif
         canvas->canvas()->drawPath(rainbowFilterPath, filterPaint);
         startAngle += sweepAngle;
     }
@@ -447,15 +430,9 @@ void FlutterRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context
     botPaint.setStrokeWidth(thickness);
     botPaint.setAntiAlias(true);
 
-#ifdef USE_SYSTEM_SKIA
-    botPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2,
-        SkShader::kDecal_TileMode, 0.0,
-        sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2)), 0, nullptr));
-#else
     botPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2, SkTileMode::kDecal,
         0.0, sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2)), 0,
         nullptr));
-#endif
     canvas->canvas()->save();
     PaintTrackBackground(canvas, center, thickness, backgroundTrack_, diameter);
     canvas->canvas()->rotate(animateAngle, center.GetX(), center.GetY()); // animate

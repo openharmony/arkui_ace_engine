@@ -46,7 +46,7 @@ public:
     }
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
     bool Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value);
-    void OnReSync(const WeakPtr<FrameNode>& trigger = nullptr);
+    void OnReSync(const WeakPtr<FrameNode>& trigger = nullptr, const AnimationOption& option = AnimationOption());
     bool OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode);
     bool OnFollowWithoutTransition(std::optional<bool> direction = std::nullopt);
     void WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
@@ -67,7 +67,7 @@ private:
     void ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& layoutWrapper, bool isNodeIn);
     void SyncGeometry(bool isNodeIn);
     bool IsParent(const WeakPtr<FrameNode>& parent, const WeakPtr<FrameNode>& child) const;
-    void RecordAnimationOption(const WeakPtr<FrameNode>& trigger);
+    void RecordAnimationOption(const WeakPtr<FrameNode>& trigger, const AnimationOption& option);
     RectF GetNodeAbsFrameRect(const RefPtr<FrameNode>& node, std::optional<OffsetF> parentPos = std::nullopt) const;
 
     std::string id_;
@@ -83,6 +83,8 @@ private:
     OffsetF outNodeParentPos_;
     RefPtr<FrameNode> holder_;
     bool followWithoutTransition_ = false;
+    // static node means the node on the tree without transition
+    std::optional<RectF> staticNodeAbsRect_;
     RefPtr<LayoutProperty> layoutPropertyIn_;
     RefPtr<LayoutProperty> layoutPropertyOut_;
     AnimationOption animationOption_;

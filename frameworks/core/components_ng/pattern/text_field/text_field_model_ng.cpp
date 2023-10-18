@@ -41,6 +41,10 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textEditingValue = pattern->GetTextEditingValue();
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("TextFieldModelNG::GetOrCreateNode with text %{public}s, current text %{public}s",
+            value.value_or("NA").c_str(), textEditingValue.text.c_str());
+    }
     if (value.has_value() && value.value() != textEditingValue.text) {
         pattern->InitEditingValueText(value.value());
     }
@@ -148,14 +152,23 @@ void TextFieldModelNG::RequestKeyboardOnFocus(bool needToRequest)
     pattern->SetNeedToRequestKeyboardOnFocus(needToRequest);
 }
 
+void TextFieldModelNG::SetTextRectWillChange()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->SetTextRectWillChange();
+}
+
 void TextFieldModelNG::SetType(TextInputType value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
         layoutProperty->UpdateTypeChanged(true);
     }
+    SetTextRectWillChange();
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value);
 }
 
@@ -245,11 +258,7 @@ void TextFieldModelNG::SetMaxLines(uint32_t value)
 }
 void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    if (layoutProperty->GetFontSizeValue(value) != value) {
-        layoutProperty->UpdateFontSizeChanged(true);
-    }
+    SetTextRectWillChange();
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
@@ -455,11 +464,11 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
     Color backgroundColor;
     if (tmp) {
         auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipeline);
+        CHECK_NULL_VOID(pipeline);
         auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID_NOLOG(themeManager);
+        CHECK_NULL_VOID(themeManager);
         auto theme = themeManager->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
         return;
     }
@@ -475,7 +484,7 @@ void TextFieldModelNG::SetPadding(NG::PaddingProperty& newPadding, Edge oldPaddi
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         auto textFieldPadding = theme->GetPadding();
         auto top = textFieldPadding.Top();
         auto bottom = textFieldPadding.Bottom();

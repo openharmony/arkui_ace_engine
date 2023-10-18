@@ -23,18 +23,18 @@ RefPtr<AceType> CalendarControllerModelImpl::GetController()
 
 void CalendarControllerModelImpl::BackToToday(RefPtr<AceType>& controller)
 {
-    CHECK_NULL_VOID_NOLOG(controller);
+    CHECK_NULL_VOID(controller);
     auto controllerV2 = AceType::DynamicCast<CalendarControllerV2>(controller);
-    CHECK_NULL_VOID_NOLOG(controllerV2);
+    CHECK_NULL_VOID(controllerV2);
     controllerV2->BackToToday();
 }
 
 void CalendarControllerModelImpl::GoTo(const int32_t& year, const int32_t& month, const int32_t& day,
     RefPtr<AceType>& controller)
 {
-    CHECK_NULL_VOID_NOLOG(controller);
+    CHECK_NULL_VOID(controller);
     auto controllerV2 = AceType::DynamicCast<CalendarControllerV2>(controller);
-    CHECK_NULL_VOID_NOLOG(controllerV2);
+    CHECK_NULL_VOID(controllerV2);
     controllerV2->GoTo(year, month, day);
 }
 } // namespace OHOS::Ace::Framework

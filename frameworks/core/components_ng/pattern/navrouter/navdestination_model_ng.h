@@ -37,6 +37,7 @@ public:
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
+    void CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
 };
 } // namespace OHOS::Ace::NG
 

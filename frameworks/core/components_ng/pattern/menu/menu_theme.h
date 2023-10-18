@@ -18,6 +18,7 @@
 
 #include <cstdint>
 
+#include "core/components/theme/theme.h"
 #include "frameworks/base/geometry/dimension.h"
 
 namespace OHOS::Ace::NG {
@@ -27,6 +28,142 @@ constexpr uint8_t GRADIENT_END_GRADIENT = 255;
 constexpr uint32_t DEFAULT_BACKGROUND_COLOR = 0xFFFFFFF;
 constexpr uint32_t MENU_MIN_GRID_COUNTS = 2;
 constexpr uint32_t MENU_MAX_GRID_COUNTS = 6;
+
+/**
+ * MenuTheme defines styles of menu item. MenuTheme should be built
+ * using MenuTheme::Builder.
+ */
+class MenuTheme : public virtual Theme {
+    DECLARE_ACE_TYPE(MenuTheme, Theme);
+
+public:
+    class Builder {
+    public:
+        Builder() = default;
+        ~Builder() = default;
+
+        RefPtr<MenuTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            RefPtr<MenuTheme> theme = AceType::Claim(new MenuTheme());
+            if (!themeConstants) {
+                return theme;
+            }
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            return theme;
+        }
+
+    private:
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<MenuTheme>& theme) const
+        {
+            if (!themeStyle) {
+                return;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SELECT, nullptr);
+            if (!pattern) {
+                LOGE("Pattern of menu is null, please check!");
+                return;
+            }
+            theme->filterAnimationDuration_ = 250;
+            theme->previewAnimationDuration_ = 300;
+            theme->previewBeforeAnimationScale_ = 0.95f;
+            theme->previewAfterAnimationScale_ = 1.1f;
+            theme->menuAnimationScale_ = 0.4f;
+            theme->springMotionResponse_ = 0.416f;
+            theme->springMotionDampingFraction_ = 0.73f;
+            theme->contextMenuAppearDuration_ = 250;
+            theme->disappearDuration_ = 250;
+            theme->previewDisappearSpringMotionResponse_ = 0.304f;
+            theme->previewDisappearSpringMotionDampingFraction_ = 0.97f;
+            theme->filterRadius_ = Dimension(100.0f);
+            theme->previewBorderRadius_ = 16.0_vp;
+        }
+    };
+
+    ~MenuTheme() override = default;
+
+    int32_t GetFilterAnimationDuration() const
+    {
+        return filterAnimationDuration_;
+    }
+
+    int32_t GetPreviewAnimationDuration() const
+    {
+        return previewAnimationDuration_;
+    }
+
+    float GetPreviewBeforeAnimationScale() const
+    {
+        return previewBeforeAnimationScale_;
+    }
+
+    float GetPreviewAfterAnimationScale() const
+    {
+        return previewAfterAnimationScale_;
+    }
+
+    float GetMenuAnimationScale() const
+    {
+        return menuAnimationScale_;
+    }
+
+    float GetSpringMotionResponse() const
+    {
+        return springMotionResponse_;
+    }
+
+    float GetSpringMotionDampingFraction() const
+    {
+        return springMotionDampingFraction_;
+    }
+
+    int32_t GetContextMenuAppearDuration() const
+    {
+        return contextMenuAppearDuration_;
+    }
+
+    int32_t GetDisappearDuration() const
+    {
+        return disappearDuration_;
+    }
+
+    float GetPreviewDisappearSpringMotionResponse() const
+    {
+        return previewDisappearSpringMotionResponse_;
+    }
+
+    float GetPreviewDisappearSpringMotionDampingFraction() const
+    {
+        return previewDisappearSpringMotionDampingFraction_;
+    }
+
+    Dimension GetFilterRadius() const
+    {
+        return filterRadius_;
+    }
+
+    Dimension GetPreviewBorderRadius() const
+    {
+        return previewBorderRadius_;
+    }
+
+protected:
+    MenuTheme() = default;
+
+private:
+    int32_t filterAnimationDuration_ = 0;
+    int32_t previewAnimationDuration_ = 0;
+    float previewBeforeAnimationScale_ = 1.0f;
+    float previewAfterAnimationScale_ = 1.0f;
+    float menuAnimationScale_ = 1.0f;
+    float springMotionResponse_ = 0.0f;
+    float springMotionDampingFraction_ = 0.0f;
+    int32_t contextMenuAppearDuration_ = 0;
+    int32_t disappearDuration_ = 0;
+    float previewDisappearSpringMotionResponse_ = 0.0f;
+    float previewDisappearSpringMotionDampingFraction_ = 0.0f;
+    Dimension filterRadius_;
+    Dimension previewBorderRadius_;
+};
 
 } // namespace OHOS::Ace::NG
 

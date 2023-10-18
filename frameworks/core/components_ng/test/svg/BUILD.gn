@@ -15,6 +15,6 @@ group("svg_unittest") {
   testonly = true
   deps = [
     "dom:svg_dom_test_ng",
-    "parse:svg_parse_unit_test",
+    "parse:parse_test_ng",
   ]
 }

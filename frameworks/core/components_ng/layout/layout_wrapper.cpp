@@ -47,7 +47,7 @@ void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraint
 void LayoutWrapper::OffsetNodeToSafeArea()
 {
     auto&& insets = GetLayoutProperty()->GetSafeAreaInsets();
-    CHECK_NULL_VOID_NOLOG(insets);
+    CHECK_NULL_VOID(insets);
     auto geometryNode = GetGeometryNode();
     auto offset = geometryNode->GetMarginFrameOffset();
     if (offset.GetX() < insets->left_.end) {
@@ -111,7 +111,7 @@ void LayoutWrapper::SaveGeoState()
 void LayoutWrapper::ExpandSafeArea()
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    CHECK_NULL_VOID_NOLOG(opts && opts->Expansive());
+    CHECK_NULL_VOID(opts && opts->Expansive());
 
     // children of Scrollable nodes don't support expandSafeArea
     auto host = GetHostNode();
@@ -125,10 +125,6 @@ void LayoutWrapper::ExpandSafeArea()
         ExpandIntoKeyboard();
     }
 
-    if (!(opts->type & SAFE_AREA_TYPE_SYSTEM) && !(opts->type & SAFE_AREA_TYPE_CUTOUT)) {
-        return;
-    }
-    // expand System and Cutout safeArea
     // get frame in global offset
     auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
     auto geometryNode = GetGeometryNode();

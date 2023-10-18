@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PROPERTIES_H
 
 #include <functional>
+#include <optional>
+
 #include "base/geometry/dimension.h"
 
 namespace OHOS::Ace {
@@ -109,6 +111,8 @@ using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
+using CalePredictSnapOffsetCallback = std::function<std::optional<float>(float delta)>;
+using StartScrollSnapMotionCallback = std::function<void(float scrollSnapDelta, float scrollSnapVelocity)>;
 } // namespace OHOS::Ace
 
 #endif

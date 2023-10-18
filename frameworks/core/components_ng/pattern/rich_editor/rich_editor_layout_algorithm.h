@@ -16,26 +16,40 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_LAYOUT_ALGORITHM_H
 
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorLayoutAlgorithm : public TextLayoutAlgorithm {
     DECLARE_ACE_TYPE(RichEditorLayoutAlgorithm, TextLayoutAlgorithm);
 
 public:
-    RichEditorLayoutAlgorithm();
-    RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren, const RefPtr<Paragraph>& paragraph);
-    ~RichEditorLayoutAlgorithm() override;
+    RichEditorLayoutAlgorithm() = delete;
+    RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs);
+    ~RichEditorLayoutAlgorithm() override = default;
 
     const OffsetF& GetParentGlobalOffset() const
     {
         return parentGlobalOffset_;
     }
+    std::optional<SizeF> MeasureContent(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
 private:
+    void GetPlaceholderRects(std::vector<Rect>& rects) override;
+    int32_t GetPreviousLength() const override;
+    ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const override;
+
+    void ApplyIndent(const TextStyle& textStyle, double width) override
+    { // do nothing
+    }
+
+    std::vector<std::list<RefPtr<SpanItem>>> spans_;
+    ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);

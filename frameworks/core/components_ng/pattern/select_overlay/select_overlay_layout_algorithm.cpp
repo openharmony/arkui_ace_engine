@@ -33,9 +33,11 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(*info_) || (!info_->firstHandle.isShow && !info_->secondHandle.isShow)) {
+    if (!CheckInShowArea(*info_)) {
         menu->SetActive(false);
         return;
+    } else if (!info_->firstHandle.isShow && !info_->secondHandle.isShow) {
+        menu->SetActive(false);
     } else {
         menu->SetActive(true);
     }
@@ -98,21 +100,25 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
     OffsetF menuPosition;
+    bool isExtension = false;
 
     // Calculate the spacing with text and handle, menu is fixed up the handle and text.
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
     double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
 
-    auto menuWidth = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
-    auto menuHeight = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
+    auto width = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
+    auto height = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
 
     // When the extended menu is displayed, the default menu becomes circular, but the position of the circle is aligned
     // with the end of the original menu.
-    if (GreatNotEqual(menuWidth, menuHeight)) {
-        menuWidth_ = menuWidth;
+    if (GreatNotEqual(width, height)) {
+        menuWidth_ = width;
+        menuHeight_ = height;
     } else {
-        return defaultMenuEndOffset_ - OffsetF(menuWidth, 0.0f);
+        isExtension = true;
     }
+    auto menuWidth = menuWidth_.value_or(width);
+    auto menuHeight = menuHeight_.value_or(height);
 
     // paint rect is in global position, need to convert to local position
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
@@ -128,7 +134,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             singleHandle.Width(), singleHandle.Height());
     }
 
-    if (info_->isSingleHandle) {
+    if (info_->isSingleHandle || !(info_->firstHandle.isShow && info_->secondHandle.isShow)) {
         auto menuSpacing = static_cast<float>(menuSpacingBetweenText);
         menuPosition = OffsetF((singleHandle.Left() + singleHandle.Right() - menuWidth) / 2.0f,
             static_cast<float>(singleHandle.Top() - menuSpacing - menuHeight));
@@ -174,8 +180,17 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText)) {
         menuPosition.SetY(viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText);
     }
+    if (info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->handleReverse) {
+        menuPosition.SetY(menuPosition.GetY() - menuSpacingBetweenHandle);
+    }
+    if (!info_->firstHandle.isShow && info_->secondHandle.isShow && info_->handleReverse) {
+        menuPosition.SetY(menuPosition.GetY() - menuSpacingBetweenHandle);
+    }
     LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
+    if (isExtension) {
+        return defaultMenuEndOffset_ - OffsetF(width, 0);
+    }
     return menuPosition;
 }
 

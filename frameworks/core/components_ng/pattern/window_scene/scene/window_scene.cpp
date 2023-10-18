@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 
 #include "session_manager/include/scene_session_manager.h"
+#include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -38,12 +39,12 @@ const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 {
     session_ = session;
-    sizeChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
+    boundsChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        self->OnBoundsSizeChanged(bounds);
+        self->OnBoundsChanged(bounds);
     };
-    CHECK_NULL_VOID_NOLOG(IsMainWindow());
+    CHECK_NULL_VOID(IsMainWindow());
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         LOGI("RSSurfaceNode buffer available callback");
@@ -59,8 +60,8 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 
 WindowScene::~WindowScene()
 {
-    CHECK_NULL_VOID_NOLOG(IsMainWindow());
-    CHECK_NULL_VOID_NOLOG(session_);
+    CHECK_NULL_VOID(IsMainWindow());
+    CHECK_NULL_VOID(session_);
     session_->SetShowRecent(false);
     UnregisterLifecycleListener();
 }
@@ -78,7 +79,7 @@ void WindowScene::OnAttachToFrameNode()
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
-        surfaceNode->SetBoundsSizeChangedCallback(sizeChangedCallback_);
+        surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
         return;
     }
 
@@ -88,7 +89,7 @@ void WindowScene::OnAttachToFrameNode()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
-    surfaceNode->SetBoundsSizeChangedCallback(sizeChangedCallback_);
+    surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
     WindowPattern::OnAttachToFrameNode();
 }
@@ -110,7 +111,7 @@ void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
     context->SetRSNode(surfaceNode);
 }
 
-void WindowScene::OnBoundsSizeChanged(const Rosen::Vector4f& bounds)
+void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 {
     Rosen::WSRect windowRect {
         .posX_ = std::round(bounds.x_),
@@ -118,9 +119,18 @@ void WindowScene::OnBoundsSizeChanged(const Rosen::Vector4f& bounds)
         .width_ = std::round(bounds.z_),
         .height_ = std::round(bounds.w_),
     };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
 
     CHECK_NULL_VOID(session_);
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
+    if (transactionController && (session_->GetSessionRect() != windowRect)) {
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED,
+            transactionController->GetRSTransaction());
+    } else {
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    }
 }
 
 void WindowScene::BufferAvailableCallback()
@@ -137,6 +147,7 @@ void WindowScene::BufferAvailableCallback()
             CHECK_NULL_VOID(context);
             auto rsNode = context->GetRSNode();
             CHECK_NULL_VOID(rsNode);
+            rsNode->MarkNodeGroup(true);
             auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
             rsNode->SetTransitionEffect(effect);
             Rosen::RSAnimationTimingProtocol protocol;
@@ -191,6 +202,15 @@ void WindowScene::OnActivation()
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+
+        if (self->session_ && self->session_->GetShowRecent() && self->startingNode_) {
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            host->AddChild(self->contentNode_, 0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            self->session_->GetSurfaceNode()->SetBufferAvailableCallback(self->callback_);
         }
     };
 
@@ -241,33 +261,6 @@ void WindowScene::OnForeground()
         host->RemoveChild(self->snapshotNode_);
         self->snapshotNode_.Reset();
         host->AddChild(self->contentNode_);
-        if (!self->session_->GetBufferAvailable() && !self->startingNode_) {
-            self->CreateStartingNode();
-            host->AddChild(self->startingNode_);
-        }
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-
-    ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
-}
-
-void WindowScene::OnBackground()
-{
-    CHECK_NULL_VOID(session_);
-    auto snapshot = session_->GetSnapshot();
-
-    auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        host->RemoveChild(self->contentNode_);
-        self->CreateSnapshotNode(snapshot);
-        host->AddChild(self->snapshotNode_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 

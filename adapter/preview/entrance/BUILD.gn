@@ -66,11 +66,14 @@ ohos_source_set("preview_entrance_source") {
       "//foundation/window/window_manager",
       "//foundation/ability/ability_runtime",
       "//ide/tools/previewer",
+      "//arkcompiler/ets_runtime",
+      "//arkcompiler/runtime_core",
     ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       external_deps += [
         "graphic_2d:librender_service_client",
+        "previewer:ide_extension",
         "previewer:ide_util",
         "window_manager:previewer_window",
       ]

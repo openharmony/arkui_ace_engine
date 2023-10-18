@@ -20,11 +20,7 @@
 #include "include/utils/SkParsePath.h"
 
 #include "base/utils/utils.h"
-#ifndef NEW_SKIA
-#include "core/components/common/painter/flutter_svg_painter.h"
-#else
 #include "core/components/common/painter/rosen_svg_painter.h"
-#endif
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
@@ -105,7 +101,7 @@ std::string ParseIdFromUrl(const std::string& url)
 
 void SvgNode::SetAttr(const std::string& name, const std::string& value)
 {
-    CHECK_NULL_VOID_NOLOG(declaration_);
+    CHECK_NULL_VOID(declaration_);
     if (!declaration_->SetSpecializedAttr(std::make_pair(name, value))) {
         declaration_->SetAttr({ std::make_pair(name, value) });
     }
@@ -118,7 +114,7 @@ RSPath SvgNode::AsRSPath(const Size& viewPort) const
 
 void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
 {
-    CHECK_NULL_VOID_NOLOG(declaration_);
+    CHECK_NULL_VOID(declaration_);
     Inherit(parent);
     if (hrefFill_) {
         auto href = declaration_->GetFillState().GetHref();
@@ -203,7 +199,7 @@ bool SvgNode::OnCanvas(RSCanvas& canvas)
 #ifndef USE_ROSEN_DRAWING
     // drawing.h api 不完善，直接取用SkCanvas，后续要重写
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    CHECK_NULL_RETURN_NOLOG(rsCanvas, false);
+    CHECK_NULL_RETURN(rsCanvas, false);
     skCanvas_ = rsCanvas->ExportSkCanvas();
     return skCanvas_ != nullptr;
 #else
@@ -255,11 +251,8 @@ void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
     auto matrix = (animateTransform_.empty()) ? SvgTransform::CreateMatrix4(transform_)
                                               : SvgTransform::CreateMatrixFromMap(animateTransform_);
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-    skCanvas_->concat(FlutterSvgPainter::ToSkMatrix(matrix));
-#else
+
     skCanvas_->concat(RosenSvgPainter::ToSkMatrix(matrix));
-#endif
 #else
     rsCanvas_->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
 #endif

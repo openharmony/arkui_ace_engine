@@ -70,7 +70,7 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
 
 void DotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
 {
-    CHECK_NULL_VOID_NOLOG(contentProperty.backgroundColor.GetAlpha());
+    CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
     auto itemWidth = contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] * 2;
     auto itemHeight = contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
     auto selectedItemWidth = contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
@@ -126,7 +126,7 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
         rectWidth -= widthChangeValue;
     }
     // Paint background
-    RSCanvas canvas = context.canvas;
+    RSCanvas& canvas = context.canvas;
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(contentProperty.backgroundColor));
@@ -137,7 +137,7 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
 
 void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty& contentProperty)
 {
-    RSCanvas canvas = context.canvas;
+    RSCanvas& canvas = context.canvas;
     OffsetF selectedCenter = {};
     for (size_t i = 0; i < contentProperty.vectorBlackPointCenterX.size(); ++i) {
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
@@ -243,7 +243,7 @@ void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const Offset
 
 void DotIndicatorModifier::PaintMask(DrawingContext& context)
 {
-    RSCanvas canvas = context.canvas;
+    RSCanvas& canvas = context.canvas;
 
     RSBrush brush;
     brush.SetAntiAlias(true);
@@ -273,8 +273,12 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
     indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()));
 
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
-    longPointLeftCenterX_->Set(longPointCenterX.first);
-    longPointRightCenterX_->Set(longPointCenterX.second);
+    if (longPointLeftAnimEnd_) {
+        longPointLeftCenterX_->Set(longPointCenterX.first);
+    }
+    if (longPointRightAnimEnd_) {
+        longPointRightCenterX_->Set(longPointCenterX.second);
+    }
     itemHalfSizes_->Set(normalItemHalfSizes);
     normalToHoverPointDilateRatio_->Set(1.0f);
     hoverToNormalPointDilateRatio_->Set(1.0f);
@@ -291,8 +295,12 @@ void DotIndicatorModifier::UpdateDilatePaintProperty(
     indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()));
 
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
-    longPointLeftCenterX_->Set(longPointCenterX.first);
-    longPointRightCenterX_->Set(longPointCenterX.second);
+    if (longPointLeftAnimEnd_) {
+        longPointLeftCenterX_->Set(longPointCenterX.first);
+    }
+    if (longPointRightAnimEnd_) {
+        longPointRightCenterX_->Set(longPointCenterX.second);
+    }
     itemHalfSizes_->Set(hoverItemHalfSizes);
     backgroundWidthDilateRatio_->Set(1.0f);
     backgroundHeightDilateRatio_->Set(1.0f);
@@ -409,7 +417,7 @@ void DotIndicatorModifier::UpdateHoverAndPressConversionPaintProperty()
     AnimationUtils::Animate(option, [weak = WeakClaim(this), backgroundColor]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->UpdateBackgroundColor(backgroundColor); 
+        modifier->UpdateBackgroundColor(backgroundColor);
     });
 }
 
@@ -452,19 +460,29 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
     AnimationUtils::Animate(blackPointOption, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
 
-    AnimationOption longPointLeftOption;
-    longPointLeftOption.SetDuration(POINT_ANIMATION_DURATION);
-    longPointLeftOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
-        isForward ? LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY,
-        CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
-    AnimationUtils::Animate(longPointLeftOption, [&]() { longPointLeftCenterX_->Set(longPointCenterX.first); });
+    if (longPointLeftAnimEnd_) {
+        AnimationOption longPointLeftOption;
+        longPointLeftAnimEnd_ = false;
+        longPointLeftOption.SetDuration(POINT_ANIMATION_DURATION);
+        longPointLeftOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
+            isForward ? LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY,
+            CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
+        AnimationUtils::Animate(longPointLeftOption,
+                                [&]() { longPointLeftCenterX_->Set(longPointCenterX.first); },
+                                [&]() { longPointLeftAnimEnd_ = true; });
+    }
 
-    AnimationOption longPointRightOption;
-    longPointRightOption.SetDuration(POINT_ANIMATION_DURATION);
-    longPointRightOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
-        isForward ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
-        CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
-    AnimationUtils::Animate(longPointRightOption, [&]() { longPointRightCenterX_->Set(longPointCenterX.second); });
+    if (longPointRightAnimEnd_) {
+        AnimationOption longPointRightOption;
+        longPointRightAnimEnd_ = false;
+        longPointRightOption.SetDuration(POINT_ANIMATION_DURATION);
+        longPointRightOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
+            isForward ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
+            CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
+        AnimationUtils::Animate(longPointRightOption,
+                                [&]() { longPointRightCenterX_->Set(longPointCenterX.second); },
+                                [&]() { longPointRightAnimEnd_ = true; });
+    }
 }
 
 void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
@@ -494,8 +512,12 @@ void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBotto
         modifier->backgroundWidthDilateRatio_->Set(backgroundWidthDilateRatio);
         modifier->backgroundHeightDilateRatio_->Set(backgroundHeightDilateRatio);
         modifier->vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
-        modifier->longPointLeftCenterX_->Set(longPointCenterX.first);
-        modifier->longPointRightCenterX_->Set(longPointCenterX.second);
+        if (modifier->longPointLeftAnimEnd_) {
+            modifier->longPointLeftCenterX_->Set(longPointCenterX.first);
+        }
+        if (modifier->longPointRightAnimEnd_) {
+            modifier->longPointRightCenterX_->Set(longPointCenterX.second);
+        }
     });
 }
 } // namespace OHOS::Ace::NG

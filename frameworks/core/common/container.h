@@ -35,6 +35,7 @@
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/pipeline/pipeline_base.h"
+#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 namespace OHOS::Ace {
 
@@ -214,6 +215,16 @@ public:
         return filesDataPath_;
     }
 
+    void SetTempDir(const std::string& path)
+    {
+        tempDir_ = path;
+    }
+
+    const std::string& GetTempDir() const
+    {
+        return tempDir_;
+    }
+
     virtual void SetViewFirstUpdating(std::chrono::time_point<std::chrono::high_resolution_clock> time) {}
 
     virtual void UpdateResourceConfiguration(const std::string& jsonStr) {}
@@ -237,7 +248,7 @@ public:
     static bool IsCurrentUseNewPipeline()
     {
         auto container = Current();
-        return container ? container->useNewPipeline_ : false;
+        return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
     }
 
     // SetCurrentUsePartialUpdate is called when initial render on a page
@@ -353,6 +364,15 @@ public:
         return false;
     }
 
+    static bool GreatOrEqualAPIVersion(PlatformVersion version)
+    {
+        if (PipelineBase::GetCurrentContext() &&
+            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)) {
+            return true;
+        }
+        return false;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
@@ -366,6 +386,7 @@ private:
     std::string moduleName_;
     std::string bundlePath_;
     std::string filesDataPath_;
+    std::string tempDir_;
     bool usePartialUpdate_ = false;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;

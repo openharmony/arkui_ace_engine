@@ -1969,7 +1969,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
 void JSWeb::WebRotate(const JSCallbackInfo& args)
 {
-    // LOGD("Web rotate is not supported.");
+    LOGD("Web rotate is not supported.");
 }
 
 void JSWeb::OnAlert(const JSCallbackInfo& args)
@@ -2586,6 +2586,7 @@ void JSWeb::JsEnabled(bool isJsEnabled)
 
 void JSWeb::ContentAccessEnabled(bool isContentAccessEnabled)
 {
+#if !defined(NG_BUILD) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2593,6 +2594,9 @@ void JSWeb::ContentAccessEnabled(bool isContentAccessEnabled)
         return;
     }
     webComponent->SetContentAccessEnabled(isContentAccessEnabled);
+#else
+    LOGE("do not support components in new pipeline mode");
+#endif
 }
 
 void JSWeb::FileAccessEnabled(bool isFileAccessEnabled)
@@ -2644,6 +2648,7 @@ void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
 
 void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
 {
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     LOGI("JSWeb add js interface");
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
@@ -2674,6 +2679,7 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     if (jsWebController) {
         jsWebController->SetJavascriptInterface(args);
     }
+#endif
 }
 
 void JSWeb::UserAgent(const std::string& userAgent)
@@ -3437,8 +3443,7 @@ JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventI
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMapToJs);
-    NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
-    auto jsPixelMap = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    auto jsPixelMap = JsConverter::ConvertNapiValueToJsVal(napiValue);
     obj->SetPropertyObject("favicon", jsPixelMap);
     return JSRef<JSObject>::Cast(obj);
 }

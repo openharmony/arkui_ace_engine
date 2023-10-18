@@ -32,6 +32,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -165,6 +166,9 @@ void WrapLayoutAlgorithm::StretchItemsInContent(LayoutWrapper* layoutWrapper, co
     }
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (const auto& item : content.itemList) {
+        if (UserDefinedCrossAxisSize(item) && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            continue;
+        }
         auto itemCrossAxisLength = GetItemCrossAxisLength(item->GetGeometryNode());
         // if content cross axis size is larger than item cross axis size,
         // measure items again with content cross axis size as ideal size
@@ -585,7 +589,7 @@ void WrapLayoutAlgorithm::CalcFlexGrowLayout(
     auto layoutProperty = itemWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
-    CHECK_NULL_VOID_NOLOG(flexItemProperty);
+    CHECK_NULL_VOID(flexItemProperty);
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     if (!layoutConstraint.has_value()) {
         return;
@@ -605,6 +609,19 @@ void WrapLayoutAlgorithm::CalcFlexGrowLayout(
         }
         itemWrapper->Measure(layoutConstraintValue);
     }
+}
+
+bool WrapLayoutAlgorithm::UserDefinedCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    if (layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()) {
+        auto userDefinedIdealSize = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
+        if (userDefinedIdealSize.has_value()) {
+            return isHorizontal_ ? userDefinedIdealSize->Height().has_value()
+                                 : userDefinedIdealSize->Width().has_value();
+        }
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

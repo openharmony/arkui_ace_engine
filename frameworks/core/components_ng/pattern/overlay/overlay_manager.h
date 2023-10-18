@@ -34,6 +34,8 @@
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace {
@@ -71,8 +73,8 @@ public:
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
+    void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
-    void ShowPopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
@@ -99,11 +101,16 @@ public:
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId);
-    void HideMenuInSubWindow();
+    RefPtr<FrameNode> GetMenuNode(int32_t targetId);
+    void HideMenuInSubWindow(bool showPreviewAnimation = true);
     void CleanMenuInSubWindow();
+    void CleanPreviewInSubWindow();
+    void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
+    void ClearToast();
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft,
+        const ToastShowMode& showMode = ToastShowMode::DEFAULT);
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
@@ -244,6 +251,7 @@ public:
     void RemovePixelMapAnimation(bool startDrag, double x, double y);
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
+    void RemoveFilterAnimation();
     void RemoveEventColumn();
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
@@ -256,11 +264,12 @@ public:
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
 
-    static void DestroySheetMask(const RefPtr<FrameNode>& sheetNode);
+    RefPtr<FrameNode> GetSheetMask(const RefPtr<FrameNode>& sheetNode);
 
     void DeleteModal(int32_t targetId);
 
     void BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId);
+    void CloseKeyboard(int32_t targetId);
     void DestroyKeyboard();
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
@@ -294,10 +303,11 @@ private:
     void BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bool isInSubWindow = false);
     void BlurLowerNode(const RefPtr<FrameNode>& currentOverlay);
     void ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOverlay);
+    void PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk);
     void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
 
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
-    void PopMenuAnimation(const RefPtr<FrameNode>& menu);
+    void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
@@ -313,6 +323,7 @@ private:
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
         bool isModeChangeToAuto = false);
+    void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn);
 
     void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
     bool ModalExitProcess(const RefPtr<FrameNode>& topModalNode);
@@ -320,6 +331,7 @@ private:
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     bool DialogInMapHoldingFocus();
+    void PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
@@ -327,7 +339,7 @@ private:
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> dialogMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
-    RefPtr<FrameNode> customKeyboard_;
+    std::unordered_map<int32_t, RefPtr<FrameNode>> customKeyboardMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
     std::list<WeakPtr<FrameNode>> modalList_;
     WeakPtr<FrameNode> lastModalNode_;

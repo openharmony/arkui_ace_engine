@@ -142,6 +142,7 @@ shared_ptr<JsValue> ArkJSValue::Call(shared_ptr<JsRuntime> runtime, shared_ptr<J
     const EcmaVM* vm = pandaRuntime->GetEcmaVm();
     JSExecutionScope executionScope(vm);
     LocalScope scope(vm);
+    panda::TryCatch trycatch(vm);
     if (!IsFunction(pandaRuntime)) {
         return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(vm));
     }
@@ -153,8 +154,8 @@ shared_ptr<JsValue> ArkJSValue::Call(shared_ptr<JsRuntime> runtime, shared_ptr<J
     Local<JSValueRef> thisValue = std::static_pointer_cast<ArkJSValue>(thisObj)->GetValue(pandaRuntime);
     Local<FunctionRef> function(GetValue(pandaRuntime));
     Local<JSValueRef> result = function->Call(vm, thisValue, arguments.data(), argc);
-    Local<ObjectRef> exception = JSNApi::GetUncaughtException(vm);
-    pandaRuntime->HandleUncaughtException();
+    Local<ObjectRef> exception = trycatch.GetAndClearException();
+    pandaRuntime->HandleUncaughtException(trycatch);
     if (!exception.IsEmpty() && !exception->IsHole()) {
         result = JSValueRef::Undefined(vm);
     }

@@ -54,13 +54,16 @@ GestureEventFunc ClickEventActuator::GetClickEvent()
     auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        for (const auto& callback : actuator->clickEvents_) {
+        auto clickEvents = actuator->clickEvents_;
+        for (const auto& callback : clickEvents) {
             if (callback) {
                 (*callback)(info);
             }
         }
         if (actuator->userCallback_) {
-            (*actuator->userCallback_)(info);
+            // actuator->userCallback_ may be overwritten in its invoke so we copy it first
+            auto userCallback = actuator->userCallback_;
+            (*userCallback)(info);
         }
         if (actuator->onAccessibilityEventFunc_) {
             actuator->onAccessibilityEventFunc_(AccessibilityEventType::CLICK);

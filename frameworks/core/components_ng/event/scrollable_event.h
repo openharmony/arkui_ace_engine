@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float HTMBLOCK_VELOCITY = 20;
+constexpr float HTMBLOCK_VELOCITY = 200;
 }
 
 class GestureEventHub;
@@ -122,6 +122,13 @@ public:
         getAnimateVelocityCallback_ = std::move(getAnimateVelocityCallback);
     }
 
+    void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
+    {
+        if (scrollable_) {
+            scrollable_->AddPreviewMenuHandleDragEnd(std::move(actionEnd));
+        }
+    }
+
 private:
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
@@ -145,6 +152,18 @@ public:
     void RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
         scrollableEvents_.erase(scrollableEvent->GetAxis());
+    }
+
+    void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
+    {
+        for (auto it = scrollableEvents_.begin(); it != scrollableEvents_.end(); ++it) {
+            auto scrollableEvent = it->second;
+            if (!scrollableEvent) {
+                continue;
+            }
+            scrollableEvent->AddPreviewMenuHandleDragEnd(std::move(actionEnd));
+            break;
+        }
     }
 
     void AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect);

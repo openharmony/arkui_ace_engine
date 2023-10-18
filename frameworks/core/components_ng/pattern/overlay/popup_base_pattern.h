@@ -17,16 +17,15 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_POPUP_PATTERN_BASE_H
 
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stage/content_root_pattern.h"
 namespace OHOS::Ace::NG {
 // base class of all Popup patterns (Dialog, Toast, Menu, Bubble, etc.)
-class PopupBasePattern : virtual public Pattern {
-    DECLARE_ACE_TYPE(PopupBasePattern, Pattern);
+class PopupBasePattern : virtual public ContentRootPattern {
+    DECLARE_ACE_TYPE(PopupBasePattern, ContentRootPattern);
+
 public:
     PopupBasePattern() = default;
     ~PopupBasePattern() override = default;
-
-    void BeforeCreateLayoutWrapper() override;
 
     void SetContainerId(int32_t containerId)
     {
@@ -44,9 +43,15 @@ public:
     }
 
 protected:
-    virtual bool ShouldAvoidKeyboard() const
+    bool AvoidKeyboard() const override
     {
         return true;
+    }
+
+    bool AvoidTop() const override
+    {
+        // popups don't need to avoid status bar
+        return false;
     }
 
 private:

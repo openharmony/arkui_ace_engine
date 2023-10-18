@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_tool_bar.h"
-#endif
 #include "rosen_render_tool_bar.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderToolBar::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderToolBar>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

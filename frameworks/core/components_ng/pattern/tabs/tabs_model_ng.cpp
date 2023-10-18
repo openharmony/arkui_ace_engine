@@ -448,7 +448,11 @@ void TabsModelNG::Pop()
     auto tabBarFocusNode = tabBarNode->GetFocusHub();
     CHECK_NULL_VOID(tabBarFocusNode);
     if (tabBarPosition == BarPosition::START) {
-        tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+        if (tabsFocusNode->IsCurrentFocus()) {
+            tabBarFocusNode->RequestFocusImmediately();
+        } else {
+            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+        }
     }
 
     auto tabContentNum = swiperNode->TotalChildCount();
@@ -478,11 +482,13 @@ void TabsModelNG::Pop()
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(dividerRenderProperty);
     dividerRenderProperty->UpdateDividerColor(dividerColor);
+    dividerRenderProperty->UpdateLineCap(LineCap::BUTT);
 
     auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
     CHECK_NULL_VOID(dividerLayoutProperty);
     dividerLayoutProperty->UpdateVertical(axis == Axis::VERTICAL);
     dividerLayoutProperty->UpdateStrokeWidth(dividerStrokeWidth);
+    dividerLayoutProperty->UpdateStrokeWidthLimitation(false);
     CHECK_NULL_VOID(dividerNode);
     dividerNode->MarkModifyDone();
 

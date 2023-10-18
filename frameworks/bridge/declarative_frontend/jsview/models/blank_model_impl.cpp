@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/models/blank_model_impl.h"
 
+#include "base/utils/utils.h"
 #include "core/components/box/box_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -46,5 +47,12 @@ void BlankModelImpl::SetHeight(const Dimension& height)
     if (height > flexItem->GetFlexBasis()) {
         flexItem->SetFlexBasis(height);
     }
+}
+
+void BlankModelImpl::SetColor(const Color& color)
+{
+    auto blank = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    CHECK_NULL_VOID(blank);
+    blank->SetColor(color);
 }
 } // namespace OHOS::Ace::Framework

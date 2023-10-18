@@ -106,6 +106,7 @@ void JSRating::Create(const JSCallbackInfo& info)
 void JSRating::SetStars(const JSCallbackInfo& info)
 {
     if (!info[0]->IsNumber()) {
+        RatingModel::GetInstance()->SetStars(STARS_DEFAULT);
         return;
     }
 
@@ -119,6 +120,7 @@ void JSRating::SetStars(const JSCallbackInfo& info)
 void JSRating::SetStepSize(const JSCallbackInfo& info)
 {
     if (!info[0]->IsNumber()) {
+        RatingModel::GetInstance()->SetStepSize(STEPS_DEFAULT);
         return;
     }
     static const double stepSizeMin = 0.1;

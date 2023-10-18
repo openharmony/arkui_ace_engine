@@ -21,8 +21,10 @@
 #include "base/resource/internal_resource.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
@@ -54,6 +56,8 @@ constexpr static int32_t CONTENT_INDEX = 3;
 Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 Dimension SIDEBAR_WIDTH_NEGATIVE = -1.0_vp;
+constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER = 1;
+constexpr static int32_t DEFAULT_CONTROL_BUTTON_ZINDEX = 3;
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -293,6 +297,9 @@ void SideBarContainerPattern::OnModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    CreateAndMountNodes();
+
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -322,31 +329,177 @@ void SideBarContainerPattern::OnModifyDone()
     }
 }
 
+void SideBarContainerPattern::CreateAndMountNodes()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto children = host->GetChildren();
+    if (children.size() < DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
+        return;
+    }
+
+    if (HasControlButton()) {
+        return;
+    }
+
+    auto sideBarNode = children.front();
+    sideBarNode->MovePosition(DEFAULT_NODE_SLOT);
+    auto sideBarFrameNode = AceType::DynamicCast<FrameNode>(sideBarNode);
+    if (sideBarFrameNode) {
+        auto renderContext = sideBarFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (!renderContext->HasBackgroundColor()) {
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            auto sideBarTheme = context->GetTheme<SideBarTheme>();
+            CHECK_NULL_VOID(sideBarTheme);
+            Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
+            renderContext->UpdateBackgroundColor(bgColor);
+        }
+    }
+    host->RebuildRenderContextTree();
+
+    CreateAndMountDivider(host);
+    CreateAndMountControlButton(host);
+}
+
+void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode)
+{
+    CHECK_NULL_VOID(parentNode);
+    auto layoutProperty = parentNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto dividerColor = layoutProperty->GetDividerColor().value_or(DEFAULT_DIVIDER_COLOR);
+    auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
+
+    int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+
+    auto dividerHub = dividerNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(dividerHub);
+    auto inputHub = dividerHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    InitDividerMouseEvent(inputHub);
+
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    dividerRenderProperty->UpdateDividerColor(dividerColor);
+
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    dividerLayoutProperty->UpdateVertical(true);
+    dividerLayoutProperty->UpdateStrokeWidth(dividerStrokeWidth);
+
+    dividerNode->MountToParent(parentNode);
+    dividerNode->MarkModifyDone();
+}
+
+void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode)
+{
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    CHECK_NULL_VOID(sideBarTheme);
+
+    auto buttonNode = CreateControlButton(sideBarTheme);
+    CHECK_NULL_VOID(buttonNode);
+    auto imgNode = CreateControlImage(sideBarTheme, parentNode);
+    CHECK_NULL_VOID(imgNode);
+
+    auto buttonHub = buttonNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(buttonHub);
+    auto gestureHub = buttonHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    SetHasControlButton(true);
+    InitControlButtonTouchEvent(gestureHub);
+
+    imgNode->MountToParent(buttonNode);
+    buttonNode->MountToParent(parentNode);
+    imgNode->MarkModifyDone();
+    buttonNode->MarkModifyDone();
+}
+
+RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<SideBarTheme>& sideBarTheme)
+{
+    int32_t buttonId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_RETURN(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    auto butttonRadius = sideBarTheme->GetControlButtonRadius();
+    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(butttonRadius));
+    auto buttonRenderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_RETURN(buttonRenderContext, nullptr);
+    buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
+    return buttonNode;
+}
+
+RefPtr<FrameNode> SideBarContainerPattern::CreateControlImage(
+    const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& parentNode)
+{
+    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imgNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_RETURN(imgNode, nullptr);
+
+    auto layoutProperty = parentNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto isShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
+    std::optional<ImageSourceInfo> info = std::nullopt;
+    if (isShowSideBar) {
+        info = layoutProperty->GetControlButtonShowIconInfo();
+    } else {
+        info = layoutProperty->GetControlButtonHiddenIconInfo();
+    }
+    if (!info.has_value()) {
+        info = std::make_optional<ImageSourceInfo>();
+        info->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        Color controlButtonColor = sideBarTheme->GetControlImageColor();
+        info->SetFillColor(controlButtonColor);
+    }
+    auto imageLayoutProperty = imgNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateImageSourceInfo(info.value());
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    Dimension imageWidth;
+    Dimension imageHeight;
+    GetControlImageSize(imageWidth, imageHeight);
+    CalcSize imageCalcSize((CalcLength(imageWidth)), CalcLength(imageHeight));
+    imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
+    return imgNode;
+}
+
 void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!dragEvent_);
+    CHECK_NULL_VOID(!dragEvent_);
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart();
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragUpdate(static_cast<float>(info.GetOffsetX()));
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
     };
 
@@ -396,11 +549,11 @@ void SideBarContainerPattern::CreateAnimation()
 
 void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!controlButtonClickEvent_);
+    CHECK_NULL_VOID(!controlButtonClickEvent_);
 
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->SetControlButtonClick(true);
         pattern->DoAnimation();
     };
@@ -438,6 +591,10 @@ void SideBarContainerPattern::DoAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    if (autoHide_) {
+        sideBarStatus_ = SideBarStatus::HIDDEN;
+    }
 
     UpdateAnimDir();
 
@@ -526,7 +683,7 @@ void SideBarContainerPattern::DoSideBarAnimation()
         controller_->AddInterpolator(isSideBarStart ? leftToRightAnimation_ : rightToLeftAnimation_);
         controller_->AddStopListener([weak]() {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
+            CHECK_NULL_VOID(pattern);
             pattern->SetSideBarStatus(SideBarStatus::SHOW);
             pattern->UpdateControlButtonIcon();
         });
@@ -534,7 +691,7 @@ void SideBarContainerPattern::DoSideBarAnimation()
         controller_->AddInterpolator(isSideBarStart ? rightToLeftAnimation_ : leftToRightAnimation_);
         controller_->AddStopListener([weak]() {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
+            CHECK_NULL_VOID(pattern);
             pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
             pattern->UpdateControlButtonIcon();
         });
@@ -629,9 +786,14 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
         isControlButtonClick_ = false;
     }
 
+    if (autoHide_ != layoutAlgorithm->GetAutoHide()) {
+        FireChangeEvent(layoutAlgorithm->GetSideBarStatus() == SideBarStatus::SHOW);
+    }
+
     adjustMaxSideBarWidth_ = layoutAlgorithm->GetAdjustMaxSideBarWidth();
     adjustMinSideBarWidth_ = layoutAlgorithm->GetAdjustMinSideBarWidth();
     type_ = layoutAlgorithm->GetSideBarContainerType();
+    autoHide_ = layoutAlgorithm->GetAutoHide();
 
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -749,8 +911,8 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
     realSideBarWidth_ =
         isPercent ? ConvertPxToPercent(minSideBarWidth_) : Dimension(minSideBarWidth_, DimensionUnit::PX);
 
-    auto autoHide_ = layoutProperty->GetAutoHide().value_or(true);
-    if (autoHide_) {
+    auto autoHideProperty = layoutProperty->GetAutoHide().value_or(true);
+    if (autoHideProperty) {
         DoAnimation();
     }
 }
@@ -767,7 +929,7 @@ void SideBarContainerPattern::HandleDragEnd()
 void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub)
 {
     CHECK_NULL_VOID(inputHub);
-    CHECK_NULL_VOID_NOLOG(!hoverEvent_);
+    CHECK_NULL_VOID(!hoverEvent_);
 
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();

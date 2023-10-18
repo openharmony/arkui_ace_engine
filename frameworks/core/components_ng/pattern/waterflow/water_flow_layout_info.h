@@ -44,6 +44,7 @@ public:
     float GetMainHeight(int32_t crossIndex, int32_t itemIndex);
     float GetStartMainPos(int32_t crossIndex, int32_t itemIndex);
     void Reset();
+    void Reset(int32_t resetFrom);
     int32_t GetCrossCount() const;
     int32_t GetMainCount() const;
     void ClearCacheAfterIndex(int32_t currentIndex);
@@ -52,6 +53,9 @@ public:
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float maxHeight_ = 0.0f;
+    // store offset for distributed migration
+    float storedOffset_ = 0.0f;
+    float restoreOffset_ = 0.0f;
 
     bool itemEnd_ = false;
     bool itemStart_ = false;

@@ -256,6 +256,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             return;
         }
         jsEngine->LoadJs(url, jsPage, isMainPage);
+        jsEngine->UpdateRootComponent();
     };
 
     const auto& setPluginMessageTransferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -530,11 +531,35 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             }
             return jsEngine->LoadNamedRouterSource(namedRouter, isTriggeredByJs);
         };
-        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadNamedRouterCallback));
+        auto updateRootComponentCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->UpdateRootComponent();
+        };
+        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadNamedRouterCallback),
+                                           std::move(updateRootComponentCallback));
+
+        auto moduleNamecallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& pageName)->
+        std::string {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return "";
+            }
+            return jsEngine->SearchRouterRegisterMap(pageName);
+        };
+        auto container = Container::Current();
+        if (container) {
+            auto pageUrlChecker = container->GetPageUrlChecker();
+            if (pageUrlChecker != nullptr) {
+                pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
+            }
+        }
     }
 }
 
-void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void DeclarativeFrontend::RunPage(const std::string& url, const std::string& params)
 {
     auto container = Container::Current();
     auto isStageModel = container ? container->IsUseStageModel() : false;
@@ -551,7 +576,7 @@ void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const 
             },
             TaskExecutor::TaskType::JS);
     }
-    // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
+
     if (delegate_) {
         if (isFormRender_) {
             auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
@@ -559,6 +584,13 @@ void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const 
         } else {
             delegate_->RunPage(url, params, pageProfile_);
         }
+    }
+}
+
+void DeclarativeFrontend::RunPageByNamedRouter(const std::string& name)
+{
+    if (delegate_) {
+        delegate_->RunPage(name, "", pageProfile_, true);
     }
 }
 
@@ -683,7 +715,7 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
     }
 }
 
-NativeValue* DeclarativeFrontend::GetContextValue()
+napi_value DeclarativeFrontend::GetContextValue()
 {
     return jsEngine_->GetContextValue();
 }

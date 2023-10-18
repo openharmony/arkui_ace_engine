@@ -134,10 +134,19 @@ public:
         setActiveFunc_ = std::move(func);
     }
 
+    void SetOnDumpInfoFunc(std::function<void(const std::vector<std::string>&)>&& func);
+
     void FireSetActiveFunc(bool active)
     {
         if (setActiveFunc_) {
             setActiveFunc_(active);
+        }
+    }
+
+    void FireOnDumpInfoFunc(const std::vector<std::string>& params)
+    {
+        if (onDumpInfoFunc_) {
+            onDumpInfoFunc_(params);
         }
     }
 
@@ -178,6 +187,7 @@ private:
     std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
     std::function<void()> recycleRenderFunc_;
     std::function<void(bool)> setActiveFunc_;
+    std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
     bool needRebuild_ = false;
 };
 } // namespace OHOS::Ace::NG

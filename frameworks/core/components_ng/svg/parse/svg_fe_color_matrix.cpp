@@ -15,13 +15,10 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_color_matrix.h"
 
-#include "securec.h"
-#ifndef NEW_SKIA
-#include "include/effects/SkColorFilterImageFilter.h"
-#else
 #include "include/core/SkColorFilter.h"
+#include "securec.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
-#endif
+
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
 
@@ -42,7 +39,7 @@ SvgFeColorMatrix::SvgFeColorMatrix() : SvgFe()
 void SvgFeColorMatrix::OnInitStyle()
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
-    CHECK_NULL_VOID_NOLOG(declaration);
+    CHECK_NULL_VOID(declaration);
     auto value = declaration->GetValues();
     if (memset_s(matrix_, sizeof(matrix_), 0, sizeof(matrix_)) != EOK) {
         return;
@@ -53,13 +50,8 @@ void SvgFeColorMatrix::OnInitStyle()
         StringUtils::StringSplitter(value, ',', matrix);
     }
     for (int i = 0; i < int(sizeof(matrix_) / sizeof(float)) && i < (int)matrix.size(); i++) {
-#ifdef USE_SYSTEM_SKIA
-        // phone skia is range 0.0 and 255.0
-        matrix_[i] = matrix[i] * 255;
-#else
         // tv skia is range 0.0 and 1.0
         matrix_[i] = matrix[i];
-#endif
     }
 }
 
@@ -72,26 +64,19 @@ void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilt
 #endif
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
-    CHECK_NULL_VOID_NOLOG(declaration);
+    CHECK_NULL_VOID(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
 
 #ifndef USE_ROSEN_DRAWING
-#ifdef USE_SYSTEM_SKIA
-    auto colorFilter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix_);
-#else
-    auto colorFilter = SkColorFilters::Matrix(matrix_);
-#endif
 
-#ifndef NEW_SKIA
-    imageFilter = SkColorFilterImageFilter::Make(colorFilter, imageFilter);
-#else
+    auto colorFilter = SkColorFilters::Matrix(matrix_);
+
     imageFilter = SkImageFilters::ColorFilter(colorFilter, imageFilter);
-#endif
 #else
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix_);
     auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix);
-    CHECK_NULL_VOID_NOLOG(colorFilter);
+    CHECK_NULL_VOID(colorFilter);
 
     imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
 #endif

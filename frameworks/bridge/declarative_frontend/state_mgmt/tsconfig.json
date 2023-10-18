@@ -4,6 +4,8 @@
     // declarations of C++ exposed classes
     "src/lib/common/ace_console.native.d.ts",
     "src/lib/common/ace_trace.native.d.ts",
+    "src/lib/common/state_mgmt_profiler.ts",
+    "src/lib/common/state_mgmt_profiler.native.d.ts",
     "src/lib/common/environment_setting.d.ts",
     "src/lib/common/storage.d.ts",
     "src/lib/common/local_storage_native.d.ts",
@@ -53,6 +55,7 @@
     "src/lib/partial_update/pu_synced_property_one_way.ts",
     "src/lib/partial_update/pu_synced_property_two_way.ts",
     "src/lib/partial_update/pu_synced_property_object_nested.ts",
+    "src/lib/partial_update/pu_uinode_registry_proxy.ts",
     "src/lib/partial_update/pu_view.ts",
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",

@@ -24,12 +24,15 @@
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"
+#include "adapter/preview/entrance/clipboard/clipboard_impl.h"
+#include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
 #include "adapter/preview/entrance/event_dispatcher.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "adapter/preview/external/multimodalinput/axis_event.h"
 #include "adapter/preview/external/multimodalinput/key_event.h"
 #include "adapter/preview/external/multimodalinput/pointer_event.h"
 #include "adapter/preview/inspector/inspector_client.h"
+#include "base/log/log_wrapper.h"
 #include "frameworks/base/log/log.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -45,8 +48,6 @@ namespace OHOS::Ace {
 using namespace Platform;
 
 namespace {
-
-constexpr int32_t UNUSED_PAGE_ID = 1;
 
 #ifdef WINDOWS_PLATFORM
 constexpr char DELIMITER[] = "\\";
@@ -88,14 +89,14 @@ public:
     void OnFinish() const override
     {
         LOGI("UIContent OnFinish");
-        CHECK_NULL_VOID_NOLOG(onFinish_);
+        CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
     void OnStartAbility(const std::string& address) override
     {
         LOGI("UIContent OnStartAbility");
-        CHECK_NULL_VOID_NOLOG(onStartAbility_);
+        CHECK_NULL_VOID(onStartAbility_);
         onStartAbility_(address);
     }
 
@@ -199,6 +200,11 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     : instanceId_(ACE_INSTANCE_ID), runtime_(runtime), isFormRender_(isCard)
 {
     LOGI("The constructor is used to support ets card, isFormRender_ = %{public}d", isFormRender_);
+    if (context) {
+        auto options = context->GetOptions();
+        bundleName_ = options.bundleName;
+        moduleName_ = options.moduleName;
+    }
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability) : instanceId_(ACE_INSTANCE_ID) {}
@@ -206,11 +212,11 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability) : instanceId_(A
 void UIContentImpl::DestroyUIDirector()
 {
     auto container = AceContainer::GetContainerInstance(instanceId_);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto rsUIDirector = pipelineContext->GetRSUIDirector();
-    CHECK_NULL_VOID_NOLOG(rsUIDirector);
+    CHECK_NULL_VOID(rsUIDirector);
     rsUIDirector->Destroy();
 }
 
@@ -223,10 +229,10 @@ void UIContentImpl::DestroyCallback() const
     pipelineContext->SetNextFrameLayoutCallback(nullptr);
 }
 
-void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
+void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
     CommonInitialize(window, url, storage);
-    AceContainer::RunPage(instanceId_, UNUSED_PAGE_ID, url, "");
+    AceContainer::RunPage(instanceId_, url, "");
 }
 
 std::string UIContentImpl::GetContentInfo() const
@@ -235,7 +241,7 @@ std::string UIContentImpl::GetContentInfo() const
     return AceContainer::GetContentInfo(instanceId_);
 }
 
-void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
 {
     static std::once_flag onceFlag;
     std::call_once(onceFlag, []() {
@@ -245,6 +251,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         u_setDataDirectory(icuPath.c_str());
 #endif
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+        ClipboardProxy::GetInstance()->SetDelegate(std::make_unique<Platform::ClipboardProxyImpl>());
     });
     rsWindow_ = window;
 
@@ -260,7 +267,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     AceContainer::CreateContainer(instanceId_, FrontendType::DECLARATIVE_JS, useNewPipeline_);
     auto container = AceContainer::GetContainerInstance(instanceId_);
     CHECK_NULL_VOID(container);
+    container->SetContainerSdkPath(containerSdkPath_);
     container->SetIsFRSCardContainer(false);
+    container->SetBundleName(bundleName_);
+    container->SetModuleName(moduleName_);
+    LOGI("Save bundle %{public}s, module %{public}s", bundleName_.c_str(), moduleName_.c_str());
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
         container->SetSharedRuntime(runtime_);
@@ -319,7 +330,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         LOGI("Set MinPlatformVersion to %{public}d", compatibleVersion_);
         pipelineContext->SetMinPlatformVersion(compatibleVersion_);
     }
-    container->InitializeStageAppConfig(assetPath_, bundleName_, moduleName_, compileMode_);
+    container->InitializeAppConfig(assetPath_, bundleName_, moduleName_, compileMode_);
     AceContainer::AddRouterChangeCallback(instanceId_, onRouterChange_);
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
     view->NotifySurfaceChanged(deviceWidth_, deviceHeight_);

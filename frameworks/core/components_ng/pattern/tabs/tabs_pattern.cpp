@@ -72,7 +72,10 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             tabBarPattern->SetIndicator(index);
         }
         tabBarPattern->UpdateIndicator(index);
-        tabBarPattern->UpdateTextColor(index);
+        if (tabBarPattern->GetTabBarStyle() != TabBarStyle::SUBTABBATSTYLE ||
+                tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) != Axis::HORIZONTAL) {
+            tabBarPattern->UpdateTextColor(index);
+        }
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
                 tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
@@ -129,7 +132,6 @@ void TabsPattern::OnUpdateShowDivider()
     auto divider = layoutProperty->GetDivider().value_or(defaultDivider);
     auto children = host->GetChildren();
     if (children.size() < CHILDREN_MIN_SIZE) {
-        LOGE("OnUpdateShowDivider: children is empty or children's size is less than 2.");
         return;
     }
 
@@ -208,7 +210,6 @@ void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto info = JsonUtil::ParseJsonString(restoreInfo);
     if (!info->IsValid() || !info->IsObject()) {
-        LOGW("TabsPattern:: restore info is invalid");
         return;
     }
     auto jsonIsOn = info->GetValue("Index");

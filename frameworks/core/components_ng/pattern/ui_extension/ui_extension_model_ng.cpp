@@ -34,9 +34,10 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
     auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
     wantWrap->SetWantParam(params);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
-        [wantWrap]() { return AceType::MakeRefPtr<UIExtensionPattern>(wantWrap); });
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->UpdateWant(wantWrap);
     pattern->SetOnReleaseCallback(std::move(onRelease));
     pattern->SetOnErrorCallback(std::move(onError));
     return frameNode;
@@ -46,12 +47,13 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const Moda
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, [want]() { return AceType::MakeRefPtr<UIExtensionPattern>(want); });
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->UpdateWant(want);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, frameNode);
     pipeline->AddWindowStateChangedCallback(nodeId);
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_RETURN(pattern, frameNode);
     pattern->SetOnReleaseCallback(std::move(callbacks.onRelease));
     pattern->SetOnErrorCallback(std::move(callbacks.onError));
     pattern->SetOnResultCallback(std::move(callbacks.onResult));
@@ -66,7 +68,10 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
-        [wantWrap]() { return AceType::MakeRefPtr<UIExtensionPattern>(wantWrap); });
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateWant(wantWrap);
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

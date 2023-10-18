@@ -63,6 +63,7 @@ constexpr char EVENT_KEY_MAX_FRAMETIME[] = "MAX_FRAMETIME";
 constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
 constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
+constexpr char EVENT_KEY_SKIPPED_FRAME_TIME[] = "SKIPPED_FRAME_TIME";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 
@@ -320,7 +321,7 @@ void EventReport::ReportEventComplete(DataBase& data)
     const auto& e2eLatency = animationStartLantency + animationEndLantency;
     const auto& note = data.baseInfo.note;
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_APP_PID, appPid,
         EVENT_KEY_BUNDLE_NAME, bundleName,
         EVENT_KEY_PROCESS_NAME, processName,
@@ -357,7 +358,7 @@ void EventReport::ReportEventJankFrame(DataBase& data)
     const auto& maxSeqMissedFrames = data.maxSuccessiveFrames;
     const auto& note = data.baseInfo.note;
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_UNIQUE_ID, static_cast<int32_t>(uniqueId),
         EVENT_KEY_SCENE_ID, sceneId,
         EVENT_KEY_PROCESS_NAME, processName,
@@ -373,5 +374,26 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_MAX_FRAMETIME, static_cast<uint64_t>(maxFrameTime),
         EVENT_KEY_MAX_SEQ_MISSED_FRAMES, maxSeqMissedFrames,
         EVENT_KEY_NOTE, note);
+}
+
+void EventReport::ReportJankFrameApp(JankInfo& info)
+{
+    std::string eventName = "JANK_FRAME_APP";
+    const auto& bundleName = info.baseInfo.bundleName;
+    const auto& processName = info.baseInfo.processName;
+    const auto& abilityName = info.baseInfo.abilityName;
+    const auto& pageUrl = info.baseInfo.pageUrl;
+    const auto& versionCode = info.baseInfo.versionCode;
+    const auto& versionName = info.baseInfo.versionName;
+    const auto& skippedFrameTime = info.skippedFrameTime;
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_MODULE_NAME, bundleName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_VERSION_CODE, versionCode,
+        EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
 }
 } // namespace OHOS::Ace

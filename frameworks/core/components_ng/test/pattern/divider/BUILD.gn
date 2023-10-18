@@ -11,21 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("divider_pattern_test_ng") {
-  ace_animation = true
-  sources = [
-    # other
-    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
-
-    # self
-    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_modifier.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
-    "divider_pattern_test_ng.cpp",
-  ]
+ace_unittest("divider_test_ng") {
+  type = "new"
+  sources = [ "divider_test_ng.cpp" ]
 }

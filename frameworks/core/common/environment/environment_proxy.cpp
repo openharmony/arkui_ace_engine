@@ -42,7 +42,7 @@ void EnvironmentProxy::SetDelegate(std::unique_ptr<EnvironmentInterface>&& deleg
 
 RefPtr<Environment> EnvironmentProxy::GetEnvironment(const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    CHECK_NULL_RETURN_NOLOG(delegate_, nullptr);
+    CHECK_NULL_RETURN(delegate_, nullptr);
     return delegate_->GetEnvironment(taskExecutor);
 }
 

@@ -22,18 +22,17 @@
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
 
-#include "base/log/log.h"
 #include "base/log/ace_trace.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/thread/frame_trace_adapter.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve.h"
 #include "core/animation/curve_animation.h"
-#include "base/thread/frame_trace_adapter.h"
 
 namespace OHOS::Ace::Napi {
-
 static void ParseString(napi_env env, napi_value propertyNapi, std::string& property)
 {
     if (propertyNapi != nullptr) {
@@ -46,14 +45,15 @@ static void ParseString(napi_env env, napi_value propertyNapi, std::string& prop
             NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
             return;
         }
-        auto nativeProperty = reinterpret_cast<NativeValue*>(propertyNapi);
-        auto resultProperty = nativeProperty->ToString();
-        auto nativeStringProperty =
-            reinterpret_cast<NativeString*>(resultProperty->GetInterface(NativeString::INTERFACE_ID));
-        size_t propertyLen = nativeStringProperty->GetLength() + 1;
-        std::unique_ptr<char[]> propertyString = std::make_unique<char[]>(propertyLen);
+
+        size_t buffSize = 0;
+        napi_status status = napi_get_value_string_utf8(env, propertyNapi, nullptr, 0, &buffSize);
+        if (status != napi_ok || buffSize == 0) {
+            return;
+        }
+        std::unique_ptr<char[]> propertyString = std::make_unique<char[]>(buffSize + 1);
         size_t retLen = 0;
-        napi_get_value_string_utf8(env, propertyNapi, propertyString.get(), propertyLen, &retLen);
+        napi_get_value_string_utf8(env, propertyNapi, propertyString.get(), buffSize + 1, &retLen);
         property = propertyString.get();
     }
 }
@@ -638,8 +638,8 @@ extern "C" __attribute__((constructor)) void AnimatorRegister()
 
 void AnimatorResult::ApplyOption()
 {
-    CHECK_NULL_VOID_NOLOG(animator_);
-    CHECK_NULL_VOID_NOLOG(option_);
+    CHECK_NULL_VOID(animator_);
+    CHECK_NULL_VOID(option_);
     animator_->SetDuration(option_->duration);
     animator_->SetIteration(option_->iterations);
     animator_->SetStartDelay(option_->delay);

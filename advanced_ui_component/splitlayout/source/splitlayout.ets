@@ -14,15 +14,15 @@
  */
 
 @Component
-export struct splitlayout {
+export struct SplitLayout {
   @BuilderParam container: () => void
   @State sizeValue: string = ''
   @State areaWidth: number = 0
   @State imageBackgroundColor: string = "#19000000"
   @Prop mainImage: Resource
-  @Prop primaryText: string = "新歌推荐"
-  secondaryText?: string = "私人订制新歌精选站，为你推荐专属优质新歌;为你推荐专属优质新歌"
-  tertiaryText?: string = "每日更新"
+  @Prop primaryText: string = ""
+  secondaryText?: string = ""
+  tertiaryText?: string = ""
 
   build() {
     Column() {
@@ -37,11 +37,11 @@ export struct splitlayout {
             Column() {
               Stack({ alignContent: Alignment.Bottom }) {
                 Image(this.mainImage)
-				  .height('34%')
-				  .width('100%')
+                  .height('34%')
+                  .width('100%')
                 Column() {
                   Text(this.primaryText)
-				    .fontWeight(FontWeight.Medium)
+                    .fontWeight(FontWeight.Medium)
                     .textAlign(TextAlign.Center)
                     .fontSize($r('sys.float.ohos_id_text_size_headline7'))
                     .fontColor($r('sys.color.ohos_id_color_text_primary'))
@@ -88,7 +88,7 @@ export struct splitlayout {
                   .width('20%')
                 Column() {
                   Text(this.primaryText)
-				    .fontWeight(FontWeight.Medium)
+                    .fontWeight(FontWeight.Medium)
                     .fontSize($r('sys.float.ohos_id_text_size_headline7'))
                     .fontColor($r('sys.color.ohos_id_color_text_primary'))
                   Text(this.secondaryText)
@@ -99,16 +99,18 @@ export struct splitlayout {
                     .fontSize($r('sys.float.ohos_id_text_size_caption'))
                     .fontColor($r('sys.color.ohos_id_color_text_secondary'))
                 }
-				.width('42%')
+                .width('42%')
                 .alignItems(HorizontalAlign.Start)
                 .margin({ right: 96 })
               }
               .backgroundColor(this.imageBackgroundColor)
               .height('34%')
+              .width('100%')
 
               Column() {
                 this.container()
               }
+              .width('100%')
               .height('66%')
             }
 
@@ -121,7 +123,8 @@ export struct splitlayout {
           breakpoints: {
             reference: BreakpointsReference.WindowSize },
           direction: GridRowDirection.Row
-        }) {
+        })
+        {
           GridCol({ span: { xs: 4, sm: 4, md: 4, lg: 4 } }) {
             Column() {
               Image(this.mainImage)
@@ -130,7 +133,7 @@ export struct splitlayout {
                 .margin({ bottom: 36 })
               Text(this.primaryText)
                 .textAlign(TextAlign.Center)
-				.fontWeight(FontWeight.Medium)
+                .fontWeight(FontWeight.Medium)
                 .fontSize($r('sys.float.ohos_id_text_size_headline7'))
                 .fontColor($r('sys.color.ohos_id_color_text_primary'))
                 .margin({ left: 48, right: 48 })
@@ -145,6 +148,7 @@ export struct splitlayout {
                 .fontColor($r('sys.color.ohos_id_color_text_secondary'))
                 .margin({ left: 48, right: 48 })
             }
+            .width('100%')
             .height('100%')
             .backgroundColor(this.imageBackgroundColor)
             .justifyContent(FlexAlign.Center)
@@ -156,7 +160,7 @@ export struct splitlayout {
             this.container()
           }
 
-        }
+        }.width('100%')
       }
     }
     .onAreaChange((oldValue: Area, newValue: Area) => {

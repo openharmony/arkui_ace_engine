@@ -50,6 +50,7 @@
 #include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/plugin_utils.h"
+#include "core/image/image_file_cache.h"
 namespace OHOS {
 namespace Ace {
 namespace {
@@ -82,12 +83,12 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePath, const s
     }
     std::string jsonStr = isHap ? GetStringFromHap(packagePath, manifest) : GetStringFromFile(packagePath, manifest);
     if (jsonStr.empty()) {
-        LOGE("return default frontend: JS frontend.");
+        LOGD("return default frontend: JS frontend.");
         return FrontendType::JS;
     }
     auto rootJson = JsonUtil::ParseJsonString(jsonStr);
     if (rootJson == nullptr) {
-        LOGE("return default frontend: JS frontend.");
+        LOGD("return default frontend: JS frontend.");
         return FrontendType::JS;
     }
     auto mode = rootJson->GetObject("mode");
@@ -118,14 +119,14 @@ public:
     void OnFinish() const override
     {
         LOGI("AcePlatformEventCallback OnFinish");
-        CHECK_NULL_VOID_NOLOG(onFinish_);
+        CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
     void OnStartAbility(const std::string& address) override
     {
         LOGI("AcePlatformEventCallback OnStartAbility");
-        CHECK_NULL_VOID_NOLOG(onStartAbility_);
+        CHECK_NULL_VOID(onStartAbility_);
         onStartAbility_(address);
     }
 
@@ -211,13 +212,12 @@ AceAbility::AceAbility() = default;
 void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     Ability::OnStart(want, sessionInfo);
-    LOGI("AceAbility::OnStart called");
     abilityId_ = g_instanceId++;
     static std::once_flag onceFlag;
     auto abilityContext = GetAbilityContext();
     auto cacheDir = abilityContext->GetCacheDir();
     std::call_once(onceFlag, [abilityContext, cacheDir]() {
-        LOGI("Initialize for current process.");
+        LOGD("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
         CapabilityRegistry::Register();
@@ -228,8 +228,8 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         AceApplicationInfo::GetInstance().SetAppVersionCode(abilityContext->GetApplicationInfo()->versionCode);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
-        ImageCache::SetImageCacheFilePath(cacheDir);
-        ImageCache::SetCacheFileInfo();
+        ImageFileCache::GetInstance().SetImageCacheFilePath(cacheDir);
+        ImageFileCache::GetInstance().SetCacheFileInfo();
         AceEngine::InitJsDumpHeadSignal();
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
@@ -239,8 +239,8 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
     auto apiTargetVersion = abilityContext->GetApplicationInfo()->apiTargetVersion;
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFA(
         AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiTargetVersion, apiReleaseType);
-    LOGI("AceAbility: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
-         "useNewPipe: %{public}d",
+    LOGI("AceAbility OnStart called, apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, "
+         "and apiReleaseType: %{public}s, useNewPipe: %{public}d",
         apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
     std::shared_ptr<AceAbility> self = std::static_pointer_cast<AceAbility>(shared_from_this());
@@ -302,7 +302,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    CHECK_NULL_VOID_NOLOG(moduleInfo);
+    CHECK_NULL_VOID(moduleInfo);
     packagePathStr += "/" + moduleInfo->package + "/";
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     std::string srcPath;
@@ -317,9 +317,6 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
     std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePath, srcPath, isHap);
     useNewPipe = useNewPipe && (frontendType == FrontendType::ETS_CARD || frontendType == FrontendType::DECLARATIVE_JS);
-    if (frontendType != FrontendType::ETS_CARD && frontendType != FrontendType::DECLARATIVE_JS) {
-        LOGI("AceAbility: JS project use old pipeline");
-    }
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
 #ifndef NG_BUILD
@@ -433,8 +430,6 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
                     context->SetRSUIDirector(rsUiDirector);
                 }
                 LOGI("Init Rosen Backend");
-            } else {
-                LOGI("not Init Rosen Backend");
             }
         };
 #endif
@@ -451,16 +446,14 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 
     // action event handler
     auto&& actionEventHandler = [this](const std::string& action) {
-        LOGI("on Action called to event handler");
-
         auto eventAction = JsonUtil::ParseJsonString(action);
         auto bundleName = eventAction->GetValue("bundleName");
         auto abilityName = eventAction->GetValue("abilityName");
         auto params = eventAction->GetValue("params");
         auto bundle = bundleName->GetString();
         auto ability = abilityName->GetString();
-        LOGI("bundle:%{public}s ability:%{public}s, params:%{public}s", bundle.c_str(), ability.c_str(),
-            params->GetString().c_str());
+        LOGI("on Action called to event handler， bundle:%{public}s ability:%{public}s, params:%{public}s",
+            bundle.c_str(), ability.c_str(), params->GetString().c_str());
         if (bundle.empty() || ability.empty()) {
             LOGE("action ability or bundle is empty");
             return;
@@ -477,7 +470,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         context->SetActionEventHandler(actionEventHandler);
         context->SetGetWindowRectImpl([window]() -> Rect {
             Rect rect;
-            CHECK_NULL_RETURN_NOLOG(window, rect);
+            CHECK_NULL_RETURN(window, rect);
             auto windowRect = window->GetRect();
             rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
             return rect;
@@ -508,32 +501,30 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 
     auto windowRect = window->GetRect();
     if (!windowRect.IsUninitializedRect()) {
-        LOGI("notify window rect explicitly");
+        LOGW("notify window rect explicitly");
         OnSizeChange(windowRect, OHOS::Rosen::WindowSizeChangeReason::UNDEFINED);
     }
     // run page.
-    Platform::AceContainer::RunPage(abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),
-        parsedPageUrl, want.GetStringParam(START_PARAMS_KEY));
+    Platform::AceContainer::RunPage(abilityId_, parsedPageUrl, want.GetStringParam(START_PARAMS_KEY));
 
     if (!remoteData_.empty()) {
         Platform::AceContainer::OnRestoreData(abilityId_, remoteData_);
     }
     LayoutInspector::SetCallback(abilityId_);
-    LOGI("AceAbility::OnStart called End");
+    LOGD("AceAbility OnStart called End");
 }
 
 void AceAbility::OnStop()
 {
-    LOGI("AceAbility::OnStop called ");
+    LOGI("AceAbility OnStop called ");
     Ability::OnStop();
     Platform::AceContainer::DestroyContainer(abilityId_);
     abilityId_ = -1;
-    LOGI("AceAbility::OnStop called End");
 }
 
 void AceAbility::OnActive()
 {
-    LOGI("AceAbility::OnActive called ");
+    LOGI("AceAbility OnActive called ");
     // AbilityManager will miss first OnForeground notification
     if (isFirstActive_) {
         Platform::AceContainer::OnShow(abilityId_);
@@ -541,71 +532,61 @@ void AceAbility::OnActive()
     }
     Ability::OnActive();
     Platform::AceContainer::OnActive(abilityId_);
-    LOGI("AceAbility::OnActive called End");
 }
 
 void AceAbility::OnForeground(const Want& want)
 {
-    LOGI("AceAbility::OnForeground called ");
+    LOGI("AceAbility OnForeground called ");
     Ability::OnForeground(want);
     Platform::AceContainer::OnShow(abilityId_);
-    LOGI("AceAbility::OnForeground called End");
 }
 
 void AceAbility::OnBackground()
 {
-    LOGI("AceAbility::OnBackground called ");
+    LOGI("AceAbility OnBackground called ");
     Ability::OnBackground();
     Platform::AceContainer::OnHide(abilityId_);
-    LOGI("AceAbility::OnBackground called End");
 }
 
 void AceAbility::OnInactive()
 {
-    LOGI("AceAbility::OnInactive called ");
+    LOGI("AceAbility OnInactive called ");
     Ability::OnInactive();
     Platform::AceContainer::OnInactive(abilityId_);
-    LOGI("AceAbility::OnInactive called End");
 }
 
 void AceAbility::OnBackPressed()
 {
-    LOGI("AceAbility::OnBackPressed called ");
+    LOGI("AceAbility OnBackPressed called ");
     if (!Platform::AceContainer::OnBackPressed(abilityId_)) {
-        LOGI("AceAbility::OnBackPressed: passed to Ability to process");
         Ability::OnBackPressed();
     }
-    LOGI("AceAbility::OnBackPressed called End");
 }
 
 void AceAbility::OnNewWant(const Want& want)
 {
-    LOGI("AceAbility::OnNewWant called ");
+    LOGI("AceAbility OnNewWant called ");
     Ability::OnNewWant(want);
     std::string params = want.GetStringParam(START_PARAMS_KEY);
     Platform::AceContainer::OnNewRequest(abilityId_, params);
     std::string data = want.ToString();
     Platform::AceContainer::OnNewWant(abilityId_, data);
-    LOGI("AceAbility::OnNewWant called End");
 }
 
 void AceAbility::OnRestoreAbilityState(const PacMap& inState)
 {
-    LOGI("AceAbility::OnRestoreAbilityState called ");
+    LOGI("AceAbility OnRestoreAbilityState called ");
     Ability::OnRestoreAbilityState(inState);
-    LOGI("AceAbility::OnRestoreAbilityState called End");
 }
 
 void AceAbility::OnSaveAbilityState(PacMap& outState)
 {
-    LOGI("AceAbility::OnSaveAbilityState called ");
+    LOGI("AceAbility OnSaveAbilityState called ");
     Ability::OnSaveAbilityState(outState);
-    LOGI("AceAbility::OnSaveAbilityState called End");
 }
 
 void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
 {
-    LOGI("AceAbility::OnConfigurationUpdated called ");
     Ability::OnConfigurationUpdated(configuration);
 
     auto container = Platform::AceContainer::GetContainer(abilityId_);
@@ -615,7 +596,7 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
     taskExecutor->PostTask(
         [weakContainer = WeakPtr<Platform::AceContainer>(container), configuration]() {
             auto container = weakContainer.Upgrade();
-            CHECK_NULL_VOID_NOLOG(container);
+            CHECK_NULL_VOID(container);
             Platform::ParsedConfig parsedConfig;
             parsedConfig.colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
             parsedConfig.deviceAccess =
@@ -627,27 +608,25 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
             container->UpdateConfiguration(parsedConfig, configuration.GetName());
         },
         TaskExecutor::TaskType::UI);
-    LOGI("AceAbility::OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
+    LOGI("AceAbility OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
 }
 
 void AceAbility::OnAbilityResult(int requestCode, int resultCode, const OHOS::AAFwk::Want& resultData)
 {
-    LOGI("AceAbility::OnAbilityResult called ");
+    LOGI("AceAbility OnAbilityResult called ");
     AbilityProcess::GetInstance()->OnAbilityResult(this, requestCode, resultCode, resultData);
-    LOGI("AceAbility::OnAbilityResult called End");
 }
 
 bool AceAbility::OnStartContinuation()
 {
-    LOGI("AceAbility::OnStartContinuation called.");
+    LOGI("AceAbility OnStartContinuation called.");
     bool ret = Platform::AceContainer::OnStartContinuation(abilityId_);
-    LOGI("AceAbility::OnStartContinuation finish.");
     return ret;
 }
 
 bool AceAbility::OnSaveData(OHOS::AAFwk::WantParams& saveData)
 {
-    LOGI("AceAbility::OnSaveData called.");
+    LOGI("AceAbility OnSaveData called.");
     std::string data = Platform::AceContainer::OnSaveData(abilityId_);
     if (data == "false") {
         return false;
@@ -663,13 +642,12 @@ bool AceAbility::OnSaveData(OHOS::AAFwk::WantParams& saveData)
         std::string params = json->GetObject(CONTINUE_PARAMS_KEY)->ToString();
         saveData.SetParam(CONTINUE_PARAMS_KEY, OHOS::AAFwk::String::Box(params));
     }
-    LOGI("AceAbility::OnSaveData finish.");
     return true;
 }
 
 bool AceAbility::OnRestoreData(OHOS::AAFwk::WantParams& restoreData)
 {
-    LOGI("AceAbility::OnRestoreData called.");
+    LOGI("AceAbility OnRestoreData called.");
     if (restoreData.HasParam(PAGE_URI)) {
         auto value = restoreData.GetParam(PAGE_URI);
         OHOS::AAFwk::IString* ao = OHOS::AAFwk::IString::Query(value);
@@ -684,23 +662,20 @@ bool AceAbility::OnRestoreData(OHOS::AAFwk::WantParams& restoreData)
             remoteData_ = OHOS::AAFwk::String::Unbox(ao);
         }
     }
-    LOGI("AceAbility::OnRestoreData finish.");
     return true;
 }
 
 void AceAbility::OnCompleteContinuation(int result)
 {
     Ability::OnCompleteContinuation(result);
-    LOGI("AceAbility::OnCompleteContinuation called.");
+    LOGI("AceAbility OnCompleteContinuation called.");
     Platform::AceContainer::OnCompleteContinuation(abilityId_, result);
-    LOGI("AceAbility::OnCompleteContinuation finish.");
 }
 
 void AceAbility::OnRemoteTerminated()
 {
-    LOGI("AceAbility::OnRemoteTerminated called.");
+    LOGI("AceAbility OnRemoteTerminated called.");
     Platform::AceContainer::OnRemoteTerminated(abilityId_);
-    LOGI("AceAbility::OnRemoteTerminated finish.");
 }
 
 void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason,
@@ -756,7 +731,7 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
     auto rect = info->rect_;
     auto type = info->type_;
     Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    LOGI("AceAbility::OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
+    LOGI("AceAbility OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
     if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
         auto container = Platform::AceContainer::GetContainer(abilityId_);
         CHECK_NULL_VOID(container);
@@ -766,7 +741,7 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
         taskExecutor->PostTask(
             [container, keyboardRect, rsTransaction] {
                 auto context = container->GetPipelineContext();
-                CHECK_NULL_VOID_NOLOG(context);
+                CHECK_NULL_VOID(context);
                 context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
             },
             TaskExecutor::TaskType::UI);
@@ -786,7 +761,7 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
 
 void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
 {
-    LOGI("AceAbility::OnDrag called ");
+    LOGI("AceAbility OnDrag called ");
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_VOID(container);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
@@ -831,20 +806,20 @@ bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) co
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
-        LOGI("OnInputEvent: Platform::AceContainer::OnBackPressed called");
+        LOGI("OnInputEvent: Platform AceContainer OnBackPressed called");
         if (Platform::AceContainer::OnBackPressed(abilityId_)) {
-            LOGI("OnInputEvent: Platform::AceContainer::OnBackPressed return true");
+            LOGD("OnInputEvent: Platform AceContainer OnBackPressed return true");
             return true;
         }
-        LOGI("OnInputEvent: Platform::AceContainer::OnBackPressed return false");
+        LOGD("OnInputEvent: Platform AceContainer OnBackPressed return false");
         return false;
     }
     LOGI("OnInputEvent: dispatch key to arkui");
     if (aceView->DispatchKeyEvent(aceView, keyEvent)) {
-        LOGI("OnInputEvent: arkui consumed this key event");
+        LOGD("OnInputEvent: arkui consumed this key event");
         return true;
     }
-    LOGI("OnInputEvent: arkui do not consumed this key event");
+    LOGD("OnInputEvent: arkui do not consumed this key event");
     return false;
 }
 
@@ -855,7 +830,7 @@ bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) 
 
 void AceAbility::SetBackgroundColor(uint32_t color)
 {
-    LOGI("AceAbilityHandler::SetBackgroundColor color is %{public}u", color);
+    LOGI("AceAbilityHandler SetBackgroundColor color is %{public}u", color);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(abilityId_);
@@ -887,23 +862,23 @@ uint32_t AceAbility::GetBackgroundColor()
         },
         TaskExecutor::TaskType::UI);
 
-    LOGI("AceAbilityHandler::GetBackgroundColor, value is %{public}u", bgColor);
+    LOGI("AceAbilityHandler GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;
 }
 
 void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
     auto container = Platform::AceContainer::GetContainer((abilityId_));
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    CHECK_NULL_VOID_NOLOG(pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow());
-    LOGI("AceAbility::OnAvoidAreaChanged type:%{public}d, avoidArea:topRect:x:%{public}d, y:%{public}d, "
+    CHECK_NULL_VOID(
+        pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow());
+    LOGI("AceAbility OnAvoidAreaChanged type:%{public}d, avoidArea:topRect:x:%{public}d, y:%{public}d, "
          "width:%{public}d, height%{public}d",
         type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
         (int32_t)avoidArea.topRect_.height_);
     auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     auto safeArea = ConvertAvoidArea(avoidArea);
     ContainerScope scope(abilityId_);
     taskExecutor->PostTask(

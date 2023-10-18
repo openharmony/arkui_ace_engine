@@ -852,6 +852,11 @@ void FrontendDelegateImpl::PostJsTask(std::function<void()>&& task)
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
 }
 
+void FrontendDelegateImpl::PostUITask(std::function<void()>&& task)
+{
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
 void FrontendDelegateImpl::RemoveVisibleChangeNode(NodeId id)
 {
     auto task = [nodeId = id, pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get())]() {
@@ -918,8 +923,8 @@ Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-
-void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void FrontendDelegateImpl::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& /* showMode */)
 {
     LOGD("FrontendDelegateImpl ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);

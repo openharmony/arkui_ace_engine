@@ -32,7 +32,7 @@ public:
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(void, AttachPipelineContext, (const RefPtr<PipelineBase>& context), (override));
     MOCK_METHOD(void, SetAssetManager, (const RefPtr<AssetManager>& assetManager), (override));
-    MOCK_METHOD(void, RunPage, (int32_t pageId, const std::string& url, const std::string& params), (override));
+    MOCK_METHOD(void, RunPage, (const std::string& url, const std::string& params), (override));
     MOCK_METHOD(void, ReplacePage, (const std::string& url, const std::string& params), (override));
     MOCK_METHOD(void, PushPage, (const std::string& url, const std::string& params), (override));
     MOCK_METHOD(void, AddPage, (const RefPtr<AcePage>& page), (override));

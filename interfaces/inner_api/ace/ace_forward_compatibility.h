@@ -26,18 +26,19 @@ class ACE_FORCE_EXPORT AceForwardCompatibility final {
 public:
     ~AceForwardCompatibility() = default;
 
-    static void Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool forceFullUpdate);
+    static void Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool deprecated);
     static bool Inited();
     static bool IsForceOldPipeline();
-    static bool IsNewPipeline();
+    static bool IsNewPipeline(); // true for using libace, false for using libace_compatible
+    static bool IsUseNG(); // true for using newpipeline in ace engine
     static bool PipelineChanged();
     static const char* GetAceLibName();
 private:
     AceForwardCompatibility() = default;
-    static bool isForceOldPipeline_;
-    static bool isNewPipeline_;
-    static bool isNewAppspawn_;
-    static bool isInited_;
+    static inline bool isForceOldPipeline_ = true;
+    static inline bool isNewPipeline_ = true;
+    static inline bool isNewAppspawn_ = true;
+    static inline bool isInited_ = false;
 };
 } // namespace Ace
 } // namespace OHOS

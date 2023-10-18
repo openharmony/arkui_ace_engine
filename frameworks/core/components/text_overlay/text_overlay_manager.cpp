@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components/text_overlay/text_overlay_manager.h"
+
 #include <cmath>
 #include <string>
-
-#include "core/components/text_overlay/text_overlay_manager.h"
 
 #include "core/components/font/constants_converter.h"
 #include "core/components/stack/stack_element.h"
@@ -66,7 +66,7 @@ Offset TextOverlayBase::MakeEmptyOffset() const
                     return Offset::Zero();
                 }
                 case TextDirection::LTR:
-                default:{
+                default: {
                     return Offset(textOverlayPaintRect_.Width(), 0.0);
                 }
             }
@@ -79,7 +79,7 @@ Offset TextOverlayBase::MakeEmptyOffset() const
                     return Offset(textOverlayPaintRect_.Width(), 0.0);
                 }
                 case TextDirection::LTR:
-                default:{
+                default: {
                     return Offset::Zero();
                 }
             }
@@ -295,8 +295,7 @@ DirectionStatus TextOverlayBase::GetDirectionStatusOfPosition(int32_t position) 
     StringUtils::DeleteAllMark(tempBefore, mark);
     const auto& textBeforeCursor = StringUtils::ToWstring(tempBefore);
 
-    std::string tempAfter =
-        textValue_.GetSelectedText(TextSelection(position, textValue_.GetWideText().length()));
+    std::string tempAfter = textValue_.GetSelectedText(TextSelection(position, textValue_.GetWideText().length()));
     StringUtils::DeleteAllMark(tempAfter, mark);
     const auto& textAfterCursor = StringUtils::ToWstring(tempAfter);
 
@@ -363,27 +362,9 @@ int32_t TextOverlayBase::GetCursorPositionForClick(const Offset& offset, const O
     // Solve can't select right boundary of RTL language.
     double rightBoundary = GetBoundaryOfParagraph(false);
     if (GreatOrEqual(clickOffset_.GetX(), rightBoundary)) {
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-        int32_t rightBoundaryPosition =
-            static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
-                rightBoundary - cursorWidth_, clickOffset_.GetY()).position);
-#else
-        int32_t rightBoundaryPosition =
-            static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-                rightBoundary - cursorWidth_, clickOffset_.GetY()).index);
-#endif
-#else
-#ifndef USE_GRAPHIC_TEXT_GINE
-        int32_t rightBoundaryPosition =
-            static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(
-                rightBoundary - cursorWidth_, clickOffset_.GetY()).position);
-#else
-        int32_t rightBoundaryPosition =
-            static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-                rightBoundary - cursorWidth_, clickOffset_.GetY()).index);
-#endif
-#endif
+        int32_t rightBoundaryPosition = static_cast<int32_t>(
+            paragraph_->GetGlyphIndexByCoordinate(rightBoundary - cursorWidth_, clickOffset_.GetY()).index);
+
         return realTextDirection_ == TextDirection::RTL ? 0 : rightBoundaryPosition;
     }
 
@@ -391,8 +372,7 @@ int32_t TextOverlayBase::GetCursorPositionForClick(const Offset& offset, const O
     return static_cast<int32_t>(
         paragraph_->GetGlyphPositionAtCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).position);
 #else
-    return static_cast<int32_t>(
-        paragraph_->GetGlyphIndexByCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).index);
+    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).index);
 #endif
 }
 
@@ -520,11 +500,11 @@ void TextOverlayBase::PaintSelection(RSCanvas* canvas, const Offset& globalOffse
         auto selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
         selectedRect_.emplace_back(selectionRect + globalOffset);
         if (box.direction == txt::TextDirection::ltr) {
-            canvas->DrawRect(RSRect(
-                selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom()));
+            canvas->DrawRect(
+                RSRect(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom()));
         } else {
-            canvas->DrawRect(RSRect(
-                selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom()));
+            canvas->DrawRect(
+                RSRect(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom()));
         }
     }
     canvas->DetachPen();
@@ -596,8 +576,8 @@ void TextOverlayManager::PopTextOverlay()
     }
 }
 
-void TextOverlayManager::PushTextOverlayToStack(const RefPtr<TextOverlayComponent>& textOverlay,
-    const WeakPtr<PipelineContext>& pipelineContext)
+void TextOverlayManager::PushTextOverlayToStack(
+    const RefPtr<TextOverlayComponent>& textOverlay, const WeakPtr<PipelineContext>& pipelineContext)
 {
     if (!textOverlay) {
         LOGE("TextOverlay is null");

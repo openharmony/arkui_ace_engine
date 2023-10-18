@@ -27,9 +27,9 @@ class MockUdmfClient : public UdmfClient {
     DECLARE_ACE_TYPE(MockUdmfClient, UdmfClient);
 
 public:
-    MOCK_METHOD(RefPtr<UnifiedData>, TransformUnifiedData, (NativeValue* nativeValue), (override));
-    MOCK_METHOD(NativeValue*, TransformUdmfUnifiedData, (RefPtr<UnifiedData>& UnifiedData), (override));
-    MOCK_METHOD(NativeValue*, TransformSummary, ((std::map<std::string, int64_t>& summary)), (override));
+    MOCK_METHOD(RefPtr<UnifiedData>, TransformUnifiedData, (napi_value napiValue), (override));
+    MOCK_METHOD(napi_value, TransformUdmfUnifiedData, (RefPtr<UnifiedData>& UnifiedData), (override));
+    MOCK_METHOD(napi_value, TransformSummary, ((std::map<std::string, int64_t>& summary)), (override));
     MOCK_METHOD(RefPtr<UnifiedData>, CreateUnifiedData, (), (override));
     MOCK_METHOD(int32_t, SetData, (const RefPtr<UnifiedData>& unifiedData, std::string& key), (override));
     MOCK_METHOD(int32_t, GetData, (const RefPtr<UnifiedData>& unifiedData, const std::string& key), (override));
@@ -40,12 +40,16 @@ public:
         (const RefPtr<UnifiedData>& unifiedData, const std::string& url, const std::string& description), (override));
     MOCK_METHOD(void, GetLinkRecord,
         (const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description), (override));
+    MOCK_METHOD(bool, GetFileUriRecord,
+        (const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri), (override));
+    MOCK_METHOD(bool, AddFileUriRecord,
+        (const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri), (override));
     MOCK_METHOD(void, AddHtmlRecord, (const RefPtr<UnifiedData>& unifiedData,
         const std::string& htmlContent, const std::string& plainContent), (override));
     MOCK_METHOD(void, GetHtmlRecord,
         (const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent), (override));
-    MOCK_METHOD(
-        void, AddPixelMapRecord, (const RefPtr<UnifiedData>& unifiedData, (std::vector<uint8_t>& data)), (override));
+    MOCK_METHOD(void, AddPixelMapRecord, (const RefPtr<UnifiedData>& unifiedData, (std::vector<uint8_t> & data),
+        PixelMapRecordDetails& details), (override));
     MOCK_METHOD(void, AddImageRecord, (const RefPtr<UnifiedData>& unifiedData, const std::string& uri), (override));
     MOCK_METHOD(
         void, AddPlainTextRecord, (const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr), (override));

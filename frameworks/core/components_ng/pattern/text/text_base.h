@@ -27,7 +27,7 @@ using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>
 
 enum class MouseStatus { PRESSED, RELEASED, MOVE, NONE };
 
-class TextBase : public virtual SelectionHost {
+class TextBase : public SelectionHost {
     DECLARE_ACE_TYPE(TextBase, SelectionHost);
 
 public:

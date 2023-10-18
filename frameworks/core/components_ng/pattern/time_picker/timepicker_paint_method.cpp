@@ -42,7 +42,7 @@ CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor,
                enabled = enabled_](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(picker);
+        CHECK_NULL_VOID(picker);
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
         double upperLine = (frameRect.Height() - dividerSpacing) / 2.0;
         double downLine = (frameRect.Height() + dividerSpacing) / 2.0;
@@ -79,6 +79,9 @@ void TimePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     topEndPoint.SetY(frameRect.Height());
     Color endColor = backgroundColor_;
     Color middleColor = endColor.ChangeAlpha(0);
+    if (NearZero(frameRect.Bottom())) {
+        return;
+    }
     std::vector<float> topPos { 0.0f, gradientHeight / frameRect.Bottom(),
         (frameRect.Bottom() - gradientHeight) / frameRect.Bottom(), 1.0f };
     std::vector<RSColorQuad> topColors { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(),

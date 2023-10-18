@@ -82,7 +82,7 @@ void SelectOverlayPattern::OnAttachToFrameNode()
     };
     panEvent_ =
         MakeRefPtr<PanEvent>(std::move(panStart), std::move(panUpdate), std::move(panEnd), std::move(panCancel));
-    gesture->SetPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
+    gesture->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
 
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
@@ -508,10 +508,8 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
         DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(selectOverlayLayoutAlgorithm, false);
     defaultMenuEndOffset_ = selectOverlayLayoutAlgorithm->GetDefaultMenuEndOffset();
-    auto menuWidth = selectOverlayLayoutAlgorithm->GetMenuWidth();
-    if (menuWidth.has_value()) {
-        menuWidth_ = menuWidth.value();
-    }
+    menuWidth_ = selectOverlayLayoutAlgorithm->GetMenuWidth();
+    menuHeight_ = selectOverlayLayoutAlgorithm->GetMenuHeight();
     hasExtensionMenu_ = selectOverlayLayoutAlgorithm->GetHasExtensionMenu();
     if (IsCustomMenu()) {
         MenuWrapperPattern::CheckAndShowAnimation();
@@ -542,7 +540,7 @@ void SelectOverlayPattern::StartHiddenHandleTask()
     auto weak = WeakClaim(this);
     hiddenHandleTask_.Reset([weak] {
         auto client = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         client->HiddenHandle();
     });
     taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS);
@@ -555,6 +553,7 @@ void SelectOverlayPattern::HiddenHandle()
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     host->GetOrCreateGestureEventHub()->RemoveClickEvent(clickEvent_);
+    host->GetOrCreateGestureEventHub()->RemovePanEvent(panEvent_);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

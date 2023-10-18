@@ -78,16 +78,9 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         auto paint = MakeRefPtr<ScrollPaintMethod>();
-        auto scrollBarOverlayModifier = GetScrollBarOverlayModifier();
-        if (!scrollBarOverlayModifier) {
-            scrollBarOverlayModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
-            SetScrollBarOverlayModifier(scrollBarOverlayModifier);
-        }
-        paint->SetScrollBarOverlayModifier(scrollBarOverlayModifier);
-        auto scrollBar = GetScrollBar();
-        if (scrollBar) {
-            paint->SetScrollBar(scrollBar);
-        }
+        paint->SetScrollBar(GetScrollBar());
+        CreateScrollBarOverlayModifier();
+        paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
         auto scrollEffect = GetScrollEdgeEffect();
         if (scrollEffect && scrollEffect->IsFadeEffect()) {
             paint->SetEdgeEffect(scrollEffect);
@@ -173,7 +166,7 @@ public:
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
-    bool IsOutOfBoundary() const;
+    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     void OnAnimateStop() override;
@@ -259,11 +252,14 @@ public:
     ScrollSnapAlign GetScrollSnapAlign() const
     {
         auto host = GetHost();
-        CHECK_NULL_RETURN_NOLOG(host, ScrollSnapAlign::NONE);
+        CHECK_NULL_RETURN(host, ScrollSnapAlign::NONE);
         auto scrollLayoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-        CHECK_NULL_RETURN_NOLOG(scrollLayoutProperty, ScrollSnapAlign::NONE);
+        CHECK_NULL_RETURN(scrollLayoutProperty, ScrollSnapAlign::NONE);
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
+
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
@@ -281,7 +277,6 @@ private:
     void RegisterScrollEventTask();
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
-    void HandleScrollBarOutBoundary();
     void ValidateOffset(int32_t source);
     void HandleScrollPosition(float scroll, int32_t scrollState);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;

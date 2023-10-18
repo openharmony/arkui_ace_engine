@@ -100,7 +100,7 @@ void FlutterNode::Dump(int32_t depth)
 
 void FlutterNode::GenBackgroundLayer()
 {
-    CHECK_NULL_VOID_NOLOG(needUpdateBackgroud_);
+    CHECK_NULL_VOID(needUpdateBackgroud_);
     if (bgColor_ == Color::TRANSPARENT || frameRect_.IsEmpty()) {
         return;
     }
@@ -119,7 +119,7 @@ void FlutterNode::GenBackgroundLayer()
 
 std::shared_ptr<flutter::PictureLayer> FlutterNode::CreatePictureLayer(sk_sp<SkPicture> picture, int32_t instanceId)
 {
-    CHECK_NULL_RETURN_NOLOG(picture, nullptr);
+    CHECK_NULL_RETURN(picture, nullptr);
     auto window = flutter::ace::WindowManager::GetWindow(instanceId);
     CHECK_NULL_RETURN(window, nullptr);
     return std::make_shared<flutter::PictureLayer>(SkPoint::Make(0, 0), window->CreateGPUObject(picture), false, false);

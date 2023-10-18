@@ -68,6 +68,10 @@ public:
     void SetStrokeRadius(float strokeRaidus);
 
 private:
+    void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintCapsuleForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintVerticalCapsuleForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+
     void ContentDrawWithFunction(DrawingContext& context);
     void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintLinearSweeping(RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal) const;
@@ -107,6 +111,7 @@ private:
     Gradient CreateCapsuleGradient() const;
     bool PostTask(const TaskExecutor::Task& task);
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
+    bool IsSweepEffectOn();
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
@@ -141,7 +146,7 @@ private:
     bool isLoading_ = false;
     bool isSweeping_ = false;
     float sweepingDateBackup_ = 0.0f;
-    uint32_t continuousSweepingCounter_ = 0;
+    bool dateUpdated_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };

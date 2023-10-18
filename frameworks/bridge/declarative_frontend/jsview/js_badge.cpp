@@ -17,6 +17,8 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/utils.h"
+#include "core/components/common/layout/grid_container_info.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/badge_model_impl.h"
 
@@ -61,6 +63,9 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return badgeParameters;
     }
+
+    auto badgeTheme = GetTheme<BadgeTheme>();
+    CHECK_NULL_RETURN(badgeTheme, BadgeParameters());
     auto obj = JSRef<JSObject>::Cast(info[0]);
     auto value = obj->GetProperty("value");
     if (!value->IsNull() && value->IsString()) {
@@ -82,11 +87,6 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         bool xResult = ParseJsDimensionVp(xVal, dimenX);
         bool yResult = ParseJsDimensionVp(yVal, dimenY);
         if (!(xResult || yResult)) {
-            auto badgeTheme = GetTheme<BadgeTheme>();
-            if (!badgeTheme) {
-                LOGW("Get badge theme error");
-                return BadgeParameters();
-            }
             badgeParameters.badgePositionX = badgeTheme->GetBadgePositionX();
             badgeParameters.badgePositionY = badgeTheme->GetBadgePositionY();
         } else {
@@ -112,21 +112,27 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         }
 
         CalcDimension fontSize;
-        if (ParseJsDimensionFp(fontSizeValue, fontSize)) {
-            badgeParameters.badgeFontSize = fontSize;
+        if (ParseJsDimensionNG(fontSizeValue, fontSize, DimensionUnit::FP)) {
+            if (fontSize.IsNonNegative() && fontSize.Unit() != DimensionUnit::PERCENT) {
+                badgeParameters.badgeFontSize = fontSize;
+            } else {
+                badgeParameters.badgeFontSize = badgeTheme->GetBadgeFontSize();
+            }
+        } else if (!fontSizeValue->IsUndefined()) {
+            badgeParameters.badgeFontSize = badgeTheme->GetBadgeFontSize();
+        } else {
+            badgeParameters.badgeFontSize = UNDEFINED_DIMENSION;
         }
 
         CalcDimension badgeSize;
-        if (ParseJsDimensionFp(badgeSizeValue, badgeSize)) {
-            auto badgeTheme = GetTheme<BadgeTheme>();
+        if (ParseJsDimensionNG(badgeSizeValue, badgeSize, DimensionUnit::FP)) {
             if (badgeSize.IsNonNegative() && badgeSize.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeCircleSize = badgeSize;
-            } else if (!badgeTheme) {
-                LOGW("Get badge theme error");
-                return BadgeParameters();
             } else {
                 badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();
             }
+        } else {
+            badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();
         }
 
         Color color;
@@ -138,11 +144,6 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         if (ParseJsDimensionVp(borderWidthValue, borderWidth)) {
             badgeParameters.badgeBorderWidth = borderWidth;
         } else {
-            auto badgeTheme = GetTheme<BadgeTheme>();
-            if (!badgeTheme) {
-                LOGW("Get badge theme error");
-                return BadgeParameters();
-            }
             badgeParameters.badgeBorderWidth = badgeTheme->GetBadgeBorderWidth();
         }
 
@@ -150,11 +151,6 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         if (ParseJsColor(borderColorValue, borderColor)) {
             badgeParameters.badgeBorderColor = borderColor;
         } else {
-            auto badgeTheme = GetTheme<BadgeTheme>();
-            if (!badgeTheme) {
-                LOGW("Get badge theme error");
-                return BadgeParameters();
-            }
             badgeParameters.badgeBorderColor = badgeTheme->GetBadgeBorderColor();
         }
 
@@ -176,6 +172,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
     auto maxCount = obj->GetProperty("maxCount");
     if (!maxCount->IsNull() && maxCount->IsNumber()) {
         badgeParameters.badgeMaxCount = maxCount->ToNumber<int32_t>();
+    } else {
+        badgeParameters.badgeMaxCount = badgeTheme->GetMaxCount();
     }
 
     return badgeParameters;

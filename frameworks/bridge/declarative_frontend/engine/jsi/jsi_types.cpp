@@ -267,14 +267,23 @@ JsiRef<JsiValue> JsiObject::GetProperty(const char* prop) const
     return refValue;
 }
 
+bool JsiObject::HasProperty(const char* prop) const
+{
+    auto vm = GetEcmaVM();
+    auto stringRef = panda::StringRef::NewFromUtf8(vm, prop);
+    bool has = GetHandle()->Has(vm, stringRef);
+    return has;
+}
+
 JsiRef<JsiValue> JsiObject::ToJsonObject(const char* value) const
 {
     auto vm = GetEcmaVM();
+    panda::TryCatch trycatch(vm);
     auto valueRef = JsiValueConvertor::toJsiValueWithVM<std::string>(vm, value);
     panda::Local<JSValueRef> result = JSON::Parse(vm, valueRef);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    if (result.IsEmpty() || runtime->HasPendingException()) {
-        runtime->HandleUncaughtException();
+    if (result.IsEmpty() || trycatch.HasCaught()) {
+        runtime->HandleUncaughtException(trycatch);
         return JsiRef<JsiValue>::Make(JSValueRef::Undefined(vm));
     }
 
@@ -314,6 +323,7 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
 {
     auto vm = GetEcmaVM();
     LocalScope scope(vm);
+    panda::TryCatch trycatch(vm);
     std::vector<panda::Local<panda::JSValueRef>> arguments;
     for (int i = 0; i < argc; ++i) {
         arguments.emplace_back(argv[i].Get().GetLocalHandle());
@@ -322,8 +332,8 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
     auto result = GetHandle()->Call(vm, thisObj, arguments.data(), argc);
     JSNApi::ExecutePendingJob(vm);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    if (result.IsEmpty() || runtime->HasPendingException()) {
-        runtime->HandleUncaughtException();
+    if (result.IsEmpty() || trycatch.HasCaught()) {
+        runtime->HandleUncaughtException(trycatch);
         result = JSValueRef::Undefined(vm);
     }
     return JsiRef<JsiValue>::Make(result);

@@ -11,24 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("flex_test_ng") {
-  ace_animation = true
-  sources = [
-    #button
-    "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/button/button_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/button/toggle_button_pattern.cpp",
-
-    # other
-    "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
-
-    # self
-    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/flex/wrap_layout_algorithm.cpp",
-    "flex_test_ng.cpp",
-  ]
+  type = "new"
+  sources = [ "flex_test_ng.cpp" ]
 }

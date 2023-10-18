@@ -95,14 +95,7 @@ void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBa
             LOGE("Node is not scrollable node.");
             continue;
         }
-
-        float value = 0.0f;
-        float scrollableDistance = GetScrollableDistance(scrollable);
-        if (!NearZero(controlDistance)) {
-            value = distance * scrollableDistance / controlDistance;
-        } else {
-            LOGD("scroll bar scrollable distance is zero");
-        }
+        float value = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, distance);
         node.onPositionChanged(value, SCROLL_FROM_BAR);
     }
 }
@@ -159,7 +152,7 @@ void ScrollBarProxy::StartScrollBarAnimator() const
             continue;
         }
         if (scrollBar->GetDisplayMode() == DisplayMode::AUTO) {
-            scrollBar->StartAnimator();
+            scrollBar->StartDisappearAnimator();
         }
         scrollBar->SendAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     }
@@ -172,8 +165,40 @@ void ScrollBarProxy::StopScrollBarAnimator() const
         if (!scrollBar) {
             continue;
         }
-        scrollBar->StopAnimator();
+        scrollBar->StopDisappearAnimator();
         scrollBar->SendAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    }
+}
+
+bool ScrollBarProxy::NotifySnapScroll(float delta, float velocity, float controlDistance) const
+{
+    for (const auto& node : scrollableNodes_) {
+        auto scrollable = node.scrollableNode.Upgrade();
+        if (!scrollable || !CheckScrollable(scrollable) || !node.calePredictSnapOffsetCallback ||
+            !node.startScrollSnapMotionCallback) {
+            LOGD("Node is not a scrollable or snap node.");
+            continue;
+        }
+        auto patternOffset = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, delta);
+        auto predictSnapOffset = node.calePredictSnapOffsetCallback(patternOffset);
+        // If snap scrolling, predictSnapOffset will has a value.
+        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
+            LOGD("ScrollBarProxy::NotifySnapScroll predictSnapOffset:%{public}f", predictSnapOffset.value());
+            node.startScrollSnapMotionCallback(predictSnapOffset.value(), velocity);
+            // Outer scrollBar can only control one snap scrollable component.
+            return true;
+        }
+    }
+    return false;
+}
+
+float ScrollBarProxy::CalcPatternOffset(float scrollableDistance, float controlDistance, float delta) const
+{
+    if (!NearZero(controlDistance)) {
+        return delta * scrollableDistance / controlDistance;
+    } else {
+        LOGD("scroll bar scrollable distance is zero");
+        return 0.0f;
     }
 }
 } // namespace OHOS::Ace::NG

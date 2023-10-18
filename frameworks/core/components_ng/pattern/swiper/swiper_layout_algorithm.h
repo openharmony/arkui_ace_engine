@@ -191,6 +191,11 @@ public:
         return isNeedResetPrevMarginAndNextMargin_;
     }
 
+    bool IsCrossMatchChild() const
+    {
+        return crossMatchChild_;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void SetInactive(
@@ -201,6 +206,7 @@ private:
     void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
     void ArrowLayout(
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper, const PaddingPropertyF padding) const;
+    void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index, bool isForward, Axis axis) const;
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
     float nextMargin_ = 0.0f;
@@ -223,6 +229,7 @@ private:
     bool canOverScroll_ = false;
 
     bool mainSizeIsMeasured_ = false;
+    bool crossMatchChild_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;

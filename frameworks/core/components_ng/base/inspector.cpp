@@ -36,6 +36,10 @@ const char INSPECTOR_WIDTH[] = "width";
 const char INSPECTOR_HEIGHT[] = "height";
 const char INSPECTOR_RESOLUTION[] = "$resolution";
 const char INSPECTOR_CHILDREN[] = "$children";
+const char INSPECTOR_DEBUGLINE[] = "$debugLine";
+#ifdef PREVIEW
+const char INSPECTOR_VIEW_ID[] = "$viewID";
+#endif
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
@@ -111,9 +115,9 @@ void GetSpanInspector(
 {
     // span rect follows parent text size
     auto spanParentNode = parent->GetParent();
-    CHECK_NULL_VOID_NOLOG(spanParentNode);
+    CHECK_NULL_VOID(spanParentNode);
     auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
-    CHECK_NULL_VOID_NOLOG(node);
+    CHECK_NULL_VOID(node);
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
@@ -133,8 +137,8 @@ void GetSpanInspector(
                       .append(",")
                       .append(std::to_string(rect.Height()));
     jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
-    jsonNode->Put("$debugLine", parent->GetDebugLine().c_str());
-    jsonNode->Put("$viewID", parent->GetViewId().c_str());
+    jsonNode->Put(INSPECTOR_DEBUGLINE, parent->GetDebugLine().c_str());
+    jsonNode->Put(INSPECTOR_VIEW_ID, parent->GetViewId().c_str());
     jsonNodeArray->Put(jsonNode);
 }
 
@@ -168,8 +172,8 @@ void GetInspectorChildren(
                           .append(",")
                           .append(std::to_string(rect.Height()));
         jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
-        jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
-        jsonNode->Put("$viewID", node->GetViewId().c_str());
+        jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
+        jsonNode->Put(INSPECTOR_VIEW_ID, node->GetViewId().c_str());
         auto jsonObject = JsonUtil::Create(true);
         parent->ToJsonValue(jsonObject);
         jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
@@ -218,15 +222,16 @@ void GetSpanInspector(
 {
     // span rect follows parent text size
     auto spanParentNode = parent->GetParent();
-    CHECK_NULL_VOID_NOLOG(spanParentNode);
+    CHECK_NULL_VOID(spanParentNode);
     auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
-    CHECK_NULL_VOID_NOLOG(node);
+    CHECK_NULL_VOID(node);
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
+    jsonNode->Put(INSPECTOR_DEBUGLINE, parent->GetDebugLine().c_str());
     RectF rect = node->GetTransformRectRelativeToWindow();
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     jsonNodeArray->Put(jsonNode);
@@ -253,6 +258,7 @@ void GetInspectorChildren(
     }
 
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
+    jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
@@ -287,8 +293,18 @@ RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
 }
 } // namespace
 
+std::set<RefPtr<FrameNode>> Inspector::offscreenNodes;
+
 RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key)
 {
+    if (!offscreenNodes.empty()) {
+        for (auto node : offscreenNodes) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key));
+            if (frameNode) {
+                return frameNode;
+            }
+        }
+    }
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto rootNode = context->GetRootElement();
@@ -316,6 +332,8 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
         jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     }
     auto jsonAttrs = JsonUtil::Create(true);
+    std::string debugLine = inspectorElement->GetDebugLine();
+    jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
     inspectorElement->ToJsonValue(jsonAttrs);
     jsonNode->Put(INSPECTOR_ATTRS, jsonAttrs);
     return jsonNode->ToString();
@@ -327,7 +345,7 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     CHECK_NULL_VOID(frameNode);
     rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
     rectangle.localOffset = frameNode->GetGeometryNode()->GetFrameOffset();
-    rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
+    rectangle.windowOffset = frameNode->GetTransformRelativeOffset();
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
@@ -389,7 +407,7 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(context, jsonRoot->ToString());
+    CHECK_NULL_RETURN(context, jsonRoot->ToString());
     auto scale = context->GetViewScale();
     auto rootHeight = context->GetRootHeight();
     auto rootWidth = context->GetRootWidth();
@@ -399,7 +417,7 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
 
     auto pageRootNode = context->GetStageManager()->GetLastPage();
-    CHECK_NULL_RETURN_NOLOG(pageRootNode, jsonRoot->ToString());
+    CHECK_NULL_RETURN(pageRootNode, jsonRoot->ToString());
     auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : pageRootNode->GetChildren()) {
@@ -488,6 +506,20 @@ void Inspector::HideAllMenus()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideAllMenus();
+}
+
+void Inspector::AddOffscreenNode(RefPtr<FrameNode> node)
+{
+    CHECK_NULL_VOID(node);
+    LOGI("add offscreen node:%{public}d", node->GetId());
+    offscreenNodes.insert(node);
+}
+
+void Inspector::RemoveOffscreenNode(RefPtr<FrameNode> node)
+{
+    CHECK_NULL_VOID(node);
+    LOGI("remove offscreen node:%{public}d", node->GetId());
+    offscreenNodes.erase(node);
 }
 
 } // namespace OHOS::Ace::NG

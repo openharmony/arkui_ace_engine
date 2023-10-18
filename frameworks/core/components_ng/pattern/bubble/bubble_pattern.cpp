@@ -329,17 +329,21 @@ void BubblePattern::PopBubble()
         return;
     }
     popupInfo.markNeedUpdate = true;
-    popupInfo.popupId = -1;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-    if (showInSubWindow) {
-        SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
-    } else {
-        overlayManager->HidePopup(targetNodeId_, popupInfo);
-    }
+    StartExitingAnimation([showInSubWindow, targetId = targetNodeId_, popupInfo,
+                              weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
+        if (showInSubWindow) {
+            SubwindowManager::GetInstance()->HidePopupNG(targetId);
+        } else {
+            auto overlay = weakOverlayManger.Upgrade();
+            CHECK_NULL_VOID(overlay);
+            overlay->UpdatePopupNode(targetId, popupInfo);
+        }
+    });
 }
 
 RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
@@ -441,6 +445,10 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
 
 void BubblePattern::StartExitingAnimation(std::function<void()> finish)
 {
+    if (!IsOnShow()) {
+        return;
+    }
+
     StartOffsetExitingAnimation();
     StartAlphaExitingAnimation(finish);
 }
@@ -565,9 +573,6 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
         case WindowSizeChangeReason::DRAG_START:
         case WindowSizeChangeReason::DRAG:
         case WindowSizeChangeReason::DRAG_END: {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             break;
         }
         default: {

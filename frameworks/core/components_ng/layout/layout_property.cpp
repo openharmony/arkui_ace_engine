@@ -321,7 +321,7 @@ void LayoutProperty::CheckAspectRatio()
 
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 {
-    CHECK_NULL_VOID_NOLOG(gridProperty_);
+    CHECK_NULL_VOID(gridProperty_);
     auto parent = host->GetAncestorNodeOfFrame();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
@@ -349,7 +349,7 @@ void LayoutProperty::UpdateGridProperty(std::optional<int32_t> span, std::option
 
 bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
 {
-    CHECK_NULL_RETURN_NOLOG(gridProperty_, false);
+    CHECK_NULL_RETURN(gridProperty_, false);
     auto optOffset = gridProperty_->GetOffset();
     if (optOffset == UNDEFINED_DIMENSION) {
         return false;
@@ -498,7 +498,7 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 
 MarginPropertyF LayoutProperty::CreateMargin()
 {
-    CHECK_NULL_RETURN_NOLOG(margin_, MarginPropertyF());
+    CHECK_NULL_RETURN(margin_, MarginPropertyF());
     if (!marginResult_.has_value() && margin_) {
         if (layoutConstraint_.has_value()) {
             marginResult_ = ConvertToMarginPropertyF(
@@ -527,25 +527,23 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // store the previous visibility value.
-    auto preVisible = host->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE);
+    auto preVisibility = propVisibility_;
 
     // update visibility value.
     propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
-    if (allowTransition) {
-        if (preVisible == VisibleType::VISIBLE && (visible == VisibleType::INVISIBLE || visible == VisibleType::GONE)) {
-            // only trigger transition when visibility changes between visible and invisible.
+    if (allowTransition && preVisibility) {
+        if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeDisappear(false);
-        } else if ((preVisible == VisibleType::INVISIBLE || preVisible == VisibleType::GONE) &&
-                   visible == VisibleType::VISIBLE) {
+        } else if (preVisibility.value() != VisibleType::VISIBLE && visible == VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeAppear(false);
         }
     }
 
     auto parent = host->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID_NOLOG(parent);
+    CHECK_NULL_VOID(parent);
     // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
-    if (preVisible != VisibleType::GONE && visible != VisibleType::GONE) {
+    if (preVisibility.value_or(VisibleType::VISIBLE) != VisibleType::GONE && visible != VisibleType::GONE) {
         parent->MarkNeedSyncRenderTree();
         parent->RebuildRenderContextTree();
         return;
@@ -578,14 +576,14 @@ void LayoutProperty::UpdateSafeAreaInsets(const SafeAreaInsets& safeArea)
 
 bool LayoutProperty::HasFixedWidth() const
 {
-    CHECK_NULL_RETURN_NOLOG(calcLayoutConstraint_, false);
+    CHECK_NULL_RETURN(calcLayoutConstraint_, false);
     auto&& idealSize = calcLayoutConstraint_->selfIdealSize;
     return (idealSize && idealSize->WidthFixed());
 }
 
 bool LayoutProperty::HasFixedHeight() const
 {
-    CHECK_NULL_RETURN_NOLOG(calcLayoutConstraint_, false);
+    CHECK_NULL_RETURN(calcLayoutConstraint_, false);
     auto&& idealSize = calcLayoutConstraint_->selfIdealSize;
     return (idealSize && idealSize->HeightFixed());
 }
@@ -635,7 +633,7 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
     auto geometryTransitionOld = GetGeometryTransition();
     auto geometryTransitionNew =
         ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_, followWithoutTransition);
-    CHECK_NULL_VOID_NOLOG(geometryTransitionOld != geometryTransitionNew);
+    CHECK_NULL_VOID(geometryTransitionOld != geometryTransitionNew);
     if (geometryTransitionOld) {
         geometryTransitionOld->OnFollowWithoutTransition();
         // unregister node from old geometry transition
@@ -649,7 +647,7 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
     }
     geometryTransition_ = geometryTransitionNew;
 
-    LOGD("GeometryTransition: node: %{public}d update id, old id: %{public}s, new id: %{public}s", host->GetId(),
+    LOGI("GeometryTransition: node: %{public}d update id, old id: %{public}s, new id: %{public}s", host->GetId(),
         geometryTransitionOld ? geometryTransitionOld->GetId().c_str() : "empty",
         geometryTransitionNew ? id.c_str() : "empty");
     ElementRegister::GetInstance()->DumpGeometryTransition();
@@ -1001,5 +999,62 @@ void LayoutProperty::UpdateAllGeometryTransition(const RefPtr<UINode>& parent)
             q.push(child);
         }
     }
+}
+
+std::pair<bool, bool> LayoutProperty::GetPercentSensitive()
+{
+    if (!contentConstraint_.has_value()) {
+        return { false, false };
+    }
+    std::pair<bool, bool> res = { false, false };
+    const auto& constraint = contentConstraint_.value();
+    if (GreaterOrEqualToInfinity(constraint.maxSize.Height())) {
+        if (calcLayoutConstraint_ && calcLayoutConstraint_->PercentHeight()) {
+            res.second = true;
+        }
+    }
+    if (GreaterOrEqualToInfinity(constraint.maxSize.Width())) {
+        if (calcLayoutConstraint_ && calcLayoutConstraint_->PercentWidth()) {
+            res.first = true;
+        }
+    }
+    return res;
+}
+
+std::pair<bool, bool> LayoutProperty::UpdatePercentSensitive(bool width, bool height)
+{
+    if (!contentConstraint_.has_value()) {
+        return { false, false };
+    }
+    const auto& constraint = contentConstraint_.value();
+    if (GreaterOrEqualToInfinity(constraint.maxSize.Height())) {
+        heightPercentSensitive_ = heightPercentSensitive_ || height;
+    }
+    if (GreaterOrEqualToInfinity(constraint.maxSize.Width())) {
+        widthPercentSensitive_ = heightPercentSensitive_ || width;
+    }
+    return { widthPercentSensitive_, heightPercentSensitive_ };
+}
+
+bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& preLayoutConstraint,
+    const std::optional<LayoutConstraintF>& preContentConstraint)
+{
+    if (!preLayoutConstraint || !layoutConstraint_) {
+        return false;
+    }
+    if (!preContentConstraint || !contentConstraint_) {
+        return false;
+    }
+    const auto& layout = layoutConstraint_.value();
+    const auto& content = contentConstraint_.value();
+    if (GreaterOrEqualToInfinity(layout.maxSize.Width()) && !widthPercentSensitive_) {
+        return (layout.EqualWithoutPercentWidth(preLayoutConstraint.value()) &&
+            content.EqualWithoutPercentWidth(preContentConstraint.value()));
+    }
+    if (GreaterOrEqualToInfinity(layout.maxSize.Height()) && !heightPercentSensitive_) {
+        return (layout.EqualWithoutPercentHeight(preLayoutConstraint.value()) &&
+            content.EqualWithoutPercentHeight(preContentConstraint.value()));
+    }
+    return (preLayoutConstraint == layoutConstraint_ && preContentConstraint == contentConstraint_);
 }
 } // namespace OHOS::Ace::NG

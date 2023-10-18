@@ -23,11 +23,6 @@
 #include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::Framework {
-void SideBarContainerModelImpl::Pop()
-{
-    ViewStackProcessor::GetInstance()->PopContainer();
-}
-
 void SideBarContainerModelImpl::SetSideBarContainerType(SideBarContainerType type)
 {
     std::list<RefPtr<Component>> children;
@@ -183,10 +178,6 @@ void SideBarContainerModelImpl::SetDividerStartMargin(const Dimension& startMarg
 void SideBarContainerModelImpl::SetDividerEndMargin(const Dimension& endMargin) {}
 
 void SideBarContainerModelImpl::SetMinContentWidth(const Dimension& minContentWidth) {};
-
-void SideBarContainerModelImpl::CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode) {}
-
-void SideBarContainerModelImpl::CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode) {}
 
 void SideBarContainerModelImpl::MarkNeedInitRealSideBarWidth() {}
 } // namespace OHOS::Ace::Framework

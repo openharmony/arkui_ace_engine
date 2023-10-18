@@ -44,6 +44,8 @@ public:
     float GetChildHeight(LayoutWrapper* layoutWrapper, float width) const;
 
 private:
+    std::optional<SizeF> MeasureContentForApiNine(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     ProgressType type_ = ProgressType::LINEAR;
     float strokeWidth_= 2.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressLayoutAlgorithm);

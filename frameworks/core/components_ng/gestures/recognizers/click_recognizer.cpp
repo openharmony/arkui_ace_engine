@@ -37,6 +37,7 @@ constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 constexpr double MAX_THRESHOLD = 20.0;
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
+constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 
 } // namespace
 
@@ -119,6 +120,10 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && pipeline->IsFormRender()) {
+        touchDownTime_ = event.time;
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
@@ -127,11 +132,6 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     LOGI("click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
          "%{public}d, %{public}d",
         event.id, equalsToFingers_, currentTouchPointsNum_);
-
-    if (currentTouchPointsNum_ >= fingers_) {
-        LOGI("current down finger is larger than defined, %{public}d, %{public}d", currentTouchPointsNum_, fingers_);
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-    }
 
     // The last recognition sequence has been completed, reset the timer.
     if (tappedCount_ > 0 && currentTouchPointsNum_ == 0) {
@@ -155,9 +155,15 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    if (currentFingers_ < fingers_) {
-        LOGW("ClickGesture current finger number is less than requiried finger number.");
-        return;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
+    // logic when the formal scenario is complete.
+    if (pipeline && pipeline->IsFormRender()) {
+        if (event.time.time_since_epoch().count() - touchDownTime_.time_since_epoch().count() >
+            DEFAULT_LONGPRESS_DURATION) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            return;
+        }
     }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
@@ -311,7 +317,9 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         info.SetDisplayY(touchPoint.screenY);
         info.SetEnhanceData(touchPoint.enhanceData);
 #endif
-        (*onAction)(info);
+        // onAction may be overwritten in its invoke so we copy it first
+        auto onActionFunction = *onAction;
+        onActionFunction(info);
     }
 }
 

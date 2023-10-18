@@ -30,14 +30,15 @@ void RichEditorModelNG::Create()
         V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_LEFT);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
 
     richEditorPattern->InitSurfaceChangedCallback();
     richEditorPattern->InitSurfacePositionChangedCallback();
+    richEditorPattern->ClearSelectionMenu();
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -132,7 +133,7 @@ void RichEditorModelNG::BindSelectionMenu(
     }
 }
 
-void RichEditorModelNG::SetOnPaste(std::function<bool()>&& func)
+void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);

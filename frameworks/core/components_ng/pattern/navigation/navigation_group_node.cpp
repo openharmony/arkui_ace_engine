@@ -66,7 +66,7 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavigationGroupNode>(frameNode));
+    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<NavigationGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navigationGroupNode = AceType::MakeRefPtr<NavigationGroupNode>(tag, nodeId, pattern);
     navigationGroupNode->InitializePatternAndContext();
@@ -93,7 +93,7 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
     contentNode->AddChild(child);
 }
 
-void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild)
+void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild, bool modeChange)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
@@ -115,6 +115,14 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         SetBackButtonEvent(navDestination);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
+        if (!eventHub->GetOnStateChange()) {
+            auto onStateChangeMap = pattern->GetOnStateChangeMap();
+            auto iter = onStateChangeMap.find(uiNode->GetId());
+            if (iter != onStateChangeMap.end()) {
+                eventHub->SetOnStateChange(iter->second);
+                pattern->DeleteOnStateChangeItem(iter->first);
+            }
+        }
         if (i == navDestinationNodes.size() - 1) {
             // process shallow builder
             navDestination->ProcessShallowBuilder();
@@ -123,8 +131,16 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             // for the navDestination at the top, FireChangeEvent
             eventHub->FireChangeEvent(true);
             hasChanged = CheckNeedMeasure(navDestination->GetLayoutProperty()->GetPropertyChangeFlag());
+            if (!hasChanged && NavigationLayoutAlgorithm::IsAutoHeight(GetLayoutProperty<NavigationLayoutProperty>())) {
+                hasChanged = true;
+            }
         } else {
             eventHub->FireChangeEvent(false);
+            // split mode and node is not animation node in stack mode need to hide
+            if (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
+                navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild) {
+                navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+            }
         }
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
         if (childIndex < 0) {
@@ -168,7 +184,9 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             ++slot;
         }
     }
-    if (hasChanged) {
+    if (modeChange) {
+        navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    } else if (hasChanged) {
         navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 }
@@ -234,7 +252,7 @@ void NavigationGroupNode::SetBackButtonVisible(const RefPtr<UINode>& navDestinat
     CHECK_NULL_VOID(titleBarLayoutProperty);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     if (isVisible) {
         backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -257,63 +275,82 @@ void NavigationGroupNode::SetBackButtonEvent(
     CHECK_NULL_VOID(backButtonEventHub);
     auto onBackButtonEvent =
         [navDestinationWeak = WeakPtr<NavDestinationGroupNode>(navDestination), navigationWeak = WeakClaim(this),
-            navRouterPatternWeak = WeakPtr<NavRouterPattern>(navRouterPattern)](GestureEvent& /*info*/) {
-            // the one before navDestination in the stack
-            auto navDestination = navDestinationWeak.Upgrade();
-            CHECK_NULL_VOID(navDestination);
-            auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            auto onBackPressed = eventHub->GetOnBackPressedEvent();
-            bool isOverride = false;
-            if (onBackPressed != nullptr) {
-                isOverride = eventHub->FireOnBackPressedEvent();
-            }
-            if (isOverride) {
-                LOGI("this onBackButtonPressed event returns false");
-                return;
-            }
-            auto navigation = navigationWeak.Upgrade();
-            CHECK_NULL_VOID(navigation);
-            if (navigation->isOnAnimation_) {
-                LOGI("animation is ongoing");
-                return;
-            }
-            auto navigationPattern = navigation->GetPattern<NavigationPattern>();
-            CHECK_NULL_VOID(navigationPattern);
-            auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
-            auto preNavDestinationNode =
-                navigationPattern->GetPreNavDestination(navDestinationPattern->GetName(), navDestination);
-            auto preNavDestination =
-                AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(preNavDestinationNode));
+            navRouterPatternWeak = WeakPtr<NavRouterPattern>(navRouterPattern)](GestureEvent& /*info*/) -> bool {
+        auto navDestination = navDestinationWeak.Upgrade();
+        CHECK_NULL_RETURN(navDestination, false);
+        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_RETURN(eventHub, false);
+        auto isOverride = eventHub->GetOnBackPressedEvent();
+        auto result = false;
+        if (isOverride) {
+            result = eventHub->FireOnBackPressedEvent();
+        }
+        if (result) {
+            LOGI("this onBackButtonPressed event returns true");
+            return true;
+        }
+        auto navigation = navigationWeak.Upgrade();
+        CHECK_NULL_RETURN(navigation, false);
+        const auto& children = navigation->GetContentNode()->GetChildren();
+        auto isLastChild = children.size() == 1 ? true : false;
+        if (isOverride) {
+            result = navigation->HandleBack(navDestination, isLastChild, true);
+        } else {
+            result = navigation->HandleBack(navDestination, isLastChild, false);
+        }
+        // when js navigationStack is provided, modifyDone will be called by state manager.
+        auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+        CHECK_NULL_RETURN(navigationPattern, false);
+        if (!navigationPattern->GetNavigationStackProvided()) {
+            navigation->MarkModifyDone();
+            navigation->MarkDirtyNode();
+        }
 
-            navigationPattern->RemoveNavDestination();
-            // when js navigationStack is provided, modifyDone will be called by state manager.
-            if (!navigationPattern->GetNavigationStackProvided()) {
-                navigation->MarkModifyDone();
-                navigation->MarkDirtyNode();
-            }
-        }; // backButton event
+        return result;
+    }; // backButton event
 
     navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
     backButtonEventHub->GetOrCreateGestureEventHub()->SetUserOnClick(onBackButtonEvent);
 }
 
-RefPtr<FrameNode> NavigationGroupNode::GetNavDestinationNodeToHandleBack()
+bool NavigationGroupNode::CheckCanHandleBack()
 {
-    auto pattern = GetPattern<NavigationPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
+    auto navigation = AceType::WeakClaim(this).Upgrade();
+    CHECK_NULL_RETURN(navigation, false);
+    if (navigation->isOnAnimation_) {
+        return true;
+    }
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, false);
     const auto& children = contentNode_->GetChildren();
     if (children.empty()) {
-        return nullptr;
+        return false;
     }
-    auto mode = pattern->GetNavigationMode();
-    if (mode == NavigationMode::SPLIT) {
-        if (children.size() == 1) {
-            return nullptr;
-        }
-        return AceType::DynamicCast<NavDestinationGroupNode>(children.back());
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(children.back());
+    CHECK_NULL_RETURN(navDestination, false);
+    GestureEvent gestureEvent;
+    return navDestination->GetNavDestinationBackButtonEvent()(gestureEvent);
+}
+
+bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride)
+{
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    if (!isOverride && !isLastChild) {
+        navigationPattern->RemoveNavDestination();
+        return true;
     }
-    return AceType::DynamicCast<NavDestinationGroupNode>(children.back());
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(node);
+    CHECK_NULL_RETURN(navDestination, false);
+
+    auto mode = navigationPattern->GetNavigationMode();
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    if (isLastChild && (mode == NavigationMode::SPLIT ||
+                           (mode == NavigationMode::STACK && layoutProperty->GetHideNavBar().value_or(false)))) {
+        return false;
+    }
+
+    navigationPattern->RemoveNavDestination();
+    return true;
 }
 
 void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
@@ -339,14 +376,14 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
             weakNavigation = WeakClaim(this), id = Container::CurrentId(), nodeWidth, nodeHeight] {
             ContainerScope scope(id);
             auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(context);
+            CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            CHECK_NULL_VOID(taskExecutor);
             // animation finish event should be posted to UI thread
             taskExecutor->PostTask(
                 [weakNode, weakTitle, weakNavigation, nodeWidth, nodeHeight]() {
                     LOGI("navigation animation end");
-                    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
+                    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                     auto navigation = weakNavigation.Upgrade();
                     if (navigation) {
                         navigation->isOnAnimation_ = false;
@@ -357,6 +394,7 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
                         // has another transition, just return
                         return;
                     }
+                    node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                     auto title = weakTitle.Upgrade();
                     if (title) {
                         title->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -439,13 +477,13 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                                 weakNavigation = WeakClaim(this), isNavBar, id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
+        CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread
         taskExecutor->PostTask(
             [weakNode, weakTitle, weakNavigation, isNavBar]() {
-                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 LOGI("navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 if (navigation) {
@@ -457,16 +495,18 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                 }
                 auto node = weakNode.Upgrade();
                 CHECK_NULL_VOID(node);
-                bool needSetInVisible = false;
+                bool needSetInvisible = false;
                 if (isNavBar) {
-                    needSetInVisible =
+                    needSetInvisible =
                         AceType::DynamicCast<NavBarNode>(node)->GetTransitionType() == PageTransitionType::EXIT_PUSH;
+                    // store this flag for navBar layout only
+                    navigation->SetNeedSetInvisible(needSetInvisible);
                 } else {
-                    needSetInVisible = AceType::DynamicCast<NavDestinationGroupNode>(node)->GetTransitionType() ==
+                    needSetInvisible = AceType::DynamicCast<NavDestinationGroupNode>(node)->GetTransitionType() ==
                                        PageTransitionType::EXIT_PUSH;
                 }
-                // for the case, the navBar form EXIT_PUSH to push  during animation
-                if (needSetInVisible) {
+                // for the case, the navBar form EXIT_PUSH to push during animation
+                if (needSetInvisible) {
                     node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 }
                 node->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -522,7 +562,7 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
             [weakNavigation]() {
-                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 LOGI("navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
@@ -589,7 +629,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
     }
     CHECK_NULL_VOID(titleNode);
 
-    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), id = Container::CurrentId()] {
+    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), id = Container::CurrentId(), isNavBar] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -597,12 +637,16 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
-            [weakNavigation]() {
-                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
+            [weakNavigation, isNavBar]() {
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 LOGI("navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
+                // clear this flag for navBar layout only
+                if (isNavBar) {
+                    navigation->SetNeedSetInvisible(false);
+                }
             },
             TaskExecutor::TaskType::UI);
     });
@@ -648,14 +692,14 @@ void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButto
             [backButtonNodeContextWK = WeakClaim(RawPtr(backButtonNodeContext)), id = Container::CurrentId()] {
                 ContainerScope scope(id);
                 auto context = PipelineContext::GetCurrentContext();
-                CHECK_NULL_VOID_NOLOG(context);
+                CHECK_NULL_VOID(context);
                 auto taskExecutor = context->GetTaskExecutor();
-                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                CHECK_NULL_VOID(taskExecutor);
                 // animation finish event should be posted to UI thread.
                 taskExecutor->PostTask(
                     [backButtonNodeContextWK, id]() {
                         auto backButtonNodeContext = backButtonNodeContextWK.Upgrade();
-                        CHECK_NULL_VOID_NOLOG(backButtonNodeContext);
+                        CHECK_NULL_VOID(backButtonNodeContext);
                         ContainerScope scope(id);
                         backButtonNodeContext->UpdateOpacity(1.0);
                     },
@@ -675,9 +719,9 @@ void NavigationGroupNode::MaskAnimation(const RefPtr<RenderContext>& transitionO
         [transitionOutNodeContextWK = WeakPtr<RenderContext>(transitionOutNodeContext), id = Container::CurrentId()] {
             ContainerScope scope(id);
             auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(context);
+            CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostTask(
                 [transitionOutNodeContextWK]() {
                     auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
@@ -711,7 +755,7 @@ void NavigationGroupNode::TitleOpacityAnimationOut(const RefPtr<RenderContext>& 
             taskExecutor->PostTask(
                 [transitionOutNodeContextWK, id]() {
                     auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
-                    CHECK_NULL_VOID_NOLOG(transitionOutNodeContext);
+                    CHECK_NULL_VOID(transitionOutNodeContext);
                     transitionOutNodeContext->UpdateOpacity(1.0);
                 },
                 TaskExecutor::TaskType::UI);

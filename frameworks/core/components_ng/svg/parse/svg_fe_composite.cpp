@@ -15,11 +15,8 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_composite.h"
 
-#ifdef NEW_SKIA
 #include "include/effects/SkImageFilters.h"
-#else
-#include "include/effects/SkArithmeticImageFilter.h"
-#endif
+
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_composite_declaration.h"
 
@@ -38,15 +35,15 @@ SvgFeComposite::SvgFeComposite() : SvgFe()
 }
 
 #ifndef USE_ROSEN_DRAWING
-void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
-    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
+    ColorInterpolationType& currentColor) const
 #else
 void SvgFeComposite::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
 #endif
 {
     auto declaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(declaration_);
-    CHECK_NULL_VOID_NOLOG(declaration);
+    CHECK_NULL_VOID(declaration);
     if (declaration->GetOperatorType() != FeOperatorType::FE_ARITHMETIC) {
         // this version skia not support SkBlendImageFilters
         return;
@@ -57,20 +54,14 @@ void SvgFeComposite::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter
     ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-    imageFilter = SkArithmeticImageFilter::Make(
-        declaration->GetK1(), declaration->GetK2(), declaration->GetK3(), declaration->GetK4(),
-        true, backImageFilter, foreImageFilter, nullptr);
+
+    imageFilter = SkImageFilters::Arithmetic(declaration->GetK1(), declaration->GetK2(), declaration->GetK3(),
+        declaration->GetK4(), true, backImageFilter, foreImageFilter, nullptr);
 #else
-    imageFilter = SkImageFilters::Arithmetic(
-        declaration->GetK1(), declaration->GetK2(), declaration->GetK3(), declaration->GetK4(),
-        true, backImageFilter, foreImageFilter, nullptr);
-#endif
-#else
-    std::vector<RSScalar> coefficients = {
-        declaration->GetK1(), declaration->GetK2(), declaration->GetK3(), declaration->GetK4() };
-    imageFilter = RSRecordingImageFilter::CreateArithmeticImageFilter(
-        coefficients, true, backImageFilter, foreImageFilter);
+    std::vector<RSScalar> coefficients = { declaration->GetK1(), declaration->GetK2(), declaration->GetK3(),
+        declaration->GetK4() };
+    imageFilter =
+        RSRecordingImageFilter::CreateArithmeticImageFilter(coefficients, true, backImageFilter, foreImageFilter);
 #endif
 
     ConverImageFilterColor(imageFilter, srcColor, currentColor);

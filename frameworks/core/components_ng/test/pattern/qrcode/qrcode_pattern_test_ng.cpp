@@ -96,8 +96,16 @@ void QRCodePropertyTestNg::MockPipelineContextGetTheme()
 HWTEST_F(QRCodePropertyTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    MockPipelineContextGetTheme();
     QRCodeModelNG qrCodeModelNG;
     qrCodeModelNG.Create(CREATE_VALUE);
+
+    /**
+     * @tc.cases: case. cover more than APIVersion 10.
+     */
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
     qrCodeModelNG.SetQRCodeColor(QR_CODE_COLOR_VALUE);
     qrCodeModelNG.SetQRBackgroundColor(QR_CODE_BACKGROUND_COLOR_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -378,8 +386,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodeModelSetContentOpacity001, TestSize.Level1)
     ASSERT_NE(frameNode1, nullptr);
     auto qrcodePaintProperty1 = frameNode1->GetPaintProperty<QRCodePaintProperty>();
     ASSERT_NE(qrcodePaintProperty1, nullptr);
-    EXPECT_EQ(
-        qrcodePaintProperty1->GetOpacityValue(), 0.1);
+    EXPECT_EQ(qrcodePaintProperty1->GetOpacityValue(), 0.1);
 
     qrCodeModelNG.Create(CREATE_VALUE);
     qrCodeModelNG.SetQRCodeColor(qrCodeTheme->GetQrcodeColor());
@@ -485,6 +492,49 @@ HWTEST_F(QRCodePropertyTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.
 }
 
 /**
+ * @tc.name: QRCodeLayoutAlgorithmMeasureContent002
+ * @tc.desc: test MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodePropertyTestNg, QRCodeLayoutAlgorithmMeasureContent002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, layoutProperty);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+    auto qrCodeLayoutAlgorithm = AceType::DynamicCast<QRCodeLayoutAlgorithm>(qrCodePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(qrCodeLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(qrCodeLayoutAlgorithm));
+
+    /**
+     * @tc.steps: steps2. construct arguments and call MeasureContent().
+     * @tc.expected: cover branch not padding and Negative is false. Check the result of MeasureContent.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize.SetWidth(-20.0f);
+    contentConstraint.selfIdealSize.SetHeight(-20.0f);
+    auto size1 = qrCodeLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_NE(size1, std::nullopt);
+    EXPECT_EQ(size1->Width(), -20.0f);
+}
+
+/**
  * @tc.name: QRCodeModifierOnDraw001
  * @tc.desc: test onDraw
  * @tc.type: FUNC
@@ -583,5 +633,59 @@ HWTEST_F(QRCodePropertyTestNg, QRCodeModifierOnDraw002, TestSize.Level1)
     auto qrCodeModifier = AceType::DynamicCast<QRCodeModifier>(qrCodePaintMethod->GetContentModifier(paintWrapper));
     qrCodeModifier->onDraw(context);
     EXPECT_EQ(qrCodeModifier->color_->Get(), Color::FOREGROUND);
+}
+
+/**
+ * @tc.name: UpdateContentModifier001
+ * @tc.desc: test qrcodePaintMethod UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodePropertyTestNg, UpdateContentModifier001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+
+    /**
+     * @tc.steps: steps2. Create qrCodePaintMethod and paintWrapper
+     */
+    auto qrCodePaintMethod = AceType::DynamicCast<QRCodePaintMethod>(qrCodePattern->CreateNodePaintMethod());
+    ASSERT_NE(qrCodePaintMethod, nullptr);
+    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::INVERT);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    /**
+     * @tc.steps: steps3. Call UpdateContentModifier
+     * @tc.expected: Call UpdateContentModifier and cover branch HasForegroundColorStrategy is true
+     */
+    qrCodePaintMethod->UpdateContentModifier(paintWrapper);
+    EXPECT_TRUE(renderContext->HasForegroundColorStrategy());
+
+    /**
+     * @tc.steps: steps4. Call UpdateContentModifier
+     * @tc.expected: Call UpdateContentModifier and cover branch HasForegroundColorStrategy、HasForegroundColor is false
+     */
+    auto renderContext2 = AceType::MakeRefPtr<MockRenderContext>();
+    auto* paintWrapper2 = new PaintWrapper(renderContext2, geometryNode, qrcodePaintProperty);
+    ASSERT_NE(paintWrapper2, nullptr);
+    qrCodePaintMethod->UpdateContentModifier(paintWrapper2);
+    EXPECT_FALSE(renderContext2->HasForegroundColor());
 }
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,8 @@
 
 #include <functional>
 
+#include "base/log/log.h"
+
 #ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/lib/ui/ui_dart_state.h"
 
@@ -29,7 +31,9 @@
 #include "core/common/rosen/rosen_asset_manager.h"
 #endif
 
+#include "jsapp/rich/external/StageContext.h"
 #include "native_engine/native_engine.h"
+#include "previewer/include/window.h"
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/osal/stage_card_parser.h"
@@ -43,6 +47,7 @@
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_engine.h"
@@ -50,6 +55,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_window.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
 #include "core/components/theme/app_theme.h"
@@ -60,7 +66,6 @@
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "previewer/include/window.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -71,6 +76,20 @@ const char UNICODE_SETTING_TAG[] = "unicodeSetting";
 const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
+
+void SaveResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName, RefPtr<ResourceAdapter>& resourceAdapter)
+{
+    auto defaultBundleName = "";
+    auto defaultModuleName = "";
+    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+    LOGI("Save default adapter");
+
+    if (!bundleName.empty() && !moduleName.empty()) {
+        LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName.c_str(), moduleName.c_str());
+        ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+    }
+}
 } // namespace
 
 std::once_flag AceContainer::onceFlag_;
@@ -218,7 +237,7 @@ void AceContainer::RunNativeEngineLoop()
     taskExecutor_->PostTask([this]() { RunNativeEngineLoop(); }, TaskExecutor::TaskType::PLATFORM);
 }
 
-void AceContainer::InitializeStageAppConfig(const std::string& assetPath, const std::string& bundleName,
+void AceContainer::InitializeAppConfig(const std::string& assetPath, const std::string& bundleName,
     const std::string& moduleName, const std::string& compileMode)
 {
     bool isBundle = (compileMode != "esmodule");
@@ -231,6 +250,55 @@ void AceContainer::InitializeStageAppConfig(const std::string& assetPath, const 
     formFrontend->SetBundleName(bundleName);
     formFrontend->SetModuleName(moduleName);
     formFrontend->SetIsBundle(isBundle);
+}
+
+void AceContainer::SetHspBufferTrackerCallback()
+{
+    if (GetSettings().usingSharedRuntime) {
+        LOGI("The callback has been set by ability in the light simulator.");
+        return;
+    }
+    auto frontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+    CHECK_NULL_VOID(frontend);
+    auto weak = WeakPtr(frontend->GetJsEngine());
+    taskExecutor_->PostTask(
+        [weak, instanceId = instanceId_]() {
+            ContainerScope scope(instanceId);
+            auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(weak.Upgrade());
+            CHECK_NULL_VOID(jsEngine);
+            jsEngine->SetHspBufferTrackerCallback(
+                [](const std::string& inputPath, uint8_t** buff, size_t* buffSize) -> bool {
+                    if (!buff || !buffSize || inputPath.empty()) {
+                        LOGI("The pointer of buff or buffSize is null or inputPath is empty.");
+                        return false;
+                    }
+                    auto data = OHOS::Ide::StageContext::GetInstance().GetModuleBuffer(inputPath);
+                    CHECK_NULL_RETURN(data, false);
+                    *buff = data->data();
+                    *buffSize = data->size();
+                    return true;
+                });
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::SetMockModuleListToJsEngine()
+{
+    if (GetSettings().usingSharedRuntime) {
+        LOGI("The callback has been set by ability in the light simulator.");
+        return;
+    }
+    auto frontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+    CHECK_NULL_VOID(frontend);
+    auto weak = WeakPtr(frontend->GetJsEngine());
+    taskExecutor_->PostTask(
+        [weak, instanceId = instanceId_, mockJsonInfo = mockJsonInfo_]() {
+            ContainerScope scope(instanceId);
+            auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(weak.Upgrade());
+            CHECK_NULL_VOID(jsEngine);
+            jsEngine->SetMockModuleList(mockJsonInfo);
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl)
@@ -456,7 +524,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     AceEngine::Get().RemoveContainer(instanceId);
 }
 
-bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params)
+bool AceContainer::RunPage(int32_t instanceId, const std::string& url, const std::string& params)
 {
     ACE_FUNCTION_TRACE();
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -470,7 +538,7 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
         auto type = front->GetType();
         if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
             (type == FrontendType::ETS_CARD)) {
-            front->RunPage(pageId, url, params);
+            front->RunPage(url, params);
             return true;
         } else {
             LOGE("Frontend type not supported when runpage");
@@ -504,6 +572,9 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
         return;
     }
     themeManager->UpdateConfig(resConfig);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    }
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_, config = resConfig,
             weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
@@ -729,6 +800,9 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
         return;
     }
     themeManager->UpdateConfig(resConfig);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    }
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_,
             weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
@@ -817,10 +891,19 @@ void AceContainer::AttachView(
     ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::Create();
+        resourceAdapter->Init(resourceInfo);
+        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
+        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+    }
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource, load theme map.
-        themeManager->InitResource(resourceInfo_);
+        if (!SystemProperties::GetResourceDecoupling()) {
+            themeManager->InitResource(resourceInfo_);
+        }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
@@ -879,6 +962,8 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         flutterTaskExecutor->InitJsThread(false);
         InitializeFrontend();
+        SetHspBufferTrackerCallback();
+        SetMockModuleListToJsEngine();
         auto front = AceType::DynamicCast<DeclarativeFrontend>(GetFrontend());
         if (front) {
             front->UpdateState(Frontend::State::ON_CREATE);
@@ -931,10 +1016,20 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
     ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::Create();
+        resourceAdapter->Init(resourceInfo_);
+        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
+        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+    }
+
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource, load theme map.
-        themeManager->InitResource(resourceInfo_);
+        if (!SystemProperties::GetResourceDecoupling()) {
+            themeManager->InitResource(resourceInfo_);
+        }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
@@ -997,10 +1092,10 @@ RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)
 std::string AceContainer::GetContentInfo(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN_NOLOG(container, "");
+    CHECK_NULL_RETURN(container, "");
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN_NOLOG(front, "");
+    CHECK_NULL_RETURN(front, "");
     return front->GetContentInfo();
 }
 

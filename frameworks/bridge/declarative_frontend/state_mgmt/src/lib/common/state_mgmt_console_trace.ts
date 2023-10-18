@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,14 @@ class stateMgmtConsole {
     }
     public static error (...args : any) : void {
         aceConsole.error(...args);
+    }
+    public static propertyAccess (...args : any) : void {
+        // enable for fran gran debugging variables observation
+        // this code line has been left in intentionally
+        // aceConsole.debug(...args);
+    }
+    public static applicationError (...args : any) : void {
+        aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
     }
 }
 

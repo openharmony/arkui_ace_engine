@@ -35,7 +35,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
+WeakPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
 
 RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogProperties,
     const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent> dialogEvent,
@@ -43,7 +43,7 @@ RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogPrope
 {
     if (settingData.rangeVector.empty() && settingData.options.empty()) {
         LOGI("Dialog input parameter range vector is empty, not display dialog.");
-        return dialogNode_;
+        return nullptr;
     }
     if (settingData.options.empty()) {
         return RangeShow(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
@@ -91,7 +91,9 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     textPickerNode->MountToParent(contentColumn);
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
-    auto closeCallback = [dialogNode](const GestureEvent& /* info */) {
+    auto closeCallback = [weak = WeakPtr<FrameNode>(dialogNode)](const GestureEvent& /* info */) {
+        auto dialogNode = weak.Upgrade();
+        CHECK_NULL_VOID(dialogNode);
         auto pipeline = PipelineContext::GetCurrentContext();
         auto overlayManager = pipeline->GetOverlayManager();
         overlayManager->CloseDialog(dialogNode);
@@ -211,7 +213,9 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
 
-    auto closeCallBack = [dialogNode](const GestureEvent& /* info */) {
+    auto closeCallBack = [weak = WeakPtr<FrameNode>(dialogNode)](const GestureEvent& /* info */) {
+        auto dialogNode = weak.Upgrade();
+        CHECK_NULL_VOID(dialogNode);
         auto pipeline = PipelineContext::GetCurrentContext();
         auto overlayManager = pipeline->GetOverlayManager();
         overlayManager->CloseDialog(dialogNode);
@@ -445,7 +449,9 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     CHECK_NULL_RETURN(dateNode, nullptr);
     SetDialogAcceptEvent(dateNode, std::move(acceptEvent));
-    auto clickCallback = [dateNode](const GestureEvent& /* info */) {
+    auto clickCallback = [weak = WeakPtr<FrameNode>(dateNode)](const GestureEvent& /* info */) {
+        auto dateNode = weak.Upgrade();
+        CHECK_NULL_VOID(dateNode);
         auto pickerPattern = dateNode->GetPattern<TextPickerPattern>();
         CHECK_NULL_VOID(pickerPattern);
         auto str = pickerPattern->GetSelectedObject(false);
@@ -622,7 +628,8 @@ bool TextPickerDialogView::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_ESCAPE) {
         auto pipeline = PipelineContext::GetCurrentContext();
         auto overlayManager = pipeline->GetOverlayManager();
-        overlayManager->CloseDialog(dialogNode_);
+        auto dialogNode = dialogNode_.Upgrade();
+        overlayManager->CloseDialog(dialogNode);
         return true;
     }
 

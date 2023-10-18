@@ -23,8 +23,10 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/ace_trace.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/blank/blank_layout_property.h"
@@ -39,7 +41,6 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
 /**
  * Get the main axis direction based on direction.
  */
@@ -108,9 +109,9 @@ void UpdateChildLayoutConstrainByFlexBasis(
     FlexDirection direction, const RefPtr<LayoutWrapper>& child, LayoutConstraintF& layoutConstraint)
 {
     const auto& flexItemProperty = child->GetLayoutProperty()->GetFlexItemProperty();
-    CHECK_NULL_VOID_NOLOG(flexItemProperty);
+    CHECK_NULL_VOID(flexItemProperty);
     const auto& flexBasis = flexItemProperty->GetFlexBasis();
-    CHECK_NULL_VOID_NOLOG(flexBasis);
+    CHECK_NULL_VOID(flexBasis);
     if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
     }
@@ -147,19 +148,19 @@ float GetMainAxisMargin(const RefPtr<LayoutWrapper>& child, FlexDirection direct
 float FlexLayoutAlgorithm::GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     float size = 0.0f;
-    CHECK_NULL_RETURN_NOLOG(layoutWrapper, size);
+    CHECK_NULL_RETURN(layoutWrapper, size);
     return GetMainAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetMarginFrameSize(), direction_);
 }
 
 float FlexLayoutAlgorithm::GetChildCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    CHECK_NULL_RETURN_NOLOG(layoutWrapper, 0.0f);
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
     return GetCrossAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetMarginFrameSize(), direction_);
 }
 
 float FlexLayoutAlgorithm::GetSelfCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    CHECK_NULL_RETURN_NOLOG(layoutWrapper, 0.0f);
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
     return GetCrossAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetFrameSize(), direction_);
 }
 
@@ -259,7 +260,8 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
         node.layoutWrapper = child;
         node.layoutConstraint = childLayoutConstraint;
 
-        bool childGone = child && child->GetHostNode() && child->GetHostNode()->GetLayoutProperty() &&
+        bool childGone =
+            child && child->GetHostNode() && child->GetHostNode()->GetLayoutProperty() &&
             child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE;
         int32_t childDisplayPriority = 1;
         float childLayoutWeight = 0.0f;
@@ -270,8 +272,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
             if (childFlexItemProperty) {
                 childDisplayPriority = childFlexItemProperty->GetDisplayIndex().value_or(1);
                 if (!childrenHasAlignSelfBaseLine_ &&
-                    childFlexItemProperty->GetAlignSelf().value_or(FlexAlign::FLEX_START) == FlexAlign::BASELINE &&
-                    childGone) {
+                    childFlexItemProperty->GetAlignSelf().value_or(FlexAlign::FLEX_START) == FlexAlign::BASELINE) {
                     childrenHasAlignSelfBaseLine_ = true;
                 }
             }
@@ -320,7 +321,7 @@ void FlexLayoutAlgorithm::MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrappe
 void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
     LayoutWrapper* containerLayoutWrapper, FlexItemProperties& flexItemProperties)
 {
-    if (GreatNotEqual(totalFlexWeight_, 0.0f) && !isInfiniteLayout_) {
+    if (GreatNotEqual(totalFlexWeight_, 0.0f)) {
         auto newTotalFlexWeight = totalFlexWeight_;
         /**
          * The child elements with layoutWeight=0 are measured first.
@@ -521,32 +522,10 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
         while (iter != magicNodes_.rend()) {
             auto childList = iter->second;
             for (auto& child : childList) {
-                const auto& childLayoutWrapper = child.layoutWrapper;
-                if (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && PipelineBase::GetCurrentContext() &&
-                    PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-                    auto mainAxisSize = 0.0f;
-                    auto crossAxisSize = 0.0f;
-                    auto blankLayoutProperty = childLayoutWrapper->GetLayoutProperty();
-                    if (blankLayoutProperty) {
-                        const auto& calcConstraint = blankLayoutProperty->GetCalcLayoutConstraint();
-                        if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
-                            auto size = ConvertToSize(calcConstraint->selfIdealSize.value(),
-                                child.layoutConstraint.scaleProperty, child.layoutConstraint.percentReference);
-                            mainAxisSize = std::max(IsHorizontal(direction_) ? size.Width() : size.Height(), 0.0f);
-                            crossAxisSize = std::max(IsHorizontal(direction_) ? size.Height() : size.Width(), 0.0f);
-                        }
-                    }
-                    childLayoutWrapper->GetHostNode()->GetPattern()->BeforeCreateLayoutWrapper();
-                    childLayoutWrapper->GetGeometryNode()->SetFrameSize(IsHorizontal(direction_)
-                                                                            ? SizeF(mainAxisSize, crossAxisSize)
-                                                                            : SizeF(crossAxisSize, mainAxisSize));
-                    secondaryMeasureList_.emplace_back(child);
-                    UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
-                    CheckSizeValidity(childLayoutWrapper);
-                    UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
-                    CheckSizeValidity(childLayoutWrapper);
+                if (HandleBlankFirstTimeMeasure(child, flexItemProperties)) {
                     continue;
                 }
+                const auto& childLayoutWrapper = child.layoutWrapper;
                 UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
                 {
                     ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
@@ -563,7 +542,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
                 CheckSizeValidity(childLayoutWrapper);
                 CheckBaselineProperties(childLayoutWrapper);
-                if (!isInfiniteLayout_) {
+                if (!isInfiniteLayout_ || GreatNotEqual(MainAxisMinValue(containerLayoutWrapper), 0.0f)) {
                     UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
                 }
                 secondaryMeasureList_.emplace_back(child);
@@ -572,6 +551,50 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
         }
         allocatedSize_ -= space_;
     }
+}
+
+bool FlexLayoutAlgorithm::HandleBlankFirstTimeMeasure(
+    const MagicLayoutNode& child, FlexItemProperties& flexItemProperties)
+{
+    const auto& childLayoutWrapper = child.layoutWrapper;
+    if (!(childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG &&
+            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN))) {
+        return false;
+    }
+
+    // if constainer is self adaptive, secondaryMeasure won't happen, blank can call Measure directly
+    if (selfAdaptive_ || isInfiniteLayout_) {
+        childLayoutWrapper->Measure(child.layoutConstraint);
+        UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
+        CheckSizeValidity(childLayoutWrapper);
+        if (!isInfiniteLayout_) {
+            UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
+        }
+        secondaryMeasureList_.emplace_back(child);
+        return true;
+    }
+    // to make blank components splilt remain space(not selfAdaptive)
+    // min size should not participate in the first measure of blank
+    auto mainAxisSize = 0.0f;
+    auto crossAxisSize = 0.0f;
+    auto blankLayoutProperty = childLayoutWrapper->GetLayoutProperty();
+    childLayoutWrapper->GetHostNode()->GetPattern()->BeforeCreateLayoutWrapper();
+    if (blankLayoutProperty) {
+        const auto& calcConstraint = blankLayoutProperty->GetCalcLayoutConstraint();
+        if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+            auto size = ConvertToSize(calcConstraint->selfIdealSize.value(), child.layoutConstraint.scaleProperty,
+                child.layoutConstraint.percentReference);
+            mainAxisSize = std::max(IsHorizontal(direction_) ? size.Width() : size.Height(), 0.0f);
+            crossAxisSize = std::max(IsHorizontal(direction_) ? size.Height() : size.Width(), 0.0f);
+        }
+    }
+    childLayoutWrapper->GetGeometryNode()->SetFrameSize(
+        IsHorizontal(direction_) ? SizeF(mainAxisSize, crossAxisSize) : SizeF(crossAxisSize, mainAxisSize));
+    secondaryMeasureList_.emplace_back(child);
+    UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
+    CheckSizeValidity(childLayoutWrapper);
+    UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
+    return true;
 }
 
 void FlexLayoutAlgorithm::UpdateFlexProperties(
@@ -637,38 +660,57 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
         CheckIsGrowOrShrink(getFlex, remainSpace, spacePerFlex, flexItemProperties, lastChild);
         iter = secondaryMeasureList_.rbegin();
         while (iter != secondaryMeasureList_.rend()) {
-            auto child = *iter;
+            auto& child = *iter;
             auto childLayoutWrapper = child.layoutWrapper;
+            if (!childLayoutWrapper) {
+                continue;
+            }
             if (GetSelfAlign(childLayoutWrapper) == FlexAlign::STRETCH) {
-                UpdateLayoutConstraintOnCrossAxis((*iter).layoutConstraint, crossAxisSize);
-                (*iter).needSecondMeasure = true;
+                if (!UserDefinedCrossAxisSize(childLayoutWrapper) &&
+                    Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+                    UpdateLayoutConstraintOnCrossAxis(child.layoutConstraint, crossAxisSize);
+                    child.needSecondMeasure = true;
+                }
             }
             if (LessOrEqual(totalFlexWeight_, 0.0f) &&
-                (!isInfiniteLayout_ ||
+                (!isInfiniteLayout_ || GreatNotEqual(MainAxisMinValue(layoutWrapper), 0.0f) ||
                     (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && !selfAdaptive_ &&
-                        PipelineBase::GetCurrentContext() &&
-                        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN))) {
+                        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)))) {
+                if (child.needKeepMinCalcSize) {
+                    ++iter;
+                    continue;
+                }
                 float childMainAxisMargin = GetMainAxisMargin(childLayoutWrapper, direction_);
                 float itemFlex = getFlex(child.layoutWrapper);
                 float flexSize =
                     (child.layoutWrapper == lastChild) ? (remainSpace - allocatedFlexSpace)
                     : GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1)
                         ? spacePerFlex * itemFlex
-                        : spacePerFlex * itemFlex * (GetChildMainAxisSize(child.layoutWrapper) - childMainAxisMargin);
+                        : spacePerFlex * itemFlex * (GetChildMainAxisSize(childLayoutWrapper) - childMainAxisMargin);
                 if (!NearZero(flexSize) && childLayoutWrapper->IsActive()) {
                     flexSize += GetChildMainAxisSize(childLayoutWrapper);
-                    (*iter).needSecondMeasure = true;
+                    child.needSecondMeasure = true;
                     CheckBlankAndKeepMin(childLayoutWrapper, flexSize);
                     if (LessOrEqual(flexSize, 0.0f)) {
-                        (*iter).layoutWrapper->SetActive(false);
+                        child.layoutWrapper->SetActive(false);
                         flexItemProperties.totalShrink -=
-                            itemFlex * (GetChildMainAxisSize(child.layoutWrapper) - childMainAxisMargin);
-                        reserveMainAxisSize += GetChildMainAxisSize(child.layoutWrapper);
+                            itemFlex * (GetChildMainAxisSize(childLayoutWrapper) - childMainAxisMargin);
+                        reserveMainAxisSize += GetChildMainAxisSize(childLayoutWrapper);
                         needSecondMeasure = true;
-                        UpdateLayoutConstraintOnMainAxis((*iter).layoutConstraint, 0.0f);
+                        UpdateLayoutConstraintOnMainAxis(child.layoutConstraint, 0.0f);
                         break;
                     }
-                    UpdateLayoutConstraintOnMainAxis((*iter).layoutConstraint, flexSize);
+                    if (IsKeepMinSize(childLayoutWrapper, flexSize)) {
+                        needSecondMeasure = true;
+                        auto shrinkSize = itemFlex * (GetChildMainAxisSize(childLayoutWrapper) - childMainAxisMargin);
+                        reserveMainAxisSize -= (flexSize - shrinkSize);
+                        child.needKeepMinCalcSize = true;
+                        flexItemProperties.totalShrink -= shrinkSize;
+                    }
+                    UpdateLayoutConstraintOnMainAxis(child.layoutConstraint, flexSize);
+                } else if (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && NearZero(flexSize) &&
+                           childLayoutWrapper->IsActive()) {
+                    child.needSecondMeasure = true;
                 }
             }
             ++iter;
@@ -752,6 +794,18 @@ void FlexLayoutAlgorithm::CheckBlankAndKeepMin(const RefPtr<LayoutWrapper>& chil
     }
 }
 
+bool FlexLayoutAlgorithm::IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize)
+{
+    auto child = childLayoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(child, false);
+    auto minSize = MainAxisMinValue(AceType::RawPtr(childLayoutWrapper));
+    if (GreatOrEqual(minSize, flexSize)) {
+        flexSize = minSize;
+        return true;
+    }
+    return false;
+}
+
 void FlexLayoutAlgorithm::UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size)
 {
     if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
@@ -771,6 +825,25 @@ void FlexLayoutAlgorithm::UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& l
     }
 }
 
+float FlexLayoutAlgorithm::MainAxisMinValue(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    CHECK_NULL_RETURN(layoutWrapper->GetLayoutProperty(), 0.0f);
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, 0.0f);
+    return IsHorizontal(direction_) ? layoutConstraint->minSize.Width() : layoutConstraint->minSize.Height();
+}
+
+bool FlexLayoutAlgorithm::MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper)
+{
+    const auto& margin = layoutWrapper->GetGeometryNode()->GetMargin();
+    CHECK_NULL_RETURN(margin, false);
+    if (IsHorizontal(direction_)) {
+        return LessNotEqual(margin->left.value_or(0.0f) + margin->right.value_or(0.0f), 0.0f);
+    }
+    return LessNotEqual(margin->top.value_or(0.0f) + margin->bottom.value_or(0.0f), 0.0f);
+}
+
 void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
@@ -782,7 +855,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     InitFlexProperties(layoutWrapper);
     Axis axis = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? Axis::HORIZONTAL
                                                                                                : Axis::VERTICAL;
-    auto realSize = CreateIdealSize(layoutConstraint.value(), axis, measureType).ConvertToSizeT();
+    auto realSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), axis, measureType).ConvertToSizeT();
     if (children.empty()) {
         LOGD("layoutWrapper children is empty");
         layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
@@ -800,15 +873,16 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                      : layoutConstraint->maxSize.Height()) &&
         NearEqual(mainAxisSize_, -1.0f);
     if (NearEqual(mainAxisSize_, -1.0f)) {
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        auto marginOnMainAxisNegative = MarginOnMainAxisNegative(layoutWrapper);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             mainAxisSize_ = direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
                                 ? layoutConstraint->maxSize.Width()
                                 : layoutConstraint->maxSize.Height();
-        } else if (isLinearLayoutFeature_ && IsHorizontal(direction_) && !NearZero(layoutConstraint->minSize.Width())) {
+        } else if (isLinearLayoutFeature_ && IsHorizontal(direction_) && !NearZero(layoutConstraint->minSize.Width()) &&
+                   !marginOnMainAxisNegative) {
             mainAxisSize_ = layoutConstraint->minSize.Width();
         } else if (isLinearLayoutFeature_ && !IsHorizontal(direction_) &&
-                   !NearZero(layoutConstraint->minSize.Height())) {
+                   !NearZero(layoutConstraint->minSize.Height()) && !marginOnMainAxisNegative) {
             mainAxisSize_ = layoutConstraint->minSize.Height();
         } else {
             mainAxisSize_ =
@@ -837,10 +911,6 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         mainAxisSize_ = 0.0f;
     }
     TravelChildrenFlexProps(layoutWrapper, realSize);
-    if (GreatNotEqual(totalFlexWeight_, 0.0f)) {
-        LOGD("Flex weight only supported in match parent");
-        isInfiniteLayout_ = false;
-    }
     selfIdealCrossAxisSize_ = GetCrossAxisSizeHelper(realSize, direction_);
     FlexItemProperties flexItemProperties;
 
@@ -869,26 +939,26 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         mainAxisSize_ = allocatedSize_;
     }
 
-    auto finialMainAxisSize = mainAxisSize_;
-    auto finialCrossAxisSize = crossAxisSize_;
+    auto finalMainAxisSize = mainAxisSize_;
+    auto finalCrossAxisSize = crossAxisSize_;
     if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
-        finialCrossAxisSize += verticalPadding;
-        finialMainAxisSize += horizontalPadding;
+        finalCrossAxisSize += verticalPadding;
+        finalMainAxisSize += horizontalPadding;
     } else {
-        finialCrossAxisSize += horizontalPadding;
-        finialMainAxisSize += verticalPadding;
+        finalCrossAxisSize += horizontalPadding;
+        finalMainAxisSize += verticalPadding;
     }
     auto mainAxisSizeMin = GetMainAxisSizeHelper(layoutConstraint->minSize, direction_);
     auto mainAxisSizeMax = GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_);
     auto crossAxisSizeMin = GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_);
     auto crossAxisSizeMax = GetCrossAxisSizeHelper(layoutConstraint->maxSize, direction_);
-    finialMainAxisSize = std::clamp(
-        finialMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
-    finialCrossAxisSize = std::clamp(finialCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax),
-        std::max(crossAxisSizeMin, crossAxisSizeMax));
+    finalMainAxisSize = std::clamp(
+        finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
+    finalCrossAxisSize = std::clamp(
+        finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax), std::max(crossAxisSizeMin, crossAxisSizeMax));
 
     realSize.UpdateIllegalSizeWithCheck(
-        GetCalcSizeHelper(finialMainAxisSize, finialCrossAxisSize, direction_).ConvertToSizeT());
+        GetCalcSizeHelper(finalMainAxisSize, finalCrossAxisSize, direction_).ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
 }
 
@@ -959,9 +1029,11 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     PlaceChildren(layoutWrapper, frontSpace, betweenSpace, paddingOffset);
 
     for (auto&& child : children) {
-        ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
+        if (!child->IsOutOfLayout() && child->IsActive()) {
+            ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
                 child->GetHostNode()->GetId(), child->GetHostNode()->GetParent()->GetId());
-        child->Layout();
+            child->Layout();
+        }
     }
 }
 
@@ -1075,11 +1147,25 @@ void FlexLayoutAlgorithm::PlaceChildren(
 FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
+    FlexAlign crossAxisAlign = (crossAxisAlign_ == FlexAlign::AUTO) ? FlexAlign::FLEX_START : crossAxisAlign_;
     if (!flexItemProperty || !flexItemProperty->GetAlignSelf().has_value() ||
         flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) == FlexAlign::AUTO) {
-        return crossAxisAlign_;
+        return crossAxisAlign;
     }
-    return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_);
+    return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign);
+}
+
+bool FlexLayoutAlgorithm::UserDefinedCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    if (layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()) {
+        auto userDefinedIdealSize = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
+        if (userDefinedIdealSize.has_value()) {
+            return IsHorizontal(direction_) ? userDefinedIdealSize->Height().has_value()
+                                            : userDefinedIdealSize->Width().has_value();
+        }
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,13 @@
 
 #include "include/utils/SkBase64.h"
 
+#include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/theme_utils.h"
+
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #endif
@@ -42,8 +49,8 @@
 #include "core/common/thread_checker.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
-#include "core/image/flutter_image_cache.h" // TODO: add adapter layer and use FlutterImageCache there
 #include "core/image/image_cache.h"
+#include "core/image/image_file_cache.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -145,12 +152,12 @@ sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
 std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
 #endif
 {
-    std::string cacheFilePath = ImageCache::GetImageCacheFilePath(uri);
+    std::string cacheFilePath = ImageFileCache::GetInstance().GetImageCacheFilePath(uri);
     if (cacheFilePath.length() > PATH_MAX) {
         LOGE("cache file path is too long, cacheFilePath: %{private}s", cacheFilePath.c_str());
         return nullptr;
     }
-    bool cacheFileFound = ImageCache::GetFromCacheFile(cacheFilePath);
+    bool cacheFileFound = ImageFileCache::GetInstance().GetFromCacheFile(cacheFilePath);
     if (!cacheFileFound) {
         return nullptr;
     }
@@ -186,14 +193,14 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(imageCache, nullptr);
     auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetKey());
-    CHECK_NULL_RETURN_NOLOG(cacheData, nullptr);
+    CHECK_NULL_RETURN(cacheData, nullptr);
 #ifndef USE_ROSEN_DRAWING
     const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(cacheData->GetDataWrapper());
     return *skData;
 #else
-    auto rosenCachedImageData = AceType::DynamicCast<RosenCachedImageData>(cacheData);
+    auto rosenCachedImageData = AceType::DynamicCast<NG::DrawingImageData>(cacheData);
     CHECK_NULL_RETURN(rosenCachedImageData, nullptr);
-    return rosenCachedImageData->GetRsData();
+    return rosenCachedImageData->GetRSData();
 #endif
 }
 
@@ -209,12 +216,9 @@ void ImageLoader::CacheImageData(const std::string& key, const RefPtr<NG::ImageD
 RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string& key, const std::string& suffix)
 {
     ACE_FUNCTION_TRACE();
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineCtx, nullptr);
-    auto imageCache = pipelineCtx->GetImageCache();
-    CHECK_NULL_RETURN(imageCache, nullptr);
-    std::string filePath = ImageCache::GetImageCacheFilePath(key) + suffix;
-    auto data = imageCache->GetDataFromCacheFile(filePath);
+    auto* fileCache = &ImageFileCache::GetInstance();
+    std::string filePath = fileCache->GetImageCacheFilePath(key) + suffix;
+    auto data = fileCache->GetDataFromCacheFile(filePath);
     return data;
 }
 
@@ -244,7 +248,7 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
         }
         rsData = LoadImageData(src, context);
         CHECK_NULL_RETURN(rsData, nullptr);
-        ImageLoader::CacheImageData(src.GetKey(), AceType::MakeRefPtr<RosenCachedImageData>(rsData));
+        ImageLoader::CacheImageData(src.GetKey(), AceType::MakeRefPtr<NG::DrawingImageData>(rsData));
     } while (0);
     return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&rsData));
 #endif
@@ -470,7 +474,9 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
 #endif
     // 3. write it into file cache.
     BackgroundTaskExecutor::GetInstance().PostTask(
-        [uri, imgData = std::move(imageData)]() { ImageCache::WriteCacheFile(uri, imgData.data(), imgData.size()); },
+        [uri, imgData = std::move(imageData)]() {
+            ImageFileCache::GetInstance().WriteCacheFile(uri, imgData.data(), imgData.size());
+        },
         BgTaskPriority::LOW);
     return data;
 }
@@ -512,7 +518,6 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
 
-#if defined(FLUTTER_2_5) || defined(NEW_SKIA)
     size_t outputLen;
     SkBase64::Error error = SkBase64::Decode(base64Code.data(), base64Code.size(), nullptr, &outputLen);
     if (error != SkBase64::Error::kNoError) {
@@ -534,28 +539,6 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
     return resData;
-#else
-    SkBase64 base64Decoder;
-    SkBase64::Error error = base64Decoder.decode(base64Code.data(), base64Code.size());
-    if (error != SkBase64::kNoError) {
-        LOGE("error base64 image code!");
-        return nullptr;
-    }
-    auto base64Data = base64Decoder.getData();
-    const uint8_t* imageData = reinterpret_cast<uint8_t*>(base64Data);
-#ifndef USE_ROSEN_DRAWING
-    auto resData = SkData::MakeWithCopy(imageData, base64Decoder.getDataSize());
-#else
-    auto resData = std::make_shared<RSData>();
-    resData->BuildWithCopy(imageData, base64Decoder.getDataSize());
-#endif
-    // in SkBase64, the fData is not deleted after decoded.
-    if (base64Data != nullptr) {
-        delete[] base64Data;
-        base64Data = nullptr;
-    }
-    return resData;
-#endif
 }
 
 std::string_view Base64ImageLoader::GetBase64ImageCode(const std::string& uri)
@@ -620,16 +603,27 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     auto uri = imageSourceInfo.GetSrc();
     auto bundleName = imageSourceInfo.GetBundleName();
     auto moudleName = imageSourceInfo.GetModuleName();
-    auto themeManager = PipelineBase::CurrentThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_RETURN(themeConstants, nullptr);
+
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName);
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        CHECK_NULL_RETURN(resourceAdapter, nullptr);
+    } else {
+        auto themeManager = PipelineBase::CurrentThemeManager();
+        CHECK_NULL_RETURN(themeManager, nullptr);
+        themeConstants = themeManager->GetThemeConstants();
+        CHECK_NULL_RETURN(themeConstants, nullptr);
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     std::string rawFile;
     if (GetResourceId(uri, rawFile)) {
         // must fit raw file firstly, as file name may contains number
-        if (!themeConstants->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
+        if (!resourceWrapper->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
             LOGW("get image data by name failed, uri:%{private}s, rawFile:%{public}s", uri.c_str(), rawFile.c_str());
             return nullptr;
         }
@@ -643,7 +637,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     }
     uint32_t resId = 0;
     if (GetResourceId(uri, resId)) {
-        if (!themeConstants->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
+        if (!resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
             LOGW("get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(), resId);
             return nullptr;
         }
@@ -657,7 +651,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     }
     std::string resName;
     if (GetResourceName(uri, resName)) {
-        if (!themeConstants->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
+        if (!resourceWrapper->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
             LOGW("get image data by name failed, uri:%{private}s, resName:%{public}s", uri.c_str(), resName.c_str());
             return nullptr;
         }

@@ -280,6 +280,10 @@ RefPtr<FrameNode> FormPattern::GetOrCreateImageNode()
         auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_RETURN(imageNode, nullptr);
         host->AddChild(imageNode);
+        auto eventHub = imageNode->GetOrCreateGestureEventHub();
+        if (eventHub != nullptr) {
+            eventHub->RemoveDragEvent();
+        }
         return imageNode;
     }
 
@@ -637,6 +641,9 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    if (isDynamic) {
+        renderContext->ClearChildren();
+    }
     renderContext->AddChild(externalRenderContext, 0);
 
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
@@ -711,7 +718,7 @@ void FormPattern::CreateCardContainer()
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, weak] {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
+            CHECK_NULL_VOID(pattern);
             LOGI("card id:%{public}zu", id);
             pattern->FireOnAcquiredEvent(id);
         });
@@ -856,7 +863,7 @@ void FormPattern::OnLoadEvent()
 
 void FormPattern::OnActionEvent(const std::string& action)
 {
-    CHECK_NULL_VOID_NOLOG(formManagerBridge_);
+    CHECK_NULL_VOID(formManagerBridge_);
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         LOGE("get event action failed");

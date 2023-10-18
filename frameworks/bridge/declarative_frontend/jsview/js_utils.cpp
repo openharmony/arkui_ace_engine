@@ -21,19 +21,21 @@
 #include <dlfcn.h>
 #endif
 
+#ifdef PIXEL_MAP_SUPPORTED
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
+#endif
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
 #include "base/want/want_wrap.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
-// Min disable event api version.
-constexpr int32_t MIN_DISABLE_EVENT_VERSION = 10;
-} // namespace
+namespace {} // namespace
 
 #if !defined(PREVIEW)
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
@@ -57,8 +59,8 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 #endif
     JSValueWrapper valueWrapper = value;
 
-    ScopeRAII scope(nativeEngine->GetScopeManager());
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
     PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
     if (!pixelMapNapiEntry) {
@@ -66,8 +68,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
         return nullptr;
     }
 
-    void* pixmapPtrAddr =
-        pixelMapNapiEntry(reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
+    void* pixmapPtrAddr = pixelMapNapiEntry(reinterpret_cast<napi_env>(nativeEngine), napiValue);
     if (pixmapPtrAddr == nullptr) {
         LOGE("Failed to get pixmap pointer");
         return nullptr;
@@ -92,12 +93,18 @@ void* UnwrapNapiValue(const JSRef<JSVal>& obj)
 #endif
     JSValueWrapper valueWrapper = value;
 
-    ScopeRAII scope(nativeEngine->GetScopeManager());
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-    CHECK_NULL_RETURN(nativeValue, nullptr);
-    NativeObject* object = static_cast<NativeObject*>(nativeValue->GetInterface(NativeObject::INTERFACE_ID));
-    CHECK_NULL_RETURN(object, nullptr);
-    return object->GetNativePointer();
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType != napi_object) {
+        LOGE("napiValue is not napi_object");
+        return nullptr;
+    }
+    void* objectNapi = nullptr;
+    napi_unwrap(env, napiValue, &objectNapi);
+    return objectNapi;
 }
 } // namespace
 
@@ -135,11 +142,9 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
-
-    ScopeRAII scope(nativeEngine->GetScopeManager());
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-
-    return WantWrap::CreateWantWrap(reinterpret_cast<void*>(nativeEngine), reinterpret_cast<void*>(nativeValue));
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    return WantWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
 }
 
 #endif
@@ -147,21 +152,18 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 // When the api version >= 10, it is disable event version.
 bool IsDisableEventVersion()
 {
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return false;
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGW("pipelineContext is null!");
-        return false;
-    }
-    if (pipelineContext->GetMinPlatformVersion() >= MIN_DISABLE_EVENT_VERSION) {
-        LOGD("The version supports disable event callback.");
-        return true;
-    }
-    LOGW("The version doesn't support disable event callback.");
-    return false;
+    return Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
 }
+
+#ifdef PIXEL_MAP_SUPPORTED
+JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, {});
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto* env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap->GetPixelMapSharedPtr());
+    return JsConverter::ConvertNapiValueToJsVal(napiValue);
+}
+#endif
 } // namespace OHOS::Ace::Framework

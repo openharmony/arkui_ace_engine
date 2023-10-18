@@ -39,6 +39,14 @@ struct KeyboardShortcut {
     std::function<void()> onKeyboardShortcutAction = nullptr;
 };
 
+enum class DragFuncType {
+    DRAG_ENTER,
+    DRAG_LEAVE,
+    DRAG_MOVE,
+    DRAG_DROP,
+    DRAG_END,
+};
+
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType)
@@ -132,7 +140,9 @@ public:
                     auto eventHub = weak.Upgrade();
                     CHECK_NULL_VOID(eventHub);
                     if (eventHub->onAppear_) {
-                        eventHub->onAppear_();
+                        // callback may be overwritten in its invoke so we copy it first
+                        auto onAppear = eventHub->onAppear_;
+                        onAppear();
                     }
                 },
                 TaskExecutor::TaskType::UI);
@@ -154,7 +164,9 @@ public:
     void FireOnDisappear()
     {
         if (onDisappear_) {
-            onDisappear_();
+            // callback may be overwritten in its invoke so we copy it first
+            auto onDisappear = onDisappear_;
+            onDisappear();
         }
     }
 
@@ -173,7 +185,9 @@ public:
     void FireOnAreaChanged(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
     {
         if (onAreaChanged_) {
-            onAreaChanged_(oldRect, oldOrigin, rect, origin);
+            // callback may be overwritten in its invoke so we copy it first
+            auto onAreaChanged = onAreaChanged_;
+            onAreaChanged(oldRect, oldOrigin, rect, origin);
         }
     }
 
@@ -211,7 +225,9 @@ public:
             LOGI("DragDropManager fire onDragEnter");
         }
         if (onDragEnter_) {
-            onDragEnter_(info, extraParams);
+            // callback may be overwritten in its invoke so we copy it first
+            auto onDragEnter = onDragEnter_;
+            onDragEnter(info, extraParams);
         }
     }
 
@@ -226,7 +242,9 @@ public:
             LOGI("DragDropManager fire onDragLeave");
         }
         if (onDragLeave_) {
-            onDragLeave_(info, extraParams);
+            // callback may be overwritten in its invoke so we copy it first
+            auto onDragLeave = onDragLeave_;
+            onDragLeave(info, extraParams);
         }
     }
 
@@ -241,7 +259,9 @@ public:
             LOGI("DragDropManager fire onDragMove");
         }
         if (onDragMove_) {
-            onDragMove_(info, extraParams);
+            // callback may be overwritten in its invoke so we copy it first
+            auto onDragMove = onDragMove_;
+            onDragMove(info, extraParams);
         }
     }
 
@@ -279,20 +299,27 @@ public:
     {
         return false;
     }
-    
+
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragDropManager fire onDrop");
         }
         if (onDrop_) {
-            onDrop_(info, extraParams);
+            // callback may be overwritten in its invoke so we copy it first
+            auto onDrop = onDrop_;
+            onDrop(info, extraParams);
         }
     }
 
     bool HasOnDrop() const
     {
-        return static_cast<bool>(onDrop_);
+        return onDrop_ != nullptr;
+    }
+
+    bool HasCustomerOnDrop() const
+    {
+        return customerOnDrop_ != nullptr;
     }
 
     virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
@@ -307,6 +334,11 @@ public:
     bool IsEnabled() const
     {
         return enabled_;
+    }
+
+    bool IsDeveloperEnabled() const
+    {
+        return developerEnabled_;
     }
 
     void SetEnabled(bool enabled)
@@ -391,6 +423,17 @@ public:
         return keyboardShortcut_;
     }
 
+    void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnDragFunc&& onDragFunc);
+
+    void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnNewDragFunc&& onDragEnd);
+
+    void FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info,
+        const std::string& extraParams = "");
+
+    bool IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
+
+    void HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
+
 protected:
     virtual void OnModifyDone() {}
 
@@ -411,6 +454,12 @@ private:
     OnDragFunc onDragMove_;
     OnDragFunc onDrop_;
     OnNewDragFunc onDragEnd_;
+
+    OnDragFunc customerOnDragEnter_;
+    OnDragFunc customerOnDragLeave_;
+    OnDragFunc customerOnDragMove_;
+    OnDragFunc customerOnDrop_;
+    OnNewDragFunc customerOnDragEnd_;
 
     bool enabled_ { true };
     bool developerEnabled_ { true };

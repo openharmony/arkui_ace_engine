@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -30,7 +31,6 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -82,6 +82,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         contentModifier->ModifyTextStyle(textStyle);
         contentModifier->SetFontReady(false);
     }
+    textStyle.SetHalfLeading(pipeline->GetHalfLeading());
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
 
@@ -97,7 +98,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     }
 
     textStyle_ = textStyle;
-    
+
     auto height = static_cast<float>(paragraph_->GetHeight());
     double baselineOffset = 0.0;
     textStyle.GetBaselineOffset().NormalizeToPx(
@@ -189,7 +190,7 @@ void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
 {
-    int32_t spanTextLength = 0;
+    int32_t spanTextLength = GetPreviousLength();
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -234,12 +235,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
 
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
-    ParagraphStyle paraStyle = { .direction = GetTextDirection(content),
-        .align = textStyle.GetTextAlign(),
-        .maxLines = textStyle.GetMaxLines(),
-        .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .wordBreak = textStyle.GetWordBreak(),
-        .textOverflow = textStyle.GetTextOverflow() };
+    auto paraStyle = GetParagraphStyle(textStyle, content);
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph_, false);
     paragraph_->PushStyle(textStyle);
@@ -262,9 +258,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
     }
     CHECK_NULL_RETURN(paragraph_, false);
     auto maxSize = GetMaxMeasureSize(contentConstraint);
-    if (GreatNotEqual(textStyle.GetTextIndent().Value(), 0.0)) {
-        ApplyIndents(textStyle, maxSize.Width());
-    }
+    ApplyIndent(textStyle, maxSize.Width());
     paragraph_->Layout(maxSize.Width());
 
     bool ret = CreateImageSpanAndLayout(textStyle, content, contentConstraint, layoutWrapper);
@@ -299,7 +293,6 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto contentOffset = GetContentOffset(layoutWrapper);
-    CHECK_NULL_VOID(paragraph_);
     std::vector<int32_t> placeHolderIndex;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
@@ -315,26 +308,19 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     size_t index = 0;
-    size_t imageSpanIndex = 0;
     std::vector<Rect> rectsForPlaceholders;
-    paragraph_->GetRectsForPlaceholders(rectsForPlaceholders);
+    GetPlaceholderRects(rectsForPlaceholders);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    // children only contains the image span.
     for (const auto& child : children) {
         if (!child) {
             ++index;
             continue;
         }
-        if (index >= placeHolderIndex.size()) {
+        if (index >= placeHolderIndex.size() || index >= rectsForPlaceholders.size()) {
             return;
         }
-        imageSpanIndex = placeHolderIndex.at(index);
-        if (imageSpanIndex >= rectsForPlaceholders.size() || imageSpanIndex < 0) {
-            ++index;
-            continue;
-        }
-        auto rect = rectsForPlaceholders.at(imageSpanIndex);
-        LOGI("ImageSpan Left= %{public}f, Top = %{public}f, width = %{public}f, height = %{public}f", rect.Left(),
-            rect.Top(), rect.Width(), rect.Height());
+        auto rect = rectsForPlaceholders.at(index);
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             ++index;
@@ -458,12 +444,13 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
 {
     if (!textStyle.GetAdaptTextSize()) {
         if (!CreateParagraphAndLayout(
-            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
+                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper))
+        {
             return false;
         }
     } else {
         if (!AdaptMinTextSize(
-            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
+                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
             return false;
         }
     }
@@ -486,7 +473,8 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle
     const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper)
 {
     if (!AdaptMaxTextSize(
-        textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
+            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper))
+    {
         return false;
     }
 
@@ -710,21 +698,27 @@ void TextLayoutAlgorithm::UpdateTextColorIfForeground(const RefPtr<FrameNode>& f
     }
 }
 
-void TextLayoutAlgorithm::ApplyIndents(const TextStyle& textStyle, double width)
+void TextLayoutAlgorithm::ApplyIndent(const TextStyle& textStyle, double width)
 {
+    if (LessOrEqual(textStyle.GetTextIndent().Value(), 0.0)) {
+        return;
+    }
+    // first line indent
     CHECK_NULL_VOID(paragraph_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     double indent = 0.0;
     if (textStyle.GetTextIndent().Unit() != DimensionUnit::PERCENT) {
         if (!textStyle.GetTextIndent().NormalizeToPx(
-            pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), width, indent)) {
+                pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), width, indent))
+        {
             return;
         }
     } else {
         indent = width * textStyle.GetTextIndent().Value();
     }
     std::vector<float> indents;
+    // only indent first line
     indents.emplace_back(static_cast<float>(indent));
     indents.emplace_back(0.0);
     paragraph_->SetIndents(indents);
@@ -779,7 +773,8 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
         double preLineFontSize = textStyle.GetFontSize().Value();
         if (preLinetLastSpan != spanContentLines.rend()) {
             currentRect = preLinetLastSpan->second.first;
-            if (preLinetLastSpan->second.second.back() && preLinetLastSpan->second.second.back()->fontStyle) {
+            if (preLinetLastSpan->second.second.back() && preLinetLastSpan->second.second.back()->fontStyle &&
+                preLinetLastSpan->second.second.back()->fontStyle->GetFontSize().has_value()) {
                 preLineFontSize = preLinetLastSpan->second.second.back()->fontStyle->GetFontSize().value().Value();
             }
         }
@@ -796,6 +791,7 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
                     continue;
                 }
                 if (NearEqual(rect.GetOffset().GetY(), currentRect.GetOffset().GetY()) && child->fontStyle &&
+                    child->fontStyle->GetFontSize().has_value() &&
                     NearEqual(preLineFontSize, child->fontStyle->GetFontSize().value().Value())) {
                     continue;
                 }
@@ -880,9 +876,7 @@ bool TextLayoutAlgorithm::CreateImageSpanAndLayout(const TextStyle& textStyle, c
         }
         CHECK_NULL_RETURN(paragraph_, false);
         auto maxSize = GetMaxMeasureSize(contentConstraint);
-        if (GreatNotEqual(textStyle.GetTextIndent().Value(), 0.0)) {
-            ApplyIndents(textStyle, maxSize.Width());
-        }
+        ApplyIndent(textStyle, maxSize.Width());
         paragraph_->Layout(maxSize.Width());
     }
     return true;
@@ -892,5 +886,22 @@ size_t TextLayoutAlgorithm::GetLineCount() const
 {
     CHECK_NULL_RETURN(paragraph_, 0);
     return paragraph_->GetLineCount();
+}
+
+void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<Rect>& rects)
+{
+    CHECK_NULL_VOID(paragraph_);
+    paragraph_->GetRectsForPlaceholders(rects);
+}
+
+ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
+{
+    return { .direction = GetTextDirection(content),
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow()
+    };
 }
 } // namespace OHOS::Ace::NG

@@ -40,6 +40,7 @@ void FrameNode::OnAccessibilityEvent(
     AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const
 {}
 void FrameNode::DumpInfo() {}
+void FrameNode::DumpAdvanceInfo() {}
 void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const {}
@@ -191,9 +192,9 @@ void FrameNode::InitializePatternAndContext()
     pattern_->AttachToFrameNode(WeakClaim(this));
 }
 
-std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
+void FrameNode::CreateLayoutTask(bool forceUseMainThread)
 {
-    return std::nullopt;
+    return;
 }
 
 std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
@@ -272,7 +273,7 @@ bool FrameNode::IsResponseRegion() const
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
+    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     return HitTestResult::BUBBLING;
 }

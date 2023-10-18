@@ -120,15 +120,12 @@ void DomGridColumn::DomGridColumn::ParseSpanAndOffset(const std::string& value, 
 
     std::unique_ptr<JsonValue> jsonValue = JsonUtil::ParseJsonString(value);
     if (!jsonValue) {
-        LOGE("parse format is error");
         return;
     }
 
     std::unique_ptr<JsonValue> spanValue = jsonValue->GetValue(DOM_GRID_COLUMN_SPAN);
     if (spanValue && spanValue->IsNumber()) {
         span = spanValue->GetUInt();
-    } else {
-        LOGW("get span failed");
     }
 
     std::unique_ptr<JsonValue> offsetValue = jsonValue->GetValue(DOM_GRID_COLUMN_OFFSET);

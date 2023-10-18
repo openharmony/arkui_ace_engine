@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
@@ -47,6 +48,19 @@ JSRef<JSObject> GenConstraint(const std::optional<NG::LayoutConstraintF>& parent
     constraint->SetProperty<double>("minHeight", minSize.Height());
     constraint->SetProperty<double>("maxWidth", maxSize.Width());
     constraint->SetProperty<double>("maxHeight", maxSize.Height());
+    return constraint;
+}
+
+JSRef<JSObject> GenConstraintNG(const std::optional<NG::LayoutConstraintF>& parentConstraint)
+{
+    auto minSize = parentConstraint->minSize;
+    auto maxSize = parentConstraint->maxSize;
+    JSRef<JSObject> constraint = JSRef<JSObject>::New();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    constraint->SetProperty<double>("minWidth", minSize.Width() / pipeline->GetDipScale());
+    constraint->SetProperty<double>("minHeight", minSize.Height() / pipeline->GetDipScale());
+    constraint->SetProperty<double>("maxWidth", maxSize.Width() / pipeline->GetDipScale());
+    constraint->SetProperty<double>("maxHeight", maxSize.Height() / pipeline->GetDipScale());
     return constraint;
 }
 
@@ -107,6 +121,17 @@ JSRef<JSObject> GenSelfLayoutInfo(RefPtr<NG::LayoutProperty> layoutProperty)
     if (!layoutProperty) {
         return selfLayoutInfo;
     }
+    auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+        layoutProperty = parentNode->GetLayoutProperty();
+    }
+    auto width = layoutProperty->GetCalcLayoutConstraint()
+                     ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToVp()
+                     : 0.0f;
+    auto height = layoutProperty->GetCalcLayoutConstraint()
+                      ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height()->GetDimension().ConvertToVp()
+                      : 0.0f;
 
     const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
     const std::unique_ptr<NG::BorderWidthProperty>& defaultEdgeWidth = std::make_unique<NG::BorderWidthProperty>();
@@ -118,14 +143,13 @@ JSRef<JSObject> GenSelfLayoutInfo(RefPtr<NG::LayoutProperty> layoutProperty)
     selfLayoutInfo->SetPropertyObject("padding",
         GenPadding(layoutProperty->GetPaddingProperty() ? layoutProperty->GetPaddingProperty() : defaultPadding));
     selfLayoutInfo->SetProperty(
-        "width", layoutProperty->GetCalcLayoutConstraint()
-                     ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToVp()
-                     : 0.0f);
+        "width", NearEqual(width, 0.0f)
+                     ? layoutProperty->GetLayoutConstraint()->percentReference.Width() / pipeline->GetDipScale()
+                     : width);
     selfLayoutInfo->SetProperty(
-        "height", layoutProperty->GetCalcLayoutConstraint()
-                      ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height()->GetDimension().ConvertToVp()
-                      : 0.0f);
-
+        "height", NearEqual(height, 0.0f)
+                      ? layoutProperty->GetLayoutConstraint()->percentReference.Height() / pipeline->GetDipScale()
+                      : height);
     return selfLayoutInfo;
 }
 
@@ -215,12 +239,6 @@ void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
     ViewMeasureLayout::SetLayoutChildren(layoutWrapper->GetAllChildrenWithBuild());
     ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
     jsLayoutFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
-
-    for (const auto& child : children) {
-        if (child->GetLayoutProperty()->GetPositionProperty()) {
-            child->Layout();
-        }
-    }
 }
 
 void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
@@ -239,12 +257,6 @@ void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
     ViewMeasureLayout::SetMeasureChildren(children);
     ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
     jsMeasureFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
-
-    for (const auto& child : children) {
-        if (child->GetGeometryNode()->GetFrameRect().IsEmpty()) {
-            child->Measure(parentConstraint.value());
-        }
-    }
 }
 
 void ViewFunctions::ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper)
@@ -252,24 +264,23 @@ void ViewFunctions::ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper)
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecutePlaceChildren");
     auto children = layoutWrapper->GetAllChildrenWithBuild();
-    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
-
     auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutWrapper->GetHostNode()->GetParent());
-    auto selfLayoutInfo = GenSelfLayoutInfo(parentNode->GetLayoutProperty());
+    std::optional<NG::LayoutConstraintF> parentConstraint;
+    if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+        parentConstraint = parentNode->GetGeometryNode()->GetParentLayoutConstraint();
+    } else {
+        parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+    }
+
+    auto selfLayoutInfo = GenSelfLayoutInfo(layoutWrapper->GetLayoutProperty());
     auto childArray = GenPlaceChildrenArray(children);
-    auto constraint = GenConstraint(parentConstraint);
+    auto constraint = GenConstraintNG(parentConstraint);
 
     JSRef<JSVal> params[3] = { selfLayoutInfo, childArray, constraint };
 
     ViewMeasureLayout::SetLayoutChildren(layoutWrapper->GetAllChildrenWithBuild());
     ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
     jsPlaceChildrenFunc_.Lock()->Call(jsObject_.Lock(), 3, params);
-
-    for (const auto& child : children) {
-        if (child->GetLayoutProperty()->GetPositionProperty()) {
-            child->Layout();
-        }
-    }
 }
 
 void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
@@ -277,12 +288,17 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecutePlaceChildren");
     auto children = layoutWrapper->GetAllChildrenWithBuild();
-    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
-
     auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutWrapper->GetHostNode()->GetParent());
-    auto selfLayoutInfo = GenSelfLayoutInfo(parentNode->GetLayoutProperty());
+    std::optional<NG::LayoutConstraintF> parentConstraint;
+    if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+        parentConstraint = parentNode->GetGeometryNode()->GetParentLayoutConstraint();
+    } else {
+        parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+    }
+
+    auto selfLayoutInfo = GenSelfLayoutInfo(layoutWrapper->GetLayoutProperty());
     auto childArray = GenMeasureChildArray(children, true);
-    auto constraint = GenConstraint(parentConstraint);
+    auto constraint = GenConstraintNG(parentConstraint);
 
     JSRef<JSVal> params[3];
 
@@ -293,12 +309,6 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     ViewMeasureLayout::SetMeasureChildren(children);
     ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
     JSRef<JSObject> result = jsMeasureSizeFunc_.Lock()->Call(jsObject_.Lock(), 3, params);
-
-    for (const auto& child : children) {
-        if (child->GetGeometryNode()->GetFrameRect().IsEmpty()) {
-            child->Measure(parentConstraint.value());
-        }
-    }
 
     CalcDimension measureWidth;
     CalcDimension measureHeight;
@@ -313,6 +323,10 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     NG::CalcSize idealSize = { NG::CalcLength(measureWidth.ConvertToPx()),
         NG::CalcLength(measureHeight.ConvertToPx()) };
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(idealSize);
+    if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+        auto parentLayoutProperty = parentNode->GetLayoutProperty();
+        parentLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
+    }
 }
 
 void ViewFunctions::ExecuteReload(bool deep)
@@ -365,6 +379,22 @@ void ViewFunctions::ExecuteSetActive(bool active)
         func->Call(jsObject_.Lock(), 1, &isActive);
     } else {
         LOGE("the set active func is null");
+    }
+}
+
+void ViewFunctions::ExecuteOnDumpInfo(const std::vector<std::string>& params)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsOnDumpInfo_.Lock();
+    if (!func->IsEmpty()) {
+        JSRef<JSArray> arr = JSRef<JSArray>::New();
+        for (size_t i = 0; i < params.size(); ++i) {
+            arr->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(params.at(i))));
+        }
+        JSRef<JSVal> argv = arr;
+        func->Call(jsObject_.Lock(), 1, &argv);
+    } else {
+        LOGE("the on dump info func is null");
     }
 }
 
@@ -429,7 +459,7 @@ void ViewFunctions::InitViewFunctions(
             LOGD("View is not a recycle node");
         }
 
-        JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycle");
+        JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycleInternal");
         if (jsAboutToRecycleFunc->IsFunction()) {
             jsAboutToRecycleFunc_ = JSRef<JSFunc>::Cast(jsAboutToRecycleFunc);
         }
@@ -439,6 +469,13 @@ void ViewFunctions::InitViewFunctions(
             jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
         } else {
             LOGD("View don't have the ability to prevent inactive update");
+        }
+
+        JSRef<JSVal> jsOnDumpInfo = jsObject->GetProperty("onDumpInfo");
+        if (jsOnDumpInfo->IsFunction()) {
+            jsOnDumpInfo_ = JSRef<JSFunc>::Cast(jsOnDumpInfo);
+        } else {
+            LOGD("View don't have the ability to dump info");
         }
     }
 
@@ -602,7 +639,7 @@ void ViewFunctions::ExecuteDisappear()
 
 void ViewFunctions::ExecuteAboutToRecycle()
 {
-    ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycle");
+    ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycleInternal");
 }
 
 bool ViewFunctions::HasLayout() const
@@ -708,9 +745,13 @@ void ViewFunctions::ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo)
     }
     ACE_SCOPED_TRACE("%s", debugInfo);
     JSRef<JSVal> jsObject = jsObject_.Lock();
-    std::string functionName(debugInfo);
-    AceScopedPerformanceCheck scoped(functionName);
-    func.Lock()->Call(jsObject);
+    if (!jsObject->IsUndefined()) {
+        std::string functionName(debugInfo);
+        AceScopedPerformanceCheck scoped(functionName);
+        func.Lock()->Call(jsObject);
+    } else {
+        LOGE("jsObject is undefined. Internal error while trying to exec %{public}s", debugInfo);
+    }
 }
 
 JSRef<JSVal> ViewFunctions::ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, const char* debugInfo)

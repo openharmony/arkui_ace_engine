@@ -78,7 +78,7 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
     auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         if (sharedFinish == pattern->pageTransitionFinish_) {
             // ensure this is exactly the finish callback saved in pagePattern,
             // otherwise means new pageTransition started
@@ -144,8 +144,8 @@ void PagePattern::ProcessShowState()
 void PagePattern::OnShow()
 {
     // Do not invoke onPageShow unless the initialRender function has been executed.
-    CHECK_NULL_VOID_NOLOG(isRenderDone_);
-    CHECK_NULL_VOID_NOLOG(!isOnShow_);
+    CHECK_NULL_VOID(isRenderDone_);
+    CHECK_NULL_VOID(!isOnShow_);
     auto container = Container::Current();
     if (!container || !container->WindowIsShow()) {
         LOGW("no need to trigger onPageShow callback when not in the foreground");
@@ -157,6 +157,10 @@ void PagePattern::OnShow()
     isOnShow_ = true;
     JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
     PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
+    auto pageUrlChecker = container->GetPageUrlChecker();
+    if (pageUrlChecker != nullptr) {
+        pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
+    }
     if (onPageShow_) {
         onPageShow_();
     }
@@ -164,12 +168,20 @@ void PagePattern::OnShow()
 
 void PagePattern::OnHide()
 {
-    CHECK_NULL_VOID_NOLOG(isOnShow_);
+    CHECK_NULL_VOID(isOnShow_);
     JankFrameReport::FlushRecord();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);
     isOnShow_ = false;
+    auto container = Container::Current();
+    if (container) {
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        if (pageUrlChecker != nullptr) {
+            pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
+        }
+    }
+    
     if (onPageHide_) {
         onPageHide_();
     }
@@ -271,16 +283,17 @@ void PagePattern::BeforeCreateLayoutWrapper()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    // SafeArea already applied to AppBar
+    // SafeArea already applied to AppBar (AtomicServicePattern)
     if (pipeline->GetInstallationFree()) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto safeArea = pipeline->GetSafeArea();
-    auto props = host->GetLayoutProperty();
-    if (safeArea.IsValid() || props->GetSafeAreaInsets()) {
-        props->UpdateSafeAreaInsets(safeArea);
-    }
+    ContentRootPattern::BeforeCreateLayoutWrapper();
+}
+
+bool PagePattern::AvoidKeyboard() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled();
 }
 } // namespace OHOS::Ace::NG

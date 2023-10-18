@@ -18,12 +18,8 @@ build_component("bubble") {
   sources = [
     "bubble_component.cpp",
     "bubble_element.cpp",
-    "flutter_render_bubble.cpp",
     "render_bubble.cpp",
     "render_bubble_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_bubble.cpp" ]
-  }
   rosen_sources = [ "rosen_render_bubble.cpp" ]
 }

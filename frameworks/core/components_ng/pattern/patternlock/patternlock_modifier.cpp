@@ -25,6 +25,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
@@ -142,7 +143,7 @@ void PatternLockModifier::onDraw(DrawingContext& context)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         DrawForApiNine(context);
         return;
     }
@@ -885,5 +886,25 @@ void PatternLockModifier::SetCircleClip(RSCanvas& canvas)
         path.AddCircle(center.GetX(), center.GetY(), clipRadius);
     }
     canvas.ClipPath(path, RSClipOp::DIFFERENCE, true);
+}
+
+void PatternLockModifier::UpdateBoundsRect()
+{
+    auto offset = offset_->Get();
+    auto pathStrokeWidth = pathStrokeWidth_->Get();
+    auto sideLength = sideLength_->Get();
+
+    auto addDistance = circleRadius_->Get() * scaleLightRingRadiusEnd_ -
+                       sideLength_->Get() / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER;
+    if (pathStrokeWidth / 2.0f > addDistance) {
+        addDistance = pathStrokeWidth / 2.0f;
+    }
+
+    RectF boundsRect;
+    boundsRect.SetLeft((offset.GetX() - addDistance) < 0 ? (offset.GetX() - addDistance) : 0);
+    boundsRect.SetTop((offset.GetY() - addDistance) < 0 ? (offset.GetY() - addDistance) : 0);
+    boundsRect.SetWidth(sideLength + addDistance * 2.0f);
+    boundsRect.SetHeight(sideLength + addDistance * 2.0f);
+    SetBoundsRect(boundsRect);
 }
 } // namespace OHOS::Ace::NG

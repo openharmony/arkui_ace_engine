@@ -24,7 +24,6 @@
 #include "frameworks/base/geometry/dimension.h"
 
 namespace OHOS::Ace {
-
 class ACE_EXPORT GaugeModel {
 public:
     static GaugeModel* GetInstance();
@@ -38,9 +37,16 @@ public:
     virtual void SetGradientColors(
         const std::vector<NG::ColorStopArray>& colors, const std::vector<float>& values, const NG::GaugeType& type) = 0;
     virtual void SetStrokeWidth(const Dimension& strokeWidth) = 0;
-    virtual void SetLabelMarkedText(std::string labelTextString) = 0;
-    virtual void SetMarkedTextColor(const Color color) = 0;
+    virtual void SetLabelMarkedText(const std::string labelTextString) = 0;
+    virtual void SetMarkedTextColor(const Color& color) = 0;
+    virtual void SetDescription(const RefPtr<AceType>& customNode) = 0;
+    virtual void SetIsShowLimitValue(bool isShowLimitValue) = 0;
+    virtual void SetIsShowDescription(bool isShowDescription) = 0;
     virtual void SetShadowOptions(const NG::GaugeShadowOptions& shadowOptions) = 0;
+    virtual void SetIsShowIndicator(bool isShowIndicator) = 0;
+    virtual void SetIndicatorIconPath(
+        const std::string& iconPath, const std::string& bundleName, const std::string& moduleName) = 0;
+    virtual void SetIndicatorSpace(const Dimension& space) = 0;
 
 private:
     static std::unique_ptr<GaugeModel> instance_;

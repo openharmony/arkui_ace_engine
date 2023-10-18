@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -57,17 +58,22 @@ void RichEditorOverlayModifier::SetCaretWidth(float width)
     caretWidth_->Set(width);
 }
 
+float RichEditorOverlayModifier::GetCaretWidth() const
+{
+    return caretWidth_->Get();
+}
+
 void RichEditorOverlayModifier::SetCaretVisible(bool value)
 {
     caretVisible_->Set(value);
 }
 
-float RichEditorOverlayModifier::GetCareHeight() const
+float RichEditorOverlayModifier::GetCaretHeight() const
 {
     return caretHeight_->Get();
 }
 
-OffsetF RichEditorOverlayModifier::GetCareOffset() const
+OffsetF RichEditorOverlayModifier::GetCaretOffset() const
 {
     return caretOffset_->Get();
 }
@@ -84,8 +90,13 @@ void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
     brush.SetColor(caretColor_->Get());
     drawingContext.canvas.AttachBrush(brush);
 
-    drawingContext.canvas.DrawRect(
-        RSRect(offset.GetX(), offset.GetY(), offset.GetX() + caretWidth_->Get(), offset.GetY() + caretHeight_->Get()));
+    if (NearEqual(offset.GetX(), contentRect_.value().Right())) {
+        drawingContext.canvas.DrawRect(RSRect(
+            offset.GetX() - caretWidth_->Get(), offset.GetY(), offset.GetX(), offset.GetY() + caretHeight_->Get()));
+    } else {
+        drawingContext.canvas.DrawRect(RSRect(
+            offset.GetX(), offset.GetY(), offset.GetX() + caretWidth_->Get(), offset.GetY() + caretHeight_->Get()));
+    }
 
     drawingContext.canvas.DetachBrush();
     drawingContext.canvas.Restore();

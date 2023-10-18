@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_LAYOUT_PROPERTY_H
 
+#include "core/common/container.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -32,6 +33,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propVertical_ = CloneVertical();
         value->propStrokeWidth_ = CloneStrokeWidth();
+        value->propStrokeWidthLimitation_ = CloneStrokeWidthLimitation();
         return value;
     }
 
@@ -40,19 +42,18 @@ public:
         LayoutProperty::Reset();
         ResetVertical();
         ResetStrokeWidth();
+        ResetStrokeWidthLimitation();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
         json->Put("vertical", propVertical_.value_or(true) ? "true" : "false");
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        const static int32_t PLATFORM_VERSION_TEN = 10;
         json->Put("strokeWidth",
             propStrokeWidth_
-                .value_or(Dimension(1,
-                    pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ? DimensionUnit::PX : DimensionUnit::VP))
+                .value_or(
+                    Dimension(1, Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) ? DimensionUnit::PX
+                                                                                                 : DimensionUnit::VP))
                 .ToString()
                 .c_str());
     }
@@ -66,6 +67,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Vertical, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidthLimitation, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DividerLayoutProperty);

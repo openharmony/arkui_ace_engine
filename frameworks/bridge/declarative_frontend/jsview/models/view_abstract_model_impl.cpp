@@ -1357,12 +1357,10 @@ void ViewAbstractModelImpl::SetRestoreId(int32_t restoreId)
 
 void ViewAbstractModelImpl::SetDebugLine(const std::string& line)
 {
-#if defined(PREVIEW)
     auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (component) {
         component->SetDebugLine(line);
     }
-#endif
 }
 
 void ViewAbstractModelImpl::SetHoverEffect(HoverEffectType hoverEffect)
@@ -1534,7 +1532,7 @@ void ViewAbstractModelImpl::BindMenu(
 }
 
 void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>& buildFunc,
-    const NG::MenuParam& menuParam, const NG::MenuType& menuType)
+    const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);

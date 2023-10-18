@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/window_scene/root/root_scene_model.h"
 #include "core/components_ng/pattern/window_scene/root/root_scene_node.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
+#include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_model.h"
@@ -107,7 +108,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest001, TestSize.Level1)
     int32_t persistentId = 0;
     model.Create(persistentId);
 
-    auto windowSceneNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto windowSceneNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     EXPECT_EQ(windowSceneNode, nullptr);
 }
 
@@ -128,8 +129,8 @@ HWTEST_F(WindowPatternTest, WindowPatternTest002, TestSize.Level1)
     auto persistentId = session->GetPersistentId();
     model.Create(persistentId);
 
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    EXPECT_NE(frameNode, nullptr);
+    auto windowSceneNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(windowSceneNode, nullptr);
 }
 
 /**
@@ -156,8 +157,8 @@ HWTEST_F(WindowPatternTest, WindowPatternTest003, TestSize.Level1)
     auto persistentId = session->GetPersistentId();
     model.Create(persistentId);
 
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    ASSERT_NE(frameNode, nullptr);
+    auto windowSceneNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(windowSceneNode, nullptr);
 
     Rosen::RSSurfaceNodeConfig config = { .SurfaceNodeName = "SurfaceNode" };
     session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
@@ -192,16 +193,16 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
      */
     session->state_ = Rosen::SessionState::STATE_DISCONNECT;
     model.Create(persistentId);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    ASSERT_NE(frameNode, nullptr);
+    auto windowSceneNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(windowSceneNode, nullptr);
 
     /**
      * @tc.steps: step3. Set session state to STATE_ACTIVE.
      */
     session->state_ = Rosen::SessionState::STATE_ACTIVE;
     model.Create(persistentId);
-    frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    ASSERT_NE(frameNode, nullptr);
+    windowSceneNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(windowSceneNode, nullptr);
 
     /**
      * @tc.steps: step3. Set session state to STATE_BACKGROUND.
@@ -211,8 +212,8 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
     EXPECT_NE(session->surfaceNode_, nullptr);
     session->state_ = Rosen::SessionState::STATE_BACKGROUND;
     model.Create(persistentId);
-    frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    ASSERT_NE(frameNode, nullptr);
+    windowSceneNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(windowSceneNode, nullptr);
 }
 
 /**

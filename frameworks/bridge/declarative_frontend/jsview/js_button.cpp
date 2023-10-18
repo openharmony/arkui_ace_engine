@@ -143,9 +143,13 @@ void JSButton::SetType(const JSCallbackInfo& info)
     }
 }
 
-void JSButton::SetStateEffect(bool stateEffect)
+void JSButton::SetStateEffect(const JSCallbackInfo& info)
 {
-    ButtonModel::GetInstance()->SetStateEffect(stateEffect);
+    if (info.Length() < 1) {
+        return;
+    }
+    bool value = info[0]->IsBoolean() ? info[0]->ToBoolean() : true;
+    ButtonModel::GetInstance()->SetStateEffect(value);
 }
 
 void JSButton::HandleDifferentRadius(const JSRef<JSVal>& args)
@@ -311,7 +315,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("fontStyle", &JSButton::SetFontStyle, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("fontFamily", &JSButton::SetFontFamily, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("type", &JSButton::SetType, MethodOptions::NONE);
-    JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect, MethodOptions::NONE);
+    JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect);
     JSClass<JSButton>::StaticMethod("labelStyle", &JSButton::SetLableStyle, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("onClick", &JSButton::JsOnClick);
     JSClass<JSButton>::StaticMethod("remoteMessage", &JSButton::JsRemoteMessage);

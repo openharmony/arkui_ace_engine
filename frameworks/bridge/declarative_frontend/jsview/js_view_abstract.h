@@ -23,10 +23,15 @@
 #include "base/geometry/dimension_rect.h"
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -57,6 +62,10 @@ enum class ResourceType : uint32_t {
 
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
+RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
+RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject);
+RefPtr<ResourceWrapper> CreateResourceWrapper();
+
 class JSViewAbstract {
 public:
     static void GetAngle(
@@ -69,16 +78,20 @@ public:
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
 
     static void JsScale(const JSCallbackInfo& info);
+    static void SetDefaultScale();
     static void JsScaleX(const JSCallbackInfo& info);
     static void JsScaleY(const JSCallbackInfo& info);
     static void JsOpacity(const JSCallbackInfo& info);
     static void JsTranslate(const JSCallbackInfo& info);
+    static void SetDefaultTranslate();
     static void JsTranslateX(const JSCallbackInfo& info);
     static void JsTranslateY(const JSCallbackInfo& info);
     static void JsRotate(const JSCallbackInfo& info);
+    static void SetDefaultRotate();
     static void JsRotateX(const JSCallbackInfo& info);
     static void JsRotateY(const JSCallbackInfo& info);
     static void JsTransform(const JSCallbackInfo& info);
+    static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
     static void JsWidth(const JSCallbackInfo& info);
@@ -89,6 +102,7 @@ public:
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
     static void JsBackgroundEffect(const JSCallbackInfo& info);
+    static void ParseEffectOption(const JSRef<JSObject>& jsObj, EffectOption& effectOption);
     static void JsForegroundBlurStyle(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
@@ -107,6 +121,8 @@ public:
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
+    static void ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
+        std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void ParseBorderWidth(const JSRef<JSVal>& args);
@@ -255,9 +271,7 @@ public:
     static void JsFocusOnTouch(const JSCallbackInfo& info);
     static void JsDefaultFocus(const JSCallbackInfo& info);
     static void JsGroupDefaultFocus(const JSCallbackInfo& info);
-#if defined(PREVIEW)
     static void JsDebugLine(const JSCallbackInfo& info);
-#endif
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
@@ -333,6 +347,8 @@ public:
     static bool JsWidth(const JSRef<JSVal>& jsValue);
     static bool JsHeight(const JSRef<JSVal>& jsValue);
     static void GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
+    static void ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
+        CalcDimension& bottomLeft, CalcDimension& bottomRight);
 
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)
@@ -361,12 +377,8 @@ public:
             return false;
         }
 
-        auto themeConstants = GetThemeConstants();
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
-
+        auto resourceObject = GetResourceObject(jsObj);
+        auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
         auto resIdNum = resId->ToNumber<int32_t>();
         if (resIdNum == -1) {
             if (!IsGetResourceByName(jsObj)) {
@@ -376,13 +388,13 @@ public:
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
             if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-                result = static_cast<T>(themeConstants->GetIntByName(param->ToString()));
+                result = static_cast<T>(resourceWrapper->GetIntByName(param->ToString()));
                 return true;
             }
             return false;
         }
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-            result = static_cast<T>(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
+            result = static_cast<T>(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
             return true;
         }
         return false;

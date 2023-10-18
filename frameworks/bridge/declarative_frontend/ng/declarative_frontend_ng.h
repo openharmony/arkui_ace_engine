@@ -44,7 +44,7 @@ public:
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
-    void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
+    void RunPage(const std::string& url, const std::string& params) override;
 
     void ReplacePage(const std::string& url, const std::string& params) override;
 
@@ -64,7 +64,8 @@ public:
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const override {}
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
-    NativeValue* GetContextValue() override;
+    napi_value GetContextValue() override;
+    
 #if defined(PREVIEW)
     void RunNativeEngineLoop() override
     {

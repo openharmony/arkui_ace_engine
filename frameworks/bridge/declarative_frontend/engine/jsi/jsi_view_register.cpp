@@ -221,14 +221,14 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
 
-    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    panda::Global<panda::ObjectRef> obj(vm, Local<panda::ObjectRef>(firstArg));
+    JsiDeclarativeEngine::SetEntryObject(obj);
 #if defined(PREVIEW)
     panda::Global<panda::ObjectRef> rootView(vm, obj->ToObject(vm));
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     arkRuntime->AddRootView(rootView);
 #endif
-    UpdateRootComponent(obj);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -259,13 +259,9 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
         return panda::JSValueRef::Undefined(vm);
     }
 
-    auto engine = EngineHelper::GetEngine(Container::CurrentId());
-    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
-    auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
-    CHECK_NULL_RETURN(jsiEngine, panda::JSValueRef::Undefined(vm));
-
-    jsiEngine->AddToNamedRouterMap(panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)),
-        secondArg->ToString(vm)->ToString(), thirdArg->ToObject(vm));
+    JsiDeclarativeEngine::AddToNamedRouterMap(vm,
+        panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)), secondArg->ToString(vm)->ToString(),
+        thirdArg->ToObject(vm));
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -273,6 +269,11 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
 panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+#if defined(PREVIEW)
+    LOGW("[Engine Log] The postCardAction interface in the Previewer is a mocked implementation and"
+"may behave differently than an real device.");
+    return panda::JSValueRef::Undefined(vm);
+#endif
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {
         LOGE("The arg is wrong, must have no more than two argument");

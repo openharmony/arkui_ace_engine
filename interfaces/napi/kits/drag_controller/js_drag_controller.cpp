@@ -22,6 +22,7 @@
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "napi/native_common.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_value.h"
 #include "node_api.h"
 
@@ -151,9 +152,7 @@ void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNo
                 LOGE("status = %{public}d", status);
                 return;
             }
-            auto* nativeValue = reinterpret_cast<NativeValue*>(eventNapi);
-            panda::CopyableGlobal<JSValueRef> globalRef = *nativeValue;
-            auto localRef = globalRef.ToLocal();
+            auto localRef = NapiValueToLocalValue(eventNapi);
             if (localRef->IsNull()) {
                 LOGE("localRef is null");
                 return;
@@ -270,9 +269,10 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             int32_t width = asyncCtx->pixmap->GetWidth();
             int32_t height = asyncCtx->pixmap->GetHeight();
 
-            Msdp::DeviceStatus::DragData dragData { { asyncCtx->pixmap, width * PIXELMAP_WIDTH_RATE,
-                                                        height * PIXELMAP_HEIGHT_RATE },
-                {}, udKey, asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true };
+            Msdp::DeviceStatus::DragData dragData {
+                { asyncCtx->pixmap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE }, {}, udKey, "", "",
+                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true
+            };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
                 napi_handle_scope scope = nullptr;
@@ -384,12 +384,7 @@ bool ParseDragInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
     napi_get_named_property(asyncCtx->env, asyncCtx->argv[1], "data", &dataNApi);
     napi_typeof(asyncCtx->env, dataNApi, &valueType);
     if (valueType == napi_object) {
-        auto* nativeValue = reinterpret_cast<NativeValue*>(dataNApi);
-        if (!nativeValue) {
-            errMsg = "parse data fail";
-            return false;
-        }
-        asyncCtx->unifiedData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
+        asyncCtx->unifiedData = UdmfClient::GetInstance()->TransformUnifiedData(dataNApi);
     } else if (valueType != napi_undefined) {
         errMsg = "data's type is wrong";
         return false;
@@ -503,8 +498,9 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
                 LOGE("taskExecutor is null.");
                 return;
             }
+            auto windowId = container->GetWindowId();
             taskExecutor->PostTask(
-                [asyncCtx]() {
+                [asyncCtx, windowId]() {
                     if (!asyncCtx) {
                         LOGE("DragControllerAsyncContext is null");
                         return;
@@ -513,8 +509,12 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
                     napi_open_handle_scope(asyncCtx->env, &scope);
                     HandleFail(asyncCtx, -1);
                     napi_close_handle_scope(asyncCtx->env, scope);
-                    Msdp::DeviceStatus::InteractionManager::GetInstance()->StopDrag(
-                        Msdp::DeviceStatus::DragResult::DRAG_CANCEL, false);
+                    if (SystemProperties::GetDebugEnabled()) {
+                        LOGI("JSExecuteDrag, windowId is %{public}d.", windowId);
+                    }
+                    Msdp::DeviceStatus::DragDropResult dropResult {
+                        Msdp::DeviceStatus::DragResult::DRAG_CANCEL, false, windowId };
+                    Msdp::DeviceStatus::InteractionManager::GetInstance()->StopDrag(dropResult);
                     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(false);
                 },
                 TaskExecutor::TaskType::JS);
@@ -538,7 +538,7 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
             napi_close_escapable_handle_scope(env, scope);
             return nullptr;
         }
-        auto callback = [asyncCtx](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode) {
+        auto callback = [asyncCtx](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode, std::function<void()>) {
             if (!asyncCtx) {
                 LOGE("DragControllerAsyncContext is null");
                 return;
@@ -550,7 +550,7 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
         auto builder = [build = asyncCtx->customBuilder, env] {
             napi_call_function(env, nullptr, build, 0, nullptr, nullptr);
         };
-        delegate->CreateSnapshot(builder, callback);
+        delegate->CreateSnapshot(builder, callback, false);
     }
 
     napi_escape_handle(env, scope, result, &result);

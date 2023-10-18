@@ -48,6 +48,7 @@ using RemoveMessage = void (*)(int32_t instanceId);
 using WaitForConnection = bool (*)();
 using SetSwitchCallBack = void (*)(const std::function<void(bool)>& setStatus,
     const std::function<void(int32_t)>& createLayoutInfo, int32_t instanceId);
+using SetDebugModeCallBack = void (*)(const std::function<void()>& setDebugMode);
 
 SendMessage g_sendMessage = nullptr;
 SendLayoutMessage g_sendLayoutMessage = nullptr;
@@ -55,6 +56,7 @@ RemoveMessage g_removeMessage = nullptr;
 StoreInspectorInfo g_storeInspectorInfo = nullptr;
 StoreMessage g_storeMessage = nullptr;
 SetSwitchCallBack g_setSwitchCallBack = nullptr;
+SetDebugModeCallBack g_setDebugModeCallBack = nullptr;
 WaitForConnection g_waitForConnection = nullptr;
 
 
@@ -106,6 +108,8 @@ bool ConnectServerManager::InitFunc()
     g_storeMessage = reinterpret_cast<StoreMessage>(dlsym(handlerConnectServerSo_, "StoreMessage"));
     g_removeMessage = reinterpret_cast<RemoveMessage>(dlsym(handlerConnectServerSo_, "RemoveMessage"));
     g_setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(dlsym(handlerConnectServerSo_, "SetSwitchCallBack"));
+    g_setDebugModeCallBack =
+        reinterpret_cast<SetDebugModeCallBack>(dlsym(handlerConnectServerSo_, "SetDebugModeCallBack"));
     g_sendLayoutMessage = reinterpret_cast<SendLayoutMessage>(dlsym(handlerConnectServerSo_, "SendLayoutMessage"));
     g_storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(dlsym(handlerConnectServerSo_, "StoreInspectorInfo"));
     g_waitForConnection = reinterpret_cast<WaitForConnection>(dlsym(handlerConnectServerSo_, "WaitForConnection"));
@@ -115,6 +119,7 @@ bool ConnectServerManager::InitFunc()
     g_storeMessage = reinterpret_cast<StoreMessage>(&Toolchain::StoreMessage);
     g_removeMessage = reinterpret_cast<RemoveMessage>(&Toolchain::RemoveMessage);
     g_setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(&Toolchain::SetSwitchCallBack);
+    g_setDebugModeCallBack = reinterpret_cast<SetDebugModeCallBack>(&Toolchain::SetDebugModeCallBack);
     g_sendLayoutMessage = reinterpret_cast<SendLayoutMessage>(&Toolchain::SendLayoutMessage);
     g_storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(&Toolchain::StoreInspectorInfo);
     g_waitForConnection = reinterpret_cast<WaitForConnection>(&Toolchain::WaitForConnection);
@@ -154,12 +159,15 @@ void ConnectServerManager::InitConnectServer()
     StartServer startServer = reinterpret_cast<StartServer>(&ArkCompiler::Toolchain::StartServer);
 #endif // IOS_PLATFORM
     startServer(packageName_);
+    g_setDebugModeCallBack([]() {
+        AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(false);
+    });
 }
 
 void ConnectServerManager::CloseConnectServerSo()
 {
 #if !defined(IOS_PLATFORM)
-    CHECK_NULL_VOID_NOLOG(handlerConnectServerSo_);
+    CHECK_NULL_VOID(handlerConnectServerSo_);
     dlclose(handlerConnectServerSo_);
     handlerConnectServerSo_ = nullptr;
 #endif
@@ -171,7 +179,7 @@ void ConnectServerManager::SetDebugMode()
     if (!CheckDebugVersion()) {
         return;
     }
-    
+
     if (!g_waitForConnection()) { // waitForDebugger : waitForDebugger means the connection state of the connect server
         AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(true);
     }
@@ -211,14 +219,18 @@ void ConnectServerManager::AddInstance(
     // Get the message including information of new instance, which will be send to IDE.
     std::string message = GetInstanceMapMessage("addInstance", instanceId, language);
 
+    g_storeMessage(instanceId, message);
     if (!g_waitForConnection()) { // g_waitForConnection : the res means the connection state of the connect server
         g_sendMessage(message); // if connected, message will be sent immediately.
-    } else { // if not connected, message will be stored and sent later when "connected" coming.
-        g_storeMessage(instanceId, message);
     }
     CHECK_NULL_VOID(createLayoutInfo_);
-    g_setSwitchCallBack([this](bool status) { setStatus_(status); },
-        [this](int32_t containerId) { createLayoutInfo_(containerId); }, instanceId);
+    auto setStatus = [this](bool status) {
+        setStatus_(status);
+    };
+    auto createLayoutInfo = [this](int32_t containerId) {
+        createLayoutInfo_(containerId);
+    };
+    g_setSwitchCallBack(setStatus, createLayoutInfo, instanceId);
 }
 
 void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr)
@@ -247,10 +259,9 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
         LOGW("Instance name not found with instance id: %{public}d", instanceId);
     }
 
+    g_removeMessage(instanceId);
     if (!g_waitForConnection()) {
         g_sendMessage(message);
-    } else {
-        g_removeMessage(instanceId);
     }
 }
 

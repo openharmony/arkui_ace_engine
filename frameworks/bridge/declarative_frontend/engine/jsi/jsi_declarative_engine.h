@@ -16,6 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_DECLARATIVE_ENGINE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_DECLARATIVE_ENGINE_H
 
+#include <cstddef>
+#include <cstdint>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -64,7 +66,7 @@ public:
     void DestroyRootViewHandle(int32_t pageId);
     void DestroyAllRootViewHandle();
     void FlushReload();
-    NativeValue* GetContextValue();
+    napi_value GetContextValue();
 
     static std::unique_ptr<JsonValue> GetI18nStringResource(
         const std::string& targetStringKey, const std::string& targetStringValue);
@@ -200,7 +202,6 @@ private:
     static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
     shared_ptr<JsValue> CallGetUIContextFunc(const shared_ptr<JsRuntime>& runtime,
         const std::vector<shared_ptr<JsValue>>& argv);
-
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
@@ -376,10 +377,11 @@ public:
         pluginModuleName_ = pluginModuleName;
     }
 
-    NativeValue* GetContextValue() override
+    napi_value GetContextValue() override
     {
         return engineInstance_->GetContextValue();
     }
+
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
@@ -393,10 +395,20 @@ public:
         assetPath_ = assetPath;
         isBundle_ = isBundle;
     }
+    // Support the hsp on the previewer
+    void SetHspBufferTrackerCallback(std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback);
+    // Support to execute the ets code mocked by developer
+    void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo);
 #endif
-    void AddToNamedRouterMap(panda::Global<panda::FunctionRef> pageGenerator, const std::string& namedRoute,
-        panda::Local<panda::ObjectRef> params);
+    static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
+        const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
+    std::string SearchRouterRegisterMap(const std::string& pageName) override;
+    bool UpdateRootComponent() override;
+    static void SetEntryObject(const panda::Global<panda::ObjectRef>& obj)
+    {
+        obj_ = obj;
+    }
 
 private:
     bool CallAppFunc(const std::string& appFuncName);
@@ -433,8 +445,9 @@ private:
 #endif
     std::string pluginBundleName_;
     std::string pluginModuleName_;
-    std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap;
+    static std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
     bool isFirstCallShow_ = true;
+    static panda::Global<panda::ObjectRef> obj_;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

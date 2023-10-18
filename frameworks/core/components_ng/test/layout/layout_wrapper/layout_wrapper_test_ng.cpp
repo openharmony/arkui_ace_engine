@@ -1528,11 +1528,11 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest040, TestSize.Level1)
     wrapper->geometryNode_->SetFrameOffset({ RK356_WIDTH, RK356_HEIGHT });
 
     // recreate wrapper to simulate next layout
-    wrapper = AceType::MakeRefPtr<LayoutWrapperNode>(host, wrapper->geometryNode_, host->GetLayoutProperty());
-    wrapper->RestoreGeoState();
+    auto wrapper2 = AceType::MakeRefPtr<LayoutWrapperNode>(host, wrapper->geometryNode_, host->GetLayoutProperty());
+    wrapper2->RestoreGeoState();
     EXPECT_EQ(manager->GetGeoRestoreNodes().size(), 0UL);
-    EXPECT_FALSE(wrapper->geometryNode_->previousState_);
-    EXPECT_EQ(wrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_FALSE(wrapper2->geometryNode_->previousState_);
+    EXPECT_EQ(wrapper2->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
 }
 
 /**
@@ -1664,21 +1664,21 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest042, TestSize.Level1)
 
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 1 });
     layoutWrapper->OffsetNodeToSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(-RK356_WIDTH, 1));
 
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 5 });
     layoutWrapper->OffsetNodeToSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(-RK356_WIDTH, 1));
 
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
     layoutWrapper->OffsetNodeToSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(-RK356_WIDTH, 1));
 
     layoutWrapper->layoutProperty_->UpdateSafeAreaInsets(
         SafeAreaInsets({ 0, 5 }, { 0, 1 }, {}, { RK356_HEIGHT - 1, RK356_HEIGHT }));
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
     layoutWrapper->OffsetNodeToSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(5, 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(-RK356_WIDTH, 1));
 }
 
 /**

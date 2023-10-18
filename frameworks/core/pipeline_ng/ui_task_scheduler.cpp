@@ -15,7 +15,6 @@
 
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
-#include "base/log/ace_performance_check.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
@@ -64,15 +63,8 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             continue;
         }
         time = GetSysTimestamp();
-        auto task = node->CreateLayoutTask(forceUseMainThread);
-        if (task) {
-            if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
-                (*task)();
-                time = GetSysTimestamp() - time;
-            } else {
-                LOGW("need to use multithread feature");
-            }
-        }
+        node->CreateLayoutTask(forceUseMainThread);
+        time = GetSysTimestamp() - time;
         if (frameInfo_ != nullptr) {
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }

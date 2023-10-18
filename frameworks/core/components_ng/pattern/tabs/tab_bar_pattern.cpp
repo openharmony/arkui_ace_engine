@@ -88,7 +88,6 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     if (axis_ == axis && scrollableEvent_) {
-        LOGD("Direction not changed, need't resister scroll event again.");
         return;
     }
 
@@ -127,7 +126,7 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
                 overScroll = mainSize + pattern->GetLeftPadding() - pattern->tabItemOffsets_.back().GetX() -
                              pattern->scrollMargin_;
             }
-          
+
             if (source == SCROLL_FROM_UPDATE) {
                 // adjust offset.
                 if (mainSize != 0.0f) {
@@ -425,6 +424,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     }
     tabBarLayoutProperty->UpdateIndicator(index);
     PaintFocusState();
+    UpdateTextColor(index);
 }
 
 void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -513,6 +513,8 @@ void TabBarPattern::OnModifyDone()
     SetAccessibilityAction();
     UpdateSubTabBoard();
     needSetCentered_ = true;
+    FocusIndexChange(layoutProperty->GetIndicatorValue(0));
+    focusIndicator_ = layoutProperty->GetIndicatorValue(0);
 
     CHECK_NULL_VOID(swiperController_);
     auto removeEventCallback = [weak = WeakClaim(this)]() {
@@ -587,6 +589,9 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         UpdateIndicator(indicator);
     }
     UpdateGradientRegions();
+    if (isTouchingSwiper_ && layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+        ApplyTurnPageRateToIndicator(turnPageRate_);
+    }
     return false;
 }
 
@@ -604,15 +609,12 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         auto scrollable = scrollableEvent_->GetScrollable();
         if (scrollable && !scrollable->IsSpringStopped()) {
             if (IsOutOfBoundary()) {
-                LOGD("Tabbar is scrolling");
                 return;
             }
             scrollable->StopScrollable();
         }
     }
-    LOGI("Click event x is %{public}lf", info.GetLocalLocation().GetX());
     if (tabItemOffsets_.empty()) {
-        LOGW("tabItemOffsets is empty");
         return;
     }
 
@@ -626,9 +628,12 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
+    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    SetSwiperCurve(curve);
     TabBarClickEvent(index);
     if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE &&
-        tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
+        tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
+        layoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
         HandleSubTabBarClick(layoutProperty, index);
         return;
     }
@@ -945,6 +950,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
             targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
     }
+    UpdateTextColor(index);
     swiperController_->SwipeTo(index);
     layoutProperty->UpdateIndicator(index);
 }
@@ -990,23 +996,17 @@ int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
     if (axis == Axis::VERTICAL) {
         auto clickRange = std::make_pair(tabItemOffsets_[0].GetY(), tabItemOffsets_[tabItemOffsets_.size() - 1].GetY());
         if (LessNotEqual(local.GetY(), clickRange.first) || GreatNotEqual(local.GetY(), clickRange.second)) {
-            LOGW("clicked (%{public}lf) position out of range [%{public}lf, %{public}lf]", local.GetY(),
-                clickRange.first, clickRange.second);
             return -1;
         }
     } else {
         auto clickRange = std::make_pair(tabItemOffsets_[0].GetX(), tabItemOffsets_[tabItemOffsets_.size() - 1].GetX());
         if (!isRTL_) {
             if (LessNotEqual(local.GetX(), clickRange.first) || GreatNotEqual(local.GetX(), clickRange.second)) {
-                LOGW("clicked (%{public}lf) position out of range [%{public}lf, %{public}lf]", local.GetX(),
-                    clickRange.first, clickRange.second);
                 return -1;
             }
         } else {
             if (GreatNotEqual(local.GetX(), frameSize.MainSize(axis)) ||
                 LessNotEqual(local.GetX(), clickRange.second)) {
-                LOGW("clicked (%{public}lf) position out of range [%{public}lf, %{public}lf]", local.GetX(),
-                    clickRange.first, clickRange.second);
                 return -1;
             }
         }
@@ -1149,7 +1149,7 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
 
     RectF rect = layoutProperty->GetIndicatorRect(indicator);
     paintProperty->UpdateIndicator(rect);
-    if (!isTouchingSwiper_) {
+    if (!isTouchingSwiper_ || tabBarStyles_[indicator] != TabBarStyle::SUBTABBATSTYLE) {
         currentIndicatorOffset_ = rect.GetX() + rect.Width() / 2;
         tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -1307,7 +1307,6 @@ bool TabBarPattern::IsContainsBuilder()
 
 void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset)
 {
-    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf", startPos, endPos);
     auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     isAnimating_ = true;
 
@@ -1374,7 +1373,6 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
                             ? host->GetGeometryNode()->GetPaddingSize().Width() - childrenMainSize_
                             : space - frontChildrenMainSize;
     auto startOffset = currentOffset_;
-    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf", startOffset, targetOffset);
     auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 
     // If animation is still running, stop it before play new animation.
@@ -1569,7 +1567,7 @@ float TabBarPattern::CalculateBackChildrenMainSize(int32_t indicator)
         auto childFrameSize = childGeometryNode->GetMarginFrameSize();
         backChildrenMainSize += childFrameSize.MainSize(axis_);
     }
-    return indicator == childCount - 1 ? 0.0f : backChildrenMainSize;
+    return indicator == static_cast<int32_t>(childCount - 1) ? 0.0f : backChildrenMainSize;
 }
 
 void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)
@@ -1584,7 +1582,7 @@ void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID(springEffect);
         springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_RETURN_NOLOG(pattern, false);
+            CHECK_NULL_RETURN(pattern, false);
             return pattern->IsAtTop() || pattern->IsAtBottom();
         });
         // add callback to springEdgeEffect
@@ -1598,7 +1596,7 @@ void TabBarPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 {
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto tabBar = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(tabBar, 0.0);
+        CHECK_NULL_RETURN(tabBar, 0.0);
         return tabBar->tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE ? tabBar->currentOffset_ : 0.0;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
@@ -1951,7 +1949,7 @@ void TabBarPattern::InitTurnPageRateEvent()
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAnimationEndEvent([weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
             pattern->isTouchingSwiper_ = false;
         }
     });

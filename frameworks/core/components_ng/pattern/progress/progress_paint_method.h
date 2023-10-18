@@ -55,7 +55,11 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(progressModifier_);
-        GetThemeDate();
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            GetThemeDataForApiNine();
+        } else {
+            GetThemeData();
+        }
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
         color_ = paintProperty->GetColor().value_or(color_);
@@ -100,7 +104,8 @@ public:
         progressModifier_->SetStrokeRadius(strokeRadius);
     }
 
-    void GetThemeDate();
+    void GetThemeData();
+    void GetThemeDataForApiNine();
     void CalculateStrokeWidth(const SizeF& contentSize);
 
 private:

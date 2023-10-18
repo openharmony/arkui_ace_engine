@@ -25,15 +25,11 @@ void NavBarPattern::OnCoordScrollStart()
 {
 }
 
-void NavBarPattern::OnCoordScrollUpdate(float offset)
+void NavBarPattern::OnCoordScrollUpdate(float offset, float dragOffsetY)
 {
 }
 
 void NavBarPattern::OnCoordScrollEnd()
-{
-}
-
-void NavBarPattern::NavBarMotion(double, double)
 {
 }
 
@@ -43,6 +39,20 @@ bool NavBarPattern::GetFullStatus()
 }
 
 bool NavBarPattern::GetIsMinTitle() const
+{
+    return true;
+}
+
+void NavBarPattern::ResetAssociatedScroll()
+{
+}
+
+bool NavBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node)
+{
+    return true;
+}
+
+bool NavBarPattern::IsTitleModeFree()
 {
     return true;
 }

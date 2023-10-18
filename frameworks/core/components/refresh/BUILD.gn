@@ -16,15 +16,12 @@ import(
 
 build_component("refresh") {
   sources = [
-    "flutter_render_refresh.cpp",
     "refresh_component.cpp",
     "refresh_element.cpp",
     "render_refresh.cpp",
     "render_refresh_creator.cpp",
     "render_refresh_target.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_refresh.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_refresh.cpp" ]
 }

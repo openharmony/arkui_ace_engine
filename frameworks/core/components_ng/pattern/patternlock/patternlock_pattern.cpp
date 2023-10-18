@@ -127,8 +127,8 @@ bool PatternLockPattern::CheckInHotSpot(const OffsetF& offset, int32_t x, int32_
         return false;
     }
     auto activeCircleRadiusScale = patternLockTheme->GetActiveCircleRadiusScale();
-    auto handleCircleRadius =
-        std::min(static_cast<float>(circleRadius_.ConvertToPx()), sideLength / backgroundRadiusScale / RADIUS_COUNT);
+    auto handleCircleRadius = std::min(static_cast<float>(circleRadius_.ConvertToPxWithSize(sideLength)),
+        sideLength / backgroundRadiusScale / RADIUS_COUNT);
     auto hotSpotCircleRadius = patternLockTheme->GetHotSpotCircleRadius();
     handleCircleRadius = std::max(handleCircleRadius * activeCircleRadiusScale,
         std::min(
@@ -154,11 +154,7 @@ bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int32_t x, int32_
             AddPassPoint(x, y);
             choosePoint_.emplace_back(x, y);
             StartModifierConnectedAnimate(x, y);
-            auto host = GetHost();
-            CHECK_NULL_RETURN(host, false);
-            auto eventHub = host->GetEventHub<PatternLockEventHub>();
-            CHECK_NULL_RETURN(eventHub, false);
-            eventHub->UpdateDotConnectedEvent(choosePoint_.back().GetCode());
+            UpdateDotConnectEvent();
         }
         return true;
     }
@@ -173,6 +169,40 @@ bool PatternLockPattern::CheckChoosePoint(int32_t x, int32_t y) const
         }
     }
     return false;
+}
+
+void PatternLockPattern::UpdateDotConnectEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<PatternLockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
+}
+
+void PatternLockPattern::AddPassPointToChoosePoint(
+    int32_t lastCode, int32_t nowCode, std::vector<PatternLockCell> passPointVec)
+{
+    passPointCount_ = static_cast<int32_t>(passPointVec.size());
+    if (nowCode > lastCode) {
+        choosePoint_.emplace_back(passPointVec.front());
+        UpdateDotConnectEvent();
+        StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
+        if (passPointCount_ > 1) {
+            choosePoint_.emplace_back(passPointVec.back());
+            UpdateDotConnectEvent();
+            StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
+        }
+    } else {
+        choosePoint_.emplace_back(passPointVec.back());
+        UpdateDotConnectEvent();
+        StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
+        if (passPointCount_ > 1) {
+            choosePoint_.emplace_back(passPointVec.front());
+            UpdateDotConnectEvent();
+            StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
+        }
+    }
 }
 
 void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
@@ -208,22 +238,7 @@ void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
     if (passPointLength == 0) {
         return;
     }
-    passPointCount_ = static_cast<int32_t>(passPointLength);
-    if (nowCode > lastCode) {
-        choosePoint_.emplace_back(passPointVec.front());
-        StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
-        if (passPointLength > 1) {
-            choosePoint_.emplace_back(passPointVec.back());
-            StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
-        }
-    } else {
-        choosePoint_.emplace_back(passPointVec.back());
-        StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
-        if (passPointLength > 1) {
-            choosePoint_.emplace_back(passPointVec.front());
-            StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
-        }
-    }
+    AddPassPointToChoosePoint(lastCode, nowCode, passPointVec);
 }
 
 void PatternLockPattern::HandleReset()
@@ -368,13 +383,13 @@ void PatternLockPattern::InitFocusEvent()
 
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
@@ -386,7 +401,7 @@ void PatternLockPattern::InitFocusEvent()
     focusHub->SetOnKeyEventInternal(keyTask);
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->GetInnerFocusPaintRect(paintRect);
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
@@ -395,7 +410,7 @@ void PatternLockPattern::InitFocusEvent()
 void PatternLockPattern::HandleFocusEvent()
 {
     HandleReset();
-    currentPoint_ = {1, 1};
+    currentPoint_ = { 1, 1 };
     isMoveEventValid_ = true;
 }
 
@@ -414,16 +429,17 @@ void PatternLockPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(patternLockTheme);
     auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(patternLockPaintProperty);
-    float circleRadius =
-        patternLockPaintProperty->GetCircleRadius().value_or(patternLockTheme->GetCircleRadius()).ConvertToPx();
-    auto backgroundRadiusScale = patternLockTheme->GetBackgroundRadiusScale();
-    auto focusPaddingRadius = patternLockTheme->GetFocusPaddingRadius();
-    auto focusPaintWidth = patternLockTheme->GetFocusPaintWidth();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     OffsetF contentOffset = geometryNode->GetContentOffset();
     float sideLength = geometryNode->GetContentSize().Width();
     float offset = sideLength / PATTERN_LOCK_COL_COUNT;
+    float circleRadius = patternLockPaintProperty->GetCircleRadius()
+                             .value_or(patternLockTheme->GetCircleRadius())
+                             .ConvertToPxWithSize(sideLength);
+    auto backgroundRadiusScale = patternLockTheme->GetBackgroundRadiusScale();
+    auto focusPaddingRadius = patternLockTheme->GetFocusPaddingRadius();
+    auto focusPaintWidth = patternLockTheme->GetFocusPaintWidth();
     float foucusCircleRadius = std::min(circleRadius * backgroundRadiusScale, offset / RADIUS_TO_DIAMETER) +
                                (focusPaddingRadius).ConvertToPx() + focusPaintWidth.ConvertToPx() / RADIUS_TO_DIAMETER;
     float outRadius = offset / RADIUS_TO_DIAMETER - foucusCircleRadius;
@@ -467,9 +483,8 @@ void PatternLockPattern::OnFocusClick()
     AddPassPoint(currentPoint_.first, currentPoint_.second);
     choosePoint_.emplace_back(currentPoint_.first, currentPoint_.second);
     StartModifierConnectedAnimate(currentPoint_.first, currentPoint_.second);
-    auto eventHub = host->GetEventHub<PatternLockEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->UpdateDotConnectedEvent(choosePoint_.back().GetCode());
+    UpdateDotConnectEvent();
+
     isMoveEventValid_ = true;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -488,7 +503,7 @@ void PatternLockPattern::PaintFocusState()
 void PatternLockPattern::OnKeyDrapUp()
 {
     if (currentPoint_.second != 1) {
-        currentPoint_ = {currentPoint_.first, currentPoint_.second - 1};
+        currentPoint_ = { currentPoint_.first, currentPoint_.second - 1 };
         PaintFocusState();
     }
 }
@@ -496,7 +511,7 @@ void PatternLockPattern::OnKeyDrapUp()
 void PatternLockPattern::OnKeyDrapDown()
 {
     if (currentPoint_.second != PATTERN_LOCK_COL_COUNT) {
-        currentPoint_ = {currentPoint_.first, currentPoint_.second + 1};
+        currentPoint_ = { currentPoint_.first, currentPoint_.second + 1 };
         PaintFocusState();
     }
 }
@@ -504,7 +519,7 @@ void PatternLockPattern::OnKeyDrapDown()
 void PatternLockPattern::OnKeyDrapLeft()
 {
     if (currentPoint_.first != 1) {
-        currentPoint_ = {currentPoint_.first - 1, currentPoint_.second};
+        currentPoint_ = { currentPoint_.first - 1, currentPoint_.second };
         PaintFocusState();
     }
 }
@@ -512,7 +527,7 @@ void PatternLockPattern::OnKeyDrapLeft()
 void PatternLockPattern::OnKeyDrapRight()
 {
     if (currentPoint_.first != PATTERN_LOCK_COL_COUNT) {
-        currentPoint_ = {currentPoint_.first + 1, currentPoint_.second};
+        currentPoint_ = { currentPoint_.first + 1, currentPoint_.second };
         PaintFocusState();
     }
 }
@@ -544,11 +559,11 @@ bool PatternLockPattern::OnKeyEvent(const KeyEvent& event)
             OnKeyDrapRight();
             return true;
         case KeyCode::KEY_MOVE_HOME:
-            currentPoint_ = {1, 1};
+            currentPoint_ = { 1, 1 };
             PaintFocusState();
             return true;
         case KeyCode::KEY_MOVE_END:
-            currentPoint_ = {PATTERN_LOCK_COL_COUNT, PATTERN_LOCK_COL_COUNT};
+            currentPoint_ = { PATTERN_LOCK_COL_COUNT, PATTERN_LOCK_COL_COUNT };
             PaintFocusState();
             return true;
         case KeyCode::KEY_ESCAPE:
@@ -570,7 +585,7 @@ void PatternLockPattern::InitMouseEvent()
     CHECK_NULL_VOID(inputEventHub);
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleHoverEvent(isHover);
     };
     auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -579,7 +594,7 @@ void PatternLockPattern::InitMouseEvent()
 
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleMouseEvent(info);
     };
     auto mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));

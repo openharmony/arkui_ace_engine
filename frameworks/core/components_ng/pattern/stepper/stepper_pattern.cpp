@@ -88,7 +88,7 @@ void StepperPattern::InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperE
 {
     ChangeEvent changeEvent = [weak = WeakClaim(this)](int32_t index) {
         auto stepperPattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(stepperPattern->TotalCount() > -1);
+        CHECK_NULL_VOID(stepperPattern->TotalCount() > -1);
         stepperPattern->UpdateIndexWithoutMeasure(index);
         stepperPattern->UpdateOrCreateLeftButtonNode(index);
         stepperPattern->UpdateOrCreateRightButtonNode(index);
@@ -430,9 +430,12 @@ void StepperPattern::InitButtonOnHoverEvent(RefPtr<FrameNode> buttonNode, bool i
     CHECK_NULL_VOID(buttonNode);
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(buttonInputHub);
-    auto hoverCallback = [weak = WeakClaim(this), buttonNode, isLeft](bool isHovered) {
+    auto hoverCallback = [weak = WeakClaim(this), buttonNodeWeak = WeakPtr<FrameNode>(buttonNode), isLeft](
+                             bool isHovered) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto buttonNode = buttonNodeWeak.Upgrade();
+        CHECK_NULL_VOID(buttonNode);
         pattern->ButtonOnHover(buttonNode, isHovered, isLeft);
     };
     buttonOnHoverListenr_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
@@ -496,9 +499,12 @@ void StepperPattern::InitButtonTouchEvent(RefPtr<FrameNode> buttonNode)
     buttonEventHub->SetStateEffect(false);
     auto buttonGestureHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(buttonGestureHub);
-    auto touchCallback = [weak = WeakClaim(this), buttonNode](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this), buttonNodeWeak = WeakPtr<FrameNode>(buttonNode)](
+                             const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto buttonNode = buttonNodeWeak.Upgrade();
+        CHECK_NULL_VOID(buttonNode);
         pattern->ButtonOnTouch(buttonNode, info.GetTouches().front().GetTouchType());
     };
     buttonTouchListenr_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -560,7 +566,7 @@ void StepperPattern::InitButtonClickEvent()
         if (leftGestureHub->IsClickEventsEmpty()) {
             auto leftClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
                 auto stepperPattern = weak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(stepperPattern);
+                CHECK_NULL_VOID(stepperPattern);
                 stepperPattern->HandlingLeftButtonClickEvent();
             };
             leftGestureHub->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(leftClickEvent)));
@@ -575,7 +581,7 @@ void StepperPattern::InitButtonClickEvent()
     if (rightGestureHub->IsClickEventsEmpty()) {
         auto rightClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
             auto stepperPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(stepperPattern);
+            CHECK_NULL_VOID(stepperPattern);
             stepperPattern->HandlingRightButtonClickEvent();
         };
         rightGestureHub->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(rightClickEvent)));

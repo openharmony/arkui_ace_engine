@@ -42,9 +42,9 @@ void TextFieldManager::MovePage(int32_t pageId, const Offset& rootRect, double o
         return;
     }
     auto scrollElement = iter->second.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollElement);
+    CHECK_NULL_VOID(scrollElement);
     const auto& scroll = AceType::DynamicCast<RenderScroll>(scrollElement->GetRenderNode());
-    CHECK_NULL_VOID_NOLOG(scroll);
+    CHECK_NULL_VOID(scroll);
     if (GreatNotEqual(position_.GetY(), rootRect.GetY())) {
         hasMove_ = true;
         scroll->SetNeedMove(true);
@@ -79,10 +79,10 @@ const Offset& TextFieldManager::GetClickPosition()
 bool TextFieldManager::UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight)
 {
     auto onFocusTextField = onFocusTextField_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(onFocusTextField, false);
+    CHECK_NULL_RETURN(onFocusTextField, false);
 #ifndef NG_BUILD
     auto slidingPanelParent = onFocusTextField->GetSlidingPanelAncest();
-    CHECK_NULL_RETURN_NOLOG(slidingPanelParent, false);
+    CHECK_NULL_RETURN(slidingPanelParent, false);
     if (GreatNotEqual(onFocusTextField->GetPaintRect().Height() +
         onFocusTextField->GetGlobalOffset().GetY(), fullHeight)) {
         LOGI("Raising panel with offset %{public}f",
@@ -99,10 +99,10 @@ bool TextFieldManager::UpdatePanelForVirtualKeyboard(double offsetY, double full
 bool TextFieldManager::ResetSlidingPanelParentHeight()
 {
     auto onFocusTextField = onFocusTextField_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(onFocusTextField, false);
+    CHECK_NULL_RETURN(onFocusTextField, false);
 #ifndef NG_BUILD
     auto slidingPanelParent = onFocusTextField->GetSlidingPanelAncest();
-    CHECK_NULL_RETURN_NOLOG(slidingPanelParent, false);
+    CHECK_NULL_RETURN(slidingPanelParent, false);
     slidingPanelParent->UpdatePanelHeightByCurrentMode();
 #endif
     return true;

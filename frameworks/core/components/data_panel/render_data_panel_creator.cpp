@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NEW_SKIA
-#include "flutter_render_data_panel.h"
-#endif
+
 #include "rosen_render_data_panel.h"
 
 namespace OHOS::Ace {
@@ -27,11 +25,7 @@ RefPtr<RenderNode> RenderProgressDataPanel::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderProgressDataPanel>();
-#else
         return nullptr;
-#endif
     }
 }
 
@@ -44,11 +38,7 @@ RefPtr<RenderNode> RenderPercentageDataPanel::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderPercentageDataPanel>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

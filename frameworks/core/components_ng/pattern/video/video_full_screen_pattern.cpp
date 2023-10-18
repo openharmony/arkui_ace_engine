@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-# include "core/components_ng/pattern/video/video_full_screen_pattern.h"
+#include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 
-#include "core/components_ng/pattern/video/video_full_screen_node.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/video/video_full_screen_node.h"
 
 namespace OHOS::Ace::NG {
 void VideoFullScreenPattern::InitFullScreenParam(const RefPtr<VideoPattern>& videoPattern,
-                                                 const RefPtr<RenderSurface>& renderSurface,
-                                                 const RefPtr<MediaPlayer>& mediaPlayer,
-                                                 const RefPtr<RenderContext>& context)
+    const RefPtr<RenderSurface>& renderSurface, const RefPtr<MediaPlayer>& mediaPlayer,
+    const RefPtr<RenderContext>& context)
 {
     UpdateMediaParam(mediaPlayer, renderSurface, context);
     videoPattern->ResetMediaParam();
@@ -41,7 +41,6 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     // add node to root
     auto rootNode = PipelineContext::GetCurrentContext()->GetRootElement();
     if (!rootNode) {
-        LOGI("rootNode is nullptr");
         auto videoPattern = AceType::DynamicCast<VideoPattern>(videoNode->GetPattern());
         videoPattern->UpdateMediaParam(mediaPlayer_, renderSurface_, renderContextForMediaPlayer_);
         ResetMediaParam();
@@ -56,7 +55,7 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     parentConstraint.maxSize.SetHeight(rootHeight);
     auto geometryNode = fullScreenNode->GetGeometryNode();
     geometryNode->SetParentLayoutConstraint(parentConstraint);
-    geometryNode->SetMarginFrameOffset(OffsetF {0.0f, 0.0f});
+    geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, 0.0f });
     fullScreenNode->MarkModifyDone();
     fullScreenNode->RebuildRenderContextTree();
     fullScreenNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -104,30 +103,20 @@ void VideoFullScreenPattern::UpdateState()
     auto videoNode = videoPattern->GetHost();
     CHECK_NULL_VOID(videoNode);
     auto videoLayout = videoNode->GetLayoutProperty<VideoLayoutProperty>();
-    bool isChanged = false;
-    if (videoLayout->HasObjectFit() &&
-        (fullScreenLayout->GetObjectFit() != videoLayout->GetObjectFit())) {
-        isChanged = true;
+    if (videoLayout->HasObjectFit() && (fullScreenLayout->GetObjectFit() != videoLayout->GetObjectFit())) {
         fullScreenLayout->UpdateObjectFit(videoLayout->GetObjectFit().value());
     }
-    if (videoLayout->HasVideoSource() &&
-        (fullScreenLayout->GetVideoSource() != videoLayout->GetVideoSource())) {
-        isChanged = true;
+    if (videoLayout->HasVideoSource() && (fullScreenLayout->GetVideoSource() != videoLayout->GetVideoSource())) {
         fullScreenLayout->UpdateVideoSource(videoLayout->GetVideoSource().value());
     }
     if (videoLayout->HasPosterImageInfo() &&
         (fullScreenLayout->GetPosterImageInfo() != videoLayout->GetPosterImageInfo())) {
-        isChanged = true;
         fullScreenLayout->UpdatePosterImageInfo(videoLayout->GetPosterImageInfo().value());
     }
-    if (videoLayout->HasControls() && (
-        fullScreenLayout->GetControls() != videoLayout->GetControls())) {
-        isChanged = true;
+    if (videoLayout->HasControls() && (fullScreenLayout->GetControls() != videoLayout->GetControls())) {
         fullScreenLayout->UpdateControls(videoLayout->GetControls().value());
     }
-    if (isChanged) {
-        fullScreenNode->MarkModifyDone();
-        fullScreenNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    }
+    fullScreenNode->MarkModifyDone();
+    fullScreenNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 } // namespace OHOS::Ace::NG

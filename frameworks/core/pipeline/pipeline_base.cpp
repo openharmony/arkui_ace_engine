@@ -22,6 +22,7 @@
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -396,13 +397,8 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 {
     auto frontend = weakFrontend_.Upgrade();
     CHECK_NULL_VOID(frontend);
-    CHECK_NULL_VOID(taskExecutor_);
-    WindowConfig windowConfig;
-    taskExecutor_->PostSyncTask(
-        [frontend, &windowConfig] {
-            windowConfig = frontend->GetWindowConfig();
-        },
-        TaskExecutor::TaskType::JS);
+    auto lock = frontend->GetLock();
+    auto& windowConfig = frontend->GetWindowConfig();
     if (windowConfig.designWidth <= 0) {
         LOGE("the frontend design width <= 0");
         return;
@@ -426,9 +422,9 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 void PipelineBase::DumpFrontend() const
 {
     auto frontend = weakFrontend_.Upgrade();
-    if (frontend) {
-        frontend->DumpFrontend();
-    }
+    CHECK_NULL_VOID(frontend);
+    auto lock = frontend->GetLock();
+    frontend->DumpFrontend();
 }
 
 bool PipelineBase::Dump(const std::vector<std::string>& params) const
@@ -544,18 +540,32 @@ void PipelineBase::OpenImplicitAnimation(
             [finishCallback, weak]() {
                 auto context = weak.Upgrade();
                 CHECK_NULL_VOID(context);
-                CHECK_NULL_VOID_NOLOG(finishCallback);
+                if (!finishCallback) {
+                    if (context->IsFormRender()) {
+                        LOGW("[Form animation]  Form animation is finish.");
+                        context->SetIsFormAnimation(false);
+                    }
+                    return;
+                }
                 if (context->IsFormRender()) {
-                    context->SetEnableImplicitAnimation(false);
+                    LOGW("[Form animation]  Form animation is finish.");
+                    context->SetFormAnimationFinishCallback(true);
                     finishCallback();
                     context->FlushBuild();
-                    context->SetEnableImplicitAnimation(true);
+                    context->SetFormAnimationFinishCallback(false);
+                    context->SetIsFormAnimation(false);
                     return;
                 }
                 finishCallback();
             },
             TaskExecutor::TaskType::UI);
     };
+    if (IsFormRender()) {
+        SetIsFormAnimation(true);
+        if (!IsFormAnimationFinishCallback()) {
+            SetFormAnimationStartTime(GetMicroTickCount());
+        }
+    }
     AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
 #endif
 }
@@ -576,6 +586,11 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);
 
     for (auto& callback : subWindowVsyncCallbacks_) {
+        callback.second(nanoTimestamp, frameCount);
+    }
+
+    decltype(jsFormVsyncCallbacks_) jsFormVsyncCallbacks(std::move(jsFormVsyncCallbacks_));
+    for (auto& callback : jsFormVsyncCallbacks) {
         callback.second(nanoTimestamp, frameCount);
     }
 
@@ -621,16 +636,6 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
         }
     }
     double keyboardHeight = keyboardArea.Height();
-    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        if (windowManager_->GetWindowType() == WindowType::WINDOW_TYPE_UNDEFINED ||
-            (windowManager_->GetWindowType() > WindowType::WINDOW_TYPE_APP_END &&
-                windowManager_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT)) {
-            LOGW("this window type: %{public}d do not need avoid virtual keyboard.",
-                static_cast<int32_t>(windowManager_->GetWindowMode()));
-            return;
-        }
-        keyboardHeight = ModifyKeyboardHeight(keyboardHeight);
-    }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
@@ -663,7 +668,7 @@ Rect PipelineBase::GetCurrentWindowRect() const
 
 bool PipelineBase::HasFloatTitle() const
 {
-    CHECK_NULL_RETURN_NOLOG(windowManager_, false);
+    CHECK_NULL_RETURN(windowManager_, false);
     return GetWindowModal() == WindowModal::CONTAINER_MODAL &&
            windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
 }
@@ -676,6 +681,7 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
         return nullptr;
     }
+    auto lock = frontend->GetLock();
     return frontend->GetAccessibilityManager();
 }
 
@@ -692,6 +698,13 @@ void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_
 {
     if (callback) {
         subWindowVsyncCallbacks_.try_emplace(subWindowId, std::move(callback));
+    }
+}
+
+void PipelineBase::SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId)
+{
+    if (callback) {
+        jsFormVsyncCallbacks_.try_emplace(subWindowId, std::move(callback));
     }
 }
 
@@ -739,9 +752,13 @@ void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
     subWindowVsyncCallbacks_.erase(subWindowId);
 }
 
+void PipelineBase::RemoveJsFormVsyncCallback(int32_t subWindowId)
+{
+    jsFormVsyncCallbacks_.erase(subWindowId);
+}
+
 bool PipelineBase::MaybeRelease()
 {
-    CHECK_RUN_ON(UI);
     CHECK_NULL_RETURN(taskExecutor_, true);
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         LOGI("Destroy Pipeline on UI thread.");

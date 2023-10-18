@@ -27,9 +27,9 @@ namespace OHOS::Ace::NG {
 void ListPositionController::JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(pattern);
+    CHECK_NULL_VOID(pattern);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    CHECK_NULL_VOID_NOLOG(listPattern);
+    CHECK_NULL_VOID(listPattern);
     LOGW("jumpTo is not supported now");
     if (align == ScrollAlign::NONE) {
         align = ScrollAlign::START;
@@ -70,7 +70,7 @@ void ListPositionController::ScrollPage(bool reverse, bool smooth)
 bool ListPositionController::IsAtEnd() const
 {
     auto listPattern = AceType::DynamicCast<ListPattern>(scroll_.Upgrade());
-    CHECK_NULL_RETURN_NOLOG(listPattern, false);
+    CHECK_NULL_RETURN(listPattern, false);
     return listPattern->IsAtBottom();
 }
 } // namespace OHOS::Ace::NG

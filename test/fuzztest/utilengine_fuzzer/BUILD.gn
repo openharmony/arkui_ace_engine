@@ -39,6 +39,7 @@ ohos_fuzztest("UtilEngineFuzzTest") {
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine_loader.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "//third_party/cJSON/cJSON.c",
     "utilengine_fuzzer.cpp",
   ]

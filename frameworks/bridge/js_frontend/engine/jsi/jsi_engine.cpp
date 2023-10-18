@@ -111,7 +111,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
     }
 
     JSValueWrapper valueWrapper = arkJsValue->GetValue(arkRuntime);
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
     PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
     if (!pixelMapNapiEntry) {
@@ -119,7 +119,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
         return nullptr;
     }
     void* pixmapPtrAddr =
-        pixelMapNapiEntry(reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
+        pixelMapNapiEntry(reinterpret_cast<napi_env>(nativeEngine), napiValue);
     if (pixmapPtrAddr == nullptr) {
         LOGE(" Failed to get pixmap pointer");
         return nullptr;
@@ -963,7 +963,7 @@ void ShowToast(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& 
     LOGD("ShowToast message = %{private}s duration = %{public}d bottom = %{private}s", message.c_str(), duration,
         bottom.c_str());
 
-    GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom);
+    GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT);
 }
 
 std::vector<ButtonInfo> ParseDialogButtons(
@@ -2849,22 +2849,34 @@ void JsiEngineInstance::RegisterConsoleModule(ArkNativeEngine* engine)
 {
     ACE_SCOPED_TRACE("JsiEngineInstance::RegisterConsoleModule");
     LOGD("JsiEngineInstance RegisterConsoleModule to nativeEngine");
-    NativeValue* global = engine->GetGlobal();
-    if (global->TypeOf() != NATIVE_OBJECT) {
+    napi_env env = reinterpret_cast<napi_env>(engine);
+    napi_value globalObj;
+    napi_get_global(env, &globalObj);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, globalObj, &valueType);
+    if (valueType != napi_object) {
         LOGE("global is not NativeObject");
         return;
     }
-    auto nativeGlobal = reinterpret_cast<NativeObject*>(global->GetInterface(NativeObject::INTERFACE_ID));
 
-    // app log method
-    NativeValue* console = engine->CreateObject();
-    auto consoleObj = reinterpret_cast<NativeObject*>(console->GetInterface(NativeObject::INTERFACE_ID));
-    consoleObj->SetProperty("log", engine->CreateFunction("log", strlen("log"), AppInfoLogPrint, nullptr));
-    consoleObj->SetProperty("debug", engine->CreateFunction("debug", strlen("debug"), AppDebugLogPrint, nullptr));
-    consoleObj->SetProperty("info", engine->CreateFunction("info", strlen("info"), AppInfoLogPrint, nullptr));
-    consoleObj->SetProperty("warn", engine->CreateFunction("warn", strlen("warn"), AppWarnLogPrint, nullptr));
-    consoleObj->SetProperty("error", engine->CreateFunction("error", strlen("error"), AppErrorLogPrint, nullptr));
-    nativeGlobal->SetProperty("console", console);
+    napi_value logValue;
+    napi_create_function(env, "log", strlen("log"), AppInfoLogPrint, nullptr, &logValue);
+    napi_value debugValue;
+    napi_create_function(env, "debug", strlen("debug"), AppDebugLogPrint, nullptr, &debugValue);
+    napi_value infoValue;
+    napi_create_function(env, "info", strlen("info"), AppInfoLogPrint, nullptr, &infoValue);
+    napi_value warnValue;
+    napi_create_function(env, "warn", strlen("warn"), AppWarnLogPrint, nullptr, &warnValue);
+    napi_value errorValue;
+    napi_create_function(env, "error", strlen("error"), AppErrorLogPrint, nullptr, &errorValue);
+    napi_value consoleObj = nullptr;
+    napi_create_object(env, &consoleObj);
+    napi_set_named_property(env, consoleObj, "log", logValue);
+    napi_set_named_property(env, consoleObj, "debug", debugValue);
+    napi_set_named_property(env, consoleObj, "info", infoValue);
+    napi_set_named_property(env, consoleObj, "warn", warnValue);
+    napi_set_named_property(env, consoleObj, "error", errorValue);
+    napi_set_named_property(env, globalObj, "console", consoleObj);
 }
 
 shared_ptr<JsValue> SyscapCanIUse(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -3210,12 +3222,11 @@ void JsiEngine::RegisterInitWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
     bool debugVersion = IsDebugVersion();
-    bool debugMode = NeedDebugBreakPoint();
     std::string libraryPath = "";
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, debugMode, libraryPath](NativeEngine* nativeEngine) {
+    auto&& initWorkerFunc = [weakInstance, libraryPath](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
@@ -3237,6 +3248,7 @@ void JsiEngine::RegisterInitWorkerFunc()
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
+        bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = {libraryPath.c_str(), debugMode};
         panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
 #endif

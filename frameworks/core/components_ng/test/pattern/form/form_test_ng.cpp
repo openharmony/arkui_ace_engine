@@ -57,28 +57,34 @@ struct TestProperty {};
 
 class FormTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp() override;
-    void TearDown() override;
 
 protected:
     static RefPtr<FrameNode> CreateFromNode();
 };
 
-void FormTestNg::SetUp()
+void FormTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    MockContainer::SetUp();
+}
+
+void FormTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
+    MockContainer::TearDown();
+}
+
+void FormTestNg::SetUp()
+{
     formInfo.id = 1;
     formInfo.cardName = "defalut";
     formInfo.bundleName = "bundle";
     formInfo.abilityName = "ability";
     formInfo.moduleName = "module";
     formInfo.allowUpdate = true;
-}
-void FormTestNg::TearDown()
-{
-    MockPipelineBase::TearDown();
 }
 
 RefPtr<FrameNode> FormTestNg::CreateFromNode()
@@ -472,11 +478,8 @@ HWTEST_F(FormTestNg, CreateCardContainer002, TestSize.Level1)
     pattern->subContainer_ = subContainer;
     pattern->frameNode_ = frameNode;
     pattern->cardInfo_.id = 1;
-    auto mockContianer = AceType::MakeRefPtr<MockContainer>();
-    AceEngine::Get().AddContainer(ContainerScope::CurrentId(), mockContianer);
-    auto conainer = Container::Current();
+    RefPtr<Container> conainer = Container::Current();
     ASSERT_NE(conainer, nullptr);
-    ASSERT_EQ(conainer, mockContianer);
     conainer->SetUseNewPipeline();
     ASSERT_EQ(Container::IsCurrentUseNewPipeline(), true);
 

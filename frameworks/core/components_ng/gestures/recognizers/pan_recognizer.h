@@ -52,6 +52,16 @@ public:
         isForDrag_ = isForDrag;
     }
 
+    void SetMouseDistance(double distance)
+    {
+        mouseDistance_ = distance;
+    }
+
+    void SetIsAllowMouse(bool isAllowMouse)
+    {
+        isAllowMouse_ = isAllowMouse;
+    }
+
 private:
     enum class GestureAcceptResult {
         ACCEPT,
@@ -70,6 +80,7 @@ private:
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     GestureAcceptResult IsPanGestureAccept() const;
     bool CalculateTruthFingers(bool isDirectionUp) const;
+    void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     void ChangeFingers(int32_t fingers);
@@ -87,6 +98,7 @@ private:
 
     PanDirection direction_;
     double distance_ = 0.0;
+    double mouseDistance_ = 0.0;
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
     std::map<int32_t, Offset> touchPointsDistance_;
@@ -108,6 +120,7 @@ private:
     bool isFlushTouchEventsEnd_ = false;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     bool isForDrag_ = false;
+    bool isAllowMouse_ = true;
 };
 
 } // namespace OHOS::Ace::NG

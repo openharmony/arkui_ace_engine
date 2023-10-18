@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -45,7 +46,11 @@ void NavDestinationModelNG::Create()
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     if (!navDestinationNode->GetTitleBarNode()) {
-        CreateBackButton(navDestinationNode);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
+        }
     }
     // content node
     if (!navDestinationNode->GetTitleBarNode()) {
@@ -57,6 +62,35 @@ void NavDestinationModelNG::Create()
     }
 
     stack->Push(navDestinationNode);
+}
+
+void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
+{
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->AddChild(titleBarNode);
+    navDestinationNode->SetTitleBarNode(titleBarNode);
+
+    int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto backButtonNode =
+        FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ImagePattern>());
+    titleBarNode->AddChild(backButtonNode);
+    titleBarNode->SetBackButton(backButtonNode);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(backButtonLayoutProperty);
+    backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    backButtonNode->MarkModifyDone();
+
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
 }
 
 void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
@@ -76,7 +110,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     CHECK_NULL_VOID(backButtonLayoutProperty);
     backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+        CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
     backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
     backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
     backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -85,7 +119,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 
     PaddingProperty padding;
-    padding.SetEdges(CalcLength(BUTTON_PADDING.ConvertToPx()));
+    padding.SetEdges(CalcLength(BUTTON_PADDING));
     backButtonLayoutProperty->UpdatePadding(padding);
 
     auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
@@ -100,10 +134,12 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
 
     auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
+    auto paintProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(paintProperty);
     if (!navDestinationEventHub->IsEnabled()) {
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
     } else {
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor());
+        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor());
     }
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -139,10 +175,12 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
         });
-    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    CHECK_NULL_VOID(navDestinationPattern);
     if (!navDestinationNode->GetTitleBarNode()) {
-        CreateBackButton(navDestinationNode);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
+        }
     }
     // content node
     if (!navDestinationNode->GetContentNode()) {

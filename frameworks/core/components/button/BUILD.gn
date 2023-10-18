@@ -18,12 +18,9 @@ build_component("button") {
   sources = [
     "button_component.cpp",
     "button_element.cpp",
-    "flutter_render_button.cpp",
     "render_button.cpp",
     "render_button_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_button.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_button.cpp" ]
 }

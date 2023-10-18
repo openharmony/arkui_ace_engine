@@ -94,8 +94,17 @@ public:
         ResetGridLayoutInfoAndMeasure();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsGap, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowsGap, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ColumnsGap, Dimension, PROPERTY_UPDATE_MEASURE);
+    void OnColumnsGapUpdate(const Dimension& /* columnsGap */) const
+    {
+        ResetPositionFlags();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(RowsGap, Dimension, PROPERTY_UPDATE_MEASURE);
+    void OnRowsGapUpdate(const Dimension& /* rowsGap */) const
+    {
+        ResetPositionFlags();
+    }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CachedCount, int32_t);
     void OnCachedCountUpdate(int32_t /* cachedCount */) const {}
@@ -138,6 +147,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutProperty);
 
     void ResetGridLayoutInfoAndMeasure() const;
+    void ResetPositionFlags() const;
     std::string GetBarStateString() const;
     std::string GetGridDirectionStr() const;
     Color GetBarColor() const;

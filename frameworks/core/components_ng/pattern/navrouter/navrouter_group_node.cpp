@@ -40,7 +40,7 @@ RefPtr<NavRouterGroupNode> NavRouterGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavRouterGroupNode>(frameNode));
+    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<NavRouterGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navRouterGroupNode = AceType::MakeRefPtr<NavRouterGroupNode>(tag, nodeId, pattern);
     navRouterGroupNode->InitializePatternAndContext();
@@ -166,6 +166,11 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         name = routeInfo->GetName();
         auto uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
         navigationPattern->AddNavDestinationNode(name, uiNode, navRouteMode, routeInfo);
+        auto navRouterEventHub = GetEventHub<NavRouterEventHub>();
+        CHECK_NULL_VOID(navRouterEventHub);
+        if (uiNode) {
+            navigationPattern->AddOnStateChangeItem(uiNode->GetId(), navRouterEventHub->GetOnStateChange());
+        }
     } else if (navDestination) {
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);

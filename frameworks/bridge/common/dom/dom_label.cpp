@@ -48,7 +48,6 @@ void DOMLabel::PrepareSpecializedComponent()
             }
             auto trigger = labelComponent->GetLabelTrigger();
             if (!trigger) {
-                LOGW("label not get trigger");
                 return;
             }
             trigger->Click();

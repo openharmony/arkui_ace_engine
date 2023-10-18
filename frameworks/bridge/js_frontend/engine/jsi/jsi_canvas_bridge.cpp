@@ -62,7 +62,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
     }
 
     JSValueWrapper valueWrapper = arkJsValue->GetValue(arkRuntime);
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
     PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
     if (!pixelMapNapiEntry) {
@@ -70,7 +70,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
         return nullptr;
     }
     void* pixmapPtrAddr = pixelMapNapiEntry(
-        reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
+        reinterpret_cast<napi_env>(nativeEngine), napiValue);
     if (pixmapPtrAddr == nullptr) {
         LOGE(" Failed to get pixmap pointer");
         return nullptr;
@@ -171,23 +171,6 @@ inline NodeId GetCurrentNodeId(const shared_ptr<JsRuntime>& runtime, const share
     return id < 0 ? 0 : id;
 }
 
-void PushTaskToPageById(const shared_ptr<JsRuntime>& runtime, NodeId id,
-    const std::function<void(const RefPtr<CanvasTaskPool>&)>& task)
-{
-    auto command = Referenced::MakeRefPtr<JsCommandContextOperation>(id, task);
-    // push command
-    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
-    if (!engine) {
-        LOGE("engine is null.");
-        return;
-    }
-    auto page = engine->GetRunningPage();
-    if (!page) {
-        LOGE("page is null.");
-        return;
-    }
-    page->PushCommand(command);
-}
 void PushTaskToPage(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::function<void(const RefPtr<CanvasTaskPool>&)>& task)
 {
@@ -385,6 +368,7 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
 #endif
 
     LOGD("JsiCanvasBridge::HandleWebglContext");
+    renderContext_ = runtime->NewUndefined();
     auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
     if (!engine) {
         LOGE("engine is null.");
@@ -428,11 +412,13 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
             return;
         }
         auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
-        auto pool = paintChild->GetTaskPool();
-        if (!pool) {
-            return;
+        if (paintChild) {
+            auto pool = paintChild->GetTaskPool();
+            if (!pool) {
+                return;
+            }
+            pool->WebGLInit(canvasRenderContext);
         }
-        pool->WebGLInit(canvasRenderContext);
     };
 
     auto delegate = engine->GetFrontendDelegate();
@@ -445,11 +431,35 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
 
     canvasRenderContext->Init();
 
-    auto onWebGLUpdateCallback = [runtime, id]() {
-        auto task = [](const RefPtr<CanvasTaskPool>& pool) {
-            pool->WebGLUpdate();
-        };
-        PushTaskToPageById(runtime, id, task);
+    auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+    if (!canvas) {
+        return;
+    }
+
+    auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+    if (!paintChild) {
+        return;
+    }
+
+    auto pool = paintChild->GetTaskPool();
+    if (!pool) {
+        return;
+    }
+
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(delegate));
+    auto weakPool = AceType::WeakClaim(AceType::RawPtr(pool));
+
+    auto onWebGLUpdateCallback = [weakDelegate, weakPool]() {
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate) {
+            auto task = [weakPool]() {
+                auto pool = weakPool.Upgrade();
+                if (pool) {
+                    pool->WebGLUpdate();
+                }
+            };
+            delegate->PostUITask(task);
+        }
     };
     canvasRenderContext->SetUpdateCallback(onWebGLUpdateCallback);
 }
@@ -1854,20 +1864,12 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
         return runtime->NewUndefined();
     }
 
-    // 4 NapiValue to JsValue
-    NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
-    if (!nativeValue) {
-        LOGE("nativeValue is null");
-        return runtime->NewUndefined();
-    }
-
-    Global<JSValueRef> globalRef = *nativeValue;
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     if (!arkRuntime) {
         LOGE("arkRuntime is null");
         return runtime->NewUndefined();
     }
-    auto jsValue = std::make_shared<ArkJSValue>(arkRuntime, globalRef.ToLocal(arkRuntime->GetEcmaVm()));
+    auto jsValue = std::make_shared<ArkJSValue>(arkRuntime, NapiValueToLocalValue(napiValue));
     if (!jsValue) {
         LOGE("jsValue is null");
         return runtime->NewUndefined();

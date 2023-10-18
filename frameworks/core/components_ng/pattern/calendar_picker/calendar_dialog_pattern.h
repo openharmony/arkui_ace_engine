@@ -39,12 +39,7 @@ public:
         return true;
     }
 
-    const RefPtr<FrameNode>& GetEntryNode() const
-    {
-        return entryNode_;
-    }
-
-    void SetEntryNode(const RefPtr<FrameNode>& node)
+    void SetEntryNode(const WeakPtr<FrameNode>& node)
     {
         entryNode_ = node;
     }
@@ -113,7 +108,7 @@ private:
     bool HandleKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
-    void HandleTitleArrowsClickEvent(const RefPtr<FrameNode>& buttonNode, int32_t nodeIndex);
+    void HandleTitleArrowsClickEvent(int32_t nodeIndex);
     void HandleEntryChange(const std::string& info);
     void HandleEntryLayoutChange();
     void ClearCalendarFocusedState();
@@ -150,7 +145,7 @@ private:
     bool isCalendarFirstFocused_ = false;
     bool hoverState_ = false;
     OffsetF dialogOffset_;
-    RefPtr<FrameNode> entryNode_ = nullptr;
+    WeakPtr<FrameNode> entryNode_ = nullptr;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
     RefPtr<InputEvent> hoverListener_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarDialogPattern);

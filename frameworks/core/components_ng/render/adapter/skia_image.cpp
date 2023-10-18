@@ -18,10 +18,11 @@
 #include <utility>
 
 #include "image_painter_utils.h"
+#include "include/core/SkGraphics.h"
 
 #include "base/image/pixel_map.h"
 #include "core/components_ng/render/drawing.h"
-#include "frameworks/core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
 #endif
@@ -157,7 +158,7 @@ RefPtr<CanvasImage> SkiaImage::QueryFromCache(const std::string& key)
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
     auto cacheImage = cache->GetCacheImage(key);
-    CHECK_NULL_RETURN_NOLOG(cacheImage, nullptr);
+    CHECK_NULL_RETURN(cacheImage, nullptr);
     LOGD("skImage found in cache: %{public}s", key.c_str());
 
     auto skiaImage = MakeRefPtr<SkiaImage>(cacheImage->imagePtr);
@@ -210,12 +211,9 @@ bool SkiaImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArra
 
     SkPaint paint;
     auto config = GetPaintConfig();
-#ifndef NEW_SKIA
-    ImagePainterUtils::AddFilter(paint, config);
-#else
+
     SkSamplingOptions options;
     ImagePainterUtils::AddFilter(paint, options, config);
-#endif
     auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
     recordingCanvas->ClipAdaptiveRRect(radii.get());
     recordingCanvas->scale(config.scaleX_, config.scaleY_);
@@ -223,15 +221,19 @@ bool SkiaImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArra
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, GetUniqueID(),
         GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
-#ifndef NEW_SKIA
-    recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);
-#else
+
     // TODO:Haw to set SamplingOptions?
     recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options, paint);
-#endif
     return true;
 #else // !ENABLE_ROSEN_BACKEND
     return false;
 #endif
 }
 } // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+void ImageCache::Purge()
+{
+    SkGraphics::PurgeResourceCache();
+}
+} // namespace OHOS::Ace

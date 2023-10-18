@@ -28,9 +28,7 @@ build_component("video") {
     "video_element.cpp",
     "video_element_v2.cpp",
   ]
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_texture.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_texture.cpp" ]
 
   include_dirs = [

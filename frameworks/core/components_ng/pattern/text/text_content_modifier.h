@@ -85,6 +85,11 @@ public:
 
     void SetFontReady(bool value);
 
+protected:
+    OffsetF GetPaintOffset() const
+    {
+        return paintOffset_;
+    }
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
@@ -149,7 +154,7 @@ private:
 
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
-    RefPtr<PropertyBool> contentChange_;
+    RefPtr<PropertyInt> contentChange_;
     RefPtr<PropertyBool> clip_;
     RefPtr<PropertyString> fontFamilyString_;
     RefPtr<PropertyBool> fontReady_;

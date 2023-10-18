@@ -431,7 +431,7 @@ public:
     void InitWebViewWithWindow();
     void ShowWebView();
     void HideWebView();
-    void Resize(const double& width, const double& height);
+    void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
         return rosenWindowId_;
@@ -520,6 +520,7 @@ public:
         backgroundColor_ = backgroundColor;
     }
     void NotifyMemoryLevel(int32_t level);
+    void SetAudioMuted(bool muted);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -572,6 +573,7 @@ public:
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
+    std::string tempDir_;
     void UpdateDragCursor(NWeb::NWebDragData::DragOperation op)
     {
         op_ = op;
@@ -601,7 +603,7 @@ public:
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
     void GLContextInit(void* window);
     sptr<OHOS::SurfaceDelegate> GetSurfaceDelegateClient();
-    void SetBoundsOrResize(const Size& drawSize, const Offset& offset);
+    void SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard = false);
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
@@ -627,6 +629,7 @@ public:
         parentNWebId_ = parentNWebId;
     }
 #endif
+    void SetToken();
 private:
     void InitWebEvent();
     void RegisterWebEvent();

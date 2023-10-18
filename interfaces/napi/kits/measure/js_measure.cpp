@@ -40,7 +40,7 @@ static int32_t HandleIntStyle(napi_value fontStyleNApi, napi_env env)
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, fontStyleNApi, &valueType);
     if (valueType == napi_string) {
-        size_t fontStyleLen = GetParamLen(fontStyleNApi) + 1;
+        size_t fontStyleLen = GetParamLen(env, fontStyleNApi) + 1;
         std::unique_ptr<char[]> fontStyleTemp = std::make_unique<char[]>(fontStyleLen);
         napi_get_value_string_utf8(env, fontStyleNApi, fontStyleTemp.get(), fontStyleLen, &ret);
         fontStyleStr = fontStyleTemp.get();
@@ -50,16 +50,13 @@ static int32_t HandleIntStyle(napi_value fontStyleNApi, napi_env env)
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, fontStyleNApi, recv)) {
-            LOGE("can not parse resource info from inout params.");
             return fontStyleInt;
         }
         if (!ParseString(recv, fontStyleStr)) {
-            LOGE("can not get message from resource manager.");
             return fontStyleInt;
         }
         fontStyleInt = StringUtils::StringToInt(fontStyleStr);
     } else {
-        LOGE("The parameter type is incorrect.");
         return fontStyleInt;
     }
     return fontStyleInt;
@@ -73,7 +70,7 @@ static std::string HandleStringType(napi_value ParameterNApi, napi_env env)
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, ParameterNApi, &valueType);
     if (valueType == napi_string) {
-        size_t ParameterLen = GetParamLen(ParameterNApi) + 1;
+        size_t ParameterLen = GetParamLen(env, ParameterNApi) + 1;
         std::unique_ptr<char[]> Parameter = std::make_unique<char[]>(ParameterLen);
         napi_get_value_string_utf8(env, ParameterNApi, Parameter.get(), ParameterLen, &ret);
         ParameterStr = Parameter.get();
@@ -83,15 +80,12 @@ static std::string HandleStringType(napi_value ParameterNApi, napi_env env)
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, ParameterNApi, recv)) {
-            LOGE("can not parse resource info from inout params.");
             return ParameterStr;
         }
         if (!ParseString(recv, ParameterStr)) {
-            LOGE("can not get message from resource manager.");
             return ParameterStr;
         }
     } else {
-        LOGE("The parameter type is incorrect.");
         return ParameterStr;
     }
     return ParameterStr;
@@ -110,7 +104,7 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
         Parameter.SetValue(ParameterValue);
         Parameter.SetUnit(DimensionUnit::VP);
     } else if (valueType == napi_string) {
-        size_t ParameterLen = GetParamLen(ParameterNApi) + 1;
+        size_t ParameterLen = GetParamLen(env, ParameterNApi) + 1;
         std::unique_ptr<char[]> ParameterTemp = std::make_unique<char[]>(ParameterLen);
         napi_get_value_string_utf8(env, ParameterNApi, ParameterTemp.get(), ParameterLen, &ret);
         ParameterStr = ParameterTemp.get();
@@ -118,11 +112,9 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, ParameterNApi, recv)) {
-            LOGE("can not parse resource info from inout params.");
             return std::nullopt;
         }
         if (!ParseString(recv, ParameterStr)) {
-            LOGE("can not get message from resource manager.");
             return std::nullopt;
         }
         Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);

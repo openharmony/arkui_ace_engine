@@ -42,7 +42,7 @@ public:
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
 
     // remain child needs to keep to use pop animation
-    void UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild);
+    void UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild, bool modeChange = false);
     static RefPtr<NavigationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -91,7 +91,19 @@ public:
         isModeChange_ = isModeChange;
     }
 
-    RefPtr<FrameNode> GetNavDestinationNodeToHandleBack();
+    bool GetNeedSetInvisible() const
+    {
+        return needSetInvisible_;
+    }
+
+    void SetNeedSetInvisible(bool needSetInvisible)
+    {
+        needSetInvisible_ = needSetInvisible;
+    }
+
+    bool CheckCanHandleBack();
+
+    bool HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
@@ -114,6 +126,7 @@ private:
     RefPtr<UINode> dividerNode_;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
+    bool needSetInvisible_ { false };
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

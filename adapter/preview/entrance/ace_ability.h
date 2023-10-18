@@ -17,6 +17,10 @@
 #define FOUNDATION_ACE_ADAPTER_PREVIEW_ACE_ABILITY_H
 
 #include <atomic>
+#include <map>
+#include <memory>
+#include <refbase.h>
+#include <string>
 #include <thread>
 
 #include "adapter/preview/entrance/ace_run_args.h"
@@ -30,11 +34,8 @@
 #include "adapter/preview/external/multimodalinput/pointer_event.h"
 #include "frameworks/base/utils/macros.h"
 
-#include <memory>
-#include <refbase.h>
-
 namespace OHOS::Rosen {
-    class Window;
+class Window;
 }
 
 namespace OHOS::Ace::Platform {
@@ -67,6 +68,7 @@ public:
 
     // Be called in Previewer frontend thread, which is not ACE platform thread.
     static std::unique_ptr<AceAbility> CreateInstance(AceRunArgs& runArgs);
+    void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo);
     void InitEnv();
     void InitializeClipboard() const;
     void OnBackPressed() const;
@@ -86,6 +88,16 @@ public:
     bool OperateComponent(const std::string& attrsJson);
     void SetWindow(sptr<OHOS::Rosen::Window> rsWindow);
     sptr<OHOS::Rosen::Window> GetWindow();
+
+    std::string GetBundleName()
+    {
+        return bundleName_;
+    }
+
+    std::string GetModuleName()
+    {
+        return moduleName_;
+    }
 
 private:
     void InitializeAppInfo();

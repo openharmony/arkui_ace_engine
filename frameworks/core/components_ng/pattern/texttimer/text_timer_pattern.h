@@ -72,6 +72,7 @@ public:
     }
 
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void Tick(uint64_t duration);
     void InitTextTimerController();
@@ -83,6 +84,9 @@ private:
     void HandleStart();
     void HandlePause();
     void HandleReset();
+
+    uint64_t GetFormatDuration(uint64_t duration) const;
+    uint64_t GetMillisecondsDuration(uint64_t duration) const;
 
     static void UpdateTextLayoutProperty(
         RefPtr<TextTimerLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
@@ -97,7 +101,7 @@ private:
     RefPtr<Scheduler> scheduler_;
     RefPtr<FrameNode> textNode_;
     uint64_t elapsedTime_ = 0; // millisecond.
-    uint64_t lastReportingTime_ = 0;
+    uint64_t lastElapsedTime_ = 0;
     bool isCountDown_ = false;
     double inputCount_ = 0.0;
     std::optional<int32_t> textId_;

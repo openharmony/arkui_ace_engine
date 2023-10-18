@@ -99,7 +99,7 @@ public:
         return "";
     }
     void AddPage(const RefPtr<AcePage>& page) override {}
-    void RunPage(int32_t pageId, const std::string& content, const std::string& params) override {}
+    void RunPage(const std::string& content, const std::string& params) override {}
     void PushPage(const std::string& content, const std::string& params) override {}
     void ReplacePage(const std::string& url, const std::string& params) override {}
     void UpdateState(State state) override {}

@@ -18,27 +18,20 @@
 #include <cmath>
 #include <unistd.h>
 
-#include "securec.h"
-
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkColor.h"
-#include "include/core/SkShader.h"
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
+#include "include/core/SkColorFilter.h"
 #include "include/core/SkImage.h"
 #include "include/core/SkPoint.h"
+#include "include/core/SkShader.h"
 #include "include/core/SkSurface.h"
-#ifdef NEW_SKIA
-#include "include/core/SkColorFilter.h"
-#include "include/effects/SkImageFilters.h"
-#else
-#include "include/effects/SkBlurImageFilter.h"
-#endif
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
+#include "include/effects/SkImageFilters.h"
 #include "include/utils/SkParsePath.h"
+#include "securec.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/json/json_util.h"
@@ -47,15 +40,12 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
-#ifndef NEW_SKIA
-#include "core/components/common/painter/flutter_decoration_painter.h"
-#endif
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/image/flutter_image_cache.h"
 #include "core/image/image_cache.h"
 #include "core/image/image_provider.h"
+#include "core/image/sk_image_cache.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -68,6 +58,7 @@ constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
 constexpr double CONIC_END_ANGLE = 359.9;
+constexpr double MAX_GRAYSCALE = 255.0;
 constexpr int32_t IMAGE_CACHE_COUNT = 50;
 
 #ifndef USE_ROSEN_DRAWING
@@ -174,8 +165,7 @@ sk_sp<SkShader> CustomPaintPaintMethod::MakeConicGradient(SkPaint& paint, const 
 {
     sk_sp<SkShader> skShader = nullptr;
     if (gradient.GetType() == Ace::GradientType::CONIC) {
-        if (!gradient.GetConicGradient().centerX.has_value() ||
-            !gradient.GetConicGradient().centerY.has_value() ||
+        if (!gradient.GetConicGradient().centerX.has_value() || !gradient.GetConicGradient().centerY.has_value() ||
             !gradient.GetConicGradient().startAngle.has_value()) {
             return skShader;
         }
@@ -196,27 +186,19 @@ sk_sp<SkShader> CustomPaintPaintMethod::MakeConicGradient(SkPaint& paint, const 
             colors[i] = gradientColor.GetColor().GetValue();
             pos[i] = gradientColor.GetDimension().Value();
         }
-#ifdef USE_SYSTEM_SKIA
-    auto mode = SkShader::kClamp_TileMode;
-#else
-    auto mode = SkTileMode::kClamp;
-#endif
-        skShader = SkGradientShader::MakeSweep(centerX, centerY,
-                                               colors, pos, colorsSize, mode,
-                                               SkDoubleToScalar(CONIC_START_ANGLE),
-                                               SkDoubleToScalar(CONIC_END_ANGLE),
-                                               0, &matrix);
+
+        auto mode = SkTileMode::kClamp;
+        skShader = SkGradientShader::MakeSweep(centerX, centerY, colors, pos, colorsSize, mode,
+            SkDoubleToScalar(CONIC_START_ANGLE), SkDoubleToScalar(CONIC_END_ANGLE), 0, &matrix);
     }
     return skShader;
 }
 #else
-std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(
-    RSBrush* brush, const Ace::Gradient& gradient)
+std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient)
 {
     std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
     if (gradient.GetType() == Ace::GradientType::CONIC) {
-        if (!gradient.GetConicGradient().centerX.has_value() ||
-            !gradient.GetConicGradient().centerY.has_value() ||
+        if (!gradient.GetConicGradient().centerX.has_value() || !gradient.GetConicGradient().centerY.has_value() ||
             !gradient.GetConicGradient().startAngle.has_value()) {
             return nullptr;
         }
@@ -238,8 +220,8 @@ std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(
             pos.at(i) = gradientColor.GetDimension().Value();
         }
         auto mode = RSTileMode::CLAMP;
-        shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY),
-            colors, pos, mode, static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE));
+        shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY), colors, pos, mode,
+            static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE));
     }
     return shaderEffect;
 }
@@ -264,11 +246,8 @@ void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& p
         colors[i] = gradientColor.GetColor().GetValue();
         pos[i] = gradientColor.GetDimension().Value();
     }
-#ifdef USE_SYSTEM_SKIA
-    auto mode = SkShader::kClamp_TileMode;
-#else
+
     auto mode = SkTileMode::kClamp;
-#endif
     sk_sp<SkShader> skShader = nullptr;
     if (gradient.GetType() == Ace::GradientType::LINEAR) {
         skShader = SkGradientShader::MakeLinear(pts, colors, pos, gradientColors.size(), mode);
@@ -315,8 +294,7 @@ void CustomPaintPaintMethod::UpdatePaintShader(
         shaderEffect = MakeConicGradient(nullptr, gradient);
     } else {
         if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
-            shaderEffect = RSShaderEffect::CreateRadialGradient(
-                endPoint, gradient.GetOuterRadius(), colors, pos, mode);
+            shaderEffect = RSShaderEffect::CreateRadialGradient(endPoint, gradient.GetOuterRadius(), colors, pos, mode);
         } else {
             shaderEffect = RSShaderEffect::CreateTwoPointConical(
                 beginPoint, gradient.GetInnerRadius(), endPoint, gradient.GetOuterRadius(), colors, pos, mode);
@@ -354,10 +332,9 @@ RSMatrix CustomPaintPaintMethod::GetMatrixFromPattern(const Ace::Pattern& patter
     if (context) {
         viewScale = context->GetViewScale();
     }
-    matrix.SetMatrix(
-        pattern.GetScaleX() * viewScale, pattern.GetSkewX() * viewScale, pattern.GetTranslateX() * viewScale,
-        pattern.GetSkewY() * viewScale, pattern.GetScaleY() * viewScale, pattern.GetTranslateY() * viewScale,
-        0.0f, 0.0f, 1.0f);
+    matrix.SetMatrix(pattern.GetScaleX() * viewScale, pattern.GetSkewX() * viewScale,
+        pattern.GetTranslateX() * viewScale, pattern.GetSkewY() * viewScale, pattern.GetScaleY() * viewScale,
+        pattern.GetTranslateY() * viewScale, 0.0f, 0.0f, 1.0f);
     return matrix;
 }
 #endif
@@ -423,85 +400,34 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
     static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&, SkMatrix*)> staticPattern[] = {
         { "clamp",
             [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, matrix));
-#else
-#ifdef NEW_SKIA
-                paint.setShader(
-                    image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions(), matrix));
-#else
-                paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, matrix));
-#endif
-#endif
+                paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions(), matrix));
             } },
         { "mirror",
             [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, matrix));
-#else
-#ifdef NEW_SKIA
                 paint.setShader(
                     image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, SkSamplingOptions(), matrix));
-#else
-                paint.setShader(image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, matrix));
-#endif
-#endif
             } },
         { "no-repeat",
             [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kDecal_TileMode, matrix));
-#else
-#ifdef NEW_SKIA
-                paint.setShader(
-                    image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, SkSamplingOptions(), matrix));
-#else
-                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, matrix));
-#endif
-#endif
+                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, SkSamplingOptions(), matrix));
             } },
         { "repeat",
             [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, matrix));
-#else
-#ifdef NEW_SKIA
                 paint.setShader(
                     image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, SkSamplingOptions(), matrix));
-#else
-                paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, matrix));
-#endif
-#endif
             } },
         { "repeat-x",
             [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kDecal_TileMode, matrix));
-#else
-#ifdef NEW_SKIA
                 paint.setShader(
                     image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, SkSamplingOptions(), matrix));
-#else
-                paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, matrix));
-#endif
-#endif
             } },
         { "repeat-y",
             [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-#ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kRepeat_TileMode, matrix));
-#else
-#ifdef NEW_SKIA
                 paint.setShader(
                     image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, SkSamplingOptions(), matrix));
-#else
-                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, matrix));
-#endif
-#endif
             } },
     };
-    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern),
-        pattern.GetRepetition().c_str());
+    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
     if (operatorIter != -1) {
         staticPattern[operatorIter].value(image, paint, matrix);
     }
@@ -517,39 +443,38 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPe
     }
     static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
         staticPattern[] = {
-        { "clamp",
-            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                shaderEffect = RSShaderEffect::CreateImageShader(*image,
-                    RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), matrix);
-            } },
-        { "mirror",
-            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                shaderEffect = RSShaderEffect::CreateImageShader(*image,
-                    RSTileMode::MIRROR, RSTileMode::MIRROR, RSSamplingOptions(), matrix);
-            } },
-        { "no-repeat",
-            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(*image,
-                        RSTileMode::DECAL, RSTileMode::DECAL, RSSamplingOptions(), matrix);
-            } },
-        { "repeat",
-            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(*image,
-                        RSTileMode::REPEAT, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
-            } },
-        { "repeat-x",
-            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(*image,
-                        RSTileMode::REPEAT, RSTileMode::DECAL, RSSamplingOptions(), matrix);
-            } },
-        { "repeat-y",
-            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(*image,
-                        RSTileMode::DECAL, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
-            } },
+            { "clamp",
+                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                    shaderEffect = RSShaderEffect::CreateImageShader(
+                        *image, RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), matrix);
+                } },
+            { "mirror",
+                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                    shaderEffect = RSShaderEffect::CreateImageShader(
+                        *image, RSTileMode::MIRROR, RSTileMode::MIRROR, RSSamplingOptions(), matrix);
+                } },
+            { "no-repeat",
+                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                    shaderEffect = RSShaderEffect::CreateImageShader(
+                        *image, RSTileMode::DECAL, RSTileMode::DECAL, RSSamplingOptions(), matrix);
+                } },
+            { "repeat",
+                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                    shaderEffect = RSShaderEffect::CreateImageShader(
+                        *image, RSTileMode::REPEAT, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
+                } },
+            { "repeat-x",
+                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                    shaderEffect = RSShaderEffect::CreateImageShader(
+                        *image, RSTileMode::REPEAT, RSTileMode::DECAL, RSSamplingOptions(), matrix);
+                } },
+            { "repeat-y",
+                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                    shaderEffect = RSShaderEffect::CreateImageShader(
+                        *image, RSTileMode::DECAL, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
+                } },
         };
-    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern),
-        pattern.GetRepetition().c_str());
+    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
     if (operatorIter != -1) {
         std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
         staticPattern[operatorIter].value(image, shaderEffect, matrix);
@@ -578,57 +503,7 @@ void CustomPaintPaintMethod::InitPaintBlend(RSBrush& brush)
 #endif
 
 #ifndef USE_ROSEN_DRAWING
-#ifndef NEW_SKIA
-void CustomPaintPaintMethod::GetStrokePaint(SkPaint& paint)
-{
-    static const LinearEnumMapNode<LineJoinStyle, SkPaint::Join> skLineJoinTable[] = {
-        { LineJoinStyle::MITER, SkPaint::Join::kMiter_Join },
-        { LineJoinStyle::ROUND, SkPaint::Join::kRound_Join },
-        { LineJoinStyle::BEVEL, SkPaint::Join::kBevel_Join },
-    };
-    static const LinearEnumMapNode<LineCapStyle, SkPaint::Cap> skLineCapTable[] = {
-        { LineCapStyle::BUTT, SkPaint::Cap::kButt_Cap },
-        { LineCapStyle::ROUND, SkPaint::Cap::kRound_Cap },
-        { LineCapStyle::SQUARE, SkPaint::Cap::kSquare_Cap },
-    };
-    InitImagePaint(paint);
-    paint.setColor(strokeState_.GetColor().GetValue());
-    paint.setStyle(SkPaint::Style::kStroke_Style);
-    paint.setStrokeJoin(ConvertEnumToSkEnum(
-        strokeState_.GetLineJoin(), skLineJoinTable, ArraySize(skLineJoinTable), SkPaint::Join::kMiter_Join));
-    paint.setStrokeCap(ConvertEnumToSkEnum(
-        strokeState_.GetLineCap(), skLineCapTable, ArraySize(skLineCapTable), SkPaint::Cap::kButt_Cap));
-    paint.setStrokeWidth(static_cast<SkScalar>(strokeState_.GetLineWidth()));
-    paint.setStrokeMiter(static_cast<SkScalar>(strokeState_.GetMiterLimit()));
 
-    // set line Dash
-    UpdateLineDash(paint);
-
-    // set global alpha
-    if (globalState_.HasGlobalAlpha()) {
-        paint.setAlphaf(globalState_.GetAlpha());
-    }
-}
-
-void CustomPaintPaintMethod::InitImagePaint(SkPaint& paint)
-{
-    if (smoothingEnabled_) {
-        if (smoothingQuality_ == "low") {
-            paint.setFilterQuality(SkFilterQuality::kLow_SkFilterQuality);
-        } else if (smoothingQuality_ == "medium") {
-            paint.setFilterQuality(SkFilterQuality::kMedium_SkFilterQuality);
-        } else if (smoothingQuality_ == "high") {
-            paint.setFilterQuality(SkFilterQuality::kHigh_SkFilterQuality);
-        } else {
-            LOGE("Unsupported Quality type:%{public}s", smoothingQuality_.c_str());
-        }
-    } else {
-        paint.setFilterQuality(SkFilterQuality::kNone_SkFilterQuality);
-    }
-    ClearPaintImage(paint);
-    SetPaintImage(paint);
-}
-#else
 void CustomPaintPaintMethod::GetStrokePaint(SkPaint& paint, SkSamplingOptions& options)
 {
     static const LinearEnumMapNode<LineJoinStyle, SkPaint::Join> skLineJoinTable[] = {
@@ -658,7 +533,12 @@ void CustomPaintPaintMethod::GetStrokePaint(SkPaint& paint, SkSamplingOptions& o
 
     // set global alpha
     if (globalState_.HasGlobalAlpha()) {
-        paint.setAlphaf(globalState_.GetAlpha());
+        if (strokeState_.GetPaintStyle() == PaintStyle::Color) {
+            paint.setAlphaf(
+                globalState_.GetAlpha() * static_cast<double>(strokeState_.GetColor().GetAlpha()) / MAX_GRAYSCALE);
+        } else {
+            paint.setAlphaf(globalState_.GetAlpha());
+        }
     }
 }
 
@@ -680,7 +560,6 @@ void CustomPaintPaintMethod::InitImagePaint(SkPaint& paint, SkSamplingOptions& o
     ClearPaintImage(paint);
     SetPaintImage(paint);
 }
-#endif
 #else
 void CustomPaintPaintMethod::GetStrokePaint(RSPen& pen, RSSamplingOptions& options)
 {
@@ -710,7 +589,12 @@ void CustomPaintPaintMethod::GetStrokePaint(RSPen& pen, RSSamplingOptions& optio
 
     // set global alpha
     if (globalState_.HasGlobalAlpha()) {
-        pen.SetAlphaF(globalState_.GetAlpha());
+        if (strokeState_.GetPaintStyle() == PaintStyle::Color) {
+            pen.SetAlphaF(
+                globalState_.GetAlpha() * static_cast<double>(strokeState_.GetColor().GetAlpha()) / MAX_GRAYSCALE);
+        } else {
+            pen.SetAlphaF(globalState_.GetAlpha());
+        }
     }
 }
 
@@ -789,8 +673,8 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
     switch (canvasImage.flag) {
         case 0:
             srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width(),
-                skiaDom_->containerSize().height());
+            dstRect = SkRect::MakeXYWH(
+                canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
             break;
         case 1: {
             srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
@@ -808,8 +692,8 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
     float scaleX = dstRect.width() / srcRect.width();
     float scaleY = dstRect.height() / srcRect.height();
     OffsetF offset = GetContentOffset(paintWrapper);
-    OffsetF startPoint = offset + OffsetF(dstRect.left(), dstRect.top()) -
-        OffsetF(srcRect.left() * scaleX, srcRect.top() * scaleY);
+    OffsetF startPoint =
+        offset + OffsetF(dstRect.left(), dstRect.top()) - OffsetF(srcRect.left() * scaleX, srcRect.top() * scaleY);
 
     SkCanvas* skCanvas = GetRawPtrOfSkCanvas();
     skCanvas->save();
@@ -829,15 +713,15 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
             break;
         case 1: {
             srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
             break;
         }
         case 2: {
-            srcRect = RSRect(canvasImage.sx, canvasImage.sy,
-                canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
+                canvasImage.sHeight + canvasImage.sy);
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
             break;
         }
         default:
@@ -847,7 +731,7 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
     float scaleY = dstRect.GetHeight() / srcRect.GetHeight();
     OffsetF offset = GetContentOffset(paintWrapper);
     OffsetF startPoint = offset + OffsetF(dstRect.GetLeft(), dstRect.GetTop()) -
-        OffsetF(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
+                         OffsetF(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
 
     RSCanvas* rsCanvas = GetRawPtrOfRSCanvas();
     rsCanvas->Save();
@@ -878,14 +762,11 @@ void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace:
     skBitmap.allocPixels(imageInfo);
     skBitmap.setPixels(data);
     auto contentOffset = GetContentOffset(paintWrapper);
-#ifndef NEW_SKIA
-    skCanvas_->drawBitmap(skBitmap, imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
-#else
+
     SkPaint paint;
     paint.setBlendMode(SkBlendMode::kSrc);
     skCanvas_->drawImage(skBitmap.asImage(), imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY(),
         SkSamplingOptions(), &paint);
-#endif
 #else
     RSBitmap bitmap;
     RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
@@ -902,12 +783,9 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
     OffsetF offset = GetContentOffset(paintWrapper);
 #ifndef USE_ROSEN_DRAWING
     SkPaint paint;
-#ifndef NEW_SKIA
-    InitImagePaint(paint);
-#else
+
     SkSamplingOptions options;
     InitImagePaint(paint, options);
-#endif
     paint.setAntiAlias(antiAlias_);
     if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
         paint.setColor(fillState_.GetColor().GetValue());
@@ -922,7 +800,12 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
-        paint.setAlphaf(globalState_.GetAlpha()); // update the global alpha after setting the color
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            paint.setAlphaf(
+                globalState_.GetAlpha() * static_cast<double>(fillState_.GetColor().GetAlpha()) / MAX_GRAYSCALE);
+        } else {
+            paint.setAlphaf(globalState_.GetAlpha()); // update the global alpha after setting the color
+        }
     }
     if (HasShadow()) {
         SkPath path;
@@ -947,8 +830,8 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
     if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
         brush.SetColor(fillState_.GetColor().GetValue());
     }
-    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
-        rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
+    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(), rect.Right() + offset.GetX(),
+        offset.GetY() + rect.Bottom());
     if (HasShadow()) {
         RSRecordingPath path;
         path.AddRect(rsRect);
@@ -961,7 +844,12 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
         UpdatePaintShader(fillState_.GetPatternValue(), nullptr, &brush);
     }
     if (globalState_.HasGlobalAlpha()) {
-        brush.SetAlphaF(globalState_.GetAlpha()); // update the global alpha after setting the color
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            brush.SetAlphaF(
+                globalState_.GetAlpha() * static_cast<double>(fillState_.GetColor().GetAlpha()) / MAX_GRAYSCALE);
+        } else {
+            brush.SetAlphaF(globalState_.GetAlpha()); // update the global alpha after setting the color
+        }
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachBrush(brush);
@@ -986,12 +874,9 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
     OffsetF offset = GetContentOffset(paintWrapper);
 #ifndef USE_ROSEN_DRAWING
     SkPaint paint;
-#ifndef NEW_SKIA
-    GetStrokePaint(paint);
-#else
+
     SkSamplingOptions options;
     GetStrokePaint(paint, options);
-#endif
     paint.setAntiAlias(antiAlias_);
     SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
@@ -1021,8 +906,8 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
     pen.SetAntiAlias(antiAlias_);
-    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
-        rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
+    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(), rect.Right() + offset.GetX(),
+        offset.GetY() + rect.Bottom());
     if (HasShadow()) {
         RSRecordingPath path;
         path.AddRect(rsRect);
@@ -1057,12 +942,9 @@ void CustomPaintPaintMethod::ClearRect(PaintWrapper* paintWrapper, const Rect& r
     OffsetF offset = GetContentOffset(paintWrapper);
 #ifndef USE_ROSEN_DRAWING
     SkPaint paint;
-#ifndef NEW_SKIA
-    InitImagePaint(paint);
-#else
+
     SkSamplingOptions options;
     InitImagePaint(paint, options);
-#endif
     paint.setAntiAlias(antiAlias_);
     paint.setBlendMode(SkBlendMode::kClear);
     auto skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
@@ -1074,8 +956,8 @@ void CustomPaintPaintMethod::ClearRect(PaintWrapper* paintWrapper, const Rect& r
     InitImagePaint(nullptr, &brush, options);
     brush.SetAntiAlias(antiAlias_);
     brush.SetBlendMode(RSBlendMode::CLEAR);
-    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
-        rect.Right() + offset.GetX(), rect.Bottom() + offset.GetY());
+    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(), rect.Right() + offset.GetX(),
+        rect.Bottom() + offset.GetY());
     rsCanvas_->AttachBrush(brush);
     rsCanvas_->DrawRect(rsRect);
     rsCanvas_->DetachBrush();
@@ -1086,17 +968,9 @@ void CustomPaintPaintMethod::SetFillRuleForPath(const CanvasFillRule& rule)
 {
 #ifndef USE_ROSEN_DRAWING
     if (rule == CanvasFillRule::NONZERO) {
-#ifndef NEW_SKIA
-        skPath_.setFillType(SkPath::FillType::kWinding_FillType);
-#else
         skPath_.setFillType(SkPathFillType::kWinding);
-#endif
     } else if (rule == CanvasFillRule::EVENODD) {
-#ifndef NEW_SKIA
-        skPath_.setFillType(SkPath::FillType::kEvenOdd_FillType);
-#else
         skPath_.setFillType(SkPathFillType::kEvenOdd);
-#endif
     }
 #else
     if (rule == CanvasFillRule::NONZERO) {
@@ -1111,17 +985,9 @@ void CustomPaintPaintMethod::SetFillRuleForPath2D(const CanvasFillRule& rule)
 {
 #ifndef USE_ROSEN_DRAWING
     if (rule == CanvasFillRule::NONZERO) {
-#ifndef NEW_SKIA
-        skPath2d_.setFillType(SkPath::FillType::kWinding_FillType);
-#else
         skPath2d_.setFillType(SkPathFillType::kWinding);
-#endif
     } else if (rule == CanvasFillRule::EVENODD) {
-#ifndef NEW_SKIA
-        skPath2d_.setFillType(SkPath::FillType::kEvenOdd_FillType);
-#else
         skPath2d_.setFillType(SkPathFillType::kEvenOdd);
-#endif
     }
 #else
     if (rule == CanvasFillRule::NONZERO) {
@@ -1137,12 +1003,9 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
     OffsetF offset = GetContentOffset(paintWrapper);
 #ifndef USE_ROSEN_DRAWING
     SkPaint paint;
-#ifndef NEW_SKIA
-    InitImagePaint(paint);
-#else
+
     SkSamplingOptions options;
     InitImagePaint(paint, options);
-#endif
     paint.setAntiAlias(antiAlias_);
     if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
         paint.setColor(fillState_.GetColor().GetValue());
@@ -1155,7 +1018,12 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
-        paint.setAlphaf(globalState_.GetAlpha());
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            paint.setAlphaf(
+                globalState_.GetAlpha() * static_cast<double>(fillState_.GetColor().GetAlpha()) / MAX_GRAYSCALE);
+        } else {
+            paint.setAlphaf(globalState_.GetAlpha());
+        }
     }
     if (HasShadow()) {
         PaintShadow(skPath_, shadow_, skCanvas_.get(), &paint);
@@ -1188,7 +1056,12 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
         UpdatePaintShader(fillState_.GetPatternValue(), nullptr, &brush);
     }
     if (globalState_.HasGlobalAlpha()) {
-        brush.SetAlphaF(globalState_.GetAlpha());
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            brush.SetAlphaF(
+                globalState_.GetAlpha() * static_cast<double>(fillState_.GetColor().GetAlpha()) / MAX_GRAYSCALE);
+        } else {
+            brush.SetAlphaF(globalState_.GetAlpha());
+        }
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachBrush(brush);
@@ -1225,12 +1098,9 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
 {
 #ifndef USE_ROSEN_DRAWING
     SkPaint paint;
-#ifndef NEW_SKIA
-    InitImagePaint(paint);
-#else
+
     SkSamplingOptions options;
     InitImagePaint(paint, options);
-#endif
     paint.setAntiAlias(antiAlias_);
     if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
         paint.setColor(fillState_.GetColor().GetValue());
@@ -1243,7 +1113,12 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
-        paint.setAlphaf(globalState_.GetAlpha());
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            paint.setAlphaf(
+                globalState_.GetAlpha() * static_cast<double>(fillState_.GetColor().GetAlpha()) / MAX_GRAYSCALE);
+        } else {
+            paint.setAlphaf(globalState_.GetAlpha());
+        }
     }
     if (HasShadow()) {
         PaintShadow(skPath2d_, shadow_, skCanvas_.get(), &paint);
@@ -1276,7 +1151,12 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
         UpdatePaintShader(fillState_.GetPattern(), nullptr, &brush);
     }
     if (globalState_.HasGlobalAlpha()) {
-        brush.SetAlphaF(globalState_.GetAlpha());
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            brush.SetAlphaF(
+                globalState_.GetAlpha() * static_cast<double>(fillState_.GetColor().GetAlpha()) / MAX_GRAYSCALE);
+        } else {
+            brush.SetAlphaF(globalState_.GetAlpha());
+        }
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachBrush(brush);
@@ -1301,12 +1181,9 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
     OffsetF offset = GetContentOffset(paintWrapper);
 #ifndef USE_ROSEN_DRAWING
     SkPaint paint;
-#ifndef NEW_SKIA
-    GetStrokePaint(paint);
-#else
+
     SkSamplingOptions options;
     GetStrokePaint(paint, options);
-#endif
     paint.setAntiAlias(antiAlias_);
     if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
@@ -1376,12 +1253,9 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
 {
 #ifndef USE_ROSEN_DRAWING
     SkPaint paint;
-#ifndef NEW_SKIA
-    GetStrokePaint(paint);
-#else
+
     SkSamplingOptions options;
     GetStrokePaint(paint, options);
-#endif
     paint.setAntiAlias(antiAlias_);
     if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
@@ -1489,8 +1363,7 @@ void CustomPaintPaintMethod::MoveTo(PaintWrapper* paintWrapper, double x, double
 #ifndef USE_ROSEN_DRAWING
     skPath_.moveTo(SkDoubleToScalar(x + offset.GetX()), SkDoubleToScalar(y + offset.GetY()));
 #else
-    rsPath_.MoveTo(
-        static_cast<RSScalar>(x + offset.GetX()), static_cast<RSScalar>(y + offset.GetY()));
+    rsPath_.MoveTo(static_cast<RSScalar>(x + offset.GetX()), static_cast<RSScalar>(y + offset.GetY()));
 #endif
 }
 
@@ -1500,8 +1373,7 @@ void CustomPaintPaintMethod::LineTo(PaintWrapper* paintWrapper, double x, double
 #ifndef USE_ROSEN_DRAWING
     skPath_.lineTo(SkDoubleToScalar(x + offset.GetX()), SkDoubleToScalar(y + offset.GetY()));
 #else
-    rsPath_.LineTo(
-        static_cast<RSScalar>(x + offset.GetX()), static_cast<RSScalar>(y + offset.GetY()));
+    rsPath_.LineTo(static_cast<RSScalar>(x + offset.GetX()), static_cast<RSScalar>(y + offset.GetY()));
 #endif
 }
 
@@ -1549,8 +1421,8 @@ void CustomPaintPaintMethod::Arc(PaintWrapper* paintWrapper, const ArcParam& par
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
         rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
         rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
-        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(half + half + startAngle),
-            static_cast<RSScalar>(sweepAngle));
+        rsPath_.ArcTo(
+            point1, point2, static_cast<RSScalar>(half + half + startAngle), static_cast<RSScalar>(sweepAngle));
     } else {
         rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(sweepAngle));
     }
@@ -1581,8 +1453,8 @@ void CustomPaintPaintMethod::AddRect(PaintWrapper* paintWrapper, const Rect& rec
         rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
     skPath_.addRect(skRect);
 #else
-    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
-        rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
+    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(), rect.Right() + offset.GetX(),
+        offset.GetY() + rect.Bottom());
     rsPath_.AddRect(rsRect);
 #endif
 }
@@ -1666,10 +1538,8 @@ void CustomPaintPaintMethod::BezierCurveTo(PaintWrapper* paintWrapper, const Bez
         SkDoubleToScalar(param.x + offset.GetX()), SkDoubleToScalar(param.y + offset.GetY()));
 #else
     rsPath_.CubicTo(static_cast<RSScalar>(param.cp1x + offset.GetX()),
-        static_cast<RSScalar>(param.cp1y + offset.GetY()),
-        static_cast<RSScalar>(param.cp2x + offset.GetX()),
-        static_cast<RSScalar>(param.cp2y + offset.GetY()),
-        static_cast<RSScalar>(param.x + offset.GetX()),
+        static_cast<RSScalar>(param.cp1y + offset.GetY()), static_cast<RSScalar>(param.cp2x + offset.GetX()),
+        static_cast<RSScalar>(param.cp2y + offset.GetY()), static_cast<RSScalar>(param.x + offset.GetX()),
         static_cast<RSScalar>(param.y + offset.GetY()));
 #endif
 }
@@ -1681,10 +1551,8 @@ void CustomPaintPaintMethod::QuadraticCurveTo(PaintWrapper* paintWrapper, const 
     skPath_.quadTo(SkDoubleToScalar(param.cpx + offset.GetX()), SkDoubleToScalar(param.cpy + offset.GetY()),
         SkDoubleToScalar(param.x + offset.GetX()), SkDoubleToScalar(param.y + offset.GetY()));
 #else
-    rsPath_.QuadTo(static_cast<RSScalar>(param.cpx + offset.GetX()),
-        static_cast<RSScalar>(param.cpy + offset.GetY()),
-        static_cast<RSScalar>(param.x + offset.GetX()),
-        static_cast<RSScalar>(param.y + offset.GetY()));
+    rsPath_.QuadTo(static_cast<RSScalar>(param.cpx + offset.GetX()), static_cast<RSScalar>(param.cpy + offset.GetY()),
+        static_cast<RSScalar>(param.x + offset.GetX()), static_cast<RSScalar>(param.y + offset.GetY()));
 #endif
 }
 
@@ -2078,18 +1946,16 @@ OHOS::Rosen::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(
 {
 #ifndef USE_GRAPHIC_TEXT_GINE
     if (align == txt::TextAlign::start) {
-        return (direction == txt::TextDirection::ltr) ? txt::TextAlign::left
-                                                      : txt::TextAlign::right;
+        return (direction == txt::TextDirection::ltr) ? txt::TextAlign::left : txt::TextAlign::right;
     } else if (align == txt::TextAlign::end) {
-        return (direction == txt::TextDirection::ltr) ? txt::TextAlign::right
-                                                      : txt::TextAlign::left;
+        return (direction == txt::TextDirection::ltr) ? txt::TextAlign::right : txt::TextAlign::left;
 #else
     if (align == OHOS::Rosen::TextAlign::START) {
         return (direction == OHOS::Rosen::TextDirection::LTR) ? OHOS::Rosen::TextAlign::LEFT
-                                                      : OHOS::Rosen::TextAlign::RIGHT;
+                                                              : OHOS::Rosen::TextAlign::RIGHT;
     } else if (align == OHOS::Rosen::TextAlign::END) {
         return (direction == OHOS::Rosen::TextDirection::LTR) ? OHOS::Rosen::TextAlign::RIGHT
-                                                      : OHOS::Rosen::TextAlign::LEFT;
+                                                              : OHOS::Rosen::TextAlign::LEFT;
 #endif
     } else {
         return align;
@@ -2101,17 +1967,10 @@ void CustomPaintPaintMethod::ClearPaintImage(SkPaint& paint)
 {
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-    paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
+
     paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
     paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
-#ifdef NEW_SKIA
     paint.setImageFilter(SkImageFilters::Blur(0, 0, nullptr));
-#else
-    paint.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
-#endif
 }
 #else
 void CustomPaintPaintMethod::ClearPaintImage(RSPen* pen, RSBrush* brush)
@@ -2494,11 +2353,7 @@ void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, SkPaint& 
     if (Negative(blurNum)) {
         return;
     }
-#ifdef NEW_SKIA
     paint.setImageFilter(SkImageFilters::Blur(blurNum, blurNum, nullptr));
-#else
-    paint.setImageFilter(SkBlurImageFilter::Make(blurNum, blurNum, nullptr));
-#endif
 }
 #else
 void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
@@ -2525,15 +2380,8 @@ void CustomPaintPaintMethod::SetColorFilter(float matrix[20], RSPen* pen, RSBrus
 #endif
 {
 #ifndef USE_ROSEN_DRAWING
-#ifdef USE_SYSTEM_SKIA
-    matrix[4] *= 255;
-    matrix[9] *= 255;
-    matrix[14] *= 255;
-    matrix[19] *= 255;
-    paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
+
     paint.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
 #else
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
@@ -2561,8 +2409,8 @@ bool CustomPaintPaintMethod::GetFilterType(FilterType& filterType, std::string& 
     filterType = FilterStrToFilterType(paramData.substr(0, index));
     filterParam = paramData.substr(index + 1);
     size_t endIndex = filterParam.find(")");
-    if (endIndex  != std::string::npos) {
-            filterParam.erase(endIndex, 1);
+    if (endIndex != std::string::npos) {
+        filterParam.erase(endIndex, 1);
     }
     return true;
 }
@@ -2632,7 +2480,7 @@ bool CustomPaintPaintMethod::CheckNumberAndPercentage(const std::string& param, 
         return false;
     }
     // param.size() > 1, param[i] != (. || 0 ~ 9), return false (except for the last one)
-    for (auto i  = 0U; i < param.size() - 1; i++) {
+    for (auto i = 0U; i < param.size() - 1; i++) {
         if (param[i] < '.' || param[i] == '/' || param[i] > '9') {
             return false;
         }
@@ -2668,7 +2516,7 @@ FilterType CustomPaintPaintMethod::FilterStrToFilterType(const std::string& filt
 bool CustomPaintPaintMethod::HasImageShadow() const
 {
     return !(NearZero(imageShadow_->GetOffset().GetX()) && NearZero(imageShadow_->GetOffset().GetY()) &&
-         NearZero(imageShadow_->GetBlurRadius()));
+             NearZero(imageShadow_->GetBlurRadius()));
 }
 
 std::optional<double> CustomPaintPaintMethod::CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth)

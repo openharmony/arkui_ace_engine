@@ -18,6 +18,8 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/event/ace_events.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -33,7 +35,12 @@ constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
 constexpr int32_t LONG_PRESS_DELAY = 300;
 } // namespace
 
-void SwiperIndicatorPattern::OnAttachToFrameNode() {}
+void SwiperIndicatorPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
+}
 
 void SwiperIndicatorPattern::OnModifyDone()
 {
@@ -101,16 +108,16 @@ void SwiperIndicatorPattern::OnModifyDone()
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
+    CHECK_NULL_RETURN(config.frameSizeChange, false);
     return true;
 }
 
 void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!clickEvent_);
+    CHECK_NULL_VOID(!clickEvent_);
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleClick(info);
     };
     clickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickTask));
@@ -120,6 +127,7 @@ void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestu
 void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
 {
     if (info.GetSourceDevice() == SourceType::MOUSE) {
+        isClicked_ = true;
         HandleMouseClick(info);
     } else {
         HandleTouchClick(info);
@@ -128,8 +136,11 @@ void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
 
 void SwiperIndicatorPattern::HandleMouseClick(const GestureEvent& /* info */)
 {
+    if (isRepeatClicked_) {
+        return;
+    }
     GetMouseClickIndex();
-    CHECK_NULL_VOID_NOLOG(mouseClickIndex_);
+    CHECK_NULL_VOID(mouseClickIndex_);
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
@@ -184,9 +195,9 @@ void SwiperIndicatorPattern::InitHoverMouseEvent()
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
 
-    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover, HoverInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && info.GetSourceDevice() != SourceType::TOUCH) {
             pattern->HandleHoverEvent(isHover);
         }
     };
@@ -211,9 +222,19 @@ void SwiperIndicatorPattern::InitHoverMouseEvent()
 
 void SwiperIndicatorPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    if (info.GetSourceDevice() == SourceType::TOUCH) {
+        return;
+    }
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-
+    auto mouseAction = info.GetAction();
+    if ((mouseAction == MouseAction::PRESS || mouseAction == MouseAction::RELEASE) &&
+        isClicked_ && NearEqual(hoverPoint_, PointF(mouseOffsetX, mouseOffsetY))) {
+        isRepeatClicked_ = true;
+        return;
+    }
+    isClicked_ = false;
+    isRepeatClicked_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     hoverPoint_.SetX(mouseOffsetX);
@@ -339,7 +360,6 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
             if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
                 hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {
                 mouseClickIndex_ = i;
-                swiperPattern->SetIndicatorDoingAnimation(true);
                 break;
             }
             centerX += itemWidth + space;
@@ -539,7 +559,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
 
 void SwiperIndicatorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!longPressEvent_);
+    CHECK_NULL_VOID(!longPressEvent_);
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -613,13 +633,13 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
 float SwiperIndicatorPattern::HandleTouchClickMargin()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, 0.0f);
+    CHECK_NULL_RETURN(host, 0.0f);
     auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
-    CHECK_NULL_RETURN_NOLOG(paintProperty, 0.0f);
+    CHECK_NULL_RETURN(paintProperty, 0.0f);
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(pipeline, 0.0f);
+    CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_RETURN_NOLOG(theme, 0.0f);
+    CHECK_NULL_RETURN(theme, 0.0f);
     auto itemWidth = paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx();
     auto selectedItemWidth = paintProperty->GetSelectedItemWidthValue(theme->GetSize()).ConvertToPx();
     if (Negative(itemWidth) || Negative(selectedItemWidth)) {
@@ -627,7 +647,7 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
         selectedItemWidth = theme->GetSize().ConvertToPx();
     }
     auto swiperNode = GetSwiperNode();
-    CHECK_NULL_RETURN_NOLOG(swiperNode, 0.0f);
+    CHECK_NULL_RETURN(swiperNode, 0.0f);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     int32_t itemCount = swiperPattern->TotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
@@ -635,7 +655,7 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
     auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0f);
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
     auto frameSize = geometryNode->GetFrameSize();
     auto axis = swiperPattern->GetDirection();
     return ((axis == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * 0.5f;

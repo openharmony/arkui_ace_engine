@@ -38,23 +38,28 @@ namespace OHOS::Ace::Framework {
 #if !defined(PREVIEW)
 class ScopeRAII {
 public:
-    explicit ScopeRAII(NativeScopeManager* manager) : manager_(manager)
+    explicit ScopeRAII(napi_env env) : env_(env)
     {
-        scope_ = manager_->Open();
+        napi_open_handle_scope(env_, &scope_);
     }
     ~ScopeRAII()
     {
-        manager_->Close(scope_);
+        napi_close_handle_scope(env_, scope_);
     }
 
 private:
-    NativeScopeManager* manager_;
-    NativeScope* scope_;
+    napi_env env_;
+    napi_handle_scope scope_;
 };
+
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
 const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj);
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
 RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj);
+#endif
+
+#ifdef PIXEL_MAP_SUPPORTED
+JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap);
 #endif
 
 bool IsDisableEventVersion();

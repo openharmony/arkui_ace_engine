@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/property/calc_length.h"
@@ -882,7 +883,7 @@ void ViewAbstract::SetOnDragEnter(
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragEnter(std::move(onDragEnter));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(onDragEnter));
 
     AddDragFrameNodeToManager();
 }
@@ -892,7 +893,7 @@ void ViewAbstract::SetOnDragLeave(
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragLeave(std::move(onDragLeave));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(onDragLeave));
 
     AddDragFrameNodeToManager();
 }
@@ -902,7 +903,7 @@ void ViewAbstract::SetOnDragMove(
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragMove(std::move(onDragMove));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(onDragMove));
 
     AddDragFrameNodeToManager();
 }
@@ -911,7 +912,7 @@ void ViewAbstract::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEven
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDrop(std::move(onDrop));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(onDrop));
 
     AddDragFrameNodeToManager();
 }
@@ -920,7 +921,7 @@ void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragE
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragEnd(std::move(onDragEnd));
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
 
     AddDragFrameNodeToManager();
 }
@@ -1124,6 +1125,29 @@ void ViewAbstract::BindPopup(
         if (popupNode) {
             popupId = popupNode->GetId();
         }
+        if (!showInSubWindow) {
+            // erase popup when target node destroy
+            auto destructor = [id = targetNode->GetId()]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto overlayManager = pipeline->GetOverlayManager();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->ErasePopup(id);
+                SubwindowManager::GetInstance()->HideSubWindowNG();
+            };
+            targetNode->PushDestroyCallback(destructor);
+        } else {
+            // erase popup in subwindow when target node destroy
+            auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+                CHECK_NULL_VOID(subwindow);
+                auto overlayManager = subwindow->GetOverlayManager();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->ErasePopup(id);
+                SubwindowManager::GetInstance()->HideSubWindowNG();
+            };
+            targetNode->PushDestroyCallback(destructor);
+        }
     } else {
         // use param to update PopupParm
         if (!isUseCustom) {
@@ -1151,26 +1175,40 @@ void ViewAbstract::BindPopup(
         if (isShow) {
             LOGI("Popup now show in subwindow.");
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
+            if (popupPattern) {
+                popupPattern->SetContainerId(Container::CurrentId());
+                popupPattern->StartEnteringAnimation(nullptr);
+            }
         } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetId);
+            if (popupPattern) {
+                popupPattern->StartExitingAnimation([targetId]() {
+                    LOGI("Popup now hide in subwindow.");
+                    SubwindowManager::GetInstance()->HidePopupNG(targetId);
+                });
+            }
         }
         return;
     }
-    auto destroyCallback = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager)), targetId]() {
-        auto overlay = weakOverlayManger.Upgrade();
-        CHECK_NULL_VOID(overlay);
-        overlay->ErasePopup(targetId);
-    };
-    targetNode->PushDestroyCallback(destroyCallback);
     if (!popupInfo.isCurrentOnShow) {
         targetNode->OnAccessibilityEvent(
             AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     if (isShow) {
         LOGI("begin to update popup node.");
-        overlayManager->ShowPopup(targetId, popupInfo);
+        overlayManager->UpdatePopupNode(targetId, popupInfo);
+        if (popupPattern) {
+            popupPattern->StartEnteringAnimation(nullptr);
+        }
     } else {
-        overlayManager->HidePopup(targetId, popupInfo);
+        if (popupPattern) {
+            popupPattern->StartExitingAnimation(
+                [targetId, popupInfo, weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
+                    auto overlay = weakOverlayManger.Upgrade();
+                    CHECK_NULL_VOID(overlay);
+                    LOGI("begin to update popup node.");
+                    overlay->UpdatePopupNode(targetId, popupInfo);
+                });
+        }
     }
 }
 
@@ -1189,17 +1227,18 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
 }
 
 void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-    MenuType menuType, const NG::OffsetF& offset, const MenuParam& menuParam)
+    const NG::OffsetF& offset, const MenuParam& menuParam, const RefPtr<UINode>& previewCustomNode)
 {
     LOGD("ViewAbstract::BindMenuWithCustomNode");
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
-    auto type = menuType;
+    auto type = menuParam.type;
 #ifdef PREVIEW
     // unable to use the subWindow in the Previewer.
     type = MenuType::MENU;
 #endif
-    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
+    auto menuNode =
+        MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
     if (type == MenuType::CONTEXT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
@@ -1336,12 +1375,10 @@ void ViewAbstract::SetRestoreId(int32_t restoreId)
 
 void ViewAbstract::SetDebugLine(const std::string& line)
 {
-#ifdef PREVIEW
     auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
         uiNode->SetDebugLine(line);
     }
-#endif
 }
 
 void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)

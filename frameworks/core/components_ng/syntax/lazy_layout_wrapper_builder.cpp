@@ -51,7 +51,7 @@ void LazyLayoutWrapperBuilder::AdjustGridOffset()
 
 int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()
 {
-    CHECK_NULL_RETURN_NOLOG(builder_, 0);
+    CHECK_NULL_RETURN(builder_, 0);
     return builder_->GetTotalCount();
 }
 

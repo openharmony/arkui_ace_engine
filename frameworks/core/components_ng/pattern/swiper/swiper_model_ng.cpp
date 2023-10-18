@@ -66,7 +66,6 @@ void SwiperModelNG::SetDisplayMode(SwiperDisplayMode displayMode)
 void SwiperModelNG::SetDisplayCount(int32_t displayCount)
 {
     if (displayCount <= 0) {
-        LOGE("SwiperModelNG::SetDisplayCount displayCount is invalid, return.");
         return;
     }
 
@@ -108,7 +107,6 @@ void SwiperModelNG::SetItemSpace(const Dimension& itemSpace)
 void SwiperModelNG::SetCachedCount(int32_t cachedCount)
 {
     if (cachedCount < 0) {
-        LOGE("SwiperModelNG::SetCachedCount cachedCount is invalid, return.");
         return;
     }
 
@@ -315,4 +313,12 @@ void SwiperModelNG::SetHoverShow(bool hoverShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, HoverShow, hoverShow);
 }
 
+void SwiperModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
 } // namespace OHOS::Ace::NG

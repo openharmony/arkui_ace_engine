@@ -45,7 +45,7 @@ ohos_unittest("SpringChainTest") {
     "$ace_root/frameworks/core/animation/spring_animation.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
-    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
 
     # common
     "$ace_root/frameworks/core/common/ace_application_info.cpp",
@@ -119,7 +119,6 @@ ohos_unittest("SpringChainTest") {
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # image
-    "$ace_root/frameworks/core/image/flutter_image_cache.cpp",
     "$ace_root/frameworks/core/image/image_cache.cpp",
 
     # layout

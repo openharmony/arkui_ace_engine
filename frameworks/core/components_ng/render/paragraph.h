@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PAPAGRAPH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PAPAGRAPH_H
 
+#include "base/geometry/ng/size_t.h"
+#include "base/image/pixel_map.h"
 #ifdef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #endif
@@ -29,6 +31,16 @@
 
 namespace OHOS::Ace::NG {
 
+struct LeadingMargin {
+    SizeF size;
+    RefPtr<PixelMap> pixmap;
+
+    bool operator==(const LeadingMargin& other) const
+    {
+        return size == other.size && pixmap == other.pixmap;
+    }
+};
+
 struct ParagraphStyle {
     TextDirection direction = TextDirection::AUTO;
     TextAlign align = TextAlign::LEFT;
@@ -36,6 +48,8 @@ struct ParagraphStyle {
     std::string fontLocale;
     WordBreak wordBreak = WordBreak::NORMAL;
     TextOverflow textOverflow = TextOverflow::CLIP;
+    std::optional<LeadingMargin> leadingMargin;
+    double fontSize = 14.0;
 };
 
 // Paragraph is interface for drawing text and text paragraph.
@@ -75,7 +89,7 @@ public:
     virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
 
     // interfaces for painting
-    virtual void Paint(const RSCanvas& canvas, float x, float y) = 0;
+    virtual void Paint(RSCanvas& canvas, float x, float y) = 0;
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 };
 
