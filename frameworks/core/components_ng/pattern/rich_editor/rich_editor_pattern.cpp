@@ -821,9 +821,6 @@ void RichEditorPattern::UpdateTextStyle(
     if (updateSpanStyle.updateFontSize.has_value()) {
         spanNode->UpdateFontSize(textStyle.GetFontSize());
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
-    } else {
-        spanNode->UpdateFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
-        spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
     }
     if (updateSpanStyle.updateItalicFontStyle.has_value()) {
         spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
