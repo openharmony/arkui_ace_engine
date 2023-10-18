@@ -156,7 +156,8 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
     });
 }
 
-void ShowContextMenuDisappearAnimation(AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+void ShowContextMenuDisappearAnimation(
+    AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern, bool startDrag = false)
 {
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuChild = menuWrapperPattern->GetMenu();
@@ -171,6 +172,10 @@ void ShowContextMenuDisappearAnimation(AnimationOption& option, const RefPtr<Men
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
+    if (startDrag) {
+        menuRenderContext->UpdateTransformScale(
+            VectorF(menuTheme->GetMenuDragAnimationScale(), menuTheme->GetMenuDragAnimationScale()));
+    }
     auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
     AnimationOption positionOption;
@@ -440,7 +445,7 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
     menuPattern->SetFirstShow();
 }
 
-void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation)
+void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
 {
     ResetLowerNodeFocusable(menu);
 
@@ -493,7 +498,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         } else {
             ShowPreviewDisappearAnimation(menuWrapperPattern);
         }
-        ShowContextMenuDisappearAnimation(option, menuWrapperPattern);
+        ShowContextMenuDisappearAnimation(option, menuWrapperPattern, startDrag);
     } else {
         AnimationUtils::Animate(
             option,
@@ -948,7 +953,7 @@ void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t 
     PopMenuAnimation(menu);
 }
 
-void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation)
+void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDrag)
 {
     LOGI("OverlayManager::HideMenuInSubWindow from close");
     if (menuMap_.empty()) {
@@ -958,7 +963,7 @@ void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation)
     auto rootNode = rootNodeWeak_.Upgrade();
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
-        PopMenuAnimation(node, showPreviewAnimation);
+        PopMenuAnimation(node, showPreviewAnimation, startDrag);
     }
 }
 
