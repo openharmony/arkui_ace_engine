@@ -303,7 +303,12 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
 #else
     InitImagePaint(imagePaint_, sampleOptions_);
 #endif
-    InitPaintBlend(imagePaint_);
+    SkPaint compositeOperationpPaint;
+    InitPaintBlend(compositeOperationpPaint);
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        skCanvas_->saveLayer(
+            SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
+    }
 
     if (globalState_.HasGlobalAlpha()) {
         imagePaint_.setAlphaf(globalState_.GetAlpha());
@@ -347,6 +352,10 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
         }
         default:
             break;
+    }
+
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        skCanvas_->restore();
     }
 #else
     LOGE("Drawing is not supported");
