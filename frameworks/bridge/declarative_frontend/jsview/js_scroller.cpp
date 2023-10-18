@@ -124,7 +124,7 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     } else if (animationValue->IsBoolean()) {
         smooth = animationValue->ToBoolean();
     }
-    TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollTo xOffset is %lf, yOffset is %lf, duration is %lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLL, "The xOffset and yOffset of scroll is %lf, %lf, duration is %lf",
         xOffset.Value(), yOffset.Value(), duration);
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
@@ -162,7 +162,7 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
     if (!scrollController) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SCROLL, "Scroll edge is %{public}d", static_cast<int32_t>(edge));
+    TAG_LOGD(AceLogTag::ACE_SCROLL, "The edge of Scroll is %{public}d", static_cast<int32_t>(edge));
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
     scrollController->ScrollToEdge(edgeType, true);
 }
@@ -208,7 +208,7 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
     if (!scrollController) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SCROLL, "ScrollPage next is %{public}s, direction is %{public}d",
+    TAG_LOGD(AceLogTag::ACE_SCROLL, "Whether to scroll page is %{public}s, direction is %{public}d",
         next ? "true" : "false", static_cast<int32_t>(direction));
     scrollController->ScrollPage(!next, true);
 }

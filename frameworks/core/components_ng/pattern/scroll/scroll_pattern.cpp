@@ -705,8 +705,7 @@ std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta)
     }
     if (predictSnapOffset.has_value()) {
         predictSnapOffset = predictSnapOffset.value() - currentOffset_;
-        TAG_LOGD(AceLogTag::ACE_SCROLL, "CalePredictSnapOffset predictSnapOffset is %{public}f",
-            predictSnapOffset.value());
+        TAG_LOGD(AceLogTag::ACE_SCROLL, "Prediction of snap offset is %{public}f", predictSnapOffset.value());
     }
     return predictSnapOffset;
 }

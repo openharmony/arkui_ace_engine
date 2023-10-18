@@ -637,7 +637,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             springController_->Stop();
         }
         StopSnapController();
-        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "scrollMotion position is %{public}lf, velocity is %{public}lf",
+        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}lf, velocity is %{public}lf",
             mainPosition, correctVelocity);
         double friction = friction_ > 0 ? friction_ : sFriction_;
         if (motion_) {
@@ -823,7 +823,8 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "scrollSnapDelta is %{public}f, scrollSnapVelocity is %{public}f",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The snap delta of scroll motion is %{public}f, "
+        "The snap velocity of scroll motion is %{public}f",
         scrollSnapDelta, scrollSnapVelocity);
     if (!snapController_) {
         snapController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
@@ -1006,6 +1007,8 @@ void Scrollable::ProcessScrollMotionStop()
 
 void Scrollable::ProcessSpringMotion(double position)
 {
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
+        currentPos_, position);
     currentVelocity_ = scrollMotion_->GetCurrentVelocity();
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
