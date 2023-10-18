@@ -11,8 +11,9 @@
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "build": "mkdir -p ./dist;\ntsc --build tsconfig.json",
-    "build_release": "rm -rf ./distRelease;\n mkdir -p ./distRelease;\ntsc --build tsconfig.release.json;\n node disableLogs.js distRelease/stateMgmt.js",
+    "build": "mkdir -p ./dist;\ntsc --build tsconfig.json\n node disableProfiler.js dist/stateMgmt.js",
+    "build_release": "rm -rf ./distRelease;\n mkdir -p ./distRelease;\ntsc --build tsconfig.release.json;\n node disableLogs.js distRelease/stateMgmt.js && node disableProfiler.js distRelease/stateMgmt.js",
+    "build_profile": "rm -rf ./distProfile;\n mkdir -p ./distProfile;\ntsc --build tsconfig.profile.json;\n node disableLogs.js distProfile/stateMgmt.js",
     "build_sdk": "rm -rf ./distSdk;\n mkdir -p ./distSdk;\ntsc --build tsconfig.sdk.json",
     "test": "rm -rf ./distTest;\n mkdir -p ./distTest;\n tsc --build tsconfig.test.json;\n node distTest/stateMgmt_test.js"
   },
