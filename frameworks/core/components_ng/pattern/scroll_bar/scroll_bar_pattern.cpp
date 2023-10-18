@@ -131,11 +131,11 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         CHECK_NULL_RETURN(renderContext, false);
         if (controlDistanceChanged_) {
             controlDistanceChanged_ = false;
-            if(!Positive(controlDistance_)){
+            if (!Positive(controlDistance_)) {
                 SetOpacity(0);
                 return true;
             }
-            SetOpacity(UINT8_MAX); 
+            SetOpacity(UINT8_MAX);
             if (displayMode_ == DisplayMode::AUTO) {
                 StartDisappearAnimator();
             }
