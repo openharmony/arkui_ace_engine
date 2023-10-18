@@ -3423,6 +3423,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     if (needShowSoftKeyboard) {
         LOGI("Start to request keyboard");
         if (customKeyboardBulder_) {
+#if defined(ENABLE_STANDARD_INPUT) && defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        imeAttached_ = true;
+#endif
             return RequestCustomKeyboard();
         }
 #if defined(ENABLE_STANDARD_INPUT)
