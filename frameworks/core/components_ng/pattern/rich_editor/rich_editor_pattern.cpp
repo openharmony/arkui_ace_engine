@@ -1277,6 +1277,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     UpdateSelectionType(textSelectInfo);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay();
+    selectionMenuOffset_ = info.GetGlobalLocation();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
@@ -2817,6 +2818,11 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
 
     if (menuParams == nullptr) {
         return;
+    }
+
+    // long pressing on the image needs to set the position of the pop-up menu following the long pressing position
+    if (selectType == RichEditorType::IMAGE && !selectInfo.isUsingMouse) {
+        selectInfo.menuInfo.menuOffset = OffsetF(selectionMenuOffset_.GetX(), selectionMenuOffset_.GetY());
     }
 
     selectInfo.menuInfo.menuBuilder = menuParams->buildFunc;
