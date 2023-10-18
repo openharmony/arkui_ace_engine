@@ -821,6 +821,9 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
 {
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "ProcessScrollSnapSpringMotion scrollSnapDelta is %{public}f, "
+        "scrollSnapVelocity is %{public}f",
+        scrollSnapDelta, scrollSnapVelocity);
     if (!snapController_) {
         snapController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
         snapController_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
