@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
-#define protected public
 #define private public
+#define protected public
 #include "core/components_ng/test/pattern/test_ng.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
 void TestNG::SetWidth(const Dimension& width)
@@ -43,6 +46,7 @@ void TestNG::RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode, float width
         LayoutConstraint.selfIdealSize = { width, height };
     }
     LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    frameNode->UpdateLayoutPropertyFlag();
     frameNode->Measure(LayoutConstraint);
     frameNode->Layout();
 }

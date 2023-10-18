@@ -13,7 +13,7 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("image_test_ng") {
+ace_unittest("text_field_test_ng") {
   type = "new"
-  sources = [ "image_test_ng.cpp" ]
+  sources = [ "text_field_test_ng.cpp" ]
 }

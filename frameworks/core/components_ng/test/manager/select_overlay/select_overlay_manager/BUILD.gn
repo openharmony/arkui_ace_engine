@@ -16,8 +16,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("select_overlay_manager_test_ng") {
   type = "new"
   module_output = "manager"
-  sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
-    "select_overlay_manager_test_ng.cpp",
-  ]
+  sources = [ "select_overlay_manager_test_ng.cpp" ]
 }

@@ -221,9 +221,6 @@ public:
     }
 
     void OnModifyDone() override;
-
-    void UpdateCaretPositionByTextEdit();
-    void UpdateCaretPositionByPressOffset();
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
@@ -277,10 +274,7 @@ public:
         selectController_->UpdateCaretIndex(caretPosition);
     }
     void SetEditingValueToProperty(const std::string& newValueText);
-
-    // void UpdatePositionOfParagraph(int32_t pos);
     void UpdateCaretPositionByTouch(const Offset& offset);
-    void UpdateCaretOffsetByEvent();
     bool IsReachedBoundary(float offset);
 
     virtual TextInputAction GetDefaultTextInputAction();
@@ -495,7 +489,6 @@ public:
     bool CursorMoveUp() override;
     bool CursorMoveDown() override;
     void SetCaretPosition(int32_t position);
-    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip) override;
@@ -915,7 +908,7 @@ public:
         isCustomFont_ = isCustomFont;
     }
 
-    bool GetIsCustomFont()
+    bool GetIsCustomFont() const
     {
         return isCustomFont_;
     }
@@ -1002,8 +995,6 @@ private:
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
 #endif
-    bool CaretPositionCloseToTouchPosition();
-    void CreateSingleHandle(bool animation = false, bool isMenuShow = true);
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
@@ -1022,9 +1013,6 @@ private:
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
-    // assert handles are inside the contentRect, reset them if not
-    void CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle,
-        float firstHandleSize = 0.0f, float secondHandleSize = 0.0f);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle,
         bool animation = false, bool isMenuShow = true);
 
@@ -1053,9 +1041,7 @@ private:
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
     void FireOnSelectionChange(int32_t start, int32_t end);
-    void UpdateDestinationToCaretByEvent();
     void UpdateCaretPositionByLastTouchOffset();
-    bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
     void UpdateCaretRect();
     void AdjustTextInReasonableArea();
@@ -1075,14 +1061,6 @@ private:
 
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    // void BeforeCreateLayoutWrapper() override;
-
-    bool FilterWithRegex(
-        const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
-    bool FilterWithAscii(const std::string& valueToUpdate, std::string& result);
-    bool FilterWithEmail(std::string& result);
-    void EditingValueFilter(std::string& valueToUpdate, std::string& result, bool isInsertValue = false);
-    bool LastTouchIsInSelectRegion(const std::vector<RectF>& boxes);
     bool CursorInContentRegion();
     float FitCursorInSafeArea();
     bool OffsetInContentRegion(const Offset& offset);

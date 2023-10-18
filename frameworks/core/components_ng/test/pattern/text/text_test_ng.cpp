@@ -3890,9 +3890,6 @@ HWTEST_F(TextTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.steps: step3. When text CopyOptions is None, call the callback function in textAccessibilityProperty.
      * @tc.expected: Related function is called.
      */
-    RectF rect(0.0f, 0.0f, 0.0f, 0.0f);
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_), GetPaintRectWithTransform())
-        .WillRepeatedly(Return(rect));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, TEXT_SIZE_INT));
     EXPECT_TRUE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_TRUE(textAccessibilityProperty->ActActionCopy());

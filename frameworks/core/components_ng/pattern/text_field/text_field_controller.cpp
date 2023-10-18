@@ -60,14 +60,14 @@ Rect TextFieldController::GetTextContentRect()
         rect.SetTop(y);
         textFieldPattern->UpdateRectByAlignment(rect);
         if (textFieldPattern->IsOperation()) {
-            return Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+            return { rect.GetX(), rect.GetY(), rect.Width(), rect.Height() };
         }
         if (NearEqual(rect.GetX(), -Infinity<float>())) {
-            return Rect(textFieldPattern->GetPaddingLeft(), rect.GetY(), 0, 0);
+            return { textFieldPattern->GetPaddingLeft(), rect.GetY(), 0, 0 };
         }
-        return Rect(rect.GetX(), rect.GetY(), 0, 0);
+        return { rect.GetX(), rect.GetY(), 0, 0 };
     }
-    return Rect(0, 0, 0, 0);
+    return { 0, 0, 0, 0 };
 }
 
 int32_t TextFieldController::GetTextContentLinesNum()
@@ -79,15 +79,14 @@ int32_t TextFieldController::GetTextContentLinesNum()
             return lines;
         }
         RectF textRect = textFieldPattern->GetTextRect();
-        
-        if ((int32_t)textFieldPattern->GetLineHeight() == 0) {
+
+        if (static_cast<int32_t>(textFieldPattern->GetLineHeight()) == 0) {
             return lines;
         }
-        lines = (int32_t)textRect.Height() / (int32_t)textFieldPattern->GetLineHeight();
+        lines = static_cast<int32_t>(textRect.Height()) / static_cast<int32_t>(textFieldPattern->GetLineHeight());
         return lines;
-    } else {
-        lines = getTextContentLinesNum_();
     }
+    lines = getTextContentLinesNum_();
     return lines;
 }
 

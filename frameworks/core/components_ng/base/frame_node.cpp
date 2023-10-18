@@ -975,7 +975,6 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
         Layout();
     }
     SetRootMeasureNode(false);
-    return;
 }
 
 std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)

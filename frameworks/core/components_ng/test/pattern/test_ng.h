@@ -18,19 +18,15 @@
 
 #include "gtest/gtest.h"
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-using namespace testing;
-using namespace testing::ext;
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 constexpr float DEVICE_WIDTH = 480.f;
@@ -44,10 +40,9 @@ class TestNG {
 public:
     static void SetWidth(const Dimension& width);
     static void SetHeight(const Dimension& height);
-    void RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode,
-        float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
+    void RunMeasureAndLayout(
+        const RefPtr<FrameNode>& frameNode, float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
-    void MockGetPaintRectWithTransform(const RefPtr<FrameNode>& frameNode, RectF paintRect = RectF());
 
     AssertionResult IsEqualOverScrollOffset(const OverScrollOffset& actual, const OverScrollOffset& expected)
     {
@@ -126,12 +121,11 @@ public:
     {
         return GetChildFrameNode(frameNode, index)->GetEventHub<T>();
     }
-    
+
     const RectF& GetChildRect(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
         return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameRect();
     }
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_PATTERN_H

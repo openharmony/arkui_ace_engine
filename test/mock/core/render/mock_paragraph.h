@@ -56,8 +56,8 @@ public:
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
     MOCK_METHOD3(
         CalcCaretMetricsByPosition, bool(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity));
-    MOCK_METHOD3(
-        CalcCaretMetricsByPosition, bool(int32_t extent, CaretMetricsF& caretCaretMetric, OffsetF lastTouchOffsetF));
+    MOCK_METHOD3(CalcCaretMetricsByPosition,
+        bool(int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffsetF));
 
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();

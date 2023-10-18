@@ -1162,9 +1162,9 @@ void TextFieldPattern::HandleTouchUp()
     }
 }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
 void TextFieldPattern::InitDragEvent()
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -1177,10 +1177,8 @@ void TextFieldPattern::InitDragEvent()
         ClearDragDropEvent();
         RemoveDragFrameNodeFromManager(host);
     }
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
 {
     auto callback = [weak = WeakClaim(this)](const Offset& point) {
