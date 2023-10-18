@@ -472,7 +472,7 @@ private:
     void InitIndicator();
     void InitArrow();
 
-    void HandleDragStart();
+    void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
 
