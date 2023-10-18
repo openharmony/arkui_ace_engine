@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_PARAGRAPH_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_PARAGRAPH_MANAGER_H
 #include <list>
+#include <optional>
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -32,6 +33,7 @@ public:
 
         std::string ToString() const;
     };
+    std::optional<double> minParagraphFontSize;
 
     int32_t GetIndex(Offset offset) const;
     float GetHeight() const;
