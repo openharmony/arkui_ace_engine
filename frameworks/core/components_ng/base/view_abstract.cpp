@@ -994,13 +994,7 @@ void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
         LOGD("current state is not processed, return");
         return;
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    if (target) {
-        target->UpdateOffset(value);
-        target->SyncGeometryProperties(AceType::RawPtr(frameNode->GetGeometryNode()), true);
-    }
+    ACE_UPDATE_RENDER_CONTEXT(Offset, value);
 }
 
 void ViewAbstract::MarkAnchor(const OffsetT<Dimension>& value)

@@ -807,7 +807,6 @@ void FrameNode::TriggerOnAreaChangeCallback()
     if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         auto currParentOffsetToWindow = GetOffsetRelativeToWindow() - currFrameRect.GetOffset();
-        currFrameRect.SetOffset(geometryNode_->GetPixelGridRoundOffsetForArea());
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             eventHub_->FireOnAreaChanged(
                 *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
