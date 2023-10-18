@@ -68,6 +68,7 @@ jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
+arkcomponent_obj_path = base_output_path + "/arkComponent.o"
 
 gen_obj("js_proxyclass") {
   input = "engine/stateMgmt.js"
@@ -84,6 +85,15 @@ gen_obj("js_enum_style") {
     jsenumstyle_obj_path = base_output_path + "/js_enum_style.c"
   }
   output = jsenumstyle_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("ark_component") {
+  input = "engine/arkComponent.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    arkcomponent_obj_path = base_output_path + "/ark_component.c"
+  }
+  output = arkcomponent_obj_path
   snapshot_dep = []
 }
 
@@ -526,6 +536,7 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_uicontext",
+      ":gen_obj_src_ark_component",
     ]
 
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
@@ -889,6 +900,7 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_uicontext",
+      ":gen_obj_src_ark_component",
     ]
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework &&

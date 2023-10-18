@@ -75,14 +75,17 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsUIContext_abc_start[];
+extern const char _binary_arkComponent_abc_start[];
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
 extern const char _binary_jsUIContext_abc_end[];
+extern const char _binary_arkComponent_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
 extern const char* _binary_jsUIContext_abc_end;
+extern const char* _binary_arkComponent_abc_end;
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -306,6 +309,11 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         if (!jsEnumStyleResult) {
             LOGE("EvaluateJsCode jsEnumStyle failed");
         }
+        bool arkComponentResult = runtime_->EvaluateJsCode(
+            (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
+        if (!arkComponentResult) {
+            LOGE("EvaluateJsCode arkComponent failed");
+        }
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -425,6 +433,15 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     bool jsUIContextResult = arkRuntime->EvaluateJsCode(tsCodeStart, tsCodeLength);
     if (!jsUIContextResult) {
         LOGE("PreloadAceModule EvaluateJsCode jsUIContextResult failed");
+    }
+
+    // preload ark component
+    bool arkComponentResult = arkRuntime->EvaluateJsCode(
+        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
+    if (!arkComponentResult) {
+        LOGE("EvaluateJsCode arkComponent failed");
+        globalRuntime_ = nullptr;
+        return;
     }
 
     isModulePreloaded_ = evalResult;
@@ -2256,6 +2273,15 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
     if (!jsEnumStyleResult) {
         LOGE("EvaluateJsCode jsEnumStyle failed");
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark component
+    bool arkComponentResult = arkRuntime->EvaluateJsCode(
+        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
+    if (!arkComponentResult) {
+        LOGE("EvaluateJsCode arkComponent failed");
         globalRuntime_ = nullptr;
         return;
     }

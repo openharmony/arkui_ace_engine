@@ -37,6 +37,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "arkoala_api.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -1123,6 +1124,9 @@ void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "GetArkUINativeModule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetArkUINativeModule));
+    
 
     JsBindFormViews(globalObj, formModuleList);
 
@@ -1305,6 +1309,8 @@ void JsRegisterViews(BindingTarget globalObj)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "focusControl"), focusControlObj);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerNamedRoute"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRegisterNamedRoute));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "GetArkUINativeModule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetArkUINativeModule));
 
     JsBindViews(globalObj);
 

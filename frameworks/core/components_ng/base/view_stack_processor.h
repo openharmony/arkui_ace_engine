@@ -34,15 +34,24 @@
 #define ACE_UPDATE_LAYOUT_PROPERTY(target, name, value)                         \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(target, name, value, frameNode);        \
+    } while (false)
+#define ACE_UPDATE_NODE_LAYOUT_PROPERTY(target, name, value, frameNode)         \
+    do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
         auto cast##target = frameNode->GetLayoutProperty<target>();             \
         if (cast##target) {                                                     \
             cast##target->Update##name(value);                                  \
         }                                                                       \
     } while (false)
+
 #define ACE_UPDATE_PAINT_PROPERTY(target, name, value)                          \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_UPDATE_NODE_PAINT_PROPERTY(target, name, value, frameNode);         \
+    } while (false)
+#define ACE_UPDATE_NODE_PAINT_PROPERTY(target, name, value, frameNode)          \
+    do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
         auto cast##target = frameNode->GetPaintProperty<target>();              \
         if (cast##target) {                                                     \
@@ -53,6 +62,10 @@
 #define ACE_UPDATE_RENDER_CONTEXT(name, value)                                  \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_UPDATE_NODE_RENDER_CONTEXT(name, value, frameNode);                 \
+    } while (false)
+#define ACE_UPDATE_NODE_RENDER_CONTEXT(name, value, frameNode)                  \
+    do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
         auto target = frameNode->GetRenderContext();                            \
         if (target) {                                                           \
@@ -63,46 +76,67 @@
 #define ACE_RESET_LAYOUT_PROPERTY(target, name)                                 \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_RESET_NODE_LAYOUT_PROPERTY(target, name, frameNode);                \
+    } while (false)
+#define ACE_RESET_NODE_LAYOUT_PROPERTY(target, name, frameNode)                 \
+    do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
         auto cast##target = frameNode->GetLayoutProperty<target>();             \
         CHECK_NULL_VOID(cast##target);                                          \
         cast##target->Reset##name();                                            \
     } while (false)
 
-#define ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(target, name, changeFlag)           \
-    do {                                                                        \
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
-        CHECK_NULL_VOID(frameNode);                                             \
-        auto cast##target = frameNode->GetLayoutProperty<target>();             \
-        CHECK_NULL_VOID(cast##target);                                          \
-        if (cast##target->Has##name()) {                                        \
-            cast##target->Reset##name();                                        \
-            cast##target->UpdatePropertyChangeFlag(changeFlag);                 \
-        }                                                                       \
+#define ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(target, name, changeFlag)                      \
+    do {                                                                                   \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();            \
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(target, name, changeFlag, frameNode);     \
+    } while (false)
+#define ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(target, name, changeFlag, frameNode)      \
+    do {                                                                                   \
+        CHECK_NULL_VOID(frameNode);                                                        \
+        auto cast##target = frameNode->GetLayoutProperty<target>();                        \
+        CHECK_NULL_VOID(cast##target);                                                     \
+        if (cast##target->Has##name()) {                                                   \
+            cast##target->Reset##name();                                                   \
+            cast##target->UpdatePropertyChangeFlag(changeFlag);                            \
+        }                                                                                  \
     } while (false)
 
 #define ACE_RESET_PAINT_PROPERTY(target, name)                                  \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_RESET_NODE_PAINT_PROPERTY(target, name, frameNode);                 \
+    } while (false)
+#define ACE_RESET_NODE_PAINT_PROPERTY(target, name, frameNode)                  \
+    do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
         auto cast##target = frameNode->GetPaintProperty<target>();              \
         CHECK_NULL_VOID(cast##target);                                          \
         cast##target->Reset##name();                                            \
     } while (false)
 
-#define ACE_RESET_PAINT_PROPERTY_WITH_FLAG(target, name, changeFlag)            \
-    do {                                                                        \
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
-        CHECK_NULL_VOID(frameNode);                                             \
-        auto cast##target = frameNode->GetPaintProperty<target>();              \
-        CHECK_NULL_VOID(cast##target);                                          \
-        cast##target->Reset##name();                                            \
-        cast##target->UpdatePropertyChangeFlag(changeFlag);                     \
+#define ACE_RESET_PAINT_PROPERTY_WITH_FLAG(target, name, changeFlag)                      \
+    do {                                                                                  \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();           \
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(target, name, changeFlag, frameNode);     \
+    } while (false)
+#define ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(target, name, changeFlag, frameNode)      \
+    do {                                                                                  \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();           \
+        CHECK_NULL_VOID(frameNode);                                                       \
+        auto cast##target = frameNode->GetPaintProperty<target>();                        \
+        CHECK_NULL_VOID(cast##target);                                                    \
+        cast##target->Reset##name();                                                      \
+        cast##target->UpdatePropertyChangeFlag(changeFlag);                               \
     } while (false)
 
 #define ACE_RESET_RENDER_CONTEXT(target, name)                                  \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_RESET_NODE_RENDER_CONTEXT(target, name, frameNode);                 \
+    } while (false)
+#define ACE_RESET_NODE_RENDER_CONTEXT(target, name, frameNode)                  \
+    do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
         auto cast##target = frameNode->GetRenderContext();                      \
         CHECK_NULL_VOID(cast##target);                                          \

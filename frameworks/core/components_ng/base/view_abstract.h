@@ -312,6 +312,20 @@ public:
         const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
     static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
 
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetWidth(FrameNode* frameNode, const CalcLength& width);
+    static void SetHeight(FrameNode* frameNode, const CalcLength& width);
+    static void SetOpacity(FrameNode* frameNode, double opacity);
+    static void SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
+    static void SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
+    static void SetBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
+    static void SetZIndex(FrameNode* frameNode, int32_t value);
+    static void SetBackShadow(FrameNode* frameNode, const Shadow& shadow);
+    static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
+    static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
+    static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
+
 private:
     static void AddDragFrameNodeToManager();
 };

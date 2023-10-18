@@ -22,6 +22,7 @@ abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
 abcuicontext_obj_path = base_output_path + "/abc_uicontext.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
+arkcomponent_obj_path = base_output_path + "/abc_ark_component.o"
 
 es2abc_gen_abc("gen_stateMgmt_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
@@ -51,6 +52,16 @@ es2abc_gen_abc("gen_jsUIContext_abc") {
 
   in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsUIContext.js" ]
   out_puts = [ base_output_path + "/jsUIContext.abc" ]
+}
+
+es2abc_gen_abc("gen_arkComponent_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkComponent.js")
+  dst_file = rebase_path(base_output_path + "/arkComponent.abc")
+
+  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkComponent.js" ]
+  out_puts = [ base_output_path + "/arkComponent.abc" ]
 }
 
 if (!is_cross_platform_build) {
@@ -93,6 +104,15 @@ gen_obj("abc_uicontext") {
   }
   output = abcuicontext_obj_path
   snapshot_dep = [ ":gen_jsUIContext_abc" ]
+}
+
+gen_obj("abc_ark_component") {
+  input = base_output_path + "/arkComponent.abc"
+  if (use_mac || use_mingw_win || use_ios || use_linux) {
+    arkcomponent_obj_path = base_output_path + "/arkComponent.c"
+  }
+  output = arkcomponent_obj_path
+  snapshot_dep = [ ":gen_arkComponent_abc" ]
 }
 
 if (!is_cross_platform_build) {
@@ -138,6 +158,8 @@ template("declarative_js_engine_ark") {
       "modules/jsi_router_module.cpp",
       "modules/jsi_syscap_module.cpp",
       "modules/jsi_timer_module.cpp",
+      "arkoala_api_impl.cpp",
+      "nativeModule/arkoala_common_modifier.cpp",
     ]
 
     include_dirs = []
@@ -211,6 +233,7 @@ template("declarative_js_engine_ark") {
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
       ":gen_obj_src_abc_uicontext",
+      ":gen_obj_src_abc_ark_component",
     ]
   }
 }
