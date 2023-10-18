@@ -1461,12 +1461,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     } else {
         CloseSelectOverlay(true);
     }
-
-    if (RequestKeyboard(false, true, true)) {
-        auto eventHub = host->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnEditChanged(true); // 事件可能重复上报待整改
-    }
+    needToRequestKeyboardInner_ = true;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
