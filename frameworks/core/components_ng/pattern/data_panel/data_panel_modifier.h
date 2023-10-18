@@ -40,18 +40,17 @@ constexpr float ANIMATION_CURVE_STIFFNESS = 110.0f; // The circle animation spri
 constexpr float ANIMATION_CURVE_DAMPING = 17.0f;    // The circle animation spring curve damping is 17.0
 constexpr size_t MAX_COUNT = 9;
 constexpr float DEFAULT_MAX_VALUE = 100.0f;
+constexpr float START_ANGLE = 0.0f;
 struct ArcData {
     Offset center;
-    float progress = 0.0f;
+    float progressValue = 0.0f;
     float radius = 0.0f;
     float thickness = 0.0f;
     double maxValue = 0.0;
+    double totalValue = 0.0f;
     Gradient progressColors;
     Gradient shadowColor;
-
-    float wholeAngle = 360.0f;
-    float startAngle = 0.0f;
-
+    float drawAngle = 0.0f;
     float gradientPointBase = 0.0f;
 };
 struct LinearData {
@@ -76,18 +75,17 @@ public:
     void onDraw(DrawingContext& context) override;
     void UpdateDate();
 
-    void PaintCircle(DrawingContext& context, OffsetF offset, float date) const;
+    void PaintCircle(DrawingContext& context, OffsetF offset) const;
     void PaintLinearProgress(DrawingContext& context, OffsetF offset) const;
     void PaintBackground(RSCanvas& canvas, OffsetF offset, float totalWidth, float height, float segmentWidth) const;
     void PaintColorSegment(RSCanvas& canvas, const LinearData& segmentLinearData) const;
-    void PaintSpace(RSCanvas& canvas, OffsetF offset, float spaceWidth, float xSpace, float height) const;
+    void PaintSpace(RSCanvas& canvas, const LinearData& segmentLinearData, float spaceWidth) const;
     void PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const;
-    void PaintProgress(RSCanvas& canvas, ArcData arcData, bool useEffect = false, bool useAnimator = false,
-        float percent = 0.0f) const;
+    void PaintProgress(RSCanvas& canvas, ArcData arcData) const;
 
     void SetValues(std::vector<double> values)
     {
-        for (size_t i = 0; i < values.size(); i++) {
+        for (size_t i = 0; i < values.size(); ++i) {
             if (i >= MAX_COUNT) {
                 return;
             }
@@ -98,9 +96,7 @@ public:
 
     void SetMax(double max)
     {
-        if (max_) {
-            max_->Set(max);
-        }
+        max_->Set(max);
     };
 
     void SetDataPanelType(size_t dataPanelType)
@@ -113,9 +109,7 @@ public:
 
     void SetEffect(bool effect)
     {
-        if (isEffect_) {
-            isEffect_->Set(effect);
-        }
+        isEffect_->Set(effect);
     };
 
     void SetOffset(OffsetF offset)
@@ -125,7 +119,7 @@ public:
 
     void SetValueColors(const std::vector<Gradient>& valueColors)
     {
-        for (size_t i = 0; i < valueColors.size(); i++) {
+        for (size_t i = 0; i < valueColors.size(); ++i) {
             if (i >= MAX_COUNT) {
                 return;
             }
@@ -135,16 +129,12 @@ public:
 
     void SetTrackBackground(const Color& trackBackgroundColor)
     {
-        if (trackBackgroundColor_) {
-            trackBackgroundColor_->Set(LinearColor(trackBackgroundColor));
-        }
+        trackBackgroundColor_->Set(LinearColor(trackBackgroundColor));
     };
 
     void SetStrokeWidth(float strokeWidth)
     {
-        if (strokeWidth_) {
-            strokeWidth_->Set(strokeWidth);
-        }
+        strokeWidth_->Set(strokeWidth);
     };
 
     void SetShadowVisible(bool isShadowVisible)
@@ -159,28 +149,22 @@ public:
 
     void SetShadowRadius(float shadowRadius)
     {
-        if (shadowRadiusFloat_) {
-            shadowRadiusFloat_->Set(shadowRadius);
-        }
+        shadowRadiusFloat_->Set(shadowRadius);
     };
 
     void SetShadowOffsetX(float shadowOffsetX)
     {
-        if (shadowOffsetXFloat_) {
-            shadowOffsetXFloat_->Set(shadowOffsetX);
-        }
+        shadowOffsetXFloat_->Set(shadowOffsetX);
     };
 
     void SetShadowOffsetY(float shadowOffsetY)
     {
-        if (shadowOffsetYFloat_) {
-            shadowOffsetYFloat_->Set(shadowOffsetY);
-        }
+        shadowOffsetYFloat_->Set(shadowOffsetY);
     };
 
     void SetShadowColors(const std::vector<Gradient>& valueColors, const size_t shadowColorsLastLength)
     {
-        for (size_t i = 0; i < valueColors.size(); i++) {
+        for (size_t i = 0; i < valueColors.size(); ++i) {
             if (i >= MAX_COUNT) {
                 return;
             }
@@ -190,15 +174,13 @@ public:
     };
 
 private:
-    void PaintRainbowFilterMask(
-        RSCanvas& canvas, double factor, ArcData arcData, float shadowColorSize, float totalValue) const;
+    void PaintRainbowFilterMask(RSCanvas& canvas, ArcData arcData) const;
     void PaintColorSegmentFilterMask(RSCanvas& canvas, const LinearData& segmentLinearData) const;
     Gradient SortGradientColorsOffset(const Gradient& srcGradient) const;
     RefPtr<AnimatablePropertyFloat> date_;
     RefPtr<PropertyBool> isEffect_;
     size_t dataPanelType_;
     OffsetF offset_;
-    bool isFirstAnimate_ = true;
     bool isFirstCreate_ = true;
     bool isHasShadowValue_ = false;
 
