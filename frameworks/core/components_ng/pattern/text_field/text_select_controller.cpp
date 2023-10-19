@@ -118,8 +118,10 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     UpdateCaretIndex(index);
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
+        MoveCaretToContentRect(GetCaretIndex());
+    } else {
+        caretInfo_.rect = CalculateEmptyValueCaretRect();
     }
-    MoveCaretToContentRect(GetCaretIndex());
 }
 
 int32_t TextSelectController::ConvertTouchOffsetToPosition(const Offset& localOffset)
@@ -298,6 +300,7 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
 
 void TextSelectController::MoveCaretToContentRect(int32_t index)
 {
+    index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     CaretMetricsF CaretMetrics;
     caretInfo_.index = index;
     firstHandleInfo_.index = index;

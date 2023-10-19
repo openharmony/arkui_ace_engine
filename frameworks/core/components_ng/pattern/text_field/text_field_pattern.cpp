@@ -1457,7 +1457,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     StartTwinkling();
     SetIsSingleHandle(true);
     if (lastCaretIndex == selectController_->GetCaretIndex() && hasFocus && caretStatus_ == CaretStatus::SHOW &&
-        !isUsingMouse_ && !IsSelected()) {
+        !isUsingMouse_) {
         ProcessOverlay(true);
     } else {
         CloseSelectOverlay(true);
@@ -1907,8 +1907,8 @@ void TextFieldPattern::ProcessOverlay(bool animation, bool isShowMenu)
     selectController_->CalculateHandleOffset();
     if (isSingleHandle_) {
         StartTwinkling();
-        LOGD("Show single handle Handle info %{public}s", selectController_->GetSecondHandleRect().ToString().c_str());
-        ShowSelectOverlay(std::nullopt, selectController_->GetSecondHandleRect(), animation, isShowMenu);
+        LOGD("Show single handle Handle info %{public}s", selectController_->GetCaretRect().ToString().c_str());
+        ShowSelectOverlay(std::nullopt, selectController_->GetCaretRect(), animation, isShowMenu);
     } else {
         LOGD("Show handles firstHandle info %{public}s, secondHandle Info %{public}s",
             selectController_->GetFirstHandleRect().ToString().c_str(),
@@ -3026,7 +3026,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     SwapIfLarger(start, end);
     LOGI("Handle Delete within [%{public}d, %{public}d]", start, end);
     contentController_->erase(start, end - start);
-    selectController_->UpdateCaretIndex(start);
+    selectController_->MoveCaretToContentRect(start);
     FireOnTextChangeEvent();
     CloseSelectOverlay(true);
     StartTwinkling();
