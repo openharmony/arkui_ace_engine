@@ -2102,7 +2102,9 @@ bool RichEditorPattern::CursorMoveUp()
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-        int32_t caretPosition = paragraphs_.GetIndex(Offset(caretOffset.GetX(), caretOffset.GetY() - caretHeight));
+        auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
+        int32_t caretPosition = paragraphs_.GetIndex(
+            Offset(caretOffset.GetX() - contentRect_.GetX(), caretOffset.GetY() - minDet));
         caretPosition = std::clamp(caretPosition, 0, static_cast<int32_t>(GetTextContentLength()));
         if (caretPosition_ == caretPosition) {
             return false;
@@ -2120,7 +2122,9 @@ bool RichEditorPattern::CursorMoveDown()
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-        int32_t caretPosition = paragraphs_.GetIndex(Offset(caretOffset.GetX(), caretOffset.GetY() + caretHeight));
+        auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
+        int32_t caretPosition = paragraphs_.GetIndex(
+            Offset(caretOffset.GetX() - contentRect_.GetX(), caretOffset.GetY() + caretHeight + minDet / 2.0));
         caretPosition = std::clamp(caretPosition, 0, static_cast<int32_t>(GetTextContentLength()));
         if (caretPosition_ == caretPosition) {
             return false;
