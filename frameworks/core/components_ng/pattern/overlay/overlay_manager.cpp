@@ -1055,6 +1055,7 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
     CHECK_NULL_VOID(pipeline);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetMenuHide();
     auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
     if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         ShowPreviewDisappearAnimation(menuWrapperPattern);
