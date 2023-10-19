@@ -30,6 +30,7 @@
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
@@ -2012,7 +2013,9 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     WebPattern::RegisterSelectPopupCallback(menu, callback, params);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->RegisterOnHideMenu([weak = WeakClaim(this), callback]() {
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->RegisterMenuDisappearCallback([weak = WeakClaim(this), callback]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         callback->Cancel();

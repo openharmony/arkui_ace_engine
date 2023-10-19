@@ -413,7 +413,8 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
                     } else {
                         overlayManager->FocusOverlayNode(menu);
                     }
-                    overlayManager->CallOnShowMenuCallback();
+                    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+                    menuWrapperPattern->CallMenuAppearCallback();
                 },
                 TaskExecutor::TaskType::UI);
         });
@@ -469,8 +470,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     root = overlayManager->FindWindowScene(menu);
                 }
                 CHECK_NULL_VOID(root);
-                overlayManager->CallOnHideMenuCallback();
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+                menuWrapperPattern->CallMenuDisappearCallback();
                 // clear contextMenu then return
                 if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
@@ -978,6 +979,7 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
 
 void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
+    // menu is menuWrapper
     LOGI("OverlayManager::HideMenuNode menu targetId is %{public}d", targetId);
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
