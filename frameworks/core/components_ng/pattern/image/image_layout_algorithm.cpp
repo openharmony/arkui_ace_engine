@@ -70,7 +70,7 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     do {
         auto aspectRatio = static_cast<float>(Size::CalcRatio(rawImageSize));
         if (NearZero(aspectRatio)) {
-            LOGW("image aspectRatio is 0");
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "image aspectRatio is 0");
             return std::nullopt;
         }
         // case 2.1: image component is not set with size, use image source size as image component size
