@@ -329,7 +329,6 @@ void AceAbility::InitializeAppInfo()
         auto hapModuleInfo = faContext->GetHapModuleInfo();
         CHECK_NULL_VOID(hapModuleInfo);
         bundleName_ = appInfo->GetBundleName();
-        moduleName_ = hapModuleInfo->GetModuleName();
         compatibleVersion_ = appInfo->GetMinAPIVersion();
         auto targetVersion = appInfo->GetTargetAPIVersion();
         auto releaseType = appInfo->GetApiReleaseType();
