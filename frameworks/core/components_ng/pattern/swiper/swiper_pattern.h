@@ -427,6 +427,13 @@ public:
     {
         isIndicatorLongPress_ = isIndicatorLongPress;
     }
+    void SetCachedCount(int32_t cachedCount)
+    {
+        if (cachedCount_.has_value() && cachedCount_.value() != cachedCount) {
+            SetLazyLoadFeature(true);
+        }
+        cachedCount_ = cachedCount;
+    }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
@@ -685,6 +692,7 @@ private:
     bool isTouchPad_ = false;
 
     float mainDeltaSum_ = 0.0f;
+    std::optional<int32_t> cachedCount_;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
