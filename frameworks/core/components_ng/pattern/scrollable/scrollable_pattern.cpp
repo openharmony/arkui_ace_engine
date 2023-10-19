@@ -694,7 +694,8 @@ void ScrollablePattern::ScrollTo(float position)
 
 void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
-    LOGI("AnimateTo:%{public}f, duration:%{public}f", position, duration);
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of the animation is %{public}f, duration is %{public}f",
+        position, duration);
     float currVelocity = 0.0f;
     if (!IsScrollableStopped()) {
         CHECK_NULL_VOID(scrollableEvent_);

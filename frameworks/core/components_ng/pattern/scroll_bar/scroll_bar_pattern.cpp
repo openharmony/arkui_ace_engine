@@ -59,7 +59,6 @@ void ScrollBarPattern::OnModifyDone()
     }
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     if (axis_ == axis && scrollableEvent_) {
-        LOGD("Direction not changed, need't resister scroll event again.");
         return;
     }
 
@@ -187,7 +186,6 @@ void ScrollBarPattern::StartDisappearAnimator()
     if (!Positive(controlDistance_)) {
         return;
     }
-    LOGD("outer scrollBar start disappear animator");
     if (disapplearDelayTask_) {
         disapplearDelayTask_.Cancel();
     }
