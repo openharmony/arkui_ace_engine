@@ -125,37 +125,12 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 {
     auto isAtTop = (IsAtTop() && Positive(offset));
     auto refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
-    switch (refreshCoordinateMode) {
-        case RefreshCoordinationMode::SCROLLABLE_SCROLL:
-            return true;
-        case RefreshCoordinationMode::REFRESH_SCROLL:
-            return false;
-        default:
-            break;
-    }
-
     auto isDraggedDown = navBarPattern_ ? navBarPattern_->GetDraggedDown() : false;
-
-    if (!ProcessAssociatedScroll(offset, source)) {
+    auto navigationInCoordination = CoordinateWithNavigation(isAtTop, isDraggedDown, offset, source);
+    if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination) {
         return false;
     }
 
-    if ((isAtTop || isDraggedDown) && (source == SCROLL_FROM_UPDATE) && !isReactInParentMovement_ &&
-        (axis_ == Axis::VERTICAL)) {
-        isReactInParentMovement_ = true;
-        ProcessNavBarReactOnStart();
-    }
-
-    if (navBarPattern_ && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
-        isReactInParentMovement_ = false;
-        ProcessNavBarReactOnEnd();
-    }
-    if (isReactInParentMovement_) {
-        auto needMove = ProcessNavBarReactOnUpdate(offset);
-        if (navBarPattern_ && navBarPattern_->IsTitleModeFree()) {
-            return needMove;
-        }
-    }
     if (source == SCROLL_FROM_START) {
         SetParentScrollable();
         GetParentNavigation();
@@ -223,6 +198,32 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         }
     }
     return coordinationMode;
+}
+
+bool ScrollablePattern::CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source)
+{
+    bool reactiveIn = false;
+    if (!ProcessAssociatedScroll(offset, source)) {
+        return true;
+    }
+
+    if ((isAtTop || isDraggedDown) && (source == SCROLL_FROM_UPDATE) && !isReactInParentMovement_ &&
+        (axis_ == Axis::VERTICAL)) {
+        isReactInParentMovement_ = true;
+        ProcessNavBarReactOnStart();
+    }
+
+    if (navBarPattern_ && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
+        isReactInParentMovement_ = false;
+        ProcessNavBarReactOnEnd();
+    }
+    if (isReactInParentMovement_) {
+        auto needMove = ProcessNavBarReactOnUpdate(offset);
+        if (navBarPattern_ && navBarPattern_->IsTitleModeFree()) {
+            reactiveIn = !needMove;
+        }
+    }
+    return reactiveIn;
 }
 
 void ScrollablePattern::OnScrollEnd()
