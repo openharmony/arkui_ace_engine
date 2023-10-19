@@ -3525,7 +3525,6 @@ export struct TreeViewInner {
               findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId()));
             this.listTreeViewMenu = this.item.getMenu();
             that.listNodeDataSource.setClickIndex(thisIndex);
-            that.listNodeDataSource.setPopUpInfo(PopUpType.HINTS, InputError.NONE, false, thisIndex);
             clearTimeout(this.item.getNodeItem().mainTitleNode.popUpTimeout);
           }
           event.stopPropagation();

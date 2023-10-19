@@ -54,7 +54,7 @@ export declare type SelectOptions = {
 
 @Component
 struct IconGroup {
-  @State bgColor: Resource = $r('sys.color.ohos_id_color_background')
+  @State bgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
   @State isFocus: boolean = false
   item: OperationOption
   focusBorderWidth = BORDER_WIDTH
@@ -80,14 +80,14 @@ struct IconGroup {
         this.bgColor = $r('sys.color.ohos_id_color_click_effect')
       }
       if (event.type === TouchType.Up) {
-        this.bgColor = $r('sys.color.ohos_id_color_background')
+        this.bgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
       }
     })
     .onHover((isHover: boolean) => {
       if (isHover) {
         this.bgColor = $r('sys.color.ohos_id_color_hover')
       } else {
-        this.bgColor = $r('sys.color.ohos_id_color_background')
+        this.bgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
       }
     })
     .stateStyles({
@@ -122,8 +122,8 @@ export struct SubHeader {
   @Prop operationType: OperationType = OperationType.BUTTON
   operationItem: Array<OperationOption>
   @State isDuplicateLine: boolean = false
-  @State textArrowBgColor: Resource = $r('sys.color.ohos_id_color_background')
-  @State buttonBgColor: Resource = $r('sys.color.ohos_id_color_background')
+  @State textArrowBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
+  @State buttonBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
   @State flexWidth: number = 0
   @State textArrowWidth: number = 0
   @State textArrowFocus: boolean = false
@@ -263,14 +263,14 @@ export struct SubHeader {
             this.textArrowBgColor = $r('sys.color.ohos_id_color_click_effect')
           }
           if (event.type === TouchType.Up) {
-            this.textArrowBgColor = $r('sys.color.ohos_id_color_background')
+            this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
           }
         })
         .onHover((isHover: boolean) => {
           if (isHover) {
             this.textArrowBgColor = $r('sys.color.ohos_id_color_hover')
           } else {
-            this.textArrowBgColor = $r('sys.color.ohos_id_color_background')
+            this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
           }
         })
         .onKeyEvent((event) => {
@@ -338,14 +338,14 @@ export struct SubHeader {
             this.buttonBgColor = $r('sys.color.ohos_id_color_click_effect')
           }
           if (event.type === TouchType.Up) {
-            this.buttonBgColor = $r('sys.color.ohos_id_color_background')
+            this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
           }
         })
         .onHover((isHover: boolean) => {
           if (isHover) {
             this.buttonBgColor = $r('sys.color.ohos_id_color_hover')
           } else {
-            this.buttonBgColor = $r('sys.color.ohos_id_color_background')
+            this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
           }
         })
         .onKeyEvent((event) => {
