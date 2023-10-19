@@ -18,11 +18,13 @@
 #include "include/codec/SkCodec.h"
 #include "include/core/SkGraphics.h"
 
+#include "base/image/image_source.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/image_provider/adapter/skia_svg_dom.h"
 #include "core/components_ng/svg/svg_dom.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t ASTC_FRAME_COUNT = 1;
 
 SkiaImageData::SkiaImageData(const void* data, size_t length)
 {
@@ -87,9 +89,15 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
 
 std::pair<SizeF, int32_t> SkiaImageData::Parse() const
 {
+    SizeF imageSize;
+    if (ImageSource::IsAstc(GetSkData()->bytes())) {
+        ImageSource::Size astcSize = ImageSource::GetASTCInfo(GetSkData()->bytes());
+        imageSize.SetSizeT(SizeF(astcSize.first, astcSize.second));
+        return { imageSize, ASTC_FRAME_COUNT };
+    }
+
     auto codec = SkCodec::MakeFromData(GetSkData());
     CHECK_NULL_RETURN(codec, {});
-    SizeF imageSize;
     switch (codec->getOrigin()) {
         case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
         case SkEncodedOrigin::kRightTop_SkEncodedOrigin:
