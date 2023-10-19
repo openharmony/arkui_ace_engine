@@ -313,19 +313,6 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
-void DragDropManager::RegisterDragStatusListener(int32_t nodeId, const WeakPtr<FrameNode>& node)
-{
-    auto ret = nodesForDragNotify_.try_emplace(nodeId, node);
-    if (!ret.second) {
-        nodesForDragNotify_[nodeId] = node;
-    }
-}
-
-void DragDropManager::UnRegisterDragStatusListener(int32_t nodeId)
-{
-    nodesForDragNotify_.erase(nodeId);
-}
-
 bool CheckParentVisible(const RefPtr<FrameNode>& frameNode)
 {
     bool isVisible = frameNode->IsVisible();
@@ -410,14 +397,12 @@ void DragDropManager::NotifyDragRegisterFrameNode(std::unordered_map<int32_t, We
         }
         auto pattern = frameNode->GetPattern<Pattern>();
         CHECK_NULL_VOID(pattern);
-#ifdef ENABLE_DRAG_FRAMEWORK
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragDropManager NotifyDragRegisterFrameNode. Dragged frameNode is %{public}s, depth is %{public}d, "
                  "DragEventType is %{public}d.",
                 frameNode->GetTag().c_str(), frameNode->GetDepth(), static_cast<int32_t>(dragEventType));
         }
         pattern->HandleOnDragStatusCallback(dragEventType, notifyEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
     }
 }
 
