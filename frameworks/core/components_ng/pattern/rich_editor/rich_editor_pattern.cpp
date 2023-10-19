@@ -1271,8 +1271,11 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
     InitSelection(textOffset);
-    auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    if (!BetweenSelectedPosition(info.GetGlobalLocation())) {
+        textSelector_.Update(selectEnd, selectEnd);
+    }
+    auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     UpdateSelectionType(textSelectInfo);
     CalculateHandleOffsetAndShowOverlay();
