@@ -135,7 +135,7 @@ std::string WebResourceRequsetImpl::GetRequestUrl() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebResourceRequsetImpl url failed");
+        return std::string();
     }
     return obj->GetRequestUrl(object_);
 }
@@ -164,7 +164,7 @@ std::string WebResourceErrorImpl::GetErrorInfo() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetResourceErrorObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebResourceErrorImpl ErrorInfo failed");
+        return std::string();
     }
     return obj->GetErrorInfo(object_);
 }
@@ -173,7 +173,7 @@ int WebResourceErrorImpl::GetErrorCode() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetResourceErrorObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebResourceErrorImpl ErrorCode failed");
+        return std::string();
     }
     return obj->GetErrorCode(object_); 
 }
@@ -202,9 +202,7 @@ void WebDelegateCross::CreatePluginResource(
     state_ = State::CREATING;
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
-        LOGI("pipelineContext is null");
         state_ = State::CREATEFAILED;
-        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to context is null");
         return;
     }
     context_ = context;
@@ -215,12 +213,10 @@ void WebDelegateCross::CreatePluginResource(
     platformTaskExecutor.PostSyncTask([weakWeb = AceType::WeakClaim(this), weakRes, size, position] {
         auto webDelegate = weakWeb.Upgrade();
         if (webDelegate == nullptr) {
-            LOGI("webDelegate is null!");
             return;
         }
         auto webPattern = webDelegate->webPattern_.Upgrade();
         if (!webPattern) {
-            LOGI("webPattern is null!");
             webDelegate->OnError(WEB_ERROR_CODE_CREATEFAIL, WEB_ERROR_MSG_CREATEFAIL);
             return;
         }
@@ -231,7 +227,6 @@ void WebDelegateCross::CreatePluginResource(
         }
         auto context = webDelegate->context_.Upgrade();
         if (!context) {
-            LOGI("context is null");
             return;
         }
 
@@ -584,7 +579,6 @@ void WebDelegateCross::SetBoundsOrResize(const Size& drawSize, const Offset& off
     updateLayoutMethod_ = MakeMethodHash(WEB_METHOD_UPDATE_LAYOUT);
     auto context = context_.Upgrade();
     if (!context) {
-        LOGI("context is null");
         return;
     }
     std::stringstream paramStream;

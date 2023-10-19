@@ -233,7 +233,6 @@ public:
         if (!webPaintProperty_) {
             webPaintProperty_ = MakeRefPtr<WebPaintProperty>();
             if (!webPaintProperty_) {
-                LOGE("MakeRefPtr failed return null");
             }
         }
         return webPaintProperty_;

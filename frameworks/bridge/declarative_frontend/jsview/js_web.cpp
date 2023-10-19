@@ -187,7 +187,6 @@ public:
     void Confirm(const JSCallbackInfo& args)
     {
         if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
-            LOGW("web http auth confirm list is not string");
             auto code = JSVal(ToJSValue(false));
             auto descriptionRef = JSRef<JSVal>::Make(code);
             args.SetReturnValue(descriptionRef);
@@ -314,7 +313,7 @@ public:
             privateKeyFile = args[0]->ToString();
             certChainFile = args[1]->ToString();
         } else {
-            LOGE("HandleConfirm error, args is invalid");
+            TAG_LOGD(AceLogTag::ACE_WEB, "Web certificate information processing handle, obtaining information failed");
             return;
         }
 
@@ -533,12 +532,10 @@ public:
             for (size_t i = 0; i < array->Length(); i++) {
                 JSRef<JSVal> val = array->GetValueAt(i);
                 if (!val->IsString()) {
-                    LOGW("resources list is not string at index %{public}zu", i);
                     continue;
                 }
                 std::string res;
                 if (!ConvertFromJSValue(val, res)) {
-                    LOGW("can't convert resource at index %{public}zu of JSWebPermissionRequest, so skip it.", i);
                     continue;
                 }
                 resources.push_back(res);
@@ -609,7 +606,6 @@ public:
             return;
         }
         if (args.Length() < 1 || !args[0]->IsObject()) {
-            LOGE("JSScreenCaptureRequest parame error");
             request_->Deny();
             return;
         }
@@ -665,10 +661,8 @@ public:
 
     static JSRef<JSObject> PopController(int32_t id)
     {
-        LOGI("PopController");
         auto iter = controller_map_.find(id);
         if (iter == controller_map_.end()) {
-            LOGI("JSWebWindowNewHandler not find web controller");
             return JSRef<JSVal>::Make();
         }
         auto controller = iter->second.controller_;
@@ -680,7 +674,6 @@ public:
     {
         auto getThisVarFunction = controller->GetProperty("innerGetThisVar");
         if (!getThisVarFunction->IsFunction()) {
-            LOGE("get innerGetThisVar failed");
             parentWebId = -1;
             return false;
         }
@@ -704,27 +697,22 @@ public:
 
     void SetWebController(const JSCallbackInfo& args)
     {
-        LOGI("JSWebWindowNewHandler SetWebController");
         if (handler_) {
             int32_t parentNWebId = handler_->GetParentNWebId();
             if (parentNWebId == -1) {
-                LOGE("SetWebController parent web id err");
                 return;
             }
             if (args.Length() < 1 || !args[0]->IsObject()) {
-                LOGE("SetWebController param err");
                 WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, false);
                 return;
             }
             auto controller = JSRef<JSObject>::Cast(args[0]);
             if (controller.IsEmpty()) {
-                LOGI("SetWebController controller is empty");
                 WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, false);
                 return;
             }
             auto getWebIdFunction = controller->GetProperty("innerGetWebId");
             if (!getWebIdFunction->IsFunction()) {
-                LOGI("SetWebController get innerGetWebId failed");
                 WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, false);
                 return;
             }
@@ -732,7 +720,6 @@ public:
             auto webId = func->Call(controller, 0, {});
             int32_t childWebId = webId->ToNumber<int32_t>();
             if (childWebId == parentNWebId || childWebId != -1) {
-                LOGE("The child window is initialized or the parent window is the same as the child window");
                 WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, false);
                 return;
             }
@@ -952,12 +939,10 @@ public:
         }
         if (args[0]->IsNumber()) {
             auto fd = args[0]->ToNumber<int32_t>();
-            LOGI("intercept set data file handle %{public}d", fd);
             response_->SetFileHandle(fd);
             return;
         }
         if (args[0]->IsString()) {
-            LOGI("intercept set data string");
             auto data = args[0]->ToString();
             response_->SetData(data);
             return;
@@ -966,13 +951,12 @@ public:
             std::string resourceUrl;
             std::string url;
             if (!JSViewAbstract::ParseJsMedia(args[0], resourceUrl)) {
-                LOGE("intercept failed to parse url object");
                 return;
             }
             auto np = resourceUrl.find_first_of("/");
             url = (np == std::string::npos) ? resourceUrl : resourceUrl.erase(np, 1);
             response_->SetResourceUrl(url);
-            LOGI("intercept set data url %{public}s", url.c_str());
+            TAG_LOGD(AceLogTag::ACE_WEB, "intercept set data url %{public}s", url.c_str());
             return;
         }
     }
@@ -1021,19 +1005,17 @@ public:
         JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
         for (size_t i = 0; i < array->Length(); i++) {
             if (!(array->GetValueAt(i)->IsObject())) {
-                LOGE("Param is invalid");
                 return;
             }
             auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
             auto headerKey = obj->GetProperty("headerKey");
             auto headerValue = obj->GetProperty("headerValue");
             if (!headerKey->IsString() || !headerValue->IsString()) {
-                LOGE("headerKey or headerValue is undefined");
                 return;
             }
             auto keystr = headerKey->ToString();
             auto valstr = headerValue->ToString();
-            LOGI("Set Response Header %{public}s:%{public}s", keystr.c_str(), valstr.c_str());
+            TAG_LOGD(AceLogTag::ACE_WEB, "Set Response Header %{public}s:%{public}s", keystr.c_str(), valstr.c_str());
             response_->SetHeadersVal(keystr, valstr);
         }
     }
@@ -1045,10 +1027,8 @@ public:
         }
         bool isReady = false;
         if (!ConvertFromJSValue(args[0], isReady)) {
-            LOGE("get response status fail");
             return;
         }
-        LOGI("intercept set response status is %{public}d", isReady);
         response_->SetResponseStatus(isReady);
     }
 
@@ -1267,12 +1247,10 @@ public:
             for (size_t i = 0; i < array->Length(); i++) {
                 JSRef<JSVal> val = array->GetValueAt(i);
                 if (!val->IsString()) {
-                    LOGW("file selector list is not string at index %{public}zu", i);
                     continue;
                 }
                 std::string fileName;
                 if (!ConvertFromJSValue(val, fileName)) {
-                    LOGW("can't convert file name at index %{public}zu of JSFileSelectorResult, so skip it.", i);
                     continue;
                 }
                 fileList.push_back(fileName);
@@ -1733,7 +1711,6 @@ JSRef<JSVal> FullScreenEnterEventToJSValue(const FullScreenEnterEvent& eventInfo
     JSRef<JSObject> resultObj = JSClass<JSFullScreenExitHandler>::NewInstance();
     auto jsFullScreenExitHandler = Referenced::Claim(resultObj->Unwrap<JSFullScreenExitHandler>());
     if (!jsFullScreenExitHandler) {
-        LOGE("jsFullScreenExitHandler is nullptr");
         return JSRef<JSVal>::Cast(obj);
     }
     jsFullScreenExitHandler->SetHandler(eventInfo.GetHandler());
@@ -1823,7 +1800,6 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
     JSRef<JSObject> resultObj = JSClass<JSWebHttpAuth>::NewInstance();
     auto jsWebHttpAuth = Referenced::Claim(resultObj->Unwrap<JSWebHttpAuth>());
     if (!jsWebHttpAuth) {
-        LOGE("jsWebHttpAuth is nullptr");
         return JSRef<JSVal>::Cast(obj);
     }
     jsWebHttpAuth->SetResult(eventInfo.GetResult());
@@ -1839,7 +1815,6 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
     JSRef<JSObject> resultObj = JSClass<JSWebSslError>::NewInstance();
     auto jsWebSslError = Referenced::Claim(resultObj->Unwrap<JSWebSslError>());
     if (!jsWebSslError) {
-        LOGE("jsWebSslError is nullptr");
         return JSRef<JSVal>::Cast(obj);
     }
     jsWebSslError->SetResult(eventInfo.GetResult());
@@ -1854,7 +1829,6 @@ JSRef<JSVal> WebSslSelectCertEventToJSValue(const WebSslSelectCertEvent& eventIn
     JSRef<JSObject> resultObj = JSClass<JSWebSslSelectCert>::NewInstance();
     auto jsWebSslSelectCert = Referenced::Claim(resultObj->Unwrap<JSWebSslSelectCert>());
     if (!jsWebSslSelectCert) {
-        LOGE("jsWebSslSelectCert is nullptr");
         return JSRef<JSVal>::Cast(obj);
     }
     jsWebSslSelectCert->SetResult(eventInfo.GetResult());
@@ -1894,7 +1868,6 @@ JSRef<JSVal> SearchResultReceiveEventToJSValue(const SearchResultReceiveEvent& e
 void JSWeb::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("web create error, info is invalid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -1908,14 +1881,12 @@ void JSWeb::Create(const JSCallbackInfo& info)
         dstSrc = np < 0 ? webSrc : webSrc.erase(np, 1);
     }
     if (!dstSrc) {
-        LOGE("Web component failed to parse src");
         return;
     }
-    LOGD("JSWeb::Create src:%{public}s", dstSrc->c_str());
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web Create src:%{public}s", dstSrc->c_str());
 
     auto controllerObj = paramObject->GetProperty("controller");
     if (!controllerObj->IsObject()) {
-        LOGE("web create error, controllerObj is invalid");
         return;
     }
     auto controller = JSRef<JSObject>::Cast(controllerObj);
@@ -1951,7 +1922,6 @@ void JSWeb::Create(const JSCallbackInfo& info)
         auto getWebDebugingFunction = controller->GetProperty("getWebDebuggingAccess");
         bool webDebuggingAccess = JSRef<JSFunc>::Cast(getWebDebugingFunction)->Call(controller, 0, {})->ToBoolean();
         if (webDebuggingAccess == JSWeb::webDebuggingAccess_) {
-            LOGI("JS already set debug mode, no need to set again");
             return;
         }
         WebModel::GetInstance()->SetWebDebuggingAccessEnabled(webDebuggingAccess);
@@ -1969,7 +1939,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
 void JSWeb::WebRotate(const JSCallbackInfo& args)
 {
-    LOGD("Web rotate is not supported.");
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web rotate is not supported.");
 }
 
 void JSWeb::OnAlert(const JSCallbackInfo& args)
@@ -1994,9 +1964,7 @@ void JSWeb::OnPrompt(const JSCallbackInfo& args)
 
 void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)
 {
-    LOGI("OnCommonDialog, event type is %{public}d", dialogEventType);
     if (!args[0]->IsFunction()) {
-        LOGW("param is not funtion.");
         return;
     }
     auto jsFunc =
@@ -2118,7 +2086,6 @@ void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
 void JSWeb::OnFullScreenExit(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
-        LOGE("Param is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FullScreenExitEvent, 1>>(
@@ -2137,7 +2104,6 @@ void JSWeb::OnFullScreenExit(const JSCallbackInfo& args)
 void JSWeb::OnFullScreenEnter(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("param is invalid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FullScreenEnterEvent, 1>>(
@@ -2209,7 +2175,6 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
 void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DownloadStartEvent, 1>>(
@@ -2228,7 +2193,6 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
 void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("param is invalid.");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebHttpAuthEvent, 1>>(
@@ -2251,7 +2215,6 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
 void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("param is invalid.");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslErrorEvent, 1>>(
@@ -2270,9 +2233,7 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
 
 void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb::OnSslSelectCertRequest");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("param is invalid.");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslSelectCertEvent, 1>>(
@@ -2299,9 +2260,7 @@ void JSWeb::MediaPlayGestureAccess(bool isNeedGestureAccess)
 
 void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnKeyEvent");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -2352,9 +2311,7 @@ JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& event
 
 void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnErrorReceive");
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ReceivedErrorEvent, 1>>(
@@ -2372,9 +2329,7 @@ void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
 
 void JSWeb::OnHttpErrorReceive(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnHttpErrorReceive");
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ReceivedHttpErrorEvent, 1>>(
@@ -2402,7 +2357,6 @@ JSRef<JSVal> OnInterceptRequestEventToJSValue(const OnInterceptRequestEvent& eve
 
 void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnInterceptRequest");
     if ((args.Length() <= 0) || !args[0]->IsFunction()) {
         return;
     }
@@ -2416,7 +2370,6 @@ void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
         auto* eventInfo = TypeInfoHelper::DynamicCast<OnInterceptRequestEvent>(info);
         JSRef<JSVal> obj = func->ExecuteWithValue(*eventInfo);
         if (!obj->IsObject()) {
-            LOGI("hap return value is null");
             return nullptr;
         }
         auto jsResponse = JSRef<JSObject>::Cast(obj)->Unwrap<JSWebResourceResponse>();
@@ -2430,9 +2383,7 @@ void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
 
 void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnUrlLoadIntercept");
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<UrlLoadInterceptEvent, 1>>(
@@ -2454,9 +2405,7 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
 
 void JSWeb::OnLoadIntercept(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnLoadIntercept");
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadInterceptEvent, 1>>(
@@ -2496,7 +2445,6 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
 
 void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
 {
-    LOGI("OnFileSelectorShow");
     if (!args[0]->IsFunction()) {
         return;
     }
@@ -2537,9 +2485,7 @@ JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
 
 void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb: OnContextMenuShow");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("param is invalid.");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ContextMenuEvent, 1>>(
@@ -2561,7 +2507,6 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
 
 void JSWeb::OnContextMenuHide(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb: OnContextMenuHide");
     if (!args[0]->IsFunction()) {
         return;
     }
@@ -2590,12 +2535,11 @@ void JSWeb::ContentAccessEnabled(bool isContentAccessEnabled)
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
-        LOGE("JSWeb: MainComponent is null.");
         return;
     }
     webComponent->SetContentAccessEnabled(isContentAccessEnabled);
 #else
-    LOGE("do not support components in new pipeline mode");
+    TAG_LOGW(AceLogTag::ACE_WEB, "do not support components in new pipeline mode");
 #endif
 }
 
@@ -2649,7 +2593,6 @@ void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
 void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
 {
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-    LOGI("JSWeb add js interface");
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
@@ -2659,13 +2602,11 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     auto name = JSRef<JSVal>::Cast(paramObject->GetProperty("name"));
     auto methodList = JSRef<JSVal>::Cast(paramObject->GetProperty("methodList"));
     if (!controllerObj->IsObject()) {
-        LOGE("web create error, controllerObj is invalid");
         return;
     }
     auto controller = JSRef<JSObject>::Cast(controllerObj);
     auto jsProxyFunction = controller->GetProperty("jsProxy");
     if (jsProxyFunction->IsFunction()) {
-        LOGI("The controller is WebviewController.");
         auto jsProxyCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(jsProxyFunction), object,
                                    name, methodList]() {
             JSRef<JSVal> argv[] = { object, name, methodList };
@@ -2674,7 +2615,6 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
 
         WebModel::GetInstance()->SetJsProxyCallback(jsProxyCallback);
     }
-    LOGI("The controller is WebController.");
     auto jsWebController = controller->Unwrap<JSWebController>();
     if (jsWebController) {
         jsWebController->SetJavascriptInterface(args);
@@ -2704,9 +2644,7 @@ JSRef<JSVal> RefreshAccessedHistoryEventToJSValue(const RefreshAccessedHistoryEv
 
 void JSWeb::OnRenderExited(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnRenderExited");
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RenderExitedEvent, 1>>(
@@ -2724,9 +2662,7 @@ void JSWeb::OnRenderExited(const JSCallbackInfo& args)
 
 void JSWeb::OnRefreshAccessedHistory(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnRefreshAccessedHistory");
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RefreshAccessedHistoryEvent, 1>>(
@@ -2792,9 +2728,7 @@ void JSWeb::WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
 
 void JSWeb::OnMouse(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnMouse");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -2815,9 +2749,7 @@ JSRef<JSVal> ResourceLoadEventToJSValue(const ResourceLoadEvent& eventInfo)
 
 void JSWeb::OnResourceLoad(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnRefreshAccessedHistory");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ResourceLoadEvent, 1>>(
@@ -2844,7 +2776,6 @@ JSRef<JSVal> ScaleChangeEventToJSValue(const ScaleChangeEvent& eventInfo)
 void JSWeb::OnScaleChange(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ScaleChangeEvent, 1>>(
@@ -2871,7 +2802,6 @@ JSRef<JSVal> ScrollEventToJSValue(const WebOnScrollEvent& eventInfo)
 void JSWeb::OnScroll(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc =
@@ -2900,7 +2830,6 @@ JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& ev
 void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebPermissionRequestEvent, 1>>(
@@ -2929,7 +2858,6 @@ JSRef<JSVal> ScreenCaptureRequestEventToJSValue(const WebScreenCaptureRequestEve
 void JSWeb::OnScreenCaptureRequest(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebScreenCaptureRequestEvent, 1>>(
@@ -2948,7 +2876,6 @@ void JSWeb::OnScreenCaptureRequest(const JSCallbackInfo& args)
 void JSWeb::BackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;
@@ -2965,33 +2892,32 @@ void JSWeb::InitialScale(float scale)
 
 void JSWeb::Password(bool password)
 {
-    LOGI("JSWeb: Password placeholder");
+    TAG_LOGD(AceLogTag::ACE_WEB, "Sets the Web should save the password.");
 }
 
 void JSWeb::TableData(bool tableData)
 {
-    LOGI("JSWeb: TableData placeholder");
+    TAG_LOGD(AceLogTag::ACE_WEB, "Sets the Web should save the table data.");
 }
 
 void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb: OnFileSelectorShow Abandoned");
+    TAG_LOGD(AceLogTag::ACE_WEB, "Set whether to discard the file abandoned.");
 }
 
 void JSWeb::WideViewModeAccess(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb: WideViewModeAccess placeholder");
+    TAG_LOGD(AceLogTag::ACE_WEB, "Sets the Web access meta 'viewport' in HTML.");
 }
 
 void JSWeb::WebDebuggingAccess(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb: WebDebuggingAccess placeholder");
+    TAG_LOGD(AceLogTag::ACE_WEB, "Set up web debugging access.");
 }
 
 void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<SearchResultReceiveEvent, 1>>(
@@ -3010,7 +2936,6 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
 void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3022,12 +2947,10 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
 
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
-            LOGE("builder param is not an object.");
             return itemInfo;
         }
         auto component = ParseDragNode(ret);
         if (component) {
-            LOGI("use custom builder param.");
             itemInfo.node = component;
             return itemInfo;
         }
@@ -3055,7 +2978,6 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
 void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3073,7 +2995,6 @@ void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
 void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3091,7 +3012,6 @@ void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
 void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3109,7 +3029,6 @@ void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
 void JSWeb::JsOnDrop(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3144,9 +3063,7 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
 
 bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
 {
-    LOGI("HandleWindowNewEvent");
     if (eventInfo == nullptr) {
-        LOGE("EventInfo is nullptr");
         return false;
     }
     auto handler = eventInfo->GetWebWindowNewHandler();
@@ -3195,7 +3112,6 @@ JSRef<JSVal> WindowExitEventToJSValue(const WebWindowExitEvent& eventInfo)
 void JSWeb::OnWindowExit(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebWindowExitEvent, 1>>(
@@ -3286,7 +3202,6 @@ JSRef<JSVal> PageVisibleEventToJSValue(const PageVisibleEvent& eventInfo)
 void JSWeb::OnPageVisible(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<PageVisibleEvent, 1>>(
@@ -3309,9 +3224,7 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
 
 void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnInterceptKeyEvent");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3336,7 +3249,6 @@ JSRef<JSVal> DataResubmittedEventToJSValue(const DataResubmittedEvent& eventInfo
     JSRef<JSObject> resultObj = JSClass<JSDataResubmitted>::NewInstance();
     auto jsDataResubmitted = Referenced::Claim(resultObj->Unwrap<JSDataResubmitted>());
     if (!jsDataResubmitted) {
-        LOGE("jsDataResubmitted is nullptr");
         return JSRef<JSVal>::Cast(obj);
     }
     jsDataResubmitted->SetHandler(eventInfo.GetHandler());
@@ -3347,7 +3259,6 @@ JSRef<JSVal> DataResubmittedEventToJSValue(const DataResubmittedEvent& eventInfo
 void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DataResubmittedEvent, 1>>(
@@ -3428,7 +3339,6 @@ JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventI
     opt.editable = true;
     auto pixelMap = Media::PixelMap::Create(opt);
     if (pixelMap == nullptr) {
-        LOGE("pixelMap is null");
         return JSRef<JSVal>::Cast(obj);
     }
     uint32_t stride = width << 2;
@@ -3437,7 +3347,6 @@ JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventI
     std::shared_ptr<Media::PixelMap> pixelMapToJs(pixelMap.release());
     auto engine = EngineHelper::GetCurrentEngine();
     if (!engine) {
-        LOGE("engine is null");
         return JSRef<JSVal>::Cast(obj);
     }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -3451,7 +3360,6 @@ JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventI
 void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FaviconReceivedEvent, 1>>(
@@ -3483,7 +3391,6 @@ JSRef<JSVal> TouchIconUrlEventToJSValue(const TouchIconUrlEvent& eventInfo)
 void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<TouchIconUrlEvent, 1>>(
@@ -3548,10 +3455,8 @@ JSRef<JSVal> AudioStateChangedEventToJSValue(const AudioStateChangedEvent& event
 
 void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnAudioStateChanged");
-
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web Audio State Changed.");
     if (!args[0]->IsFunction()) {
-        LOGE("OnAudioStateChanged Param is invalid, it is not a function");
         return;
     }
 
@@ -3572,7 +3477,6 @@ void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
 void JSWeb::MediaOptions(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
-        LOGE("WebMediaOptions Param is invalid, it is not a object");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(args[0]);
@@ -3600,7 +3504,6 @@ JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent&
 void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FirstContentfulPaintEvent, 1>>(
@@ -3623,10 +3526,7 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
 
 void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
 {
-    LOGI("JSWeb OnControllerAttached");
-
     if (!args[0]->IsFunction()) {
-        LOGE("OnControllerAttached Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(args[0]));
@@ -3654,7 +3554,6 @@ JSRef<JSVal> OverScrollEventToJSValue(const WebOnOverScrollEvent& eventInfo)
 void JSWeb::OnOverScroll(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("Param is invalid, it is not a function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebOnOverScrollEvent, 1>>(
