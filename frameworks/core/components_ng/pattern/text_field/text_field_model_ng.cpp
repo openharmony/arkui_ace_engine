@@ -225,9 +225,8 @@ void TextFieldModelNG::SetCaretPosition(const int32_t& value)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    auto caretPosition = layoutProperty->GetPlaceholderValue().empty() ? value : 0;
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CaretPosition, caretPosition);
-    pattern->SetCaretPosition(caretPosition);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CaretPosition, value);
+    pattern->SetCaretPosition(value);
 }
 
 void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
@@ -453,7 +452,7 @@ void TextFieldModelNG::SetShowCounter(bool value)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    if(value) {
+    if (value) {
         pattern->AddCounterNode();
     } else {
         pattern->ClearCounterNode();
