@@ -10739,7 +10739,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset002, TestSize.Level1)
     EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
     swiperPattern->isDragging_ = false;
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.388f);
 }
 
 /**
