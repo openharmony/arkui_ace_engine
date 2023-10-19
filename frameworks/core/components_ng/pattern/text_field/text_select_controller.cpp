@@ -273,12 +273,14 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index)
     firstHandleInfo_.index = index;
     CalcCaretMetricsByPosition(GetFirstHandleIndex(), firstHandleMetrics, TextAffinity::DOWNSTREAM);
     OffsetF firstHandleOffset = firstHandleMetrics.offset;
-
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
     firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), firstHandleMetrics.height });
     MoveHandleToContentRect(firstHandle);
     firstHandleInfo_.rect = firstHandle;
+
+    caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
+
     UpdateSecondHandleOffset();
     FireSelectEvent();
 }
@@ -294,6 +296,9 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
     secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), secondHandleMetrics.height });
     MoveHandleToContentRect(secondHandle);
     secondHandleInfo_.rect = secondHandle;
+
+    caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
+
     UpdateFirstHandleOffset();
     FireSelectEvent();
 }

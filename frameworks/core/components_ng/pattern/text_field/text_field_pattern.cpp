@@ -2134,10 +2134,16 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     if (!isSingleHandle_) {
-        auto handleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
-        proxy->UpdateFirstSelectHandleInfo(handleInfo);
-        handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
-        proxy->UpdateSecondSelectHandleInfo(handleInfo);
+        if (selectController_->GetFirstHandleIndex() == selectController_->GetSecondHandleIndex()) {
+            CloseSelectOverlay(true);
+            StartTwinkling();
+        } else {
+            auto handleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
+            proxy->UpdateFirstSelectHandleInfo(handleInfo);
+            handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
+            proxy->UpdateSecondSelectHandleInfo(handleInfo);
+        }
+        selectController_->UpdateCaretOffset();
     } else {
         auto handleInfo = GetSelectHandleInfo(selectController_->GetCaretRect().GetOffset());
         proxy->UpdateSecondSelectHandleInfo(handleInfo);

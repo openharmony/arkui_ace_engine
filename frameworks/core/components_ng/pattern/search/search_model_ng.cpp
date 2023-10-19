@@ -485,15 +485,19 @@ void SearchModelNG::SetOnChange(std::function<void(const std::string&)>&& onChan
     CHECK_NULL_VOID(searchTextField);
     auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto searchChangeFunc = [weak = AceType::WeakClaim(AceType::RawPtr(searchTextField)), onChange](
-                                const std::string& value) {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto searchChangeFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), onChange](const std::string& value) {
         if (onChange) {
             onChange(value);
         }
-        auto node = weak.Upgrade();
-        if (node) {
-            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        }
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto searchPattern = AceType::DynamicCast<SearchPattern>(pattern);
+        CHECK_NULL_VOID(searchPattern);
+        searchPattern->UpdateChangeEvent(value);
     };
     eventHub->SetOnChange(std::move(searchChangeFunc));
 }
@@ -628,6 +632,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     PaddingProperty padding;
     padding.left = CalcLength(0.0);
     padding.right = CalcLength(0.0);
+    padding.bottom = CalcLength(0.0);
+    padding.top = CalcLength(0.0);
     textFieldLayoutProperty->UpdatePadding(padding);
     pattern->SetEnableTouchAndHoverEffect(false);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -819,15 +825,20 @@ void SearchModelNG::SetOnChangeEvent(std::function<void(const std::string&)>&& o
     CHECK_NULL_VOID(searchTextField);
     auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto searchChangeFunc = [weak = AceType::WeakClaim(AceType::RawPtr(searchTextField)), onChangeEvent](
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto searchChangeFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), onChangeEvent](
                                 const std::string& value) {
         if (onChangeEvent) {
             onChangeEvent(value);
         }
-        auto node = weak.Upgrade();
-        if (node) {
-            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        }
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto searchPattern = AceType::DynamicCast<SearchPattern>(pattern);
+        CHECK_NULL_VOID(searchPattern);
+        searchPattern->UpdateChangeEvent(value);
     };
     eventHub->SetOnChangeEvent(std::move(searchChangeFunc));
 }

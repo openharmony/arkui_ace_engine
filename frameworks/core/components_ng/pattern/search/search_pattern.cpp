@@ -173,6 +173,7 @@ void SearchPattern::OnModifyDone()
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldMouseEvent();
+    InitTextFieldValueChangeEvent();
     InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
     InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
     InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
@@ -182,6 +183,23 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+}
+
+void SearchPattern::InitTextFieldValueChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->GetOnChange()) {
+        auto searchChangeFunc = [weak = AceType::WeakClaim(this)](const std::string& value) {
+            auto searchPattern = weak.Upgrade();
+            searchPattern->UpdateChangeEvent(value);
+        };
+        eventHub->SetOnChange(std::move(searchChangeFunc));
+    }
 }
 
 void SearchPattern::InitButtonAndImageClickEvent()
