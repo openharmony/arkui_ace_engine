@@ -273,6 +273,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (mouseStatus_ == MouseStatus::RELEASED) {
         mouseStatus_ = MouseStatus::NONE;
     }
+    StopScrollable();
     if (IsTextArea()) {
         CheckScrollable();
     } else {
