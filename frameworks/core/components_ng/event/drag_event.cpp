@@ -144,9 +144,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto renderContext = frameNode->GetRenderContext();
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             if (gestureHub->GetTextDraggable()) {
-                auto pattern = frameNode->GetPattern<TextBase>();
-                CHECK_NULL_VOID(pattern);
-                frameNode->SetDraggable(isTextReceivedLongPress_);
                 if (gestureHub->GetIsTextDraggable()) {
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 }
@@ -777,7 +774,6 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     manager->MountPixelMapToRootNode(columnNode);
     auto modifier = dragNode->GetPattern<TextDragPattern>()->GetOverlayModifier();
     modifier->StartAnimate();
-    isTextReceivedLongPress_ = true;
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("DragEvent set text animation success.");
     }

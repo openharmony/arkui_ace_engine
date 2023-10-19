@@ -891,7 +891,6 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
         }
     }
 
-    dragEventActuator_->ResetTextReceivedLongPress();
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
