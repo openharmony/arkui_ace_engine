@@ -231,6 +231,11 @@ public:
         return {};
     }
 
+    virtual Matrix4 GetLocalTransformMatrix()
+    {
+        return Matrix4();
+    }
+
     virtual void GetPointWithRevert(PointF& point) {}
 
     virtual void GetPointWithTransform(PointF& point) {}
