@@ -21,7 +21,6 @@
 #else
 #include "image/bitmap.h"
 #endif
-#ifdef NEW_SKIA
 #include "include/core/SkSamplingOptions.h"
 #ifndef PREVIEW
 #include "pixel_map.h"

@@ -88,8 +88,8 @@ private:
     void DrawOntoCanvas(
         const std::shared_ptr<SkBitmap>& bitMap, float width, float height, SkCanvas& canvas, const SkPaint& paint);
 #else
-    void DrawOntoCanvas(
-        const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap, float width, float height, Rosen::Drawing::Canvas& canvas);
+    void DrawOntoCanvas(const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap,
+        float width, float height, Rosen::Drawing::Canvas& canvas);
 #endif
 
     std::unique_ptr<uint8_t[]> jsonBuf_;
