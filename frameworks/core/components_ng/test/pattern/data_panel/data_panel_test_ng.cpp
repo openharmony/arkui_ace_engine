@@ -1174,11 +1174,19 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest007, TestSize.Level1)
      */
     dataPanelModifier.SetEffect(true);
     dataPanelModifier.PaintCircle(context, OFFSET);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     /**
      * case2: effect = false.
      */
     dataPanelModifier.SetEffect(false);
     dataPanelModifier.PaintCircle(context, OFFSET);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    /**
+     * case3: isHasShadowValue = true.
+     */
+    dataPanelModifier.SetIsHasShadowValue(true);
+    dataPanelModifier.PaintCircle(context, OFFSET);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
 }
 
 /**
@@ -1219,11 +1227,19 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level1)
      */
     dataPanelModifier.SetEffect(true);
     dataPanelModifier.PaintLinearProgress(context, OFFSET);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     /**
      * case2: effect = false.
      */
     dataPanelModifier.SetEffect(false);
     dataPanelModifier.PaintLinearProgress(context, OFFSET);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    /**
+     * case3: isHasShadowValue = true.
+     */
+    dataPanelModifier.SetIsHasShadowValue(true);
+    dataPanelModifier.PaintLinearProgress(context, OFFSET);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
 }
 
 /**
