@@ -449,17 +449,6 @@ float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()
     return static_cast<float>(height.ConvertToPx());
 }
 
-float TextFieldLayoutAlgorithm::GetTextFieldDefaultImageHeight()
-{
-    const auto defaultHeight = 40.0_vp;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, defaultHeight.ConvertToPx());
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, defaultHeight.ConvertToPx());
-    auto height = textFieldTheme->GetIconHotZoneSize();
-    return static_cast<float>(height.ConvertToPx());
-}
-
 void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier)
 {

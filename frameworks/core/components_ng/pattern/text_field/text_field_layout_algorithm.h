@@ -89,7 +89,6 @@ protected:
     void SetPropertyToModifier(const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier);
 
     float GetTextFieldDefaultHeight();
-    float GetTextFieldDefaultImageHeight();
 
     void ConstructTextStyles(
         const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder);

@@ -566,10 +566,6 @@ public:
         return selectController_->GetCaretRect();
     }
 
-    float GetIconRightOffset();
-    float GetIconHotZoneSize();
-    float GetIconSize();
-
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
 

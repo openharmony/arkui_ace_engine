@@ -100,7 +100,7 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
         if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
 #if defined(PREVIEW)
             pattern->DeleteBackward(TextFieldPattern::GetGraphemeClusterLength(
-                pattern->GetWideText(), pattern->GetCaretIndex().caretPosition, true));
+                pattern->GetWideText(), pattern->GetCaretIndex(), true));
 #else
             pattern->DeleteForward(
                 TextFieldPattern::GetGraphemeClusterLength(pattern->GetWideText(), pattern->GetCaretIndex()));

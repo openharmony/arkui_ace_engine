@@ -359,42 +359,6 @@ void TextFieldPattern::AdjustTextInReasonableArea()
     }
 }
 
-float TextFieldPattern::GetIconSize()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, 0.0f);
-    auto pipeline = tmpHost->GetContext();
-    CHECK_NULL_RETURN(pipeline, 0.0f);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, 0.0f);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
-    return static_cast<float>(textFieldTheme->GetIconSize().ConvertToPx());
-}
-
-float TextFieldPattern::GetIconHotZoneSize()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, 0.0f);
-    auto pipeline = tmpHost->GetContext();
-    CHECK_NULL_RETURN(pipeline, 0.0f);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, 0.0f);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
-    return static_cast<float>(textFieldTheme->GetIconHotZoneSize().ConvertToPx());
-}
-
-float TextFieldPattern::GetIconRightOffset()
-{
-    auto iconSize = GetIconSize();
-    auto iconHotZoneSize = GetIconHotZoneSize();
-    if (NearZero(iconSize) || NearZero(iconHotZoneSize)) {
-        return 0.0f;
-    }
-    return (iconHotZoneSize - iconSize) / 2.0f;
-}
-
 bool TextFieldPattern::IsTextArea() const
 {
     auto tmpHost = GetHost();
@@ -877,7 +841,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     if (IsSelected()) {
         SetIsSingleHandle(false);
     }
-    updateSelectionAfterObscure_ = ResetObscureTickCountDown();
+    ResetObscureTickCountDown();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     // move text to end
     if (IsTextArea() && GreatOrEqual(textRect_.Height(), contentRect_.Height())) {
@@ -1862,11 +1826,14 @@ void TextFieldPattern::InitLongPressEvent()
 
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (ResetObscureTickCountDown()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     if (isUsingMouse_) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -1880,7 +1847,6 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 #ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
 #endif
-    ResetObscureTickCountDown();
     isUsingMouse_ = false;
     auto focusHub = GetFocusHub();
 
@@ -2692,7 +2658,11 @@ void TextFieldPattern::OnCursorMoveDone()
     CloseSelectOverlay();
     selectionMode_ = SelectionMode::NONE;
     selectController_->MoveCaretToContentRect(GetCaretIndex());
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (ResetObscureTickCountDown()) {
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    } else {
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t directionMove)
@@ -2809,7 +2779,6 @@ bool TextFieldPattern::CharLineChanged(int32_t caretPosition)
 bool TextFieldPattern::CursorMoveLeft()
 {
     LOGI("Handle cursor move left");
-    ResetObscureTickCountDown();
     auto originCaretPosition = selectController_->GetCaretIndex();
     if (IsSelected()) {
         selectController_->UpdateCaretIndex(
@@ -2844,7 +2813,6 @@ bool TextFieldPattern::CursorMoveLeftWord()
     } else {
         UpdateCaretPositionWithClamp(originCaretPosition - leftWordLength);
     }
-    ResetObscureTickCountDown();
     OnCursorMoveDone();
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -2869,7 +2837,6 @@ bool TextFieldPattern::CursorMoveLineBegin()
     } else {
         UpdateCaretPositionWithClamp(0);
     }
-    ResetObscureTickCountDown();
     OnCursorMoveDone();
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -2902,7 +2869,6 @@ bool TextFieldPattern::CursorMoveHome()
 bool TextFieldPattern::CursorMoveRight()
 {
     LOGI("Handle cursor move right");
-    ResetObscureTickCountDown();
     auto originCaretPosition = selectController_->GetCaretIndex();
     if (IsSelected()) {
         CloseSelectOverlay();
@@ -2935,7 +2901,6 @@ bool TextFieldPattern::CursorMoveRightWord()
     } else {
         UpdateCaretPositionWithClamp(originCaretPosition + rightWordLength);
     }
-    ResetObscureTickCountDown();
     OnCursorMoveDone();
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -2960,7 +2925,6 @@ bool TextFieldPattern::CursorMoveLineEnd()
     } else {
         UpdateCaretPositionWithClamp(textLength);
     }
-    ResetObscureTickCountDown();
     OnCursorMoveDone();
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -3291,8 +3255,8 @@ void TextFieldPattern::InitSurfacePositionChangedCallback()
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
     LOGI("Handle DeleteBackward %{public}d characters", length);
+    ResetObscureTickCountDown();
     if (IsSelected()) {
-        ResetObscureTickCountDown();
         Delete(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return;
     }
@@ -3300,7 +3264,6 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         LOGW("Caret position at the beginning , cannot DeleteBackward");
         return;
     }
-    ResetObscureTickCountDown();
     auto start = std::max(selectController_->GetCaretIndex() - length, 0);
     contentController_->erase(start, length);
     selectController_->UpdateCaretIndex(start);
@@ -3322,8 +3285,8 @@ void TextFieldPattern::DeleteBackward(int32_t length)
 void TextFieldPattern::DeleteForward(int32_t length)
 {
     LOGI("Handle DeleteForward %{public}d characters", length);
+    ResetObscureTickCountDown();
     if (IsSelected()) {
-        ResetObscureTickCountDown();
         Delete(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return;
     }
@@ -3331,7 +3294,6 @@ void TextFieldPattern::DeleteForward(int32_t length)
         LOGW("Caret position at the end , cannot DeleteForward");
         return;
     }
-    ResetObscureTickCountDown();
     contentController_->erase(selectController_->GetCaretIndex(), length);
     FireOnTextChangeEvent();
     selectionMode_ = SelectionMode::NONE;
@@ -3378,7 +3340,7 @@ void TextFieldPattern::AfterSelection()
 {
     LOGI("Selection %{public}s, caret position %{public}d", selectController_->ToString().c_str(),
         selectController_->GetCaretIndex());
-    updateSelectionAfterObscure_ = ResetObscureTickCountDown();
+    ResetObscureTickCountDown();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -4916,11 +4878,13 @@ void TextFieldPattern::UpdateRecordCaretIndex(int32_t index)
 
 void TextFieldPattern::OnObscuredChanged(bool isObscured)
 {
+    ResetObscureTickCountDown();
     textObscured_ = isObscured;
+    CloseSelectOverlay(false);
+    selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    StartTwinkling();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    selectController_->UpdateCaretIndex(selectController_->GetSecondHandleIndex());
-    StartTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

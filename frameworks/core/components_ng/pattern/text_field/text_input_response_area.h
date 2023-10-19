@@ -85,6 +85,8 @@ private:
     void UpdateImageSource();
     bool IsShowPasswordIcon();
     void OnPasswordIconClicked();
+    float GetIconRightOffset();
+    float GetIconSize();
     RefPtr<FrameNode> CreateNode();
     std::optional<ImageSourceInfo> GetCurrentSourceInfo()
     {
@@ -93,7 +95,6 @@ private:
     bool isObscured_ = true;
     std::optional<ImageSourceInfo> showIcon_;
     std::optional<ImageSourceInfo> hideIcon_;
-    RefPtr<ClickEvent> clickListener_;
     WeakPtr<FrameNode> passwordNode_;
 };
 

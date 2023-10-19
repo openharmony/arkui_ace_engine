@@ -102,8 +102,8 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_RETURN(textFieldPattern, nullptr);
-    auto iconSize = textFieldPattern->GetIconSize();
-    auto rightOffset = textFieldPattern->GetIconRightOffset();
+    auto iconSize = GetIconSize();
+    auto rightOffset = GetIconRightOffset();
     auto hotZoneSize = iconSize + rightOffset;
 
     auto stackNode = FrameNode::CreateFrameNode(
@@ -137,19 +137,13 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(node);
     auto focusHub = node->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusable(true);
-
-    if (!clickListener_) {
-        auto gesture = node->GetOrCreateGestureEventHub();
-        auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-            auto button = weak.Upgrade();
-            CHECK_NULL_VOID(button);
-            button->OnPasswordIconClicked();
-        };
-        clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-        gesture->AddClickEvent(clickListener_);
-    }
-    // TODO mouse hover event
+    auto gesture = node->GetOrCreateGestureEventHub();
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto button = weak.Upgrade();
+        CHECK_NULL_VOID(button);
+        button->OnPasswordIconClicked();
+    };
+    gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
 }
 
 void PasswordResponseArea::OnPasswordIconClicked()
@@ -184,6 +178,36 @@ OffsetF PasswordResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect
     return OffsetF(parentSize.Width() - childSize.Width(), 0);
 }
 
+float PasswordResponseArea::GetIconSize()
+{
+    auto textFieldPattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(textFieldPattern, 0.0f);
+    auto tmpHost = textFieldPattern->GetHost();
+    CHECK_NULL_RETURN(tmpHost, 0.0f);
+    auto pipeline = tmpHost->GetContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, 0.0f);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
+    return static_cast<float>(textFieldTheme->GetIconSize().ConvertToPx());
+}
+
+float PasswordResponseArea::GetIconRightOffset()
+{
+    auto textFieldPattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(textFieldPattern, 0.0f);
+    auto tmpHost = textFieldPattern->GetHost();
+    auto pipeline = tmpHost->GetContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, 0.0f);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
+    auto themePadding = textFieldTheme->GetPadding();
+    return static_cast<float>(themePadding.Left().ConvertToPx());
+}
+
 void PasswordResponseArea::LoadImageSourceInfo()
 {
     auto textFieldPattern = hostPattern_.Upgrade();
@@ -216,7 +240,6 @@ void PasswordResponseArea::UpdateImageSource()
 void PasswordResponseArea::DestoryArea()
 {
     TextInputResponseArea::DestoryArea();
-    clickListener_.Reset();
     isObscured_ = true;
     hostPattern_.Reset();
     passwordNode_.Reset();
@@ -250,7 +273,6 @@ void UnitResponseArea::InitResponseArea(const WeakPtr<Pattern>& hostPattern)
         return;
     }
     auto unitNode = unitNode_.Upgrade();
-    ;
     CHECK_NULL_VOID(unitNode);
     unitNode->MountToParent(host);
 }
