@@ -35,7 +35,9 @@ public:
     RefPtr<ThemeStyle> GetTheme(int32_t themeId) override;
 
     Color GetColor(uint32_t resId) override;
+    Color GetColorByName(const std::string& resName) override;
     Dimension GetDimension(uint32_t resId) override;
+    Dimension GetDimensionByName(const std::string& resName) override;
     std::string GetString(uint32_t resId) override;
     std::string GetPluralString(uint32_t resId, int quantity) override;
     std::vector<std::string> GetStringArray(uint32_t resId) const override;
