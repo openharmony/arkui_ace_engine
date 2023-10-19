@@ -45,7 +45,7 @@ ImageSourceInfo CreateSourceInfo(
 void ImageModelNG::Create(
     const std::string& src, RefPtr<PixelMap>& pixMap, const std::string& bundleName, const std::string& moduleName)
 {
-    LOGD("creating new image %{public}s", src.c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "creating new image %{public}s", src.c_str());
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
