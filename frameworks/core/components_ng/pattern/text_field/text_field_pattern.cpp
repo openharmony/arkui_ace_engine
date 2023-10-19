@@ -3905,9 +3905,6 @@ std::string TextFieldPattern::GetBarStateString() const
 
 void TextFieldPattern::UpdateScrollBarOffset()
 {
-    if (contentController_->IsEmpty()) {
-        return;
-    }
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
