@@ -110,7 +110,6 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
         };
     auto it = functionMap.find(name);
     if (it == functionMap.end()) {
-        LOGE("ResSchedDataReport the name not found: %{public}s", name);
         return;
     }
     it->second(payload);

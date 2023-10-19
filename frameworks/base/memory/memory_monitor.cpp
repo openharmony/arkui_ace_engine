@@ -46,7 +46,6 @@ public:
         std::lock_guard<std::mutex> lock(mutex_);
         auto result = memoryMap_.emplace(ptr, MemInfo());
         if (!result.second) {
-            LOGE("Address is already in memory map");
             return;
         }
 
@@ -58,7 +57,6 @@ public:
         std::lock_guard<std::mutex> lock(mutex_);
         auto it = memoryMap_.find(ptr);
         if (it == memoryMap_.end()) {
-            LOGE("Address MUST be in memory map");
             return;
         }
         count_--;
@@ -77,7 +75,6 @@ public:
         std::lock_guard<std::mutex> lock(mutex_);
         auto it = memoryMap_.find(ptr);
         if (it == memoryMap_.end()) {
-            LOGE("Address MUST be in memory map");
             return;
         }
 

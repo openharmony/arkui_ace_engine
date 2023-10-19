@@ -184,7 +184,6 @@ std::vector<double> Matrix3N::MapScalars(const std::vector<double>& src) const
 bool Matrix3N::MapScalars(const std::vector<double>& src, std::vector<double>& result) const
 {
     if (static_cast<int32_t>(src.size()) != columns_) {
-        LOGE("failt to MapScalars, due to %{public}d, %{public}d", static_cast<int32_t>(src.size()), columns_);
         return false;
     }
     result.resize(DIMENSION, 0);
