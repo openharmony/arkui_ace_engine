@@ -35,7 +35,6 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
         info.updateViewIdFunc(viewIdStr);
     }
     auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
-    LOGD("Creating CustomNode with claimed elmtId %{public}d.", viewId);
     RefPtr<NG::CustomNodeBase> customNode;
     if (info.hasMeasureOrLayout) {
         customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(viewId, key);

@@ -288,7 +288,6 @@ RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
     if (overlayNode->GetTag() == "stage") {
         return nullptr;
     }
-    LOGI("GetOverlayNode if overlay node has showed");
     return overlayNode;
 }
 } // namespace
@@ -402,7 +401,6 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
 }
 std::string Inspector::GetInspector(bool isLayoutInspector)
 {
-    LOGI("GetInspector start");
     auto jsonRoot = JsonUtil::Create(true);
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
@@ -511,14 +509,12 @@ void Inspector::HideAllMenus()
 void Inspector::AddOffscreenNode(RefPtr<FrameNode> node)
 {
     CHECK_NULL_VOID(node);
-    LOGI("add offscreen node:%{public}d", node->GetId());
     offscreenNodes.insert(node);
 }
 
 void Inspector::RemoveOffscreenNode(RefPtr<FrameNode> node)
 {
     CHECK_NULL_VOID(node);
-    LOGI("remove offscreen node:%{public}d", node->GetId());
     offscreenNodes.erase(node);
 }
 
