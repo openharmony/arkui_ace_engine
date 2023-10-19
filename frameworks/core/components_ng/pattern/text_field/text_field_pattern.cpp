@@ -3577,6 +3577,7 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
 {
     LOGI("Request close soft keyboard");
     if (forceClose) {
+        isKeyboardClosedByUser_ = false;
         StopTwinkling();
         CloseSelectOverlay(true);
         if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
@@ -4658,6 +4659,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         CHECK_NULL_VOID(eventHub);
         eventHub->UpdateSubmitEvent(textEditingValue_.text);
         CloseKeyboard(forceCloseKeyboard);
+        FocusHub::LostFocusToViewRoot();
         return;
     }
 
@@ -4681,6 +4683,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     }
     eventHub->FireOnSubmit(static_cast<int32_t>(action));
     CloseKeyboard(forceCloseKeyboard);
+    FocusHub::LostFocusToViewRoot();
 }
 
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
