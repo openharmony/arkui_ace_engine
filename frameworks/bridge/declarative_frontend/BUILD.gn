@@ -128,11 +128,6 @@ template("declarative_js_engine") {
     deps = []
     configs = [ "$ace_root:ace_config" ]
 
-    if (defined(config.model_component_support) &&
-        config.model_component_support) {
-      configs += [ "//foundation/graphic/graphic_3d/3d_widget_adapter:widget_adapter_config" ]
-    }
-
     sources = [
       "engine/bindings_implementation.cpp",
       "engine/declarative_engine_loader.cpp",
@@ -501,6 +496,7 @@ template("declarative_js_engine") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
+      external_deps += [ "graphic_3d:3dWidgetAdapterInterface" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&
@@ -846,6 +842,7 @@ template("declarative_js_engine_ng") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
+      external_deps += [ "graphic_3d:3dWidgetAdapterInterface" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&

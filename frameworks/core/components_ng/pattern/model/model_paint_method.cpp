@@ -48,18 +48,14 @@ void ModelPaintMethod::PerformPaint(RSCanvas& canvas, PaintWrapper* paintWrapper
     LOGD("MODEL_NG PerformPaint()");
     auto adapter = modelAdapter_.Upgrade();
     CHECK_NULL_VOID(adapter);
-    if (!adapter->IsReady()) {
-        return;
-    }
     auto paintProperty = DynamicCast<ModelPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-    auto offset = paintWrapper->GetContentOffset();
-    adapter->OnPaint(paintProperty);
+    adapter->OnPaint3D(paintProperty);
     std::shared_ptr<Rosen::Drawing::CoreCanvasImpl> coreCanvas = canvas.GetCanvasData();
     const Rosen::Drawing::SkiaCanvas* skiaCanvas = static_cast<const Rosen::Drawing::SkiaCanvas*>(coreCanvas.get());
     CHECK_NULL_VOID(skiaCanvas);
     SkCanvas* skCanvas = skiaCanvas->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
-    adapter->GetTextureLayer(offset)->OnDraw(skCanvas);
+    adapter->OnPaint3DSceneTexture(skCanvas);
 }
 } // namespace OHOS::Ace::NG

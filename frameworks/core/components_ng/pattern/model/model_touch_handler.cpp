@@ -17,10 +17,10 @@
 
 namespace OHOS::Ace::NG {
 
-bool ModelTouchHandler::HandleTouchEvent(const TouchEventInfo& info)
+bool ModelTouchHandler::HandleTouchEvent(const TouchEventInfo& info, uint32_t viewWidth, uint32_t viewHeight)
 {
     auto event = CreateTouchEvent(info);
-    auto sceneEvent = CreateSceneTouchEvent(event);
+    auto sceneEvent = CreateSceneTouchEvent(event, viewWidth, viewHeight);
     switch (event.type) {
         case TouchType::MOVE: {
             touches_[event.id] = event;
@@ -54,15 +54,14 @@ bool ModelTouchHandler::HandleTouchEvent(const TouchEventInfo& info)
         }
         isClicked_ = touchCount_ > 0;
         return true;
-    } else {
-        CHECK_NULL_RETURN(cameraEventCallback_, false);
-        cameraEventCallback_(sceneEvent);
-        return true;
     }
-    return false;
+
+    CHECK_NULL_RETURN(cameraEventCallback_, false);
+    cameraEventCallback_(sceneEvent);
+    return true;
 }
 
-OHOS::Ace::TouchEvent ModelTouchHandler::CreateTouchEvent(const TouchEventInfo& info)
+TouchEvent ModelTouchHandler::CreateTouchEvent(const TouchEventInfo& info) const
 {
     auto point = info.GetChangedTouches().front();
     return {
@@ -75,13 +74,19 @@ OHOS::Ace::TouchEvent ModelTouchHandler::CreateTouchEvent(const TouchEventInfo& 
     };
 }
 
-OHOS::Render3D::SceneViewerTouchEvent ModelTouchHandler::CreateSceneTouchEvent(const TouchEvent& point) const
+Render3D::PointerEvent ModelTouchHandler::CreateSceneTouchEvent(const TouchEvent& point,
+    uint32_t viewWidth, uint32_t viewHeight) const
 {
-    OHOS::Render3D::SceneViewerTouchEvent event(point.id);
+    if (viewWidth == 0U || viewHeight == 0U) {
+        LOGE("CreateSceneTouchEvent error view width and height %d x %d", viewWidth, viewHeight);
+        return {};
+    }
+    Render3D::PointerEvent pointerEvent;
+    pointerEvent.buttonIndex_ = -1;
 
-    event.SetEventType(point.type);
-    event.SetGlobalLocation(point.GetScreenOffset());
-    event.SetLocalLocation(point.GetOffset());
+    pointerEvent.pointerId_ = point.id;
+    pointerEvent.x_ = point.GetOffset().GetX() / viewWidth;
+    pointerEvent.y_ = point.GetOffset().GetY() / viewHeight;
 
     Offset deltaChange(0.0, 0.0);
     auto touch = touches_.find(point.id);
@@ -90,8 +95,31 @@ OHOS::Render3D::SceneViewerTouchEvent ModelTouchHandler::CreateSceneTouchEvent(c
         deltaChange.SetX(point.screenX - oldPoint.screenX);
         deltaChange.SetY(point.screenY - oldPoint.screenY);
     }
-    event.SetDeltaChange(std::move(deltaChange));
-    return event;
+    
+    pointerEvent.deltaX_ = deltaChange.GetX() / viewWidth;
+    pointerEvent.deltaY_ = deltaChange.GetY() / viewHeight;
+    switch (point.type) {
+        case TouchType::DOWN:
+            pointerEvent.eventType_ = Render3D::PointerEventType::PRESSED;
+            break;
+        case TouchType::UP:
+            pointerEvent.eventType_ = Render3D::PointerEventType::RELEASED;
+            break;
+        case Ace::TouchType::MOVE:
+            pointerEvent.eventType_ = Render3D::PointerEventType::MOVED;
+            break;
+        case Ace::TouchType::CANCEL:
+            pointerEvent.eventType_ = Render3D::PointerEventType::CANCELLED;
+            break;
+        case TouchType::PULL_DOWN:
+        case TouchType::PULL_UP:
+        case TouchType::PULL_MOVE:
+        case TouchType::PULL_IN_WINDOW:
+        case TouchType::PULL_OUT_WINDOW:
+        case TouchType::UNKNOWN:
+            break;
+    }
+    
+    return pointerEvent;
 }
-
 } // namespace OHOS::Ace
