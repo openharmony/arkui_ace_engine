@@ -49,6 +49,7 @@ protected:
 
 private:
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    void ReloadToStartIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
     virtual void SkipLargeOffset(float mainSize, LayoutWrapper* layoutWrapper);
