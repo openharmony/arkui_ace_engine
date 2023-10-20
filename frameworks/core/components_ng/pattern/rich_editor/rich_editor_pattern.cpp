@@ -1215,6 +1215,7 @@ void RichEditorPattern::OnVisibleChange(bool isVisible)
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
 {
     if (forceClose) {
+        isKeyboardClosedByUser_ = false;
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
         }
@@ -2068,6 +2069,10 @@ void RichEditorPattern::SetInputMethodStatus(bool keyboardShown)
 {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     imeShown_ = keyboardShown;
+    if (!keyboardShown && isKeyboardClosedByUser_) {
+        FocusHub::LostFocusToViewRoot();
+    }
+    isKeyboardClosedByUser_ = true;
 #endif
 }
 

@@ -1729,7 +1729,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0035, TestSize.Level1)
     focusHub->focusType_ = FocusType::NODE;
     focusHub->currentFocus_ = false;
     focusHub->onPreFocusCallback_ = []() {};
-    EXPECT_FALSE(focusHub->RequestFocusImmediately(true));
+    EXPECT_FALSE(focusHub->RequestFocusImmediately());
     EXPECT_FALSE(focusHub->RequestFocusImmediately());
     context->SetIsFocusingByTab(false);
     focusHub->SetFocusType(FocusType::DISABLE);

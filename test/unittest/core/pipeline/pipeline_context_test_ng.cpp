@@ -422,7 +422,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_->children_.push_back(frameNode_1);
     focusHub = frameNode_1->eventHub_->GetOrCreateFocusHub();
     focusHub->SetIsDefaultHasFocused(true);
-    EXPECT_FALSE(context_->RequestDefaultFocus());
+    EXPECT_FALSE(context_->RequestDefaultFocus(focusHub));
     /**
      * @tc.steps6: call SetIsDefaultHasFocused with false and create a new frameNode
                 init frameNode_2's focusHub
@@ -440,9 +440,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_2->eventHub_->enabled_ = true;
     newFocusHub->focusable_ = true;
     newFocusHub->parentFocusable_ = true;
-    EXPECT_TRUE(context_->RequestDefaultFocus());
+    EXPECT_TRUE(context_->RequestDefaultFocus(newFocusHub));
     newFocusHub->SetFocusType(FocusType::DISABLE);
-    EXPECT_FALSE(context_->RequestDefaultFocus());
+    EXPECT_FALSE(context_->RequestDefaultFocus(newFocusHub));
 
     /**
      * @tc.steps7: Create a new frameNode and call AddDirtyDefaultFocus
@@ -464,7 +464,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     EXPECT_FALSE(context_->dirtyFocusNode_.Upgrade());
     EXPECT_FALSE(context_->dirtyFocusScope_.Upgrade());
 
-    context_->MarkRootFocusNeedUpdate();
     auto frameNodeId_4 = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_4 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_4, nullptr);
     auto eventHubRoot = frameNode_4->GetEventHub<EventHub>();
@@ -474,7 +473,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
 
     context_->rootNode_ = frameNode_4;
     context_->FlushFocus();
-    EXPECT_FALSE(context_->isRootFocusNeedUpdate_);
+    EXPECT_TRUE(focusHubRoot->IsCurrentFocus());
 }
 
 /**
