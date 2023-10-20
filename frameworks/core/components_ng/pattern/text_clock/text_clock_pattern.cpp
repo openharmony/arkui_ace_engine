@@ -29,9 +29,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-#ifdef WINDOWS_PLATFORM
-constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
-#endif
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
@@ -71,28 +68,6 @@ std::unordered_map<char, TextClockElementIndex> curDateTimeMap = { { 'y', TextCl
     { 'm', TextClockElementIndex::CUR_MINUTE_INDEX }, { 's', TextClockElementIndex::CUR_SECOND_INDEX },
     { 'S', TextClockElementIndex::CUR_MILLISECOND_INDEX }, { 'a', TextClockElementIndex::CUR_AMPM_INDEX },
     { 'E', TextClockElementIndex::CUR_WEEK_INDEX } };
-
-int32_t GetSystemTimeZone()
-{
-#ifndef WINDOWS_PLATFORM
-    return timezone / TOTAL_SECONDS_OF_HOUR;
-#else
-    struct timeval currentTime;
-    struct timezone timeZone;
-    gettimeofday(&currentTime, &timeZone);
-    int32_t timeZoneHour = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
-    return timeZoneHour;
-#endif
-}
-
-/**
- *  The East time zone is usually represented by a positive number
- *  and the west by a negative number.
- */
-int32_t GetGMT(int32_t hoursWest)
-{
-    return -hoursWest;
-}
 } // namespace
 
 TextClockPattern::TextClockPattern()
@@ -196,7 +171,7 @@ void TextClockPattern::UpdateTimeText()
     CHECK_NULL_VOID(textContext);
     textContext->SetClipToFrame(false);
     textContext->UpdateClipEdge(false);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     textNode->MarkModifyDone();
     if (isStart_) {
         RequestUpdateForNextSecond();
@@ -243,13 +218,12 @@ void TextClockPattern::UpdateTimeTextCallBack()
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
 {
-    auto offset = GetGMT(hourWest_);
     time_t current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    auto utcTime = std::gmtime(&current); // Convert to UTC time.
-    auto utcTimeSecond = std::mktime(utcTime);
-    // UTC time(timezone is GMT 0) add time zone offset.
-    time_t targetTimeZoneTime = utcTimeSecond + offset * TOTAL_SECONDS_OF_HOUR;
-    auto* timeZoneTime = std::localtime(&targetTimeZoneTime);
+    auto* timeZoneTime = std::localtime(&current);
+    if (!NearEqual(hourWest_, INT_MAX)) {
+        current = current - hourWest_ * TOTAL_SECONDS_OF_HOUR;
+        timeZoneTime = std::gmtime(&current); // Convert to UTC time.
+    }
     CHECK_NULL_RETURN(timeZoneTime, "");
     DateTime dateTime; // This is for i18n date time.
     dateTime.year = timeZoneTime->tm_year + BASE_YEAR;
@@ -259,8 +233,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     dateTime.minute = timeZoneTime->tm_min;
     dateTime.second = timeZoneTime->tm_sec;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        std::string time = Localization::GetInstance()->FormatDateTime(dateTime, GetFormat());
-        return time;
+        return Localization::GetInstance()->FormatDateTime(dateTime, GetFormat());
     }
     dateTime.week = timeZoneTime->tm_wday;       // 0-6
     std::string dateTimeFormat = DEFAULT_FORMAT; // the format to get datetime value from the thirdlib
@@ -536,14 +509,11 @@ std::string TextClockPattern::GetFormat() const
 int32_t TextClockPattern::GetHoursWest() const
 {
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
-    auto tz = GetSystemTimeZone();
-    CHECK_NULL_RETURN(textClockLayoutProperty, tz);
+    CHECK_NULL_RETURN(textClockLayoutProperty, INT_MAX);
     if (textClockLayoutProperty->GetHoursWest().has_value()) {
-        return NearEqual(textClockLayoutProperty->GetHoursWest().value(), INT_MAX)
-                   ? tz
-                   : textClockLayoutProperty->GetHoursWest().value();
+        return textClockLayoutProperty->GetHoursWest().value();
     }
-    return tz;
+    return INT_MAX;
 }
 
 RefPtr<FrameNode> TextClockPattern::GetTextNode()
