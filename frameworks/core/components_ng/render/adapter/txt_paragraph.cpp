@@ -509,7 +509,7 @@ bool TxtParagraph::CalcCaretMetricsByPosition(
     auto downStreamSuccess = ComputeOffsetForCaretDownstream(extent, metricsDownstream);
     auto upStreamSuccess = ComputeOffsetForCaretUpstream(extent, metricsUpstream);
     if (downStreamSuccess || upStreamSuccess) {
-        if (metricsDownstream.offset.GetY() < lastTouchOffset.GetY() && downStreamSuccess) {
+        if ((metricsDownstream.offset.GetY() < lastTouchOffset.GetY()) && downStreamSuccess) {
             caretCaretMetric = metricsDownstream;
         } else if (upStreamSuccess) {
             caretCaretMetric = metricsUpstream;

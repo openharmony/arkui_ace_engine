@@ -106,8 +106,6 @@ void TextSelectController::UpdateCaretRectByPositionNearTouchOffset(int32_t posi
     CalcCaretMetricsByPositionNearTouchOffset(position, caretMetrics,
         OffsetF(static_cast<float>(touchOffset.GetX()), static_cast<float>(touchOffset.GetY())));
 
-    CaretMetricsF CaretMetrics;
-    paragraph_->CalcCaretMetricsByPosition(position, CaretMetrics, TextAffinity::UPSTREAM);
     caretInfo_.UpdateOffset(caretMetrics.offset);
     UpdateCaretHeight(caretMetrics.height);
 }
@@ -118,7 +116,8 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     UpdateCaretIndex(index);
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
-        MoveCaretToContentRect(GetCaretIndex());
+        MoveHandleToContentRect(caretInfo_.rect);
+        UpdateRecordCaretIndex(caretInfo_.index);
     } else {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
     }

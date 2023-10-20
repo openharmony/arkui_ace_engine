@@ -1613,8 +1613,11 @@ void TextFieldPattern::OnModifyDone()
         lastTextRectY_ = textRect_.GetY();
     }
     ProcessInnerPadding();
-    textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
-    textRect_.SetTop(GetPaddingTop() + GetBorderTop());
+    // The textRect position can't be changed by only redraw.
+    if (CheckNeedMeasure(layoutProperty->GetPropertyChangeFlag())) {
+        textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
+        textRect_.SetTop(GetPaddingTop() + GetBorderTop());
+    }
     CalculateDefaultCursor();
     if (renderContext->HasBackgroundColor()) {
         paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
@@ -1661,6 +1664,7 @@ void TextFieldPattern::OnModifyDone()
         }
     } else {
         SetAxis(Axis::HORIZONTAL);
+        SetScrollBar(DisplayMode::OFF);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
             SetScrollEnable(false);
@@ -2063,10 +2067,10 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     CHECK_NULL_VOID(SelectOverlayIsOn());
     CHECK_NULL_VOID(!contentController_->IsEmpty());
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
-    auto position = UpdateCaretPositionOnHandleMove(localOffset);
     if (isSingleHandle_) {
-        selectController_->MoveCaretToContentRect(position);
+        selectController_->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
     } else {
+        auto position = UpdateCaretPositionOnHandleMove(localOffset);
         if (isFirstHandle) {
             selectController_->MoveFirstHandleToContentRect(position);
             auto proxy = GetSelectOverlayProxy();
@@ -2261,7 +2265,6 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         return;
     }
-    pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
     isUsingMouse_ = true;
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleRightMouseEvent(info);
