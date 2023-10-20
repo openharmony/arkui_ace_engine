@@ -36,7 +36,8 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
-            child->GetHostNode()->GetId(), child->GetHostNode()->GetParent()->GetId());
+            child->GetHostNode()->GetId(), child->GetHostNode()->GetParent() ?
+                child->GetHostNode()->GetParent()->GetId() : 0);
         child->Measure(layoutConstraint);
     }
     PerformMeasureSelf(layoutWrapper);
@@ -47,7 +48,8 @@ void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     PerformLayout(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
-            child->GetHostNode()->GetId(), child->GetHostNode()->GetParent()->GetId());
+            child->GetHostNode()->GetId(), child->GetHostNode()->GetParent() ?
+                child->GetHostNode()->GetParent()->GetId() : 0);
         child->Layout();
     }
 }
