@@ -139,7 +139,7 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto window = static_cast<RosenWindow*>(container->GetWindow());
-    CHECK_NULL_RETURN(window,false);
+    CHECK_NULL_RETURN(window, false);
     auto rootScene = static_cast<Rosen::RootScene*>(window->GetWindow().GetRefPtr());
     CHECK_NULL_RETURN(rootScene, false);
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
