@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 
 namespace OHOS::Ace::NG {
 uint64_t UITaskScheduler::frameId_ = 0;
@@ -142,8 +143,14 @@ void UITaskScheduler::FlushTask()
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
     }
+    FlushDelayJsActive();
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
+}
+
+void UITaskScheduler::FlushDelayJsActive()
+{
+    CustomNode::FlushDelayJsActive();
 }
 
 void UITaskScheduler::AddPredictTask(PredictTask&& task)
