@@ -63,6 +63,7 @@ public:
                 LOGE("Pattern of menu is null, please check!");
                 return;
             }
+            theme->previewMenuMaskColor_ = pattern->GetAttr<Color>("preview_menu_mask_color", Color(0x33182431));
             theme->filterAnimationDuration_ = 250;
             theme->previewAnimationDuration_ = 300;
             theme->previewBeforeAnimationScale_ = 0.95f;
@@ -146,6 +147,11 @@ public:
         return previewBorderRadius_;
     }
 
+    Color GetPreviewMenuMaskColor() const
+    {
+        return previewMenuMaskColor_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -163,6 +169,7 @@ private:
     float previewDisappearSpringMotionDampingFraction_ = 0.0f;
     Dimension filterRadius_;
     Dimension previewBorderRadius_;
+    Color previewMenuMaskColor_;
 };
 
 } // namespace OHOS::Ace::NG

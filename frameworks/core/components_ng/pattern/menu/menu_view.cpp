@@ -291,6 +291,40 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     ShowPixelMapAnimation(imageNode);
 }
 
+void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
+{
+    CHECK_NULL_VOID(columnNode);
+
+    auto filterRenderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(filterRenderContext);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+
+    auto maskColor = menuTheme->GetPreviewMenuMaskColor();
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
+    styleOption.colorMode = ThemeColorMode::SYSTEM;
+
+    AnimationOption option;
+    option.SetDuration(menuTheme->GetFilterAnimationDuration());
+    option.SetCurve(Curves::SHARP);
+    filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
+    AnimationUtils::Animate(
+        option,
+        [filterRenderContext, styleOption, maskColor]() {
+            CHECK_NULL_VOID(filterRenderContext);
+            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+                filterRenderContext->UpdateBackBlurStyle(styleOption);
+            } else {
+                filterRenderContext->UpdateBackgroundColor(maskColor);
+            }
+        },
+        option.GetOnFinishEvent());
+}
+
 void SetFilter(const RefPtr<FrameNode>& targetNode)
 {
     auto parent = targetNode->GetParent();
@@ -305,7 +339,8 @@ void SetFilter(const RefPtr<FrameNode>& targetNode)
     CHECK_NULL_VOID(manager);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        CHECK_NULL_VOID(isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE);
+        CHECK_NULL_VOID(isBindOverlayValue && (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+            SystemProperties::GetDeviceType() == DeviceType::TABLET));
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -322,27 +357,7 @@ void SetFilter(const RefPtr<FrameNode>& targetNode)
             manager->SetFilterColumnNode(columnNode);
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
-        auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_VOID(menuTheme);
-
-        auto filterRenderContext = columnNode->GetRenderContext();
-        CHECK_NULL_VOID(filterRenderContext);
-
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
-        styleOption.colorMode = ThemeColorMode::SYSTEM;
-
-        AnimationOption option;
-        option.SetDuration(menuTheme->GetFilterAnimationDuration());
-        option.SetCurve(Curves::SHARP);
-        filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
-        AnimationUtils::Animate(
-            option,
-            [filterRenderContext, styleOption]() {
-                CHECK_NULL_VOID(filterRenderContext);
-                filterRenderContext->UpdateBackBlurStyle(styleOption);
-            },
-            option.GetOnFinishEvent());
+        ShowFilterAnimation(columnNode);
     }
 }
 #endif
