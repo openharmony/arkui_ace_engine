@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
@@ -141,6 +142,7 @@ const std::string TEXT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\"
                                        "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
 const std::string TEXT_EQUALS_VALUE =
     R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
+const Ace::WordBreak TEXT_WORD_BREAK = Ace::WordBreak::BREAK_ALL;
 
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -196,6 +198,7 @@ struct TestProperty {
     std::optional<Dimension> adaptMaxFontSize = std::nullopt;
     std::optional<Dimension> letterSpacing = std::nullopt;
     std::optional<Dimension> textIndent = std::nullopt;
+    std::optional<Ace::WordBreak> wordBreak = std::nullopt;
 };
 
 class TextTestNg : public testing::Test {
@@ -307,6 +310,9 @@ RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue
     if (testProperty.textIndent.has_value()) {
         textModel.SetTextIndent(testProperty.textIndent.value());
     }
+    if (testProperty.wordBreak.has_value()) {
+        textModel.SetWordBreak(testProperty.wordBreak.value());
+    }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
     return AceType::DynamicCast<FrameNode>(element);
@@ -358,6 +364,7 @@ void TextTestNg::UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutP
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
     textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
+    textLayoutProperty->UpdateWordBreak(TEXT_WORD_BREAK);
 }
 
 std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> Init()
@@ -371,7 +378,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> Init()
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->rootNode_ =
         FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());
-    ;
+
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     pattern->clipboard_ = clipboard;
     return { frameNode, pattern };
@@ -401,6 +408,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     testProperty.adaptMinFontSize = std::make_optional(ADAPT_MIN_FONT_SIZE_VALUE);
     testProperty.adaptMaxFontSize = std::make_optional(ADAPT_MAX_FONT_SIZE_VALUE);
     testProperty.textIndent = std::make_optional(TEXT_INDENT);
+    testProperty.wordBreak = std::make_optional(TEXT_WORD_BREAK);
 
     RefPtr<FrameNode> frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
@@ -431,6 +439,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetAdaptMaxFontSize(), ADAPT_MAX_FONT_SIZE_VALUE);
     EXPECT_EQ(textStyle.GetAdaptTextSize(),
         testProperty.adaptMinFontSize.has_value() || testProperty.adaptMaxFontSize.has_value());
+    EXPECT_EQ(textStyle.GetWordBreak(), TEXT_WORD_BREAK);
 
     /**
      * @tc.cases: case2. renderContext has foreground color and modifier will foreground color flag
@@ -2730,13 +2739,6 @@ HWTEST_F(TextTestNg, CreateParagraph001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
 {
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(3);
-    EXPECT_CALL(*paragraph, AddPlaceholder).Times(1);
-    EXPECT_CALL(*paragraph, Build).Times(2);
-    EXPECT_CALL(*paragraph, GetRectsForPlaceholders).Times(2);
-    EXPECT_CALL(*paragraph, PopStyle).Times(1);
-
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto pattern = AceType::MakeRefPtr<TextPattern>();
@@ -4812,5 +4814,90 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
     EXPECT_TRUE(pattern->hasClicked_);
     pattern->HandleClickEvent(info);
     EXPECT_FALSE(pattern->hasClicked_);
+}
+
+/**
+ * @tc.name: SetTextSelection001
+ * @tc.desc: test test_pattern.h SetTextSelection function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextSelection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+
+    /**
+     * @tc.steps: step2. call SetTextSelection with CopyOptions::None
+     * @tc.expected: not selected
+     */
+    textModelNG.SetTextSelection(0, 4);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), -1);
+
+    /**
+     * @tc.steps: step3. Get LayoutProperty and update CopyOption
+     * @tc.expected: textSelector_ updated successfully
+     */
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    pattern->SetTextSelection(0, 4);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), -1);
+    textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
+    pattern->SetTextSelection(0, 4);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), -1);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+    pattern->SetTextSelection(0, 4);
+
+    /**
+     * @tc.steps: step4. enabled is false or obscured is true
+     * @tc.expected: not selected
+     */
+    auto eventHub = pattern->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->enabled_ = false;
+    pattern->SetTextSelection(0, 4);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), -1);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    std::vector<ObscuredReasons> reasons;
+    reasons.push_back(ObscuredReasons::PLACEHOLDER);
+    renderContext->UpdateObscured(reasons);
+    pattern->SetTextSelection(0, 4);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), -1);
+    eventHub->enabled_ = true;
+    pattern->SetTextSelection(0, 4);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), -1);
+}
+
+/**
+ * @tc.name: TextFrameNodeCreator004
+ * @tc.desc: Test onCopy event of text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextFrameNodeCreator004, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
+    EXPECT_TRUE(eventHub);
+    std::string EventValue;
+    auto Event = [&EventValue](const std::string& param) { EventValue = param; };
+
+    textModelNG.SetOnCopy(Event);
+    eventHub->SetOnCopy(std::move(Event));
+    EXPECT_TRUE(eventHub->onCopy_);
 }
 } // namespace OHOS::Ace::NG

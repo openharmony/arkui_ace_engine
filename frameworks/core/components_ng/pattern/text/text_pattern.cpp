@@ -393,7 +393,11 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         pattern->OnHandleMoveDone(handleRect, isFirst);
     };
-    selectInfo.menuInfo.menuIsShow = true;
+    if (!selectInfo.firstHandle.isShow && !selectInfo.secondHandle.isShow) {
+        selectInfo.menuInfo.menuIsShow = false;
+    } else {
+        selectInfo.menuInfo.menuIsShow = true;
+    }
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuCallback.onCopy = [weak = WeakClaim(this)]() {
