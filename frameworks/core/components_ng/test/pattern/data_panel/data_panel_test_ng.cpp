@@ -968,31 +968,6 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level1)
     dataPanelModifier.PaintCircle(context, OFFSET);
 }
 
-/**
- * @tc.name: DataPanelPaintCircleTest002
- * @tc.desc: Test DataPanel PaintMethod PaintCircle
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level1)
-{
-    /**
-     * case 2:defaultThickness < radius
-     * radius = 50.0f
-     */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DataPanelTheme>()));
-
-    DataPanelModifier dataPanelModifier;
-    Testing::MockCanvas rsCanvas;
-
-    DrawingContext context { rsCanvas, 50.0f, 50.0f };
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    dataPanelModifier.PaintCircle(context, OFFSET);
-}
 
 /**
  * @tc.name: DataPanelPaintCircleTest003
@@ -1002,9 +977,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level1)
 HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
 {
     /**
-     * case 3:maxValue > 0 and totalvalue < maxvalue and one of value nearequael 0
-     * max = 100.0f Values = { 0.001f, 2.0f, 3.0f };
-     * effect = false  totalvalue > 0
+     * case 3: totalvalue = 20
+     *  values = { 10.0f, 10.0f } totalvalue = 20
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
@@ -1020,8 +994,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     dataPanelModifier.SetMax(100.0f);
-    dataPanelModifier.SetEffect(false);
-    std::vector<double> VALUES = { 0.001f, 2.0f, 3.0f };
+    std::vector<double> VALUES = { 10.0f, 10.0f };
     dataPanelModifier.SetValues(VALUES);
     dataPanelModifier.PaintCircle(context, OFFSET);
 }
@@ -1034,103 +1007,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
 HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level1)
 {
     /**
-     * case 4:maxValue < 0 and totalvalue > maxvalue
-     * max = -100.0f Values = { 100.0f, 200.0f, 300.0f };
-     * effect = true  totalvalue > 0
-     */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
-    Testing::MockCanvas rsCanvas;
-    DrawingContext context { rsCanvas, 10.0f, 10.0f };
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    dataPanelModifier.SetMax(-100.0f);
-    dataPanelModifier.SetEffect(true);
-    std::vector<double> VALUES = { 100.0f, 200.0f, 300.0f };
-    dataPanelModifier.SetValues(VALUES);
-    dataPanelModifier.PaintCircle(context, OFFSET);
-}
-
-/**
- * @tc.name: DataPanelPaintCircleTest005
- * @tc.desc: Test DataPanel PaintMethod PaintCircle
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level1)
-{
-    /**
-     * case 5:effect = true  totalvalue = 0
-     * effect = true   values = { -10.0f, 10.0f } totalvalue = 0
-     */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-
-    DataPanelModifier dataPanelModifier;
-    Testing::MockCanvas rsCanvas;
-    DrawingContext context { rsCanvas, 10.0f, 10.0f };
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    dataPanelModifier.SetMax(100.0f);
-    dataPanelModifier.SetEffect(true);
-    std::vector<double> VALUES = { -10.0f, 10.0f };
-    dataPanelModifier.SetValues(VALUES);
-    dataPanelModifier.PaintCircle(context, OFFSET);
-}
-
-/**
- * @tc.name: DataPanelPaintCircleTest006
- * @tc.desc: Test DataPanel PaintMethod PaintCircle
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest006, TestSize.Level1)
-{
-    /**
-     * case 6:effect = false  totalvalue = 0
-     * effect = false   values = { -10.0f, 10.0f } totalvalue = 0
-     */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
-    Testing::MockCanvas rsCanvas;
-    DrawingContext context { rsCanvas, 10.0f, 10.0f };
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    dataPanelModifier.SetMax(100.0f);
-    dataPanelModifier.SetEffect(false);
-    std::vector<double> VALUES = { -10.0f, 10.0f };
-    dataPanelModifier.SetValues(VALUES);
-    dataPanelModifier.PaintCircle(context, OFFSET);
-}
-
-/**
- * @tc.name: DataPanelPaintCircleTest007
- * @tc.desc: Test DataPanel PaintMethod PaintCircle
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest007, TestSize.Level1)
-{
-    /**
-     * case 7:maxValue > 0
-     * max = 100.0f Values = { 10.0f, 20.0f };
+     * case 4:maxValue > 0 and one of value nearequael 0
+     * max = 100.0f Values = { 0.001f, 20.0f };
      * isShadowVisible = true
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -1147,7 +1025,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest007, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     dataPanelModifier.SetMax(100.0f);
-    std::vector<double> VALUES = { 10.0f, 20.0f };
+    std::vector<double> VALUES = { 0.001f, 20.0f };
     dataPanelModifier.SetValues(VALUES);
     std::vector<Gradient> valueColors;
     // test Solid color when the valueColors >0 and valueColors <=9
