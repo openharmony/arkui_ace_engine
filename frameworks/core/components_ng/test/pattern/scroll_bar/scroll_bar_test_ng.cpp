@@ -16,6 +16,7 @@
 #define private public
 #define protected public
 #include "gtest/gtest.h"
+#include "test/mock/base/mock_task_executor.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -735,10 +737,23 @@ HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
     ASSERT_NE(pattern->scrollableEvent_, nullptr);
     auto callback = pattern->scrollEndCallback_;
     ASSERT_NE(callback, nullptr);
-    EXPECT_EQ(pattern->disappearAnimation_, nullptr);
+    MockPipelineBase::SetUp();
+    auto context = MockPipelineBase::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    MockPipelineBase::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
     /**
-     * @tc.steps: step3. call callback function and controlDistance_ is 0.
+     * @tc.steps: step3. DisplayMode::ON
+     * @tc.expected: opacity_ is UINT8_MAX.
+     */
+    pattern->displayMode_ = DisplayMode::ON;
+    pattern->OnModifyDone();
+    callback();
+    EXPECT_EQ(pattern->disappearAnimation_, nullptr);
+    EXPECT_EQ(pattern->opacity_, UINT8_MAX);
+
+    /**
+     * @tc.steps: step4. DisplayMode::AUTO and call callback function and controlDistance_ is 0.
      * @tc.expected: disappearAnimation_ is nullptr.
      */
     pattern->displayMode_ = DisplayMode::AUTO;
@@ -746,12 +761,12 @@ HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
     EXPECT_EQ(pattern->disappearAnimation_, nullptr);
 
     /**
-     * @tc.steps: step4. call callback function and controlDistance_ bigger than 0.
+     * @tc.steps: step5. call callback function and controlDistance_ bigger than 0.
      * @tc.expected: disappearAnimation_ is not nullptr.
      */
     pattern->controlDistance_ = 10.f;
     pattern->displayMode_ = DisplayMode::AUTO;
     callback();
-    EXPECT_EQ(pattern->disappearAnimation_, nullptr);
+    ASSERT_NE(pattern->disappearAnimation_, nullptr);
 }
 } // namespace OHOS::Ace::NG
