@@ -53,7 +53,8 @@ struct ClientOverlayInfo {
     std::optional<SelectHandleInfo> secondHandleInfo;
     bool animation = true;
     bool isMenuShow = true;
-    std::function<void(SelectOverlayInfo&)> overlayInfoModifier;
+    bool isShowMouseMenu = false;
+    bool isShowPaste = false;
     OverlayExtraInfo extraInfo;
 };
 
@@ -74,7 +75,7 @@ class SelectOverlayClient : public SelectionHost {
 
 public:
     void InitSelectOverlay();
-    void RequestOpenSelectOverlay(ClientOverlayInfo overlayInfo);
+    void RequestOpenSelectOverlay(const ClientOverlayInfo& overlayInfo);
     virtual void RequestCloseSelectOverlay(bool animation);
     bool SelectOverlayIsOn();
 
@@ -88,7 +89,8 @@ public:
         return false;
     }
 
-    virtual bool OnPreShowSelectOverlay(SelectOverlayInfo& overlayInfo, OverlayExtraInfo& extraInfo)
+    virtual bool OnPreShowSelectOverlay(
+        SelectOverlayInfo& overlayInfo, const ClientOverlayInfo& clientInfo, bool isSelectOverlayOn)
     {
         return false;
     }
@@ -156,7 +158,9 @@ protected:
     }
 
 private:
-    void UpdateShowingSelectOverlay(HandleShowMode mode, const SelectOverlayInfo& overlayInfo);
+    std::optional<SelectOverlayInfo> GetSelectOverlayInfo(const ClientOverlayInfo& clientInfo);
+    void CreateSelectOverlay(const ClientOverlayInfo& showOverlayInfo);
+    void UpdateShowingSelectOverlay(const ClientOverlayInfo& clientInfo);
     ParentScrollableCallback scrollCallback_;
     ScrollableParentInfo scrollableParentInfo_;
     SelectOverlayInfo selectOverlayInfo_;

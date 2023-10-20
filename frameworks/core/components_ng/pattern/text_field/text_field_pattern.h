@@ -934,7 +934,8 @@ public:
     void OnHandleClosed(bool closedByGlobalEvent) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
     bool CheckSelectionRectVisible() override;
-    bool OnPreShowSelectOverlay(SelectOverlayInfo& overlayInfo, OverlayExtraInfo& extra) override;
+    bool OnPreShowSelectOverlay(
+        SelectOverlayInfo& overlayInfo, const ClientOverlayInfo& clientInfo, bool isSelectOverlayOn) override;
     void OnSelectOverlayMenuClicked(SelectOverlayMenuId menuId) override
     {
         switch (menuId) {

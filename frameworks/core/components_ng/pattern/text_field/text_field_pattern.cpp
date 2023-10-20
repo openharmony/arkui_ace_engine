@@ -67,6 +67,7 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/event/ace_events.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #if not defined(ACE_UNITTEST)
@@ -105,8 +106,6 @@ const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
-const std::string CLIPBOARD_HAS_DATA = "HAS_DATA";
-const std::string SELECT_OVERLAY_MENU_IS_SHOW = "MENU_IS_SHOW";
 
 void SwapIfLarger(int32_t& a, int32_t& b)
 {
@@ -760,7 +759,6 @@ void TextFieldPattern::HandleBlurEvent()
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
-    CloseSelectOverlay(true);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -934,6 +932,7 @@ void TextFieldPattern::HandleOnPaste()
         if (textfield->IsTextArea() && layoutProperty->HasMaxLength()) {
             textfield->HandleCounterBorder();
         }
+        textfield->CloseSelectOverlay(true);
         auto host = textfield->GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = textfield->GetHost()->GetEventHub<TextFieldEventHub>();
@@ -1354,7 +1353,7 @@ void TextFieldPattern::InitTouchEvent()
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isUsingMouse_ = false;
+        pattern->isUsingMouse_ = info.GetSourceDevice() == SourceType::MOUSE;
         pattern->HandleTouchEvent(info);
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -1382,7 +1381,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     TimeStamp clickTimeStamp = info.GetTimeStamp();
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout = clickTimeStamp - lastClickTimeStamp_;
     lastClickTimeStamp_ = info.GetTimeStamp();
-    isUsingMouse_ = false;
+    isUsingMouse_ = info.GetSourceDevice() == SourceType::MOUSE;
     if (timeout.count() < DOUBLECLICK_INTERVAL_MS) {
         HandleDoubleClickEvent(info); // 注册手势事件
     } else {
@@ -1422,7 +1421,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     StartTwinkling();
     SetIsSingleHandle(true);
     if (lastCaretIndex == selectController_->GetCaretIndex() && hasFocus && caretStatus_ == CaretStatus::SHOW &&
-        !isUsingMouse_) {
+        info.GetSourceDevice() != SourceType::MOUSE) {
         ProcessOverlay(true);
     } else {
         CloseSelectOverlay(true);
@@ -1438,7 +1437,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
         StopTwinkling();
         SetIsSingleHandle(false);
     }
-    if (!isUsingMouse_) {
+    if (info.GetSourceDevice() != SourceType::MOUSE) {
         ProcessOverlay(true);
     }
     auto host = GetHost();
@@ -1818,7 +1817,7 @@ void TextFieldPattern::InitLongPressEvent()
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isUsingMouse_ = false;
+        pattern->isUsingMouse_ = info.GetSourceDevice() == SourceType::MOUSE;
         pattern->HandleLongPress(info);
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
@@ -1832,7 +1831,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (ResetObscureTickCountDown()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (isUsingMouse_) {
+    if (info.GetSourceDevice() == SourceType::MOUSE) {
         return;
     }
     auto hub = host->GetEventHub<EventHub>();
@@ -1848,7 +1847,6 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 #ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
 #endif
-    isUsingMouse_ = false;
     auto focusHub = GetFocusHub();
 
     if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
@@ -1910,8 +1908,9 @@ void TextFieldPattern::ShowSelectOverlay(
             secondHandleInfo.paintRect = handle;
             overlayInfo.secondHandleInfo = secondHandleInfo;
         }
-        overlayInfo.extraInfo.boolExtra.insert({ CLIPBOARD_HAS_DATA, hasData });
-        overlayInfo.extraInfo.boolExtra.insert({ SELECT_OVERLAY_MENU_IS_SHOW, isMenuShow });
+        overlayInfo.isShowPaste = hasData;
+        overlayInfo.isMenuShow = isMenuShow;
+        overlayInfo.isShowMouseMenu = pattern->IsUsingMouse();
         pattern->RequestOpenSelectOverlay(overlayInfo);
         auto start = pattern->GetTextSelectController()->GetStartIndex();
         auto end = pattern->GetTextSelectController()->GetEndIndex();
@@ -1920,7 +1919,8 @@ void TextFieldPattern::ShowSelectOverlay(
     clipboard_->HasData(hasDataCallback);
 }
 
-bool TextFieldPattern::OnPreShowSelectOverlay(SelectOverlayInfo& overlayInfo, OverlayExtraInfo& extraInfo)
+bool TextFieldPattern::OnPreShowSelectOverlay(
+    SelectOverlayInfo& overlayInfo, const ClientOverlayInfo& clientInfo, bool isSelectOverlayOn)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1929,7 +1929,9 @@ bool TextFieldPattern::OnPreShowSelectOverlay(SelectOverlayInfo& overlayInfo, Ov
     bool isHideSelectionMenu = layoutProperty->GetSelectionMenuHiddenValue(false);
     // right click menu
     if (IsUsingMouse()) {
-        CHECK_NULL_RETURN(isHideSelectionMenu, false);
+        if (isHideSelectionMenu && !isSelectOverlayOn) {
+            return false;
+        }
         overlayInfo.rightClickOffset = GetRightClickOffset();
         overlayInfo.isUsingMouse = true;
     } else {
@@ -1946,10 +1948,9 @@ bool TextFieldPattern::OnPreShowSelectOverlay(SelectOverlayInfo& overlayInfo, Ov
     overlayInfo.menuInfo.showCopy = hasTextContent && AllowCopy() && IsSelected();
     overlayInfo.menuInfo.showCut = overlayInfo.menuInfo.showCopy;
     overlayInfo.menuInfo.showCopyAll = hasTextContent && !IsSelectAll();
-    auto hasData = extraInfo.GetBoolOrDefault(CLIPBOARD_HAS_DATA, false);
+    auto hasData = clientInfo.isShowPaste;
     overlayInfo.menuInfo.showPaste = hasData;
-    overlayInfo.menuInfo.menuIsShow = (hasTextContent || hasData) && !isHideSelectionMenu &&
-                                      extraInfo.GetBoolOrDefault(SELECT_OVERLAY_MENU_IS_SHOW, false);
+    overlayInfo.menuInfo.menuIsShow = (hasTextContent || hasData) && !isHideSelectionMenu && clientInfo.isMenuShow;
     overlayInfo.isHandleLineShow = overlayInfo.isHandleLineShow && !IsSingleHandle();
     overlayInfo.menuInfo.menuDisable = isHideSelectionMenu;
     auto gesture = host->GetOrCreateGestureEventHub();
@@ -2259,7 +2260,6 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         return;
     }
     pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
-    CloseSelectOverlay(true);
     isUsingMouse_ = true;
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleRightMouseEvent(info);
@@ -2270,7 +2270,10 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
 {
-    if (info.GetAction() == MouseAction::RELEASE) {
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto focusHub = tmpHost->GetOrCreateFocusHub();
+    if (info.GetAction() == MouseAction::RELEASE && focusHub->IsCurrentFocus()) {
         LOGI("Handle mouse right button release");
         rightClickOffset_ = OffsetF(
             static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
@@ -3201,7 +3204,6 @@ void TextFieldPattern::OnVisibleChange(bool isVisible)
         if (SelectOverlayIsOn()) {
             StartTwinkling();
         }
-        CloseSelectOverlay();
     }
 }
 
@@ -4667,7 +4669,6 @@ void TextFieldPattern::StopEditing()
     }
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
-    CloseSelectOverlay();
     CloseKeyboard(true);
 }
 
