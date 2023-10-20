@@ -310,7 +310,8 @@ public:
         std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap);
 
     void InitializeRouterManager(
-        NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback);
+        NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
+        NG::UpdateRootComponentCallback&& updateRootComponentCallback);
 
     const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const
     {

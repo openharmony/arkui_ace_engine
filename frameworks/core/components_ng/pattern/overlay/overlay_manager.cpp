@@ -758,9 +758,6 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
     CHECK_NULL_VOID(popupInfo.isCurrentOnShow);
     popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
-    auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSkipHotArea(true);
 
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -1066,6 +1063,7 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
     CHECK_NULL_VOID(pipeline);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetMenuHide();
     auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
     if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         ShowPreviewDisappearAnimation(menuWrapperPattern);

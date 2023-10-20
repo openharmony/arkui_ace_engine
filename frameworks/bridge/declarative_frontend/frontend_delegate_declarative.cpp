@@ -798,11 +798,13 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
 }
 
 void FrontendDelegateDeclarative::InitializeRouterManager(
-    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback)
+    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
+    NG::UpdateRootComponentCallback&& updateRootComponentCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
     pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
     pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
+    pageRouterManager_->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 }
 
 // Start FrontendDelegate overrides.

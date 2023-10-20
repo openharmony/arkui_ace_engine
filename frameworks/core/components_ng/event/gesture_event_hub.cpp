@@ -122,11 +122,12 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         if (recognizer) {
             auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
             if (!recognizerGroup && newIdx >= idx) {
-                recognizer->SetTransInfo(host->GetId());
+                recognizer->SetNodeId(host->GetId());
             }
             recognizer->BeginReferee(touchId);
             innerRecognizers.push_back(std::move(recognizer));
         } else {
+            eventTarget->SetNodeId(host->GetId());
             finalResult.push_back(eventTarget);
         }
         newIdx++; // not process previous recognizers
@@ -190,10 +191,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 if (groupRecognizer) {
                     groupRecognizer->SetCoordinateOffset(offset);
                 }
-                groupRecognizer->SetTransInfo(host->GetId());
+                groupRecognizer->SetNodeId(host->GetId());
             }
         } else {
-            recognizer->SetTransInfo(host->GetId());
+            recognizer->SetNodeId(host->GetId());
         }
         recognizer->SetSize(size.Height(), size.Width());
         recognizer->SetCoordinateOffset(offset);

@@ -77,6 +77,8 @@ public:
 
     virtual void SetInstanceId(int32_t instanceId) {}
 
+    virtual void SetSurfaceDefaultSize(int32_t width, int32_t height) {}
+
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };

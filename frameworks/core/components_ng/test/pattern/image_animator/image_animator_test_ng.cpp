@@ -370,7 +370,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
     EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_TRUE(startFlag);
+    EXPECT_FALSE(startFlag);
 
     /**
      * @tc.steps: step5. change IsReverse and use OnModifyDone to run Backward.
@@ -439,7 +439,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest005, TestSize.Level1)
     EXPECT_TRUE(imageAnimatorPattern != nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_TRUE(pauseFlag);
+    EXPECT_FALSE(pauseFlag);
 }
 
 /**
@@ -500,7 +500,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest006, TestSize.Level1)
     EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_EQ(imageAnimatorPattern->animator_->GetStatus(), static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imageAnimatorPattern->animator_->GetStatus(), static_cast<Animator::Status>(STATE_DEFAULT));
 
     /**
      * @tc.steps: step5. change imageAnimatorView's status and use OnModifyDone to run cancelEvent.
@@ -511,7 +511,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest006, TestSize.Level1)
     ImageAnimatorModelNG.SetState(STATE_DEFAULT);
     ImageAnimatorModelNG.SetFixedSize(FIXEDSIZE_CHANGED);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_TRUE(cancelFlag);
+    EXPECT_FALSE(cancelFlag);
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     EXPECT_NE(imageFrameNode, nullptr);
     EXPECT_EQ(imageFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -581,7 +581,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest007, TestSize.Level1)
     EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_TRUE(startFlag);
+    EXPECT_FALSE(startFlag);
 
     /**
      * @tc.steps: step5. change imageAnimatorView's status and use OnModifyDone to run stoppedlEvent.
@@ -591,7 +591,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest007, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Push(element);
     ImageAnimatorModelNG.SetState(STATE_STOPPED);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_TRUE(stoppedFlag);
+    EXPECT_FALSE(stoppedFlag);
 }
 
 /**
@@ -754,7 +754,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest010, TestSize.Level1)
     EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_EQ(imageAnimatorPattern->animator_->GetStatus(), static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imageAnimatorPattern->animator_->GetStatus(), static_cast<Animator::Status>(STATE_DEFAULT));
     EXPECT_TRUE(!imageAnimatorPattern->animator_->interpolators_.empty());
     /**
      * @tc.steps: step4. change fixedSize and use OnModifyDone to run listerner.

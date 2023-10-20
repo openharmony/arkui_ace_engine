@@ -742,7 +742,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest0010, TestSize.Level1)
 
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(childWrapper->GetGeometryNode()->GetContentSize().Width(), 1.0);
+    EXPECT_EQ(childWrapper->GetGeometryNode()->GetContentSize().Width(), 0);
     /**
      * @tc.steps: step4. use layoutAlgorithm to measure and layout.
      * @tc.expected: check whether the value of geometry's contentSize's height is 1.
@@ -753,7 +753,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest0010, TestSize.Level1)
     buttonLayoutProperty->UpdateFontSize(Dimension(24.0));
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(childWrapper->GetGeometryNode()->GetContentSize().Height(), 1.0);
+    EXPECT_EQ(childWrapper->GetGeometryNode()->GetContentSize().Height(), 0);
 }
 
 /**

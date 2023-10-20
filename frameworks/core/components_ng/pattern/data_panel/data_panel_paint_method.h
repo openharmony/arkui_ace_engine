@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DATA_PANEL_DATA_PANEL_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DATA_PANEL_DATA_PANEL_PAINT_METHOD_H
 
+#include "core/components/common/properties/color.h"
+#include "core/components/data_panel/data_panel_theme.h"
 #include "core/components_ng/pattern/data_panel/data_panel_modifier.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/data_panel/data_panel_theme.h"
 
 namespace OHOS::Ace::NG {
 

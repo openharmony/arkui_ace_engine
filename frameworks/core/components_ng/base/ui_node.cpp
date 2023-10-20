@@ -645,6 +645,8 @@ RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool fo
 
 void UINode::Build()
 {
+    ACE_SCOPED_TRACE("Build[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
+        GetParent() ? GetParent()->GetId() : 0);
     for (const auto& child : GetChildren()) {
         child->Build();
     }

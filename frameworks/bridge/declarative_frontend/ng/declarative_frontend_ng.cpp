@@ -226,8 +226,17 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
         return jsEngine->LoadNamedRouterSource(namedRouter, isTriggeredByJs);
     };
 
+    auto updateRootComponentCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->UpdateRootComponent();
+    };
+
     pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
     pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
+    pageRouterManager->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarativeNG>(taskExecutor);
     delegate_->SetMediaQueryCallback(std::move(mediaQueryCallback));

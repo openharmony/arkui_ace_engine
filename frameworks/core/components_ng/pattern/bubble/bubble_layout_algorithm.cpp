@@ -134,29 +134,14 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.empty()) {
-        return;
-    }
-    auto child = children.front();
-    child->Layout();
-}
-
-/*
-    Because of bubble's position depends on targetNode,
-    The position of the bubble needs to be calculated after the targetNode layout is complete.
-*/
-OffsetT<Dimension> BubbleLayoutAlgorithm::GetChildOffsetAfterLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
-{
-    CHECK_NULL_RETURN(layoutWrapper, OffsetT<Dimension> {});
     auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(bubbleProp, OffsetT<Dimension> {});
+    CHECK_NULL_VOID(bubbleProp);
     auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, OffsetT<Dimension> {});
+    CHECK_NULL_VOID(frameNode);
     auto bubblePattern = frameNode->GetPattern<BubblePattern>();
-    CHECK_NULL_RETURN(bubblePattern, OffsetT<Dimension> {});
+    CHECK_NULL_VOID(bubblePattern);
     auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
-    CHECK_NULL_RETURN(bubblePaintProperty, OffsetT<Dimension> {});
+    CHECK_NULL_VOID(bubblePaintProperty);
     bool UseArrowOffset = bubblePaintProperty->GetArrowOffset().has_value();
     auto ShowInSubWindow = bubbleProp->GetShowInSubWindow().value_or(false);
     if (!bubblePattern->IsExiting()) {
@@ -167,18 +152,29 @@ OffsetT<Dimension> BubbleLayoutAlgorithm::GetChildOffsetAfterLayout(const RefPtr
         targetOffset_ -= overlayGlobalOffset;
     }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    auto childWrapper = children.front();
     if (children.empty()) {
-        return OffsetT<Dimension> {};
+        return;
     }
     selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize();       // window's size
+    auto childWrapper = children.front();
     childSize_ = childWrapper->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
     childOffset_ = GetChildPosition(childSize_, bubbleProp, UseArrowOffset);            // bubble's offset
     UpdateChildPosition(bubbleProp);
     UpdateTouchRegion();
+    childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset_);
+    childWrapper->Layout();
+    auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(childLayoutWrapper);
+    const auto& columnChild = childLayoutWrapper->GetAllChildrenWithBuild();
+    bool useCustom = bubbleProp->GetUseCustom().value_or(false);
+    if (columnChild.size() > 1 && !useCustom) {
+        auto buttonRow = columnChild.back();
+        buttonRowSize_ = buttonRow->GetGeometryNode()->GetMarginFrameSize();
+        buttonRowOffset_ = buttonRow->GetGeometryNode()->GetMarginFrameOffset() + childOffset_;
+    }
 
     // If bubble displayed in subwindow, set the hotarea of subwindow.
-    if (bubbleProp->GetShowInSubWindowValue(false) && (!bubblePattern->IsSkipHotArea())) {
+    if (bubbleProp->GetShowInSubWindowValue(false)) {
         std::vector<Rect> rects;
         if (!bubbleProp->GetBlockEventValue(true)) {
             auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(), childSize_.Width(), childSize_.Height());
@@ -191,12 +187,6 @@ OffsetT<Dimension> BubbleLayoutAlgorithm::GetChildOffsetAfterLayout(const RefPtr
         }
         SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId(), bubblePattern->GetContainerId());
     }
-    bubblePattern->SetSkipHotArea(false);
-
-    Dimension childOffsetX(childOffset_.GetX());
-    Dimension childOffsetY(childOffset_.GetY());
-    OffsetT<Dimension> childRenderOffset(childOffsetX, childOffsetY);
-    return childRenderOffset;
 }
 
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp)

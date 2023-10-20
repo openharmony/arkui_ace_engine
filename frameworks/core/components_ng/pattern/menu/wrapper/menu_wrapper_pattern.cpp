@@ -179,7 +179,7 @@ void MenuWrapperPattern::CheckAndShowAnimation()
 
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (IsContextMenu()) {
+    if (IsContextMenu() && !IsHided()) {
         SetHotAreas(dirty);
     }
     CheckAndShowAnimation();

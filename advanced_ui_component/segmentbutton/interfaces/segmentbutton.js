@@ -1662,9 +1662,15 @@ class SegmentButton extends ViewPU {
         }));
         If.pop();
         this.observeComponentCreation(((t, e) => {
+            var o;
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Stack.create();
             Stack.size(ObservedObject.GetRawObject(this.componentSize));
+            Stack.clip(new Rect({
+                width: this.componentSize.width,
+                height: this.componentSize.height,
+                radius: null !== (o = "capsule" === this.options.type && this.options.multiply ? this.options.iconTextRadius : this.options.iconTextBackgroundRadius) && void 0 !== o ? o : this.componentSize.height / 2
+            }));
             e || Stack.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));

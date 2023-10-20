@@ -11809,7 +11809,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest012, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->transId_ = 1;
+    clickRecognizerPtr->SetNodeId(1);
     AncestorNodeInfo info1;
     AncestorNodeInfo info2;
     AncestorNodeInfo info3;
@@ -11822,9 +11822,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest012, TestSize.L
     transFormIds.insert(pair3);
     EXPECT_EQ(transFormIds.size(), 3);
     PointF f1 = PointF(1.0, 0.0);
-    PointF f2 = PointF(1.0, 0.0);
-    clickRecognizerPtr->Transform(f1, f2);
-    EXPECT_EQ(clickRecognizerPtr->transId_, 1);
+    NGGestureRecognizer::Transform(f1, 1);
     EXPECT_EQ(NGGestureRecognizer::GetGlobalTransIds().size(), 0);
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 }
@@ -11843,7 +11841,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest013, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->transId_ = 1;
+    clickRecognizerPtr->SetNodeId(1);
     AncestorNodeInfo info1;
     AncestorNodeInfo info2;
     AncestorNodeInfo info3;
@@ -11855,9 +11853,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest013, TestSize.L
     transFormIds.insert(transFormIds.begin(), std::make_pair(2, info3));
     EXPECT_EQ(transFormIds.size(), 3);
     PointF f1 = PointF(1.0, 0.0);
-    PointF f2 = PointF(1.0, 0.0);
-    clickRecognizerPtr->Transform(f1, f2);
-    EXPECT_EQ(clickRecognizerPtr->transId_, 1);
+    NGGestureRecognizer::Transform(f1, 1);
     EXPECT_EQ(NGGestureRecognizer::GetGlobalTransIds().size(), 0);
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 }
@@ -11923,7 +11919,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest014, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->transId_ = 1;
+    clickRecognizerPtr->SetNodeId(1);
     AncestorNodeInfo info1;
     AncestorNodeInfo info2;
     AncestorNodeInfo info3;
@@ -11935,9 +11931,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest014, TestSize.L
     transFormIds[2] = info3;
     EXPECT_EQ(transFormIds.size(), 3);
     PointF f1 = PointF(1.0, 0.0);
-    PointF f2 = PointF(1.0, 0.0);
-    clickRecognizerPtr->Transform(f1, f2);
-    EXPECT_EQ(clickRecognizerPtr->transId_, 1);
+    NGGestureRecognizer::Transform(f1, 1);
     EXPECT_EQ(NGGestureRecognizer::GetGlobalTransIds().size(), 0);
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 }

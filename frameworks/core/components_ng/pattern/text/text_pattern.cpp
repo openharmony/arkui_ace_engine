@@ -1164,6 +1164,9 @@ void TextPattern::InitSurfaceChangedCallback()
 
 void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
+    if (newWidth == prevWidth && newHeight == prevHeight) {
+        return;
+    }
     CloseSelectOverlay();
     ResetSelection();
 }

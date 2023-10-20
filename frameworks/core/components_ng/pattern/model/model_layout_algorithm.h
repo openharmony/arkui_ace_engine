@@ -19,7 +19,6 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/model/model_adapter_wrapper.h"
-#include "core/components_ng/pattern/model/model_layout_property.h"
 
 namespace OHOS::Ace::NG {
 

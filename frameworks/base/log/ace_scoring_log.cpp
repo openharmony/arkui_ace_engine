@@ -60,7 +60,6 @@ void AceScoringLog::Init()
                                        ? AceApplicationInfo::GetInstance().GetPackageName()
                                        : AceApplicationInfo::GetInstance().GetProcessName();
         AceScoringLog::isDebuggingEnabled_ = SystemProperties::IsScoringEnabled(AceScoringLog::procName_);
-        LOGI("AceScoringLog enabled");
     });
     startTime_ = GetSysTimestamp();
 }
@@ -71,8 +70,6 @@ AceScoringLog::~AceScoringLog()
         return;
     }
     endTime_ = GetSysTimestamp();
-    LOGI("%{public}s %{public}s %{public}" PRIu64 " %{public}" PRIu64 "", procName_.c_str(), logInfo_.c_str(),
-        startTime_, endTime_);
 }
 
 } // namespace OHOS::Ace
