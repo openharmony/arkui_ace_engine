@@ -725,6 +725,12 @@ export struct SegmentButton {
         }
       }
       .size(this.componentSize)
+      .clip(new Rect({
+        width: this.componentSize.width as number,
+        height: this.componentSize.height as number,
+        radius: (this.options.type === 'capsule' && this.options.multiply ?
+        this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
+        this.componentSize.height as number / 2 }))
 
       SegmentButtonItemArrayComponent({
         optionsArray: this.options.buttons,

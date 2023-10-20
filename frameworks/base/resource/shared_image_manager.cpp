@@ -46,7 +46,7 @@ std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const s
             std::lock_guard<std::mutex> lockCancelableCallbackMap_(sharedImageManager->cancelableCallbackMapMutex_);
             sharedImageManager->cancelableCallbackMap_.erase(picName);
         }
-        LOGI("Done clean image data for %{private}s, data size is %{public}zu", picName.c_str(), dataSize);
+        LOGD("Done clean image data for %{private}s, data size is %{public}zu", picName.c_str(), dataSize);
     };
     return clearImageDataCallback;
 }
@@ -72,7 +72,6 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
             for (const auto& providerWp : providersToNotify->second) {
                 auto provider = providerWp.Upgrade();
                 if (!provider) {
-                    LOGE("provider of %{private}s is null, data size is %{public}zu", name.c_str(), sharedImage.size());
                     continue;
                 }
                 providerWpSet.emplace(provider);
@@ -99,20 +98,18 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
                     std::lock_guard<std::mutex> lockImageMap(sharedImageManager->sharedImageMapMutex_);
                     auto imageDataIter = sharedImageMap.find(name);
                     if (imageDataIter == sharedImageMap.end()) {
-                        LOGE("fail to find data of %{public}s in sharedImageMap, stop UpdateData", name.c_str());
+                        LOGW("fail to find data of %{public}s in sharedImageMap, stop UpdateData", name.c_str());
                         return;
                     }
                     dataSize = imageDataIter->second.size();
                     for (const auto& providerWp : providerWpSet) {
                         auto provider = providerWp.Upgrade();
                         if (!provider) {
-                            LOGE("provider of %{public}s is null when UpdateData, dataSize is %{public}zu",
-                                name.c_str(), dataSize);
                             continue;
                         }
                         provider->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), imageDataIter->second);
                     }
-                    LOGI("done add image data for %{private}s, length of data is %{public}zu", name.c_str(), dataSize);
+                    LOGD("done add image data for %{private}s, length of data is %{public}zu", name.c_str(), dataSize);
                 }
                 sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
             },
@@ -131,13 +128,12 @@ bool SharedImageManager::FindImageInSharedImageMap(
 {
     auto loader = providerWp.Upgrade();
     if (!loader) {
-        LOGE("provider of %{private}s is null", name.c_str());
         return false;
     }
     std::lock_guard<std::mutex> lockImageMap(sharedImageMapMutex_);
     auto iter = sharedImageMap_.find(name);
     if (iter == sharedImageMap_.end()) {
-        LOGE("image data of %{private}s does not found in SharedImageMap", name.c_str());
+        LOGW("image data of %{private}s does not found in SharedImageMap", name.c_str());
         return false;
     }
     loader->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), iter->second);

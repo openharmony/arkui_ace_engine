@@ -15,17 +15,19 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_sceneview.h"
 
+#include "custom/custom_render_descriptor.h"
+#include "custom/shader_input_buffer.h"
+#include "data_type/constants.h"
+#include "data_type/geometry/cone.h"
+#include "data_type/geometry/cube.h"
+#include "data_type/geometry/sphere.h"
+
 #include "base/geometry/quaternion.h"
 #include "base/geometry/vec3.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/model/model_view_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/custom/custom_render_descriptor.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/cone.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/cube.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/sphere.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/shader_input_buffer.h"
 
 namespace OHOS::Ace {
 
@@ -44,7 +46,7 @@ ModelView* ModelView::GetInstance()
                 LOGD("ModelView::GetInstance() NG Pipeline");
                 instance_.reset(new NG::ModelViewNG());
             } else {
-                LOGE("ModelView::GetInstance() NOT NG Pipeline");
+                LOGW("ModelView::GetInstance() NOT NG Pipeline not support");
             }
 #endif
         }
@@ -58,7 +60,7 @@ namespace OHOS::Ace::Framework {
 
 void JSSceneView::JsOnClick(const JSCallbackInfo& info)
 {
-    LOGW("JSSceneView JsOnClick To be implemented for NG pipeline");
+    LOGD("JSSceneView JsOnClick");
 }
 
 void JSSceneView::JsSetHandleCameraMove(const JSCallbackInfo& info)
@@ -93,7 +95,7 @@ void JSSceneView::Create(const JSCallbackInfo& info)
     }
 
     LOGD("srcPath after ParseJsMedia(): %s", srcPath.c_str());
-    ModelView::GetInstance()->Create(srcPath);
+    ModelView::GetInstance()->Create(srcPath, OHOS::Render3D::SurfaceType::SURFACE_TEXTURE);
 }
 
 void JSSceneView::JsCamera(const JSCallbackInfo& info)
@@ -254,7 +256,8 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
     AnimationOption animOption = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
     LOGD("JSLight() animOption: %d", animOption.GetDuration());
 
-    auto type = argsPtrItem->GetInt("type", 1);
+    auto type = static_cast<NG::ModelLightType>(argsPtrItem->GetInt("type",
+        static_cast<int>(NG::ModelLightType::DIRECTIONAL_LIGHT)));
     auto intensity = argsPtrItem->GetDouble("intensity", 10.0);
     auto shadow = argsPtrItem->GetBool("shadow", false);
     LOGD("type: %d, intensity: %f, shadow: %d", type, intensity, shadow);
@@ -274,7 +277,7 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
         }
     }
 
-    OHOS::Render3D::Position position;
+    NG::ModelPosition position;
     // positionInAngles
     if (argsPtrItem->Contains("positionInAngles")) {
         auto positionArgs = argsPtrItem->GetObject("positionInAngles");
@@ -284,8 +287,8 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
         auto distance = positionArgs->GetDouble("distance", 4.0);
         bool isAngularPosition = true;
         LOGD("positionInAngles: x: %f, y: %f, z: %f, distance: %f,", x, y, z, distance);
-        position.Set(AnimatableFloat(x, animOption), AnimatableFloat(y, animOption),
-            AnimatableFloat(z, animOption), AnimatableFloat(distance, animOption), isAngularPosition);
+        position.Set({ AnimatableFloat(x, animOption), AnimatableFloat(y, animOption),
+            AnimatableFloat(z, animOption) }, AnimatableFloat(distance, animOption), isAngularPosition);
     }
 
     // position (Not positionInAngles)
@@ -296,8 +299,8 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
         auto z = positionArgs->GetDouble("z", 0.0);
         LOGD("position: x: %f, y: %f, z: %f", x, y, z);
         bool isAngularPosition = false;
-        position.Set(AnimatableFloat(x, animOption), AnimatableFloat(y, animOption),
-            AnimatableFloat(z, animOption), AnimatableFloat(0.0, animOption), isAngularPosition);
+        position.Set({ AnimatableFloat(x, animOption), AnimatableFloat(y, animOption),
+            AnimatableFloat(z, animOption) }, AnimatableFloat(0.0, animOption), isAngularPosition);
     }
 
     double maxInvalid = std::numeric_limits<double>::max();
@@ -313,7 +316,7 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
         rotation = Quaternion(x, y, z, w);
     }
 
-    ModelView::GetInstance()->AddLight(AceType::MakeRefPtr<OHOS::Render3D::SVLight>(
+    ModelView::GetInstance()->AddLight(AceType::MakeRefPtr<NG::ModelLight>(
         type, color, AnimatableFloat(intensity, animOption), shadow, position, rotation));
 }
 
@@ -348,7 +351,7 @@ void JSSceneView::JsAddCube(const JSCallbackInfo& info)
 
     LOGD("JSAddCube(%s, %.2f, %.2f, %.2f)", name.c_str(), width, height, depth);
     ModelView::GetInstance()->AddGeometry(
-        AceType::MakeRefPtr<OHOS::Render3D::SVCube>(name.c_str(), width, height, depth, position));
+        std::make_shared<OHOS::Render3D::Cube>(name.c_str(), width, height, depth, position));
 }
 
 void JSSceneView::JsAddSphere(const JSCallbackInfo& info)
@@ -382,7 +385,7 @@ void JSSceneView::JsAddSphere(const JSCallbackInfo& info)
 
     LOGD("JSAddSphere(%s, %.2f, %d, %d)", name.c_str(), radius, rings, sectors);
     ModelView::GetInstance()->AddGeometry(
-        AceType::MakeRefPtr<OHOS::Render3D::SVSphere>(name.c_str(), radius, rings, sectors, position));
+        std::make_shared<OHOS::Render3D::Sphere>(name.c_str(), radius, rings, sectors, position));
 }
 
 void JSSceneView::JsAddCone(const JSCallbackInfo& info)
@@ -416,7 +419,7 @@ void JSSceneView::JsAddCone(const JSCallbackInfo& info)
 
     LOGD("JSAddCone(%s, %.2f, %d, %d)", name.c_str(), radius, length, sectors);
     ModelView::GetInstance()->AddGeometry(
-        AceType::MakeRefPtr<OHOS::Render3D::SVCone>(name.c_str(), radius, length, sectors, position));
+        std::make_shared<OHOS::Render3D::Cone>(name.c_str(), radius, length, sectors, position));
 }
 
 void JSSceneView::JsGLTFAnimation(const JSCallbackInfo& info)
@@ -441,7 +444,7 @@ void JSSceneView::JsGLTFAnimation(const JSCallbackInfo& info)
     auto duration = argsPtrItem->GetDouble("duration", -1.0); // Invalid.
     auto reverse = argsPtrItem->GetBool("reverse", false);
 
-    ModelView::GetInstance()->AddGLTFAnimation(AceType::MakeRefPtr<OHOS::Render3D::GLTFAnimation>(
+    ModelView::GetInstance()->AddGLTFAnimation(std::make_shared<OHOS::Render3D::GLTFAnimation>(
         name, static_cast<OHOS::Render3D::AnimationState>(state), repeatCount, speed, duration, reverse));
 }
 
@@ -464,8 +467,7 @@ void JSSceneView::JsAddCustomRender(const JSCallbackInfo& info)
         return;
     }
 
-    RefPtr<OHOS::Render3D::SVCustomRenderDescriptor> desc =
-        AceType::MakeRefPtr<OHOS::Render3D::SVCustomRenderDescriptor>(uri, "", info[1]->ToBoolean());
+    auto desc = std::make_shared<OHOS::Render3D::CustomRenderDescriptor>(uri, info[1]->ToBoolean());
     LOGE("JsAddCustomRender(%s, %s)", desc->GetUri().c_str(), (desc->NeedsFrameCallback() ? "true" : "false"));
     ModelView::GetInstance()->AddCustomRender(desc);
 }
@@ -556,20 +558,33 @@ void JSSceneView::JsShaderInputBuffer(const JSCallbackInfo& info)
         return;
     }
 
-    std::vector<float> shaderBuffer;
-    for (int32_t i = 0; i < length; i++) {
+    auto modelView = ModelView::GetInstance();
+    auto bufferOpt = modelView->GetShaderInputBuffer();
+    std::shared_ptr<OHOS::Render3D::ShaderInputBuffer> buffer = nullptr;
+    if (bufferOpt.has_value()) {
+        buffer = bufferOpt.value();
+    }
+
+    if (!buffer) {
+        buffer = std::make_shared<OHOS::Render3D::ShaderInputBuffer>();
+    }
+
+    if (!buffer->Alloc(length)) {
+        LOGE("JsShaderInputBuffer map shader input buffer error!");
+        return;
+    }
+
+    for (uint32_t i = 0; i < static_cast<uint32_t>(length); i++) {
         JSRef<JSVal> jsValue = array->GetValueAt(i);
         if (jsValue->IsNumber()) {
-            shaderBuffer.emplace_back(jsValue->ToNumber<float>());
+            buffer->Update(jsValue->ToNumber<float>(), i);
         } else {
             LOGE("JsShaderInputBuffer() Invalid data.");
             return;
         }
     }
 
-    RefPtr<OHOS::Render3D::ShaderInputBuffer> buffer =
-        AceType::MakeRefPtr<OHOS::Render3D::ShaderInputBuffer>(shaderBuffer);
-    ModelView::GetInstance()->AddShaderInputBuffer(buffer);
+    modelView->AddShaderInputBuffer(buffer);
 }
 
 void JSSceneView::JSBind(BindingTarget globalObj)
@@ -582,12 +597,12 @@ void JSSceneView::JSBind(BindingTarget globalObj)
     JSClass<JSSceneView>::StaticMethod("gestureAccess", &JSSceneView::JsSetHandleCameraMove);
     JSClass<JSSceneView>::StaticMethod("camera", &JSSceneView::JsCamera);
     JSClass<JSSceneView>::StaticMethod("transparent", &JSSceneView::JsSetTransparent);
-    JSClass<JSSceneView>::StaticMethod("background", &JSSceneView::JsSetBackground);
+    JSClass<JSSceneView>::StaticMethod("environment", &JSSceneView::JsSetBackground);
     JSClass<JSSceneView>::StaticMethod("light", &JSSceneView::JsLight);
     JSClass<JSSceneView>::StaticMethod("cube", &JSSceneView::JsAddCube);
     JSClass<JSSceneView>::StaticMethod("sphere", &JSSceneView::JsAddSphere);
     JSClass<JSSceneView>::StaticMethod("cone", &JSSceneView::JsAddCone);
-    JSClass<JSSceneView>::StaticMethod("glTFAnimation", &JSSceneView::JsGLTFAnimation);
+    JSClass<JSSceneView>::StaticMethod("modelAnimation", &JSSceneView::JsGLTFAnimation);
     JSClass<JSSceneView>::StaticMethod("customRender", &JSSceneView::JsAddCustomRender);
     JSClass<JSSceneView>::StaticMethod("width", &JSSceneView::JsWidth);
     JSClass<JSSceneView>::StaticMethod("height", &JSSceneView::JsHeight);

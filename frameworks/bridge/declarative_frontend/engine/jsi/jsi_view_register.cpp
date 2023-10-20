@@ -221,14 +221,14 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
 
-    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    panda::Global<panda::ObjectRef> obj(vm, Local<panda::ObjectRef>(firstArg));
+    JsiDeclarativeEngine::SetEntryObject(obj);
 #if defined(PREVIEW)
     panda::Global<panda::ObjectRef> rootView(vm, obj->ToObject(vm));
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     arkRuntime->AddRootView(rootView);
 #endif
-    UpdateRootComponent(obj);
 
     return panda::JSValueRef::Undefined(vm);
 }

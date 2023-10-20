@@ -95,6 +95,7 @@ private:
     float MainAxisMinValue(LayoutWrapper* layoutWrapper);
     bool MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper);
     bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
+    bool UserDefinedCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;

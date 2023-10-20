@@ -276,7 +276,15 @@ int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
 
 bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result)
 {
-    if (!paragraph_ || (text_.empty() && placeHolderIndex_ == -1)) {
+    if (!paragraph_) {
+        return false;
+    }
+    if (text_.empty() && placeHolderIndex_ == -1) {
+        if (paragraph_->GetLineCount() > 0) {
+            result.offset.Reset();
+            result.height = paragraph_->GetHeight();
+            return true;
+        }
         return false;
     }
     if (static_cast<size_t>(extent) > GetParagraphLength()) {

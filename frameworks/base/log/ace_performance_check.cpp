@@ -118,7 +118,6 @@ std::string AceScopedPerformanceCheck::GetCurrentTime()
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto* local = std::localtime(&now);
     if (!local) {
-        LOGE("Get localtime failed");
         return {};
     }
 

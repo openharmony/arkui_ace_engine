@@ -1142,7 +1142,7 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 
     // 2012 2015
-    std::vector<KeyCode> cases = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_DPAD_LEFT,
+    std::vector<KeyCode> cases = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_TAB,
         KeyCode::KEY_DPAD_RIGHT };
     for (int i = 0; i < 4; ++i) {
         keyE.code = cases[i];
@@ -1154,7 +1154,7 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     }
 
     keyE.code = KeyCode::KEY_PRINT;
-    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 
     keyE.code = KeyCode::KEY_2;
     keyE.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };

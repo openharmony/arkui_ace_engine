@@ -1178,6 +1178,9 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
     LOGD("TextPattern handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
          "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
+    if (newWidth == prevWidth && newHeight == prevHeight) {
+        return;
+    }
     CloseSelectOverlay();
     ResetSelection();
 }

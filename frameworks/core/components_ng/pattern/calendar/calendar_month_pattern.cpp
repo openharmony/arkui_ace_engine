@@ -195,10 +195,10 @@ void CalendarMonthPattern::OnClick(Offset& localLocation, const ObtainedMonth& o
         for (auto& day : pattern->obtainedMonth_.days) {
             day.focused = false;
         }
-        pattern->obtainedMonth_.days[index].focused = true;
         auto calendarEventHub = GetEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         if (index >= 0 && index < static_cast<int32_t>(obtainedMonth.days.size())) {
+            pattern->obtainedMonth_.days[index].focused = true;
             auto json = JsonUtil::Create(true);
             json->Put("day", obtainedMonth.days[index].day);
             json->Put("month", obtainedMonth.days[index].month.month);

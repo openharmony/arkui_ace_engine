@@ -45,7 +45,6 @@ void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, boo
 void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
 {
     if (!taskExecutor_ || !callback) {
-        LOGE("Failed to get the data from clipboard.");
         return;
     }
     taskExecutor_->PostTask([callback] { callback(ClipboardHelper::GetClipboardData()); },
@@ -55,7 +54,6 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
 void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
 {
     if (!taskExecutor_ || !callback) {
-        LOGE("Failed to know if data exists from clipboard.");
         return;
     }
     taskExecutor_->PostTask([callback] { callback(!ClipboardHelper::GetClipboardData().empty()); },
@@ -65,7 +63,6 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
 void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)
 {
     if (!taskExecutor_ || !callbackSetClipboardPixmapData_) {
-        LOGE("Failed to set the pixmap data to clipboard.");
         return;
     }
     taskExecutor_->PostTask([callbackSetClipboardPixmapData = callbackSetClipboardPixmapData_,
@@ -76,7 +73,6 @@ void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions 
 void ClipboardImpl::GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode)
 {
     if (!taskExecutor_ || !callbackGetClipboardPixmapData_ || !callback) {
-        LOGE("Failed to get the pixmap data from clipboard.");
         return;
     }
     taskExecutor_->PostTask([callbackGetClipboardPixmapData = callbackGetClipboardPixmapData_,

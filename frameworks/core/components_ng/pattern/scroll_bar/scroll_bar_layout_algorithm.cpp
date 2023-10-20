@@ -118,8 +118,6 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float currentOffset = 0.0f;
     if (!NearZero(controlDistance)) {
         currentOffset = scrollOffset * scrollableDistance_ / controlDistance;
-    } else {
-        LOGW("scroll bar scrollable distance is zero");
     }
     currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
     if (scrollableDistance_ > 0.0f) {

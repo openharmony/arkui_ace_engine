@@ -256,7 +256,7 @@ inline CalcDimension StringToCalcDimension(
     const std::string& value, bool useVp = false, DimensionUnit defaultUnit = DimensionUnit::PX)
 {
     if (value.find("calc") != std::string::npos) {
-        LOGI("StringToCalcDimension calc value = %{public}s", value.c_str());
+        LOGD("StringToCalcDimension calc value = %{public}s", value.c_str());
         return CalcDimension(value, DimensionUnit::CALC);
     } else {
         if (useVp) {

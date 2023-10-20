@@ -209,6 +209,8 @@ public:
     void UpdateTranslateInXY(const OffsetF& offset) override;
     OffsetF GetShowingTranslateProperty() override;
 
+    Matrix4 GetLocalTransformMatrix() override;
+
     void GetPointWithRevert(PointF& point) override;
 
     void GetPointWithTransform(PointF& point) override;
@@ -434,6 +436,7 @@ private:
 
     float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
+    Matrix4 GetRevertMatrix();
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;

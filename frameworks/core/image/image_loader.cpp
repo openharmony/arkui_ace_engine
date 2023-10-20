@@ -24,6 +24,13 @@
 
 #include "include/utils/SkBase64.h"
 
+#include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/theme_utils.h"
+
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #endif
@@ -596,16 +603,27 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     auto uri = imageSourceInfo.GetSrc();
     auto bundleName = imageSourceInfo.GetBundleName();
     auto moudleName = imageSourceInfo.GetModuleName();
-    auto themeManager = PipelineBase::CurrentThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_RETURN(themeConstants, nullptr);
+
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName);
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        CHECK_NULL_RETURN(resourceAdapter, nullptr);
+    } else {
+        auto themeManager = PipelineBase::CurrentThemeManager();
+        CHECK_NULL_RETURN(themeManager, nullptr);
+        themeConstants = themeManager->GetThemeConstants();
+        CHECK_NULL_RETURN(themeConstants, nullptr);
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     std::string rawFile;
     if (GetResourceId(uri, rawFile)) {
         // must fit raw file firstly, as file name may contains number
-        if (!themeConstants->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
+        if (!resourceWrapper->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
             LOGW("get image data by name failed, uri:%{private}s, rawFile:%{public}s", uri.c_str(), rawFile.c_str());
             return nullptr;
         }
@@ -619,7 +637,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     }
     uint32_t resId = 0;
     if (GetResourceId(uri, resId)) {
-        if (!themeConstants->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
+        if (!resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
             LOGW("get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(), resId);
             return nullptr;
         }
@@ -633,7 +651,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     }
     std::string resName;
     if (GetResourceName(uri, resName)) {
-        if (!themeConstants->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
+        if (!resourceWrapper->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
             LOGW("get image data by name failed, uri:%{private}s, resName:%{public}s", uri.c_str(), resName.c_str());
             return nullptr;
         }
