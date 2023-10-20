@@ -61,6 +61,11 @@ public:
         selectAllChangeEvent_ = std::move(changeEvent);
     }
 
+    bool HasChangeEvent()
+    {
+        return selectAllChangeEvent_ != nullptr;
+    }
+
 private:
     GroupChangeEvent changeEvent_;
     std::string groupname_;

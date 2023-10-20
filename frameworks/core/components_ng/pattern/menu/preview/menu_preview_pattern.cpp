@@ -119,6 +119,7 @@ RefPtr<FrameNode> MenuPreviewPattern::GetMenuWrapper() const
 
 void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    CHECK_NULL_VOID(gestureHub);
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

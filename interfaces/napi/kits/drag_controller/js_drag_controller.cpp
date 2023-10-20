@@ -498,8 +498,9 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
                 LOGE("taskExecutor is null.");
                 return;
             }
+            auto windowId = container->GetWindowId();
             taskExecutor->PostTask(
-                [asyncCtx]() {
+                [asyncCtx, windowId]() {
                     if (!asyncCtx) {
                         LOGE("DragControllerAsyncContext is null");
                         return;
@@ -508,8 +509,12 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
                     napi_open_handle_scope(asyncCtx->env, &scope);
                     HandleFail(asyncCtx, -1);
                     napi_close_handle_scope(asyncCtx->env, scope);
-                    Msdp::DeviceStatus::InteractionManager::GetInstance()->StopDrag(
-                        Msdp::DeviceStatus::DragResult::DRAG_CANCEL, false);
+                    if (SystemProperties::GetDebugEnabled()) {
+                        LOGI("JSExecuteDrag, windowId is %{public}d.", windowId);
+                    }
+                    Msdp::DeviceStatus::DragDropResult dropResult {
+                        Msdp::DeviceStatus::DragResult::DRAG_CANCEL, false, windowId };
+                    Msdp::DeviceStatus::InteractionManager::GetInstance()->StopDrag(dropResult);
                     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(false);
                 },
                 TaskExecutor::TaskType::JS);

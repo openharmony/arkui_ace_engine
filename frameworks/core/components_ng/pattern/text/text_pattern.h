@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
@@ -63,6 +64,11 @@ public:
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<TextAccessibilityProperty>();
+    }
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<TextEventHub>();
     }
 
     bool IsAtomicNode() const override
@@ -275,6 +281,7 @@ public:
     void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
     void CheckHandles(SelectHandleInfo& handleInfo);
     OffsetF GetDragUpperLeftCoordinates() override;
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
 
 #ifndef USE_GRAPHIC_TEXT_GINE
     static RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
@@ -350,6 +357,7 @@ private:
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
+    RefPtr<RenderContext> GetRenderContext();
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;

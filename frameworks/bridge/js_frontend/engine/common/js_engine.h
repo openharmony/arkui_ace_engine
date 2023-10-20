@@ -130,6 +130,11 @@ public:
         return "";
     }
 
+    virtual bool UpdateRootComponent()
+    {
+        return false;
+    }
+
     // Update running page
     virtual void UpdateRunningPage(const RefPtr<JsAcePage>& page) = 0;
 

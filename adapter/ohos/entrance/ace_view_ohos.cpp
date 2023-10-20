@@ -98,6 +98,11 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
     LogPointInfo(pointerEvent);
     DispatchEventToPerf(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
+    if (pointerAction != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent dispatched in ace_view, eventInfo: id:%{public}d ",
+            pointerEvent->GetId());
+    }
+
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
         if (pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
@@ -259,9 +264,18 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
             touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
     }
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent processed in ace_view, eventInfo: id:%{public}d, "
+            "pointX=%{public}f pointY=%{public}f type=%{public}d timeStamp=%{public}lld",
+            pointerEvent->GetId(), touchPoint.x, touchPoint.y,
+            (int)touchPoint.type, touchPoint.time.time_since_epoch().count());
+    }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID(pointerEvent);
-        LOGD("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
+        if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
+                pointerEvent->GetId());
+        }
         pointerEvent->MarkProcessed();
     };
     if (touchPoint.type != TouchType::UNKNOWN) {

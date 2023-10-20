@@ -39,6 +39,10 @@ void CheckBoxGroupModelNG::Create(const std::optional<std::string>& groupName)
 
 void CheckBoxGroupModelNG::SetSelectAll(bool isSelected)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    pattern->SetUpdateFlag(true);
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected);
 }
 

@@ -765,11 +765,6 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        LOGI("DragDrop event gestureHub actionCancelTask  webId:%{public}d",
-            pattern->GetWebId());
-        pattern->HandleDragCancel();
     };
 
     dragEvent_ = MakeRefPtr<DragEvent>(

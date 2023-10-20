@@ -86,7 +86,12 @@ if (defined(global_parts_info.distributeddatamgr_pasteboard)) {
   enable_system_clipboard = false
 }
 enable_image_compression = true
-model_component_support = false
+if (defined(global_parts_info.graphic_graphic_3d)) {
+  model_component_support = true
+} else {
+  model_component_support = false
+}
+
 window_scene_support = true
 
 if (defined(preview_support) && preview_support) {

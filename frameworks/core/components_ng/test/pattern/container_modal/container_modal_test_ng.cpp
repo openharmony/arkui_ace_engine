@@ -172,6 +172,11 @@ void ContainerModelTestNg::ClickBtn(int32_t index)
     auto container_modal_title = column->GetChildAtIndex(0);
     auto btn = AceType::DynamicCast<FrameNode>(container_modal_title->GetChildAtIndex(index));
     auto eventHub = btn->GetOrCreateGestureEventHub();
+    eventHub->clickEventActuator_ =
+        AceType::MakeRefPtr<ClickEventActuator>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    GestureEventFunc callback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    eventHub->clickEventActuator_->AddClickEvent(clickEvent);
     auto clickEvents = eventHub->clickEventActuator_->clickEvents_;
     GestureEvent info;
     clickEvents.front()->GetGestureEventFunc()(info);

@@ -35,6 +35,7 @@ public:
     static JSRef<JSVal> CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue);
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
+    static void JsClip(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void SetCopyOptions(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
@@ -83,7 +84,8 @@ public:
     void AddTextSpan(const JSCallbackInfo& args);
     void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
-    TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseJsTextStyle(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
     void SetCaretOffset(const JSCallbackInfo& args);
     void GetCaretOffset(const JSCallbackInfo& args);

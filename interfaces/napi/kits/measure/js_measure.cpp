@@ -50,16 +50,13 @@ static int32_t HandleIntStyle(napi_value fontStyleNApi, napi_env env)
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, fontStyleNApi, recv)) {
-            LOGE("can not parse resource info from inout params.");
             return fontStyleInt;
         }
         if (!ParseString(recv, fontStyleStr)) {
-            LOGE("can not get message from resource manager.");
             return fontStyleInt;
         }
         fontStyleInt = StringUtils::StringToInt(fontStyleStr);
     } else {
-        LOGE("The parameter type is incorrect.");
         return fontStyleInt;
     }
     return fontStyleInt;
@@ -83,15 +80,12 @@ static std::string HandleStringType(napi_value ParameterNApi, napi_env env)
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, ParameterNApi, recv)) {
-            LOGE("can not parse resource info from inout params.");
             return ParameterStr;
         }
         if (!ParseString(recv, ParameterStr)) {
-            LOGE("can not get message from resource manager.");
             return ParameterStr;
         }
     } else {
-        LOGE("The parameter type is incorrect.");
         return ParameterStr;
     }
     return ParameterStr;
@@ -118,11 +112,9 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, ParameterNApi, recv)) {
-            LOGE("can not parse resource info from inout params.");
             return std::nullopt;
         }
         if (!ParseString(recv, ParameterStr)) {
-            LOGE("can not get message from resource manager.");
             return std::nullopt;
         }
         Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);

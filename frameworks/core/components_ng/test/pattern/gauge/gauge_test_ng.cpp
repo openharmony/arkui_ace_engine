@@ -1038,8 +1038,13 @@ HWTEST_F(GaugeTestNg, GaugeAccessibilityPropertyTestNg002, TestSize.Level1)
 HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create GaugePaintMethod.
+     * @tc.steps: step1. Mock theme manager and create GaugePaintMethod.
      */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto gaugeTheme = AceType::MakeRefPtr<GaugeTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(gaugeTheme));
+
     GaugeModelNG gauge;
     gauge.Create(VALUE, MIN, MAX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -1071,9 +1076,6 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
     padding.left = 20.0f;
     padding.top = 20.0f;
     geometryNode->UpdatePaddingWithBorder(padding);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
 
     /**
      * @tc.steps: step3. Adding Elements to Vector
@@ -1085,7 +1087,7 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
     ColorStopArrayVector.push_back(colorStopArray);
 
     /**
-     * @tc.cases: case1£ºGaugeType is TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT, function is called.
+     * @tc.cases: case1 GaugeType is TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT, function is called.
      */
     gaugePaintProperty->UpdateGradientColors(ColorStopArrayVector);
     gaugePaintProperty->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT);
@@ -1093,7 +1095,7 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
     EXPECT_EQ(gaugePaintProperty->GetGradientColorsValue(), ColorStopArrayVector);
 
     /**
-     * @tc.cases: case2£ºUpdateGaugeType TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT, function is called.
+     * @tc.cases: case2 GaugeType is TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT, function is called.
      */
     gaugePaintProperty->UpdateGradientColors(ColorStopArrayVector);
     gaugePaintProperty->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
@@ -1101,7 +1103,7 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
     EXPECT_EQ(gaugePaintProperty->GetGradientColorsValue(), ColorStopArrayVector);
 
     /**
-     * @tc.cases: case3£ºUpdateGaugeType TYPE_CIRCULAR_MONOCHROME, function is called.
+     * @tc.cases: case3 GaugeType is TYPE_CIRCULAR_MONOCHROME, function is called.
      */
     gaugePaintProperty->UpdateGradientColors(ColorStopArrayVector);
     gaugePaintProperty->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_MONOCHROME);
@@ -1304,7 +1306,7 @@ HWTEST_F(GaugeTestNg, Measure001, TestSize.Level1)
     pipeline->SetMinPlatformVersion(VERSION);
 
     /**
-     * @tc.cases: case1£ºSet the size to infinity and compare with the expected value.
+     * @tc.cases: case1 Set the size to infinity and compare with the expected value.
      */
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetSize(
@@ -1315,7 +1317,7 @@ HWTEST_F(GaugeTestNg, Measure001, TestSize.Level1)
     EXPECT_NE(SizeF(Infinity<float>() / SIZE_INFINITY + 1.0f, Infinity<float>() / SIZE_INFINITY + 1.0f), SizeF());
 
     /**
-     * @tc.cases: case2£ºSet the size to 300 and compare with the expected value.
+     * @tc.cases: case2 Set the size to 300 and compare with the expected value.
      */
     layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH_1, HEIGHT_1));
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
@@ -1398,7 +1400,7 @@ HWTEST_F(GaugeTestNg, Layout001, TestSize.Level1)
     geometryNode->SetContentOffset(OffsetF(50, 50));
 
     /**
-     * @tc.cases: case1£ºSet the padding size and compare it with the expected value.
+     * @tc.cases: case1 Set the padding size and compare it with the expected value.
      */
     gaugeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetPadding()->left, padding.left);
@@ -1413,8 +1415,13 @@ HWTEST_F(GaugeTestNg, Layout001, TestSize.Level1)
 HWTEST_F(GaugeTestNg, OnModifyDone, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create GaugePattern.
+     * @tc.steps: step1. Mock theme manager and create GaugePattern.
      */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto gaugeTheme = AceType::MakeRefPtr<GaugeTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(gaugeTheme));
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->minPlatformVersion_ = 11;
@@ -1471,8 +1478,13 @@ HWTEST_F(GaugeTestNg, OnModifyDone, TestSize.Level1)
 HWTEST_F(GaugeTestNg, InitLimitValueText, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create GaugePattern.
+     * @tc.steps: step1. Mock theme manager and create GaugePattern.
      */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto gaugeTheme = AceType::MakeRefPtr<GaugeTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(gaugeTheme));
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->minPlatformVersion_ = 11;
@@ -1537,29 +1549,24 @@ HWTEST_F(GaugeTestNg, GetMaxValueColor, TestSize.Level1)
     gaugePaintProperty->UpdateGradientColors(ColorStopArrayVector);
 
     /**
-     * @tc.steps: step3. UpdateGaugeType
-     * @tc.expected: Related function is called.
+     * @tc.cases: case1 GaugeType is TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT, expected color is RED.
      */
     gaugePaintProperty->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT);
     auto color = gaugePattern->GetMaxValueColor(gaugePaintProperty);
+    EXPECT_EQ(color, Color::RED);
 
     /**
-     * @tc.steps: step3. color is RED.
+     * @tc.cases: case2 GaugeType is TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT, expected color is RED.
      */
-    EXPECT_EQ(color, Color::RED);
     gaugePaintProperty->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
     color = gaugePattern->GetMaxValueColor(gaugePaintProperty);
+    EXPECT_EQ(color, Color::RED);
 
     /**
-     * @tc.steps: step3. color is RED.
+     * @tc.cases: case3 GaugeType is TYPE_CIRCULAR_MONOCHROME, expected color is BLUE.
      */
-    EXPECT_EQ(color, Color::RED);
     gaugePaintProperty->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_MONOCHROME);
     color = gaugePattern->GetMaxValueColor(gaugePaintProperty);
-
-    /**
-     * @tc.steps: step3. color is BLUE.
-     */
     EXPECT_EQ(color, Color::BLUE);
 }
 

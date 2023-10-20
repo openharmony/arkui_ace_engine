@@ -167,6 +167,14 @@ public:
         scrollableActuator_->RemoveScrollEdgeEffect(scrollEffect);
     }
 
+    void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
+    {
+        if (!scrollableActuator_) {
+            scrollableActuator_ = MakeRefPtr<ScrollableActuator>(WeakClaim(this));
+        }
+        scrollableActuator_->AddPreviewMenuHandleDragEnd(std::move(actionEnd));
+    }
+
     // Set by user define, which will replace old one.
     void SetTouchEvent(TouchEventFunc&& touchEventFunc)
     {

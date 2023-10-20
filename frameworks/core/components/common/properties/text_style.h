@@ -453,9 +453,19 @@ public:
         textShadows_ = textShadows;
     }
 
-    void SetShadow(Shadow &shadow)
+    void SetShadow(const Shadow& shadow)
     {
         textShadows_.emplace_back(shadow);
+    }
+
+    bool GetHalfLeading() const
+    {
+        return halfLeading_;
+    }
+
+    void SetHalfLeading(bool halfLeading)
+    {
+        halfLeading_ = halfLeading;
     }
 
 private:
@@ -482,7 +492,7 @@ private:
     TextDecorationStyle textDecorationStyle_ { TextDecorationStyle::SOLID };
     TextDecoration textDecoration_ { TextDecoration::NONE };
     std::vector<Shadow> textShadows_;
-    WhiteSpace whiteSpace_{ WhiteSpace::PRE };
+    WhiteSpace whiteSpace_ { WhiteSpace::PRE };
     Dimension wordSpacing_;
     Dimension textIndent_ { 0.0f, DimensionUnit::PX };
     Dimension letterSpacing_;
@@ -490,6 +500,7 @@ private:
     bool adaptTextSize_ = false;
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
+    bool halfLeading_ = false;
     WordBreak wordBreak_ { WordBreak::BREAK_WORD };
     TextCase textCase_ { TextCase::NORMAL };
 };

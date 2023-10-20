@@ -18,6 +18,7 @@
 #include "adapter/ohos/osal/resource_theme_style.h"
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/osal/resource_convertor.h"
+#include "core/common/container.h"
 #include "core/components/theme/theme_attributes.h"
 
 namespace OHOS::Ace {
@@ -130,14 +131,20 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     if (resConfig != nullptr) {
         auto configRet = newResMgr->UpdateResConfig(*resConfig);
         LOGI("AddAppRes result=%{public}d, AddSysRes result=%{public}d,  UpdateResConfig result=%{public}d, "
-            "ori=%{public}d, dpi=%{public}f, device=%{public}d",
+             "ori=%{public}d, dpi=%{public}f, device=%{public}d",
             appResRet, sysResRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(),
             resConfig->GetDeviceType());
     }
-    
+
     Platform::AceApplicationInfoImpl::GetInstance().SetResourceManager(newResMgr);
     resourceManager_ = newResMgr;
     packagePathStr_ = appResPath;
+}
+
+RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName)
+{
+    return nullptr;
 }
 
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
@@ -189,7 +196,7 @@ Color ResourceAdapterImpl::GetColor(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetColorById(resId, result);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetColor error, id=%{public}u", resId);
+            LOGW("GetColor error, id=%{public}u", resId);
         }
     }
     return Color(result);
@@ -202,7 +209,7 @@ Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetFloatById(resId, dimensionFloat, unit);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetDimension error, id=%{public}u", resId);
+            LOGW("GetDimension error, id=%{public}u", resId);
         }
     }
     return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
@@ -214,7 +221,7 @@ std::string ResourceAdapterImpl::GetString(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetStringById(resId, strResult);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetString error, id=%{public}u", resId);
+            LOGW("GetString error, id=%{public}u", resId);
         }
     }
     return strResult;
@@ -226,7 +233,7 @@ std::string ResourceAdapterImpl::GetPluralString(uint32_t resId, int quantity)
     if (resourceManager_) {
         auto state = resourceManager_->GetPluralStringById(resId, quantity, strResult);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetPluralString error, id=%{public}u", resId);
+            LOGW("GetPluralString error, id=%{public}u", resId);
         }
     }
     return strResult;
@@ -238,7 +245,7 @@ std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) con
     if (resourceManager_) {
         auto state = resourceManager_->GetStringArrayById(resId, strResults);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetStringArray error, id=%{public}u", resId);
+            LOGW("GetStringArray error, id=%{public}u", resId);
         }
     }
     return strResults;
@@ -250,7 +257,7 @@ double ResourceAdapterImpl::GetDouble(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetFloatById(resId, result);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetDouble error, id=%{public}u", resId);
+            LOGW("GetDouble error, id=%{public}u", resId);
         }
     }
     return static_cast<double>(result);
@@ -262,7 +269,7 @@ int32_t ResourceAdapterImpl::GetInt(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetIntegerById(resId, result);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetInt error, id=%{public}u", resId);
+            LOGW("GetInt error, id=%{public}u", resId);
         }
     }
     return result;
@@ -274,7 +281,7 @@ std::vector<uint32_t> ResourceAdapterImpl::GetIntArray(uint32_t resId) const
     if (resourceManager_) {
         auto state = resourceManager_->GetIntArrayById(resId, intVectorResult);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetIntArray error, id=%{public}u", resId);
+            LOGW("GetIntArray error, id=%{public}u", resId);
         }
     }
     std::vector<uint32_t> result;
@@ -289,7 +296,7 @@ bool ResourceAdapterImpl::GetBoolean(uint32_t resId) const
     if (resourceManager_) {
         auto state = resourceManager_->GetBooleanById(resId, result);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetBoolean error, id=%{public}u", resId);
+            LOGW("GetBoolean error, id=%{public}u", resId);
         }
     }
     return result;
@@ -301,7 +308,7 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetMediaById(resId, mediaPath);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetMediaPath error, id=%{public}u", resId);
+            LOGW("GetMediaPath error, id=%{public}u", resId);
             return "";
         }
         // The Media file directory starts with file// on the PC Preview

@@ -736,6 +736,7 @@ export struct Breadcrumb {
           .bindPopup(this.showMenu, {
             builder: this.menu,
             enableArrow: false,
+            popupColor: Color.Transparent,
             onStateChange: (e) => {
               if (!e.isVisible) {
                 if (this.labels.indexOf(this.menuInfo[0]) != this.hiddenLabels[0]) {

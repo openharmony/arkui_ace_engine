@@ -128,11 +128,6 @@ template("declarative_js_engine") {
     deps = []
     configs = [ "$ace_root:ace_config" ]
 
-    if (defined(config.model_component_support) &&
-        config.model_component_support) {
-      configs += [ "//foundation/graphic/graphic_3d/3d_widget_adapter:widget_adapter_config" ]
-    }
-
     sources = [
       "engine/bindings_implementation.cpp",
       "engine/declarative_engine_loader.cpp",
@@ -183,6 +178,7 @@ template("declarative_js_engine") {
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
       "jsview/js_divider.cpp",
+      "jsview/js_dump_log.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_environment.cpp",
       "jsview/js_flex.cpp",
@@ -203,6 +199,7 @@ template("declarative_js_engine") {
       "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
       "jsview/js_interactable_view.cpp",
+      "jsview/js_keyboard_avoid.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -262,6 +259,7 @@ template("declarative_js_engine") {
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
+      "jsview/js_state_mgmt_profiler.cpp",
       "jsview/js_stepper.cpp",
       "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
@@ -498,6 +496,7 @@ template("declarative_js_engine") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
+      external_deps += [ "graphic_3d:3dWidgetAdapterInterface" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&
@@ -614,9 +613,11 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",
+      "jsview/js_dump_log.cpp",
       "jsview/js_environment.cpp",
       "jsview/js_local_storage.cpp",
       "jsview/js_persistent.cpp",
+      "jsview/js_state_mgmt_profiler.cpp",
       "jsview/js_view_functions.cpp",
       "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
@@ -671,6 +672,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
       "jsview/js_interactable_view.cpp",
+      "jsview/js_keyboard_avoid.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -840,6 +842,7 @@ template("declarative_js_engine_ng") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
+      external_deps += [ "graphic_3d:3dWidgetAdapterInterface" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&

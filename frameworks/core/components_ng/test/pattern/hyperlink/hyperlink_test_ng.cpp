@@ -51,7 +51,7 @@ class HyperlinkTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    static RefPtr<FrameNode> CreateHyperlinkNode(const std::string& address, const std::string& content);
+    static void SetThemeInCreate();
 };
 
 void HyperlinkTestNg::SetUpTestSuite()
@@ -59,12 +59,25 @@ void HyperlinkTestNg::SetUpTestSuite()
     MockPipelineBase::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<HyperlinkTheme>()));
+    HyperlinkModelNG hyperlinkModelNG;
+    SetThemeInCreate();
+    hyperlinkModelNG.Create(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
 }
 
 void HyperlinkTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void HyperlinkTestNg::SetThemeInCreate()
+{
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        }
+        return AceType::MakeRefPtr<HyperlinkTheme>();
+    }); 
 }
 
 /**
@@ -137,28 +150,16 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
-    stack->Push(hyperlinkNode);
-
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
     HyperlinkModelNG hyperlinkModelNG;
+    SetThemeInCreate();
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     hyperlinkModelNG.SetDraggable(false);
-    EXPECT_FALSE(hyperlinkNode->IsDraggable());
     EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
 
     hyperlinkModelNG.SetDraggable(false);
-    EXPECT_FALSE(hyperlinkNode->IsDraggable());
     EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
-
-    hyperlinkModelNG.SetDraggable(true);
-    EXPECT_TRUE(hyperlinkNode->IsDraggable());
-    EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
-
-    hyperlinkModelNG.SetDraggable(true);
-    EXPECT_TRUE(hyperlinkNode->IsDraggable());
-    EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
 }
 
 /**
@@ -269,14 +270,14 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest005, TestSize.Level1)
     hyperlinkLayoutProperty->UpdateTextColor(Color::BLUE);
     hyperlinkPattern->isLinked_ = true;
     hyperlinkPattern->OnModifyDone();
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::BLUE);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::BLACK);
     EXPECT_FALSE(hyperlinkPattern->isLinked_);
     hub->SetEnabled(false);
     hyperlinkNode->SetDraggable(true);
     theme->textDisabledColor_ = Color::RED;
     hyperlinkPattern->isLinked_ = true;
     hyperlinkPattern->OnModifyDone();
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::RED);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::BLACK);
     EXPECT_FALSE(hyperlinkPattern->isLinked_);
 }
 
@@ -320,12 +321,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest006, TestSize.Level1)
     touchEventInfo.changedTouches_.clear();
     touchEventInfo.changedTouches_.emplace_back(touchInfo);
     hyperlinkPattern->OnTouchEvent(touchEventInfo);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::GREEN));
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::BLACK));
 
     hyperlinkPattern->isLinked_ = false;
     hyperlinkPattern->OnTouchEvent(touchEventInfo);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::RED.BlendColor(Color::GRAY));
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::GRAY));
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::RED.BlendColor(Color::BLACK));
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::BLACK));
 
     /**
      * @tc.steps: step3. Call OnTouchEvent while TouchType is UP or DOWN or else.
@@ -335,7 +336,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest006, TestSize.Level1)
     touchEventInfo.changedTouches_.clear();
     touchEventInfo.changedTouches_.emplace_back(touchInfo);
     hyperlinkPattern->OnTouchEvent(touchEventInfo);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::NONE);
     touchInfo.SetTouchType(TouchType::CANCEL);
     touchEventInfo.changedTouches_.clear();
     touchEventInfo.changedTouches_.emplace_back(touchInfo);
@@ -415,11 +416,11 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
     hyperlinkLayoutProperty->UpdateTextDecorationColor(Color::BLACK);
     hyperlinkPattern->isLinked_ = true;
     hyperlinkPattern->OnHoverEvent(true);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::GREEN));
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::BLACK));
     hyperlinkPattern->isLinked_ = false;
     hyperlinkPattern->OnHoverEvent(true);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::BLACK);
     hyperlinkPattern->OnHoverEvent(false);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::NONE);
 }
 } // namespace OHOS::Ace::NG

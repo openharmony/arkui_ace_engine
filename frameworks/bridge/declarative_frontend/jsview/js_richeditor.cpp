@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -467,6 +468,24 @@ void JSRichEditor::CreateImageStyleObj(
     }
 }
 
+void JSRichEditor::JsClip(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetClipEdge(true);
+        return;
+    }
+    if (info[0]->IsObject()) {
+        JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            LOGD("clipShape is null");
+            return;
+        }
+        ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
+    } else if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
+    }
+}
+
 void JSRichEditor::JsFocusable(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsBoolean()) {
@@ -608,6 +627,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRichEditor>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRichEditor>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSRichEditor>::StaticMethod("clip", &JSRichEditor::JsClip);
     JSClass<JSRichEditor>::StaticMethod("focusable", &JSRichEditor::JsFocusable);
     JSClass<JSRichEditor>::StaticMethod("copyOptions", &JSRichEditor::SetCopyOptions);
     JSClass<JSRichEditor>::StaticMethod("bindSelectionMenu", &JSRichEditor::BindSelectionMenu);
@@ -665,9 +685,9 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     return imageStyle;
 }
 
-TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, struct UpdateSpanStyle& updateSpanStyle)
+void JSRichEditorController::ParseJsTextStyle(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
-    TextStyle style;
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     Color textColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
@@ -677,12 +697,6 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFp(fontSize, size)) {
-        updateSpanStyle.updateFontSize = size;
-        style.SetFontSize(size);
-    } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        size = theme->GetTextStyle().GetFontSize();
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
@@ -707,7 +721,6 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
         style.SetFontFamilies(family);
     }
     ParseTextDecoration(styleObject, style, updateSpanStyle);
-    return style;
 }
 
 void JSRichEditorController::ParseTextDecoration(
@@ -869,7 +882,10 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         auto styleObj = spanObject->GetProperty("style");
         JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
         if (!styleObject->IsUndefined()) {
-            TextStyle style = ParseJsTextStyle(styleObject, updateSpanStyle_);
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
+            ParseJsTextStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
         }
         auto paraStyle = spanObject->GetProperty("paragraphStyle");
@@ -929,13 +945,19 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
 
 void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
 {
+    RangeOptions options;
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
+
+    if (args.Length() < 1) {
+        controller->DeleteSpans(options);
+        return;
+    }
+
     if (!args[0]->IsObject() || !controller) {
         return;
     }
     JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[0]);
-    RangeOptions options;
     JSRef<JSVal> startVal = spanObject->GetProperty("start");
     int32_t start = 0;
     if (!startVal->IsNull() && JSContainerBase::ParseJsInt32(startVal, start)) {
@@ -1089,13 +1111,15 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
 
     auto [start, end] = ParseRange(jsObject);
-    TextStyle textStyle;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     ImageSpanAttribute imageStyle;
     auto richEditorTextStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("textStyle"));
     auto richEditorImageStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("imageStyle"));
     updateSpanStyle_.ResetStyle();
     if (!richEditorTextStyle->IsUndefined()) {
-        textStyle = ParseJsTextStyle(richEditorTextStyle, updateSpanStyle_);
+        ParseJsTextStyle(richEditorTextStyle, textStyle, updateSpanStyle_);
     }
     if (!richEditorImageStyle->IsUndefined()) {
         imageStyle = ParseJsImageSpanAttribute(richEditorImageStyle);
@@ -1206,11 +1230,13 @@ void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
         LOGW("info[0] not is Object");
         return;
     }
-    TextStyle textStyle;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);
     typingStyle_.ResetStyle();
     if (!richEditorTextStyle->IsUndefined()) {
-        textStyle = ParseJsTextStyle(richEditorTextStyle, typingStyle_);
+        ParseJsTextStyle(richEditorTextStyle, textStyle, typingStyle_);
     }
     controller->SetTypingStyle(typingStyle_, textStyle);
 }

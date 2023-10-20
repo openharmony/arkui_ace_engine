@@ -26,10 +26,12 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
@@ -77,6 +79,7 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
     TextAlign::LEFT, TextAlign::RIGHT };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -236,6 +239,37 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
     } while (false);
 
     info.SetReturnValue(info.This());
+}
+
+void JSText::SetWordBreak(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        return;
+    }
+    TextModel::GetInstance()->SetWordBreak(WORD_BREAK_TYPES[index]);
+}
+
+void JSText::SetTextSelection(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber() || !info[1]->IsNumber()) {
+        return;
+    }
+    auto startIndex = info[0]->ToNumber<int32_t>();
+    auto endIndex = info[1]->ToNumber<int32_t>();
+    if (startIndex >= endIndex) {
+        return;
+    }
+    TextModel::GetInstance()->SetTextSelection(startIndex, endIndex);
 }
 
 void JSText::SetMaxLines(const JSCallbackInfo& info)
@@ -505,6 +539,13 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetCopyOption(copyOptions);
 }
 
+void JSText::SetOnCopy(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextModel::GetInstance()->SetOnCopy(std::move(callback));
+}
+
 void JSText::JsOnDragStart(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
@@ -640,6 +681,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("textShadow", &JSText::SetTextShadow, opt);
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
     JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
+    JSClass<JSText>::StaticMethod("wordBreak", &JSText::SetWordBreak, opt);
+    JSClass<JSText>::StaticMethod("selection", &JSText::SetTextSelection, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
     JSClass<JSText>::StaticMethod("textIndent", &JSText::SetTextIndent);
     JSClass<JSText>::StaticMethod("textOverflow", &JSText::SetTextOverflow, opt);
@@ -662,6 +705,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("remoteMessage", &JSText::JsRemoteMessage);
     JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
+    JSClass<JSText>::StaticMethod("onCopy", &JSText::SetOnCopy);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);

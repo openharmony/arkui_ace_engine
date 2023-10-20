@@ -19,6 +19,7 @@ ohos_unittest("security_component_pattern_test_ng") {
   module_out_path = pattern_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",

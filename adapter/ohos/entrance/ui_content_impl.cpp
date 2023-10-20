@@ -1245,6 +1245,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     auto pipeline = container->GetPipelineContext();
+    // Use metadata to control the center-alignment of text at line height.
+    bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
+        [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
+    pipeline->SetHalfLeading(halfLeading);
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
@@ -1428,10 +1432,18 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    LOGD("UIContentImpl ProcessPointerEvent begin");
     auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        auto info = Platform::AceContainer::GetContentInfo(instanceId_);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
+            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "ViewPosX = %{public}d, ViewPosY = %{public}d, ContentInfo = %{public}s",
+            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(),
+            container->GetViewPosY(), info.c_str());
+    }
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     return true;
@@ -1439,9 +1451,11 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGD("UIContentImpl: OnKeyUp called, keyEvent info: keyCode is %{public}d,"
-         "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-        touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
+        "keyEvent info: keyCode is %{public}d, "
+        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
+        touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(),
+        touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());

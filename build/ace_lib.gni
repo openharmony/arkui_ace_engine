@@ -30,6 +30,13 @@ template("libace_static") {
 
     deps = [ "$ace_root/frameworks/base:ace_base_$platform" ]
 
+    if (use_mingw_win || use_mac || use_linux) {
+      deps += [
+        "//third_party/icu/icu4c:shared_icui18n",
+        "//third_party/icu/icu4c:shared_icuuc",
+      ]
+    }
+
     if (platform == "ohos_ng" || is_cross_platform_build) {
       deps += [
         "$ace_root/frameworks/bridge:framework_bridge_ng_$platform",

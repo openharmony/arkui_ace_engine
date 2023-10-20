@@ -104,6 +104,8 @@ public:
     void ClearExtraInfo();
 #endif // ENABLE_DRAG_FRAMEWORK
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
+    void UpdateNotifyDragEvent(
+        RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
 
     bool IsWindowConsumed()
@@ -152,6 +154,17 @@ public:
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
 
+    std::unordered_set<int32_t> FindHitFrameNodes(const Point& point);
+
+    void UpdateDragListener(const Point& point);
+
+    void NotifyDragRegisterFrameNode(std::unordered_map<int32_t, WeakPtr<FrameNode>> nodes, DragEventType dragEventType,
+        RefPtr<NotifyDragEvent>& notifyEvent);
+
+    void RegisterDragStatusListener(int32_t nodeId, const WeakPtr<FrameNode>& node);
+
+    void UnRegisterDragStatusListener(int32_t nodeId);
+
     void SetNotifyInDraggedCallback(const std::function<void(void)>& callback)
     {
         notifyInDraggedCallback_ = callback;
@@ -186,6 +199,8 @@ private:
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
     void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
+    void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
+        RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -204,6 +219,8 @@ private:
     std::string extraInfo_;
     std::unique_ptr<JsonValue> newData_ = nullptr;
     bool isDragCancel_ = false;
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> nodesForDragNotify_;
+    std::unordered_set<int32_t> parentHitNodes_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::map<std::string, int64_t> summaryMap_;
     uint32_t recordSize_ = 0;

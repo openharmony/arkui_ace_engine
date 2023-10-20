@@ -245,14 +245,14 @@ public:
         pixelGridRoundOffset_ = pixelGridRoundOffset;
     }
 
-    const OffsetF& GetPixelGridRoundOffsetForArea() const
+    const SizeF& GetPixelGridRoundSize() const
     {
-        return pixelGridRoundOffsetForArea_;
+        return pixelGridRoundSize_;
     }
 
-    void SetPixelGridRoundOffsetForArea(const OffsetF& pixelGridRoundOffsetForArea)
+    void SetPixelGridRoundSize(const SizeF& pixelGridRoundSize)
     {
-        pixelGridRoundOffsetForArea_ = pixelGridRoundOffsetForArea;
+        pixelGridRoundSize_ = pixelGridRoundSize;
     }
 
     const OffsetF& GetParentAbsoluteOffset() const
@@ -320,7 +320,7 @@ private:
     OffsetF parentGlobalOffset_;
     OffsetF parentAbsoluteOffset_;
     OffsetF pixelGridRoundOffset_;
-    OffsetF pixelGridRoundOffsetForArea_;
+    SizeF pixelGridRoundSize_;
 };
 } // namespace OHOS::Ace::NG
 

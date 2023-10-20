@@ -808,6 +808,16 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
     }
 }
 
+void PipelineContext::SetEnableKeyBoardAvoidMode(bool value)
+{
+    safeAreaManager_->SetKeyBoardAvoidMode(value);
+}
+
+bool PipelineContext::IsEnableKeyBoardAvoidMode()
+{
+    return safeAreaManager_->KeyboardSafeAreaEnabled();
+}
+
 void PipelineContext::SetIgnoreViewSafeArea(bool value)
 {
     if (safeAreaManager_->SetIgnoreSafeArea(value)) {
@@ -1174,6 +1184,11 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     }
 }
 
+void PipelineContext::RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback)
+{
+    dumpListeners_.push_back(callback);
+}
+
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
     ACE_DCHECK(!params.empty());
@@ -1212,8 +1227,15 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-threadstuck" && params.size() >= 3) {
     } else if (params[0] == "-pipeline") {
         DumpPipelineInfo();
-    } else {
-        return false;
+    } else if (params[0] == "-jsdump") {
+        std::vector<std::string> jsParams;
+        if (params.begin() != params.end()) {
+            jsParams = std::vector<std::string>(params.begin() + 1, params.end());
+        }
+
+        for (const auto& func : dumpListeners_) {
+            func(jsParams);
+        } 
     }
 
     return true;

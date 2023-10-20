@@ -124,16 +124,12 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     referee->Adjudicate(recognizer, disposal);
 }
 
-void NGGestureRecognizer::Transform(PointF& windowPointF, PointF& originPointF)
+void NGGestureRecognizer::Transform(PointF& localPointF, int id)
 {
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
 
-    float offsetX = 0.0f;
-    float offsetY = 0.0f;
-    const float pi = 3.14159265f;
-
-    auto translateIter = translateIds.find(transId_);
+    auto translateIter = translateIds.find(id);
     if (translateIter == translateIds.end()) {
         return;
     }
@@ -145,31 +141,14 @@ void NGGestureRecognizer::Transform(PointF& windowPointF, PointF& originPointF)
         }
         translateIter = translateIds.find(translateId);
     }
+
+    Point temp(localPointF.GetX(), localPointF.GetY());
     for (auto iter = vTrans.rbegin(); iter != vTrans.rend(); iter++) {
         auto& trans = translateCfg[*iter];
-        offsetX += trans.offsetX;
-        offsetY += trans.offsetY;
-        int32_t degree = static_cast<int32_t>(trans.degree) % 360;
-        if (degree < 0) {
-            degree += 360;
-        }
-        auto radian = degree * pi / 180;
-        if (NearZero(trans.degree)) {
-            originPointF.SetX(originPointF.GetX() - trans.offsetX);
-            originPointF.SetY(originPointF.GetY() - trans.offsetY);
-        } else {
-            float windowX = (originPointF.GetX() - trans.centerX) * cos(radian) +
-                     (originPointF.GetY() - trans.centerX) * sin(radian);
-            float windowY = -1 * (originPointF.GetX() - trans.centerY) * sin(radian) +
-                     (originPointF.GetY() - trans.centerY) * cos(radian);
-            windowX += trans.centerX;
-            windowY += trans.centerY;
-            originPointF.SetX(windowX - trans.offsetX - trans.translateX);
-            originPointF.SetY(windowY - trans.offsetY - trans.translateY);
-        }
+        temp = trans.localMat * temp;
     }
-    windowPointF.SetX(originPointF.GetX() + offsetX);
-    windowPointF.SetY(originPointF.GetY() + offsetY);
+    localPointF.SetX(temp.GetX());
+    localPointF.SetY(temp.GetY());
 }
 
 void NGGestureRecognizer::SetTransInfo(int transId)

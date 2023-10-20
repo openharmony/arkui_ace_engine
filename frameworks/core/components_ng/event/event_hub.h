@@ -39,6 +39,14 @@ struct KeyboardShortcut {
     std::function<void()> onKeyboardShortcutAction = nullptr;
 };
 
+enum class DragFuncType {
+    DRAG_ENTER,
+    DRAG_LEAVE,
+    DRAG_MOVE,
+    DRAG_DROP,
+    DRAG_END,
+};
+
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType)
@@ -306,7 +314,12 @@ public:
 
     bool HasOnDrop() const
     {
-        return static_cast<bool>(onDrop_);
+        return onDrop_ != nullptr;
+    }
+
+    bool HasCustomerOnDrop() const
+    {
+        return customerOnDrop_ != nullptr;
     }
 
     virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
@@ -410,6 +423,17 @@ public:
         return keyboardShortcut_;
     }
 
+    void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnDragFunc&& onDragFunc);
+
+    void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnNewDragFunc&& onDragEnd);
+
+    void FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info,
+        const std::string& extraParams = "");
+
+    bool IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
+
+    void HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
+
 protected:
     virtual void OnModifyDone() {}
 
@@ -430,6 +454,12 @@ private:
     OnDragFunc onDragMove_;
     OnDragFunc onDrop_;
     OnNewDragFunc onDragEnd_;
+
+    OnDragFunc customerOnDragEnter_;
+    OnDragFunc customerOnDragLeave_;
+    OnDragFunc customerOnDragMove_;
+    OnDragFunc customerOnDrop_;
+    OnNewDragFunc customerOnDragEnd_;
 
     bool enabled_ { true };
     bool developerEnabled_ { true };

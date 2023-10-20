@@ -207,6 +207,8 @@ public:
 
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
+    void SetEnableKeyBoardAvoidMode(bool value) override;
+    bool IsEnableKeyBoardAvoidMode() override;
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
     {
         return safeAreaManager_;
@@ -396,6 +398,8 @@ public:
 
     void AddAnimationClosure(std::function<void()>&& animation);
     void FlushAnimationClosure();
+    void RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback);
+    void DumpJsInfo(const std::vector<std::string>& params) const;
 
     void SetDragCleanTask(std::function<void()>&& task)
     {
@@ -478,6 +482,8 @@ private:
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
     std::list<TouchEvent> touchEvents_;
+
+    std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
     RefPtr<FrameNode> rootNode_;
 

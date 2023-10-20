@@ -592,11 +592,17 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
             return true;
         }
     } else if (event.action == KeyAction::UP) {
-        if (showTips_) {
-            bubbleFlag_ = true;
-            InitializeBubble();
+        if ((direction_ == Axis::HORIZONTAL &&
+                (event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT)) ||
+            (direction_ == Axis::VERTICAL &&
+                (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN))) {
+            if (showTips_) {
+                bubbleFlag_ = true;
+                InitializeBubble();
+            }
+            PaintFocusState();
+            return true;
         }
-        PaintFocusState();
     }
     return false;
 }

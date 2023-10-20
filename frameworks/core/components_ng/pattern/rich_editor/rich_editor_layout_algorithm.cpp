@@ -135,6 +135,10 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
 {
     auto style = TextLayoutAlgorithm::GetParagraphStyle(textStyle, content);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();
+    if (!pManager_->minParagraphFontSize.has_value() ||
+        GreatNotEqual(pManager_->minParagraphFontSize.value(), style.fontSize)) {
+        pManager_->minParagraphFontSize = style.fontSize;
+    }
     auto&& spanGroup = GetSpans();
     auto&& lineStyle = spanGroup.front()->textLineStyle;
     CHECK_NULL_RETURN(lineStyle, style);

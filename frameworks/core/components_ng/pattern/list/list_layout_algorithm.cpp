@@ -112,7 +112,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 dividerSpace.reset();
             }
             if (dividerSpace.has_value()) {
-                spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
+                spaceWidth_ = std::max(spaceWidth_, static_cast<float>(Round(dividerSpace.value())));
             }
         }
         spaceWidth_ += chainInterval_;

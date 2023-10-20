@@ -441,6 +441,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.decoration_color = ConvertSkColor(textStyle.GetTextDecorationColor());
     txtStyle.font_families = textStyle.GetFontFamilies();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
+    txtStyle.half_leading = textStyle.GetHalfLeading();
 
     for (auto& spanShadow : textStyle.GetTextShadows()) {
         txt::TextShadow txtShadow;
@@ -525,6 +526,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
+    txtStyle.halfLeading = textStyle.GetHalfLeading();
 
     for (auto& spanShadow : textStyle.GetTextShadows()) {
         Rosen::TextShadow txtShadow;

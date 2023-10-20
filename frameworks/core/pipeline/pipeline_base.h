@@ -764,6 +764,12 @@ public:
 
     virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
 
+    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+
+    virtual bool IsEnableKeyBoardAvoidMode() {
+        return false;
+    }
+
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;
@@ -930,6 +936,16 @@ public:
         return false;
     }
 
+    void SetHalfLeading(bool halfLeading)
+    {
+        halfLeading_ = halfLeading;
+    }
+
+    bool GetHalfLeading() const
+    {
+        return halfLeading_;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1062,6 +1078,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool isReloading_ = false;
+    bool halfLeading_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

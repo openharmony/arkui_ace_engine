@@ -292,6 +292,9 @@ FrameNode::~FrameNode()
         auto dragManager = pipeline->GetDragDropManager();
         if (dragManager) {
             dragManager->RemoveDragFrameNode(GetId());
+#ifdef ENABLE_DRAG_FRAMEWORK
+            dragManager->UnRegisterDragStatusListener(GetId());
+#endif // ENABLE_DRAG_FRAMEWORK
         }
     }
 }
@@ -544,20 +547,20 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (!hasIdealWidth) {
         auto idealWidthVpStr = std::to_string(Dimension(geometryNode_->GetFrameSize().Width()).ConvertToVp());
         auto widthStr =
-            (idealWidthVpStr.substr(0, idealWidthVpStr.find(".") + SUBSTR_LENGTH) + DIMENSION_UNIT_VP).c_str();
-        json->Put("width", widthStr);
+            (idealWidthVpStr.substr(0, idealWidthVpStr.find(".") + SUBSTR_LENGTH) + DIMENSION_UNIT_VP);
+        json->Put("width", widthStr.c_str());
         if (jsonSize) {
-            jsonSize->Put("width", widthStr);
+            jsonSize->Put("width", widthStr.c_str());
         }
     }
 
     if (!hasIdealHeight) {
         auto idealHeightVpStr = std::to_string(Dimension(geometryNode_->GetFrameSize().Height()).ConvertToVp());
         auto heightStr =
-            (idealHeightVpStr.substr(0, idealHeightVpStr.find(".") + SUBSTR_LENGTH) + DIMENSION_UNIT_VP).c_str();
-        json->Put("height", heightStr);
+            (idealHeightVpStr.substr(0, idealHeightVpStr.find(".") + SUBSTR_LENGTH) + DIMENSION_UNIT_VP);
+        json->Put("height", heightStr.c_str());
         if (jsonSize) {
-            jsonSize->Put("height", heightStr);
+            jsonSize->Put("height", heightStr.c_str());
         }
     }
 }
@@ -807,7 +810,6 @@ void FrameNode::TriggerOnAreaChangeCallback()
     if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         auto currParentOffsetToWindow = GetOffsetRelativeToWindow() - currFrameRect.GetOffset();
-        currFrameRect.SetOffset(geometryNode_->GetPixelGridRoundOffsetForArea());
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             eventHub_->FireOnAreaChanged(
                 *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
@@ -978,11 +980,9 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     UpdateLayoutPropertyFlag();
     SetSkipSyncGeometryNode(false);
     {
-        ACE_SCOPED_TRACE("Measure");
+        ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
+            GetParent() ? GetParent()->GetId() : 0);
         Measure(GetLayoutConstraint());
-    }
-    {
-        ACE_SCOPED_TRACE("Layout");
         Layout();
     }
     SetRootMeasureNode(false);
@@ -1489,12 +1489,13 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    auto localMat = renderContext_->GetLocalTransformMatrix();
     auto param = renderContext_->GetTrans();
     if (param.empty()) {
-        translateCfg[GetId()] = { .id = GetId() };
+        translateCfg[GetId()] = { .id = GetId(), .localMat = localMat };
     } else {
         translateCfg[GetId()] = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7],
-            param[8], GetId() };
+            param[8], GetId(), localMat };
     }
     auto parent = GetAncestorNodeOfFrame();
     if (parent) {
@@ -1805,6 +1806,7 @@ void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCha
     pattern_->OnWindowSizeChanged(width, height, type);
 }
 
+/* @deprecated  This func will be deleted, please use GetTransformRelativeOffset() instead. */
 OffsetF FrameNode::GetOffsetRelativeToWindow() const
 {
     auto offset = geometryNode_->GetFrameOffset();

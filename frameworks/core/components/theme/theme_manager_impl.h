@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_IMPL_H
 
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace {
@@ -24,6 +25,7 @@ class ACE_EXPORT ThemeManagerImpl : public ThemeManager {
 
 public:
     ThemeManagerImpl();
+    explicit ThemeManagerImpl(RefPtr<ResourceAdapter>& resourceAdapter);
     ~ThemeManagerImpl() override = default;
 
     void InitResource(const ResourceInfo& resourceInfo) override

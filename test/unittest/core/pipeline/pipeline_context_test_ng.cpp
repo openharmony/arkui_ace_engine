@@ -1525,9 +1525,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
      * @tc.expected: the return is same as expectation.
      */
     context_->textFieldManager_ = nullptr;
+
     // the first arg is rootHeight_, the second arg is the parameter of function,
     // the third arg is the expectation returns
-    std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, -100 },
+    std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, 300 },
         { 200, 0, 0 } };
     for (int turn = 0; turn < params.size(); turn++) {
         context_->rootHeight_ = params[turn][0];
@@ -1542,11 +1543,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     auto manager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = manager;
     ASSERT_NE(context_->rootNode_, nullptr);
+
     // the first arg is manager->height_, the second arg is manager->position_.deltaY_
     // the third arg is rootHeight_, the forth arg is context_->rootNode_->geometryNode_->frame_.rect_.y_
     // the fifth arg is the parameter of function, the sixth arg is the expectation returns
-    params = { { 10, 100, 300, 0, 50, 0 }, { 10, 100, 300, 100, 100, 100 }, { 30, 100, 300, 100, 50, 100 },
-        { 50, 290, 400, 100, 200, -145 }, { -1000, 290, 400, 100, 200, 100 } };
+    params = { { 10, 100, 300, 0, 50, 0 }, { 10, 100, 300, 100, 100, 0 }, { 30, 100, 300, 100, 50, 0 },
+        { 50, 290, 400, 100, 200, -95 }, { -1000, 290, 400, 100, 200, 100 } };
     for (int turn = 0; turn < params.size(); turn++) {
         manager->height_ = params[turn][0];
         manager->position_.deltaY_ = params[turn][1];
@@ -2704,5 +2706,47 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg059, TestSize.Level1)
     context_->canUseLongPredictTask_ = true;
     context_->OnIdle(2);
     EXPECT_TRUE(flagCbk);
+}
+
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto& windowConfig = frontend->GetWindowConfig();
+    windowConfig.designWidth = DEFAULT_INT1;
+    context_->weakFrontend_ = frontend;
+    context_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+
+    /**
+     * @tc.steps2: Set EnableAvoidKeyboardMode is true.
+     * @tc.expected: get KeyboardSafeAreaEnabled is true.
+     */
+    context_->SetEnableKeyBoardAvoidMode(true);
+    EXPECT_TRUE(context_->GetSafeAreaManager()->KeyboardSafeAreaEnabled());
+
+    /**
+     * @tc.steps3: set root height and change virtual keyboard height.
+     * @tc.expected: Resize the root height after virtual keyboard change.
+     */
+
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerPattern, nullptr);
+    auto columNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
+    CHECK_NULL_VOID(columNode);
+
+    std::vector<std::vector<int>> params = { { 500, 400, 100 }, { 300, 100, 200 }, { 400, -300, 400 },
+        { 200, 0, 200 } };
+    for (int turn = 0; turn < params.size(); turn++) {
+        context_->rootHeight_ = params[turn][0];
+        context_->OnVirtualKeyboardHeightChange(params[turn][1]);
+        EXPECT_EQ(context_->GetRootHeight(), params[turn][2]);
+    }
 }
 } // namespace OHOS::Ace::NG

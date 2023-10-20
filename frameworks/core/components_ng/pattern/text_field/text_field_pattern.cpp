@@ -2318,7 +2318,9 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     LOGI("TextFieldPattern::HandleDoubleClickEvent");
     isDoubleClick_ = true;
-    StopTwinkling();
+    if (!GetEditingValue().text.empty()) {
+        StopTwinkling();
+    }
     if (!IsUsingMouse()) {
         caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
         isSingleHandle_ = false;
@@ -3499,6 +3501,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     if (needShowSoftKeyboard) {
         LOGI("Start to request keyboard");
         if (customKeyboardBulder_) {
+#if defined(ENABLE_STANDARD_INPUT) && defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        imeAttached_ = true;
+#endif
             return RequestCustomKeyboard();
         }
 #if defined(ENABLE_STANDARD_INPUT)

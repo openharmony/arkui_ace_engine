@@ -166,6 +166,13 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
     extSurfaceCallbackInterface_ = extSurfaceCallback;
 }
 
+void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height)
+{
+    if (consumerSurface_) {
+        consumerSurface_->SetDefaultWidthAndHeight(width, height);
+    }
+}
+
 void RosenRenderSurface::ConsumeBuffer()
 {
     ContainerScope scope(instanceId_);

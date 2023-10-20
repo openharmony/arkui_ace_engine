@@ -82,6 +82,7 @@ template("ace_core_source_set") {
       "common/font_manager.cpp",
       "common/frontend.cpp",
       "common/platform_bridge.cpp",
+      "common/resource/resource_manager.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
       "common/text_field_manager.cpp",
@@ -639,6 +640,7 @@ template("ace_core_ng_source_set") {
       "common/font_manager.cpp",
       "common/frontend.cpp",
       "common/platform_bridge.cpp",
+      "common/resource/resource_manager.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
       "common/text_field_manager.cpp",
@@ -977,10 +979,7 @@ template("ace_core_ng_source_set") {
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
-      deps += [
-        "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform",
-        "$ace_root/frameworks/core/components_ng/pattern/model:ace_core_components_model_pattern_ng_$platform",
-      ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/model:ace_core_components_model_pattern_ng_$platform" ]
     }
 
     if (defined(config.enable_image_compression) &&
