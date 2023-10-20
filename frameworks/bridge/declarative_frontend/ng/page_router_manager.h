@@ -107,7 +107,6 @@ public:
     RefPtr<FrameNode> GetCurrentPageNode() const
     {
         if (pageRouterStack_.empty()) {
-            LOGE("fail to get current page node due to page is null");
             return nullptr;
         }
         return pageRouterStack_.back().Upgrade();
