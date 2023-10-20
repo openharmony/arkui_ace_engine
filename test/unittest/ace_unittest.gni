@@ -38,19 +38,12 @@ template("ace_unittest") {
   flutter_skia = false
   render = false
   ace_unittest_name = target_name
-  ace_unittest_config = [
-    "$ace_root/test/unittest:ace_unittest_config",
-    "$ace_flutter_engine_root:flutter_config",
-  ]
+  ace_unittest_config = [ "$ace_root/test/unittest:ace_unittest_config" ]
   ace_external_deps = []
-  flutter_sources =
-      [ "$ace_root/test/mock/core/common/mock_flutter_window.cpp" ]
+  flutter_sources = []
   flutter_external_deps = []
   ace_unittest_deps = [
-    "$ace_flutter_engine_root:flutter_engine_common_ohos",
-    "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
-    "$skia_root_new:skia_ohos",
     "//third_party/googletest:gmock",
   ]
 
@@ -90,6 +83,13 @@ template("ace_unittest") {
   }
 
   if (flutter_skia) {
+    flutter_sources +=
+        [ "$ace_root/test/mock/core/common/mock_flutter_window.cpp" ]
+    ace_unittest_deps += [
+      "$ace_flutter_engine_root:flutter_engine_common_ohos",
+      "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos",
+      "$skia_root_new:skia_ohos",
+    ]
     if (enable_graphic_text_gine) {
       ace_unittest_deps -=
           [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos" ]
@@ -98,6 +98,7 @@ template("ace_unittest") {
         "$ace_flutter_engine_root/icu:ace_libicu_ohos",
       ]
     }
+    ace_unittest_config += [ "$ace_flutter_engine_root:flutter_config" ]
     flutter_external_deps = [ "eventhandler:libeventhandler" ]
   }
 
