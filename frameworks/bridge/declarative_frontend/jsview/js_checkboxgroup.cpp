@@ -128,7 +128,6 @@ void ParseSelectAllObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
 void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
     bool selectAll = false;
@@ -144,7 +143,6 @@ void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
 void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGI("args not function");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<CheckboxGroupResult, 1>>(
@@ -164,7 +162,6 @@ void JSCheckboxGroup::JsResponseRegion(const JSCallbackInfo& info)
         return;
     }
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     std::vector<DimensionRect> result;
@@ -177,7 +174,6 @@ void JSCheckboxGroup::JsResponseRegion(const JSCallbackInfo& info)
 void JSCheckboxGroup::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -204,7 +200,6 @@ void JSCheckboxGroup::JsWidth(const JSRef<JSVal>& jsValue)
 void JSCheckboxGroup::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -231,12 +226,10 @@ void JSCheckboxGroup::JsHeight(const JSRef<JSVal>& jsValue)
 void JSCheckboxGroup::JsSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -248,7 +241,6 @@ void JSCheckboxGroup::JsSize(const JSCallbackInfo& info)
 void JSCheckboxGroup::SelectedColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     Color selectedColor;
@@ -263,7 +255,6 @@ void JSCheckboxGroup::SelectedColor(const JSCallbackInfo& info)
 void JSCheckboxGroup::UnSelectedColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color unSelectedColor;
@@ -278,12 +269,10 @@ void JSCheckboxGroup::UnSelectedColor(const JSCallbackInfo& info)
 void JSCheckboxGroup::Mark(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object.");
         return;
     }
 
@@ -318,7 +307,6 @@ void JSCheckboxGroup::Mark(const JSCallbackInfo& info)
 void JSCheckboxGroup::JsPadding(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     NG::PaddingPropertyF oldPadding({ 0.0f, 0.0f, 0.0f, 0.0f });
@@ -332,7 +320,6 @@ bool JSCheckboxGroup::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPrope
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
             return false;
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||

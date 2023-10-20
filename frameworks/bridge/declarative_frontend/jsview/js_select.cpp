@@ -69,21 +69,15 @@ void JSSelect::Create(const JSCallbackInfo& info)
         for (size_t i = 0; i < size; i++) {
             std::string value;
             std::string icon;
-                JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
-                if (!indexVal->IsObject()) {
-                    LOGE("element of paramArray is not an object.");
-                    return;
-                }
-                auto indexObject = JSRef<JSObject>::Cast(indexVal);
-                auto selectValue = indexObject->GetProperty("value");
-                auto selectIcon = indexObject->GetProperty("icon");
-                if (!ParseJsString(selectValue, value)) {
-                    LOGW("selectValue is null");
-                }
-                if (!ParseJsMedia(selectIcon, icon)) {
-                    LOGI("selectIcon is null");
-                }
-
+            JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
+            if (!indexVal->IsObject()) {
+                return;
+            }
+            auto indexObject = JSRef<JSObject>::Cast(indexVal);
+            auto selectValue = indexObject->GetProperty("value");
+            auto selectIcon = indexObject->GetProperty("icon");
+            ParseJsString(selectValue, value);
+            ParseJsMedia(selectIcon, icon);
             params[i] = { value, icon };
         }
         SelectModel::GetInstance()->Create(params);
@@ -148,7 +142,6 @@ void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeE
 void JSSelect::Selected(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
@@ -183,7 +176,6 @@ void ParseValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEven
 void JSSelect::Value(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
@@ -239,7 +231,6 @@ void JSSelect::Font(const JSCallbackInfo& info)
 void JSSelect::FontColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -262,7 +253,6 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
 void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color bgColor;
@@ -288,7 +278,6 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
     auto param = JSRef<JSObject>::Cast(info[0]);
 
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -332,7 +321,6 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
 void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
@@ -353,7 +341,6 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
 void JSSelect::OptionBgColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color bgColor;
@@ -412,7 +399,6 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
 void JSSelect::OptionFontColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
@@ -426,7 +412,6 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
 void JSSelect::OnSelected(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -446,7 +431,6 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
 void JSSelect::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     CalcDimension value;
@@ -460,7 +444,6 @@ void JSSelect::JsWidth(const JSCallbackInfo& info)
 void JSSelect::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -476,7 +459,6 @@ bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
 {
     if (info.Length() < 1) {
-        LOGE("%{public}s: The arg is supposed to have at least one argument", callerName.c_str());
         return false;
     }
     bool typeVerified = false;
@@ -515,10 +497,6 @@ bool CheckJSCallbackInfo(
                 break;
         }
     }
-    if (!typeVerified) {
-        LOGE("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
-            unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
-    }
     return typeVerified || infoTypes.size() == 0;
 }
 
@@ -547,7 +525,6 @@ void JSSelect::JsSize(const JSCallbackInfo& info)
 void JSSelect::JsPadding(const JSCallbackInfo& info)
 {
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not a string, number or object.");
         return;
     }
 
@@ -590,7 +567,6 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
 void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -603,7 +579,6 @@ void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -616,7 +591,6 @@ void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -629,7 +603,6 @@ void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -642,7 +615,6 @@ void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
 void JSSelect::SetSpace(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -650,11 +622,9 @@ void JSSelect::SetSpace(const JSCallbackInfo& info)
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        LOGI("JSSelect set space value is mull");
         value = selectTheme->GetContentSpinnerPadding();
     }
     if (LessNotEqual(value.Value(), 0.0) || value.Unit() == DimensionUnit::PERCENT) {
-        LOGI("JSSelect set space value is to small");
         value = selectTheme->GetContentSpinnerPadding();
     }
 
