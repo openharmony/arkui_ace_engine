@@ -572,9 +572,7 @@ void TextFieldPattern::HandleFocusEvent()
     } else {
         StartTwinkling();
     }
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnEditChanged(true);
+    NotifyOnEditChanged(true);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
     if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         auto renderContext = host->GetRenderContext();
@@ -757,8 +755,7 @@ void TextFieldPattern::HandleBlurEvent()
     StopTwinkling();
     CloseKeyboard(true);
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    eventHub->FireOnEditChanged(false);
+    NotifyOnEditChanged(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1428,7 +1425,9 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     } else {
         CloseSelectOverlay(true);
     }
-    needToRequestKeyboardInner_ = true;
+    if (RequestKeyboard(false, true, true)) {
+        NotifyOnEditChanged(true);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2351,10 +2350,8 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
     mouseStatus_ = MouseStatus::NONE;
     blockPress_ = false;
     leftMouseCanMove_ = false;
-    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
     if (HasFocus() && RequestKeyboard(false, true, true)) {
-        eventHub->FireOnEditChanged(true);
+        NotifyOnEditChanged(true);
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -3193,9 +3190,7 @@ void TextFieldPattern::RequestKeyboardOnFocus()
     if (!RequestKeyboard(false, true, true)) {
         return;
     }
-    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnEditChanged(true);
+    NotifyOnEditChanged(true);
     needToRequestKeyboardInner_ = false;
 }
 
@@ -3863,11 +3858,7 @@ void TextFieldPattern::SearchRequestKeyboard()
     StartTwinkling();
     selectionMode_ = SelectionMode::NONE;
     if (RequestKeyboard(false, true, true)) {
-        auto tmpHost = GetHost();
-        CHECK_NULL_VOID(tmpHost);
-        auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnEditChanged(true);
+        NotifyOnEditChanged(true);
     }
 }
 
@@ -4668,11 +4659,7 @@ void TextFieldPattern::StopEditing()
 #else
     if (isCustomKeyboardAttached_) {
 #endif
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnEditChanged(false);
+        NotifyOnEditChanged(false);
     }
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
@@ -4905,5 +4892,14 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
 void TextFieldPattern::CreateHandles()
 {
     ProcessOverlay(false, false);
+}
+
+void TextFieldPattern::NotifyOnEditChanged(bool isChanged)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnEditChanged(isChanged);
 }
 } // namespace OHOS::Ace::NG

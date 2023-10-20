@@ -1096,6 +1096,7 @@ private:
     {
         isSingleHandle_ = isSingleHandle;
     }
+    void NotifyOnEditChanged(bool isChanged);
 
     RectF frameRect_;
     RectF contentRect_;

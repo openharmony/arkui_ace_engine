@@ -138,7 +138,7 @@ void SelectOverlayClient::UpdateShowingSelectOverlay(const ClientOverlayInfo& cl
     if (hasRequestSingleHandle) {
         proxy->UpdateSelectMenuInfo([newMenuInfo = selectOverlayInfo->menuInfo](SelectMenuInfo& menuInfo) {
             menuInfo.showPaste = newMenuInfo.showPaste;
-            menuInfo.showCopyAll = true;
+            menuInfo.showCopyAll = newMenuInfo.showCopyAll;
         });
         proxy->UpdateSecondSelectHandleInfo(selectOverlayInfo->secondHandle);
     } else {
