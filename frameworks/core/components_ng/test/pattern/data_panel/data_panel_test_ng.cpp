@@ -968,16 +968,15 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level1)
     dataPanelModifier.PaintCircle(context, OFFSET);
 }
 
-
 /**
- * @tc.name: DataPanelPaintCircleTest003
+ * @tc.name: DataPanelPaintCircleTest002
  * @tc.desc: Test DataPanel PaintMethod PaintCircle
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level1)
 {
     /**
-     * case 3: totalvalue = 20
+     * case 2: totalvalue = 20
      *  values = { 10.0f, 10.0f } totalvalue = 20
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -1000,14 +999,14 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: DataPanelPaintCircleTest004
+ * @tc.name: DataPanelPaintCircleTest003
  * @tc.desc: Test DataPanel PaintMethod PaintCircle
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
 {
     /**
-     * case 4:maxValue > 0 and one of value nearequael 0
+     * case 3:maxValue > 0 and one of value nearequael 0
      * max = 100.0f Values = { 0.001f, 20.0f };
      * isShadowVisible = true
      */
