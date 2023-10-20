@@ -77,6 +77,13 @@ public:
         }
     }
 
+    void RemoveResourceAdapter(const std::string& bundleName, const std::string& moduleName)
+    {
+        if (!bundleName.empty() && !moduleName.empty()) {
+            resourceAdapters_.erase(std::make_pair(bundleName, moduleName));
+        }
+    }
+
     void Reset()
     {
         resourceAdapters_.clear();

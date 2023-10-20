@@ -64,6 +64,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/image/image_file_cache.h"
 #ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
@@ -1346,6 +1347,12 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
+
+    if (isFormRender_) {
+        LOGD("Remove card for bundle %{public}s, module %{public}s", bundleName_.c_str(), moduleName_.c_str());
+        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName_, moduleName_);
+    }
+
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
