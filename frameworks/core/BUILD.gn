@@ -940,7 +940,10 @@ template("ace_core_ng_source_set") {
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+        deps += [
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform",
+          "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
+        ]
       } else {
         external_deps += [ "graphic_2d:librender_service_client" ]
         if (ace_use_rosen_drawing) {
