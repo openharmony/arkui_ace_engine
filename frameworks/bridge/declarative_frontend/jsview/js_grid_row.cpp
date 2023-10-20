@@ -200,7 +200,6 @@ RefPtr<V2::GridContainerSize> ParserColumns(const JSRef<JSVal>& jsValue)
         InheritGridRowOption(gridContainerSize, containerSizeArray);
         return gridContainerSize;
     } else {
-        LOGI("parse column error");
         return AceType::MakeRefPtr<V2::GridContainerSize>();
     }
 }
@@ -221,7 +220,6 @@ RefPtr<V2::BreakPoints> ParserBreakpoints(const JSRef<JSVal>& jsValue)
         JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
         breakpoint->breakpoints.clear();
         if (array->Length() > MAX_NUMBER_BREAKPOINT - 1) {
-            LOGI("The maximum number of breakpoints is %{public}zu", MAX_NUMBER_BREAKPOINT);
             return breakpoint;
         }
         double width = -1.0;
@@ -231,7 +229,7 @@ RefPtr<V2::BreakPoints> ParserBreakpoints(const JSRef<JSVal>& jsValue)
                 CalcDimension valueDimension;
                 JSContainerBase::ParseJsDimensionVp(threshold, valueDimension);
                 if (GreatNotEqual(width, valueDimension.Value())) {
-                    LOGI("Array data must be sorted in ascending order");
+                    TAG_LOGD(AceLogTag::ACE_GRIDROW, "Array data must be sorted in ascending order");
                     return breakpoint;
                 }
                 width = valueDimension.Value();
