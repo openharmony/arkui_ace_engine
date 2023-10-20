@@ -1209,6 +1209,12 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
         SetMenuPlacementForAnimation(layoutWrapper);
+        arrowPosition_ = GetArrowPositionWithPlacement(size);
+        if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
+            LayoutArrow(layoutWrapper);
+        }
+        LOGD("Menu layout, offset = %{public}s", menuPosition.ToString().c_str());
+        geometryNode->SetFrameOffset(menuPosition);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
@@ -1221,12 +1227,6 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto menuEndOffset =
             menuPosition - (previewOffset_ - previewOriginOffset_) + FixMenuOriginOffset(1.0f, afterAnimationScale);
         menuPattern->SetEndOffset(menuEndOffset);
-        arrowPosition_ = GetArrowPositionWithPlacement(size);
-        if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
-            LayoutArrow(layoutWrapper);
-        }
-        LOGD("Menu layout, offset = %{public}s", menuPosition.ToString().c_str());
-        geometryNode->SetFrameOffset(menuPosition);
     }
 
     // translate each option by the height of previous options

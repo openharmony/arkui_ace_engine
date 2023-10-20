@@ -57,6 +57,17 @@ void MenuPreviewPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto previewContext = host->GetRenderContext();
+    CHECK_NULL_VOID(previewContext);
+    ClickEffectInfo clickEffectInfo;
+    clickEffectInfo.level = ClickEffectLevel::LIGHT;
+    clickEffectInfo.scaleNumber = menuTheme->GetPreviewMenuScaleNumber();
+    previewContext->UpdateClickEffectLevel(clickEffectInfo);
 }
 
 bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

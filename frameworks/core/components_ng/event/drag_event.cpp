@@ -154,7 +154,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
-                SubwindowManager::GetInstance()->HideMenuNG(false);
+                SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 AnimationOption option;
                 option.SetDuration(PIXELMAP_ANIMATION_DURATION);
                 option.SetCurve(Curves::SHARP);
@@ -175,6 +175,17 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     frameNode->SetDraggable(true);
                     textDragCallback_(info.GetGlobalLocation());
                 }
+            } else if (!isNotInPreviewState_ && (gestureHub->GetPreviewMode() != MenuPreviewMode::NONE)) {
+                HideEventColumn();
+                HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+                HideFilter();
+                SubwindowManager::GetInstance()->HideMenuNG(false, true);
+                AnimationOption option;
+                option.SetDuration(PIXELMAP_ANIMATION_DURATION);
+                option.SetCurve(Curves::SHARP);
+                AnimationUtils::Animate(
+                    option, [renderContext]() { renderContext->UpdateOpacity(SCALE_NUMBER); },
+                    option.GetOnFinishEvent());
             }
         }
 
@@ -318,6 +329,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
+        auto gestureHub = actuator->gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        if (gestureHub->GetPreviewMode() != MenuPreviewMode::NONE) {
+            actuator->SetIsNotInPreviewState(false);
+        }
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
