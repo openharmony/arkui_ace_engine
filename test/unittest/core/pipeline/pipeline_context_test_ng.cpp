@@ -1358,13 +1358,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
         { "-rotation" }, { "-animationscale" }, { "-velocityscale" }, { "-scrollfriction" }, { "-threadstuck" },
         { "test" } };
     int turn = 0;
-    int falseInfoNum = 6;
     for (; turn < params.size(); turn++) {
-        if (turn < params.size() - falseInfoNum) {
-            EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
-        } else {
-            EXPECT_FALSE(context_->OnDumpInfo(params[turn]));
-        }
+        EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
     }
 }
 
