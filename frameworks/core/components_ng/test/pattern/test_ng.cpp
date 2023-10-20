@@ -47,23 +47,6 @@ void TestNG::RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode, float width
     frameNode->Layout();
 }
 
-void TestNG::OldRunMeasureAndLayout(const RefPtr<FrameNode>& frameNode, float width, float height)
-{
-    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
-    layoutWrapper->SetActive();
-    layoutWrapper->SetRootMeasureNode();
-    LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
-    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
-    if (NonNegative(width) && NonNegative(height)) {
-        LayoutConstraint.selfIdealSize = { width, height };
-    }
-    LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
-    layoutWrapper->Measure(LayoutConstraint);
-    layoutWrapper->Layout();
-    layoutWrapper->MountToHostOnMainThread();
-}
-
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)
 {
     std::unordered_set<AceAction> supportAceActions = accessibilityProperty->GetSupportAction();
@@ -79,50 +62,5 @@ void TestNG::MockGetPaintRectWithTransform(const RefPtr<FrameNode>& frameNode, R
     RefPtr<MockRenderContext> renderContext = AceType::DynamicCast<MockRenderContext>(MockRenderContext::Create());
     EXPECT_CALL(*renderContext, GetPaintRectWithTransform()).WillRepeatedly(Return(paintRect));
     frameNode->renderContext_ = renderContext;
-}
-
-testing::AssertionResult TestNG::IsEqualOffset(Offset offset, Offset expectOffset)
-{
-    if (offset == expectOffset) {
-        return testing::AssertionSuccess();
-    }
-    return testing::AssertionFailure() <<
-        "offset: " << offset.ToString() <<
-        " != " <<
-        "expectOffset: " << expectOffset.ToString();
-}
-
-testing::AssertionResult TestNG::IsEqualOverScrollOffset(OverScrollOffset offset, OverScrollOffset expectOffset)
-{
-    if (NearEqual(offset.start, expectOffset.start) && NearEqual(offset.end, expectOffset.end)) {
-        return testing::AssertionSuccess();
-    }
-    return testing::AssertionFailure() << "offset: "
-                                       << "{ " << offset.start << " , " << offset.end << " }"
-                                       << " != "
-                                       << "expectOffset: "
-                                       << "{ " << expectOffset.start << " , " << expectOffset.end << " }";
-}
-
-testing::AssertionResult TestNG::IsEqualRect(Rect rect, Rect expectRect)
-{
-    if (rect == expectRect) {
-        return testing::AssertionSuccess();
-    }
-    return testing::AssertionFailure() <<
-        "rect: " << rect.ToString() <<
-        " != " <<
-        "expectRect: " << expectRect.ToString();
-}
-
-testing::AssertionResult TestNG::IsEqualRect(RectF rect, RectF expectRect)
-{
-    if (rect == expectRect) {
-        return testing::AssertionSuccess();
-    }
-    return testing::AssertionFailure() <<
-        "rect: " << rect.ToString() <<
-        " != " <<
-        "expectRect: " << expectRect.ToString();
 }
 } // namespace OHOS::Ace::NG
