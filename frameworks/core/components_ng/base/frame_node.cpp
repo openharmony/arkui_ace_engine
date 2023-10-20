@@ -2288,7 +2288,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this))) {
         geometryTransition->WillLayout(Claim(this));
     }
     auto preConstraint = layoutProperty_->GetLayoutConstraint();

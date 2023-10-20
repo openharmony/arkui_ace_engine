@@ -71,6 +71,8 @@ public:
 
     void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
 
+    void SetFrameWithoutAnimation(const RectF& paintRect) override;
+
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
