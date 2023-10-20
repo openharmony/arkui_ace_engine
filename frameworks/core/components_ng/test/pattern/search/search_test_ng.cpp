@@ -1518,6 +1518,10 @@ HWTEST_F(SearchTestNg, Pattern009, TestSize.Level1)
     pattern->imageClickListener_.Reset();
     EXPECT_EQ(pattern->imageClickListener_, nullptr);
     pattern->InitButtonAndImageClickEvent();
+    searchModelInstance.SetMaxLength(19);
+    EXPECT_EQ(pattern->GetMaxLength(), 19);
+    searchModelInstance.ResetMaxLength();
+    EXPECT_EQ(pattern->GetMaxLength(), 1000000);
 }
 
 /**

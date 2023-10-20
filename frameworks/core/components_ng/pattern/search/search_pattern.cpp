@@ -792,6 +792,8 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     json->Put("textFont", textFontJson->ToString().c_str());
     json->Put("copyOption",
         ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str());
+    auto maxLength = GetMaxLength();
+    json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
     textFieldLayoutProperty->HasCopyOptions();
 }
 
@@ -968,4 +970,17 @@ void SearchPattern::OnColorConfigurationUpdate()
         textField_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
+
+uint32_t SearchPattern::GetMaxLength() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Infinity<uint32_t>());
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, Infinity<uint32_t>());
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, Infinity<uint32_t>());
+    return textFieldLayoutProperty->HasMaxLength() ? textFieldLayoutProperty->GetMaxLengthValue(Infinity<uint32_t>())
+                                          : Infinity<uint32_t>();
+}
+
 } // namespace OHOS::Ace::NG
