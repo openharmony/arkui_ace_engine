@@ -96,6 +96,18 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
 
+        auto textfieldLayoutProperty =
+            AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(textfieldLayoutProperty);
+        if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
+#ifndef USE_GRAPHIC_TEXT_GINE
+            auto width = static_cast<float>(paragraph_->GetLongestLine()) + pattern->GetHorizontalPaddingSum();
+#else
+            auto width = static_cast<float>(paragraph_->GetActualWidth()) + pattern->GetHorizontalPaddingSum();
+#endif
+            frameSize.SetWidth(width);
+        }
+
         // Here's what happens when the height or width is set at list one
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
@@ -359,6 +371,18 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         }
         textRect_.SetSize(
             SizeF(idealWidth, paragraph_->GetHeight()));
+
+        if (textFieldLayoutProperty->GetWidthAutoValue(false)) {
+            if (LessOrEqual(contentConstraint.minSize.Width(), 0.0f)) {
+                idealWidth = std::clamp(textRect_.GetSize().Width(), 0.0f, contentConstraint.maxSize.Width());
+            } else if (LessOrEqual(textRect_.Width(), 0.0f)) {
+                idealWidth = contentConstraint.minSize.Width();
+            } else {
+                idealWidth =
+                    std::clamp(textRect_.Width(), contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
+            }
+        }
+
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     // check password image size.

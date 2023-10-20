@@ -1791,6 +1791,9 @@ HWTEST_F(TextFieldPatternTestNg, SetTextAlign, TestSize.Level1)
      */
     textFieldContentModifier.SetTextAlign(value2);
     EXPECT_EQ(textFieldContentModifier.textAlign_->Get(), static_cast<int32_t>(value2));
+    const TextAlign value3 = TextAlign::JUSTIFY;
+    textFieldContentModifier.SetTextAlign(value3);
+    EXPECT_EQ(textFieldContentModifier.textAlign_->Get(), static_cast<int32_t>(value3));
 }
 
 /**

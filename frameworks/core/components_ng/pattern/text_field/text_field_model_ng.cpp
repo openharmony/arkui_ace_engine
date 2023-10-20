@@ -138,9 +138,6 @@ void TextFieldModelNG::SetWidthAuto(bool isAuto)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
-        return;
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, isAuto);
 }
 
@@ -232,13 +229,21 @@ void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
 
 void TextFieldModelNG::SetTextAlign(TextAlign value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    TextAlign newValue = value;
+    if (!pattern->IsTextArea() && newValue == TextAlign::JUSTIFY) {
+        newValue = TextAlign::START;
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    if (layoutProperty->GetTextAlignValue(TextAlign::START) != value) {
+    if (layoutProperty->GetTextAlignValue(TextAlign::START) != newValue) {
         layoutProperty->UpdateTextAlignChanged(true);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, newValue);
 }
+
 void TextFieldModelNG::SetMaxLength(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value);
