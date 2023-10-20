@@ -1178,6 +1178,8 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         pattern->textFieldContentModifier_->ChangeDragStatus();
         auto contentController = pattern->contentController_;
         auto selectController = pattern->selectController_;
+        pattern->dragTextStart_ = selectController->GetStartIndex();
+        pattern->dragTextEnd_ = selectController->GetEndIndex();
         std::string beforeStr = contentController->GetValueBeforeIndex(selectController->GetStartIndex());
         std::string selectedStr =
             contentController->GetSelectedValue(selectController->GetStartIndex(), selectController->GetEndIndex());
@@ -3586,6 +3588,8 @@ bool TextFieldPattern::OnBackPressed()
     }
 
     LOGI("Closing keyboard on back press");
+    selectController_->ResetHandles();
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     CloseKeyboard(true);
 #if defined(ANDROID_PLATFORM)
     return false;
@@ -4868,7 +4872,9 @@ bool TextFieldPattern::NeedPaintSelect()
 
 RefPtr<FocusHub> TextFieldPattern::GetFocusHub() const
 {
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto focusHub = host->GetOrCreateFocusHub();
     return focusHub;
 }
 

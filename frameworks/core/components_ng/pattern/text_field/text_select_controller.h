@@ -167,6 +167,7 @@ public:
         return caretInfo_;
     }
 
+    void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
     void UpdateCaretIndex(int32_t index);
     void UpdateCaretInfoByOffset(const Offset& localOffset);

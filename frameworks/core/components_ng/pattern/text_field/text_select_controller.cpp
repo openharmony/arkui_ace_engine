@@ -413,4 +413,12 @@ void TextSelectController::UpdateRecordCaretIndex(int32_t index) const
     CHECK_NULL_VOID(textFiled);
     textFiled->UpdateRecordCaretIndex(index);
 }
+
+void TextSelectController::ResetHandles()
+{
+        firstHandleInfo_.index = caretInfo_.index;
+        secondHandleInfo_.index = caretInfo_.index;
+        UpdateFirstHandleOffset();
+        UpdateSecondHandleOffset();
+}
 } // namespace OHOS::Ace::NG
