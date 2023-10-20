@@ -135,6 +135,7 @@ void ScreenPattern::UpdateDisplayInfo()
 
 bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
+    UpdateDisplayInfo();
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto window = static_cast<RosenWindow*>(container->GetWindow());
@@ -147,7 +148,6 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     float density = screenSession_->GetScreenProperty().GetDensity();
     rootScene->SetDisplayDensity();
     rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
-    UpdateDisplayInfo();
     return true;
 }
 } // namespace OHOS::Ace::NG
