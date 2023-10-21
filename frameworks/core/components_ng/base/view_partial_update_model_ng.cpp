@@ -74,6 +74,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetJSViewName(std::move(info.jsViewName));
     customNode->SetRecycleFunction(std::move(info.recycleCustomNodeFunc));
     customNode->SetSetActiveFunc(std::move(info.setActiveFunc));
+    customNode->SetOnDumpInfoFunc(std::move(info.onDumpInfoFunc));
     return customNode;
 }
 

@@ -64,6 +64,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/image/image_file_cache.h"
 #ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
@@ -1346,6 +1347,12 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
+
+    if (isFormRender_) {
+        LOGD("Remove card for bundle %{public}s, module %{public}s", bundleName_.c_str(), moduleName_.c_str());
+        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName_, moduleName_);
+    }
+
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
@@ -1432,10 +1439,18 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    LOGD("UIContentImpl ProcessPointerEvent begin");
     auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        auto info = Platform::AceContainer::GetContentInfo(instanceId_);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
+            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "ViewPosX = %{public}d, ViewPosY = %{public}d, ContentInfo = %{public}s",
+            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(),
+            container->GetViewPosY(), info.c_str());
+    }
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     return true;
@@ -1443,9 +1458,11 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGD("UIContentImpl: OnKeyUp called, keyEvent info: keyCode is %{public}d,"
-         "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-        touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
+        "keyEvent info: keyCode is %{public}d, "
+        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
+        touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(),
+        touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
@@ -1519,7 +1536,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
-        SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        if (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START) {
+            SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        }
     };
     if (container->IsUseStageModel() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
         task();

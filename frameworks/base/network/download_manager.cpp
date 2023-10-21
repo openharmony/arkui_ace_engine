@@ -49,7 +49,6 @@ public:
 
         std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> handle(curl_easy_init(), &curl_easy_cleanup);
         if (!handle) {
-            LOGE("Failed to create download task");
             return false;
         }
 

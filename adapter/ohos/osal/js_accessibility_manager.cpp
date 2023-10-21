@@ -1426,11 +1426,12 @@ void JsAccessibilityManager::InitializeCallback()
 
     SubscribeToastObserver();
 
-    if (!pipelineContext->IsFormRender()) {
-        SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
-        if (isEnabled) {
-            RegisterInteractionOperation(windowId_);
-        }
+    if (pipelineContext->IsFormRender() || pipelineContext->IsJsCard() || pipelineContext->IsJsPlugin()) {
+        return;
+    }
+    SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
+    if (isEnabled) {
+        RegisterInteractionOperation(windowId_);
     }
 }
 
@@ -1498,7 +1499,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         CHECK_NULL_VOID(node);
         FillEventInfo(node, eventInfo);
     }
-    if (accessibilityEvent.type != AccessibilityEventType::PAGE_CHANGE) {
+    if (accessibilityEvent.type != AccessibilityEventType::PAGE_CHANGE || accessibilityEvent.windowId == 0) {
         eventInfo.SetWindowId(windowId);
     } else {
         eventInfo.SetWindowId(accessibilityEvent.windowId);

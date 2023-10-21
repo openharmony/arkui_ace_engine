@@ -46,7 +46,6 @@ public:
 
     void AddTaskObserver(Task&& callback) override;
     void RemoveTaskObserver() override;
-    void Destory() override;
     bool WillRunOnCurrentThread(TaskType type) const final;
 
     int32_t GetTid(TaskType type) final

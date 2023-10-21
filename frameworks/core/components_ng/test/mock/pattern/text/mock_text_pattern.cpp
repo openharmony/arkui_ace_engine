@@ -41,7 +41,7 @@ void TextPattern::BeforeCreateLayoutWrapper() {}
 
 void TextPattern::OnVisibleChange(bool isVisible) {}
 
-void TextPattern::DumpInfo() {}
+void TextPattern::DumpAdvanceInfo() {}
 
 float TextPattern::GetLineHeight() const
 {

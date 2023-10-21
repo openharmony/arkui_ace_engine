@@ -33,6 +33,9 @@ constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
 constexpr int32_t MASK_FOCUS_STEP_TAB = 0x5;
+constexpr int32_t DEEPTH_OF_MENU = 3;
+constexpr int32_t DEEPTH_OF_DIALOG = 2;
+constexpr int32_t DEEPTH_OF_PAGE = 1;
 
 enum class FocusType : int32_t {
     DISABLE = 0,
@@ -75,6 +78,12 @@ enum class FocusStyleType : int32_t {
 enum class OnKeyEventType : int32_t {
     DEFAULT = 0,
     CONTEXT_MENU = 1,
+};
+
+enum class FocusDependence : int32_t {
+    CHILD = 0,
+    SELF = 1,
+    AUTO = 2,
 };
 
 class ACE_EXPORT FocusPaintParam : public virtual AceType {
@@ -406,9 +415,7 @@ class ACE_EXPORT FocusHub : public virtual AceType {
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
         : eventHub_(eventHub), focusable_(focusable), focusType_(type)
-    {
-        MarkRootFocusNeedUpdate();
-    }
+    {}
     ~FocusHub() override = default;
 
     void SetFocusStyleType(FocusStyleType type)
@@ -510,16 +517,23 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    bool RequestFocusImmediately(bool isWholePathFocusable = false);
+    bool RequestFocusImmediately();
     void RequestFocus() const;
-    void RequestFocusWithDefaultFocusFirstly() const;
+    void RequestFocusWithDefaultFocusFirstly();
     void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
+    RefPtr<FocusHub> GetChildMainView();
+    RefPtr<FocusHub> GetMainViewRootScope();
+
+    static RefPtr<FocusHub> GetCurrentMainView();
+    static void LostFocusToViewRoot();
+
+    void InheritFocus();
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
-    void RemoveSelf();
-    void RemoveChild(const RefPtr<FocusHub>& focusNode);
+    void RemoveSelf(BlurReason reason = BlurReason::FRAME_DESTROY);
+    void RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason = BlurReason::FRAME_DESTROY);
     bool GoToNextFocusLinear(FocusStep step, const RectF& rect = RectF());
     bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect, FocusStep step = FocusStep::NONE);
 
@@ -574,8 +588,6 @@ public:
         return currentFocus_;
     }
     bool IsCurrentFocusWholePath();
-
-    void MarkRootFocusNeedUpdate();
 
     void ClearUserOnFocus()
     {
@@ -795,6 +807,18 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->IsDefaultGroupHasFocused() : false;
     }
 
+    void SetIsViewRootScopeFocused(const RefPtr<FocusHub>& viewRootScope, bool isViewRootScopeFocused)
+    {
+        isViewRootScopeFocused_ = isViewRootScopeFocused;
+        if (viewRootScope) {
+            viewRootScope->SetFocusDependence(isViewRootScopeFocused ? FocusDependence::SELF : FocusDependence::AUTO);
+        }
+    }
+    bool GetIsViewRootScopeFocused() const
+    {
+        return isViewRootScopeFocused_;
+    }
+
     std::optional<std::string> GetInspectorKey() const;
 
     bool PaintFocusState(bool isNeedStateStyles = true);
@@ -820,6 +844,15 @@ public:
     void SetIsFocusUnit(bool isFocusUnit)
     {
         isFocusUnit_ = isFocusUnit;
+    }
+
+    FocusDependence GetFocusDependence() const
+    {
+        return focusDepend_;
+    }
+    void SetFocusDependence(FocusDependence focusDepend)
+    {
+        focusDepend_ = focusDepend;
     }
 
     static inline bool IsFocusStepVertical(FocusStep step)
@@ -857,7 +890,7 @@ protected:
 
     void OnFocus();
     void OnFocusNode();
-    void OnFocusScope();
+    void OnFocusScope(bool currentHasFocused = false);
     void OnBlur();
     void OnBlurNode();
     void OnBlurScope();
@@ -906,6 +939,7 @@ private:
     bool currentFocus_ { false };
     bool isFirstFocusInPage_ { true };
     bool isFocusUnit_ { false };
+    bool isViewRootScopeFocused_ { true };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
@@ -915,6 +949,7 @@ private:
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;
     BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
+    FocusDependence focusDepend_ = FocusDependence::CHILD;
 };
 } // namespace OHOS::Ace::NG
 

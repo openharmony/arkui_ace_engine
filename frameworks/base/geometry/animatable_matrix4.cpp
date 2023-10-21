@@ -95,8 +95,6 @@ void AnimatableMatrix4::AnimateTo(const Matrix4& endValue)
             auto context = weakContext.Upgrade();
             if (context) {
                 context->PostAsyncEvent(onFinishEvent);
-            } else {
-                LOGE("the context is null");
             }
         });
     }

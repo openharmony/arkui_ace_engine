@@ -97,6 +97,7 @@ foreach(item, ace_platforms) {
         "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
         "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
         "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+        "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
       ]
 
       if (is_ohos_standard_system) {

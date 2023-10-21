@@ -51,6 +51,7 @@
                 "udmf",
                 "os_account",
                 "graphic_2d",
+                "graphic_3d",
                 "safwk",
                 "common_event_service",
                 "data_share",
@@ -85,7 +86,8 @@
                 "opencl-headers",
                 "libuv",
                 "egl",
-                "opengles"
+                "opengles",
+                "icu"
             ]
         },
         "build": {

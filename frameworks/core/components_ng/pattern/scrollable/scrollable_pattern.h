@@ -423,6 +423,7 @@ private:
     float GetVelocity() const;
     bool NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source);
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
+    bool CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source);
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;

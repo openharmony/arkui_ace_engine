@@ -67,7 +67,7 @@ public:
     float GetFirstChildOffsetY();
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, float locationY);
     AssertionResult Selected(int32_t expectSelected);
-    AssertionResult PanEvent(GestureEvent gestureEvent, int32_t expectSelected);
+    void MoveIndex(GestureEvent gestureEvent);
     AssertionResult Touch(TouchType touchType, float locationY, int32_t expectSelected);
 
     RefPtr<FrameNode> frameNode_;
@@ -136,20 +136,15 @@ float IndexerTestNg::GetFirstChildOffsetY()
 
 AssertionResult IndexerTestNg::Selected(int32_t expectSelected)
 {
-    if (pattern_->GetSelected() == expectSelected) {
-        return AssertionSuccess();
-    }
-    return AssertionFailure() << "GetSelected(): " << pattern_->GetSelected() <<
-        "!= expectSelected: " << expectSelected;
+    return IsEqual(pattern_->GetSelected(), expectSelected);
 }
 
-AssertionResult IndexerTestNg::PanEvent(GestureEvent gestureEvent, int32_t expectSelected)
+void IndexerTestNg::MoveIndex(GestureEvent gestureEvent)
 {
     auto start = pattern_->panEvent_->GetActionStartEventFunc();
     auto update = pattern_->panEvent_->GetActionUpdateEventFunc();
     start(gestureEvent);
     update(gestureEvent);
-    return Selected(expectSelected);
 }
 
 AssertionResult IndexerTestNg::Touch(TouchType touchType, float locationY, int32_t expectSelected)
@@ -188,21 +183,24 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex001, TestSize.Level1)
      * @tc.expected: Selected unchanged.
      */
     gestureEvent.SetMainDelta(0.f);
-    EXPECT_TRUE(PanEvent(gestureEvent, 0));
+    MoveIndex(gestureEvent);
+    EXPECT_TRUE(Selected(0));
 
     /**
      * @tc.steps: step2. Delta is 1.
      * @tc.expected: Selected unchanged.
      */
     gestureEvent.SetMainDelta(1.f);
-    EXPECT_TRUE(PanEvent(gestureEvent, 0));
+    MoveIndex(gestureEvent);
+    EXPECT_TRUE(Selected(0));
 
     /**
      * @tc.steps: step3. Delta is -1.
      * @tc.expected: Selected += 1.
      */
     gestureEvent.SetMainDelta(-1.f);
-    EXPECT_TRUE(PanEvent(gestureEvent, 1));
+    MoveIndex(gestureEvent);
+    EXPECT_TRUE(Selected(1));
 
     /**
      * @tc.steps: step4. Delta is 1, selected_ is itemCount-1.
@@ -210,7 +208,8 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex001, TestSize.Level1)
      */
     pattern_->selected_ = pattern_->itemCount_ - 1;
     gestureEvent.SetMainDelta(-1.f);
-    EXPECT_TRUE(PanEvent(gestureEvent, pattern_->itemCount_ - 1));
+    MoveIndex(gestureEvent);
+    EXPECT_TRUE(Selected(pattern_->itemCount_ - 1));
 }
 
 /**
@@ -232,14 +231,16 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex002, TestSize.Level1)
      */
     float locationY = 50.f + firstOffsetY;
     gestureEvent.SetLocalLocation(Offset(0.f, locationY));
-    EXPECT_TRUE(PanEvent(gestureEvent, static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_)));
+    MoveIndex(gestureEvent);
+    EXPECT_TRUE(Selected(static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_)));
 
     /**
      * @tc.steps: step2. Location is (0, 50).
      * @tc.expected: Selected unchanged.
      */
     gestureEvent.SetLocalLocation(Offset(0.f, locationY));
-    EXPECT_TRUE(PanEvent(gestureEvent, static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_)));
+    MoveIndex(gestureEvent);
+    EXPECT_TRUE(Selected(static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_)));
 }
 
 /**
@@ -258,7 +259,8 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex003, TestSize.Level1)
     GestureEvent gestureEvent;
     gestureEvent.SetInputEventType(InputEventType::KEYBOARD);
     gestureEvent.SetLocalLocation(Offset(0.f, 50.f));
-    EXPECT_TRUE(PanEvent(gestureEvent, 0));
+    MoveIndex(gestureEvent);
+    EXPECT_TRUE(Selected(0));
 }
 
 /**

@@ -1,4 +1,40 @@
 /*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class stateMgmtProfiler {
+    static begin(blockName) {
+        var _a;
+        (_a = stateMgmtProfiler.instance) === null || _a === void 0 ? void 0 : _a.begin(blockName);
+    }
+    static end() {
+        var _a;
+        (_a = stateMgmtProfiler.instance) === null || _a === void 0 ? void 0 : _a.end();
+    }
+    static report() {
+        var _a;
+        (_a = stateMgmtProfiler.instance) === null || _a === void 0 ? void 0 : _a.report();
+    }
+    static clear() {
+        var _a;
+        (_a = stateMgmtProfiler.instance) === null || _a === void 0 ? void 0 : _a.clear();
+    }
+    static init(instance) {
+        stateMgmtProfiler.instance = instance;
+    }
+}
+stateMgmtProfiler.instance = undefined;
+/*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,16 +221,20 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     set(propName, newValue) {
+        
         if (newValue == undefined) {
             stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
+            
             return false;
         }
         var p = this.storage_.get(propName);
         if (p == undefined) {
             stateMgmtConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
+            
             return false;
         }
         p.set(newValue);
+        
         return true;
     }
     /**
@@ -209,8 +249,10 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     setOrCreate(propName, newValue) {
+        
         if (newValue == undefined) {
             stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            
             return false;
         }
         var p = this.storage_.get(propName);
@@ -222,6 +264,7 @@ class LocalStorage extends NativeLocalStorage {
             
             this.addNewPropertyInternal(propName, newValue);
         }
+        
         return true;
     }
     /**
@@ -254,9 +297,11 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     link(propName, linkUser, subscribersName) {
+        
         var p = this.storage_.get(propName);
         if (p == undefined) {
             stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
+            
             return undefined;
         }
         let linkResult;
@@ -269,6 +314,7 @@ class LocalStorage extends NativeLocalStorage {
             linkResult = p.createLink(linkUser, propName);
         }
         linkResult.setInfo(subscribersName);
+        
         return linkResult;
     }
     /**
@@ -285,11 +331,14 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     setAndLink(propName, defaultValue, linkUser, subscribersName) {
+        
         var p = this.storage_.get(propName);
         if (!p) {
             this.setOrCreate(propName, defaultValue);
         }
-        return this.link(propName, linkUser, subscribersName);
+        const link = this.link(propName, linkUser, subscribersName);
+        
+        return link;
     }
     /**
      * create and return a one-way sync ('prop') to named property
@@ -305,9 +354,11 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     prop(propName, propUser, subscribersName) {
+        
         var p = this.storage_.get(propName);
         if (p == undefined) {
             stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
+            
             return undefined;
         }
         let propResult;
@@ -320,6 +371,7 @@ class LocalStorage extends NativeLocalStorage {
             propResult = p.createProp(propUser, propName);
         }
         propResult.setInfo(subscribersName);
+        
         return propResult;
     }
     /**
@@ -335,11 +387,14 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     setAndProp(propName, defaultValue, propUser, subscribersName) {
+        
         var p = this.storage_.get(propName);
         if (!p) {
             this.setOrCreate(propName, defaultValue);
         }
-        return this.prop(propName, propUser, subscribersName);
+        const prop = this.prop(propName, propUser, subscribersName);
+        
+        return prop;
     }
     /**
      * Delete property from StorageBase
@@ -362,19 +417,23 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
     */
     delete(propName) {
+        
         var p = this.storage_.get(propName);
         if (p) {
             if (p.numberOfSubscrbers()) {
                 stateMgmtConsole.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
           ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
+                
                 return false;
             }
             p.aboutToBeDeleted();
             this.storage_.delete(propName);
+            
             return true;
         }
         else {
             stateMgmtConsole.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
+            
             return false;
         }
     }
@@ -388,12 +447,14 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     clear() {
+        
         for (let propName of this.keys()) {
             var p = this.storage_.get(propName);
             if (p.numberOfSubscrbers()) {
                 stateMgmtConsole.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
           has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.
           Any @Component instance with a @StorageLink/Prop or @LocalStorageLink/Prop is a subscriber.`);
+                
                 return false;
             }
         }
@@ -402,6 +463,7 @@ class LocalStorage extends NativeLocalStorage {
             p.aboutToBeDeleted();
         }
         this.storage_.clear();
+        
         
         return true;
     }
@@ -1746,7 +1808,7 @@ class Environment {
 }
 Environment.instance_ = undefined;
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2338,6 +2400,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
     }
     notifyHasChanged(newValue) {
         
+        
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2358,8 +2421,10 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
                 stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
+        
     }
     notifyPropertyRead() {
+        
         
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
@@ -2369,6 +2434,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
                 }
             }
         });
+        
     }
     /*
     return numebr of subscribers to this property
@@ -3257,30 +3323,31 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     // use function only for debug output and DFX.
     debugInfoSubscribers() {
         return (this.owningView_)
-            ? `owned by ${this.debugInfoOwningView()} `
-            : `owned by: owning view not known`;
+            ? `|--Owned by ${this.debugInfoOwningView()} `
+            : `|--Owned by: owning view not known`;
     }
     debugInfoSyncPeers() {
         if (!this.subscriberRefs_.size) {
-            return "sync peers: none";
+            return "|--Sync peers: none";
         }
-        let result = `sync peers:\n`;
+        let result = `|--Sync peers: {`;
         let sepa = "";
         this.subscriberRefs_.forEach((subscriber) => {
             if ("debugInfo" in subscriber) {
-                result += `    ${sepa}${subscriber.debugInfo()}`;
+                result += `\n    ${sepa}${subscriber.debugInfo()}`;
                 sepa = ", ";
             }
         });
+        result += "\n  }";
         return result;
     }
     debugInfoDependentElmtIds() {
         if (!this.dependentElementIds_.size) {
-            return `dependent components: no dependent elmtIds`;
+            return `|--Dependent components: no dependent elmtIds`;
         }
         let result = this.dependentElementIds_.size < 25
-            ? `dependent components: ${this.dependentElementIds_.size} elmtIds: `
-            : `WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
+            ? `|--Dependent components: ${this.dependentElementIds_.size} elmtIds: `
+            : `|--WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
         let sepa = "";
         if (this.owningView_) {
             this.dependentElementIds_.forEach((elmtId) => {
@@ -3365,6 +3432,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     }
     notifyPropertyHasBeenReadPU() {
         
+        
         this.subscriberRefs_.forEach((subscriber) => {
             if (subscriber) {
                 // TODO
@@ -3377,8 +3445,10 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             }
         });
         this.recordDependentUpdate();
+        
     }
     notifyPropertyHasChangedPU() {
+        
         
         if (this.owningView_) {
             if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
@@ -3400,6 +3470,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 }
             }
         });
+        
     }
     markDependentElementsDirty(view) {
         // TODO ace-ets2bundle, framework, complicated apps need to update together
@@ -3451,7 +3522,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             value: newValue
         });
         // never gets here if errorReport.varValueCheckFailed throws an exception
-        // but should nto depend on its implementation
+        // but should not depend on its implementation
         return false;
     }
     /**
@@ -3598,11 +3669,14 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
+        
         if (newValue === this.wrappedValue_) {
+            
             
             return false;
         }
         if (!this.checkIsSupportedValue(newValue)) {
+            
             return false;
         }
         this.unsubscribeWrappedObject();
@@ -3625,6 +3699,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
             
             this.wrappedValue_ = ObservedObject.createNew(newValue, this);
         }
+        
         return true;
     }
     get() {
@@ -3762,8 +3837,10 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         return `@Prop (class SynchedPropertyOneWayPU)`;
     }
     syncPeerHasChanged(eventSource) {
+        
         if (this.source_ == undefined) {
             stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
+            
             return;
         }
         if (eventSource && this.source_ == eventSource) {
@@ -3779,6 +3856,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         else {
             stateMgmtConsole.warn(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource === null || eventSource === void 0 ? void 0 : eventSource.debugInfo()}', Unexpected situation. syncPeerHasChanged from different sender than source_. Ignoring event.`);
         }
+        
     }
     /**
      * event emited by wrapped ObservedObject, when one of its property values changes
@@ -4071,10 +4149,12 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
      * @param eventSource
      */
     syncPeerHasChanged(eventSource) {
+        
         if (!this.changeNotificationIsOngoing_) {
             
             this.notifyPropertyHasChangedPU();
         }
+        
     }
     /**
      * called when wrapped ObservedObject has changed poperty
@@ -4097,12 +4177,17 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
     // get 'read through` from the ObservedProperty
     get() {
         
+        
         this.notifyPropertyHasBeenReadPU();
-        return this.getUnmonitored();
+        const result = this.getUnmonitored();
+        
+        return result;
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
+        
         if (this.getUnmonitored() === newValue) {
+            
             
             return;
         }
@@ -4112,6 +4197,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         this.setObject(newValue);
         this.notifyPropertyHasChangedPU();
         this.changeNotificationIsOngoing_ = false;
+        
     }
 }
 // class definitions for backward compatibility
@@ -4258,7 +4344,7 @@ class UINodeRegisterProxy {
         this.tagByElmtId_ = new Map();
         this.elmtIdsUnregisteredAheadOfTime_ = new Set();
     }
-    static UINodeRegisterCleanUpFunction() {
+    static uiNodeRegisterCleanUpFunction() {
         
         UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
     }
@@ -4282,6 +4368,13 @@ class UINodeRegisterProxy {
     }
     static dump() {
         UINodeRegisterProxy.instance_.dump();
+    }
+    /*
+    A function to expose debug info of the UINodeRegisterProxy
+    The function is intended to be used with debug or DFX log only
+    */
+    static debugInfoElements() {
+        return UINodeRegisterProxy.instance_.debugInfoElementsInternal();
     }
     // private properties & functions:
     /* move elmtIds from C++ ElementRegister, elmtIds of UINodes that have been deleted
@@ -4337,11 +4430,16 @@ class UINodeRegisterProxy {
         }
         return false;
     }
-    /*
-  dump the state  of UINodeRegisterProxy to log
-  does nothing in release build
-*/
+    /* dump the state  of UINodeRegisterProxy to log
+    does nothing in release build
+    */
     dump() {
+        
+    }
+    /* Generates debug info got UINodeRegisterProxy
+    This function is intended for use with debug or DFX log
+    */
+    debugInfoElementsInternal() {
         const formatElementInfo = () => {
             let result = '[ ';
             let sepa = "";
@@ -4352,18 +4450,19 @@ class UINodeRegisterProxy {
             result += ' ]';
             return result;
         };
-        
+        let retVal = "UINodeRegisterProxy debug info: ";
         if (this.elmtIdsToUnregister_.size < 50) {
-            
+            retVal += `\n- ${this.elmtIdsToUnregister_.size} elmtIds need unregister: ${formatElementInfo()}.`;
         }
         else {
-            
+            retVal += `\n- WARNING: ${this.elmtIdsToUnregister_.size} elmtIds need unregister (exceptionally high number, possible framework error): ${formatElementInfo()}.`;
         }
-        
+        retVal += `\n- ${this.elmtIdsUnregisteredAheadOfTime_.size} elmtIds marked as unregistered already: ${JSON.stringify(Array.from(this.elmtIdsUnregisteredAheadOfTime_))} .`;
+        return retVal;
     }
 }
 UINodeRegisterProxy.instance_ = new UINodeRegisterProxy();
-const UINodeRegisterCleanUpFunction = UINodeRegisterProxy.UINodeRegisterCleanUpFunction;
+const uiNodeRegisterCleanUpFunction = UINodeRegisterProxy.uiNodeRegisterCleanUpFunction;
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4541,24 +4640,31 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     dumpStateVars() {
         
+    }
+    debugInfoStateVars() {
+        let result = `|--${this.constructor.name}[${this.id__()}]`;
         Object.getOwnPropertyNames(this)
             .filter((varName) => varName.startsWith("__"))
             .forEach((varName) => {
             const prop = Reflect.get(this, varName);
-            const observedProp = prop;
             if ("debugInfoDecorator" in prop) {
-                
-                
-                
+                const observedProp = prop;
+                result += `\n  ${observedProp.debugInfoDecorator()} '${observedProp.info()}'[${observedProp.id__()}]`;
+                result += `\n  ${observedProp.debugInfoSubscribers()}`;
+                result += `\n  ${observedProp.debugInfoSyncPeers()}`;
+                result += `\n  ${observedProp.debugInfoDependentElmtIds()}`;
             }
         });
+        return result;
     }
     /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
    * @param active true for active, false for inactive
    */
     setActiveInternal(active) {
+        
         if (this.isActive_ == active) {
+            
             
             return;
         }
@@ -4570,6 +4676,7 @@ class ViewPU extends NativeViewPartialUpdate {
         else {
             this.onInactiveInternal();
         }
+        
     }
     onActiveInternal() {
         if (!this.isActive_) {
@@ -4651,17 +4758,20 @@ class ViewPU extends NativeViewPartialUpdate {
         stateMgmtConsole.error(`${this.debugInfo()}: updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version. Application error.`);
     }
     initialRenderView() {
+        
         this.isRenderInProgress = true;
         this.initialRender();
         this.isRenderInProgress = false;
+        
     }
     UpdateElement(elmtId) {
+        
         if (elmtId == this.id__()) {
             // do not attempt to update itself.
             // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
+            
             return;
         }
-        
         // do not process an Element that has been marked to be deleted
         const updateFunc1 = this.updateFuncByElmtId.get(elmtId);
         const updateFunc = ((typeof updateFunc1 == "object") ? (updateFunc1.updateFunc) : updateFunc1);
@@ -4672,14 +4782,20 @@ class ViewPU extends NativeViewPartialUpdate {
         else {
             
             this.isRenderInProgress = true;
+            
             updateFunc(elmtId, /* isFirstRender */ false);
-            // continue in native JSView
-            // Finish the Update in JSView::JsFinishUpdateFunc
-            // this function appends no longer used elmtIds (as receded by VSP) to the given allRmElmtIds array
+            
+            
             this.finishUpdateFunc(elmtId);
+            
             this.isRenderInProgress = false;
             
         }
+        
+    }
+    dumpReport() {
+        stateMgmtConsole.warn(`Printing profiler information`);
+        stateMgmtProfiler.report();
     }
     /**
      * force a complete rerender / update by executing all update functions
@@ -4690,6 +4806,7 @@ class ViewPU extends NativeViewPartialUpdate {
      * framework internal functions, apps must not call
      */
     forceCompleteRerender(deep = false) {
+        
         stateMgmtConsole.warn(`${this.debugInfo()}: forceCompleteRerender - start.`);
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
@@ -4704,6 +4821,7 @@ class ViewPU extends NativeViewPartialUpdate {
             });
         }
         stateMgmtConsole.warn(`${this.debugInfo()}: forceCompleteRerender - end`);
+        
     }
     /**
      * force a complete rerender / update on specific node by executing update function.
@@ -4713,29 +4831,36 @@ class ViewPU extends NativeViewPartialUpdate {
      * framework internal functions, apps must not call
      */
     forceRerenderNode(elmtId) {
+        
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
         this.purgeDeletedElmtIds();
         this.UpdateElement(elmtId);
         // remove elemtId from dirtDescendantElementIds.
         this.dirtDescendantElementIds_.delete(elmtId);
+        
     }
     updateStateVarsOfChildByElmtId(elmtId, params) {
         
+        
         if (elmtId < 0) {
             stateMgmtConsole.warn(`${this.debugInfo()}: updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
+            
             return;
         }
         let child = this.getChildById(elmtId);
         if (!child) {
             stateMgmtConsole.warn(`${this.debugInfo()}: updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
+            
             return;
         }
         child.updateStateVars(params);
         
+        
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
+        
         stateMgmtTrace.scopedTrace(() => {
             if (this.isRenderInProgress) {
                 stateMgmtConsole.applicationError(`${this.debugInfo()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
@@ -4764,11 +4889,13 @@ class ViewPU extends NativeViewPartialUpdate {
             }
             this.restoreInstanceId();
         }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+        
     }
     performDelayedUpdate() {
         if (!this.ownStorageLinksProps_.size) {
             return;
         }
+        
         stateMgmtTrace.scopedTrace(() => {
             
             this.syncInstanceId();
@@ -4794,6 +4921,7 @@ class ViewPU extends NativeViewPartialUpdate {
                 this.markNeedUpdate();
             }
         }, "ViewPU.performDelayedUpdate", this.constructor.name);
+        
     }
     /**
      * Function to be called from the constructor of the sub component
@@ -4861,6 +4989,7 @@ class ViewPU extends NativeViewPartialUpdate {
      *
      */
     updateDirtyElements() {
+        
         do {
             
             // see which elmtIds are managed by this View
@@ -4879,6 +5008,7 @@ class ViewPU extends NativeViewPartialUpdate {
         } while (this.dirtDescendantElementIds_.size);
         
         this.dumpStateVars();
+        
     }
     //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
     purgeDeletedElmtIds() {
@@ -5111,12 +5241,15 @@ class ViewPU extends NativeViewPartialUpdate {
      */
     forEachUpdateFunction(elmtId, itemArray, itemGenFunc, idGenFunc, itemGenFuncUsesIndex = false, idGenFuncUsesIndex = false) {
         
+        
         if (itemArray === null || itemArray === undefined) {
             stateMgmtConsole.applicationError(`${this.debugInfo()}: forEachUpdateFunction (ForEach re-render): input array is null or undefined error. Application error!`);
+            
             return;
         }
         if (itemGenFunc === null || itemGenFunc === undefined) {
             stateMgmtConsole.applicationError(`${this.debugInfo()}: forEachUpdateFunction (ForEach re-render): Item generation function missing. Application error!`);
+            
             return;
         }
         if (idGenFunc === undefined) {
@@ -5164,6 +5297,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // Item gen is with index.
         
         // Create new elements if any.
+        
         diffIndexArray.forEach((indx) => {
             ForEach.createNewChildStart(newIdArray[indx], this);
             if (itemGenFuncUsesIndex) {
@@ -5174,6 +5308,8 @@ class ViewPU extends NativeViewPartialUpdate {
             }
             ForEach.createNewChildFinish(newIdArray[indx], this);
         });
+        
+        
         
     }
     /**
@@ -5222,8 +5358,185 @@ class ViewPU extends NativeViewPartialUpdate {
         this.ownStorageLinksProps_.add(localStorageProp);
         return localStorageProp;
     }
+    /**
+     * onDumpInfo is used to process commands delivered by the hidumper process
+     * @param commands -  list of commands provided in the shell
+     * @returns void
+     */
+    onDumpInfo(commands) {
+        let dfxCommands = this.processOnDumpCommands(commands);
+        dfxCommands.forEach((command) => {
+            let view = undefined;
+            if (command.viewId) {
+                view = this.findViewInHierarchy(command.viewId);
+                if (!view) {
+                    DumpLog.print(0, `\nTarget view: ${command.viewId} not found for command: ${command.what}\n`);
+                    return;
+                }
+            }
+            else {
+                view = this;
+                command.viewId = view.id__();
+            }
+            switch (command.what) {
+                case "-dumpAll":
+                    view.printDFXHeader("ViewPU Info", command);
+                    DumpLog.print(0, view.debugInfoView(command.isRecursive));
+                    break;
+                case "-viewHierarchy":
+                    view.printDFXHeader("ViewPU Hierarchy", command);
+                    DumpLog.print(0, view.debugInfoViewHierarchy(command.isRecursive));
+                    break;
+                case "-stateVariables":
+                    view.printDFXHeader("ViewPU State Variables", command);
+                    DumpLog.print(0, view.debugInfoStateVars());
+                    break;
+                case "-registeredElementIds":
+                    view.printDFXHeader("ViewPU Registered Element IDs", command);
+                    DumpLog.print(0, view.debugInfoUpdateFuncByElmtId(command.isRecursive));
+                    break;
+                case "-dirtyElementIds":
+                    view.printDFXHeader("ViewPU Dirty Registered Element IDs", command);
+                    DumpLog.print(0, view.debugInfoDirtDescendantElementIds(command.isRecursive));
+                    break;
+                case "-uiNodeRegister":
+                    view.printDFXHeader("UINodeRegisterProxy Elements Info", command);
+                    DumpLog.print(0, view.debugInfoUINodeRegister());
+                    break;
+                case "-profiler":
+                    view.printDFXHeader("Profiler Info", command);
+                    view.dumpReport();
+                    break;
+                default:
+                    DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+            }
+        });
+    }
+    printDFXHeader(header, command) {
+        let length = 50;
+        let remainder = length - header.length < 0 ? 0 : length - header.length;
+        DumpLog.print(0, `\n${'-'.repeat(remainder / 2)}${header}${'-'.repeat(remainder / 2)}`);
+        DumpLog.print(0, `[${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+    }
+    processOnDumpCommands(commands) {
+        let isFlag = (param) => {
+            return "-r".match(param) != null || param.startsWith("-viewId=");
+        };
+        let dfxCommands = [];
+        for (var i = 0; i < commands.length; i++) {
+            let command = commands[i];
+            if (isFlag(command)) {
+                if (command.startsWith("-viewId=")) {
+                    let dfxCommand = dfxCommands[dfxCommands.length - 1];
+                    if (dfxCommand) {
+                        let input = command.split('=');
+                        if (input[1]) {
+                            let viewId = Number.parseInt(input[1]);
+                            dfxCommand.viewId = Number.isNaN(viewId) ? -1 : viewId;
+                        }
+                    }
+                }
+                else if (command.match("-r")) {
+                    let dfxCommand = dfxCommands[dfxCommands.length - 1];
+                    if (dfxCommand) {
+                        dfxCommand.isRecursive = true;
+                    }
+                }
+            }
+            else {
+                dfxCommands.push({
+                    what: command,
+                    viewId: undefined,
+                    isRecursive: false,
+                });
+            }
+        }
+        return dfxCommands;
+    }
+    findViewInHierarchy(id) {
+        let weak = this.childrenWeakrefMap_.get(id);
+        if (weak) {
+            return weak.deref();
+        }
+        let retVal = undefined;
+        for (const [key, value] of this.childrenWeakrefMap_.entries()) {
+            retVal = value.deref().findViewInHierarchy(id);
+            if (retVal)
+                break;
+        }
+        return retVal;
+    }
+    debugInfoView(recursive = false) {
+        return this.debugInfoViewInternal(recursive);
+    }
+    debugInfoViewInternal(recursive = false) {
+        let retVal = `@Component\n${this.constructor.name}[${this.id__()}]`;
+        retVal += `\n\nView Hierarchy:\n${this.debugInfoViewHierarchy(recursive)}`;
+        retVal += `\n\nState variables:\n${this.debugInfoStateVars()}`;
+        retVal += `\n\nRegistered Element IDs:\n${this.debugInfoUpdateFuncByElmtId(recursive)}`;
+        retVal += `\n\nDirty Registered Element IDs:\n${this.debugInfoDirtDescendantElementIds(recursive)}`;
+        return retVal;
+    }
+    debugInfoViewHierarchy(recursive = false) {
+        return this.debugInfoViewHierarchyInternal(0, recursive);
+    }
+    debugInfoViewHierarchyInternal(depth = 0, recursive = false) {
+        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
+        if (depth < 1 || recursive) {
+            this.childrenWeakrefMap_.forEach((value, key, map) => {
+                var _a;
+                retVaL += (_a = value.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoViewHierarchyInternal(depth + 1, recursive);
+            });
+        }
+        return retVaL;
+    }
+    debugInfoUpdateFuncByElmtId(recursive = false) {
+        return this.debugInfoUpdateFuncByElmtIdInternal({ total: 0 }, 0, recursive);
+    }
+    debugInfoUpdateFuncByElmtIdInternal(counter, depth = 0, recursive = false) {
+        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
+        this.updateFuncByElmtId.forEach((value, key, map) => {
+            retVaL += `\n${"  ".repeat(depth + 2)}${(typeof value == "object") ? value.componentName : "unknown component"}[${key}]`;
+        });
+        counter.total += this.updateFuncByElmtId.size;
+        retVaL += `\n${"  ".repeat(depth + 1)}}[${this.updateFuncByElmtId.size}]`;
+        if (recursive) {
+            this.childrenWeakrefMap_.forEach((value, key, map) => {
+                var _a;
+                retVaL += (_a = value.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoUpdateFuncByElmtIdInternal(counter, depth + 1, recursive);
+            });
+        }
+        if (recursive && depth == 0) {
+            retVaL += `\nTotal: ${counter.total}`;
+        }
+        return retVaL;
+    }
+    debugInfoDirtDescendantElementIds(recursive = false) {
+        return this.debugInfoDirtDescendantElementIdsInternal(0, recursive, { total: 0 });
+    }
+    debugInfoDirtDescendantElementIdsInternal(depth = 0, recursive = false, counter) {
+        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
+        this.dirtDescendantElementIds_.forEach((value) => {
+            retVaL += `${value}, `;
+        });
+        counter.total += this.dirtDescendantElementIds_.size;
+        retVaL += `\n${"  ".repeat(depth + 1)}}[${this.dirtDescendantElementIds_.size}]`;
+        if (recursive) {
+            this.childrenWeakrefMap_.forEach((value, key, map) => {
+                var _a;
+                retVaL += (_a = value.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoDirtDescendantElementIdsInternal(depth + 1, recursive, counter);
+            });
+        }
+        if (recursive && depth == 0) {
+            retVaL += `\nTotal: ${counter.total}`;
+        }
+        return retVaL;
+    }
+    debugInfoUINodeRegister() {
+        return UINodeRegisterProxy.debugInfoElements();
+    }
 }
-// Array.sort() converts array items to string to compare them, sigh!
+// Array.sort() converts array items to string to compare them!
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
 };
@@ -5370,4 +5683,5 @@ function makeBuilderParameterProxy(builderName, source) {
 
 PersistentStorage.configureBackend(new Storage());
 Environment.configureBackend(new EnvironmentSetting());
+
 

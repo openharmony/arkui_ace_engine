@@ -357,12 +357,7 @@ void PipelineContext::FlushFocus()
     } else {
         auto focusNodeHub = defaultFocusNode->GetFocusHub();
         if (focusNodeHub) {
-            auto defaultFocusNode = focusNodeHub->GetChildFocusNodeByType();
-            if (defaultFocusNode && defaultFocusNode->IsFocusableWholePath()) {
-                defaultFocusNode->RequestFocusImmediately();
-            } else {
-                focusNodeHub->RequestFocusImmediately();
-            }
+            RequestDefaultFocus(focusNodeHub);
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
@@ -395,16 +390,6 @@ void PipelineContext::FlushFocus()
         dirtyFocusScope_.Reset();
         dirtyDefaultFocusNode_.Reset();
         return;
-    }
-    if (isRootFocusNeedUpdate_ && rootNode_ && rootNode_->GetFocusHub()) {
-        auto rootFocusHub = rootNode_->GetFocusHub();
-        if (!rootFocusHub->IsCurrentFocus()) {
-            rootFocusHub->RequestFocusImmediately();
-        } else if (!rootFocusHub->IsCurrentFocusWholePath()) {
-            rootFocusHub->LostFocus();
-            rootFocusHub->RequestFocusImmediately();
-        }
-        isRootFocusNeedUpdate_ = false;
     }
 }
 
@@ -1162,6 +1147,11 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     }
 }
 
+void PipelineContext::RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback)
+{
+    dumpListeners_.push_back(callback);
+}
+
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
     ACE_DCHECK(!params.empty());
@@ -1200,8 +1190,15 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-threadstuck" && params.size() >= 3) {
     } else if (params[0] == "-pipeline") {
         DumpPipelineInfo();
-    } else {
-        return false;
+    } else if (params[0] == "-jsdump") {
+        std::vector<std::string> jsParams;
+        if (params.begin() != params.end()) {
+            jsParams = std::vector<std::string>(params.begin() + 1, params.end());
+        }
+
+        for (const auto& func : dumpListeners_) {
+            func(jsParams);
+        } 
     }
 
     return true;
@@ -1374,10 +1371,26 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
             manager->OnDragEnd({ 0.0f, 0.0f }, "");
         }
     }
+    auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
+    auto curMainView = FocusHub::GetCurrentMainView();
+    auto isViewRootScopeFocused = curMainView ? curMainView->GetIsViewRootScopeFocused() : true;
+    isTabJustTriggerOnKeyEvent_ = false;
+    if (isKeyTabDown && isViewRootScopeFocused) {
+        if (curMainView) {
+            auto viewRootScope = curMainView->GetMainViewRootScope();
+            if (viewRootScope && viewRootScope->GetFocusDependence() == FocusDependence::SELF &&
+                viewRootScope->IsCurrentFocus()) {
+                curMainView->SetIsDefaultHasFocused(true);
+                curMainView->SetIsViewRootScopeFocused(viewRootScope, false);
+                viewRootScope->InheritFocus();
+                isTabJustTriggerOnKeyEvent_ = true;
+            }
+        }
+    }
     // TAB key set focus state from inactive to active.
     // If return success. This tab key will just trigger onKeyEvent process.
-    isTabJustTriggerOnKeyEvent_ =
-        (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true));
+    bool isHandleFocusActive = isKeyTabDown && SetIsFocusActive(true);
+    isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent_ || isHandleFocusActive;
     auto lastPage = stageManager_ ? stageManager_->GetLastPage() : nullptr;
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);
@@ -1398,30 +1411,32 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     return true;
 }
 
-bool PipelineContext::RequestDefaultFocus()
+bool PipelineContext::RequestDefaultFocus(const RefPtr<FocusHub>& mainView)
 {
-    CHECK_NULL_RETURN(stageManager_, false);
-    auto lastPage = stageManager_->GetLastPage();
-    auto mainNode = lastPage ? lastPage : rootNode_;
-    CHECK_NULL_RETURN(mainNode, false);
-    auto mainFocusHub = mainNode->GetFocusHub();
-    CHECK_NULL_RETURN(mainFocusHub, false);
-    if (mainFocusHub->IsDefaultHasFocused()) {
+    if (mainView->GetFocusType() != FocusType::SCOPE) {
         return false;
     }
-    auto defaultFocusNodeWeak = mainFocusHub->GetDefaultFocusNode();
-    auto defaultFocusNode = defaultFocusNodeWeak.Upgrade();
-    if (!defaultFocusNode) {
-        return false;
+    auto viewRootScope = mainView->GetMainViewRootScope();
+    auto defaultFocusNode = mainView->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
+    if (!mainView->IsDefaultHasFocused() && defaultFocusNode && defaultFocusNode->IsFocusableWholePath()) {
+        mainView->SetIsViewRootScopeFocused(viewRootScope, false);
+        auto ret = defaultFocusNode->RequestFocusImmediately();
+        mainView->SetIsDefaultHasFocused(true);
+        LOGI("Target view's default focus is %{public}s/%{public}d. Request default focus return: %{public}d.",
+            defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId(), ret);
+        return ret;
     }
-    if (!defaultFocusNode->IsFocusableWholePath()) {
-        return false;
+    if (mainView->GetIsViewRootScopeFocused() && viewRootScope) {
+        mainView->SetIsViewRootScopeFocused(viewRootScope, true);
+        auto ret = viewRootScope->RequestFocusImmediately();
+        LOGI("Target view's default focus is %{public}s/%{public}d. Request view root focus return: %{public}d.",
+            viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
+        return ret;
     }
-    mainFocusHub->SetIsDefaultHasFocused(true);
-    LOGD("MainNode: %{public}s/%{public}d request default focus node: %{public}s/%{public}d",
-        mainNode->GetTag().c_str(), mainNode->GetId(), defaultFocusNode->GetFrameName().c_str(),
-        defaultFocusNode->GetFrameId());
-    return defaultFocusNode->RequestFocusImmediately();
+    mainView->SetIsViewRootScopeFocused(viewRootScope, false);
+    auto ret = mainView->RequestFocusImmediately();
+    LOGI("Target view's default focus has been focused. Request view focus return: %{public}d.", ret);
+    return ret;
 }
 
 bool PipelineContext::RequestFocus(const std::string& targetNodeId)
@@ -1621,8 +1636,10 @@ void PipelineContext::WindowFocus(bool isFocus)
         OnVirtualKeyboardAreaChange(Rect());
     } else {
         LOGD("WindowFocus: window - %{public}d on focus.", windowId_);
-        isRootFocusNeedUpdate_ = true;
-        FlushFocus();
+        auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
+        if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
+            rootFocusHub->RequestFocusImmediately();
+        }
     }
     FlushWindowFocusChangedCallback(isFocus);
 }

@@ -116,7 +116,6 @@ public:
         auto jumpIndex = json->GetInt("uiCastJumpIndex");
         if (currentOffset != currentOffset_) {
             auto delta = currentOffset - currentOffset_;
-            LOGD("UITree delta=%{public}f", delta);
             UpdateCurrentOffset(delta);
         } else if (jumpIndex >= 0) {
             jumpIndex_ = jumpIndex;
@@ -473,7 +472,7 @@ private:
     void InitIndicator();
     void InitArrow();
 
-    void HandleDragStart();
+    void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
 

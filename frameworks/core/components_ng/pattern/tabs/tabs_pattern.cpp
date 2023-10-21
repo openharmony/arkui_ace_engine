@@ -132,7 +132,6 @@ void TabsPattern::OnUpdateShowDivider()
     auto divider = layoutProperty->GetDivider().value_or(defaultDivider);
     auto children = host->GetChildren();
     if (children.size() < CHILDREN_MIN_SIZE) {
-        LOGE("OnUpdateShowDivider: children is empty or children's size is less than 2.");
         return;
     }
 
@@ -211,7 +210,6 @@ void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto info = JsonUtil::ParseJsonString(restoreInfo);
     if (!info->IsValid() || !info->IsObject()) {
-        LOGW("TabsPattern:: restore info is invalid");
         return;
     }
     auto jsonIsOn = info->GetValue("Index");

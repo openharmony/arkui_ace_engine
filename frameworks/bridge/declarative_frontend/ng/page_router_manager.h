@@ -35,6 +35,7 @@ using LoadPageCallback = std::function<bool(const std::string&,
     const std::function<void(const std::string&, int32_t)>&)>;
 using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
 using LoadNamedRouterCallback = std::function<bool(const std::string&, bool isTriggeredByJs)>;
+using UpdateRootComponentCallback = std::function<bool()>;
 
 enum class RouterMode {
     STANDARD = 0,
@@ -78,6 +79,11 @@ public:
     void SetLoadNamedRouterCallback(LoadNamedRouterCallback&& callback)
     {
         loadNamedRouter_ = callback;
+    }
+
+    void SetUpdateRootComponentCallback(UpdateRootComponentCallback&& callback)
+    {
+        updateRootComponent_ = callback;
     }
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback);
@@ -178,6 +184,7 @@ private:
     LoadPageCallback loadJs_;
     LoadCardCallback loadCard_;
     LoadNamedRouterCallback loadNamedRouter_;
+    UpdateRootComponentCallback updateRootComponent_;
     bool isCardRouter_ = false;
     int32_t pageId_ = 0;
     std::list<WeakPtr<FrameNode>> pageRouterStack_;

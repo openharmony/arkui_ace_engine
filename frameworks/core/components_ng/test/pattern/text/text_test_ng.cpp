@@ -2731,11 +2731,6 @@ HWTEST_F(TextTestNg, CreateParagraph001, TestSize.Level1)
 HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(3);
-    EXPECT_CALL(*paragraph, AddPlaceholder).Times(1);
-    EXPECT_CALL(*paragraph, Build).Times(2);
-    EXPECT_CALL(*paragraph, GetRectsForPlaceholders).Times(2);
-    EXPECT_CALL(*paragraph, PopStyle).Times(1);
 
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();

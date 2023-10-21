@@ -47,8 +47,19 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_FORM, "AceForm" },
     { AceLogTag::ACE_DRAG, "AceDrag" },
     { AceLogTag::ACE_VIDEO, "AceVideo" },
+    { AceLogTag::ACE_INPUTTRACKING, "AceInputTracking" },
+    { AceLogTag::ACE_SCROLL, "AceScroll" },
+    { AceLogTag::ACE_SCROLLABLE, "AceScrollable" },
+    { AceLogTag::ACE_INNER_SCROLL_BAR, "AceInnerScrollBar" },
+    { AceLogTag::ACE_OUTER_SCROLL_BAR, "AceOuterScrollBar" },
     { AceLogTag::ACE_FONT, "AceFont" },
     { AceLogTag::ACE_TEXTINPUT, "AceTextInput" },
+    { AceLogTag::ACE_SWIPER, "AceSwiper" },
+    { AceLogTag::ACE_TABS, "AceTabs" },
+    { AceLogTag::ACE_RICH_TEXT, "AceRichText" },
+    { AceLogTag::ACE_WEB, "AceWeb" },
+    { AceLogTag::ACE_IMAGE, "AceImage" },
+    { AceLogTag::ACE_RATING, "AceRating" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";

@@ -20,6 +20,7 @@
 #include <map>
 #include <memory>
 #include <refbase.h>
+#include <string>
 #include <thread>
 
 #include "adapter/preview/entrance/ace_run_args.h"
@@ -87,6 +88,16 @@ public:
     bool OperateComponent(const std::string& attrsJson);
     void SetWindow(sptr<OHOS::Rosen::Window> rsWindow);
     sptr<OHOS::Rosen::Window> GetWindow();
+
+    std::string GetBundleName()
+    {
+        return bundleName_;
+    }
+
+    std::string GetModuleName()
+    {
+        return moduleName_;
+    }
 
 private:
     void InitializeAppInfo();
