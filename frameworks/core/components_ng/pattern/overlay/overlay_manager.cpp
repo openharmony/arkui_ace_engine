@@ -648,6 +648,11 @@ void OverlayManager::PopToast(int32_t toastId)
     pipeline->SendEventToAccessibility(event);
 }
 
+void OverlayManager::ClearToastInSubwindow()
+{
+    SubwindowManager::GetInstance()->ClearToastInSubwindow();
+}
+
 void OverlayManager::ClearToast()
 {
     auto context = PipelineContext::GetCurrentContext();

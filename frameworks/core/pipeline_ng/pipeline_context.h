@@ -143,6 +143,8 @@ public:
 
     void HandleVisibleAreaChangeEvent();
 
+    void HandleSubwindow(bool isShow);
+
     void Destroy() override;
 
     void OnShow() override;

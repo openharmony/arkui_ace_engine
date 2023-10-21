@@ -1833,6 +1833,7 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
         }
     }
     HandleVisibleAreaChangeEvent();
+    HandleSubwindow(isShow);
 }
 
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId)
@@ -2112,5 +2113,14 @@ void PipelineContext::AnimateOnSafeAreaUpdate()
         self->SyncSafeArea();
         self->FlushUITasks();
     });
+}
+
+void PipelineContext::HandleSubwindow(bool isShow)
+{
+    // When the main window is applied to the background,
+    // there are sub windows that do not immediately hide, such as Toast floating window
+    if (!isShow) {
+        overlayManager_->ClearToastInSubwindow();
+    }
 }
 } // namespace OHOS::Ace::NG
