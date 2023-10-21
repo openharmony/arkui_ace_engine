@@ -82,6 +82,7 @@ public:
 
 private:
     void LoadImageSourceInfo();
+    ImageSourceInfo GetDefaultSourceInfo(bool isObscured);
     void UpdateImageSource();
     bool IsShowPasswordIcon();
     void OnPasswordIconClicked();

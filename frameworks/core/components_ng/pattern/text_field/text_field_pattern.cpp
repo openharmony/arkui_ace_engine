@@ -3181,24 +3181,6 @@ void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSel
 
 void TextFieldPattern::OnAreaChangedInner()
 {
-    RequestKeyboardOnFocus();
-}
-
-void TextFieldPattern::OnParentScrollCallback(Axis axis, int32_t offset)
-{
-    ProcessOverlayWhenParentScrolls();
-}
-
-void TextFieldPattern::OnParentScrollStartOrEnd(bool isEnd)
-{
-    SelectOverlayClient::OnParentScrollStartOrEnd(isEnd);
-    if (isEnd) {
-        ProcessOverlayWhenParentScrolls();
-    }
-}
-
-void TextFieldPattern::ProcessOverlayWhenParentScrolls()
-{
     auto parentGlobalOffset = GetTextPaintOffset();
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
@@ -3209,6 +3191,7 @@ void TextFieldPattern::ProcessOverlayWhenParentScrolls()
             ProcessOverlay(false);
         }
     }
+    RequestKeyboardOnFocus();
 }
 
 void TextFieldPattern::RequestKeyboardOnFocus()

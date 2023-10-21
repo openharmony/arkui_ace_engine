@@ -945,8 +945,6 @@ public:
     bool OnPreShowSelectOverlay(
         SelectOverlayInfo& overlayInfo, const ClientOverlayInfo& clientInfo, bool isSelectOverlayOn) override;
     void OnObscuredChanged(bool isObscured);
-    void OnParentScrollCallback(Axis axis, int32_t offset) override;
-    void OnParentScrollStartOrEnd(bool isEnd) override;
     void OnSelectOverlayMenuClicked(SelectOverlayMenuId menuId) override
     {
         switch (menuId) {
@@ -1105,7 +1103,6 @@ private:
         isSingleHandle_ = isSingleHandle;
     }
     void NotifyOnEditChanged(bool isChanged);
-    void ProcessOverlayWhenParentScrolls();
     void StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste = false);
 
     RectF frameRect_;

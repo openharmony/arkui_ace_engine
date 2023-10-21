@@ -125,6 +125,20 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     imageLayoutProperty->UpdateImageSourceInfo(currentImageSourceInfo.value());
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    auto eventHub = imageNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    eventHub->SetOnError([ weakNode = WeakClaim(AceType::RawPtr(imageNode)), weakArea = WeakClaim(this) ]
+        (const LoadImageFailEvent& info) {
+        auto host = weakNode.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto area = weakArea.Upgrade();
+        CHECK_NULL_VOID(area);
+        auto imagePattern = host->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(imagePattern);
+        auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+        layoutProperty->UpdateImageSourceInfo(area->GetDefaultSourceInfo(area->isObscured_));
+        imagePattern->LoadImageDataIfNeed();
+    });
     imageNode->MarkModifyDone();
     imageNode->MountToParent(stackNode);
     passwordNode_ = imageNode;
@@ -214,13 +228,20 @@ void PasswordResponseArea::LoadImageSourceInfo()
     CHECK_NULL_VOID(textFieldPattern);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    showIcon_ = layoutProperty->GetShowPasswordSourceInfoValue(GetDefaultSourceInfo(false));
+    hideIcon_ = layoutProperty->GetHidePasswordSourceInfoValue(GetDefaultSourceInfo(true));
+}
+
+ImageSourceInfo PasswordResponseArea::GetDefaultSourceInfo(bool isObscured)
+{
+    if (isObscured) {
+        ImageSourceInfo hideSystemSourceInfo;
+        hideSystemSourceInfo.SetResourceId(InternalResource::ResourceId::HIDE_PASSWORD_SVG);
+        return hideSystemSourceInfo;
+    }
     ImageSourceInfo showSystemSourceInfo;
     showSystemSourceInfo.SetResourceId(InternalResource::ResourceId::SHOW_PASSWORD_SVG);
-    showIcon_ = layoutProperty->GetShowPasswordSourceInfoValue(showSystemSourceInfo);
-
-    ImageSourceInfo hideSystemSourceInfo;
-    hideSystemSourceInfo.SetResourceId(InternalResource::ResourceId::HIDE_PASSWORD_SVG);
-    hideIcon_ = layoutProperty->GetHidePasswordSourceInfoValue(hideSystemSourceInfo);
+    return showSystemSourceInfo;
 }
 
 void PasswordResponseArea::UpdateImageSource()
