@@ -1040,7 +1040,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
             }
-            pattern->HandleDragStart();
+            pattern->HandleDragStart(info);
             // notify scrollStart upwards
             pattern->OnScrollStartRecursive(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
                                                                                     : info.GetGlobalLocation().GetY());
@@ -1184,7 +1184,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     }
     auto edgeEffect = GetEdgeEffect();
     auto isOutOfBoundary = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
-    if (!IsLoop() && isOutOfBoundary && edgeEffect == EdgeEffect::SPRING) {
+    if (!IsLoop() && isOutOfBoundary && edgeEffect == EdgeEffect::SPRING && isDragging_) {
         targetIndex_.reset();
 
         auto visibleSize = CalculateVisibleSize();
@@ -1196,15 +1196,13 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
                             : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
 
         currentDelta_ = currentDelta_ - friction * offset;
-        if (isDragging_) {
-            currentIndexOffset_ += friction * offset;
-            AnimationCallbackInfo callbackInfo;
-            callbackInfo.currentOffset =
-                GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-            FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
-        }
+        currentIndexOffset_ += friction * offset;
+        AnimationCallbackInfo callbackInfo;
+        callbackInfo.currentOffset =
+            GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
+        FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
     } else if (!IsLoop() && IsOutOfBoundary(offset) &&
-               (edgeEffect == EdgeEffect::FADE || edgeEffect == EdgeEffect::NONE)) {
+               (edgeEffect == EdgeEffect::FADE || edgeEffect == EdgeEffect::NONE) && isDragging_) {
         currentDelta_ = currentDelta_ - offset;
         if (edgeEffect == EdgeEffect::FADE) {
             auto host = GetHost();
@@ -1348,7 +1346,7 @@ void SwiperPattern::HandleTouchUp()
     StartAutoPlay();
 }
 
-void SwiperPattern::HandleDragStart()
+void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag start.");
     if (usePropertyAnimation_) {
@@ -1358,7 +1356,11 @@ void SwiperPattern::HandleDragStart()
         indicatorController_->Stop();
     }
     StopTranslateAnimation();
-    StopSpringAnimationAndFlushImmediately();
+    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
+        StopSpringAnimationAndFlushImmediately();
+    } else {
+        StopSpringAnimation();
+    }
     StopAutoPlay();
 
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();

@@ -46,6 +46,17 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
 }
 
+bool ImageSource::IsAstc(const uint8_t* data)
+{
+    return Media::ImageSource::IsASTC(data);
+}
+
+ImageSource::Size ImageSource::GetASTCInfo(const uint8_t* data)
+{
+    Media::ASTCInfo astcInfo = Media::ImageSource::GetASTCInfo(data);
+    return { astcInfo.size.width, astcInfo.size.height };
+}
+
 std::string ImageSourceOhos::GetProperty(const std::string& key)
 {
     std::string value;

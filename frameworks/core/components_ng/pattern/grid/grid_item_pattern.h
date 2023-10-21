@@ -121,6 +121,8 @@ public:
         return irregularItemInfo_;
     }
 
+    void DumpAdvanceInfo() override;
+
 protected:
     void OnModifyDone() override;
 private:

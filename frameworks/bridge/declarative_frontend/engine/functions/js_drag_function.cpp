@@ -188,7 +188,6 @@ void JsDragEvent::SetDescription(const JSCallbackInfo& args)
 void JsDragEvent::SetData(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
-        LOGE("info[0] is not an object when try SetData");
         return;
     }
     auto engine = EngineHelper::GetCurrentEngine();
@@ -207,7 +206,7 @@ void JsDragEvent::GetData(const JSCallbackInfo& args)
 {
     auto dragData = dragEvent_->GetData();
     if (!dragEvent_->IsGetDataSuccess()) {
-        LOGE("UDMF GetData failed in first attempt");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF GetData failed in first attempt");
         std::string udKey = dragEvent_->GetUdKey();
         if (udKey.empty()) {
             args.SetReturnValue(JSVal::Undefined());
@@ -215,7 +214,7 @@ void JsDragEvent::GetData(const JSCallbackInfo& args)
         }
         int ret = UdmfClient::GetInstance()->GetData(dragData, udKey);
         if (ret != 0) {
-            LOGW("UDMF GetData failed: %{public}d", ret);
+            TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF GetData failed: %{public}d", ret);
             auto engine = EngineHelper::GetCurrentEngine();
             if (!engine) {
                 args.SetReturnValue(JSVal::Undefined());
@@ -286,7 +285,6 @@ void JsDragEvent::GetUseCustomDropAnimation(const JSCallbackInfo& args)
 void JsDragEvent::SetDragInfo(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
-        LOGE("info[0] is not an object when try SetDragInfo");
         return;
     }
     auto engine = EngineHelper::GetCurrentEngine();

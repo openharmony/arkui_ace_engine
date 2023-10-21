@@ -56,10 +56,9 @@ FlexDirection GetFlexDirection(const RefPtr<UINode>& node)
 
 std::string BlankPattern::GetColorString() const
 {
-    std::string color;
-    auto renderContext = GetHost()->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, "NA");
-    return renderContext->GetBackgroundColor().value_or(Color::WHITE).ColorToString();
+    auto paintProperty = GetPaintProperty<BlankPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, "NA");
+    return paintProperty->GetColorValue(Color::TRANSPARENT).ColorToString();
 }
 
 void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

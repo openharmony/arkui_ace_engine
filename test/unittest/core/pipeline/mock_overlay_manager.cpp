@@ -24,6 +24,8 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
     bool isRightToLeft, const ToastShowMode& showMode)
 {}
 
+void OverlayManager::ClearToastInSubwindow() {}
+
 void OverlayManager::ClearToast() {}
 
 void OverlayManager::PopToast(int32_t toastId) {}

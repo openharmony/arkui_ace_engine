@@ -353,12 +353,14 @@ void RefreshPattern::HandleDragUpdate(float delta)
     float refreshFollowRadio = 0.0f;
     if (scrollOffset_.GetY() > triggerLoadingDistance_) {
         refreshFollowRadio = GetFollowRatio(scrollOffset_.GetY());
+        UpdateLoadingProgress(STATE_PROGRESS_DRAG, refreshFollowRadio);
+        UpdateLoadingMarginTop(scrollOffset_.GetY());
+        auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+        CHECK_NULL_VOID(progressPaintProperty);
+        progressPaintProperty->UpdateRefreshSizeScaleRatio(refreshFollowRadio);
+    } else {
+        UpdateLoadingProgress(STATE_PROGRESS_DRAG, 0.0f);
     }
-    UpdateLoadingProgress(STATE_PROGRESS_DRAG, refreshFollowRadio);
-    UpdateLoadingMarginTop(scrollOffset_.GetY());
-    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
-    CHECK_NULL_VOID(progressPaintProperty);
-    progressPaintProperty->UpdateRefreshSizeScaleRatio(refreshFollowRadio);
     if (scrollOffset_.GetY() > TRIGGER_REFRESH_DISTANCE.ConvertToPx()) {
         UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
     }
@@ -406,7 +408,7 @@ float RefreshPattern::GetFollowRatio(float scrollOffset)
     if (GreatNotEqual(TRIGGER_REFRESH_DISTANCE.ConvertToPx(), triggerLoading)) {
         return (scrollOffset - triggerLoading) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoading);
     }
-    return 0.0f;
+    return GreatOrEqual(scrollOffset, triggerLoading) ? 1.0f : 0.0f;
 }
 
 void RefreshPattern::TransitionPeriodAnimation()

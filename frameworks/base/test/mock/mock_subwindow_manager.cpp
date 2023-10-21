@@ -14,6 +14,7 @@
  */
 
 #include "base/geometry/rect.h"
+#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 namespace OHOS::Ace {
 namespace {
@@ -32,14 +33,14 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
 {
-    LOGI("SubwindowManager::HidePopupNG MOCK");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "SubwindowManager::HidePopupNG MOCK");
 }
 
 void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) {}
 
 void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) {}
 
-void SubwindowManager::HideMenuNG(bool showPreviewAnimation) {}
+void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag) {}
 
 void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId) {}
 

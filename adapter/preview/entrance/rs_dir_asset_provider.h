@@ -66,44 +66,44 @@ public:
         }
         auto fp = std::fopen(realPath, "rb");
         if (!fp) {
-            LOGE("[%{private}s] open file error %{public}s", fileName.c_str(), strerror(errno));
+            LOGW("[%{private}s] open file error %{public}s", fileName.c_str(), strerror(errno));
             return nullptr;
         }
 
         if (std::fseek(fp, 0, SEEK_END) != 0) {
-            LOGE("[%{private}s] seek file tail error %{public}s", fileName.c_str(), strerror(errno));
+            LOGW("[%{private}s] seek file tail error %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
 
         size_t size = std::ftell(fp);
         if (size < 0) {
-            LOGE("[%{private}s] tell file error %{public}s", fileName.c_str(), strerror(errno));
+            LOGW("[%{private}s] tell file error %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
 
         auto data = std::make_unique<char[]>(size);
         if (data == nullptr) {
-            LOGE("[%{private}s] new uint8_t array failed", fileName.c_str());
+            LOGW("[%{private}s] new uint8_t array failed", fileName.c_str());
             std::fclose(fp);
             return nullptr;
         }
 
         if (std::fseek(fp, 0, SEEK_SET) != 0) {
-            LOGE("[%{private}s] seek file begin error %{public}s", fileName.c_str(), strerror(errno));
+            LOGW("[%{private}s] seek file begin error %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
 
         auto rsize = std::fread(data.get(), 1, size, fp);
         if (rsize <= 0) {
-            LOGE("[%{private}s] read file failed, %{public}s", fileName.c_str(), strerror(errno));
+            LOGW("[%{private}s] read file failed, %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
         std::fclose(fp);
-        LOGI("[%{private}s] length: %{public}zu/%{public}zu success", fileName.c_str(), rsize, size);
+        LOGD("[%{private}s] length: %{public}zu/%{public}zu success", fileName.c_str(), rsize, size);
         return AceType::MakeRefPtr<RSAsset>(std::move(data), rsize);
     }
 

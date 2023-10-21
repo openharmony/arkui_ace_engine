@@ -95,7 +95,7 @@ template("js_engine_ark") {
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [
         ":gen_obj_src_abc_strip_native_min",
-        "//foundation/arkui/napi:ace_napi_static",
+        "//foundation/arkui/napi:ace_napi",
       ]
     } else if (defined(config.build_for_android) && config.build_for_android) {
       deps += [

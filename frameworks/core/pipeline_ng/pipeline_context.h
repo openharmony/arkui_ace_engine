@@ -143,6 +143,8 @@ public:
 
     void HandleVisibleAreaChangeEvent();
 
+    void HandleSubwindow(bool isShow);
+
     void Destroy() override;
 
     void OnShow() override;
@@ -288,14 +290,9 @@ public:
         return onShow_;
     }
 
-    void MarkRootFocusNeedUpdate()
-    {
-        isRootFocusNeedUpdate_ = true;
-    }
-
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
 
-    bool RequestDefaultFocus();
+    bool RequestDefaultFocus(const RefPtr<FocusHub>& mainView);
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyDefaultFocus(const RefPtr<FrameNode>& node);
@@ -398,6 +395,8 @@ public:
 
     void AddAnimationClosure(std::function<void()>&& animation);
     void FlushAnimationClosure();
+    void RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback);
+    void DumpJsInfo(const std::vector<std::string>& params) const;
 
     void SetDragCleanTask(std::function<void()>&& task)
     {
@@ -481,6 +480,8 @@ private:
 
     std::list<TouchEvent> touchEvents_;
 
+    std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
+
     RefPtr<FrameNode> rootNode_;
 
     std::set<RefPtr<FrameNode>> needRenderNode_;
@@ -511,7 +512,6 @@ private:
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
     bool isTabJustTriggerOnKeyEvent_ = false;
-    bool isRootFocusNeedUpdate_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
     bool isNeedFlushMouseEvent_ = false;

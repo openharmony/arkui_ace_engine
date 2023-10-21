@@ -19,7 +19,7 @@ namespace OHOS::Ace {
 void StageHapModuleInfo::Parse(const std::unique_ptr<JsonValue>& root)
 {
     if (!root) {
-        LOGE("The information of stage model application is null.");
+        LOGW("The information of stage model application is empty.");
         return;
     }
     compileMode_ = root->GetString("compileMode");

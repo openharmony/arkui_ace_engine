@@ -304,8 +304,6 @@ void TransformOperation::BlendInner(
                 TransformUtil::DecomposeTransform(fromTransform, from.matrix4_)) {
                 auto result = TransformUtil::BlendDecomposedTransforms(toTransform, fromTransform, progress);
                 ret.matrix4_ = TransformUtil::ComposeTransform(result);
-            } else {
-                LOGE("DecomposeTransform failed");
             }
             break;
         }

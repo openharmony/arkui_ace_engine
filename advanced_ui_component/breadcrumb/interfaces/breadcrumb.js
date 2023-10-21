@@ -757,6 +757,7 @@ export class Breadcrumb extends ViewPU {
                       builder: this.menu.bind(this)
                     },
                     enableArrow: !1,
+                    popupColor: Color.Transparent,
                     onStateChange: e => {
                       if (!e.isVisible) {
                         this.labels.indexOf(this.menuInfo[0]) != this

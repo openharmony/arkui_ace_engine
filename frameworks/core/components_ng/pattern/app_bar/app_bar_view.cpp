@@ -248,6 +248,7 @@ void AppBarView::BindContentCover(int32_t targetId)
         if (missionId != -1) {
             params.try_emplace("missionId", std::to_string(missionId));
         }
+        params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
         LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
             AceApplicationInfo::GetInstance().GetProcessName().c_str(),
             AceApplicationInfo::GetInstance().GetAbilityName().c_str(),

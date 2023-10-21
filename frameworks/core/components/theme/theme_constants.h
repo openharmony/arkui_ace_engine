@@ -336,6 +336,11 @@ public:
         return resAdapter_->GetResourceLimitKeys();
     }
 
+    RefPtr<ResourceAdapter> GetResourceAdapter()
+    {
+        return resAdapter_;
+    }
+
 private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];

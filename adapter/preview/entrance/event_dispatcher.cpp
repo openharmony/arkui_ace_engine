@@ -149,13 +149,11 @@ void EventDispatcher::DispatchIdleEvent(int64_t deadline)
     ACE_SCOPED_TRACE("DispatchIdleEvent");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
-        LOGE("container is null");
         return;
     }
 
     auto aceView = container->GetAceView();
     if (!aceView) {
-        LOGE("aceView is null");
         return;
     }
 
@@ -321,7 +319,7 @@ static void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 bool EventDispatcher::DispatchTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     ACE_SCOPED_TRACE("DispatchTouchEvent");
-    LOGI("Dispatch touch event");
+    LOGD("Dispatch touch event");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_RETURN(container, false);
     auto aceView = container->GetAceView();
@@ -347,7 +345,7 @@ bool EventDispatcher::DispatchTouchEvent(const std::shared_ptr<MMI::PointerEvent
 bool EventDispatcher::DispatchBackPressedEvent()
 {
     ACE_SCOPED_TRACE("DispatchBackPressedEvent");
-    LOGI("Dispatch back pressed event");
+    LOGD("Dispatch back pressed event");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_RETURN(container, false);
     auto context = container->GetPipelineContext();
@@ -360,12 +358,11 @@ bool EventDispatcher::DispatchBackPressedEvent()
         [weak, &backPromise]() {
             auto context = weak.Upgrade();
             if (context == nullptr) {
-                LOGW("context is nullptr.");
                 return;
             }
             bool canBack = false;
             if (context->IsLastPage()) {
-                LOGW("Can't back because this is the last page!");
+                LOGD("Can't back because this is the last page!");
             } else {
                 canBack = context->CallRouterBackToPopPage();
             }
@@ -378,16 +375,16 @@ bool EventDispatcher::DispatchBackPressedEvent()
 bool EventDispatcher::DispatchInputMethodEvent(unsigned int codePoint)
 {
     ACE_SCOPED_TRACE("DispatchInputMethodEvent");
-    LOGI("Dispatch input method event");
+    LOGD("Dispatch input method event");
     return TextInputClientMgr::GetInstance().AddCharacter(static_cast<wchar_t>(codePoint));
 }
 
 bool EventDispatcher::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     ACE_SCOPED_TRACE("DispatchKeyEvent");
-    LOGI("Dispatch key event");
+    LOGD("Dispatch key event");
     if (HandleTextKeyEvent(keyEvent)) {
-        LOGI("The event is related to the input component and has been handled successfully.");
+        LOGD("The event is related to the input component and has been handled successfully.");
         return true;
     }
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);

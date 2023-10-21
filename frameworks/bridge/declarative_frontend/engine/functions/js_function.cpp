@@ -44,10 +44,7 @@ JsWeakFunction::JsWeakFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFu
     jsWeakFunction_ = jsFunction;
 }
 
-JsFunction::~JsFunction()
-{
-    LOGD("Destroy: JsFunction");
-}
+JsFunction::~JsFunction() {}
 
 void JsFunctionBase::Execute(const JSRef<JSObject>& jsParamsObject)
 {
@@ -57,10 +54,9 @@ void JsFunctionBase::Execute(const JSRef<JSObject>& jsParamsObject)
 
 void JsFunctionBase::Execute(const std::vector<std::string>& keys, const std::string& param)
 {
-    LOGI("param : %{private}s", param.c_str());
+    LOGD("param : %{private}s", param.c_str());
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(param);
     if (!argsPtr) {
-        LOGW("Parse param failed!");
         return;
     }
     JSRef<JSObject> eventInfo = JSRef<JSObject>::New();

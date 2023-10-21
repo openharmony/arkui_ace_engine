@@ -422,7 +422,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_->children_.push_back(frameNode_1);
     focusHub = frameNode_1->eventHub_->GetOrCreateFocusHub();
     focusHub->SetIsDefaultHasFocused(true);
-    EXPECT_FALSE(context_->RequestDefaultFocus());
+    EXPECT_FALSE(context_->RequestDefaultFocus(focusHub));
     /**
      * @tc.steps6: call SetIsDefaultHasFocused with false and create a new frameNode
                 init frameNode_2's focusHub
@@ -440,9 +440,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_2->eventHub_->enabled_ = true;
     newFocusHub->focusable_ = true;
     newFocusHub->parentFocusable_ = true;
-    EXPECT_TRUE(context_->RequestDefaultFocus());
+    EXPECT_TRUE(context_->RequestDefaultFocus(newFocusHub));
     newFocusHub->SetFocusType(FocusType::DISABLE);
-    EXPECT_FALSE(context_->RequestDefaultFocus());
+    EXPECT_FALSE(context_->RequestDefaultFocus(newFocusHub));
 
     /**
      * @tc.steps7: Create a new frameNode and call AddDirtyDefaultFocus
@@ -464,7 +464,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     EXPECT_FALSE(context_->dirtyFocusNode_.Upgrade());
     EXPECT_FALSE(context_->dirtyFocusScope_.Upgrade());
 
-    context_->MarkRootFocusNeedUpdate();
     auto frameNodeId_4 = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_4 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_4, nullptr);
     auto eventHubRoot = frameNode_4->GetEventHub<EventHub>();
@@ -474,7 +473,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
 
     context_->rootNode_ = frameNode_4;
     context_->FlushFocus();
-    EXPECT_FALSE(context_->isRootFocusNeedUpdate_);
+    EXPECT_TRUE(focusHubRoot->IsCurrentFocus());
 }
 
 /**
@@ -1358,13 +1357,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
         { "-rotation" }, { "-animationscale" }, { "-velocityscale" }, { "-scrollfriction" }, { "-threadstuck" },
         { "test" } };
     int turn = 0;
-    int falseInfoNum = 6;
     for (; turn < params.size(); turn++) {
-        if (turn < params.size() - falseInfoNum) {
-            EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
-        } else {
-            EXPECT_FALSE(context_->OnDumpInfo(params[turn]));
-        }
+        EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
     }
 }
 
@@ -2706,5 +2700,47 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg059, TestSize.Level1)
     context_->canUseLongPredictTask_ = true;
     context_->OnIdle(2);
     EXPECT_TRUE(flagCbk);
+}
+
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto& windowConfig = frontend->GetWindowConfig();
+    windowConfig.designWidth = DEFAULT_INT1;
+    context_->weakFrontend_ = frontend;
+    context_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+
+    /**
+     * @tc.steps2: Set EnableAvoidKeyboardMode is true.
+     * @tc.expected: get KeyboardSafeAreaEnabled is true.
+     */
+    context_->SetEnableKeyBoardAvoidMode(true);
+    EXPECT_TRUE(context_->GetSafeAreaManager()->KeyboardSafeAreaEnabled());
+
+    /**
+     * @tc.steps3: set root height and change virtual keyboard height.
+     * @tc.expected: Resize the root height after virtual keyboard change.
+     */
+
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerPattern, nullptr);
+    auto columNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
+    CHECK_NULL_VOID(columNode);
+
+    std::vector<std::vector<int>> params = { { 500, 400, 100 }, { 300, 100, 200 }, { 400, -300, 400 },
+        { 200, 0, 200 } };
+    for (int turn = 0; turn < params.size(); turn++) {
+        context_->rootHeight_ = params[turn][0];
+        context_->OnVirtualKeyboardHeightChange(params[turn][1]);
+        EXPECT_EQ(context_->GetRootHeight(), params[turn][2]);
+    }
 }
 } // namespace OHOS::Ace::NG

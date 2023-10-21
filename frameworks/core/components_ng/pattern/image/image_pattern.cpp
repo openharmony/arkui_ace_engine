@@ -43,11 +43,12 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "sourceInfo does not match, ignore current callback. "
+                 "current: %{public}s vs callback's: %{public}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        LOGD("Image Data Ready %{private}s", sourceInfo.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Image Data Ready %{private}s", sourceInfo.ToString().c_str());
         pattern->OnImageDataReady();
     };
 }
@@ -61,11 +62,12 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "sourceInfo does not match, ignore current callback. "
+                 "current: %{public}s vs callback's: %{public}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        LOGI("Image Load Success %{public}s", sourceInfo.ToString().c_str());
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Image Load Success %{public}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
 }
@@ -79,7 +81,8 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "sourceInfo does not match, ignore current callback. "
+                 "current: %{public}s vs callback's: %{public}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -121,7 +124,7 @@ void ImagePattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        LOGD("current image visible ratio = %f", ratio);
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "current image visible ratio = %f", ratio);
         self->OnVisibleChange(visible);
     };
     auto host = GetHost();
@@ -288,7 +291,7 @@ void ImagePattern::LoadImageDataIfNeed()
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
 
         loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
-        LOGI("start loading image %{public}s", src.ToString().c_str());
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
         loadingCtx_->LoadImageData();
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
@@ -348,8 +351,8 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSourceInfo != sourceInfo) {
-            LOGW("alt image sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: "
-                 "%{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "alt image sourceInfo does not match, ignore current callback. "
+                 "current: %{public}s vs callback's: %{public}s",
                 currentAltSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -380,8 +383,8 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
         auto currentAltSrc = layoutProps->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSrc != sourceInfo) {
-            LOGW("alt image sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: "
-                 "%{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "alt image sourceInfo does not match, ignore current callback. "
+                 "current: %{public}s vs callback's: %{public}s",
                 currentAltSrc.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -420,7 +423,7 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
-    LOGI("Receive Memory level notification, level: %{public}d", level);
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "Receive Memory level notification, level: %{public}d", level);
     // TODO: do different data cleaning operation according to level
     // when image component is [onShow], do not clean image data
     // TODO: use [isActive_] to determine image data management
@@ -628,7 +631,7 @@ void ImagePattern::OpenSelectOverlay()
     CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    LOGI("Opening select overlay");
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "Opening select overlay");
     selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info, WeakClaim(this));
 
     // paint selected mask effect
@@ -641,7 +644,7 @@ void ImagePattern::CloseSelectOverlay()
         return;
     }
     if (!selectOverlay_->IsClosed()) {
-        LOGI("closing select overlay");
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "closing select overlay");
         selectOverlay_->Close();
     }
     selectOverlay_ = nullptr;

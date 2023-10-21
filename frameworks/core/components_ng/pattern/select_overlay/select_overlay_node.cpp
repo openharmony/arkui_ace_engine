@@ -575,6 +575,7 @@ void SelectOverlayNode::MoreAnimation()
                 auto selectOverlay = weak.Upgrade();
                 CHECK_NULL_VOID(selectOverlay);
                 selectOverlay->SetAnimationStatus(false);
+                selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             },
             TaskExecutor::TaskType::UI);
     };
@@ -657,6 +658,7 @@ void SelectOverlayNode::BackAnimation()
                 auto selectOverlay = weak.Upgrade();
                 CHECK_NULL_VOID(selectOverlay);
                 selectOverlay->SetAnimationStatus(false);
+                selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             },
             TaskExecutor::TaskType::UI);
     };

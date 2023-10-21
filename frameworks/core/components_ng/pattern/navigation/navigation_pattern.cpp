@@ -291,6 +291,12 @@ void NavigationPattern::CheckTopNavPathChange(
             CHECK_NULL_VOID(navigationPattern);
             navigationPattern->DoNavigationTransitionAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
         });
+    } else {
+        context->AddAfterLayoutTask([weakNode = WeakPtr<FrameNode>(hostNode)]() {
+            auto hostNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(hostNode);
+            hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        });
     }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
 }

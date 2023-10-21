@@ -134,7 +134,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             singleHandle.Width(), singleHandle.Height());
     }
 
-    if (info_->isSingleHandle || !(info_->firstHandle.isShow && info_->secondHandle.isShow)) {
+    if (info_->isSingleHandle) {
         auto menuSpacing = static_cast<float>(menuSpacingBetweenText);
         menuPosition = OffsetF((singleHandle.Left() + singleHandle.Right() - menuWidth) / 2.0f,
             static_cast<float>(singleHandle.Top() - menuSpacing - menuHeight));
@@ -142,6 +142,13 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         auto menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
         menuPosition = OffsetF((firstHandleRect.Left() + secondHandleRect.Left() - menuWidth) / 2.0f,
             static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
+
+        if (!info_->firstHandle.isShow && info_->secondHandle.isShow && !info_->handleReverse) {
+            menuPosition.SetY(secondHandleRect.Bottom() + menuSpacing);
+        }
+        if (info_->firstHandle.isShow && !info_->secondHandle.isShow && info_->handleReverse) {
+            menuPosition.SetY(firstHandleRect.Bottom() + menuSpacing);
+        }
     }
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
@@ -179,12 +186,6 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         }
     } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText)) {
         menuPosition.SetY(viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText);
-    }
-    if (info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->handleReverse) {
-        menuPosition.SetY(menuPosition.GetY() - menuSpacingBetweenHandle);
-    }
-    if (!info_->firstHandle.isShow && info_->secondHandle.isShow && info_->handleReverse) {
-        menuPosition.SetY(menuPosition.GetY() - menuSpacingBetweenHandle);
     }
     LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);

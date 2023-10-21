@@ -552,6 +552,11 @@ public:
         return isJsCard_;
     }
 
+    bool IsJsPlugin() const
+    {
+        return isJsPlugin_;
+    }
+
     void SetIsFormRender(bool isEtsCard)
     {
         isFormRender_ = isEtsCard;

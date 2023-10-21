@@ -92,7 +92,7 @@ public:
         return { FocusType::NODE, false };
     }
 
-    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
 
     TextSelector GetTextSelector() const
     {

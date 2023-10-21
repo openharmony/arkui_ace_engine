@@ -1396,7 +1396,7 @@ void TextFieldPattern::HandleFocusEvent()
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+                                                                                 : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
@@ -1623,7 +1623,7 @@ void TextFieldPattern::HandleOnUndoAction()
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+                                                                                    : PROPERTY_UPDATE_MEASURE);
     FireEventHubOnChange(GetEditingValue().text);
 }
 
@@ -1643,7 +1643,7 @@ void TextFieldPattern::HandleOnRedoAction()
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+                                                                                    : PROPERTY_UPDATE_MEASURE);
     FireEventHubOnChange(GetEditingValue().text);
 }
 
@@ -3501,6 +3501,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     if (needShowSoftKeyboard) {
         LOGI("Start to request keyboard");
         if (customKeyboardBulder_) {
+#if defined(ENABLE_STANDARD_INPUT) && defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        imeAttached_ = true;
+#endif
             return RequestCustomKeyboard();
         }
 #if defined(ENABLE_STANDARD_INPUT)
@@ -3577,6 +3580,7 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
 {
     LOGI("Request close soft keyboard");
     if (forceClose) {
+        isKeyboardClosedByUser_ = false;
         StopTwinkling();
         CloseSelectOverlay(true);
         if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
@@ -4101,8 +4105,7 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
         TextFieldLayoutAlgorithm::UpdateTextStyle(tmpHost, layoutProperty, textFieldTheme, textStyle, false);
         textContent = "a";
     } else {
-        TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
-            tmpHost, layoutProperty, textFieldTheme, textStyle, false);
+        TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(tmpHost, layoutProperty, textFieldTheme, textStyle, false);
         textContent = "b";
     }
     if (textStyle.GetFontSize().IsNonPositive()) {
@@ -4559,7 +4562,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     // trigger repaint of select mask
     ++drawOverlayFlag_;
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+                                                                                    : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::SetEditingValueToProperty(const std::string& newValueText)
@@ -4589,7 +4592,7 @@ void TextFieldPattern::ClearEditingValue()
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+                                                                                    : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::HandleCounterBorder()
@@ -4658,6 +4661,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         CHECK_NULL_VOID(eventHub);
         eventHub->UpdateSubmitEvent(textEditingValue_.text);
         CloseKeyboard(forceCloseKeyboard);
+        FocusHub::LostFocusToViewRoot();
         return;
     }
 
@@ -4681,6 +4685,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     }
     eventHub->FireOnSubmit(static_cast<int32_t>(action));
     CloseKeyboard(forceCloseKeyboard);
+    FocusHub::LostFocusToViewRoot();
 }
 
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
@@ -4882,7 +4887,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         HandleCounterBorder();
     }
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+                                                                                    : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::DeleteForward(int32_t length)
@@ -4915,7 +4920,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
         HandleCounterBorder();
     }
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+                                                                                    : PROPERTY_UPDATE_MEASURE);
 }
 
 std::u16string TextFieldPattern::GetLeftTextOfCursor(int32_t number)
@@ -4955,7 +4960,7 @@ void TextFieldPattern::AfterSelection()
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+                                                                                    : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::HandleSelectionUp()
@@ -6541,13 +6546,36 @@ void TextFieldPattern::FilterExistText()
     }
 }
 
-void TextFieldPattern::DumpInfo()
+void TextFieldPattern::DumpAdvanceInfo()
 {
     if (customKeyboardBulder_) {
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
     }
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = GetMiscTextConfig();
+    CHECK_NULL_VOID(miscTextConfig.has_value());
+    MiscServices::CursorInfo cursorInfo = miscTextConfig.value().cursorInfo;
+    DumpLog::GetInstance().AddDesc(std::string("cursorInfo")
+                                       .append(", left:")
+                                       .append(std::to_string(cursorInfo.left))
+                                       .append(", top:")
+                                       .append(std::to_string(cursorInfo.top))
+                                       .append(", width:")
+                                       .append(std::to_string(cursorInfo.width))
+                                       .append(", height:")
+                                       .append(std::to_string(cursorInfo.height)));
+#endif
+    DumpLog::GetInstance().AddDesc(std::string("textRect-->x:")
+                                       .append(std::to_string(textRect_.GetX()))
+                                       .append(" y:")
+                                       .append(std::to_string(textRect_.GetY())));
+    DumpLog::GetInstance().AddDesc(std::string("contentRect-->x:")
+                                       .append(std::to_string(contentRect_.GetX()))
+                                       .append(" y:")
+                                       .append(std::to_string(contentRect_.GetY())));
+    DumpLog::GetInstance().AddDesc(textSelector_.ToString());
 }
 
 bool TextFieldPattern::IsTouchAtLeftOffset(float currentOffsetX)
