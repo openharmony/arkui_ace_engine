@@ -858,8 +858,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
         return;
     }
 
-    auto frameRect = renderContext_->GetPaintRectWithTransform();
-    frameRect.SetOffset(GetOffsetRelativeToWindow());
+    auto frameRect = GetTransformRectRelativeToWindow();
     auto visibleRect = frameRect;
     RectF parentRect;
     auto parentUi = GetParent();
@@ -873,8 +872,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
             parentUi = parentUi->GetParent();
             continue;
         }
-        parentRect = parentFrame->GetRenderContext()->GetPaintRectWithTransform();
-        parentRect.SetOffset(parentFrame->GetOffsetRelativeToWindow());
+        parentRect = parentFrame->GetTransformRectRelativeToWindow();
         visibleRect = visibleRect.Constrain(parentRect);
         parentUi = parentUi->GetParent();
     }
