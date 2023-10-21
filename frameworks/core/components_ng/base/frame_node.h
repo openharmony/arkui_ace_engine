@@ -421,8 +421,10 @@ public:
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
+    RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName);
     void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
+    void DeleteAnimatablePropertyFloat(const std::string& propertyName);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);

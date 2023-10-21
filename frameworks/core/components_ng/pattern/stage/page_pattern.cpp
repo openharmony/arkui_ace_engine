@@ -86,30 +86,43 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
         }
     };
     if (effect && effect->GetUserCallback()) {
-        if (!controller_) {
-            controller_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-        }
-        if (!controller_->IsStopped()) {
-            controller_->Finish();
-        }
-        controller_->ClearInterpolators();
+        // if (!controller_) {
+        //     controller_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+        // }
+        // if (!controller_->IsStopped()) {
+        //     controller_->Finish();
+        // }
+       //controller_->ClearInterpolators();
         RouteType routeType = (type == PageTransitionType::ENTER_POP || type == PageTransitionType::EXIT_POP)
                                   ? RouteType::POP
                                   : RouteType::PUSH;
-        auto floatAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, effect->GetCurve());
-        floatAnimation->AddListener(
-            [routeType, handler = effect->GetUserCallback(), weak = WeakClaim(this)](const float& progress) {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                handler(routeType, progress);
-            });
-        if (effect->GetDelay() >= 0) {
-            controller_->SetStartDelay(effect->GetDelay());
-        }
-        controller_->SetDuration(effect->GetDuration());
-        controller_->AddInterpolator(floatAnimation);
-        controller_->AddStopListener(wrappedOnFinish);
-        controller_->Forward();
+        host -> CreateAnimatablePropertyFloat("pageTranslationProperty",
+        0.0,
+        [routeType,handler=effect->GetUserCallback()](const float& progress){ handler(routeType, progress);}
+        );
+        AnimationOption option(Curves::LINEAR,effect->GetDuration());
+        option.SetDelay(effect->GetDelay());
+        AnimationUtils::OpenImplicitAnimation(option,option.GetCurve(),
+        [ host = GetHost()](){  host -> DeleteAnimatablePropertyFloat("pageTranslationProperty"); }
+        );
+        host -> UpdateAnimatablePropertyFloat("pageTranslationProperty",1.0);
+          auto property = host->GetAnimatablePropertyFloat("pageTranslationProperty");
+        AnimationUtils::CloseImplicitAnimation();
+
+        // auto floatAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, effect->GetCurve());
+        // floatAnimation->AddListener(
+        //     [routeType, handler = effect->GetUserCallback(), weak = WeakClaim(this)](const float& progress) {
+        //         auto pattern = weak.Upgrade();
+        //         CHECK_NULL_VOID(pattern);
+        //         handler(routeType, progress);
+        //     });
+        // if (effect->GetDelay() >= 0) {
+        //     controller_->SetStartDelay(effect->GetDelay());
+        // }
+        // controller_->SetDuration(effect->GetDuration());
+        // controller_->AddInterpolator(floatAnimation);
+        // controller_->AddStopListener(wrappedOnFinish);
+        // controller_->Forward();
         return renderContext->TriggerPageTransition(type, nullptr);
     }
     return renderContext->TriggerPageTransition(type, wrappedOnFinish);
@@ -272,10 +285,31 @@ void PagePattern::FirePageTransitionFinish()
 
 void PagePattern::StopPageTransition()
 {
-    if (controller_ && !controller_->IsStopped()) {
-        controller_->Finish();
-        return;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto property = host->GetAnimatablePropertyFloat("pageTranslationProperty");
+    CHECK_NULL_VOID(property);
+    float propertyValue = property->GetProperty();
+    if (propertyValue != 1.0) {
+        AnimationOption option(Curves::LINEAR, 0);
+     
+         AnimationUtils::Animate(
+           option,
+           [  host = GetHost()](){host->UpdateAnimatablePropertyFloat("pageTranslationProperty",1.0);},
+           [  host = GetHost()](){ 
+              auto property = host->GetAnimatablePropertyFloat("pageTranslationProperty");
+              auto renderContext = host->GetRenderContext();
+              renderContext->DetachNodeAnimatableProperty(property);
+              host->DeleteAnimatablePropertyFloat("pageTranslationProperty"); 
+            }
+        );
     }
+
+    // if (controller_ && !controller_->IsStopped()) {
+    //     controller_->Finish();
+    //     return;
+    // }
     FirePageTransitionFinish();
 }
 

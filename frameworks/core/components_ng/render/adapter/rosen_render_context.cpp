@@ -3697,6 +3697,14 @@ void RosenRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePrope
     }
 }
 
+void RosenRenderContext::DetachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(property);
+    property->SetModifyImpl(nullptr);
+   
+}
+
 void RosenRenderContext::InitEventClickEffect()
 {
     if (touchListener_) {
