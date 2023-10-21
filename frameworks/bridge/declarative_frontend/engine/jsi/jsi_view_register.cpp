@@ -28,6 +28,7 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
@@ -1204,6 +1205,8 @@ void JsRegisterViews(BindingTarget globalObj)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "focusControl"), focusControlObj);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerNamedRoute"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRegisterNamedRoute));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getArkUINativeModule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModule));
 
     JsBindViews(globalObj);
 
