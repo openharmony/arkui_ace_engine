@@ -43,7 +43,6 @@ public:
             return;
         }
         if (!context) {
-            LOGE("Attach called, and context is null");
             return;
         }
 
