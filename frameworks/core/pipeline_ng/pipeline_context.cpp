@@ -190,7 +190,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
         --maxFlushTimes;
     }
     if (!dirtyNodes_.empty()) {
-        LOGW("FlushDirtyNodeUpdate 3 times, still has dirty nodes");
+        LOGD("FlushDirtyNodeUpdate 3 times, still has dirty nodes");
     }
 
     if (FrameReport::GetInstance().GetEnable()) {
@@ -526,8 +526,6 @@ void PipelineContext::SetupRootElement()
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());
-
-    LOGI("SetupRootElement success!");
 }
 
 void PipelineContext::SetupSubRootElement()
@@ -598,7 +596,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    LOGD("PipelineContext: OnSurfaceChanged start.");
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
@@ -673,7 +670,6 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!IsWindowSizeAnimationEnabled) {
-        LOGE("no animation configured");
         SetRootRect(width, height, 0.0);
         return;
     }
@@ -699,7 +695,6 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         case WindowSizeChangeReason::RESIZE:
         case WindowSizeChangeReason::UNDEFINED:
         default: {
-            LOGD("PipelineContext::RootNodeAnimation : unsupported type, no animation added");
             SetRootRect(width, height, 0.0f);
         }
     }
@@ -708,8 +703,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
 void PipelineContext::StartWindowMaximizeAnimation(
     int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    LOGI("PipelineContext::Root node RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d", width,
-        height);
+    LOGI("Root node start RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d", width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
         FlushMessages();
@@ -737,7 +731,6 @@ void PipelineContext::StartWindowMaximizeAnimation(
 
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
-    LOGI("SetRootRect width %{public}f, height %{public}f, %{public}f", width, height, offset);
     CHECK_RUN_ON(UI);
     UpdateRootSizeAndScale(width, height);
     CHECK_NULL_VOID(rootNode_);
@@ -881,9 +874,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         float offsetFix = (rootSize.Height() - positionYWithOffset) > 100.0f
                               ? keyboardHeight - (rootSize.Height() - positionYWithOffset) / 2.0f
                               : keyboardHeight;
-        LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f, "
-             "keyboardHeight %{public}f",
-            positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
         if (NearZero(keyboardHeight)) {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
@@ -935,13 +925,11 @@ bool PipelineContext::OnBackPressed()
 
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
-        LOGI("Exit full screen: back press accepted");
         return true;
     }
 
     // if has sharedTransition, back press will stop the sharedTransition
     if (sharedTransitionManager_->OnBackPressed()) {
-        LOGI("sharedTransition stop: back press accepted");
         return true;
     }
 
@@ -965,7 +953,6 @@ bool PipelineContext::OnBackPressed()
         },
         TaskExecutor::TaskType::UI);
     if (hasOverlay) {
-        LOGI("popup hidden: back press accepted");
         return true;
     }
 
@@ -974,13 +961,11 @@ bool PipelineContext::OnBackPressed()
         [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), stageManager = stageManager_, &result]() {
             auto frontend = weakFrontend.Upgrade();
             if (!frontend) {
-                LOGW("frontend is nullptr");
                 result = false;
                 return;
             }
             auto context = weakPipelineContext.Upgrade();
             if (!context) {
-                LOGW("pipelineContext is nullptr");
                 result = false;
                 return;
             }
@@ -997,7 +982,6 @@ bool PipelineContext::OnBackPressed()
 
     if (result) {
         // user accept
-        LOGI("CallRouterBackToPopPage(): navDestination accept");
         return true;
     }
 
@@ -1005,7 +989,6 @@ bool PipelineContext::OnBackPressed()
         [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), &result]() {
             auto frontend = weakFrontend.Upgrade();
             if (!frontend) {
-                LOGW("frontend is nullptr");
                 result = false;
                 return;
             }
@@ -1015,10 +998,8 @@ bool PipelineContext::OnBackPressed()
 
     if (result) {
         // user accept
-        LOGI("CallRouterBackToPopPage(): frontend accept");
         return true;
     }
-    LOGI("CallRouterBackToPopPage(): return platform consumed");
     return false;
 }
 
@@ -1082,7 +1063,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false);
-        LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -1158,13 +1138,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
-    LOGD("density_(%{public}lf), dipScale_(%{public}lf)", density_, dipScale_);
     if (!NearEqual(density, density_)) {
         isDensityChanged_ = true;
     }
     density_ = density;
     if (!NearZero(viewScale_)) {
-        LOGD("viewScale_(%{public}lf)", viewScale_);
         dipScale_ = density_ / viewScale_;
     }
 }
@@ -1369,7 +1347,6 @@ void PipelineContext::FlushMouseEvent()
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
     if (!onFocus_) {
-        LOGD("ChangeMouseStyle failed because the window is not on focus.");
         return false;
     }
     if (mouseStyleNodeId_ != nodeId) {
@@ -1377,7 +1354,6 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_RETURN(mouseStyle, false);
-    LOGD("ChangeMouseStyle to %{public}d on Frame %{public}d", format, nodeId);
     return mouseStyle->ChangePointerStyle(GetWindowId(), format);
 }
 
@@ -1437,10 +1413,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 
 bool PipelineContext::RequestDefaultFocus(const RefPtr<FocusHub>& mainView)
 {
-    LOGI("View: %{public}s/%{public}d request default focus.", mainView->GetFrameName().c_str(),
-        mainView->GetFrameId());
     if (mainView->GetFocusType() != FocusType::SCOPE) {
-        LOGE("Request default focus failed because the view node is not a scope.");
         return false;
     }
     auto viewRootScope = mainView->GetMainViewRootScope();
@@ -1473,10 +1446,8 @@ bool PipelineContext::RequestFocus(const std::string& targetNodeId)
     CHECK_NULL_RETURN(focusHub, false);
     auto currentFocusChecked = focusHub->RequestFocusImmediatelyById(targetNodeId);
     if (!isSubPipeline_ || currentFocusChecked) {
-        LOGI("Request focus in current pipeline return is %{public}d", currentFocusChecked);
         return currentFocusChecked;
     }
-    LOGI("Request focus in parent pipeline");
     auto parentPipelineBase = parentPipeline_.Upgrade();
     CHECK_NULL_RETURN(parentPipelineBase, false);
     auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipelineBase);
@@ -1615,7 +1586,6 @@ void PipelineContext::HandleOnAreaChangeEvent()
 void PipelineContext::UpdateFormLinkInfos()
 {
     if (formLinkInfoUpdateHandler_ && !formLinkInfoMap_.empty()) {
-        LOGI("formLinkInfoUpdateHandler called");
         std::vector<std::string> formLinkInfos;
         for (auto iter = formLinkInfoMap_.rbegin(); iter != formLinkInfoMap_.rend(); ++iter) {
             auto info = iter->second;
@@ -1656,7 +1626,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
-        LOGI("WindowFocus: window - %{public}d on blur.", windowId_);
+        LOGD("WindowFocus: window - %{public}d on blur.", windowId_);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         if (mouseStyle) {
             mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
@@ -1665,7 +1635,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     } else {
-        LOGI("WindowFocus: window - %{public}d on focus.", windowId_);
+        LOGD("WindowFocus: window - %{public}d on focus.", windowId_);
         auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
         if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
             rootFocusHub->RequestFocusImmediately();
@@ -1677,7 +1647,6 @@ void PipelineContext::WindowFocus(bool isFocus)
 void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
-        LOGW("ShowContainerTitle failed, Window modal is not container.");
         return;
     }
     CHECK_NULL_VOID(rootNode_);
@@ -1727,7 +1696,6 @@ void PipelineContext::SetAppBgColor(const Color& color)
 void PipelineContext::SetAppTitle(const std::string& title)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
-        LOGW("SetAppTitle failed, Window modal is not container.");
         return;
     }
     CHECK_NULL_VOID(rootNode_);
@@ -1741,7 +1709,6 @@ void PipelineContext::SetAppTitle(const std::string& title)
 void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
-        LOGW("SetAppIcon failed, Window modal is not container.");
         return;
     }
     CHECK_NULL_VOID(rootNode_);
@@ -1754,7 +1721,6 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
 
 void PipelineContext::FlushReload(const OnConfigurationChange& configurationChange)
 {
-    LOGI("PipelineContext::FlushReload.");
     AnimationOption option;
     const int32_t duration = 400;
     option.SetDuration(duration);
@@ -1777,7 +1743,6 @@ void PipelineContext::FlushReload(const OnConfigurationChange& configurationChan
 void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
-    LOGI("PipelineContext::Destroy begin.");
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
@@ -1798,7 +1763,6 @@ void PipelineContext::Destroy()
     needRenderNode_.clear();
     dirtyDefaultFocusNode_.Reset();
     PipelineBase::Destroy();
-    LOGI("PipelineContext::Destroy end.");
 }
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
@@ -1897,7 +1861,6 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     if (container && container->IsScenceBoardWindow()) {
         if (!manager->IsDragged() && manager->IsWindowConsumed()) {
             manager->SetIsWindowConsumed(false);
-            LOGD("The event does not need to be handled");
             return;
         }
     }
@@ -1942,7 +1905,6 @@ void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId)
 
 void PipelineContext::NotifyMemoryLevel(int32_t level)
 {
-    LOGI("PipelineContext: NotifyMemoryLevel called");
     auto iter = nodesToNotifyMemoryLevel_.begin();
     while (iter != nodesToNotifyMemoryLevel_.end()) {
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
@@ -1982,10 +1944,7 @@ void PipelineContext::Finish(bool /*autoFinish*/) const
 {
     CHECK_RUN_ON(UI);
     if (finishEventHandler_) {
-        LOGI("call finishEventHandler");
         finishEventHandler_();
-    } else {
-        LOGE("fail to finish current context due to handler is nullptr");
     }
 }
 
@@ -2001,9 +1960,6 @@ void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
 {
-    if (!nodeInfo->IsObject()) {
-        LOGW("restore nodeInfo is invalid");
-    }
     auto child = nodeInfo->GetChild();
     while (child->IsValid()) {
         auto key = child->GetKey();
@@ -2034,7 +1990,6 @@ void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& nod
 {
     auto ret = storeNode_.try_emplace(restoreId, node);
     if (!ret.second) {
-        LOGW("update restore node, id = %{public}d", restoreId);
         storeNode_[restoreId] = node;
     }
 }
@@ -2053,7 +2008,7 @@ bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
-        LOGW("SetAppIcon failed, Window modal is not container.");
+        LOGW("Set app icon failed, Window modal is not container.");
         return;
     }
     CHECK_NULL_VOID(rootNode_);
