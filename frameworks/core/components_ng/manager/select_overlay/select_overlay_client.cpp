@@ -73,9 +73,9 @@ void SelectOverlayClient::InitSelectOverlay()
     selectOverlayInfo_.secondHandle.isShow = false;
 }
 
-void SelectOverlayClient::RequestOpenSelectOverlay(const ClientOverlayInfo& showOverlayInfo)
+void SelectOverlayClient::RequestOpenSelectOverlay(ClientOverlayInfo& showOverlayInfo)
 {
-    LOGI("RequestOpenSelectOverlay start, has first handle %{public}d, has second handle %{public}d",
+    LOGI("first handle %{public}d, second handle %{public}d",
         showOverlayInfo.firstHandleInfo.has_value(), showOverlayInfo.secondHandleInfo.has_value());
     if (SelectOverlayIsOn()) {
         UpdateShowingSelectOverlay(showOverlayInfo);
@@ -90,12 +90,13 @@ void SelectOverlayClient::CreateSelectOverlay(const ClientOverlayInfo& clientOve
     CHECK_NULL_VOID(pipeline);
     auto overlayInfo = GetSelectOverlayInfo(clientOverlayInfo);
     CHECK_NULL_VOID(overlayInfo);
-    LOGD("first handle visibility %{public}d, second handle visibility %{public}d, select rect visibility "
-            "%{public}d",
-        overlayInfo.firstHandle.isShow, overlayInfo.secondHandle.isShow, overlayInfo.isSelectRegionVisible);
+    LOGI("first handle %{public}d, second handle %{public}d, select rect %{public}d", overlayInfo->firstHandle.isShow,
+        overlayInfo->secondHandle.isShow, overlayInfo->isSelectRegionVisible);
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(
         *overlayInfo, WeakClaim(this), clientOverlayInfo.animation);
-    StartListeningScrollableParent(GetClientHost());
+    if (!overlayInfo->isUsingMouse) {
+        StartListeningScrollableParent(GetClientHost());
+    }
 }
 
 std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const ClientOverlayInfo& clientInfo)
@@ -113,6 +114,9 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
     overlayInfo.secondHandle = secondHandleInfo.has_value() ? *secondHandleInfo : overlayInfo.secondHandle;
     overlayInfo.isSingleHandle = !firstHandleInfo && secondHandleInfo;
     overlayInfo.isSelectRegionVisible = CheckSelectionRectVisible();
+    if (!clientInfo.isUpdateMenu) {
+        return overlayInfo;
+    }
     if (!GetMenuOptionItems().empty()) {
         overlayInfo.menuOptionItems = GetMenuOptionItems();
     }
@@ -122,12 +126,14 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
     return std::nullopt;
 }
 
-void SelectOverlayClient::UpdateShowingSelectOverlay(const ClientOverlayInfo& clientInfo)
+void SelectOverlayClient::UpdateShowingSelectOverlay(ClientOverlayInfo& clientInfo)
 {
+    LOGI("update select overlay, isUseMouse %{public}d", clientInfo.isShowMouseMenu);
     auto isCurrentSingleHandle = IsShowingSingleHandle();
     auto hasRequestSingleHandle = !clientInfo.firstHandleInfo && clientInfo.secondHandleInfo;
     if (clientInfo.isShowMouseMenu || isCurrentSingleHandle ^ hasRequestSingleHandle) {
         RequestCloseSelectOverlay(true);
+        clientInfo.isUpdateMenu = true;
         CreateSelectOverlay(clientInfo);
         return;
     }
@@ -136,18 +142,22 @@ void SelectOverlayClient::UpdateShowingSelectOverlay(const ClientOverlayInfo& cl
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     if (hasRequestSingleHandle) {
-        proxy->UpdateSelectMenuInfo([newMenuInfo = selectOverlayInfo->menuInfo](SelectMenuInfo& menuInfo) {
-            menuInfo.showPaste = newMenuInfo.showPaste;
-            menuInfo.showCopyAll = newMenuInfo.showCopyAll;
-        });
+        if (clientInfo.isUpdateMenu) {
+            proxy->UpdateSelectMenuInfo([newMenuInfo = selectOverlayInfo->menuInfo](SelectMenuInfo& menuInfo) {
+                menuInfo.showPaste = newMenuInfo.showPaste;
+                menuInfo.showCopyAll = newMenuInfo.showCopyAll;
+            });
+        }
         proxy->UpdateSecondSelectHandleInfo(selectOverlayInfo->secondHandle);
     } else {
-        proxy->UpdateSelectMenuInfo([newMenuInfo = selectOverlayInfo->menuInfo](SelectMenuInfo& menuInfo) {
-            menuInfo.showPaste = newMenuInfo.showPaste;
-            menuInfo.showCopyAll = newMenuInfo.showCopyAll;
-            menuInfo.showCopy = newMenuInfo.showCopy;
-            menuInfo.showCut = newMenuInfo.showCut;
-        });
+        if (clientInfo.isUpdateMenu) {
+            proxy->UpdateSelectMenuInfo([newMenuInfo = selectOverlayInfo->menuInfo](SelectMenuInfo& menuInfo) {
+                menuInfo.showPaste = newMenuInfo.showPaste;
+                menuInfo.showCopyAll = newMenuInfo.showCopyAll;
+                menuInfo.showCopy = newMenuInfo.showCopy;
+                menuInfo.showCut = newMenuInfo.showCut;
+            });
+        }
         proxy->UpdateFirstAndSecondHandleInfo(selectOverlayInfo->firstHandle, selectOverlayInfo->secondHandle);
     }
 }
@@ -199,16 +209,6 @@ void SelectOverlayClient::StartListeningScrollableParent(const RefPtr<FrameNode>
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto registerScrollCallback = [&](int32_t parentId, int32_t callbackId) {
-        if (!scrollCallback_) {
-            scrollCallback_ = [weak = WeakClaim(this)](bool isEnd) {
-                auto client = weak.Upgrade();
-                CHECK_NULL_VOID(client);
-                client->OnParentScrollCallback(isEnd);
-            };
-        }
-        context->GetSelectOverlayManager()->RegisterScrollCallback(parentId, callbackId, std::move(scrollCallback_));
-    };
     if (scrollableParentInfo_.parentIds.empty()) {
         auto parent = host->GetParent();
         while (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
@@ -217,7 +217,7 @@ void SelectOverlayClient::StartListeningScrollableParent(const RefPtr<FrameNode>
                 auto pattern = parentNode->GetPattern<ScrollablePattern>();
                 if (pattern) {
                     scrollableParentInfo_.parentIds.emplace_back(parentNode->GetId());
-                    registerScrollCallback(parentNode->GetId(), host->GetId());
+                    RegisterParentScrollCallback(parentNode->GetId(), host->GetId());
                 }
             }
             parent = parent->GetParent();
@@ -226,9 +226,29 @@ void SelectOverlayClient::StartListeningScrollableParent(const RefPtr<FrameNode>
         LOGI("find scrollable parent %{public}d", scrollableParentInfo_.hasParent);
     } else {
         for (const auto& scrollId : scrollableParentInfo_.parentIds) {
-            registerScrollCallback(scrollId, host->GetId());
+            RegisterParentScrollCallback(scrollId, host->GetId());
         }
     }
+}
+
+void SelectOverlayClient::RegisterParentScrollCallback(int32_t parentId, int32_t callbackId)
+{
+    auto host = GetClientHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto scrollCallback = [weak = WeakClaim(this)](Axis axis, bool offset, int32_t source) {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        if (source == SCROLL_FROM_START) {
+            client->OnParentScrollStartOrEnd(false);
+        } else if (source == -1) {
+            client->OnParentScrollStartOrEnd(true);
+        } else {
+            client->OnParentScrollCallback(axis, offset);
+        }
+    };
+    context->GetSelectOverlayManager()->RegisterScrollCallback(parentId, callbackId, scrollCallback);
 }
 
 void SelectOverlayClient::StopListeningScrollableParent(const RefPtr<FrameNode>& host)

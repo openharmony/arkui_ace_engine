@@ -129,6 +129,14 @@ struct PreInlineState {
     bool hasBorderColor = false;
 };
 
+struct ShowSelectOverlayParams {
+    std::optional<RectF> firstHandle;
+    std::optional<RectF> secondHandle;
+    bool animation = false;
+    bool isShowMenu = true;
+    bool isUpdateMenu = true;
+};
+
 class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
@@ -936,6 +944,9 @@ public:
     bool CheckSelectionRectVisible() override;
     bool OnPreShowSelectOverlay(
         SelectOverlayInfo& overlayInfo, const ClientOverlayInfo& clientInfo, bool isSelectOverlayOn) override;
+    void OnObscuredChanged(bool isObscured);
+    void OnParentScrollCallback(Axis axis, int32_t offset) override;
+    void OnParentScrollStartOrEnd(bool isEnd) override;
     void OnSelectOverlayMenuClicked(SelectOverlayMenuId menuId) override
     {
         switch (menuId) {
@@ -958,8 +969,6 @@ public:
     {
         return GetHost();
     }
-
-    void OnObscuredChanged(bool isObscured);
 
     void SetResponseArea(const RefPtr<TextInputResponseArea>& responseArea)
     {
@@ -1012,13 +1021,12 @@ private:
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
-    void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle,
-        bool animation = false, bool isMenuShow = true);
+    void ShowSelectOverlay(const ShowSelectOverlayParams& params);
 
     void CursorMoveOnClick(const Offset& offset);
     void UpdateCaretInfoToController() const;
 
-    void ProcessOverlay(bool animation = false, bool isShowMenu = true);
+    void ProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
     SelectHandleInfo GetSelectHandleInfo(OffsetF info);
     void UpdateFirstHandlePosition(bool needLayout = false);
     void UpdateSecondHandlePosition(bool needLayout = false);
@@ -1097,6 +1105,8 @@ private:
         isSingleHandle_ = isSingleHandle;
     }
     void NotifyOnEditChanged(bool isChanged);
+    void ProcessOverlayWhenParentScrolls();
+    void StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste = false);
 
     RectF frameRect_;
     RectF contentRect_;

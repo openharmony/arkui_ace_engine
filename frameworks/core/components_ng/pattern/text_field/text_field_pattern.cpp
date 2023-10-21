@@ -853,7 +853,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
         CloseSelectOverlay(true);
         return;
     }
-    ProcessOverlay(true);
+    ProcessOverlay(true, true);
 }
 
 void TextFieldPattern::HandleOnCopy()
@@ -1421,7 +1421,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     SetIsSingleHandle(true);
     if (lastCaretIndex == selectController_->GetCaretIndex() && hasFocus && caretStatus_ == CaretStatus::SHOW &&
         info.GetSourceDevice() != SourceType::MOUSE) {
-        ProcessOverlay(true);
+        ProcessOverlay(true, true);
     } else {
         CloseSelectOverlay(true);
     }
@@ -1439,7 +1439,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
         SetIsSingleHandle(false);
     }
     if (info.GetSourceDevice() != SourceType::MOUSE) {
-        ProcessOverlay(true);
+        ProcessOverlay(true, true);
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1862,7 +1862,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         StopTwinkling();
     }
     SetIsSingleHandle(!IsSelected());
-    ProcessOverlay(true);
+    ProcessOverlay(true, true);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1872,56 +1872,73 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
         std::clamp(pos, 0, static_cast<int32_t>(contentController_->GetWideText().length())));
 }
 
-void TextFieldPattern::ProcessOverlay(bool animation, bool isShowMenu)
+void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool isShowMenu)
 {
     selectController_->CalculateHandleOffset();
+    ShowSelectOverlayParams showOverlayParams = { .animation = animation, .isShowMenu = isShowMenu,
+        .isUpdateMenu = isUpdateMenu };
     if (isSingleHandle_) {
         StartTwinkling();
         LOGD("Show single handle Handle info %{public}s", selectController_->GetCaretRect().ToString().c_str());
-        ShowSelectOverlay(std::nullopt, selectController_->GetCaretRect(), animation, isShowMenu);
+        showOverlayParams.firstHandle = std::nullopt;
+        showOverlayParams.secondHandle = selectController_->GetCaretRect();
+        ShowSelectOverlay(showOverlayParams);
     } else {
         LOGD("Show handles firstHandle info %{public}s, secondHandle Info %{public}s",
             selectController_->GetFirstHandleRect().ToString().c_str(),
             selectController_->GetSecondHandleRect().ToString().c_str());
-        ShowSelectOverlay(
-            selectController_->GetFirstHandleRect(), selectController_->GetSecondHandleRect(), animation, isShowMenu);
+        showOverlayParams.firstHandle = selectController_->GetFirstHandleRect();
+        showOverlayParams.secondHandle = selectController_->GetSecondHandleRect();
+        ShowSelectOverlay(showOverlayParams);
     }
 }
 
-void TextFieldPattern::ShowSelectOverlay(
-    const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle, bool animation, bool isMenuShow)
+void TextFieldPattern::ShowSelectOverlay(const ShowSelectOverlayParams& showOverlayParams)
 {
     if (isTransparent_) {
         return;
     }
-    auto hasDataCallback = [weak = WeakClaim(this), firstHandle, secondHandle, animation, isMenuShow](bool hasData) {
+    auto hasDataCallback = [weak = WeakClaim(this), params = showOverlayParams](bool hasData) {
         LOGI("HasData callback from clipboard, data available ? %{public}d", hasData);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        ClientOverlayInfo overlayInfo = { .animation = animation, .isMenuShow = isMenuShow };
-        if (firstHandle.has_value()) {
-            auto handle = firstHandle.value();
-            handle.SetOffset(handle.GetOffset() + pattern->GetTextPaintOffset());
-            SelectHandleInfo firstHandleInfo;
-            firstHandleInfo.paintRect = handle;
-            overlayInfo.firstHandleInfo = firstHandleInfo;
-        }
-        if (secondHandle.has_value()) {
-            auto handle = secondHandle.value();
-            handle.SetOffset(handle.GetOffset() + pattern->GetTextPaintOffset());
-            SelectHandleInfo secondHandleInfo;
-            secondHandleInfo.paintRect = handle;
-            overlayInfo.secondHandleInfo = secondHandleInfo;
-        }
-        overlayInfo.isShowPaste = hasData;
-        overlayInfo.isMenuShow = isMenuShow;
-        overlayInfo.isShowMouseMenu = pattern->IsUsingMouse();
-        pattern->RequestOpenSelectOverlay(overlayInfo);
-        auto start = pattern->GetTextSelectController()->GetStartIndex();
-        auto end = pattern->GetTextSelectController()->GetEndIndex();
-        pattern->UpdateSelectInfo(pattern->contentController_->GetSelectedValue(start, end));
+        pattern->StartRequestSelectOverlay(params, hasData);
     };
-    clipboard_->HasData(hasDataCallback);
+    if (showOverlayParams.isUpdateMenu) {
+        clipboard_->HasData(hasDataCallback);
+    } else {
+        StartRequestSelectOverlay(showOverlayParams);
+    }
+}
+
+void TextFieldPattern::StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste)
+{
+    ClientOverlayInfo overlayInfo = {
+        .animation = params.animation,
+        .isMenuShow = params.isShowMenu,
+        .isUpdateMenu = params.isUpdateMenu
+    };
+    if (params.firstHandle.has_value()) {
+        auto handle = params.firstHandle.value();
+        handle.SetOffset(handle.GetOffset() + GetTextPaintOffset());
+        SelectHandleInfo firstHandleInfo;
+        firstHandleInfo.paintRect = handle;
+        overlayInfo.firstHandleInfo = firstHandleInfo;
+    }
+    if (params.secondHandle.has_value()) {
+        auto handle = params.secondHandle.value();
+        handle.SetOffset(handle.GetOffset() + GetTextPaintOffset());
+        SelectHandleInfo secondHandleInfo;
+        secondHandleInfo.paintRect = handle;
+        overlayInfo.secondHandleInfo = secondHandleInfo;
+    }
+    overlayInfo.isShowPaste = isShowPaste;
+    overlayInfo.isMenuShow = params.isShowMenu;
+    overlayInfo.isShowMouseMenu = IsUsingMouse();
+    RequestOpenSelectOverlay(overlayInfo);
+    auto start = GetTextSelectController()->GetStartIndex();
+    auto end = GetTextSelectController()->GetEndIndex();
+    UpdateSelectInfo(contentController_->GetSelectedValue(start, end));
 }
 
 bool TextFieldPattern::OnPreShowSelectOverlay(
@@ -3164,10 +3181,24 @@ void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSel
 
 void TextFieldPattern::OnAreaChangedInner()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    RequestKeyboardOnFocus();
+}
+
+void TextFieldPattern::OnParentScrollCallback(Axis axis, int32_t offset)
+{
+    ProcessOverlayWhenParentScrolls();
+}
+
+void TextFieldPattern::OnParentScrollStartOrEnd(bool isEnd)
+{
+    SelectOverlayClient::OnParentScrollStartOrEnd(isEnd);
+    if (isEnd) {
+        ProcessOverlayWhenParentScrolls();
+    }
+}
+
+void TextFieldPattern::ProcessOverlayWhenParentScrolls()
+{
     auto parentGlobalOffset = GetTextPaintOffset();
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
@@ -3175,10 +3206,9 @@ void TextFieldPattern::OnAreaChangedInner()
         selectController_->UpdateCaretOffset();
         selectController_->CalculateHandleOffset();
         if (SelectOverlayIsOn()) {
-            ProcessOverlay();
+            ProcessOverlay(false);
         }
     }
-    RequestKeyboardOnFocus();
 }
 
 void TextFieldPattern::RequestKeyboardOnFocus()
@@ -4891,7 +4921,7 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
 
 void TextFieldPattern::CreateHandles()
 {
-    ProcessOverlay(false, false);
+    ProcessOverlay(true, false, false);
 }
 
 void TextFieldPattern::NotifyOnEditChanged(bool isChanged)

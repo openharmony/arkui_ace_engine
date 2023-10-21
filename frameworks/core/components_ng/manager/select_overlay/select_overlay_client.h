@@ -33,8 +33,6 @@ namespace OHOS::Ace::NG {
 
 enum class HandleShowMode { DOUBLE, SINGLE, NONE };
 
-using ParentScrollableCallback = std::function<void(bool)>;
-
 struct OverlayExtraInfo {
     std::map<std::string, bool> boolExtra;
 
@@ -55,7 +53,7 @@ struct ClientOverlayInfo {
     bool isMenuShow = true;
     bool isShowMouseMenu = false;
     bool isShowPaste = false;
-    OverlayExtraInfo extraInfo;
+    bool isUpdateMenu = true;
 };
 
 struct ScrollableParentInfo {
@@ -75,7 +73,7 @@ class SelectOverlayClient : public SelectionHost {
 
 public:
     void InitSelectOverlay();
-    void RequestOpenSelectOverlay(const ClientOverlayInfo& overlayInfo);
+    void RequestOpenSelectOverlay(ClientOverlayInfo& overlayInfo);
     virtual void RequestCloseSelectOverlay(bool animation);
     bool SelectOverlayIsOn();
 
@@ -119,7 +117,7 @@ public:
         return std::move(menuOptionItems_);
     }
 
-    virtual void OnParentScrollCallback(bool isEnd)
+    virtual void OnParentScrollStartOrEnd(bool isEnd)
     {
         auto proxy = GetSelectOverlayProxy();
         CHECK_NULL_VOID(proxy);
@@ -129,6 +127,8 @@ public:
             proxy->ShowOrHiddenMenu(true);
         }
     }
+
+    virtual void OnParentScrollCallback(Axis axis, int32_t offset) {};
 
     void StartListeningScrollableParent(const RefPtr<FrameNode>& host);
 
@@ -158,10 +158,10 @@ protected:
     }
 
 private:
+    void RegisterParentScrollCallback(int32_t parentId, int32_t callbackId);
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo(const ClientOverlayInfo& clientInfo);
     void CreateSelectOverlay(const ClientOverlayInfo& showOverlayInfo);
-    void UpdateShowingSelectOverlay(const ClientOverlayInfo& clientInfo);
-    ParentScrollableCallback scrollCallback_;
+    void UpdateShowingSelectOverlay(ClientOverlayInfo& clientInfo);
     ScrollableParentInfo scrollableParentInfo_;
     SelectOverlayInfo selectOverlayInfo_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;

@@ -339,7 +339,7 @@ void SelectOverlayManager::MarkDirty(PropertyChangeFlag flag)
     }
 }
 
-void SelectOverlayManager::NotifyOnScrollCallback(int32_t id, bool isEnd)
+void SelectOverlayManager::NotifyOnScrollCallback(int32_t id, Axis axis, float offset, int32_t source)
 {
     LOGI("NotifyOnScrollCallback scroll id %{public}d", id);
     if (parentScrollCallbacks_.empty()) {
@@ -355,17 +355,17 @@ void SelectOverlayManager::NotifyOnScrollCallback(int32_t id, bool isEnd)
         return;
     }
     for (const auto& pair : callbackMap) {
-        pair.second(isEnd);
+        pair.second(axis, offset, source);
     }
 }
 
 void SelectOverlayManager::RegisterScrollCallback(
-    int32_t scrollableParentId, int32_t callbackId, std::function<void(bool)>&& callback)
+    int32_t scrollableParentId, int32_t callbackId, ScrollableParentCallback&& callback)
 {
     LOGI("RegisterScrollCallback scroll parent id %{public}d, callbackId %{public}d", scrollableParentId, callbackId);
     auto it = parentScrollCallbacks_.find(scrollableParentId);
     if (it == parentScrollCallbacks_.end()) {
-        std::map<int32_t, std::function<void(bool)>> callbackMap = { { callbackId, std::move(callback) } };
+        std::map<int32_t, ScrollableParentCallback> callbackMap = { { callbackId, std::move(callback) } };
         parentScrollCallbacks_.insert(std::make_pair(scrollableParentId, callbackMap));
     } else {
         it->second.insert(std::make_pair(callbackId, std::move(callback)));

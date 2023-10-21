@@ -32,6 +32,8 @@
 
 namespace OHOS::Ace::NG {
 
+using ScrollableParentCallback = std::function<void(Axis, float, int32_t)>;
+
 // SelectOverlayManager is the class to show and control select handle and select menu.
 class ACE_EXPORT SelectOverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(SelectOverlayManager, AceType);
@@ -73,9 +75,9 @@ public:
         return selectOverlayItem_;
     }
 
-    void NotifyOnScrollCallback(int32_t id, bool isEnd);
+    void NotifyOnScrollCallback(int32_t id, Axis axis, float offset, int32_t source);
 
-    void RegisterScrollCallback(int32_t scrollableParentId, int32_t callbackId, std::function<void(bool)>&& callback);
+    void RegisterScrollCallback(int32_t scrollableParentId, int32_t callbackId, ScrollableParentCallback&& callback);
 
     void RemoveScrollCallback(int32_t callbackId);
 
@@ -100,7 +102,7 @@ private:
     std::vector<TouchEvent> touchDownPoints_;
     std::vector<std::string> touchTestResults_;
 
-    std::map<int32_t, std::map<int32_t, std::function<void(bool)>>> parentScrollCallbacks_;
+    std::map<int32_t, std::map<int32_t, ScrollableParentCallback>> parentScrollCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayManager);
 };
