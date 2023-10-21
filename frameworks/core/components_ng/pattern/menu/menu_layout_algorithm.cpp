@@ -1148,38 +1148,41 @@ OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, flo
     float y = 0.0f;
     switch (placement_) {
         case Placement::BOTTOM_LEFT:
-        case Placement::BOTTOM:
-        case Placement::LEFT_BOTTOM: {
+        case Placement::LEFT_BOTTOM:
             x += scaleOffset.GetX();
             y -= scaleOffset.GetY();
             break;
-        }
         case Placement::TOP_RIGHT:
-        case Placement::RIGHT:
-        case Placement::RIGHT_TOP: {
+        case Placement::RIGHT_TOP:
             x -= scaleOffset.GetX();
             y += scaleOffset.GetY();
             break;
-        }
         case Placement::TOP_LEFT:
-        case Placement::TOP:
         case Placement::LEFT_TOP:
-        case Placement::LEFT: {
             x += scaleOffset.GetX();
             y += scaleOffset.GetY();
             break;
-        }
         case Placement::BOTTOM_RIGHT:
-        case Placement::RIGHT_BOTTOM: {
+        case Placement::RIGHT_BOTTOM:
             x -= scaleOffset.GetX();
             y -= scaleOffset.GetY();
             break;
-        }
-        default: {
+        case Placement::BOTTOM:
+            y -= scaleOffset.GetY();
+            break;
+        case Placement::TOP:
+            y += scaleOffset.GetY();
+            break;
+        case Placement::LEFT:
+            x += scaleOffset.GetX();
+            break;
+        case Placement::RIGHT:
+            x -= scaleOffset.GetX();
+            break;
+        default:
             x += scaleOffset.GetX();
             y -= scaleOffset.GetY();
             break;
-        }
     }
     return OffsetF(x, y);
 }
