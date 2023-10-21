@@ -90,6 +90,11 @@ void MediaPlayerImpl::InitListener()
             if (player->stateChangeCallback_) {
                 player->stateChangeCallback_(isPlaying ? PlaybackStatus::STARTED : PlaybackStatus::PAUSED);
             }
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+            if (player->startRenderFrameCallback_ && isPlaying) {
+                player->startRenderFrameCallback_();
+            }
+#endif
         });
     };
 
