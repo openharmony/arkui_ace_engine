@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_PATTERN_H
 
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
@@ -103,6 +104,7 @@ public:
 
     void SetControlDistance(float controlDistance)
     {
+        controlDistanceChanged_ = Positive(controlDistance_) ? !Positive(controlDistance) : Positive(controlDistance);
         controlDistance_ = controlDistance;
     }
 
@@ -170,6 +172,7 @@ private:
     float lastOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
     float controlDistance_ = 0.0f;
+    bool  controlDistanceChanged_ = false;
     float scrollOffset_ = 0.0f;
     float friction_ = BAR_FRICTION;
     float frictionPosition_ = 0.0;
