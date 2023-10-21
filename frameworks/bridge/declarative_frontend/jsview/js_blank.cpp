@@ -50,7 +50,6 @@ void JSBlank::Create(const JSCallbackInfo& info)
     CalcDimension blankMin;
     BlankModel::GetInstance()->Create();
     if (info.Length() < 1) {
-        LOGD("Blank min needs at least 1 param");
         return;
     }
     if (info[0]->IsUndefined()) {

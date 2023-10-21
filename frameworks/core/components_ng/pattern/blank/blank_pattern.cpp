@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -98,7 +99,8 @@ void BlankPattern::BeforeCreateLayoutWrapper()
         crossAxisHasSize = (isParentRow && calcConstraint->selfIdealSize.value().Height().has_value()) ||
                            (!isParentRow && calcConstraint->selfIdealSize.value().Width().has_value());
     }
-    LOGD("Main axis has size %{public}d, cross has size %{public}d", mainAxisHasSize, crossAxisHasSize);
+    TAG_LOGD(AceLogTag::ACE_BLANK, "Main axis has size %{public}d, cross has size %{public}d", mainAxisHasSize,
+        crossAxisHasSize);
     if (!crossAxisHasSize) {
         layoutProp->UpdateAlignSelf(FlexAlign::STRETCH);
     }
