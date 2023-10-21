@@ -187,6 +187,9 @@ void TextFieldPaintMethod::UpdateScrollBar()
         LOGD("UpdateOverlayModifier no need paint scroll bar.");
         return;
     }
+    if (scrollBar->GetPositionModeUpdate()) {
+        textFieldOverlayModifier_->SetPositionMode(scrollBar->GetPositionMode());
+    }
     OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
     textFieldOverlayModifier_->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());

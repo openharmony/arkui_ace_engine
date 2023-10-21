@@ -42,6 +42,10 @@ void ScrollablePattern::SetAxis(Axis axis)
     if (scrollBar_) {
         scrollBar_->SetPositionMode(axis_ == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
     }
+    if (scrollBarOverlayModifier_) {
+        scrollBarOverlayModifier_->SetPositionMode(
+            axis_ == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
+    }
     auto gestureHub = GetGestureHub();
     CHECK_NULL_VOID(gestureHub);
     if (scrollableEvent_) {
@@ -486,6 +490,9 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         // set the scroll bar style
         if (GetAxis() == Axis::HORIZONTAL) {
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+            if (scrollBarOverlayModifier_) {
+                scrollBarOverlayModifier_->SetPositionMode(PositionMode::BOTTOM);
+            }
         }
         RegisterScrollBarEventTask();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -613,6 +620,7 @@ void ScrollablePattern::CreateScrollBarOverlayModifier()
     CHECK_NULL_VOID(!scrollBarOverlayModifier_);
     scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
     scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect());
+    scrollBarOverlayModifier_->SetPositionMode(scrollBar_->GetPositionMode());
 }
 
 void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)

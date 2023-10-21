@@ -23,6 +23,7 @@
 #include "base/geometry/rect.h"
 #include "base/utils/utils.h"
 #include "core/animation/friction_motion.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/scroll/scroll_bar_theme.h"
@@ -71,21 +72,6 @@ enum class DisplayMode {
      * always display scrollbar.
      */
     ON,
-};
-
-enum class PositionMode {
-    /*
-     * display scrollbar on right.
-     */
-    RIGHT = 0,
-    /*
-     * display scrollbar on left.
-     */
-    LEFT,
-    /*
-     * display scrollbar on bottom.
-     */
-    BOTTOM,
 };
 
 class ScrollBar final : public AceType {
@@ -264,6 +250,11 @@ public:
                 panRecognizer_->SetDirection(panDirection);
             }
         }
+    }
+
+    bool GetPositionModeUpdate() const
+    {
+        return positionModeUpdate_;
     }
 
     void SetShapeMode(ShapeMode shapeMode)

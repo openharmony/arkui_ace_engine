@@ -51,6 +51,9 @@ void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (!scrollBar || !scrollBar->NeedPaint()) {
         return;
     }
+    if (scrollBar->GetPositionModeUpdate()) {
+        scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
+    }
     OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
