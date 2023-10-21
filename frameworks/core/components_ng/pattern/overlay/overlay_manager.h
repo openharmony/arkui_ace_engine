@@ -108,6 +108,7 @@ public:
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
 
+    void ClearToastInSubwindow();
     void ClearToast();
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft,
         const ToastShowMode& showMode = ToastShowMode::DEFAULT);
