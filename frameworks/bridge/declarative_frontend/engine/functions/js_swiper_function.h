@@ -28,10 +28,7 @@ class JsSwiperFunction : public JsFunction {
 public:
     explicit JsSwiperFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
-    ~JsSwiperFunction() override
-    {
-        LOGD("Destroy: JsSwiperFunction");
-    };
+    ~JsSwiperFunction() override {};
 
     void Execute() override
     {
