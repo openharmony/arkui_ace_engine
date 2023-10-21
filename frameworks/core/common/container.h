@@ -232,6 +232,7 @@ public:
     static int32_t CurrentId();
     static RefPtr<Container> Current();
     static RefPtr<Container> GetActive();
+    static RefPtr<Container> GetFoucsed();
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static void UpdateCurrent(int32_t id);
 

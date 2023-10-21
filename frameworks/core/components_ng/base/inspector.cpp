@@ -290,6 +290,38 @@ RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
     }
     return overlayNode;
 }
+
+void GetContextInfo(const RefPtr<PipelineContext>& context, std::unique_ptr<JsonValue>& jsonRoot)
+{
+    auto scale = context->GetViewScale();
+    auto rootHeight = context->GetRootHeight();
+    auto rootWidth = context->GetRootWidth();
+    deviceRect.SetRect(0, 0, rootWidth * scale, rootHeight * scale);
+    jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
+    jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
+    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+}
+
+std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t pageId,
+    std::unique_ptr<JsonValue> jsonRoot, bool isLayoutInspector)
+{
+    auto jsonNodeArray = JsonUtil::CreateArray(true);
+    for (auto& uiNode : children) {
+        GetInspectorChildren(uiNode, jsonNodeArray, pageId, true);
+    }
+    if (jsonNodeArray->GetArraySize()) {
+        jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
+    }
+
+    if (isLayoutInspector) {
+        auto jsonTree = JsonUtil::Create(true);
+        jsonTree->Put("type", "root");
+        jsonTree->Put("content", jsonRoot);
+        return jsonTree->ToString();
+    }
+
+    return jsonRoot->ToString();
+}
 } // namespace
 
 std::set<RefPtr<FrameNode>> Inspector::offscreenNodes;
@@ -406,14 +438,7 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
 
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, jsonRoot->ToString());
-    auto scale = context->GetViewScale();
-    auto rootHeight = context->GetRootHeight();
-    auto rootWidth = context->GetRootWidth();
-    deviceRect.SetRect(0, 0, rootWidth * scale, rootHeight * scale);
-    jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
-    jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
-    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
-
+    GetContextInfo(context, jsonRoot);
     auto pageRootNode = context->GetStageManager()->GetLastPage();
     CHECK_NULL_RETURN(pageRootNode, jsonRoot->ToString());
     auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
@@ -425,22 +450,25 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     if (overlayNode) {
         GetFrameNodeChildren(overlayNode, children, pageId);
     }
-    auto jsonNodeArray = JsonUtil::CreateArray(true);
-    for (auto& uiNode : children) {
-        GetInspectorChildren(uiNode, jsonNodeArray, pageId, true);
-    }
-    if (jsonNodeArray->GetArraySize()) {
-        jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
-    }
 
-    if (isLayoutInspector) {
-        auto jsonTree = JsonUtil::Create(true);
-        jsonTree->Put("type", "root");
-        jsonTree->Put("content", jsonRoot);
-        return jsonTree->ToString();
-    }
+    return GetInspectorInfo(children, pageId, std::move(jsonRoot), isLayoutInspector);
+}
 
-    return jsonRoot->ToString();
+std::string Inspector::GetSubWindowInspector(bool isLayoutInspector)
+{
+    auto jsonRoot = JsonUtil::Create(true);
+    jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, jsonRoot->ToString());
+    GetContextInfo(context, jsonRoot);
+    auto overlayNode = context->GetOverlayManager()->GetRootNode().Upgrade();
+    CHECK_NULL_RETURN(overlayNode, jsonRoot->ToString());
+    auto pageId = 0;
+    std::vector<RefPtr<NG::UINode>> children;
+    GetFrameNodeChildren(overlayNode, children, pageId);
+
+    return GetInspectorInfo(children, 0, std::move(jsonRoot), isLayoutInspector);
 }
 
 bool Inspector::SendEventByKey(const std::string& key, int action, const std::string& params)
