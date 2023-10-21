@@ -317,11 +317,6 @@ public:
         return isHover_;
     }
 
-    uint8_t GetOpacity() const
-    {
-        return opacity_;
-    }
-
     void PlayScrollBarDisappearAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
@@ -571,7 +566,6 @@ private:
     Size viewPortSize_;
     Offset lastOffset_;
     double estimatedHeight_ = 0.0;
-    uint8_t opacity_ = UINT8_MAX;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
