@@ -366,8 +366,8 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    auto text = textFieldPattern->GetEditingValue();
-    searchEventHub->UpdateSubmitEvent(text.text);
+    auto text = textFieldPattern->GetTextValue();
+    searchEventHub->UpdateSubmitEvent(text);
     textFieldPattern->CloseKeyboard(true);
 }
 

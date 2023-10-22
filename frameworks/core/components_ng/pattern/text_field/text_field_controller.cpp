@@ -78,12 +78,7 @@ int32_t TextFieldController::GetTextContentLinesNum()
         if (!textFieldPattern->IsOperation()) {
             return lines;
         }
-        RectF textRect = textFieldPattern->GetTextRect();
-
-        if (static_cast<int32_t>(textFieldPattern->GetLineHeight()) == 0) {
-            return lines;
-        }
-        lines = static_cast<int32_t>(textRect.Height()) / static_cast<int32_t>(textFieldPattern->GetLineHeight());
+        lines = textFieldPattern->GetLineCount();
         return lines;
     }
     lines = getTextContentLinesNum_();

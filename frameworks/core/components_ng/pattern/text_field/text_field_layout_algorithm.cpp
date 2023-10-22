@@ -53,9 +53,9 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto isInlineStyle = pattern->IsNormalInlineState();
 
-    if (!textFieldLayoutProperty->GetValueValue("").empty()) {
+    if (!pattern->GetTextValue().empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
-        textContent = textFieldLayoutProperty->GetValueValue("");
+        textContent = pattern->GetTextValue();
         if (!pattern->IsTextArea() && isInlineStyle) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         }

@@ -341,7 +341,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     auto last = extent - placeHolderIndex_ - 1;
     auto index = static_cast<size_t>(last) == text_.length() ? last : extent;
     prevChar = text_[std::max(0, index - 1)];
-    if (prevChar == NEWLINE_CODE) {
+    if (prevChar == NEWLINE_CODE && !text_[index]) {
         // Return the start of next line.
         result.offset.SetX(MakeEmptyOffsetX());
 #ifndef USE_GRAPHIC_TEXT_GINE

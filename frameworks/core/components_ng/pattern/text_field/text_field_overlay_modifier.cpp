@@ -194,7 +194,7 @@ void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (textFieldPattern->GetScrollBarVisible() && textFieldPattern->IsFocus()) {
+    if (textFieldPattern->GetScrollBarVisible() && textFieldPattern->IsTextArea()) {
         ScrollBarOverlayModifier::onDraw(context);
     }
 }

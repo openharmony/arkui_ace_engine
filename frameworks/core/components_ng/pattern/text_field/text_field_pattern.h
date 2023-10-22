@@ -258,7 +258,6 @@ public:
         textEditingController_ = textEditController;
     }
 
-    const TextEditingValueNG& GetEditingValue() const;
     std::string GetTextValue() const
     {
         return contentController_->GetTextValue();
@@ -281,7 +280,6 @@ public:
         contentController_->SetTextValue(value);
         selectController_->UpdateCaretIndex(caretPosition);
     }
-    void SetEditingValueToProperty(const std::string& newValueText);
     void UpdateCaretPositionByTouch(const Offset& offset);
     bool IsReachedBoundary(float offset);
 
@@ -337,8 +335,6 @@ public:
         return imeAttached_;
     }
 #endif
-
-    bool DisplayPlaceHolder();
 
     const OffsetF& GetLastTouchOffset()
     {
@@ -483,7 +479,7 @@ public:
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
-        return textEditingValue_.ToString().length() > 1;
+        return contentController_->GetTextValue().length() > 0;
     }
 
     bool CursorMoveLeft() override;
@@ -793,6 +789,7 @@ public:
     void HandleOnCut();
     void StripNextLine(std::wstring& data);
     bool OnKeyEvent(const KeyEvent& event);
+    int32_t GetLineCount() const;
     TextInputType GetKeyboard()
     {
         return keyboard_;

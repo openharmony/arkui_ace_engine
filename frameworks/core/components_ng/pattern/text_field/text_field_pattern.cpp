@@ -250,6 +250,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     paragraphWidth_ = paragraphWidth;
     textRect_ = textRect;
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
+    FireOnTextChangeEvent();
     UpdateSelectController();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     AdjustTextInReasonableArea();
@@ -501,19 +502,6 @@ int32_t TextFieldPattern::ConvertTouchOffsetToCaretPositionNG(const Offset& loca
     CHECK_NULL_RETURN(paragraph_, 0);
     auto offset = localOffset - Offset(textRect_.GetX(), textRect_.GetY());
     return paragraph_->GetGlyphIndexByCoordinate(offset);
-}
-
-bool TextFieldPattern::DisplayPlaceHolder()
-{
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    auto value = layoutProperty->GetValueValue("");
-    return value.empty();
-}
-
-const TextEditingValueNG& TextFieldPattern::GetEditingValue() const
-{
-    return textEditingValue_;
 }
 
 #if defined(IOS_PLATFORM)
@@ -792,7 +780,6 @@ void TextFieldPattern::HandleOnUndoAction()
     auto textEditingValue = operationRecords_.back(); // record应该包含光标、select状态、文本
     contentController_->SetTextValue(textEditingValue.text);
     selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
-    FireOnTextChangeEvent();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto tmpHost = GetHost();
@@ -813,7 +800,6 @@ void TextFieldPattern::HandleOnRedoAction()
     selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
     redoOperationRecords_.pop_back();
     operationRecords_.push_back(textEditingValue);
-    FireOnTextChangeEvent();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto tmpHost = GetHost();
@@ -924,7 +910,6 @@ void TextFieldPattern::HandleOnPaste()
             static_cast<int32_t>(textfield->contentController_->GetWideText().length()));
         textfield->ResetObscureTickCountDown();
         textfield->selectController_->UpdateCaretIndex(newCaretPosition);
-        textfield->FireOnTextChangeEvent();
         textfield->UpdateEditingValueToRecord();
         if (textfield->IsTextArea() && layoutProperty->HasMaxLength()) {
             textfield->HandleCounterBorder();
@@ -990,7 +975,6 @@ void TextFieldPattern::HandleOnCut()
     }
     contentController_->erase(start, end - start);
     UpdateSelection(start);
-    SetEditingValueToProperty(contentController_->GetTextValue());
     CloseSelectOverlay(true);
     StartTwinkling();
     UpdateEditingValueToRecord();
@@ -1589,7 +1573,6 @@ void TextFieldPattern::OnModifyDone()
     InitTouchEvent();
     SetAccessibilityAction();
     FilterInitializeText();
-    FireOnTextChangeEvent();
     InitSelectOverlay();
     if (responseArea_) {
         responseArea_->InitResponseArea(WeakClaim(this));
@@ -1875,8 +1858,9 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool isShowMenu)
 {
     selectController_->CalculateHandleOffset();
-    ShowSelectOverlayParams showOverlayParams = { .animation = animation, .isShowMenu = isShowMenu,
-        .isUpdateMenu = isUpdateMenu };
+    ShowSelectOverlayParams showOverlayParams = {
+        .animation = animation, .isShowMenu = isShowMenu, .isUpdateMenu = isUpdateMenu
+    };
     if (isSingleHandle_) {
         StartTwinkling();
         LOGD("Show single handle Handle info %{public}s", selectController_->GetCaretRect().ToString().c_str());
@@ -1914,9 +1898,7 @@ void TextFieldPattern::ShowSelectOverlay(const ShowSelectOverlayParams& showOver
 void TextFieldPattern::StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste)
 {
     ClientOverlayInfo overlayInfo = {
-        .animation = params.animation,
-        .isMenuShow = params.isShowMenu,
-        .isUpdateMenu = params.isUpdateMenu
+        .animation = params.animation, .isMenuShow = params.isShowMenu, .isUpdateMenu = params.isUpdateMenu
     };
     if (params.firstHandle.has_value()) {
         auto handle = params.firstHandle.value();
@@ -2191,6 +2173,10 @@ void TextFieldPattern::InitEditingValueText(std::string content)
 {
     contentController_->SetTextValue(std::move(content));
     selectController_->UpdateCaretIndex(static_cast<int32_t>(StringUtils::ToWstring(content).length()));
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                      : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::InitMouseEvent()
@@ -2606,7 +2592,6 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     selectionMode_ = SelectionMode::NONE;
     CloseSelectOverlay(true);
     StartTwinkling();
-    FireOnTextChangeEvent();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
@@ -3020,7 +3005,6 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     LOGI("Handle Delete within [%{public}d, %{public}d]", start, end);
     contentController_->erase(start, end - start);
     selectController_->MoveCaretToContentRect(start);
-    FireOnTextChangeEvent();
     CloseSelectOverlay(true);
     StartTwinkling();
     UpdateEditingValueToRecord();
@@ -3035,27 +3019,10 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
                                                                                       : PROPERTY_UPDATE_MEASURE);
 }
 
-void TextFieldPattern::SetEditingValueToProperty(const std::string& newValueText)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto textCache = layoutProperty->GetValueValue("");
-    layoutProperty->UpdateValue(newValueText);
-    if (textCache != newValueText) {
-        layoutProperty->UpdateNeedFireOnChange(true);
-        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, newValueText);
-    } else {
-        layoutProperty->UpdateNeedFireOnChange(false);
-    }
-}
-
 void TextFieldPattern::ClearEditingValue()
 {
     contentController_->Reset();
     selectController_->UpdateCaretIndex(0);
-    FireOnTextChangeEvent();
     UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -3158,7 +3125,6 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     StartTwinkling();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    FireOnTextChangeEvent();
 
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -3289,7 +3255,6 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     auto start = std::max(selectController_->GetCaretIndex() - length, 0);
     contentController_->erase(start, length);
     selectController_->UpdateCaretIndex(start);
-    FireOnTextChangeEvent();
     CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
@@ -3317,7 +3282,6 @@ void TextFieldPattern::DeleteForward(int32_t length)
         return;
     }
     contentController_->erase(selectController_->GetCaretIndex(), length);
-    FireOnTextChangeEvent();
     selectionMode_ = SelectionMode::NONE;
     CloseSelectOverlay();
     StartTwinkling();
@@ -3616,7 +3580,7 @@ int32_t TextFieldPattern::GetNakedCharPosition() const
     }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, -1);
-    auto content = layoutProperty->GetValueValue("");
+    auto content = contentController_->GetTextValue();
     if (content.empty()) {
         return -1;
     }
@@ -4914,5 +4878,13 @@ void TextFieldPattern::NotifyOnEditChanged(bool isChanged)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnEditChanged(isChanged);
+}
+
+int32_t TextFieldPattern::GetLineCount() const
+{
+    if (paragraph_) {
+        return paragraph_->GetLineCount();
+    }
+    return 0;
 }
 } // namespace OHOS::Ace::NG
