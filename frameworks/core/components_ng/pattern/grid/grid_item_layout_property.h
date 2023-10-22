@@ -76,6 +76,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MainIndex, int32_t, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CrossIndex, int32_t, PROPERTY_UPDATE_LAYOUT);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RealColumnSpan, int32_t, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RealRowSpan, int32_t, PROPERTY_UPDATE_LAYOUT);
+
     int32_t GetCustomCrossIndex(Axis axis) const;
     int32_t GetMainSpan(Axis axis) const;
     int32_t GetCrossSpan(Axis axis) const;
@@ -83,6 +86,7 @@ public:
     int32_t GetCrossStart(Axis axis) const;
     int32_t GetMainEnd(Axis axis) const;
     int32_t GetCrossEnd(Axis axis) const;
+    bool CheckWhetherCurrentItemAtExpectedPosition(Axis axis) const;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridItemLayoutProperty);
