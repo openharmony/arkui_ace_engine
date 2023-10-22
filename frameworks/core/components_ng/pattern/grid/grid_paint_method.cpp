@@ -46,6 +46,9 @@ void GridPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         LOGD("no need paint scroll bar.");
         return;
     }
+    if (scrollBar->GetPositionModeUpdate()) {
+        scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
+    }
     OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
