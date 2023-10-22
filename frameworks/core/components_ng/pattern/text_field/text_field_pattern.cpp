@@ -2667,11 +2667,11 @@ float TextFieldPattern::PreferredLineHeight()
     return PreferredTextHeight(contentController_->IsEmpty());
 }
 
-void TextFieldPattern::OnCursorMoveDone()
+void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity)
 {
     CloseSelectOverlay();
     selectionMode_ = SelectionMode::NONE;
-    selectController_->MoveCaretToContentRect(GetCaretIndex());
+    selectController_->MoveCaretToContentRect(GetCaretIndex(), textAffinity);
     if (ResetObscureTickCountDown()) {
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
@@ -2769,8 +2769,8 @@ int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool n
     }
     int32_t moveLineEndOffset = 0;
     int32_t strIndex = 0;
-    for (strIndex = originCaretPosition + 1; (strIndex <= textLength && wideTextValue[strIndex] != L'\n') ||
-                                             (needToCheckLineChanged && !CharLineChanged(strIndex));
+    for (strIndex = originCaretPosition; (strIndex <= textLength && wideTextValue[strIndex] != L'\n') ||
+                                         (needToCheckLineChanged && !CharLineChanged(strIndex));
          strIndex++) {
         moveLineEndOffset++;
     }
@@ -2804,7 +2804,7 @@ bool TextFieldPattern::CursorMoveLeft()
             selectController_->GetCaretIndex() -
             GetGraphemeClusterLength(contentController_->GetWideText(), selectController_->GetCaretIndex(), true));
     }
-    OnCursorMoveDone();
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
@@ -2863,7 +2863,7 @@ bool TextFieldPattern::CursorMoveToParagraphBegin()
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
     UpdateCaretPositionWithClamp(GetLineBeginPosition(originCaretPosition, false));
-    OnCursorMoveDone();
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
@@ -2892,7 +2892,7 @@ bool TextFieldPattern::CursorMoveRight()
             selectController_->GetCaretIndex() +
             GetGraphemeClusterLength(contentController_->GetWideText(), selectController_->GetCaretIndex()));
     }
-    OnCursorMoveDone();
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
@@ -2951,7 +2951,7 @@ bool TextFieldPattern::CursorMoveToParagraphEnd()
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
     UpdateCaretPositionWithClamp(GetLineEndPosition(originCaretPosition, false));
-    OnCursorMoveDone();
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 

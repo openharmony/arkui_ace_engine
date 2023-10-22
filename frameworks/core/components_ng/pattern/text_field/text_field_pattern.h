@@ -595,7 +595,7 @@ public:
     }
 
     void ProcessInnerPadding();
-    void OnCursorMoveDone();
+    void OnCursorMoveDone(TextAffinity textAffinity = TextAffinity::UPSTREAM);
     bool IsDisabled();
     bool AllowCopy();
 

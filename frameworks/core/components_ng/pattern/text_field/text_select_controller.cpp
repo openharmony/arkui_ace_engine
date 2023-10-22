@@ -302,14 +302,14 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
     FireSelectEvent();
 }
 
-void TextSelectController::MoveCaretToContentRect(int32_t index)
+void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity textAffinity)
 {
     index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     CaretMetricsF CaretMetrics;
     caretInfo_.index = index;
     firstHandleInfo_.index = index;
     secondHandleInfo_.index = index;
-    CalcCaretMetricsByPosition(GetCaretIndex(), CaretMetrics, TextAffinity::UPSTREAM);
+    CalcCaretMetricsByPosition(GetCaretIndex(), CaretMetrics, textAffinity);
     OffsetF CaretOffset = CaretMetrics.offset;
     RectF caretRect;
     caretRect.SetOffset(CaretOffset);
@@ -415,9 +415,9 @@ void TextSelectController::UpdateRecordCaretIndex(int32_t index) const
 
 void TextSelectController::ResetHandles()
 {
-        firstHandleInfo_.index = caretInfo_.index;
-        secondHandleInfo_.index = caretInfo_.index;
-        UpdateFirstHandleOffset();
-        UpdateSecondHandleOffset();
+    firstHandleInfo_.index = caretInfo_.index;
+    secondHandleInfo_.index = caretInfo_.index;
+    UpdateFirstHandleOffset();
+    UpdateSecondHandleOffset();
 }
 } // namespace OHOS::Ace::NG
