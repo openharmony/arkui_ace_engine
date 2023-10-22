@@ -623,23 +623,23 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     CHECK_NULL_RETURN(curItemPattern, nullptr);
     auto curItemProperty = curItemPattern->GetLayoutProperty<GridItemLayoutProperty>();
     CHECK_NULL_RETURN(curItemProperty, nullptr);
-    auto scrollIrregularInfo = curItemPattern->GetScrollIrregularItemInfo();
-    bool hasIrregularItemInScroll = scrollIrregularInfo.has_value();
+    auto irregularInfo = curItemPattern->GetIrregularItemInfo();
+    bool hasIrregularItemInfo = irregularInfo.has_value();
 
     auto curMainIndex = curItemProperty->GetMainIndex().value_or(-1);
     auto curCrossIndex = curItemProperty->GetCrossIndex().value_or(-1);
-    auto curMainSpan = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainSpan
-                                                : curItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
-    auto curCrossSpan = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossSpan
-                                                 : curItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
-    auto curMainStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainStart
-                                                 : curItemProperty->GetMainStart(gridLayoutInfo_.axis_);
-    auto curCrossStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossStart
-                                                  : curItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
-    auto curMainEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainEnd
-                                               : curItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
-    auto curCrossEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossEnd
-                                                : curItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
+    auto curMainSpan =
+        hasIrregularItemInfo ? irregularInfo.value().mainSpan : curItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
+    auto curCrossSpan =
+        hasIrregularItemInfo ? irregularInfo.value().crossSpan : curItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
+    auto curMainStart =
+        hasIrregularItemInfo ? irregularInfo.value().mainStart : curItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+    auto curCrossStart =
+        hasIrregularItemInfo ? irregularInfo.value().crossStart : curItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
+    auto curMainEnd =
+        hasIrregularItemInfo ? irregularInfo.value().mainEnd : curItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
+    auto curCrossEnd =
+        hasIrregularItemInfo ? irregularInfo.value().crossEnd : curItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
 
     curFocusIndexInfo_.mainIndex = curMainIndex;
     curFocusIndexInfo_.crossIndex = curCrossIndex;
@@ -894,19 +894,19 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
         if (!childItemProperty) {
             continue;
         }
-        auto scrollIrregularInfo = childPattern->GetScrollIrregularItemInfo();
-        bool hasIrregularItemInScroll = scrollIrregularInfo.has_value();
+        auto irregularInfo = childPattern->GetIrregularItemInfo();
+        bool hasIrregularItemInfo = irregularInfo.has_value();
 
         auto childMainIndex = childItemProperty->GetMainIndex().value_or(-1);
         auto childCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
-        auto chidlMainStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainStart
-                                                       : childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
-        auto chidlMainEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainEnd
-                                                     : childItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
-        auto chidCrossStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossStart
-                                                       : childItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
-        auto chidCrossEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossEnd
-                                                     : childItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
+        auto chidlMainStart = hasIrregularItemInfo ? irregularInfo.value().mainStart
+                                                   : childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+        auto chidlMainEnd =
+            hasIrregularItemInfo ? irregularInfo.value().mainEnd : childItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
+        auto chidCrossStart = hasIrregularItemInfo ? irregularInfo.value().crossStart
+                                                   : childItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
+        auto chidCrossEnd = hasIrregularItemInfo ? irregularInfo.value().crossEnd
+                                                 : childItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
 
         GridItemIndexInfo childInfo;
         childInfo.mainIndex = childMainIndex;
@@ -916,7 +916,8 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
         childInfo.crossStart = chidCrossStart;
         childInfo.crossEnd = chidCrossEnd;
 
-        if ((isLeftStep_ && (childCrossIndex == tarCrossIndex || chidCrossEnd == tarCrossIndex)) ||
+        if ((isLeftStep_ &&
+                ((childCrossIndex == tarCrossIndex && chidCrossEnd == -1) || chidCrossEnd == tarCrossIndex)) ||
             (isRightStep_ && childCrossIndex == tarCrossIndex)) {
             double nearestDistance = GetNearestDistanceFromChildToCurFocusItemInMainAxis(tarCrossIndex, childInfo);
             int32_t intersectAreaSize = CalcIntersectAreaInTargetDirectionShadow(childInfo, true);
@@ -930,7 +931,8 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
                 targetFocusHubWeak = AceType::WeakClaim(AceType::RawPtr(childFocus));
             }
         } else if ((isUpStep_ && childMainIndex == tarMainIndex) ||
-                   (isDownStep_ && (childMainIndex == tarMainIndex || chidlMainStart == tarMainIndex))) {
+                   (isDownStep_ &&
+                       ((childMainIndex == tarMainIndex && chidlMainStart == -1) || chidlMainStart == tarMainIndex))) {
             double nearestDistance = GetNearestDistanceFromChildToCurFocusItemInCrossAxis(tarMainIndex, childInfo);
             int32_t intersectAreaSize = CalcIntersectAreaInTargetDirectionShadow(childInfo, false);
             if (LessNotEqual(nearestDistance, minDistance) ||
