@@ -675,6 +675,22 @@ void TextFieldPattern::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
     }
 }
 
+void TextFieldPattern::InitDisableColor()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+        underlineWidth_ = UNDERLINE_WIDTH;
+        underlineColor_ =
+            IsDisabled() ? theme->GetDisableUnderlineColor() : theme->GetUnderlineColor();
+        SaveUnderlineStates();
+    }
+}
+
 void TextFieldPattern::InitFocusEvent()
 {
     CHECK_NULL_VOID(!focusEventInitialized_);
@@ -1522,7 +1538,7 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     LOGI("Keyboard action is %{public}d", action_);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     // if keyboard attached and keyboard is shown, pull up keyboard again
-    if (needToResetKeyboard && imeAttached_ && imeShown_) {
+    if (needToResetKeyboard && imeShown_) {
         CloseKeyboard(true);
         RequestKeyboard(false, true, true);
     }
@@ -1554,12 +1570,6 @@ void TextFieldPattern::OnModifyDone()
         layoutProperty->UpdateTextInputType(TextInputType::TEXT);
     }
     CheckIfNeedToResetKeyboard();
-    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-        underlineWidth_ = UNDERLINE_WIDTH;
-        underlineColor_ =
-            IsDisabled() ? textFieldTheme->GetDisableUnderlineColor() : textFieldTheme->GetUnderlineColor();
-        SaveUnderlineStates();
-    }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     isTransparent_ = renderContext->GetOpacityValue(1.0f) == 0.0f;
@@ -1574,6 +1584,7 @@ void TextFieldPattern::OnModifyDone()
     SetAccessibilityAction();
     FilterInitializeText();
     InitSelectOverlay();
+    InitDisableColor();
     if (responseArea_) {
         responseArea_->InitResponseArea(WeakClaim(this));
     }
@@ -1753,13 +1764,6 @@ bool TextFieldPattern::IsDisabled()
     CHECK_NULL_RETURN(eventHub, true);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, true);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, true);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(theme, true);
-    if (!eventHub->IsEnabled()) {
-        layoutProperty->UpdateTextColor(theme->GetDisableTextColor());
-    }
     return !eventHub->IsEnabled();
 }
 
@@ -2415,9 +2419,6 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
         LOGI("RequestKeyboard set calling window id is : %{public}u", textConfig.windowId);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        imeAttached_ = true;
-#endif
 #else
         if (!HasConnection()) {
             TextInputConfiguration config;
@@ -2483,20 +2484,12 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
             return CloseCustomKeyboard();
         }
 #if defined(ENABLE_STANDARD_INPUT)
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        if (!imeAttached_) {
-            return false;
-        }
-#endif
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (!inputMethod) {
             LOGE("Request close soft keyboard failed because input method is null.");
             return false;
         }
         inputMethod->Close();
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        imeAttached_ = false;
-#endif
 #else
         if (HasConnection()) {
             connection_->Close(GetInstanceId());
@@ -3554,7 +3547,7 @@ bool TextFieldPattern::OnBackPressed()
     CHECK_NULL_RETURN(tmpHost, false);
     LOGI("Textfield %{public}d receives back press event", tmpHost->GetId());
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if ((!imeAttached_ || (imeAttached_ && !imeShown_)) && !isCustomKeyboardAttached_) {
+    if (!imeShown_ && !isCustomKeyboardAttached_) {
 #else
     if (!isCustomKeyboardAttached_) {
 #endif

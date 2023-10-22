@@ -986,6 +986,7 @@ private:
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
 
+    void InitDisableColor();
     void InitFocusEvent();
     void InitTouchEvent();
     void InitLongPressEvent();
