@@ -324,7 +324,7 @@ void PatternLockPattern::HandleGestureUpdate(const GestureEvent& info)
 
 void PatternLockPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) { LOGD("Pan event start"); };
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) {};
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -332,9 +332,9 @@ void PatternLockPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleGestureUpdate(info);
     };
 
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) { LOGD("Pan event End"); };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) {};
 
-    auto actionCancelTask = [weak = WeakClaim(this)]() { LOGD("Pan event cancel"); };
+    auto actionCancelTask = [weak = WeakClaim(this)]() {};
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
     }
