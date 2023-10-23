@@ -109,6 +109,8 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto newMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPort(), axis);
     auto oldExtentMainSize = GetMainAxisSize(viewPortExtent_, axis);
     auto newExtentMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPortExtent(), axis);
+    auto scrollBar = GetScrollBar();
+    auto scrollBarProxy = GetScrollBarProxy();
     viewPortLength_ = layoutAlgorithm->GetViewPortLength();
     viewPort_ = layoutAlgorithm->GetViewPort();
     viewSize_ = layoutAlgorithm->GetViewSize();
@@ -127,7 +129,8 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         FireOnScrollStop();
         scrollStop_ = false;
     }
-    if (ScrollableIdle() && !AnimateRunning()) {
+    if (!scrollBarProxy->IsPressed() && !scrollBar->IsPressed() && ScrollableIdle() && !AnimateRunning()) {
+        TAG_LOGI(AceLogTag::ACE_SCROLL, "StartScrollSnapMotion input1");
         auto predictSnapOffset = CalePredictSnapOffset(0.0);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);

@@ -93,7 +93,18 @@ public:
 
     float CalcPatternOffset(float scrollableDistance, float controlDistance, float delta) const;
 
+    void SetPressed(bool press)
+    {
+        isPressed_ = press;
+    }
+
+    bool IsPressed() const
+    {
+        return isPressed_;
+    }
+
 private:
+    bool isPressed_ = false;
     std::list<ScrollableNodeInfo> scrollableNodes_;  // Scrollable nodes, like list, grid, scroll, etc.
     std::list<WeakPtr<ScrollBarPattern>> scrollBars_; // ScrollBar should effect with scrollable node.
 };
