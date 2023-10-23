@@ -91,7 +91,6 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     if (!bitmap_.tryAllocPixels(imageInfo)) {
-        LOGE("The OffScreenCanvas fail to constructor due to the width and height being too large");
         isSucceed_ = false;
         return;
     }
@@ -114,8 +113,6 @@ void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& i
     if (imageObj->IsSvg()) {
         skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj)->GetSkiaDom();
         currentSource_ = loadingSource_;
-    } else {
-        LOGE("image is not svg");
     }
 }
 
@@ -679,7 +676,6 @@ void OffscreenCanvasPaintMethod::PaintText(
             }
             rsCanvas_->Scale(scale.value(), 1.0);
         }
-        LOGE("Drawing is not supported");
         rsCanvas_->Restore();
         return;
     }
@@ -699,10 +695,8 @@ void OffscreenCanvasPaintMethod::PaintText(
 #else
         rsCanvas_->Save();
         rsCanvas_->Scale(scale.value(), 1.0);
-        LOGE("Drawing is not supported");
         rsCanvas_->Restore();
     } else {
-        LOGE("Drawing is not supported");
     }
 #endif
 }
@@ -897,7 +891,6 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
 #endif
     }
 #else
-    LOGE("Drawing is not supported");
 #endif
 }
 

@@ -78,6 +78,7 @@ enum class AceLogTag : uint8_t {
     ACE_FORM,
     ACE_DRAG,
     ACE_VIDEO,
+    ACE_CANVAS,
     ACE_SCROLL,
     ACE_SCROLLABLE,
     ACE_INNER_SCROLL_BAR,

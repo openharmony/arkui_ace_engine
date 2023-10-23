@@ -79,7 +79,6 @@ inline Rect GetJsRectParam(const JSCallbackInfo& info)
 {
     // 4 parameters: rect(x, y, width, height)
     if (info.Length() != 4) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return Rect();
     }
     double x = 0.0;
@@ -102,7 +101,6 @@ inline Rect GetJsRectParam(const JSCallbackInfo& info)
 inline bool ParseJsDoubleArray(const JSRef<JSVal>& jsValue, std::vector<double>& result)
 {
     if (!jsValue->IsArray() && !jsValue->IsObject()) {
-        LOGE("arg is not array or Object.");
         return false;
     }
 
@@ -131,12 +129,10 @@ inline bool ParseJsDoubleArray(const JSRef<JSVal>& jsValue, std::vector<double>&
 inline bool ParseJsInt(const JSRef<JSVal>& jsValue, int32_t& result)
 {
     if (!jsValue->IsNumber() && !jsValue->IsObject()) {
-        LOGE("arg is not number or Object.");
         return false;
     }
 
     if (jsValue->IsNumber()) {
-        LOGD("jsValue->IsNumber()");
         result = jsValue->ToNumber<int32_t>();
         return true;
     }
@@ -144,13 +140,11 @@ inline bool ParseJsInt(const JSRef<JSVal>& jsValue, int32_t& result)
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> type = jsObj->GetProperty("type");
     if (!type->IsNumber()) {
-        LOGW("type is not number");
         return false;
     }
 
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
-        LOGW("resId is not number");
         return false;
     }
     return false;
@@ -256,7 +250,6 @@ void JSCanvasRenderer::JsCreateRadialGradient(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsCreateConicGradient(const JSCallbackInfo& info)
 {
     if (info.Length() != 3) {
-        LOGE("JsCreateConicGradient: The arg is wrong, it is supposed to have 3 arguments of number");
         return;
     }
 
@@ -301,7 +294,6 @@ void JSCanvasRenderer::JsCreateConicGradient(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -345,7 +337,6 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -400,7 +391,6 @@ void JSCanvasRenderer::SetAntiAlias()
 void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::string fontStr = "";
@@ -438,8 +428,6 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
             }
             style_.SetFontSize(size);
             CanvasRendererModel::GetInstance()->SetFontSize(baseInfo, size);
-        } else {
-            LOGW("parse text error");
         }
     }
     if (!updateFontStyle) {
@@ -575,8 +563,6 @@ void JSCanvasRenderer::ParseFillGradient(const JSCallbackInfo& info)
 void JSCanvasRenderer::ParseFillPattern(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
-            "and the first argument must be a object.");
         return;
     }
     auto* jSCanvasPattern = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasPattern>();
@@ -594,7 +580,6 @@ void JSCanvasRenderer::ParseFillPattern(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -618,7 +603,6 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsObject()) {
-        LOGE("The arg is not Object.");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -629,16 +613,12 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         ParseFillGradient(info);
     } else if (type == "pattern") {
         ParseFillPattern(info);
-    } else {
-        LOGW("unsupported function for fill style.");
     }
 }
 
 void JSCanvasRenderer::ParseStorkeGradient(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
-            "and the first argument must be a object.");
         return;
     }
     auto* jSCanvasGradient = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasGradient>();
@@ -661,8 +641,6 @@ void JSCanvasRenderer::ParseStorkeGradient(const JSCallbackInfo& info)
 void JSCanvasRenderer::ParseStrokePattern(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
-            "and the first argument must be a object.");
         return;
     }
     auto* jSCanvasPattern = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasPattern>();
@@ -680,7 +658,6 @@ void JSCanvasRenderer::ParseStrokePattern(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -703,7 +680,6 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsObject()) {
-        LOGE("The arg is not Object.");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -714,8 +690,6 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         ParseStorkeGradient(info);
     } else if (type == "pattern") {
         ParseStrokePattern(info);
-    } else {
-        LOGW("unsupported function for stroke style.");
     }
 }
 
@@ -740,7 +714,6 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     RefPtr<PixelMap> pixelMap = nullptr;
     bool isImage = false;
     if (!info[0]->IsObject()) {
-        LOGE("The arg is not Object or String.");
         return;
     }
     JSRenderImage* jsImage = JSRef<JSObject>::Cast(info[0])->Unwrap<JSRenderImage>();
@@ -762,7 +735,6 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
         pixelMap = CreatePixelMapFromNapiValue(info[0]);
 #endif
         if (!pixelMap) {
-            LOGE("pixelMap is null");
             return;
         }
     }
@@ -835,13 +807,11 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
 void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
     if (info.Length() != 2) {
-        LOGE("The argv is wrong.");
         return;
     }
     if (info[0]->IsObject()) {
         auto* jsImage = JSRef<JSObject>::Cast(info[0])->Unwrap<JSRenderImage>();
         if (jsImage == nullptr) {
-            LOGE("jsImage is null");
             return;
         }
         std::string imageSrc = jsImage->GetSrc();
@@ -906,7 +876,6 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     int32_t width = 0;
@@ -1145,7 +1114,6 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     // 3 pixelmap to NapiValue
     auto engine = EngineHelper::GetCurrentEngine();
     if (!engine) {
-        LOGE("JsGetPixelMap engine is null");
         return;
     }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -1162,15 +1130,12 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     napi_create_int32(env, 0, &temp);
     napi_set_named_property(env, napiValue, "index", temp);
 #endif
-#else
-    LOGW("[Engine Log] The function 'getPixelMap' is not supported on the current platform.");
 #endif
 }
 
 void JSCanvasRenderer::JsSetPixelMap(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The argv is wrong, it is supposed to have 1 argument");
         return;
     }
     CanvasImage image;
@@ -1180,7 +1145,6 @@ void JSCanvasRenderer::JsSetPixelMap(const JSCallbackInfo& info)
         pixelMap = CreatePixelMapFromNapiValue(info[0]);
 #endif
         if (!pixelMap) {
-            LOGE("pixelMap is null");
             return;
         }
 
@@ -1202,7 +1166,6 @@ void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
     RefPtr<AceType> OffscreenPattern;
 
     if (info.Length() != 4) {
-        LOGE("info.Length is not right %{public}d", info.Length());
         return;
     }
 
@@ -1213,7 +1176,6 @@ void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsInteger(jsId, id);
         OffscreenPattern = JSOffscreenRenderingContext::GetOffscreenPattern(id);
     } else {
-        LOGE("info 0 is not object");
         return;
     }
 
@@ -1221,15 +1183,12 @@ void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
     double column;
     double row;
     if (!ParseJsDoubleArray(info[1], mesh)) {
-        LOGE("info 1 is not double array");
         return;
     }
     if (!JSViewAbstract::ParseJsDouble(info[2], column)) {
-        LOGE("info 2 is not double");
         return;
     }
     if (!JSViewAbstract::ParseJsDouble(info[3], row)) {
-        LOGE("info 3 is not double");
         return;
     }
 
@@ -1255,7 +1214,6 @@ void JSCanvasRenderer::JsSetFilter(const JSCallbackInfo& info)
     std::string filterStr = "none";
     JSViewAbstract::ParseJsString(info[0], filterStr);
     if (filterStr == "") {
-        LOGE("invalid filter string");
         return;
     }
 
@@ -1536,7 +1494,6 @@ void JSCanvasRenderer::JsSetShadowOffsetY(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsSetImageSmoothingEnabled(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1554,7 +1511,6 @@ void JSCanvasRenderer::JsSetImageSmoothingEnabled(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsSetImageSmoothingQuality(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1576,7 +1532,6 @@ void JSCanvasRenderer::JsSetImageSmoothingQuality(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsMoveTo(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1600,7 +1555,6 @@ void JSCanvasRenderer::JsMoveTo(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsLineTo(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1624,7 +1578,6 @@ void JSCanvasRenderer::JsLineTo(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsBezierCurveTo(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1656,7 +1609,6 @@ void JSCanvasRenderer::JsBezierCurveTo(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsQuadraticCurveTo(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1683,7 +1635,6 @@ void JSCanvasRenderer::JsQuadraticCurveTo(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsArcTo(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1713,7 +1664,6 @@ void JSCanvasRenderer::JsArcTo(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsArc(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1745,7 +1695,6 @@ void JSCanvasRenderer::JsArc(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsEllipse(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1806,7 +1755,6 @@ void JSCanvasRenderer::JsFill(const JSCallbackInfo& info)
         (info.Length() == 1 && info[0]->IsObject())) {
         JSPath2D* jsCanvasPath = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
         if (jsCanvasPath == nullptr) {
-            LOGE("The arg is wrong, it is supposed to have JSPath2D argument");
             return;
         }
         auto path = jsCanvasPath->GetCanvasPath2d();
@@ -1827,7 +1775,6 @@ void JSCanvasRenderer::JsStroke(const JSCallbackInfo& info)
     if (info.Length() == 1) {
         JSPath2D* jsCanvasPath = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
         if (jsCanvasPath == nullptr) {
-            LOGE("The arg is wrong, it is supposed to have JSPath2D argument");
             return;
         }
         auto path = jsCanvasPath->GetCanvasPath2d();
@@ -1867,7 +1814,6 @@ void JSCanvasRenderer::JsClip(const JSCallbackInfo& info)
         (info.Length() == 1 && info[0]->IsObject())) {
         JSPath2D* jsCanvasPath = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
         if (jsCanvasPath == nullptr) {
-            LOGE("The arg is wrong, it is supposed to have JSPath2D argument");
             return;
         }
         auto path = jsCanvasPath->GetCanvasPath2d();
@@ -1890,7 +1836,6 @@ void JSCanvasRenderer::JsRect(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsBeginPath(const JSCallbackInfo& info)
 {
     if (info.Length() != 0) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1905,7 +1850,6 @@ void JSCanvasRenderer::JsBeginPath(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsClosePath(const JSCallbackInfo& info)
 {
     if (info.Length() != 0) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1920,7 +1864,6 @@ void JSCanvasRenderer::JsClosePath(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsRestore(const JSCallbackInfo& info)
 {
     if (info.Length() != 0) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1935,7 +1878,6 @@ void JSCanvasRenderer::JsRestore(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsSave(const JSCallbackInfo& info)
 {
     if (info.Length() != 0) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -1950,7 +1892,6 @@ void JSCanvasRenderer::JsSave(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsRotate(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     double angle = 0.0;
@@ -1967,7 +1908,6 @@ void JSCanvasRenderer::JsRotate(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsScale(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -2014,7 +1954,6 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
     if (info.Length() == 6) {
         if (!(info[0]->IsNumber() && info[1]->IsNumber() && info[2]->IsNumber() && info[3]->IsNumber()
             && info[4]->IsNumber() && info[5]->IsNumber())) {
-            LOGE("The arg is not number.");
             return;
         }
         TransformParam param;
@@ -2031,24 +1970,18 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
         return;
     } else if (info.Length() == 1) {
         if (!info[0]->IsObject()) {
-            LOGE("The arg is not Object or String.");
             return;
         }
         auto* jsMatrix2d = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMatrix2d>();
         CHECK_NULL_VOID(jsMatrix2d);
         TransformParam param = jsMatrix2d->GetTransform();
         CanvasRendererModel::GetInstance()->SetTransform(baseInfo, param, false);
-        LOGE("setTransform(Matrix2D) is not support.");
-    } else {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
     }
 }
 
 void JSCanvasRenderer::JsResetTransform(const JSCallbackInfo& info)
 {
     if (info.Length() != 0) {
-        LOGE("The argv is wrong");
         return;
     }
 
@@ -2063,7 +1996,6 @@ void JSCanvasRenderer::JsResetTransform(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
 {
     if (info.Length() < 6) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -2091,7 +2023,6 @@ void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsTranslate(const JSCallbackInfo& info)
 {
     if (info.Length() < 2) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -2172,7 +2103,6 @@ void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& trans
 void JSCanvasRenderer::JsSetTextAlign(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -2193,7 +2123,6 @@ void JSCanvasRenderer::JsSetTextAlign(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsSetTextBaseline(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -2263,7 +2192,6 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsFillRect(const JSCallbackInfo& info)
 {
     if (info.Length() < 4) {
-        LOGE("The arg is wrong, it is supposed to have at least 4 argument");
         return;
     }
 
@@ -2295,7 +2223,6 @@ void JSCanvasRenderer::JsFillRect(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsStrokeRect(const JSCallbackInfo& info)
 {
     if (info.Length() < 4) {
-        LOGE("The arg is wrong, it is supposed to have at least 4 argument");
         return;
     }
 
@@ -2327,7 +2254,6 @@ void JSCanvasRenderer::JsStrokeRect(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
 {
     if (info.Length() < 4) {
-        LOGE("The arg is wrong, it is supposed to have at least 4 argument");
         return;
     }
 

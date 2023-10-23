@@ -157,7 +157,6 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
     args.SetReturnValue(Referenced::RawPtr(jsRenderContext));
 
     if (args.Length() < 3) {
-        LOGE("The arg is wrong, it is supposed to have atleast 3 arguments");
         return;
     }
     if (args[0]->IsNumber() && args[1]->IsNumber()) {
@@ -187,7 +186,6 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         JSRenderingContextSettings* jsContextSetting
             = JSRef<JSObject>::Cast(args[2])->Unwrap<JSRenderingContextSettings>();
         if (jsContextSetting == nullptr) {
-            LOGE("jsContextSetting is null");
             return;
         }
         bool anti = jsContextSetting->GetAntialias();
@@ -203,7 +201,6 @@ void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* contex
         contextId = context->GetId();
         context->DecRefCount();
     } else {
-        LOGE("comtext is null");
         return;
     }
     std::lock_guard<std::mutex> lock(mutex_);
