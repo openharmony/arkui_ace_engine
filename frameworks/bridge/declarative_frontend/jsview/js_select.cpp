@@ -146,8 +146,8 @@ void JSSelect::Selected(const JSCallbackInfo& info)
     }
 
     int32_t value = 0;
-    if (info.Length() > 0 && info[0]->IsNumber()) {
-        value = info[0]->ToNumber<int32_t>();
+    if (info.Length() > 0) {
+        ParseJsInteger<int32_t>(info[0], value);
     }
 
     if (value < -1) {
@@ -180,8 +180,8 @@ void JSSelect::Value(const JSCallbackInfo& info)
     }
 
     std::string value;
-    if (info.Length() > 0 && info[0]->IsString()) {
-        value = info[0]->ToString();
+    if (info.Length() > 0) {
+        ParseJsString(info[0], value);
     }
 
     if (info.Length() > 1 && info[1]->IsFunction()) {
