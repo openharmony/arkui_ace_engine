@@ -26,8 +26,8 @@
 namespace OHOS::Ace::NG {
 
 struct ConstraintMenuParams {
-    float minSpacing;
-    float menuHeight;
+    float minSpacing = 0.0f;
+    float menuHeight = 0.0f;
     RefPtr<FrameNode> anchorNode;
     RectF viewPort;
 };

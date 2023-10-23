@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 
-#include <math.h>
+#include <cmath>
 
 #include <optional>
 
