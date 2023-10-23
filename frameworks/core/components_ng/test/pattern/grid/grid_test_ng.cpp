@@ -50,9 +50,9 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float ITEM_WIDTH = 100.f;
-constexpr float ITEM_HEIGHT = 100.f;
-constexpr float GRID_HEIGHT = 300.f;
+constexpr int32_t VIEWPORT_LINE_NUMBER = 4;
+constexpr float ITEM_WIDTH = DEVICE_WIDTH / VIEWPORT_LINE_NUMBER;
+constexpr float ITEM_HEIGHT = DEVICE_HEIGHT / VIEWPORT_LINE_NUMBER;
 constexpr Dimension GRIDITEM_FOCUS_INTERVAL = 3.0_vp;
 constexpr Dimension BORDER_RADIUS = 8.0_vp;
 constexpr int32_t NULL_VALUE = -1;
@@ -70,20 +70,24 @@ protected:
 
     void CreateGrid(const std::function<void(GridModelNG)>& callback = nullptr);
     void CreateGridNoProxy(const std::function<void(GridModelNG)>& callback = nullptr);
-    static void CreateGridItem(int32_t count = 10, float width = NULL_VALUE, float height = NULL_VALUE,
+    static void CreateItem(int32_t count = 10, float width = NULL_VALUE, float height = NULL_VALUE,
         bool focusable = false, GridItemStyle gridItemStyle = GridItemStyle::NONE);
-    static void CreateSingleGridItem(int32_t rowStart = NULL_VALUE, int32_t rowEnd = NULL_VALUE,
+    static void CreateVerticalItem(
+        int32_t count, bool focusable = false, GridItemStyle gridItemStyle = GridItemStyle::NONE);
+    static void CreateHorizontalItem(
+        int32_t count, bool focusable = false, GridItemStyle gridItemStyle = GridItemStyle::NONE);
+    static void CreateBigItem(int32_t rowStart = NULL_VALUE, int32_t rowEnd = NULL_VALUE,
         int32_t colStart = NULL_VALUE, int32_t colEnd = NULL_VALUE, float width = NULL_VALUE,
         float height = NULL_VALUE);
     void UpdateLayoutWrapper(
-        RefPtr<FrameNode>& frameNode, float width = DEVICE_WIDTH, float height = GRID_HEIGHT);
+        RefPtr<FrameNode>& frameNode, float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);
     void MouseSelectRelease();
     int32_t CalculateGridColumnsOrRows(float contentWidth, float gridWidth, float gutter = 0.0f, float margin = 0.0f);
-    testing::AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex);
-    testing::AssertionResult IsEqualCurrentOffset(float expectOffset);
-    testing::AssertionResult VerifyItemRect(
+    AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex);
+    AssertionResult IsEqualCurrentOffset(float expectOffset);
+    AssertionResult VerifyItemRect(
         int32_t viewItemNumber, int32_t lanes, float width, float height, int32_t startIndex, FlexDirection direction);
     int32_t findFocusNodeIndex(RefPtr<FocusHub>& focusNode);
     void UpdateLayoutInfo();
@@ -98,7 +102,7 @@ protected:
 void GridTestNg::UpdateLayoutInfo()
 {
     GetInstance();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     pattern_->gridLayoutInfo_.lineHeightMap_[0] = ITEM_HEIGHT;
     pattern_->gridLayoutInfo_.gridMatrix_[0][0] = 0;
     pattern_->gridLayoutInfo_.gridMatrix_[0][1] = 1;
@@ -158,7 +162,7 @@ void GridTestNg::CreateGrid(const std::function<void(GridModelNG)>& callback)
         callback(gridModelNG);
     }
     GetInstance();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 }
 
 void GridTestNg::CreateGridNoProxy(const std::function<void(GridModelNG)>& callback)
@@ -170,10 +174,10 @@ void GridTestNg::CreateGridNoProxy(const std::function<void(GridModelNG)>& callb
         callback(gridModelNG);
     }
     GetInstance();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 }
 
-void GridTestNg::CreateGridItem(
+void GridTestNg::CreateItem(
     int32_t count, float width, float height, bool focusable, GridItemStyle gridItemStyle)
 {
     for (int32_t i = 0; i < count; i++) {
@@ -194,7 +198,19 @@ void GridTestNg::CreateGridItem(
     }
 }
 
-void GridTestNg::CreateSingleGridItem(
+void GridTestNg::CreateVerticalItem(
+    int32_t count, bool focusable, GridItemStyle gridItemStyle)
+{
+    CreateItem(count, NULL_VALUE, ITEM_HEIGHT, focusable, gridItemStyle);
+}
+
+void GridTestNg::CreateHorizontalItem(
+    int32_t count, bool focusable, GridItemStyle gridItemStyle)
+{
+    CreateItem(count, ITEM_WIDTH, NULL_VALUE, focusable, gridItemStyle);
+}
+
+void GridTestNg::CreateBigItem(
     int32_t rowStart, int32_t rowEnd, int32_t colStart, int32_t colEnd, float width, float height)
 {
         GridItemModelNG gridItemModel;
@@ -262,25 +278,20 @@ int32_t GridTestNg::CalculateGridColumnsOrRows(float contentWidth, float gridWid
 void GridTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
     pattern_->UpdateCurrentOffset(offset, source);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 }
 
-testing::AssertionResult GridTestNg::IsEqualNextFocusNode(
+AssertionResult GridTestNg::IsEqualNextFocusNode(
     FocusStep step, int32_t currentIndex, int32_t expectNextIndex)
 {
     RefPtr<FocusHub> currentFocusNode = GetChildFocusHub(frameNode_, currentIndex);
     currentFocusNode->RequestFocusImmediately();
     RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNode(step, currentFocusNode).Upgrade();
     if (expectNextIndex != NULL_INDEX && nextFocusNode == nullptr) {
-        return testing::AssertionFailure() << "Next FocusNode is null.";
+        return AssertionFailure() << "Next FocusNode is null";
     }
     int32_t nextIndex = findFocusNodeIndex(nextFocusNode);
-    if (expectNextIndex != nextIndex) {
-        return testing::AssertionFailure() <<
-            "Get wrong Next FocusNode or Next FocusNode is not null. The nextIndex is " <<
-            nextIndex;
-    }
-    return testing::AssertionSuccess();
+    return IsEqual(nextIndex, expectNextIndex);
 }
 
 int32_t GridTestNg::findFocusNodeIndex(RefPtr<FocusHub>& focusNode)
@@ -295,23 +306,17 @@ int32_t GridTestNg::findFocusNodeIndex(RefPtr<FocusHub>& focusNode)
     return NULL_INDEX;
 }
 
-testing::AssertionResult GridTestNg::IsEqualCurrentOffset(float expectOffset)
+AssertionResult GridTestNg::IsEqualCurrentOffset(float expectOffset)
 {
     float currentOffset = pattern_->GetGridLayoutInfo().currentOffset_;
-    if (currentOffset == expectOffset) {
-        return testing::AssertionSuccess();
-    }
-    return testing::AssertionFailure() <<
-        "currentOffset: " << currentOffset <<
-        " != " <<
-        "expectOffset: " << expectOffset;
+    return IsEqual(currentOffset, expectOffset);
 }
 
-testing::AssertionResult GridTestNg::VerifyItemRect(
+AssertionResult GridTestNg::VerifyItemRect(
     int32_t viewItemNumber, int32_t lanes, float width, float height, int32_t startIndex, FlexDirection direction)
 {
     if (lanes < 1) {
-        return testing::AssertionFailure() << "lanes < 1";
+        return AssertionFailure() << "lanes < 1";
     }
     float unitX = width + COL_GAP;
     float unitY = height + ROW_GAP;
@@ -344,14 +349,14 @@ testing::AssertionResult GridTestNg::VerifyItemRect(
         RectF rect = GetChildRect(frameNode_, itemIndex);
         RectF expectRect = RectF(offsetX, offsetY, width, height);
         if (rect != expectRect) {
-            return testing::AssertionFailure() << "At Item Index: " << itemIndex << " rect: " << rect.ToString() <<
+            return AssertionFailure() << "At Item Index: " << itemIndex << " rect: " << rect.ToString() <<
                 " != " << "expectRect: " << expectRect.ToString();
         }
         if (!GetChildFrameNode(frameNode_, itemIndex)->IsActive()) {
-            return testing::AssertionFailure() << "At Item Index: " << itemIndex << " IsActive() is false";
+            return AssertionFailure() << "At Item Index: " << itemIndex << " IsActive() is false";
         }
     }
-    return testing::AssertionSuccess();
+    return AssertionSuccess();
 }
 
 /**
@@ -374,7 +379,7 @@ HWTEST_F(GridTestNg, Property001, TestSize.Level1)
         gridModelNG.SetCellLength(100);
         gridModelNG.SetEdgeEffect(EdgeEffect::SPRING);
         gridModelNG.SetScrollEnabled(false);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     /**
@@ -434,7 +439,7 @@ HWTEST_F(GridTestNg, Property002, TestSize.Level1)
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsGap(Dimension(-5));
         gridModelNG.SetColumnsGap(Dimension(-10));
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     /**
@@ -513,7 +518,7 @@ HWTEST_F(GridTestNg, AttrColumnsTemplate001, TestSize.Level1)
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetColumnsGap(Dimension(COL_GAP));
         gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
 
     /**
@@ -545,20 +550,20 @@ HWTEST_F(GridTestNg, AttrColumnsTemplate002, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 2fr 3fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     /**
      * @tc.steps: step1. Verify index 1 gridItem rect
      */
     float averageWidth = DEVICE_WIDTH / 7;
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 1),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1),
         RectF(averageWidth, 0.f, averageWidth * 2, ITEM_HEIGHT)));
 
     /**
      * @tc.steps: step2. Verify index 6 gridItem rect
      */
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 6),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6),
         RectF(averageWidth * 3, ITEM_HEIGHT, averageWidth * 3, ITEM_HEIGHT)));
 }
 
@@ -572,7 +577,7 @@ HWTEST_F(GridTestNg, AttrColumnsTemplate003, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 0fr 0fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     /**
@@ -580,7 +585,7 @@ HWTEST_F(GridTestNg, AttrColumnsTemplate003, TestSize.Level1)
      * @tc.expected: The item width is zero
      */
     float averageWidth = DEVICE_WIDTH / 2;
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 1),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1),
         RectF(averageWidth, 0.f, 0.f, ITEM_HEIGHT)));
 }
 
@@ -596,7 +601,7 @@ HWTEST_F(GridTestNg, AttrColumnsTemplate004, TestSize.Level1)
         gridModelNG.SetColumnsTemplate("repeat(auto-fit, 90px)");
         gridModelNG.SetColumnsGap(Dimension(COL_GAP));
         gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
 
     /**
@@ -632,7 +637,7 @@ HWTEST_F(GridTestNg, AttrRowsTemplate001, TestSize.Level1)
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetColumnsGap(Dimension(COL_GAP));
         gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateGridItem(24, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(20);
     });
 
     /**
@@ -644,14 +649,14 @@ HWTEST_F(GridTestNg, AttrRowsTemplate001, TestSize.Level1)
     /**
      * @tc.steps: step2. Verify all of gridItems rect
      */
-    float averageHeight = (GRID_HEIGHT + ROW_GAP) / 4 - ROW_GAP;
-    EXPECT_TRUE(VerifyItemRect(20, 4, ITEM_WIDTH, averageHeight, 0, FlexDirection::COLUMN));
+    float averageHeight = (DEVICE_HEIGHT + ROW_GAP) / 4 - ROW_GAP;
+    EXPECT_TRUE(VerifyItemRect(12, 4, ITEM_WIDTH, averageHeight, 0, FlexDirection::COLUMN));
 
     /**
      * @tc.steps: step3. Scroll and Verify
      */
     UpdateCurrentOffset(-(ITEM_WIDTH + COL_GAP));
-    EXPECT_TRUE(VerifyItemRect(20, 4, ITEM_WIDTH, averageHeight, 4, FlexDirection::COLUMN));
+    EXPECT_TRUE(VerifyItemRect(12, 4, ITEM_WIDTH, averageHeight, 4, FlexDirection::COLUMN));
 }
 
 /**
@@ -664,20 +669,20 @@ HWTEST_F(GridTestNg, AttrRowsTemplate002, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 2fr 3fr 1fr");
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(10);
     });
 
     /**
      * @tc.steps: step1. Verify index 1 gridItem rect
      */
-    float averageHeight = GRID_HEIGHT / 7;
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 1),
+    float averageHeight = DEVICE_HEIGHT / 7;
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1),
         RectF(0.f, averageHeight, ITEM_WIDTH, averageHeight * 2)));
 
     /**
      * @tc.steps: step2. Verify index 6 gridItem rect
      */
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 6),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6),
         RectF(ITEM_WIDTH, averageHeight * 3, ITEM_WIDTH, averageHeight * 3)));
 }
 
@@ -691,15 +696,15 @@ HWTEST_F(GridTestNg, AttrRowsTemplate003, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 0fr 0fr 1fr");
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(10);
     });
 
     /**
      * @tc.steps: step1. Verify index 1 gridItem rect
      * @tc.expected: The item height is zero
      */
-    float averageHeight = GRID_HEIGHT / 2;
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 1),
+    float averageHeight = DEVICE_HEIGHT / 2;
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1),
         RectF(0.f, averageHeight, ITEM_WIDTH, 0.f)));
 }
 
@@ -715,7 +720,7 @@ HWTEST_F(GridTestNg, AttrRowsTemplate004, TestSize.Level1)
         gridModelNG.SetRowsTemplate("repeat(auto-fit, 90px)");
         gridModelNG.SetColumnsGap(Dimension(COL_GAP));
         gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateGridItem(24, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(24);
     });
 
     /**
@@ -728,9 +733,9 @@ HWTEST_F(GridTestNg, AttrRowsTemplate004, TestSize.Level1)
      * @tc.steps: step2. Verify all of gridItems rect
      * @tc.expected: The rect is equal to expectRect
      */
-    float gridWidth = 90.0f;
-    int32_t lanes = CalculateGridColumnsOrRows(GRID_HEIGHT, gridWidth, ROW_GAP);
-    float averageHeight = (GRID_HEIGHT + ROW_GAP) / lanes - ROW_GAP;
+    float gridHeight = 90.0f;
+    int32_t lanes = CalculateGridColumnsOrRows(DEVICE_HEIGHT, gridHeight, ROW_GAP);
+    float averageHeight = (DEVICE_HEIGHT + ROW_GAP) / lanes - ROW_GAP;
     EXPECT_TRUE(VerifyItemRect(15, lanes, ITEM_WIDTH, averageHeight, 0, FlexDirection::COLUMN));
 }
 
@@ -745,7 +750,7 @@ HWTEST_F(GridTestNg, AttrColumnsRows001, TestSize.Level1)
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("");
         gridModelNG.SetColumnsTemplate("");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     /**
@@ -770,7 +775,7 @@ HWTEST_F(GridTestNg, AttrColumnsRows002, TestSize.Level1)
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetColumnsGap(Dimension(COL_GAP));
         gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateGridItem(20);
+        CreateItem(20);
     });
 
     /**
@@ -779,7 +784,7 @@ HWTEST_F(GridTestNg, AttrColumnsRows002, TestSize.Level1)
      */
     int32_t lanes = 4;
     float averageWidth = (DEVICE_WIDTH + COL_GAP) / lanes - COL_GAP;
-    float averageHeight = (GRID_HEIGHT + ROW_GAP) / lanes - ROW_GAP;
+    float averageHeight = (DEVICE_HEIGHT + ROW_GAP) / lanes - ROW_GAP;
     EXPECT_TRUE(VerifyItemRect(12, lanes, averageWidth, averageHeight, 0, FlexDirection::ROW));
 
     /**
@@ -798,28 +803,29 @@ HWTEST_F(GridTestNg, AttrColumnsRows002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrLayoutDirection001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
+    float itemWidth = 100.f;
+    CreateGrid([itemWidth](GridModelNG gridModelNG) {
         gridModelNG.SetLayoutDirection(FlexDirection::ROW);
         gridModelNG.SetCellLength(ITEM_HEIGHT);
         gridModelNG.SetMinCount(2);
         gridModelNG.SetMaxCount(4);
         gridModelNG.SetColumnsGap(Dimension(COL_GAP));
         gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateGridItem(20, ITEM_WIDTH, ITEM_HEIGHT);
+        CreateItem(20, itemWidth, ITEM_HEIGHT);
     });
 
     /**
      * @tc.steps: step1. Not set columns/rows Template
      * @tc.expected: The gridItem rect would effect by minCount, maxCount, gap ...
      */
-    EXPECT_TRUE(VerifyItemRect(8, 4, ITEM_WIDTH, ITEM_HEIGHT, 0, FlexDirection::ROW));
+    EXPECT_TRUE(VerifyItemRect(8, 4, itemWidth, ITEM_HEIGHT, 0, FlexDirection::ROW));
 
     /**
      * @tc.steps: step2. Scroll and Verify
      * @tc.expected: Can not scroll
      */
     UpdateCurrentOffset(-(ITEM_HEIGHT + ROW_GAP));
-    EXPECT_TRUE(VerifyItemRect(8, 4, ITEM_WIDTH, ITEM_HEIGHT, 0, FlexDirection::ROW));
+    EXPECT_TRUE(VerifyItemRect(8, 4, itemWidth, ITEM_HEIGHT, 0, FlexDirection::ROW));
 }
 
 /**
@@ -830,28 +836,29 @@ HWTEST_F(GridTestNg, AttrLayoutDirection001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrLayoutDirection002, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
+    float itemWidth = 100.f;
+    CreateGrid([itemWidth](GridModelNG gridModelNG) {
         gridModelNG.SetLayoutDirection(FlexDirection::ROW_REVERSE);
         gridModelNG.SetCellLength(ITEM_HEIGHT);
         gridModelNG.SetMinCount(2);
         gridModelNG.SetMaxCount(4);
         gridModelNG.SetColumnsGap(Dimension(COL_GAP));
         gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateGridItem(20, ITEM_WIDTH, ITEM_HEIGHT);
+        CreateItem(20, itemWidth, ITEM_HEIGHT);
     });
 
     /**
      * @tc.steps: step1. Not set columns/rows Template
      * @tc.expected: The gridItem rect would effect by minCount, maxCount, gap ...
      */
-    EXPECT_TRUE(VerifyItemRect(8, 4, ITEM_WIDTH, ITEM_HEIGHT, 0, FlexDirection::ROW_REVERSE));
+    EXPECT_TRUE(VerifyItemRect(8, 4, itemWidth, ITEM_HEIGHT, 0, FlexDirection::ROW_REVERSE));
 
     /**
      * @tc.steps: step3. Scroll and Verify
      * @tc.expected: Can not scroll
      */
     UpdateCurrentOffset(-(ITEM_HEIGHT + ROW_GAP));
-    EXPECT_TRUE(VerifyItemRect(8, 4, ITEM_WIDTH, ITEM_HEIGHT, 0, FlexDirection::ROW_REVERSE));
+    EXPECT_TRUE(VerifyItemRect(8, 4, itemWidth, ITEM_HEIGHT, 0, FlexDirection::ROW_REVERSE));
 }
 
 /**
@@ -862,28 +869,29 @@ HWTEST_F(GridTestNg, AttrLayoutDirection002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrLayoutDirection003, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
+    float itemHeight = 100.f;
+    CreateGrid([itemHeight](GridModelNG gridModelNG) {
         gridModelNG.SetLayoutDirection(FlexDirection::COLUMN);
         gridModelNG.SetCellLength(ITEM_WIDTH);
         gridModelNG.SetMinCount(2);
         gridModelNG.SetMaxCount(4);
         gridModelNG.SetColumnsGap(Dimension(COL_GAP));
         gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateGridItem(20, ITEM_WIDTH, ITEM_HEIGHT);
+        CreateItem(20, ITEM_WIDTH, itemHeight);
     });
 
     /**
      * @tc.steps: step1. Not set columns/rows Template
      * @tc.expected: The gridItem rect would effect by minCount, maxCount, gap ...
      */
-    EXPECT_TRUE(VerifyItemRect(8, 2, ITEM_WIDTH, ITEM_HEIGHT, 0, FlexDirection::COLUMN));
+    EXPECT_TRUE(VerifyItemRect(8, 4, ITEM_WIDTH, itemHeight, 0, FlexDirection::COLUMN));
 
     /**
      * @tc.steps: step3. Scroll and Verify
      * @tc.expected: Can not scroll
      */
     UpdateCurrentOffset(-(ITEM_WIDTH + COL_GAP));
-    EXPECT_TRUE(VerifyItemRect(8, 2, ITEM_WIDTH, ITEM_HEIGHT, 0, FlexDirection::COLUMN));
+    EXPECT_TRUE(VerifyItemRect(8, 4, ITEM_WIDTH, itemHeight, 0, FlexDirection::COLUMN));
 }
 
 /**
@@ -894,28 +902,29 @@ HWTEST_F(GridTestNg, AttrLayoutDirection003, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrLayoutDirection004, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
+    float itemHeight = 100.f;
+    CreateGrid([itemHeight](GridModelNG gridModelNG) {
         gridModelNG.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
         gridModelNG.SetCellLength(ITEM_WIDTH);
         gridModelNG.SetMinCount(2);
         gridModelNG.SetMaxCount(4);
         gridModelNG.SetColumnsGap(Dimension(COL_GAP));
         gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateGridItem(20, ITEM_WIDTH, ITEM_HEIGHT);
+        CreateItem(20, ITEM_WIDTH, itemHeight);
     });
 
     /**
      * @tc.steps: step1. Not set columns/rows Template
      * @tc.expected: The gridItem rect would effect by minCount, maxCount, gap ...
      */
-    EXPECT_TRUE(VerifyItemRect(8, 2, ITEM_WIDTH, ITEM_HEIGHT, 0, FlexDirection::COLUMN_REVERSE));
+    EXPECT_TRUE(VerifyItemRect(8, 4, ITEM_WIDTH, itemHeight, 0, FlexDirection::COLUMN_REVERSE));
 
     /**
      * @tc.steps: step3. Scroll and Verify
      * @tc.expected: Can not scroll
      */
     UpdateCurrentOffset(-(ITEM_WIDTH + COL_GAP));
-    EXPECT_TRUE(VerifyItemRect(8, 2, ITEM_WIDTH, ITEM_HEIGHT, 0, FlexDirection::COLUMN_REVERSE));
+    EXPECT_TRUE(VerifyItemRect(8, 4, ITEM_WIDTH, itemHeight, 0, FlexDirection::COLUMN_REVERSE));
 }
 
 /**
@@ -929,21 +938,21 @@ HWTEST_F(GridTestNg, AttrGridItem001, TestSize.Level1)
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         // not set width/height
-        CreateSingleGridItem(1, 2, 1, 2);
-        CreateSingleGridItem(NULL_VALUE, NULL_VALUE, 1, 3);
-        CreateSingleGridItem(1, 3, NULL_VALUE, NULL_VALUE);
-        CreateGridItem(7);
+        CreateBigItem(1, 2, 1, 2);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
+        CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
+        CreateItem(7);
     });
 
     float averageWidth = DEVICE_WIDTH / 4;
-    float averageHeight = GRID_HEIGHT / 4;
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 0),
+    float averageHeight = DEVICE_HEIGHT / 4;
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 0),
         RectF(averageWidth, averageHeight, averageWidth * 2, averageHeight * 2)));
 
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 1),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1),
         RectF(0.f, 0.f, averageWidth * 3, averageHeight)));
 
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 2),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2),
         RectF(averageWidth * 3, 0.f, averageWidth, averageHeight * 3)));
 }
 
@@ -957,25 +966,25 @@ HWTEST_F(GridTestNg, AttrGridItem002, TestSize.Level1)
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         // need set width
-        CreateSingleGridItem(1, 2, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
-        CreateSingleGridItem(0, 2, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
-        CreateSingleGridItem(2, 3, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
-        CreateGridItem(7, ITEM_WIDTH, NULL_VALUE);
+        CreateBigItem(1, 2, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
+        CreateBigItem(0, 2, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
+        CreateBigItem(2, 3, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(7);
     });
 
-    float averageHeight = GRID_HEIGHT / 4;
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 0),
+    float averageHeight = DEVICE_HEIGHT / 4;
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 0),
         RectF(0.f, averageHeight, ITEM_WIDTH, averageHeight * 2)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 1),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1),
         RectF(ITEM_WIDTH, 0.f, ITEM_WIDTH, averageHeight * 3)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 2),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2),
         RectF(ITEM_WIDTH * 2, averageHeight * 2, ITEM_WIDTH, averageHeight * 2)));
 
     UpdateCurrentOffset(-ITEM_WIDTH);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 1),
-        RectF(80.f, 0.f, ITEM_WIDTH, averageHeight * 3)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 2),
-        RectF(180.f, averageHeight * 2, ITEM_WIDTH, averageHeight * 2)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1),
+        RectF(0.f, 0.f, ITEM_WIDTH, averageHeight * 3)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2),
+        RectF(ITEM_WIDTH, averageHeight * 2, ITEM_WIDTH, averageHeight * 2)));
 }
 
 /**
@@ -988,24 +997,24 @@ HWTEST_F(GridTestNg, AttrGridItem003, TestSize.Level1)
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         // need set height
-        CreateSingleGridItem(NULL_VALUE, NULL_VALUE, 2, 3, NULL_VALUE, ITEM_HEIGHT);
-        CreateSingleGridItem(NULL_VALUE, NULL_VALUE, 0, 2, NULL_VALUE, ITEM_HEIGHT);
-        CreateSingleGridItem(NULL_VALUE, NULL_VALUE, 2, 1, NULL_VALUE, ITEM_HEIGHT);
-        CreateGridItem(7, NULL_VALUE, ITEM_HEIGHT);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 2, 3, NULL_VALUE, ITEM_HEIGHT);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 0, 2, NULL_VALUE, ITEM_HEIGHT);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 2, 1, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(7);
     });
 
     float averageWidth = DEVICE_WIDTH / 4;
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 0),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 0),
         RectF(averageWidth * 2, 0.f, averageWidth * 2, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 1),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1),
         RectF(0.f, ITEM_HEIGHT, averageWidth * 3, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 2),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2),
         RectF(averageWidth * 2, ITEM_HEIGHT * 2, averageWidth, ITEM_HEIGHT)));
 
     UpdateCurrentOffset(-ITEM_HEIGHT);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 1),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1),
         RectF(0.f, 0.f, averageWidth * 3, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, 2),
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2),
         RectF(averageWidth * 2, ITEM_HEIGHT, averageWidth, ITEM_HEIGHT)));
 }
 
@@ -1018,13 +1027,13 @@ HWTEST_F(GridTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetScrollEnabled(true);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
     EXPECT_EQ(layoutProperty_->GetScrollEnabled(), true);
 
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetScrollEnabled(false);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
     EXPECT_EQ(layoutProperty_->GetScrollEnabled(), false);
 }
@@ -1042,7 +1051,7 @@ HWTEST_F(GridTestNg, KeyEvent001, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     KeyEvent event;
     pattern_->OnKeyEvent(event);
@@ -1055,7 +1064,7 @@ HWTEST_F(GridTestNg, KeyEvent001, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_PAGE_DOWN;
     pattern_->OnKeyEvent(event);
-    EXPECT_TRUE(IsEqualCurrentOffset(-GRID_HEIGHT));
+    EXPECT_TRUE(IsEqualCurrentOffset(-DEVICE_HEIGHT));
 
     /**
      * @tc.steps: step3. KeyCode::KEY_PAGE_UP.
@@ -1083,7 +1092,7 @@ HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetMultiSelectable(true);
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
 
     /**
@@ -1097,7 +1106,7 @@ HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
     EXPECT_FALSE(pattern_->multiSelectable_);
     EXPECT_FALSE(pattern_->isMouseEventInit_);
 
-    UpdateCurrentOffset(GRID_HEIGHT);
+    UpdateCurrentOffset(DEVICE_HEIGHT);
 }
 
 /**
@@ -1111,7 +1120,7 @@ HWTEST_F(GridTestNg, GridTest002, TestSize.Level1)
      * @tc.steps: step1. !isConfigScrollable_
      */
     CreateGrid([](GridModelNG gridModelNG) {
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
     pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR, false);
     ASSERT_EQ(pattern_->animator_, nullptr);
@@ -1121,7 +1130,7 @@ HWTEST_F(GridTestNg, GridTest002, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR, false);
     ASSERT_NE(pattern_->animator_, nullptr);
@@ -1146,7 +1155,7 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
@@ -1171,7 +1180,7 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     EXPECT_TRUE(pattern_->OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_START));
     EXPECT_TRUE(IsEqualCurrentOffset(0));
@@ -1197,7 +1206,7 @@ HWTEST_F(GridTestNg, Event001, TestSize.Level1)
     CreateGrid([event](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr");
         gridModelNG.SetOnScroll(event);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
@@ -1217,47 +1226,47 @@ HWTEST_F(GridTestNg, Event001, TestSize.Level1)
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
     pattern_->OnScrollEndCallback();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_EQ(offsetY.ConvertToPx(), 0);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
     pattern_->OnScrollEndCallback();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_EQ(offsetY.ConvertToPx(), 0);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
     pattern_->OnScrollEndCallback();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_EQ(offsetY.ConvertToPx(), 0);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
     pattern_->OnScrollEndCallback();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_EQ(offsetY.ConvertToPx(), -ITEM_HEIGHT);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
     pattern_->OnScrollEndCallback();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
     pattern_->OnScrollEndCallback();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     pattern_->SetScrollAbort(true);
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_NONE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 }
 
 /**
@@ -1276,16 +1285,16 @@ HWTEST_F(GridTestNg, Event002, TestSize.Level1)
     CreateGrid([event](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr");
         gridModelNG.SetOnScrollIndex(event);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(12);
     });
 
     UpdateCurrentOffset(-ITEM_HEIGHT);
     EXPECT_EQ(startIndex, 0);
-    EXPECT_EQ(endIndex, 7);
+    EXPECT_EQ(endIndex, 9);
 
     UpdateCurrentOffset(-ITEM_HEIGHT);
     EXPECT_EQ(startIndex, 2);
-    EXPECT_EQ(endIndex, 9);
+    EXPECT_EQ(endIndex, 11);
 }
 
 /**
@@ -1300,7 +1309,7 @@ HWTEST_F(GridTestNg, Event003, TestSize.Level1)
     CreateGrid([event](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr");
         gridModelNG.SetOnReachStart(event);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(12);
     });
     EXPECT_TRUE(isTrigger);
 
@@ -1313,65 +1322,65 @@ HWTEST_F(GridTestNg, Event003, TestSize.Level1)
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_JUMP);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_JUMP);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
 }
 
@@ -1387,7 +1396,7 @@ HWTEST_F(GridTestNg, Event004, TestSize.Level1)
     CreateGrid([event](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr");
         gridModelNG.SetOnReachEnd(event);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     isTrigger = false;
@@ -1399,74 +1408,74 @@ HWTEST_F(GridTestNg, Event004, TestSize.Level1)
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_JUMP);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_JUMP);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_NONE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_FALSE(isTrigger);
 }
 
@@ -1485,7 +1494,7 @@ HWTEST_F(GridTestNg, Event005, TestSize.Level1)
         gridModelNG.SetColumnsTemplate("1fr 1fr");
         gridModelNG.SetOnScrollStart(scrollStart);
         gridModelNG.SetOnScrollStop(scrollStop);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
@@ -1496,7 +1505,7 @@ HWTEST_F(GridTestNg, Event005, TestSize.Level1)
     EXPECT_FALSE(isScrollStopCalled);
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isScrollStopCalled);
 }
 
@@ -1514,13 +1523,13 @@ HWTEST_F(GridTestNg, Event006, TestSize.Level1)
     CreateGrid([event](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr");
         gridModelNG.SetOnScrollFrameBegin(event);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
     EXPECT_NE(scrollableEvent->GetScrollable()->callback_, nullptr);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 }
 
 /**
@@ -1560,7 +1569,7 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithoutAnimation001, TestSize.L
         gridModelNG.SetOnScrollStop(onScrollStop);
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1571,7 +1580,7 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithoutAnimation001, TestSize.L
      * @tc.expected: Only onScroll call back function should be triggered
      */
     pattern_->ScrollTo(ITEM_HEIGHT * 1);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1616,7 +1625,7 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithoutAnimation002, TestSize.L
         gridModelNG.SetOnScrollStop(onScrollStop);
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1627,7 +1636,7 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithoutAnimation002, TestSize.L
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
     pattern_->ScrollTo(ITEM_HEIGHT * 9);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1670,7 +1679,7 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithAnimation001, TestSize.Leve
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
         gridModelNG.SetSupportAnimation(true);
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1683,7 +1692,7 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithAnimation001, TestSize.Leve
     pattern_->animator_->Stop(); pattern_->SetScrollAbort(false); pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5*ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
 
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_FALSE(isOnReachEndCallBack);
 }
@@ -1723,7 +1732,7 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithAnimation002, TestSize.Leve
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
         gridModelNG.SetSupportAnimation(true);
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1739,8 +1748,8 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithAnimation002, TestSize.Leve
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-20*ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
 
-    EXPECT_EQ(pattern_->GetTotalOffset(), 2000);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 20);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
 }
@@ -1782,7 +1791,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithoutAnimation001, TestSize
         gridModelNG.SetOnScrollStop(onScrollStop);
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateGridItem(20, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1793,7 +1802,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithoutAnimation001, TestSize
      * @tc.expected: Only onScroll call back function should be triggered
      */
     pattern_->ScrollTo(ITEM_WIDTH * 1);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1838,7 +1847,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithoutAnimation002, TestSize
         gridModelNG.SetOnScrollStop(onScrollStop);
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateGridItem(20, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1849,7 +1858,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithoutAnimation002, TestSize
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
     pattern_->ScrollTo(ITEM_WIDTH * 10);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1892,7 +1901,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithAnimation001, TestSize.Le
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
         gridModelNG.SetSupportAnimation(true);
-        CreateGridItem(20, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1908,7 +1917,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithAnimation001, TestSize.Le
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5*ITEM_WIDTH, SCROLL_FROM_ANIMATION);
 
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_FALSE(isOnReachEndCallBack);
 }
@@ -1948,7 +1957,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithAnimation002, TestSize.Le
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
         gridModelNG.SetSupportAnimation(true);
-        CreateGridItem(20, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1964,7 +1973,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithAnimation002, TestSize.Le
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-10*ITEM_WIDTH, SCROLL_FROM_ANIMATION);
 
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
 }
@@ -2005,7 +2014,7 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithoutAnimation001, TestSize.Leve
         gridModelNG.SetOnScrollStop(onScrollStop);
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2017,7 +2026,7 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithoutAnimation001, TestSize.Leve
      */
     auto controller = pattern_->positionController_;
     controller->JumpTo(5, false, ScrollAlign::CENTER, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -2060,7 +2069,7 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithoutAnimation002, TestSize.Leve
         gridModelNG.SetOnScrollStop(onScrollStop);
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2072,7 +2081,7 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithoutAnimation002, TestSize.Leve
      */
     auto controller = pattern_->positionController_;
     controller->JumpTo(19, false, ScrollAlign::END, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack); EXPECT_FALSE(isOnScrollStartCallBack); EXPECT_FALSE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
 }
@@ -2112,7 +2121,7 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithAnimation001, TestSize.Level1)
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
         gridModelNG.SetSupportAnimation(true);
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2129,7 +2138,7 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithAnimation001, TestSize.Level1)
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5*ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
 
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_FALSE(isOnReachEndCallBack);
 }
@@ -2170,7 +2179,7 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithAnimation002, TestSize.Level1)
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
         gridModelNG.SetSupportAnimation(true);
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2187,7 +2196,7 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithAnimation002, TestSize.Level1)
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-10*ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
 
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
 }
@@ -2227,7 +2236,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithoutAnimation001, TestSize.Le
         gridModelNG.SetOnScrollStop(onScrollStop);
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateGridItem(20, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2239,7 +2248,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithoutAnimation001, TestSize.Le
      */
     auto controller = pattern_->positionController_;
     controller->JumpTo(5, false, ScrollAlign::CENTER, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -2283,7 +2292,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithoutAnimation002, TestSize.Le
         gridModelNG.SetOnScrollStop(onScrollStop);
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateGridItem(20, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2295,7 +2304,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithoutAnimation002, TestSize.Le
      */
     auto controller = pattern_->positionController_;
     controller->JumpTo(19, false, ScrollAlign::END, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -2338,7 +2347,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithAnimation001, TestSize.Level
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
         gridModelNG.SetSupportAnimation(true);
-        CreateGridItem(20, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2355,7 +2364,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithAnimation001, TestSize.Level
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5*ITEM_WIDTH, SCROLL_FROM_ANIMATION_CONTROLLER);
 
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_FALSE(isOnReachEndCallBack);
 }
@@ -2395,7 +2404,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithAnimation002, TestSize.Level
         gridModelNG.SetOnReachStart(onReachStart);
         gridModelNG.SetOnReachEnd(onReachEnd);
         gridModelNG.SetSupportAnimation(true);
-        CreateGridItem(20, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2412,7 +2421,7 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithAnimation002, TestSize.Level
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-10*ITEM_WIDTH, SCROLL_FROM_ANIMATION_CONTROLLER);
 
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
 }
@@ -2426,7 +2435,7 @@ HWTEST_F(GridTestNg, GetOverScrollOffset001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
@@ -2493,7 +2502,7 @@ HWTEST_F(GridTestNg, GetOverScrollOffset002, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr");
-        CreateGridItem(5, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(8);
     });
 
     OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
@@ -2503,29 +2512,29 @@ HWTEST_F(GridTestNg, GetOverScrollOffset002, TestSize.Level1)
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
-    expectOffset = { 0, -100.f };
+    expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
 
     pattern_->gridLayoutInfo_.currentOffset_ = -ITEM_HEIGHT;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2);
-    expectOffset = { 100.f, 100.f };
+    expectOffset = { ITEM_HEIGHT, ITEM_HEIGHT };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(0.f);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT * 2);
-    expectOffset = { 0, -200.f };
+    expectOffset = { 0, -ITEM_HEIGHT * 2 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
 
     pattern_->gridLayoutInfo_.currentOffset_ = -ITEM_HEIGHT * 2;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
-    expectOffset = { 0, 100.f };
+    expectOffset = { 0, ITEM_HEIGHT };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(0.f);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
-    expectOffset = { 0, -100.f };
+    expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
 
     pattern_->gridLayoutInfo_.currentOffset_ = ITEM_HEIGHT;
@@ -2541,13 +2550,13 @@ HWTEST_F(GridTestNg, GetOverScrollOffset002, TestSize.Level1)
 
     pattern_->gridLayoutInfo_.currentOffset_ = -ITEM_HEIGHT * 3;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2);
-    expectOffset = { 0, 200.f };
+    expectOffset = { 0, ITEM_HEIGHT  * 2 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(0.f);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
-    expectOffset = { 0, -100.f };
+    expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
 }
 
@@ -2560,7 +2569,7 @@ HWTEST_F(GridTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT, true);
+        CreateVerticalItem(10, true);
     });
 
     /**
@@ -2569,9 +2578,9 @@ HWTEST_F(GridTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
      */
     int32_t focusNodeIndex = 6;
     pattern_->ScrollToFocusNodeIndex(focusNodeIndex);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, focusNodeIndex);
-    EXPECT_FALSE(focusNode->IsCurrentFocus());
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
     /**
@@ -2580,7 +2589,7 @@ HWTEST_F(GridTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
      */
     focusNodeIndex = 10;
     pattern_->ScrollToFocusNodeIndex(focusNodeIndex);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 }
 
@@ -2593,7 +2602,7 @@ HWTEST_F(GridTestNg, ScrollToNode001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT, true);
+        CreateVerticalItem(10, true);
     });
 
     /**
@@ -2603,7 +2612,7 @@ HWTEST_F(GridTestNg, ScrollToNode001, TestSize.Level1)
     int32_t focusNodeIndex = 6;
     RefPtr<FrameNode> focusNode = GetChildFrameNode(frameNode_, focusNodeIndex);
     pattern_->ScrollToNode(focusNode);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 }
 
@@ -2616,9 +2625,9 @@ HWTEST_F(GridTestNg, EventHub001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(8, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(8);
     });
-    RectF gridRect(0.f, 0.f, DEVICE_WIDTH, GRID_HEIGHT);
+    RectF gridRect(0.f, 0.f, DEVICE_WIDTH, DEVICE_HEIGHT);
     MockGetPaintRectWithTransform(frameNode_, gridRect);
 
     /**
@@ -2629,9 +2638,9 @@ HWTEST_F(GridTestNg, EventHub001, TestSize.Level1)
     EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH / 2, ITEM_HEIGHT / 2), 0); // first item
     EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH * 2, ITEM_HEIGHT / 2), 1); // between the second and third
     EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH * 2, ITEM_HEIGHT), 1); // between the 2nd, 3rd, 6th, 7th
-    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH, GRID_HEIGHT), 8); // in grid but not on item
+    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH, DEVICE_HEIGHT), 8); // in grid but not on item
     pattern_->GetGridLayoutInfo().currentRect_ = RectF(0.f, 0.f, 180.f, 300.f);
-    EXPECT_EQ(eventHub_->GetInsertPosition(180.f, 300.f), 8); // on currentRect_
+    EXPECT_EQ(eventHub_->GetInsertPosition(180.f, 300.f), 5); // on currentRect_
 
     /**
      * @tc.steps: step2. call GetFrameNodeChildSize func.
@@ -2651,7 +2660,7 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
      * @tc.expected: jumpIndex_ not change
      */
     CreateGrid([](GridModelNG gridModelNG) {
-        CreateGridItem(14, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(14);
     });
     auto controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::START, 3);
@@ -2664,77 +2673,77 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::START, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     controller->JumpTo(19, false, ScrollAlign::START, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     controller->JumpTo(11, false, ScrollAlign::START, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::CENTER, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     controller->JumpTo(12, false, ScrollAlign::CENTER, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     controller->JumpTo(11, false, ScrollAlign::CENTER, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
+    EXPECT_TRUE(IsEqualCurrentOffset(-100.f));
 
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::END, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     controller->JumpTo(12, false, ScrollAlign::END, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     controller->JumpTo(11, false, ScrollAlign::END, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::AUTO, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     controller->JumpTo(12, false, ScrollAlign::AUTO, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     controller->JumpTo(11, false, ScrollAlign::AUTO, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::NONE, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     controller->JumpTo(12, false, ScrollAlign::NONE, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     controller->JumpTo(11, false, ScrollAlign::NONE, 3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 }
 
@@ -2751,7 +2760,7 @@ HWTEST_F(GridTestNg, PositionController002, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     auto controller = pattern_->positionController_;
     controller->AnimateTo(Dimension(100.f, DimensionUnit::PX), 200.f, Curves::LINEAR, false);
@@ -2788,9 +2797,9 @@ HWTEST_F(GridTestNg, PositionController002, TestSize.Level1)
      * @tc.steps: step6. Test ScrollPage func.
      * @tc.expected: Verify currentOffset.
      */
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     controller->ScrollPage(true, true);
-    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, -300.f));
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, -DEVICE_HEIGHT));
 
     controller->ScrollPage(false, true);
     EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
@@ -2800,7 +2809,7 @@ HWTEST_F(GridTestNg, PositionController002, TestSize.Level1)
      */
     EXPECT_FALSE(controller->IsAtEnd());
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(controller->IsAtEnd());
 }
 
@@ -2816,9 +2825,9 @@ HWTEST_F(GridTestNg, PositionController003, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(20);
     });
-    RunMeasureAndLayout(frameNode_, 300.f, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, 300.f, DEVICE_HEIGHT);
 
     /**
      * @tc.steps: step2. Test GetScrollDirection func.
@@ -2846,10 +2855,10 @@ HWTEST_F(GridTestNg, PositionController003, TestSize.Level1)
      */
     pattern_->UpdateCurrentOffset(-20.f, SCROLL_FROM_UPDATE);
     controller->ScrollPage(true, false);
-    EXPECT_TRUE(IsEqualOffset(controller->GetCurrentOffset(), Offset(-280.f, 0)));
+    EXPECT_TRUE(IsEqual(controller->GetCurrentOffset(), Offset(-280.f, 0)));
     EXPECT_EQ(pattern_->GetMainContentSize(), 300.f);
     controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualOffset(controller->GetCurrentOffset(), Offset(20.f, 0)));
+    EXPECT_TRUE(IsEqual(controller->GetCurrentOffset(), Offset(20.f, 0)));
 }
 
 /**
@@ -2865,7 +2874,7 @@ HWTEST_F(GridTestNg, PositionController004, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     pattern_->gridLayoutInfo_.axis_ = Axis::NONE;
     auto controller = pattern_->positionController_;
@@ -2885,7 +2894,7 @@ HWTEST_F(GridTestNg, GridAccessibilityTest001, TestSize.Level1)
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetMultiSelectable(true);
         gridModelNG.SetEditable(true);
-        CreateGridItem(14, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(14);
     });
 
     /**
@@ -2895,10 +2904,10 @@ HWTEST_F(GridTestNg, GridAccessibilityTest001, TestSize.Level1)
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
     EXPECT_TRUE(accessibilityProperty_->IsEditable());
     EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 0);
-    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), 11);
+    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), 13);
     EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), 14);
     AceCollectionInfo info = accessibilityProperty_->GetCollectionInfo();
-    EXPECT_EQ(info.rows, 3);
+    EXPECT_EQ(info.rows, 4);
     EXPECT_EQ(info.columns, 4);
     EXPECT_EQ(info.selectMode, 1);
 }
@@ -2911,7 +2920,7 @@ HWTEST_F(GridTestNg, GridAccessibilityTest001, TestSize.Level1)
 HWTEST_F(GridTestNg, GridAccessibilityTest002, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
-        CreateGridItem(8, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(8);
     });
 
     /**
@@ -2937,9 +2946,9 @@ HWTEST_F(GridTestNg, GridAccessibilityTest003, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
-    UpdateCurrentOffset(100.f);
+    UpdateCurrentOffset(ITEM_HEIGHT);
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_1 = 0;
     exptectActions_1 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
@@ -2948,7 +2957,7 @@ HWTEST_F(GridTestNg, GridAccessibilityTest003, TestSize.Level1)
     /**
      * @tc.steps: step2. Scroll to middle.
      */
-    UpdateCurrentOffset(-100.f);
+    UpdateCurrentOffset(-ITEM_HEIGHT);
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_2 = 0;
     exptectActions_2 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
@@ -2958,7 +2967,7 @@ HWTEST_F(GridTestNg, GridAccessibilityTest003, TestSize.Level1)
     /**
      * @tc.steps: step3. Scroll to bottom.
      */
-    UpdateCurrentOffset(-200.f);
+    UpdateCurrentOffset(-ITEM_HEIGHT * 2);
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_3 = 0;
     exptectActions_3 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
@@ -2968,7 +2977,7 @@ HWTEST_F(GridTestNg, GridAccessibilityTest003, TestSize.Level1)
      * @tc.steps: step4. UnScrollable.
      */
     CreateGrid([](GridModelNG gridModelNG) {
-        CreateGridItem(14, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(14);
     });
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_4 = 0;
@@ -2984,7 +2993,7 @@ HWTEST_F(GridTestNg, GridAccessibilityTest007, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     auto itemAccessibility = GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 1);
 
@@ -3026,7 +3035,7 @@ HWTEST_F(GridTestNg, GridAccessibilityTest008, TestSize.Level1)
         gridItemModel.SetColumnEnd(3);
         SetHeight(Dimension(ITEM_HEIGHT));
         ViewStackProcessor::GetInstance()->Pop();
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     /**
@@ -3052,7 +3061,7 @@ HWTEST_F(GridTestNg, MouseSelect001, TestSize.Level1)
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetMultiSelectable(true);
-        CreateGridItem(8, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(8);
     });
 
     /**
@@ -3070,15 +3079,15 @@ HWTEST_F(GridTestNg, MouseSelect001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, MouseSelect002, TestSize.Level1)
 {
-    const Offset LEFT_TOP = Offset(90.f, 50.f);
-    const Offset LEFT_BOTTOM = Offset(90.f, 150.f);
-    const Offset RIGHT_TOP = Offset(270.f, 50.f);
-    const Offset RIGHT_BOTTOM = Offset(270.f, 150.f);
-
+    float itemWidth = DEVICE_WIDTH / 4;
+    const Offset LEFT_TOP = Offset(itemWidth * 0.5, ITEM_HEIGHT * 0.5);
+    const Offset LEFT_BOTTOM = Offset(itemWidth * 0.5, ITEM_HEIGHT * 1.5);
+    const Offset RIGHT_TOP = Offset(itemWidth * 1.5, ITEM_HEIGHT * 0.5);
+    const Offset RIGHT_BOTTOM = Offset(itemWidth * 1.5, ITEM_HEIGHT * 1.5);
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetMultiSelectable(true);
-        CreateGridItem(8, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(8);
     });
 
     /**
@@ -3133,14 +3142,15 @@ HWTEST_F(GridTestNg, MouseSelect002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, MouseSelect003, TestSize.Level1)
 {
-    const Offset LEFT_TOP = Offset(50.f, 50.f);
-    const Offset LEFT_BOTTOM = Offset(50.f, 100.f);
-    const Offset RIGHT_TOP = Offset(150.f, 50.f);
-    const Offset RIGHT_BOTTOM = Offset(150.f, 100.f);
+    float itemHeight = DEVICE_HEIGHT / 4;
+    const Offset LEFT_TOP = Offset(ITEM_WIDTH * 0.5, itemHeight * 0.5);
+    const Offset LEFT_BOTTOM = Offset(ITEM_WIDTH * 0.5, itemHeight * 1.5);
+    const Offset RIGHT_TOP = Offset(ITEM_WIDTH * 1.5, itemHeight * 0.5);
+    const Offset RIGHT_BOTTOM = Offset(ITEM_WIDTH * 1.5, itemHeight * 1.5);
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetMultiSelectable(true);
-        CreateGridItem(8, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(8);
     });
 
     /**
@@ -3198,20 +3208,21 @@ HWTEST_F(GridTestNg, MouseSelect004, TestSize.Level1)
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetMultiSelectable(true);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
     bool isSixthItemSelected = false;
     auto selectCallback = [&isSixthItemSelected](bool) { isSixthItemSelected = true; };
     GetChildPattern<GridItemPattern>(frameNode_, 1)->SetSelectable(false);
     GetChildEventHub<GridItemEventHub>(frameNode_, 2)->SetEnabled(false);
     GetChildEventHub<GridItemEventHub>(frameNode_, 5)->SetOnSelect(std::move(selectCallback));
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 
     /**
-     * @tc.steps: step2. Select (225, 50) - (315, 150) zone, include 2nd, 3rd, 6th, 7th item.
+     * @tc.steps: step2. Select zone, include 2nd, 3rd, 6th, 7th item.
      * @tc.expected: The 2nd and 3rd item is not selected but 6th item is selected.
      */
-    MouseSelect(Offset(225.f, 50.f), Offset(315.f, 150.f));
+    float itemWidth = DEVICE_WIDTH / 4;
+    MouseSelect(Offset(itemWidth * 1.5, ITEM_HEIGHT * 1.5), Offset(itemWidth * 2.5, ITEM_HEIGHT * 1.5));
     EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
     EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 2)->IsSelected());
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 5)->IsSelected());
@@ -3228,7 +3239,7 @@ HWTEST_F(GridTestNg, MouseSelect005, TestSize.Level1)
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetMultiSelectable(true);
-        CreateGridItem(8, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(8);
     });
     const Offset startOffset = Offset(225.f, 50.f);
     const Offset endOffset = Offset(315.f, 150.f);
@@ -3283,7 +3294,7 @@ HWTEST_F(GridTestNg, Drag001, TestSize.Level1)
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetEditable(true);
         gridModelNG.SetOnItemDragStart(onItemDragStart);
-        CreateGridItem(8, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(8);
     });
     eventHub_->onItemDragStart_ = onItemDragStart;
 
@@ -3329,10 +3340,10 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetEditable(true);
         gridModelNG.SetSupportAnimation(true);
-        CreateSingleGridItem(NULL_VALUE, NULL_VALUE, 2, 3, NULL_VALUE, ITEM_HEIGHT);
-        CreateSingleGridItem(NULL_VALUE, NULL_VALUE, 0, 2, NULL_VALUE, ITEM_HEIGHT);
-        CreateSingleGridItem(NULL_VALUE, NULL_VALUE, 2, 1, NULL_VALUE, ITEM_HEIGHT);
-        CreateGridItem(8, NULL_VALUE, ITEM_HEIGHT);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 2, 3, NULL_VALUE, ITEM_HEIGHT);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 0, 2, NULL_VALUE, ITEM_HEIGHT);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 2, 1, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(8);
     });
     auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
         auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
@@ -3355,7 +3366,7 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     eventHub_->FireOnItemDragEnter(dragInfo);
     eventHub_->FireOnItemDragLeave(dragInfo, NULL_VALUE);
     EXPECT_EQ(pattern_->GetOriginalIndex(), 11);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 
     /**
      * @tc.steps: step2. Drag 2nd item to 3rd item, Drag 3 item to 2 item.
@@ -3372,7 +3383,7 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, 0, 1, true);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 
     /**
      * @tc.steps: step3. Move something to 3rd item.
@@ -3385,7 +3396,7 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, NULL_VALUE, 1, true);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 
     /**
      * @tc.steps: step4. Move one item to wrong insertIndex.
@@ -3398,7 +3409,7 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     // insertIndex >= itemCount
     eventHub_->FireOnItemDragMove(dragInfo, 1, 11);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 }
 
 /**
@@ -3416,7 +3427,7 @@ HWTEST_F(GridTestNg, Drag003, TestSize.Level1)
         gridModelNG.SetMinCount(2);
         gridModelNG.SetMaxCount(4);
         gridModelNG.SetSupportAnimation(true);
-        CreateGridItem(itemCount, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(itemCount);
     });
     auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
         auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
@@ -3439,7 +3450,7 @@ HWTEST_F(GridTestNg, Drag003, TestSize.Level1)
     eventHub_->FireOnItemDragEnter(dragInfo);
     eventHub_->FireOnItemDragLeave(dragInfo, NULL_VALUE);
     EXPECT_EQ(pattern_->GetOriginalIndex(), itemCount);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 
     /**
      * @tc.steps: step2. Drag 2nd item to 3rd item, Drag 3 item to 2 item.
@@ -3456,7 +3467,7 @@ HWTEST_F(GridTestNg, Drag003, TestSize.Level1)
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, 0, 1, true);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 
     /**
      * @tc.steps: step3. Move something to 3rd item.
@@ -3469,7 +3480,7 @@ HWTEST_F(GridTestNg, Drag003, TestSize.Level1)
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, NULL_VALUE, 1, true);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 
     /**
      * @tc.steps: step4. Move one item to wrong insertIndex.
@@ -3482,7 +3493,7 @@ HWTEST_F(GridTestNg, Drag003, TestSize.Level1)
     // insertIndex >= itemCount
     eventHub_->FireOnItemDragMove(dragInfo, 1, itemCount);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 }
 
 /**
@@ -3494,7 +3505,7 @@ HWTEST_F(GridTestNg, FocusStep001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT, true);
+        CreateVerticalItem(10, true);
     });
 
     /**
@@ -3592,7 +3603,7 @@ HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE, true);
+        CreateHorizontalItem(10, true);
     });
 
     /**
@@ -3682,15 +3693,418 @@ HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusStep003
- * @tc.desc: Test GetNextFocusNode func when has unfocuseable item
+ * @tc.name:FocusStep003
+ * @tc.desc: Test GetNextFocusNode() with colTemplate/rowTemplate
  * @tc.type: FUNC
  */
 HWTEST_F(GridTestNg, FocusStep003, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
+        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT, true);
+        CreateItem(10, NULL_VALUE, NULL_VALUE, true);
+    });
+
+    /**
+     * @tc.steps: step1. GetNextFocusNode from left_top.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step2. GetNextFocusNode from right_top.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 2));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
+
+    /**
+     * @tc.steps: step3. GetNextFocusNode from left_bottom.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 8;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 7));
+
+    /**
+     * @tc.steps: step4. GetNextFocusNode from right_bottom.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 9;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 8));
+
+    /**
+     * @tc.steps: step5. GetNextFocusNode from middle.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
+}
+
+/**
+ * @tc.name: FocusStep004
+ * @tc.desc: Test GetNextFocusNode func when exist big item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, FocusStep004, TestSize.Level1)
+{
+    CreateGrid([](GridModelNG gridModelNG) {
+        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 2, 3, NULL_VALUE, ITEM_HEIGHT);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 0, 2, NULL_VALUE, ITEM_HEIGHT);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 2, 1, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(7, true);
+    });
+
+    /**
+     * @tc.steps: step1. GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step2. GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step3. GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step4. GetNextFocusNode from NormalItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step5. GetNextFocusNode from NormalItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
+}
+
+/**
+ * @tc.name: FocusStep005
+ * @tc.desc: Test GetNextFocusNode func when exist big item with RowsTemplate
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, FocusStep005, TestSize.Level1)
+{
+    CreateGrid([](GridModelNG gridModelNG) {
+        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        CreateBigItem(1, 2, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
+        CreateBigItem(0, 2, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
+        CreateBigItem(2, 3, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(7, true);
+    });
+
+    /**
+     * @tc.steps: step1. GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step2. GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step3. GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step4. GetNextFocusNode from NormalItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step5. GetNextFocusNode from NormalItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
+}
+
+/**
+ * @tc.name: FocusStep006
+ * @tc.desc: Test GetNextFocusNode func when exist big item with colTemplate/rowTemplate
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, FocusStep006, TestSize.Level1)
+{
+    CreateGrid([](GridModelNG gridModelNG) {
+        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateBigItem(1, 2, 1, 2);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
+        CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
+        CreateItem(7, NULL_VALUE, NULL_VALUE, true);
+    });
+
+    /**
+     * @tc.steps: step1. GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 3));
+
+    /**
+     * @tc.steps: step2. GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step3. GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 7));
+
+    /**
+     * @tc.steps: step4. GetNextFocusNode from NormalItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step5. GetNextFocusNode from NormalItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
+}
+
+/**
+ * @tc.name: FocusStep007
+ * @tc.desc: Test GetNextFocusNode func when has unfocuseable item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, FocusStep007, TestSize.Level1)
+{
+    CreateGrid([](GridModelNG gridModelNG) {
+        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateVerticalItem(10, true);
     });
 
     /**
@@ -3703,22 +4117,22 @@ HWTEST_F(GridTestNg, FocusStep003, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusStep004
+ * @tc.name: FocusStep008
  * @tc.desc: Test GetNextFocusNode func from top boundary item in Scrollable Grid
  * @tc.type: FUNC
  */
-HWTEST_F(GridTestNg, FocusStep004, TestSize.Level1)
+HWTEST_F(GridTestNg, FocusStep008, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(18, NULL_VALUE, ITEM_HEIGHT, true);
+        CreateVerticalItem(24, true);
     });
 
     /**
      * @tc.steps: step1. Scroll to second row
      */
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT - 1.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 
     /**
      * @tc.steps: step2. UP
@@ -3729,32 +4143,29 @@ HWTEST_F(GridTestNg, FocusStep004, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusStep005
+ * @tc.name: FocusStep009
  * @tc.desc: Test GetNextFocusNode func from bottom boundary item in Scrollable Grid
  * @tc.type: FUNC
  */
-HWTEST_F(GridTestNg, FocusStep005, TestSize.Level1)
+HWTEST_F(GridTestNg, FocusStep009, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(18, NULL_VALUE, ITEM_HEIGHT, true);
+        CreateVerticalItem(24, true);
     });
 
     /**
      * @tc.steps: step1. Scroll to first row
      */
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT + 1.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 
     /**
      * @tc.steps: step2. DOWN
      */
-    int32_t currentIndex = 15;
-    std::map<FocusStep, int32_t> next = {
-        {FocusStep::DOWN, NULL_VALUE},
-    };
+    int32_t currentIndex = 19;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 16);
+    EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 20);
 }
 
 /**
@@ -3766,16 +4177,16 @@ HWTEST_F(GridTestNg, Focus001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(18, NULL_VALUE, ITEM_HEIGHT, true);
+        CreateVerticalItem(18, true);
     });
 
     /**
      * @tc.steps: step1. When focus grid from the outside
      * @tc.expected: Will focus first child
      */
-    auto gridFocus = frameNode_->GetOrCreateFocusHub();
-    gridFocus->RequestFocusImmediately();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    auto gridFocusNode = frameNode_->GetOrCreateFocusHub();
+    gridFocusNode->RequestFocusImmediately();
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 
     /**
@@ -3783,65 +4194,59 @@ HWTEST_F(GridTestNg, Focus001, TestSize.Level1)
      * @tc.expected: Will focus last child
      */
     GetChildFocusHub(frameNode_, 1)->RequestFocusImmediately();
-    gridFocus->RequestFocusImmediately();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    gridFocusNode->RequestFocusImmediately();
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
 
     /**
      * @tc.steps: step3. Scroll to second row
      * @tc.expected: Would change startMainLineIndex_, focus last child.
      */
-    gridFocus->RequestFocusImmediately();
+    gridFocusNode->RequestFocusImmediately();
     UpdateCurrentOffset(-ITEM_HEIGHT - 1.f);
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
 }
 
 /**
- * @tc.name: GridPatternTest001
+ * @tc.name: UpdateCurrentOffset001
  * @tc.desc: Test grid pattern UpdateCurrentOffset function
  * @tc.type: FUNC
  */
-HWTEST_F(GridTestNg, GridPatternTest001, TestSize.Level1)
+HWTEST_F(GridTestNg, UpdateCurrentOffset001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(14, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
-
-    /**
-     * @tc.steps: step1. UpdateCurrentOffset to end, over start, over end
-     * @tc.expected: veridy currentOffset_.
-     */
-    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(IsEqualCurrentOffset(-100.f));
-    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    UpdateCurrentOffset(100.f, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
-    pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
+    UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentOffset(-200.f));
 
-    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_BAR);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    CreateGrid([](GridModelNG gridModelNG) {
+        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateVerticalItem(20);
+    });
+    UpdateCurrentOffset(-100.f, SCROLL_FROM_BAR);
+    EXPECT_TRUE(IsEqualCurrentOffset(-100.f));
+    UpdateCurrentOffset(100.f, SCROLL_FROM_BAR);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
-    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_BAR);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
-    pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_BAR);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
+    UpdateCurrentOffset(-200.f, SCROLL_FROM_BAR);
+    EXPECT_TRUE(IsEqualCurrentOffset(-200.f));
 
+    CreateGrid([](GridModelNG gridModelNG) {
+        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateVerticalItem(20);
+    });
     pattern_->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
-    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentOffset(-100.f));
+    UpdateCurrentOffset(100.f, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
-    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
-    pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
+    UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentOffset(-200.f));
 }
 
 /**
@@ -3853,7 +4258,7 @@ HWTEST_F(GridTestNg, GridPaintMethodTest001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
     auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
     auto paintProperty = pattern_->CreatePaintProperty();
@@ -3893,17 +4298,15 @@ HWTEST_F(GridTestNg, ScrollLayout001, TestSize.Level1)
     MockPipelineBase::GetCurrent()->SetTextFieldManager(textFieldManager);
     auto textFieldPattern = AceType::MakeRefPtr<Pattern>();
     textFieldManager->SetOnFocusTextField(textFieldPattern);
-    const Offset clickPosition = Offset(100.f, GRID_HEIGHT + ITEM_HEIGHT);
+    const Offset clickPosition = Offset(100.f, DEVICE_HEIGHT + ITEM_HEIGHT);
     textFieldManager->SetClickPosition(clickPosition);
 
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetMaxCount(2);
-        CreateGridItem(18, NULL_VALUE, ITEM_HEIGHT, true);
+        CreateVerticalItem(18, true);
     });
-
-    // MOCK GetPaintRectWithTransform()
-    const float smallerHeight = GRID_HEIGHT - ITEM_HEIGHT;
+    const float smallerHeight = DEVICE_HEIGHT - ITEM_HEIGHT;
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, smallerHeight);
     MockGetPaintRectWithTransform(frameNode_, gridRect);
 
@@ -3918,7 +4321,7 @@ HWTEST_F(GridTestNg, ScrollLayout001, TestSize.Level1)
     float gridHeight = frameNode_->GetGeometryNode()->GetFrameSize().Height();
     EXPECT_FLOAT_EQ(gridHeight, smallerHeight);
     float currentOffset = pattern_->gridLayoutInfo_.currentOffset_;
-    EXPECT_FLOAT_EQ(currentOffset, -100.f);
+    EXPECT_FLOAT_EQ(currentOffset, -ITEM_HEIGHT);
 }
 
 /**
@@ -3938,7 +4341,7 @@ HWTEST_F(GridTestNg, ScrollLayout002, TestSize.Level1)
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetMaxCount(2);
-        CreateGridItem(18, NULL_VALUE, ITEM_HEIGHT, true);
+        CreateVerticalItem(18, true);
     });
 
     /**
@@ -3946,7 +4349,7 @@ HWTEST_F(GridTestNg, ScrollLayout002, TestSize.Level1)
      * @tc.expected: currentOffset_ would not change
      */
     pattern_->gridLayoutInfo_.axis_ = Axis::HORIZONTAL;
-    const float smallerHeight = GRID_HEIGHT - ITEM_HEIGHT;
+    const float smallerHeight = DEVICE_HEIGHT - ITEM_HEIGHT;
     // change grid height and trigger Measure
     UpdateLayoutWrapper(frameNode_, DEVICE_WIDTH, smallerHeight);
     float currentOffset = pattern_->gridLayoutInfo_.currentOffset_;
@@ -3956,7 +4359,7 @@ HWTEST_F(GridTestNg, ScrollLayout002, TestSize.Level1)
      * @tc.steps: step2. While Grid !IsCurrentFocus()
      * @tc.expected: currentOffset_ would not change
      */
-    UpdateLayoutWrapper(frameNode_, DEVICE_WIDTH, GRID_HEIGHT); // reset Grid height
+    UpdateLayoutWrapper(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT); // reset Grid height
     pattern_->gridLayoutInfo_.axis_ = Axis::VERTICAL;
     // change grid height and trigger Measure
     UpdateLayoutWrapper(frameNode_, DEVICE_WIDTH, smallerHeight);
@@ -3967,7 +4370,7 @@ HWTEST_F(GridTestNg, ScrollLayout002, TestSize.Level1)
      * @tc.steps: step3. While clickPosition is in Grid
      * @tc.expected: currentOffset_ would not change
      */
-    UpdateLayoutWrapper(frameNode_, DEVICE_WIDTH, GRID_HEIGHT); // reset Grid height
+    UpdateLayoutWrapper(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT); // reset Grid height
     pattern_->gridLayoutInfo_.axis_ = Axis::VERTICAL;
     // change grid height and trigger Measure
     UpdateLayoutWrapper(frameNode_, DEVICE_WIDTH, smallerHeight);
@@ -3982,26 +4385,27 @@ HWTEST_F(GridTestNg, ScrollLayout002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AdaptiveLayout001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
+    float itemWidth = 100.f;
+    CreateGrid([itemWidth](GridModelNG gridModelNG) {
         gridModelNG.SetLayoutDirection(FlexDirection::ROW);
         gridModelNG.SetEditable(true);
         gridModelNG.SetCellLength(ITEM_HEIGHT);
         gridModelNG.SetMinCount(4);
         gridModelNG.SetMaxCount(2);
-        CreateGridItem(10, ITEM_WIDTH, ITEM_HEIGHT);
+        CreateItem(10, itemWidth, ITEM_HEIGHT);
     });
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
      * @tc.expected: would let minCount = 1, maxCount = Infinity;
      */
-    constexpr int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
+    int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
     for (int32_t index = 0; index < 10; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
-        float offsetX = index % colsNumber * ITEM_WIDTH;
+        float offsetX = index % colsNumber * itemWidth;
         float offsetY = floor(index / colsNumber) * ITEM_HEIGHT;
-        RectF expectRect = RectF(offsetX, offsetY, ITEM_WIDTH, ITEM_HEIGHT);
-        EXPECT_TRUE(IsEqualRect(childRect, expectRect)) << "index: " << index;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
 
@@ -4014,7 +4418,7 @@ HWTEST_F(GridTestNg, PerformActionTest001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
     auto gridItemAccessibilityProperty = GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 0);
@@ -4053,7 +4457,7 @@ HWTEST_F(GridTestNg, PerformActionTest002, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
     accessibilityProperty_->ActActionScrollForward();
     EXPECT_TRUE(IsEqualCurrentOffset(0.f));
@@ -4066,10 +4470,10 @@ HWTEST_F(GridTestNg, PerformActionTest002, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(IsEqualCurrentOffset(-300.f));
+    EXPECT_TRUE(IsEqualCurrentOffset(-DEVICE_HEIGHT));
     accessibilityProperty_->ActActionScrollBackward();
     EXPECT_TRUE(IsEqualCurrentOffset(0.f));
 }
@@ -4090,8 +4494,8 @@ HWTEST_F(GridTestNg, GridScrollTest001, TestSize.Level1)
         gridModelNG.SetRowsTemplate("1fr 1fr");
         gridModelNG.SetRowsGap(Dimension(5));
         gridModelNG.SetOnScrollBarUpdate(std::move(scrollFunc));
-        CreateSingleGridItem(1, 1, 1, 2);
-        CreateGridItem(2, NULL_VALUE, ITEM_HEIGHT);
+        CreateBigItem(1, 1, 1, 2);
+        CreateVerticalItem(2);
     });
     Dimension offset(1.0);
     auto fireOnScroll = eventHub_->FireOnScrollBarUpdate(1.0, offset);
@@ -4109,7 +4513,6 @@ HWTEST_F(GridTestNg, GridScrollTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. Create girdItem and initialize related properties.
      */
-
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
     gridModelNG.SetRowsTemplate("1fr 1fr");
@@ -4118,8 +4521,8 @@ HWTEST_F(GridTestNg, GridScrollTest002, TestSize.Level1)
     auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->gridLayoutInfo_, 2, 0);
     ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
     auto ret = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(100, 100), 0, 1, 0);
-    EXPECT_EQ(ret.GetY(), 0.0f);
-    EXPECT_EQ(ret.GetX(), 100.0f);
+    EXPECT_EQ(ret.GetY(), 100.f - ITEM_HEIGHT);
+    EXPECT_EQ(ret.GetX(), 100.f);
 }
 
 /**
@@ -4132,12 +4535,11 @@ HWTEST_F(GridTestNg, GridScrollTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. Create girdItem and initialize related properties.
      */
-
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
     gridModelNG.SetColumnsTemplate("1fr 1fr");
     gridModelNG.SetRowsGap(Dimension(5));
-    CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+    CreateVerticalItem(10);
     UpdateLayoutInfo();
     auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->gridLayoutInfo_, 2, 0);
     ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
@@ -4224,14 +4626,14 @@ HWTEST_F(GridTestNg, ScrollTo001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
     pattern_->ScrollTo(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
     pattern_->ScrollTo(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT));
@@ -4249,18 +4651,18 @@ HWTEST_F(GridTestNg, GetTotalHeight001, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
-    EXPECT_EQ(pattern_->GetTotalHeight(), 300.f);
+    EXPECT_EQ(pattern_->GetTotalHeight(), ITEM_HEIGHT * 3);
 
     /**
      * @tc.steps: step2. Create 20 gridItem
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
-    EXPECT_EQ(pattern_->GetTotalHeight(), 500.f);
+    EXPECT_EQ(pattern_->GetTotalHeight(), ITEM_HEIGHT * 5);
 }
 
 /**
@@ -4275,18 +4677,18 @@ HWTEST_F(GridTestNg, GetAverageHeight001, TestSize.Level1)
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
-    EXPECT_EQ(pattern_->GetAverageHeight(), 30.f);
+    EXPECT_EQ(pattern_->GetAverageHeight(), 60);
 
     /**
      * @tc.steps: step2. Create 20 gridItem
      */
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateGridItem(20, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(20);
     });
-    EXPECT_EQ(pattern_->GetAverageHeight(), 25.f);
+    EXPECT_EQ(pattern_->GetAverageHeight(), 50);
 }
 
 /**
@@ -4297,7 +4699,7 @@ HWTEST_F(GridTestNg, GetAverageHeight001, TestSize.Level1)
 HWTEST_F(GridTestNg, GridItemHoverEventTest001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT, false, GridItemStyle::PLAIN);
+        CreateVerticalItem(10, false, GridItemStyle::PLAIN);
     });
 
     /**
@@ -4327,7 +4729,7 @@ HWTEST_F(GridTestNg, GridItemHoverEventTest001, TestSize.Level1)
 HWTEST_F(GridTestNg, GridItemPressEventTest001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT, false, GridItemStyle::PLAIN);
+        CreateVerticalItem(10, false, GridItemStyle::PLAIN);
     });
 
     /**
@@ -4359,7 +4761,7 @@ HWTEST_F(GridTestNg, GridItemPressEventTest001, TestSize.Level1)
 HWTEST_F(GridTestNg, GridItemDisableEventTest001, TestSize.Level1)
 {
     CreateGrid([](GridModelNG gridModelNG) {
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT, false, GridItemStyle::PLAIN);
+        CreateVerticalItem(10, false, GridItemStyle::PLAIN);
     });
 
     /**
@@ -4381,7 +4783,7 @@ HWTEST_F(GridTestNg, GridItemDisableEventTest001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridItemGetInnerFocusPaintRectTest001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) { CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT); });
+    CreateGrid([](GridModelNG gridModelNG) { CreateVerticalItem(10); });
     auto gridItemNode = GetChildFrameNode(frameNode_, 0);
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
 
@@ -4428,7 +4830,7 @@ HWTEST_F(GridTestNg, GridScrollWithOptions001, TestSize.Level1)
     CreateGrid([option](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetLayoutOptions(option);
-        CreateGridItem(10, NULL_VALUE, ITEM_HEIGHT);
+        CreateVerticalItem(10);
     });
 
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
@@ -4452,7 +4854,7 @@ HWTEST_F(GridTestNg, GridScrollWithOptions002, TestSize.Level1)
     CreateGrid([option](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetLayoutOptions(option);
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(10);
     });
 
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
@@ -4481,12 +4883,12 @@ HWTEST_F(GridTestNg, GridScrollWithOptions003, TestSize.Level1)
     CreateGrid([option](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr");
         gridModelNG.SetLayoutOptions(option);
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(10);
     });
     pattern_->UpdateStartIndex(3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =
         AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -4512,12 +4914,12 @@ HWTEST_F(GridTestNg, GridScrollWithOptions004, TestSize.Level1)
     CreateGrid([option](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr");
         gridModelNG.SetLayoutOptions(option);
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(10);
     });
     pattern_->UpdateStartIndex(3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr 1fr");
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =
         AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -4545,7 +4947,7 @@ HWTEST_F(GridTestNg, GridScrollWithOptions005, TestSize.Level1)
     CreateGrid([option](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetLayoutOptions(option);
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(10);
     });
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =
@@ -4574,7 +4976,7 @@ HWTEST_F(GridTestNg, GridScrollWithOptions006, TestSize.Level1)
     CreateGrid([option](GridModelNG gridModelNG) {
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetLayoutOptions(option);
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(10);
     });
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =
@@ -4626,7 +5028,7 @@ HWTEST_F(GridTestNg, SearchIrregularFocusableChildInScroll001, TestSize.Level1)
     CreateGrid([option](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetLayoutOptions(option);
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE);
+        CreateHorizontalItem(10);
     });
 
     /**
@@ -4657,7 +5059,7 @@ HWTEST_F(GridTestNg, SearchIrregularFocusableChildInScroll002, TestSize.Level1)
     CreateGrid([option](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetLayoutOptions(option);
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE, true);
+        CreateHorizontalItem(10, true);
     });
 
     /**
@@ -4744,8 +5146,8 @@ HWTEST_F(GridTestNg, SearchIrregularFocusableChildInNormalGrid001, TestSize.Leve
     CreateGrid([](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateSingleGridItem(1, 2, 1, 2);
-        CreateGridItem(10, ITEM_WIDTH, NULL_VALUE, true);
+        CreateBigItem(1, 2, 1, 2);
+        CreateHorizontalItem(10, true);
     });
 
     /**

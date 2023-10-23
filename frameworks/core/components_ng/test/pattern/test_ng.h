@@ -46,23 +46,49 @@ public:
     static void SetHeight(const Dimension& height);
     void RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode,
         float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
-    void OldRunMeasureAndLayout(const RefPtr<FrameNode>& frameNode,
-        float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     void MockGetPaintRectWithTransform(const RefPtr<FrameNode>& frameNode, RectF paintRect = RectF());
 
-    testing::AssertionResult IsEqualOffset(Offset offset, Offset expectOffset);
-    testing::AssertionResult IsEqualOverScrollOffset(OverScrollOffset offset, OverScrollOffset expectOffset);
-    testing::AssertionResult IsEqualRect(Rect rect, Rect expectRect);
-    testing::AssertionResult IsEqualRect(RectF rect, RectF expectRect);
+    AssertionResult IsEqualOverScrollOffset(const OverScrollOffset& actual, const OverScrollOffset& expected)
+    {
+        if (NearEqual(actual.start, expected.start) && NearEqual(actual.end, expected.end)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << "{ " << actual.start << " , " << actual.end << " }" <<
+            " Expected: " << "{ " << expected.start << " , " << expected.end << " }";
+    }
+
+    AssertionResult IsEqual(const Offset& actual, const Offset& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
+    }
+
+    AssertionResult IsEqual(const Rect& actual, const Rect& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
+    }
+
+    AssertionResult IsEqual(const RectF& actual, const RectF& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
+    }
 
     template<typename T>
-    testing::AssertionResult IsEqual(const T& actual, const T& expected)
+    AssertionResult IsEqual(const T& actual, const T& expected)
     {
-        if (!NearEqual(actual, expected)) {
-            return testing::AssertionFailure() << "Actual: " << actual << " != expected: " << expected;
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
         }
-        return testing::AssertionSuccess();
+        return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
     }
 
     RefPtr<FrameNode> GetChildFrameNode(const RefPtr<FrameNode>& frameNode, int32_t index)

@@ -1737,7 +1737,7 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
         barWidth,
         DEVICE_HEIGHT * ratio
     );
-    EXPECT_TRUE(IsEqualRect(rect, expectRect));
+    EXPECT_TRUE(IsEqual(rect, expectRect));
 
     UpdateCurrentOffset(-VERTICAL_LENGTH);
     rect = scrollBar->touchRegion_;
@@ -1747,7 +1747,7 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
         barWidth,
         DEVICE_HEIGHT * ratio
     );
-    EXPECT_TRUE(IsEqualRect(rect, expectRect));
+    EXPECT_TRUE(IsEqual(rect, expectRect));
 
     /**
      * @tc.steps: step2. Test Bar in HORIZONTAL
@@ -1766,7 +1766,7 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
         DEVICE_WIDTH * ratio,
         barWidth
     );
-    EXPECT_TRUE(IsEqualRect(rect, expectRect));
+    EXPECT_TRUE(IsEqual(rect, expectRect));
 
     UpdateCurrentOffset(-HORIZONTAL_LENGTH);
     rect = scrollBar->touchRegion_;
@@ -1776,7 +1776,7 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
         DEVICE_WIDTH * ratio,
         barWidth
     );
-    EXPECT_TRUE(IsEqualRect(rect, expectRect));
+    EXPECT_TRUE(IsEqual(rect, expectRect));
 }
 
 /**
