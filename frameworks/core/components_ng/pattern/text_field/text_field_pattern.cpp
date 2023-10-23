@@ -775,8 +775,7 @@ void TextFieldPattern::HandleOnUndoAction()
     CHECK_NULL_VOID(layoutProperty);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                    : PROPERTY_UPDATE_MEASURE);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::HandleOnRedoAction()
@@ -795,8 +794,7 @@ void TextFieldPattern::HandleOnRedoAction()
     CHECK_NULL_VOID(layoutProperty);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                    : PROPERTY_UPDATE_MEASURE);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
@@ -2169,8 +2167,7 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     selectController_->UpdateCaretIndex(static_cast<int32_t>(StringUtils::ToWstring(content).length()));
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::InitMouseEvent()
@@ -2580,8 +2577,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
-    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                 : PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::UpdateEditingValueToRecord()
@@ -2998,8 +2994,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
-    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::ClearEditingValue()
@@ -3011,8 +3006,7 @@ void TextFieldPattern::ClearEditingValue()
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                    : PROPERTY_UPDATE_MEASURE);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::HandleCounterBorder()
@@ -3111,8 +3105,7 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
 
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                 : PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::UpdateInputFilterErrorText(const std::string& errorText)
@@ -3248,8 +3241,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
-    tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                    : PROPERTY_UPDATE_MEASURE);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::DeleteForward(int32_t length)
@@ -3276,8 +3268,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
-    tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                    : PROPERTY_UPDATE_MEASURE);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 std::u16string TextFieldPattern::GetLeftTextOfCursor(int32_t number)
@@ -4830,7 +4821,7 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::CreateHandles()
