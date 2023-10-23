@@ -237,6 +237,9 @@ void RenderGridRow::ParseNewLineForLargeOffset(
     int32_t childSpan, int32_t childOffset, int32_t restColumnNum, int32_t totalColumnNum, NewLineOffset& newLineOffset)
 {
     int32_t totalOffsetStartFromNewLine = childOffset - restColumnNum;
+    if (totalColumnNum <= 0) {
+        return;
+    }
     newLineOffset.newLineCount = totalOffsetStartFromNewLine / totalColumnNum + 1;
     // ex. totalColumn 12, restColumn is 4, child offset 26, span 6. Offsets of next 2 lines are 12 and 10
     // then the child will be placed at the third new line with offset 0.
