@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
@@ -216,8 +215,7 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     const auto& geometryNode = host->GetGeometryNode();
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    LoadImageFailEvent event(
-        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg);
+    LoadImageFailEvent event(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg);
     imageEventHub->FireErrorEvent(event);
 }
 
@@ -703,13 +701,14 @@ void ImagePattern::UpdateFillColorIfForegroundColor()
     }
 }
 
-void ImagePattern::DumpInfo()
+void ImagePattern::DumpAdvanceInfo()
 {
     auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     if (layoutProp->GetImageSourceInfo().has_value()) {
         DumpLog::GetInstance().AddDesc(std::string("url: ").append(layoutProp->GetImageSourceInfo()->ToString()));
     }
+    syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
 }
 
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
