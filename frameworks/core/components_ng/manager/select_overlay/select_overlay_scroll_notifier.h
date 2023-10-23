@@ -22,7 +22,6 @@
 
 namespace OHOS::Ace::NG {
 class SelectOverlayScrollNotifier {
-
 public:
     static inline void NotifyOnScrollCallback(WeakPtr<ScrollablePattern> pattern, float offset, int32_t source)
     {

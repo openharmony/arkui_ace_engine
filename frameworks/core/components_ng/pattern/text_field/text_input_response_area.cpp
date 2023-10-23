@@ -337,5 +337,4 @@ void UnitResponseArea::DestoryArea()
     hostPattern_.Reset();
     unitNode_.Reset();
 } // UnitResponseArea end
-
 } // namespace OHOS::Ace::NG

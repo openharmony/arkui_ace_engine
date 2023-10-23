@@ -18,7 +18,6 @@
 #include "core/components_ng/pattern/search/search_event_hub.h"
 
 namespace OHOS::Ace::NG {
-
 bool SearchTextFieldPattern::IsSearchParentNode() const
 {
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
@@ -50,5 +49,4 @@ TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction()
 {
     return TextInputAction::SEARCH;
 }
-
 } // namespace OHOS::Ace::NG

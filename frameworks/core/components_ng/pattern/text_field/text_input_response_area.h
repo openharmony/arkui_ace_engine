@@ -125,7 +125,6 @@ private:
     bool IsShowUnit();
     WeakPtr<NG::UINode> unitNode_;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_INPUT_TEXT_INPUT_RESPONSE_AREA_H

@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class ContentController : public virtual AceType {
     DECLARE_ACE_TYPE(ContentController, AceType);
 
@@ -87,7 +86,6 @@ private:
     std::string content_;
     WeakPtr<Pattern> pattern_;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_PATTERN_CONTENT_CONTROLLER_H

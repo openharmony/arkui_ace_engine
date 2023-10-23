@@ -18,7 +18,7 @@
 
 #include <cstdint>
 #include <functional>
-#include <stdint.h>
+#include <cstdint>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -32,9 +32,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-
 using OnAccessibilityCallback = std::function<void()>;
-
 } // namespace
 
 class TextSelectController : public Property {
@@ -206,7 +204,6 @@ private:
     OnAccessibilityCallback onAccessibilityCallback_;
     WeakPtr<Pattern> pattern_;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_PATTERN_TEXT_SELECT_CONTROLLER_H

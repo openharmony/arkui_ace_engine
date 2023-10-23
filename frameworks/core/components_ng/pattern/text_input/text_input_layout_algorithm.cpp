@@ -192,5 +192,4 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         responseArea->Layout(layoutWrapper);
     }
 }
-
 } // namespace OHOS::Ace::NG

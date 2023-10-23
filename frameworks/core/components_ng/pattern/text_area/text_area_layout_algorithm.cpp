@@ -221,5 +221,4 @@ void TextAreaLayoutAlgorithm::CounterLayout(LayoutWrapper* layoutWrapper)
         counterNodeLayoutWrapper->Layout();
     }
 }
-
 } // namespace OHOS::Ace::NG

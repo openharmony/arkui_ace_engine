@@ -14,9 +14,6 @@
  */
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 
-#include <string>
-#include <vector>
-
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
@@ -24,7 +21,6 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)
 {
     firstHandleInfo_.index = firstHandleIndex;

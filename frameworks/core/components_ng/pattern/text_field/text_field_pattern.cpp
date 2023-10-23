@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <optional>
 #include <regex>
-#include <stdint.h>
 #include <string>
 #include <utility>
 
@@ -660,8 +659,7 @@ void TextFieldPattern::InitDisableColor()
     CHECK_NULL_VOID(theme);
     if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         underlineWidth_ = UNDERLINE_WIDTH;
-        underlineColor_ =
-            IsDisabled() ? theme->GetDisableUnderlineColor() : theme->GetUnderlineColor();
+        underlineColor_ = IsDisabled() ? theme->GetDisableUnderlineColor() : theme->GetUnderlineColor();
         SaveUnderlineStates();
     }
 }
@@ -2388,7 +2386,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         LOGI("Start to request keyboard");
         if (customKeyboardBulder_) {
 #if defined(ENABLE_STANDARD_INPUT) && defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        imeAttached_ = true;
+            imeAttached_ = true;
 #endif
             return RequestCustomKeyboard();
         }
@@ -2540,7 +2538,6 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
-    // SwapIfLarger(start, end);
     if (IsSelected()) {
         LOGI("In select mode, replace selected text");
         caretStart = start;

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 
-#include <cstdint>
-
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -25,7 +23,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 void SelectOverlayClient::InitSelectOverlay()
 {
     selectOverlayInfo_.menuCallback.onCopy = [weak = WeakClaim(this)]() {
@@ -131,7 +128,7 @@ void SelectOverlayClient::UpdateShowingSelectOverlay(ClientOverlayInfo& clientIn
     LOGI("update select overlay, isUseMouse %{public}d", clientInfo.isShowMouseMenu);
     auto isCurrentSingleHandle = IsShowingSingleHandle();
     auto hasRequestSingleHandle = !clientInfo.firstHandleInfo && clientInfo.secondHandleInfo;
-    if (clientInfo.isShowMouseMenu || isCurrentSingleHandle ^ hasRequestSingleHandle) {
+    if (clientInfo.isShowMouseMenu || (isCurrentSingleHandle ^ hasRequestSingleHandle)) {
         RequestCloseSelectOverlay(true);
         clientInfo.isUpdateMenu = true;
         CreateSelectOverlay(clientInfo);
@@ -258,5 +255,4 @@ void SelectOverlayClient::StopListeningScrollableParent(const RefPtr<FrameNode>&
     CHECK_NULL_VOID(context);
     context->GetSelectOverlayManager()->RemoveScrollCallback(host->GetId());
 }
-
 } // namespace OHOS::Ace::NG
