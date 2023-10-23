@@ -97,6 +97,7 @@ enum class AceLogTag : uint8_t {
     ACE_PROGRESS,
     ACE_QRCODE,
     ACE_ROUTER,
+    ACE_THEME
 };
 
 enum class LogDomain : uint32_t {
