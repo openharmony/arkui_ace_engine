@@ -167,6 +167,5 @@ private:
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     std::vector<MenuOptionsParam> menuOptionItems_;
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_SELECT_OVERLAY_SELECT_OVERLAY_CLIENT_H

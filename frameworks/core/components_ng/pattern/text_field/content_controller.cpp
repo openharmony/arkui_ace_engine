@@ -235,5 +235,4 @@ std::string ContentController::GetValueAfterIndex(int32_t index)
 {
     return StringUtils::ToString(GetWideText().substr(index, GetWideText().length() - index));
 }
-
 } // namespace OHOS::Ace::NG
