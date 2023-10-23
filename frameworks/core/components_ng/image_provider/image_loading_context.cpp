@@ -22,9 +22,11 @@
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
 ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad)
     : src_(src), notifiers_(std::move(loadNotifier)), syncLoad_(syncLoad)
 {
@@ -109,7 +111,32 @@ void ImageLoadingContext::OnDataLoading()
         DataReadyCallback(obj);
         return;
     }
+    if (src_.GetSrcType() == SrcType::NETWORK && SystemProperties::GetDownloadByNetworkEnabled()) {
+        DownloadImage();
+        return;
+    }
     ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);
+}
+
+void ImageLoadingContext::DownloadImage()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    DownloadCallback downloadCallback;
+    downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](const std::vector<uint8_t>& imageData) {
+        auto ctx = weak.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
+        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(ctx->GetSourceInfo(), data);
+        ctx->DataReadyCallback(imageObj);
+    };
+    downloadCallback.failCallback = [weak = AceType::WeakClaim(this)](std::string errorMsg) {
+        auto ctx = weak.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ctx->FailCallback(errorMsg);
+    };
+    downloadCallback.cancelCallback = downloadCallback.failCallback;
+    NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
 }
 
 void ImageLoadingContext::OnMakeCanvasImage()
