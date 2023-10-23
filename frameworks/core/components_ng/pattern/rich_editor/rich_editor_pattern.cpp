@@ -1933,6 +1933,8 @@ void RichEditorPattern::CreateTextSpanNode(
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     spanNode->MountToParent(host, info.GetSpanIndex());
+    auto spanItem = spanNode->GetSpanItem();
+    AddSpanItem(spanItem, info.GetSpanIndex());
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
         auto spanItem = spanNode->GetSpanItem();
@@ -2312,6 +2314,17 @@ bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
             return true;
         } else if (keyEvent.IsNumberKey() && !keyEvent.IsCombinationKey()) {
             appendElement = keyEvent.ConvertCodeToString();
+        } else if (keyEvent.IsLetterKey()) {
+            if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
+                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
+                HandleOnSelectAll();
+            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
+                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
+                HandleOnCopy();
+            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
+                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
+                HandleOnPaste();
+            }
         }
         if (keyEvent.code == KeyCode::KEY_DEL) {
 #if defined(PREVIEW)
@@ -2349,30 +2362,6 @@ bool RichEditorPattern::HandleShiftPressedEvent(const KeyEvent& event)
             keyChar = iterCode->second;
         } else {
             return false;
-        }
-        if (event.IsLetterKey()) {
-            if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
-                HandleOnSelectAll();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
-                HandleOnCopy();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
-                HandleOnPaste();
-            }
-            return true;
-        }
-        auto visibilityCode = event.ConvertInputCodeToString();
-        if (visibilityCode != std::string("")) {
-            if ((event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
-                    event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT) &&
-                visibilityCode.length() > 1) {
-                InsertValue(visibilityCode.substr(1, 1));
-            } else {
-                InsertValue(visibilityCode.substr(0, 1).c_str());
-            }
-            return true;
         }
     } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
                                                                event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
