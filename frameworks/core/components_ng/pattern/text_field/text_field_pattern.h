@@ -530,7 +530,7 @@ public:
         return connection_;
 #endif
     }
-    float PreferredLineHeight();
+    float PreferredLineHeight(bool isAlgorithmMeasure = false);
 
     void SearchRequestKeyboard();
 
@@ -1053,7 +1053,7 @@ private:
     void StopTwinkling();
     void CheckIfNeedToResetKeyboard();
 
-    float PreferredTextHeight(bool isPlaceholder);
+    float PreferredTextHeight(bool isPlaceholder, bool isAlgorithmMeasure = false);
 
     void SetCaretOffsetForEmptyTextOrPositionZero();
     void UpdateTextFieldManager(const Offset& offset, float height);

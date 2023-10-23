@@ -106,7 +106,6 @@ protected:
     SizeF TextInputMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth);
     SizeF TextAreaMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
     RectF textRect_;

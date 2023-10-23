@@ -2596,9 +2596,9 @@ void TextFieldPattern::UpdateEditingValueToRecord()
     operationRecords_.emplace_back(record);
 }
 
-float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
+float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithmMeasure)
 {
-    if (paragraph_ && paragraph_->GetHeight() != 0.0f) {
+    if (!isAlgorithmMeasure && paragraph_ && paragraph_->GetHeight() != 0.0f) {
         return paragraph_->GetHeight() / paragraph_->GetLineCount();
     }
     RefPtr<Paragraph> paragraph;
@@ -2641,9 +2641,9 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
     return paragraph->GetHeight();
 }
 
-float TextFieldPattern::PreferredLineHeight()
+float TextFieldPattern::PreferredLineHeight(bool isAlgorithmMeasure)
 {
-    return PreferredTextHeight(contentController_->IsEmpty());
+    return PreferredTextHeight(contentController_->IsEmpty(), isAlgorithmMeasure);
 }
 
 void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity)

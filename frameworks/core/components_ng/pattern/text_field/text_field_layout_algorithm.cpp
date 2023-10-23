@@ -112,7 +112,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
             pattern->GetSingleLineHeight() * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
     }
 
-    return SizeF(contentWidth, std::min(inlineIdealHieght, std::max(preferredHeight_, paragraph_->GetHeight())));
+    auto contentHeight = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
+                             ? paragraph_->GetHeight()
+                             : std::max(preferredHeight_, paragraph_->GetHeight());
+
+    return SizeF(contentWidth, std::min(inlineIdealHieght, contentHeight));
 }
 
 float TextFieldLayoutAlgorithm::ConstraintWithMinWidth(
@@ -144,8 +148,11 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, imageWidth);
     auto counterNodeHeight = CounterNodeMeasure(contentWidth, layoutWrapper);
 
-    auto contentHeight = std::min(
-        contentConstraint.maxSize.Height() - counterNodeHeight, std::max(preferredHeight_, paragraph_->GetHeight()));
+    auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
+                      ? paragraph_->GetHeight()
+                      : std::max(preferredHeight_, paragraph_->GetHeight());
+
+    auto contentHeight = std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height);
 
     textRect_.SetSize(SizeF(std::max(0.0f, paragraph_->GetLongestLine()), paragraph_->GetHeight()));
 
@@ -160,8 +167,11 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper);
     auto counterNodeHeight = CounterNodeMeasure(contentWidth, layoutWrapper);
 
-    auto contentHeight = std::min(
-        contentConstraint.maxSize.Height() - counterNodeHeight, std::max(preferredHeight_, paragraph_->GetHeight()));
+    auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
+                      ? paragraph_->GetHeight()
+                      : std::max(preferredHeight_, paragraph_->GetHeight());
+
+    auto contentHeight = std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height);
 
     textRect_.SetSize(SizeF(std::max(0.0f, paragraph_->GetLongestLine()), paragraph_->GetHeight()));
     return SizeF(contentWidth, contentHeight);
@@ -183,8 +193,12 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(
         contentWidth = std::min(contentConstraint.maxSize.Width() - imageWidth,
             std::max(paragraph_->GetLongestLine(), contentConstraint.minSize.Width() - imageWidth));
     }
-    auto contenHeight =
-        std::min(contentConstraint.maxSize.Height(), std::max(preferredHeight_, paragraph_->GetHeight()));
+
+    auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
+                      ? paragraph_->GetHeight()
+                      : std::max(preferredHeight_, paragraph_->GetHeight());
+
+    auto contenHeight = std::min(contentConstraint.maxSize.Height(), height);
 
     textRect_.SetSize(SizeF(std::max(0.0f, paragraph_->GetLongestLine()), paragraph_->GetHeight()));
     return SizeF(contentWidth, contenHeight);

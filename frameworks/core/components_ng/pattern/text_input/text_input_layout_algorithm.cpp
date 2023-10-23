@@ -60,8 +60,10 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         }
     }
 
-    // Used for empty text.
-    preferredHeight_ = pattern->PreferredLineHeight();
+    if (textContent_.empty()) {
+        // Used for empty text.
+        preferredHeight_ = pattern->PreferredLineHeight(true);
+    }
 
     // Paragraph layout.
     if (isInlineStyle) {

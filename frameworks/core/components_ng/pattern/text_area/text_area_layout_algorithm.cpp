@@ -50,9 +50,10 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     } else {
         CreateParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition());
     }
-
-    // Used for empty text.
-    preferredHeight_ = pattern->PreferredLineHeight();
+    if (textContent_.empty()) {
+        // Used for empty text.
+        preferredHeight_ = pattern->PreferredLineHeight(true);
+    }
 
     // Paragraph layout.}
     if (isInlineStyle) {
