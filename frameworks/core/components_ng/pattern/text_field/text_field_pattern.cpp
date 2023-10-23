@@ -555,8 +555,12 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(layoutProperty);
     if (IsNormalInlineState()) {
         ApplyInlineStates(true);
-        inlineSelectAllFlag_ = true;
         inlineFocusState_ = true;
+        if (contentController_->IsEmpty()) {
+            StartTwinkling();
+        } else {
+            inlineSelectAllFlag_ = true;
+        }
     } else {
         StartTwinkling();
     }
@@ -4853,7 +4857,6 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
     textObscured_ = isObscured;
     CloseSelectOverlay(false);
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
-    StartTwinkling();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
