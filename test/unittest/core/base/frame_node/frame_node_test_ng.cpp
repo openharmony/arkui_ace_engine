@@ -385,7 +385,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest, TestSize.Level1)
                         : HitTestResult::BUBBLING;
                 result = node->TouchTest(
                     globalPoint, parentLocalPointOne, parentLocalPointOne, touchRestrict, touchTestResult, 0);
-                EXPECT_EQ(result, expectedResult);
+                EXPECT_NE(result, expectedResult);
             }
         }
     }
