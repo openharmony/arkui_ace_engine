@@ -93,18 +93,18 @@ public:
 
     float CalcPatternOffset(float scrollableDistance, float controlDistance, float delta) const;
 
-    void SetPressed(bool press)
+    void SetScrollSnapTrigger_(bool scrollSnapTrigger)
     {
-        isPressed_ = press;
+        scrollSnapTrigger_ = scrollSnapTrigger;
     }
 
-    bool IsPressed() const
+    bool IsScrollSnapTrigger() const
     {
-        return isPressed_;
+        return scrollSnapTrigger_;
     }
 
 private:
-    bool isPressed_ = false;
+    bool scrollSnapTrigger_ = false; // Used to handle the triggering problem of snap scroll
     std::list<ScrollableNodeInfo> scrollableNodes_;  // Scrollable nodes, like list, grid, scroll, etc.
     std::list<WeakPtr<ScrollBarPattern>> scrollBars_; // ScrollBar should effect with scrollable node.
 };
