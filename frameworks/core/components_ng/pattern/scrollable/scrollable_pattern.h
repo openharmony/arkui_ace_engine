@@ -295,6 +295,15 @@ public:
         return scrollSource_;
     }
 
+    static float CalculateFriction(float gamma)
+    {
+        constexpr float RATIO = 1.848f;
+        if (GreatOrEqual(gamma, 1.0)) {
+            gamma = 1.0f;
+        }
+        return exp(-RATIO * gamma);
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
