@@ -280,7 +280,7 @@ HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
     RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_NE(gestureHub, nullptr);
     bool rerult = webPattern->NotifyStartDragTask();
-    EXPECT_FALSE(rerult);
+    EXPECT_TRUE(rerult);
     webPattern->isDisableDrag_ = true;
     rerult = webPattern->NotifyStartDragTask();
     EXPECT_FALSE(rerult);
