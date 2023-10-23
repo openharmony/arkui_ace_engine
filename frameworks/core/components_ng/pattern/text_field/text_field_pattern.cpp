@@ -4646,7 +4646,7 @@ bool TextFieldPattern::CheckSelectionRectVisible()
     return false;
 }
 
-void TextFieldPattern::DumpInfo()
+void TextFieldPattern::DumpAdvanceInfo()
 {
     if (customKeyboardBulder_) {
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
