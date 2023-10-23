@@ -19,6 +19,7 @@
 #include "transaction/rs_interfaces.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
@@ -116,13 +117,11 @@ void FormPattern::OnAttachToFrameNode()
 
 void FormPattern::HandleUnTrustForm()
 {
-    LOGI("HandleUnTrustForm start.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (externalRenderContext_) {
         auto renderContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
         CHECK_NULL_VOID(renderContext);
-        LOGI("HandleUnTrustForm removeChild.");
         renderContext->RemoveChild(externalRenderContext_);
     }
 
@@ -140,7 +139,6 @@ void FormPattern::HandleUnTrustForm()
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
     host->GetRenderContext()->RequestNextFrame();
-    LOGI("HandleUnTrustForm end.");
 }
 
 void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
@@ -156,7 +154,6 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
     auto formTheme = pipelineContext->GetTheme<FormTheme>();
     CHECK_NULL_VOID(formTheme);
     Color unTrustBackgroundColor = formTheme->GetUnTrustBackgroundColor();
-    LOGI("UpdateBackgroundColor: %{public}s when isUnTrust.", unTrustBackgroundColor.ColorToString().c_str());
     host->GetRenderContext()->UpdateBackgroundColor(unTrustBackgroundColor);
 }
 
@@ -178,7 +175,6 @@ void FormPattern::HandleSnapshot()
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
 {
     if (formLinkInfos_.empty() || isDynamic_) {
-        LOGE("formLinkInfos is empty, do not handle event.");
         return;
     }
     for (const auto& info : formLinkInfos_) {
@@ -187,8 +183,8 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
         auto action = linkInfo->GetValue("action")->GetString();
         auto rectStr = linkInfo->GetValue("formLinkRect")->GetString();
         RectF linkRect = RectF::FromString(rectStr);
-        LOGD("touchPoint: %{public}s, action: %{public}s, linkRect: %{public}s", touchPoint.ToString().c_str(),
-            action.c_str(), linkRect.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_FORM, "touchPoint: %{public}s, action: %{public}s, linkRect: %{public}s",
+            touchPoint.ToString().c_str(), action.c_str(), linkRect.ToString().c_str());
         if (linkRect.IsInRegion(touchPoint)) {
             OnActionEvent(action);
             break;
@@ -199,12 +195,10 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
 void FormPattern::TakeSurfaceCaptureForUI()
 {
     if (isDynamic_) {
-        LOGI("Now it's a dynamic card");
         formLinkInfos_.clear();
         return;
     }
 
-    LOGI("TakeSurfaceCaptureForUI");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto externalContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
@@ -218,7 +212,6 @@ void FormPattern::TakeSurfaceCaptureForUI()
 void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 {
     ContainerScope scope(scopeId_);
-    LOGI("OnSnapshot");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto uiTaskExecutor =
@@ -232,7 +225,6 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 
 void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 {
-    LOGI("HandleOnSnapshot");
     CHECK_NULL_VOID(pixelMap);
     pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     UpdateStaticCard();
@@ -241,7 +233,6 @@ void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 
 void FormPattern::UpdateStaticCard()
 {
-    LOGI("UpdateStaticCard");
     // 1. Use imageNode to display pixelMap
     UpdateImageNode();
     // 2. Remove FrsNode from formNode
@@ -252,7 +243,6 @@ void FormPattern::UpdateStaticCard()
 
 void FormPattern::HideImageNode()
 {
-    LOGI("HideImageNode");
     ContainerScope scope(scopeId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -269,7 +259,6 @@ void FormPattern::HideImageNode()
 
 RefPtr<FrameNode> FormPattern::GetOrCreateImageNode()
 {
-    LOGI("GetOrCreateImageNode");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto child = host->GetLastChild();
@@ -288,7 +277,6 @@ RefPtr<FrameNode> FormPattern::GetOrCreateImageNode()
     }
 
     if (child->GetTag() != V2::IMAGE_ETS_TAG) {
-        LOGE("child is not Image");
         return nullptr;
     }
 
@@ -298,7 +286,6 @@ RefPtr<FrameNode> FormPattern::GetOrCreateImageNode()
 
 void FormPattern::UpdateImageNode()
 {
-    LOGI("UpdateImageNode");
     ContainerScope scope(scopeId_);
     CHECK_NULL_VOID(pixelMap_);
     auto host = GetHost();
@@ -327,7 +314,6 @@ void FormPattern::UpdateImageNode()
 
 void FormPattern::RemoveFrsNode()
 {
-    LOGI("RemoveFrsNode");
     ContainerScope scope(scopeId_);
     CHECK_NULL_VOID(externalRenderContext_);
     auto host = GetHost();
@@ -346,7 +332,6 @@ void FormPattern::RemoveFrsNode()
 
 void FormPattern::ReleaseRenderer()
 {
-    LOGI("ReleaseRenderer");
     ContainerScope scope(scopeId_);
     CHECK_NULL_VOID(formManagerBridge_);
     formManagerBridge_->ReleaseRenderer();
@@ -355,7 +340,6 @@ void FormPattern::ReleaseRenderer()
 void FormPattern::OnRebuildFrame()
 {
     if (isSnapshot_) {
-        LOGI("Do not need reAddChild");
         return;
     }
 
@@ -415,14 +399,13 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         // for update form component
         if (cardInfo_.allowUpdate != info.allowUpdate) {
             cardInfo_.allowUpdate = info.allowUpdate;
-            LOGI(" update card allow info:%{public}d", cardInfo_.allowUpdate);
+            TAG_LOGI(AceLogTag::ACE_FORM, "Update card allow info:%{public}d", cardInfo_.allowUpdate);
             if (subContainer_) {
                 subContainer_->SetAllowUpdate(cardInfo_.allowUpdate);
             }
         }
 
         if (formManagerBridge_ && (cardInfo_.width != info.width || cardInfo_.height != info.height)) {
-            LOGI("Form surfaceChange callback");
             formManagerBridge_->NotifySurfaceChange(size.Width(), size.Height());
         }
 
@@ -455,7 +438,6 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 void FormPattern::InitFormManagerDelegate()
 {
     if (formManagerBridge_) {
-        LOGD("Form manager bridge is already initialized.");
         return;
     }
 
@@ -551,7 +533,6 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
         [weak = WeakClaim(this), instanceID](const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic) {
-            LOGI("Form surface node callback");
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
@@ -585,7 +566,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddActionEventHandle([weak = WeakClaim(this), instanceID](const std::string& action) {
         ContainerScope scope(instanceID);
-        LOGI("OnActionEvent action: %{public}s", action.c_str());
+        TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}s", action.c_str());
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->OnActionEvent(action);
@@ -593,7 +574,6 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID]() {
         ContainerScope scope(instanceID);
-        LOGI("HandleUnTrustForm");
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         auto host = formPattern->GetHost();
@@ -610,7 +590,6 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID]() {
         ContainerScope scope(instanceID);
-        LOGI("HandleSnapshot");
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->HandleSnapshot();
@@ -719,7 +698,6 @@ void FormPattern::CreateCardContainer()
         uiTaskExecutor.PostTask([id, weak] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            LOGI("card id:%{public}zu", id);
             pattern->FireOnAcquiredEvent(id);
         });
     });
@@ -789,7 +767,6 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
 
 void FormPattern::FireOnErrorEvent(const std::string& code, const std::string& msg) const
 {
-    LOGI("FireOnErrorEvent code: %{public}s, msg: %{public}s", code.c_str(), msg.c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
@@ -802,7 +779,6 @@ void FormPattern::FireOnErrorEvent(const std::string& code, const std::string& m
 
 void FormPattern::FireOnUninstallEvent(int64_t id) const
 {
-    LOGI("FireOnUninstallEvent id: %{public}s", std::to_string(id).c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
@@ -814,7 +790,6 @@ void FormPattern::FireOnUninstallEvent(int64_t id) const
 
 void FormPattern::FireOnAcquiredEvent(int64_t id) const
 {
-    LOGI("FireOnAcquiredEvent id: %{public}s", std::to_string(id).c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
@@ -826,7 +801,6 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
 
 void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action)
 {
-    LOGI("FireOnAcquiredEvent action: %{public}s", action->ToString().c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
@@ -838,7 +812,6 @@ void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action)
 
 void FormPattern::FireOnLoadEvent() const
 {
-    LOGI("FireOnLoadEvent");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
@@ -848,7 +821,6 @@ void FormPattern::FireOnLoadEvent() const
 
 void FormPattern::OnLoadEvent()
 {
-    LOGI("OnLoadEvent");
     ACE_FUNCTION_TRACE();
     isSnapshot_ = false;
     auto host = GetHost();
@@ -866,7 +838,6 @@ void FormPattern::OnActionEvent(const std::string& action)
     CHECK_NULL_VOID(formManagerBridge_);
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
-        LOGE("get event action failed");
         return;
     }
     auto uri = eventAction->GetValue("uri");
@@ -876,13 +847,11 @@ void FormPattern::OnActionEvent(const std::string& action)
     }
     auto actionType = eventAction->GetValue("action");
     if (!actionType->IsValid()) {
-        LOGE("get event key failed");
         return;
     }
 
     auto type = actionType->GetString();
     if (type != "router" && type != "message" && type != "call") {
-        LOGE("undefined event type");
         return;
     }
 
@@ -920,13 +889,11 @@ const RefPtr<SubContainer>& FormPattern::GetSubContainer() const
 
 void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
-    if (!pointerEvent || !formManagerBridge_) {
-        LOGE("Func: %{public}s, pointerEvent or formManagerBridge is null", __func__);
-        return;
-    }
+    CHECK_NULL_VOID(pointerEvent);
+    CHECK_NULL_VOID(formManagerBridge_);
 
     if (!isVisible_) {
-        LOGW("The form is invisible, stop to dispatch pointEvent");
+        TAG_LOGI(AceLogTag::ACE_FORM, "The form is invisible, stop to dispatch pointEvent");
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
             pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
