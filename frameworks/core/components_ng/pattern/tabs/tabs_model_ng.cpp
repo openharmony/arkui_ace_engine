@@ -251,7 +251,7 @@ void TabsModelNG::SetIndex(int32_t index)
     CHECK_NULL_VOID(tabBarPattern);
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    if (index > tabContentNum - 1 || index < 0) {
+    if (index < 0) {
         index = 0;
     }
     tabBarLayoutProperty->UpdateIndicator(index);
