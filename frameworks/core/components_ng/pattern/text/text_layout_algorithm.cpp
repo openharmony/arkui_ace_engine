@@ -114,9 +114,10 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         heightFinal =
             std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
     }
-    if (NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
+        NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
         // text content is empty
-        return SizeF { 0.0f, 0.0f };
+        return SizeF {};
     }
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
