@@ -82,6 +82,9 @@ public:
     void SetIsLoop(bool isLoop)
     {
         isLoop_ = isLoop;
+        if (builder_) {
+            builder_->SetIsLoop(isLoop);
+        }
     }
 
     bool GetIsLoop() const
