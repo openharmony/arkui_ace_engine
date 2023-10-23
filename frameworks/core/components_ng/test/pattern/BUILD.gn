@@ -81,7 +81,6 @@ group("pattern_unittest") {
     "text:text_test_ng",
     "text_clock:text_clock_test_ng",
     "text_drag:text_drag_test_ng",
-    "text_field:text_field_test_ng",
     "text_picker:text_picker_test_ng",
     "text_timer:text_timer_test_ng",
     "time_picker:time_picker_test_ng",

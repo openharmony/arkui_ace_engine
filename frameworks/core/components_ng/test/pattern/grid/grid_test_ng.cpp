@@ -2627,7 +2627,7 @@ HWTEST_F(GridTestNg, EventHub001, TestSize.Level1)
         gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateVerticalItem(8);
     });
-    RectF gridRect(0.f, 0.f, DEVICE_WIDTH, GRID_HEIGHT);
+    RectF gridRect(0.f, 0.f, DEVICE_WIDTH, DEVICE_HEIGHT);
     auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_);
     mockRenderContext->rect_ = gridRect;
 
