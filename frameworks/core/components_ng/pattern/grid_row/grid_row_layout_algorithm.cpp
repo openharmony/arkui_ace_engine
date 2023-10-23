@@ -34,7 +34,7 @@ using NewLineOffset = GridRowLayoutAlgorithm::NewLineOffset;
 using LayoutPair = std::pair<RefPtr<LayoutWrapper>, NewLineOffset>;
 
 namespace {
-
+constexpr int32_t DEFAULT_COLUMN_NUMBER = 12;
 std::string ConvertSizeTypeToString(GridSizeType sizeType)
 {
     auto index = static_cast<int32_t>(sizeType);
@@ -187,6 +187,9 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gutterInDouble_ =
         std::make_pair<double, double>(context->NormalizeToPx(gutter.first), context->NormalizeToPx(gutter.second));
     int32_t columnNum = GridContainerUtils::ProcessColumn(sizeType, layoutProperty->GetColumnsValue());
+    if (columnNum <= 0) {
+        columnNum = DEFAULT_COLUMN_NUMBER;
+    }
     columnUnitWidth_ = GridContainerUtils::ProcessColumnWidth(gutterInDouble_, columnNum, maxSize.Width());
     float childrenHeight =
         MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
