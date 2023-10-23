@@ -113,7 +113,7 @@ void TextFieldModelNG::ProcessDefaultPadding(PaddingProperty& paddings)
     paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
     paddings.bottom = NG::CalcLength(themePadding.Top().ConvertToPx());
     paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
-    paddings.right = NG::CalcLength(themePadding.Left().ConvertToPx());
+    paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
 }
 
 RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(

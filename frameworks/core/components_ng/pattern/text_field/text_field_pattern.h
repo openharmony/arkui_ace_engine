@@ -1083,7 +1083,6 @@ private:
     void SaveInlineStates();
     void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
-    void SetTextRectOffset();
 
     bool ResetObscureTickCountDown();
     bool IsInPasswordMode() const;

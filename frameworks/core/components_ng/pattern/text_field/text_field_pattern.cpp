@@ -1796,8 +1796,23 @@ void TextFieldPattern::ProcessInnerPadding()
                    ? CalcLength(themePadding.Top()).GetDimension().ConvertToPx()
                    : paddingProperty->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
     utilPadding_.top = top;
-            : paddingProperty->right.value_or(CalcLength(themePadding.Right())).GetDimension().ConvertToPx();
+    auto bottom =
+        !paddingProperty
+            ? CalcLength(themePadding.Bottom()).GetDimension().ConvertToPx()
+            : paddingProperty->bottom.value_or(CalcLength(themePadding.Bottom())).GetDimension().ConvertToPx();
+    utilPadding_.bottom = bottom;
+    auto right = !paddingProperty
+                     ? CalcLength(themePadding.Right()).GetDimension().ConvertToPx()
+                     : paddingProperty->right.value_or(CalcLength(themePadding.Right())).GetDimension().ConvertToPx();
+    utilPadding_.right = right;
     lastBorderWidth_ = currentBorderWidth;
+
+    PaddingProperty paddings;
+    paddings.top = NG::CalcLength(top);
+    paddings.bottom = NG::CalcLength(bottom);
+    paddings.left = NG::CalcLength(left);
+    paddings.right = NG::CalcLength(right);
+    layoutProperty->UpdatePadding(paddings);
 }
 
 void TextFieldPattern::InitLongPressEvent()
@@ -2147,13 +2162,13 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
         if (selectController_->GetFirstHandleIndex() == selectController_->GetSecondHandleIndex()) {
             CloseSelectOverlay(true);
             StartTwinkling();
+            selectController_->UpdateCaretOffset();
         } else {
             auto handleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
             proxy->UpdateFirstSelectHandleInfo(handleInfo);
             handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
             proxy->UpdateSecondSelectHandleInfo(handleInfo);
         }
-        selectController_->UpdateCaretOffset();
     } else {
         auto handleInfo = GetSelectHandleInfo(selectController_->GetCaretRect().GetOffset());
         proxy->UpdateSecondSelectHandleInfo(handleInfo);
@@ -4347,7 +4362,6 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     layoutProperty->UpdatePadding(
         { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
     ProcessInnerPadding();
-    SetTextRectOffset();
     MarginProperty margin;
     margin.bottom =
         CalcLength(inlineState_.padding.bottom->GetDimension() + inlineState_.margin.bottom->GetDimension());
@@ -4389,7 +4403,6 @@ void TextFieldPattern::RestorePreInlineStates()
     CHECK_NULL_VOID(pipeline);
     layoutProperty->UpdateTextColor(inlineState_.textColor);
     layoutProperty->UpdatePadding(inlineState_.padding);
-    ProcessInnerPadding();
     inlinePadding_ = 0.0f;
     BorderWidthProperty currentBorderWidth;
     if (layoutProperty->GetBorderWidthProperty() != nullptr) {
@@ -4413,6 +4426,7 @@ void TextFieldPattern::RestorePreInlineStates()
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
+    ProcessInnerPadding();
     selectionMode_ = SelectionMode::NONE;
 }
 
@@ -4664,20 +4678,6 @@ bool TextFieldPattern::CheckSelectionRectVisible()
         }
     }
     return false;
-}
-
-void TextFieldPattern::SetTextRectOffset()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (barState_.has_value() && barState_.value() != layoutProperty->GetDisplayModeValue(DisplayMode::AUTO)) {
-        barState_ = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
-        textRect_.SetOffset(OffsetF(GetPaddingLeft(), lastTextRectY_));
-    } else {
-        textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
-    }
 }
 
 void TextFieldPattern::DumpInfo()
