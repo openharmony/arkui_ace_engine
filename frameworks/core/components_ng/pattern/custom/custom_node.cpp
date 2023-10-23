@@ -44,6 +44,8 @@ void CustomNode::Build()
 
 void CustomNode::Render()
 {
+    // NOTE: this function will be re-enter, we need backup needMarkParent_ first and restore it later.
+    bool needMarkParentBak = needMarkParent_;
     needMarkParent_ = false;
     if (renderFunction_) {
         auto renderFunction = std::move(renderFunction_);
@@ -64,7 +66,7 @@ void CustomNode::Render()
     {
         FireRecycleRenderFunc();
     }
-    needMarkParent_ = true;
+    needMarkParent_ = needMarkParentBak;
 }
 
 // used in HotReload to update root view @Component
