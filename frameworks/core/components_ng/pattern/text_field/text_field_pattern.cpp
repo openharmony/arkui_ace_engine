@@ -898,7 +898,7 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
         return dy + textDy;
     }
     auto dy = contentRect_.GetY() + GetBorderTop() + contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) || IsNormalInlineState()) {
         dy = contentRect_.GetY() + contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
     }
     // caret does not exceed bottom boundary, still need to check against safeArea
@@ -2696,7 +2696,7 @@ void TextFieldPattern::ProcessInnerPadding()
                     : paddingProperty->left.value_or(CalcLength(themePadding.Left())).GetDimension().ConvertToPx();
     offsetDifference_.SetX(
         left + (float)currentBorderWidth.leftDimen->ConvertToPx() - GetPaddingLeft() - GetBorderLeft());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) || IsNormalInlineState()) {
         offsetDifference_.SetX(left - GetPaddingLeft());
     }
     utilPadding_.left = left;
@@ -2704,7 +2704,7 @@ void TextFieldPattern::ProcessInnerPadding()
                    ? CalcLength(themePadding.Top()).GetDimension().ConvertToPx()
                    : paddingProperty->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
     offsetDifference_.SetY(top + (float)currentBorderWidth.topDimen->ConvertToPx() - GetPaddingTop() - GetBorderTop());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) || IsNormalInlineState()) {
         offsetDifference_.SetY(top - GetPaddingTop());
     }
     utilPadding_.top = top;
@@ -6201,7 +6201,7 @@ void TextFieldPattern::RestorePreInlineStates()
     }
     textRect_.SetOffset(OffsetF((GetPaddingLeft() + (float)(currentBorderWidth.leftDimen->ConvertToPx())),
         (GetPaddingTop() + (float)currentBorderWidth.topDimen->ConvertToPx())));
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) || IsNormalInlineState()) {
         textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     }
     layoutProperty->UpdateMargin(inlineState_.margin);
