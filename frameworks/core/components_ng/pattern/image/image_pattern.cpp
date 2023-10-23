@@ -421,7 +421,7 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "Receive Memory level notification, level: %{public}d", level);
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "Receive Memory level notification, level: %{public}d", level);
     // TODO: do different data cleaning operation according to level
     // when image component is [onShow], do not clean image data
     // TODO: use [isActive_] to determine image data management

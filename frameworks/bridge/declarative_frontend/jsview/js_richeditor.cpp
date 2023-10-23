@@ -696,7 +696,8 @@ void JSRichEditorController::ParseJsTextStyle(
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
-    if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFp(fontSize, size)) {
+    if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFp(fontSize, size) &&
+        !size.IsNegative() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
