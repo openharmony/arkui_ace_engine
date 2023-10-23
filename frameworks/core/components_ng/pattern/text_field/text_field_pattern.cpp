@@ -3577,7 +3577,6 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
 {
     LOGI("Request close soft keyboard");
     if (forceClose) {
-        isKeyboardClosedByUser_ = false;
         StopTwinkling();
         CloseSelectOverlay(true);
         if (customKeyboardBulder_ && isCustomKeyboardAttached_) {

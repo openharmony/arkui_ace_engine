@@ -569,10 +569,6 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeShown_ = keyboardShown;
-        if (!keyboardShown && isKeyboardClosedByUser_) {
-            FocusHub::LostFocusToViewRoot();
-        }
-        isKeyboardClosedByUser_ = true;
 #endif
     }
     std::u16string GetLeftTextOfCursor(int32_t number) override;
