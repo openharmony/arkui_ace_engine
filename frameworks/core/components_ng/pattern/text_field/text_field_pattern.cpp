@@ -583,11 +583,9 @@ void TextFieldPattern::HandleFocusEvent()
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
 {
-    // todo
     LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
     StopTwinkling();
     UpdateSelection(start, end);
-    AdjustTextSelectionRectOffsetX();
     if (showHandle) {
         ProcessOverlay();
     } else {
@@ -597,33 +595,6 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showH
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::AdjustTextSelectionRectOffsetX()
-{
-    if (textBoxes_.empty()) {
-        return;
-    }
-    auto contentLeftBoundary = contentRect_.GetX();
-    auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width();
-    auto selectionStart = textBoxes_.begin()->Left() + textRect_.GetX();
-    auto selectionEnd = textBoxes_.begin()->Right() + textRect_.GetX();
-
-    float dx = 0.0f;
-    if (selectionEnd < contentLeftBoundary) {
-        if (selectionStart < selectionEnd) {
-            dx = contentLeftBoundary - selectionStart;
-        } else {
-            dx = contentLeftBoundary - selectionEnd;
-        }
-    } else if (selectionEnd > contentRightBoundary) {
-        if (selectionStart < selectionEnd) {
-            dx = selectionEnd - contentRightBoundary;
-        } else {
-            dx = selectionStart - contentRightBoundary;
-        }
-    }
-    textRect_.SetLeft(textRect_.GetX() + dx);
 }
 
 void TextFieldPattern::HandleExtendAction(int32_t action)
@@ -3554,7 +3525,7 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
         return;
     }
     cursorVisible_ = false;
-    HandleSetSelection(selectionStart, selectionEnd, true);
+    HandleSetSelection(selectionStart, selectionEnd, false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

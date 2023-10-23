@@ -366,8 +366,6 @@ public:
         caretUpdateType_ = type;
     }
 
-    void AdjustTextSelectionRectOffsetX();
-
     float GetPaddingTop() const
     {
         return utilPadding_.top.value_or(0.0f);
@@ -1183,7 +1181,6 @@ private:
     RefPtr<TextFieldController> textFieldController_;
     RefPtr<TextEditController> textEditingController_;
     TextEditingValueNG textEditingValue_;
-    std::vector<RectF> textBoxes_;
     // controls redraw of overlay modifier, update when need to redraw
     bool changeSelectedRects_ = false;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
