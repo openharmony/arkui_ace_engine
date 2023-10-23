@@ -127,6 +127,7 @@ template("ace_osal_ohos_source_set") {
     }
     sources += [
       "download_manager_ohos.cpp",
+      "download_manager_ohos_v2.cpp",
       "file_uri_helper_ohos.cpp",
       "image_source_ohos.cpp",
       "mouse_style_ohos.cpp",
@@ -145,6 +146,7 @@ template("ace_osal_ohos_source_set") {
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",
       "hitrace:libhitracechain",
+      "netstack:http_client",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
       "window_manager:scene_session",
