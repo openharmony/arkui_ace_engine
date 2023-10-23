@@ -975,7 +975,9 @@ void FormPattern::EnableDrag()
     };
     auto eventHub = GetHost()->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragStart(std::move(dragStart));
+    if (!eventHub->HasOnDragStart()) {
+        eventHub->SetOnDragStart(std::move(dragStart));
+    }
 }
 
 void FormPattern::UpdateConfiguration()
