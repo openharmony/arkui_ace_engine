@@ -121,6 +121,11 @@ void SelectOverlayPattern::BeforeCreateLayoutWrapper()
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
 
+    if (info_->menuInfo.menuOffset.has_value()) {
+        layoutProperty->UpdateMenuOffset(info_->menuInfo.menuOffset.value());
+        return;
+    }
+
     // Calculate the spacing with text and handle, menu is fixed up the handle and text.
     double menuSpacing = theme->GetMenuSpacingWithText().ConvertToPx() + theme->GetHandleDiameter().ConvertToPx();
     // Get bound rect of handles
