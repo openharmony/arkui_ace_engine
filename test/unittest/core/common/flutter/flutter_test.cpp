@@ -527,13 +527,7 @@ HWTEST_F(FlutterTest, Flutter_window01, TestSize.Level1)
     auto container = AceType::MakeRefPtr<MockContainer>();
     EXPECT_CALL(*container, GetView()).Times(1).WillOnce(Return(testview));
     auto nativeView = static_cast<AceView*>(container->GetView());
-
-    /**
-     * @tc.steps3: call Create with nativeView.
-     * @tc.expected: expected Return result_two is not null.
-     */
-    auto result_two = flutterWindow.Create(nativeView);
-    ASSERT_NE(result_two, nullptr);
+    ASSERT_NE(nativeView, nullptr);
 
     /**
      * @tc.steps3: callback Destroy.

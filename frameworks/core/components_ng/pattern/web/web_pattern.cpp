@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/image/file_uri_helper.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
@@ -34,6 +35,7 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "file_uri.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "parameters.h"
 
@@ -482,6 +484,8 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
     if (GenerateDragDropInfo(dragDropInfo)) {
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, dragDropInfo);
+        CHECK_NULL_RETURN(delegate_, dragDropInfo);
+        CHECK_NULL_RETURN(delegate_->dragData_, dragDropInfo);
         // get drag pixel map successfully, disable next drag util received web kernel drag callback
         frameNode->SetDraggable(false);
 
@@ -505,6 +509,26 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         if (!linkUrl.empty()) {
             UdmfClient::GetInstance()->AddLinkRecord(aceUnifiedData, linkUrl, linkTitle);
             LOGI("DragDrop event WebEventHub HandleOnDragStart, linkUrl size:%{public}d", (int)linkUrl.size());
+        }
+
+        // image file uri
+        std::string fileName = delegate_->dragData_->GetImageFileName();
+        if (!fileName.empty()) {
+            std::string fullName;
+            if (delegate_->tempDir_.empty()) {
+                fullName = "/data/storage/el2/base/haps/entry/temp/dragdrop/" + fileName;
+            } else {
+                fullName = delegate_->tempDir_ + "/dragdrop/" + fileName;
+            }
+            LOGI("DragDrop event WebEventHub HandleOnDragStart, image path:%{public}s", fullName.c_str());
+            AppFileService::ModuleFileUri::FileUri fileUri(fullName);
+            LOGI("DragDrop event WebEventHub HandleOnDragStart, FileUri:%{public}s", fileUri.ToString().c_str());
+            std::vector<std::string> urlVec;
+            std::string udmfUri = fileUri.ToString();
+            urlVec.emplace_back(udmfUri);
+            UdmfClient::GetInstance()->AddFileUriRecord(aceUnifiedData, urlVec);
+        } else {
+            LOGW("DragDrop event start, dragdata has no image file uri, just pass");
         }
         info->SetData(aceUnifiedData);
         HandleOnDragEnter(info);
@@ -741,11 +765,6 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        LOGI("DragDrop event gestureHub actionCancelTask  webId:%{public}d",
-            pattern->GetWebId());
-        pattern->HandleDragCancel();
     };
 
     dragEvent_ = MakeRefPtr<DragEvent>(
@@ -788,6 +807,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     isDragging_ = false;
     isW3cDragEvent_ = false;
+    CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -801,6 +821,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     // get data from ace(from udmf), and send it to chromium
     if (aceData && aceData->GetSize() >= 1) {
         LOGI("DragDrop event WebEventHub onDragDropId, size:%{public}d", (int)aceData->GetSize());
+        CHECK_NULL_VOID(delegate_->dragData_);
         // plain text
         std::string plain = UdmfClient::GetInstance()->GetSinglePlainTextRecord(aceData);
         if (!plain.empty()) {
@@ -888,6 +909,7 @@ void WebPattern::HandleDragCancel()
 
 void WebPattern::ClearDragData()
 {
+    CHECK_NULL_VOID(delegate_);
     std::string plain = "";
     std::string htmlContent = "";
     std::string linkUrl = "";

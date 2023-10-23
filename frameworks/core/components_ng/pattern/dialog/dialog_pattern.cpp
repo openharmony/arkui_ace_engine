@@ -203,7 +203,8 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 {
     LOGI("build dialog child");
     // append customNode
-    if (customNode_) {
+    auto customNode = customNode_.Upgrade();
+    if (customNode) {
         // wrap custom node to set background color and round corner
         auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -211,7 +212,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         if (!props.customStyle) {
             UpdateContentRenderContext(contentWrapper, props);
         }
-        customNode_->MountToParent(contentWrapper);
+        customNode->MountToParent(contentWrapper);
         auto dialog = GetHost();
         contentWrapper->MountToParent(dialog);
         return;
@@ -873,8 +874,9 @@ void DialogPattern::OnColorConfigurationUpdate()
         CHECK_NULL_VOID(colRenderContext);
         colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
     }
-    CHECK_NULL_VOID(menuNode_);
-    for (const auto& buttonNode : menuNode_->GetChildren()) {
+    auto menuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(menuNode);
+    for (const auto& buttonNode : menuNode->GetChildren()) {
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
         }

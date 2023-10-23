@@ -77,23 +77,26 @@ static size_t ParseArgs(
 
 void ComponentObserver::callUserFunction(std::list<napi_ref>& cbList)
 {
-    for (auto& cbRef : cbList) {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env_, &scope);
-        if (scope == nullptr) {
-            return;
-        }
-        napi_value thisVal = nullptr;
-        napi_get_reference_value(env_, thisVarRef_, &thisVal);
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env_, &scope);
+    if (scope == nullptr) {
+        return;
+    }
+    napi_value thisVal = nullptr;
+    napi_get_reference_value(env_, thisVarRef_, &thisVal);
 
+    std::list<napi_value> cbs;
+    for (auto& cbRef : cbList) {
         napi_value cb = nullptr;
         napi_get_reference_value(env_, cbRef, &cb);
-
+        cbs.emplace_back(cb);
+    }
+    for (auto& cb : cbs) {
         napi_value resultArg = nullptr;
         napi_value result = nullptr;
         napi_call_function(env_, thisVal, cb, 1, &resultArg, &result);
-        napi_close_handle_scope(env_, scope);
     }
+    napi_close_handle_scope(env_, scope);
 }
 
 std::list<napi_ref>::iterator ComponentObserver::FindCbList(napi_value cb, CalloutType calloutType)

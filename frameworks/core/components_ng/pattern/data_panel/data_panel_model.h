@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 class ACE_EXPORT DataPanelModel {
 public:
     static DataPanelModel* GetInstance();
-    virtual ~ DataPanelModel() = default;
+    virtual ~DataPanelModel() = default;
 
     virtual void Create(const std::vector<double>& values, double max, int32_t dataPanelType) = 0;
     virtual void SetEffect(bool isCloseEffect) = 0;
@@ -36,6 +36,7 @@ public:
     virtual void SetTrackBackground(const Color& trackBackgroundColor) = 0;
     virtual void SetStrokeWidth(const Dimension& strokeWidth) = 0;
     virtual void SetShadowOption(const OHOS::Ace::NG::DataPanelShadow& shadowOption) = 0;
+
 private:
     static std::unique_ptr<DataPanelModel> instance_;
     static std::mutex mutex_;

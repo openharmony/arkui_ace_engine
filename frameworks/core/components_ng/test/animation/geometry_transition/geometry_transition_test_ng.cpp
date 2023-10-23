@@ -42,6 +42,7 @@ WeakPtr<FrameNode> weakNode2 = AceType::WeakClaim(AceType::RawPtr(node2));
 auto node3 = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<Pattern>());
 WeakPtr<FrameNode> weakNode3 = AceType::WeakClaim(AceType::RawPtr(node3));
 
+const int32_t DURATION_TIMES = 100;
 } // namespace
 
 class GeometryTransitionTestNg : public testing::Test {
@@ -257,5 +258,79 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
     EXPECT_TRUE(gt_->OnAdditionalLayout(weakNode1));
     weakNode1.Upgrade()->parent_ = nullptr;
     EXPECT_FALSE(gt_->OnAdditionalLayout(weakNode1));
+}
+
+/**
+ * @tc.name: GeometryTransitionTest005
+ * @tc.desc: Test OnFollowWithoutTransition()
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GeometryTransition with weakNode1.
+     */
+    Create(weakNode1, true);
+    node2->AddChild(node1);
+    gt_->inNode_ = weakNode1;
+    gt_->outNode_ = weakNode2;
+
+    /**
+     * @tc.steps: step2. assign value to followWithoutTransition_ and call OnFollowWithoutTransition.
+     * @tc.expected: called OnFollowWithoutTransition and result is expected
+     */
+    gt_->followWithoutTransition_ = true;
+    bool result =gt_->OnFollowWithoutTransition(true);
+    EXPECT_FALSE(result);
+
+    gt_->followWithoutTransition_ = false;
+    result = gt_->OnFollowWithoutTransition(true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GeometryTransitionTest006
+ * @tc.desc: Test RecordAnimationOption()
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GeometryTransition with node.
+     */
+    Create(weakNode1, true);
+    node2->AddChild(node1);
+    gt_->inNode_ = weakNode1;
+    gt_->outNode_ = weakNode2;
+
+    /**
+     * @tc.steps: step2. construt input parameters and call OnReSync RecordAnimationOption.
+     * @tc.expected: called RecordAnimationOption and result is expected.
+     */
+    RefPtr<FrameNode> trigger = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    AnimationOption option = AnimationOption();
+    gt_->RecordAnimationOption(trigger, option);
+    bool result = option.IsValid();
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step3.set animation option attribute and call OnReSync RecordAnimationOption.
+     * @tc.expected: called RecordAnimationOption and cover branch animationOption is false.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto implicitAnimationOption = stack->GetImplicitAnimationOption();
+    implicitAnimationOption.SetDuration(DURATION_TIMES);
+    gt_->RecordAnimationOption(trigger, option);
+    result = option.IsValid();
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step4. set animation option attribute and call OnReSync RecordAnimationOption.
+     * @tc.expected: called RecordAnimationOption and cover branch animationOption is true.
+     */
+    option.SetDuration(DURATION_TIMES);
+    gt_->RecordAnimationOption(trigger, option);
+    result = option.IsValid();
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

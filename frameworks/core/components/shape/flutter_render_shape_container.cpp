@@ -235,11 +235,9 @@ void FlutterRenderShapeContainer::DrawBitmapMesh(
     }
     sk_sp<SkShader> shader;
     sk_sp<SkImage> image = SkImage::MakeFromBitmap(bitmap);
-#ifdef USE_SYSTEM_SKIA
-    shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
-#else
+
     shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp);
-#endif
+
     tempPaint.setShader(shader);
     skCanvas_->drawVertices(builder.detach(), SkBlendMode::kModulate, tempPaint);
 }

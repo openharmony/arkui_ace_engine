@@ -28,7 +28,6 @@ constexpr int NAPI_ACE_ERR_NO_ERROR = 0;
 constexpr int ACE_ARGS_TWO = 2;
 constexpr int ACE_PARAM0 = 0;
 constexpr int ACE_PARAM1 = 1;
-constexpr size_t MAX_STRING_BUFF_SIZE = 1024;
 
 bool AceToJson(napi_env env, napi_value param, Json::Value& jsonObject);
 napi_value ParseJsonToKVObject(napi_env env, Json::Value& jsonObject);
@@ -572,7 +571,7 @@ bool AceKVObjectToString(napi_env env, napi_value param, std::string& value)
     napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue);
     size_t buffSize = 0;
     napi_status status = napi_get_value_string_utf8(env, returnValue, nullptr, 0, &buffSize);
-    if (status != napi_ok || buffSize == 0 || buffSize >= MAX_STRING_BUFF_SIZE) {
+    if (status != napi_ok || buffSize == 0) {
         return false;
     }
     std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(buffSize + 1);

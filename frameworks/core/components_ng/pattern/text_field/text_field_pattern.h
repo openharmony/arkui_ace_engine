@@ -174,10 +174,10 @@ public:
                 textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect());
             }
         }
-        auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, paint);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, paint);
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, paint);
         auto geometryNode = host->GetGeometryNode();
         auto frameOffset = geometryNode->GetFrameOffset();
         auto frameSize = geometryNode->GetFrameSize();
@@ -569,6 +569,10 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeShown_ = keyboardShown;
+        if (!keyboardShown && isKeyboardClosedByUser_) {
+            FocusHub::LostFocusToViewRoot();
+        }
+        isKeyboardClosedByUser_ = true;
 #endif
     }
     std::u16string GetLeftTextOfCursor(int32_t number) override;
@@ -1054,7 +1058,7 @@ public:
         customKeyboardBulder_ = keyboardBuilder;
     }
 
-    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
     void OnColorConfigurationUpdate() override;
 
     void ShowPasswordIconChange()

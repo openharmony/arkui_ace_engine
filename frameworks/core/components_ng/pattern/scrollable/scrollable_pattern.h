@@ -36,8 +36,8 @@ constexpr double FRICTION = 0.6;
 #else
 constexpr double FRICTION = 0.9;
 #endif
-class ScrollablePattern : public Pattern, NestableScrollContainer {
-    DECLARE_ACE_TYPE(ScrollablePattern, Pattern, NestableScrollContainer);
+class ScrollablePattern : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
     bool IsAtomicNode() const override
@@ -186,7 +186,6 @@ public:
     }
 
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
-    RefPtr<NestableScrollContainer> SearchParent();
     void GetParentNavigation();
 
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
@@ -377,7 +376,7 @@ private:
     float GetOffsetWithLimit(float position, float offset) const;
     void LimitMouseEndOffset();
 
-    void ProcessAssociatedScroll(double offset, int32_t source);
+    bool ProcessAssociatedScroll(double offset, int32_t source);
 
     /******************************************************************************
      * NestableScrollContainer implementations
@@ -424,6 +423,7 @@ private:
     float GetVelocity() const;
     bool NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source);
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
+    bool CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source);
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;

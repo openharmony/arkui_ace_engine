@@ -16,12 +16,9 @@ import(
 
 build_component("multimodal") {
   sources = [
-    "flutter_render_multimodal.cpp",
     "render_multimodal.cpp",
     "render_multimodal_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_multimodal.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_multimodal.cpp" ]
 }

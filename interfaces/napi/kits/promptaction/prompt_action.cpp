@@ -24,6 +24,7 @@
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -48,6 +49,12 @@ bool ContainerIsService()
     }
     // for pa service
     return containerId >= MIN_PA_SERVICE_ID || containerId < 0;
+}
+
+bool ContainerIsScenceBoard()
+{
+    auto container = Container::Current();
+    return container && container->IsScenceBoardWindow();
 }
 #endif
 } // namespace
@@ -84,8 +91,10 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     napi_value messageNApi = nullptr;
     napi_value durationNApi = nullptr;
     napi_value bottomNApi = nullptr;
+    napi_value showModeNApi = nullptr;
     std::string messageString;
     std::string bottomString;
+    NG::ToastShowMode showMode = NG::ToastShowMode::DEFAULT;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
     if (valueType == napi_object) {
@@ -97,10 +106,12 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         napi_get_named_property(env, argv, "message", &messageNApi);
         napi_get_named_property(env, argv, "duration", &durationNApi);
         napi_get_named_property(env, argv, "bottom", &bottomNApi);
+        napi_get_named_property(env, argv, "showMode", &showModeNApi);
     } else {
         NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
+
     size_t ret = 0;
     ResourceInfo recv;
     napi_typeof(env, messageNApi, &valueType);
@@ -169,17 +180,28 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+
+    // parse alignment
+    napi_typeof(env, showModeNApi, &valueType);
+    if (valueType == napi_number) {
+        int32_t num = -1;
+        napi_get_value_int32(env, showModeNApi, &num);
+        if (num >= 0 && num <= static_cast<int32_t>(NG::ToastShowMode::TOP_MOST)) {
+            showMode = static_cast<NG::ToastShowMode>(num);
+        }
+    }
 #ifdef OHOS_STANDARD_SYSTEM
-    if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
+        showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (!delegate) {
             LOGE("can not get delegate.");
             NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
-        delegate->ShowToast(messageString, duration, bottomString);
+        delegate->ShowToast(messageString, duration, bottomString, showMode);
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString);
+        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString, showMode);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
@@ -188,7 +210,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    delegate->ShowToast(messageString, duration, bottomString);
+    delegate->ShowToast(messageString, duration, bottomString, NG::ToastShowMode::DEFAULT);
 #endif
 
     return nullptr;
@@ -242,10 +264,6 @@ bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, in
     int32_t index = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
     int32_t buttonsLenInt = buttonsLen;
-    if (buttonsLenInt == 0) {
-        DeleteContextAndThrowError(env, context, "Required input parameters are missing.");
-        return false;
-    }
     if (buttonsLenInt > maxButtonNum && maxButtonNum != -1) {
         buttonsLenInt = maxButtonNum;
         LOGW("Supports 1 - %{public}u buttons", maxButtonNum);

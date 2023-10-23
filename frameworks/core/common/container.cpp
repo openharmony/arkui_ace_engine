@@ -43,6 +43,18 @@ RefPtr<Container> Container::GetActive()
     return activeContainer;
 }
 
+RefPtr<Container> Container::GetFoucsed()
+{
+    RefPtr<Container> foucsContainer;
+    AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && pipeline->GetOnFoucs()) {
+            foucsContainer = container;
+        }
+    });
+    return foucsContainer;
+}
+
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
 {
     auto curContainer = Current();

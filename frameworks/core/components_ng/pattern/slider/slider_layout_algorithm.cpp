@@ -70,8 +70,11 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     Dimension themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
                                                                                   : theme->GetInsetTrackThickness();
+    auto thickness = sliderLayoutProperty->GetThickness().value_or(themeTrackThickness);
     trackThickness_ =
-        static_cast<float>(sliderLayoutProperty->GetThickness().value_or(themeTrackThickness).ConvertToPx());
+        static_cast<float>(thickness.Unit() == DimensionUnit::PERCENT
+                               ? thickness.ConvertToPxWithSize(direction == Axis::HORIZONTAL ? height : width)
+                               : thickness.ConvertToPx());
     // this scaleValue ensure that the size ratio of the block and trackThickness is consistent
     float scaleValue = trackThickness_ / static_cast<float>(themeTrackThickness.ConvertToPx());
     Dimension themeBlockSize =

@@ -82,6 +82,7 @@ template("ace_core_source_set") {
       "common/font_manager.cpp",
       "common/frontend.cpp",
       "common/platform_bridge.cpp",
+      "common/resource/resource_manager.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
       "common/text_field_manager.cpp",
@@ -240,33 +241,28 @@ template("ace_core_source_set") {
       sources += [ "common/hdc_register.cpp" ]
     }
 
-    configs = [ "$ace_root:ace_config" ]
+    configs = [
+      "$ace_root:ace_config",
+      "$ace_flutter_engine_root:flutter_config",
+    ]
 
     deps = [
+      "$skia_root_new:skia_$platform",
       "pipeline:ace_core_pipeline_$platform",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
 
     external_deps = []
 
-    if (ace_use_new_skia) {
-      if (is_ohos) {
-        sources += [
-          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
-          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-        ]
-      } else {
-        sources += [
-          "$flutter_root/engine/flutter/common/task_runners.cc",
-          "$flutter_root/engine/flutter/shell/common/thread_host.cc",
-        ]
-      }
-      configs += [ "$ace_flutter_engine_root:flutter_config" ]
-      deps += [ "$skia_root_new:skia_$platform" ]
+    if (is_ohos) {
+      sources += [
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
+      ]
     } else {
-      deps += [
-        "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-        "$ace_flutter_engine_root/skia:ace_skia_$platform",
+      sources += [
+        "$flutter_root/engine/flutter/common/task_runners.cc",
+        "$flutter_root/engine/flutter/shell/common/thread_host.cc",
       ]
     }
 
@@ -644,6 +640,7 @@ template("ace_core_ng_source_set") {
       "common/font_manager.cpp",
       "common/frontend.cpp",
       "common/platform_bridge.cpp",
+      "common/resource/resource_manager.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
       "common/text_field_manager.cpp",
@@ -805,31 +802,25 @@ template("ace_core_ng_source_set") {
       sources -= [ "common/anr_thread.cpp" ]
     }
 
-    configs = [ "$ace_root:ace_config" ]
+    configs = [
+      "$ace_root:ace_config",
+      "$ace_flutter_engine_root:flutter_config",
+    ]
 
     deps = [
       "$ace_root/frameworks/core/components/theme:build_theme_code",
+      "$skia_root_new:skia_$platform",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
     external_deps = []
-    if (ace_use_new_skia) {
-      configs += [ "$ace_flutter_engine_root:flutter_config" ]
 
-      if (is_cross_platform_build) {
-        deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
-      }
-
-      deps += [ "$skia_root_new:skia_$platform" ]
-      if (is_ohos) {
-        sources += [
-          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
-          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-        ]
-      }
-    } else {
-      deps += [
-        "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-        "$ace_flutter_engine_root/skia:ace_skia_$platform",
+    if (is_cross_platform_build) {
+      deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
+    }
+    if (is_ohos) {
+      sources += [
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
       ]
     }
 
@@ -949,7 +940,10 @@ template("ace_core_ng_source_set") {
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+        deps += [
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform",
+          "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
+        ]
       } else {
         external_deps += [ "graphic_2d:librender_service_client" ]
         if (ace_use_rosen_drawing) {
@@ -988,10 +982,7 @@ template("ace_core_ng_source_set") {
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
-      deps += [
-        "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform",
-        "$ace_root/frameworks/core/components_ng/pattern/model:ace_core_components_model_pattern_ng_$platform",
-      ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/model:ace_core_components_model_pattern_ng_$platform" ]
     }
 
     if (defined(config.enable_image_compression) &&

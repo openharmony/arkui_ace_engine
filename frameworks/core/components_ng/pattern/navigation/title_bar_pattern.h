@@ -106,7 +106,7 @@ public:
     {
         isInitialSubtitle_ = isInitialSubtitle;
     }
-    void ProcessTitleAssociatedUpdate(float offset);
+    bool ProcessTitleAssociatedUpdate(float offset);
     void ProcessTitleDragStart(float offset);
     void SetTitleStyleByOffset(float offset);
 
@@ -171,7 +171,7 @@ public:
     }
 
     void ResetAssociatedScroll();
-    void UpdateAssociatedScrollOffset(float offset);
+    bool UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node);
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -249,6 +249,7 @@ private:
     bool dragScrolling_ = false;
     bool associatedScrollOverSize_ = false;
     float associatedScrollOffsetMax_ = 0.0f;
+    RefPtr<FrameNode> associatedScrollNode_;
 };
 
 } // namespace OHOS::Ace::NG

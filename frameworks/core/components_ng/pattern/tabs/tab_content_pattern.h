@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_PATTERN_H
 
+#include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -159,6 +160,23 @@ public:
     const BottomTabBarStyle& GetBottomTabBarStyle() const
     {
         return bottomTabBarStyle_;
+    }
+
+    void DumpAdvanceInfo() override
+    {
+        switch (selectedMode_) {
+            case SelectedMode::INDICATOR: {
+                DumpLog::GetInstance().AddDesc("SelectedMode:INDICATOR");
+                break;
+            }
+            case SelectedMode::BOARD: {
+                DumpLog::GetInstance().AddDesc("SelectedMode:BOARD");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
     }
 
 private:

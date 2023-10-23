@@ -62,7 +62,7 @@ public:
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
-    ~AceContainer() override;
+    ~AceContainer() override = default;
 
     void Initialize() override;
 
@@ -445,6 +445,7 @@ public:
         StopDragCallback&& stopDragCallback) override;
 
 private:
+    virtual bool MaybeRelease() override;
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask();

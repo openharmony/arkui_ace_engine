@@ -96,7 +96,7 @@ public:
 
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
-    virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
+    virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) {}
 
     virtual void SyncGeometryProperties(const RectF& rectF) {}
 
@@ -105,6 +105,8 @@ public:
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
     virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) {};
+
+    virtual void SetFrameWithoutAnimation(const RectF& paintRect) {};
 
     virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
     virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
@@ -229,6 +231,11 @@ public:
     virtual RectF GetPaintRectWithTranslate()
     {
         return {};
+    }
+
+    virtual Matrix4 GetLocalTransformMatrix()
+    {
+        return Matrix4();
     }
 
     virtual void GetPointWithRevert(PointF& point) {}

@@ -84,17 +84,12 @@ void JSRating::Create(const JSCallbackInfo& info)
             if (ratingValue->IsNumber()) {
                 rating = ratingValue->ToNumber<double>();
             }
-        } else {
-            LOGE("create rating fail because the rating is not value");
         }
         if (rating < 0) {
-            LOGW("rating number is invalid, and it will use 0 by default.");
             rating = RATING_SCORE_DEFAULT;
         }
         if (getIndicator->IsBoolean()) {
             indicator = getIndicator->ToBoolean();
-        } else {
-            LOGE("create rating fail because the indicator is not value");
         }
     }
     RatingModel::GetInstance()->Create(rating, indicator);
@@ -106,6 +101,7 @@ void JSRating::Create(const JSCallbackInfo& info)
 void JSRating::SetStars(const JSCallbackInfo& info)
 {
     if (!info[0]->IsNumber()) {
+        RatingModel::GetInstance()->SetStars(STARS_DEFAULT);
         return;
     }
 
@@ -119,6 +115,7 @@ void JSRating::SetStars(const JSCallbackInfo& info)
 void JSRating::SetStepSize(const JSCallbackInfo& info)
 {
     if (!info[0]->IsNumber()) {
+        RatingModel::GetInstance()->SetStepSize(STEPS_DEFAULT);
         return;
     }
     static const double stepSizeMin = 0.1;

@@ -449,6 +449,11 @@ public:
         return needScrollSnapChange_;
     }
 
+    void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
+    {
+        actionEnd_ = std::move(actionEnd);
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -539,6 +544,7 @@ private:
     bool needScrollSnapChange_ = false;
     CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
+    GestureEventFunc actionEnd_;
 };
 
 } // namespace OHOS::Ace

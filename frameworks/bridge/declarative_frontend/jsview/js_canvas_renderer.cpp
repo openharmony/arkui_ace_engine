@@ -612,6 +612,11 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         CanvasRendererModel::GetInstance()->SetFillColor(baseInfo, color, true);
         return;
     }
+    if (info[0]->IsNumber()) {
+        auto color = Color(ColorAlphaAdapt(info[0]->ToNumber<uint32_t>()));
+        CanvasRendererModel::GetInstance()->SetFillColor(baseInfo, color, false);
+        return;
+    }
     if (!info[0]->IsObject()) {
         LOGE("The arg is not Object.");
         return;
@@ -624,10 +629,6 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         ParseFillGradient(info);
     } else if (type == "pattern") {
         ParseFillPattern(info);
-    }
-    if (info[0]->IsNumber()) {
-        auto color = Color(ColorAlphaAdapt(info[0]->ToNumber<uint32_t>()));
-        CanvasRendererModel::GetInstance()->SetFillColor(baseInfo, color, false);
     } else {
         LOGW("unsupported function for fill style.");
     }
@@ -696,6 +697,11 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         CanvasRendererModel::GetInstance()->SetStrokeColor(baseInfo, color, true);
         return;
     }
+    if (info[0]->IsNumber()) {
+        auto color = Color(ColorAlphaAdapt(info[0]->ToNumber<uint32_t>()));
+        CanvasRendererModel::GetInstance()->SetStrokeColor(baseInfo, color, false);
+        return;
+    }
     if (!info[0]->IsObject()) {
         LOGE("The arg is not Object.");
         return;
@@ -708,10 +714,6 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         ParseStorkeGradient(info);
     } else if (type == "pattern") {
         ParseStrokePattern(info);
-    }
-    if (info[0]->IsNumber()) {
-        auto color = Color(ColorAlphaAdapt(info[0]->ToNumber<uint32_t>()));
-        CanvasRendererModel::GetInstance()->SetStrokeColor(baseInfo, color, false);
     } else {
         LOGW("unsupported function for stroke style.");
     }

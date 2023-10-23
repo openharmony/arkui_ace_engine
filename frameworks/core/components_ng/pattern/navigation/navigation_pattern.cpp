@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/property/property.h"
+#include "core/common/container.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -289,6 +290,12 @@ void NavigationPattern::CheckTopNavPathChange(
             auto navigationPattern = weakNavigationPattern.Upgrade();
             CHECK_NULL_VOID(navigationPattern);
             navigationPattern->DoNavigationTransitionAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+        });
+    } else {
+        context->AddAfterLayoutTask([weakNode = WeakPtr<FrameNode>(hostNode)]() {
+            auto hostNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(hostNode);
+            hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
         });
     }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);

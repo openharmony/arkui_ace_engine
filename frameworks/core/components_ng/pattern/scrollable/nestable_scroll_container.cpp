@@ -16,4 +16,24 @@
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<NestableScrollContainer> NestableScrollContainer::SearchParent()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        auto pattern = frameNode->GetPattern<NestableScrollContainer>();
+        if (!pattern) {
+            continue;
+        }
+        if (pattern->GetAxis() != GetAxis()) {
+            continue;
+        }
+        return pattern;
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -35,7 +36,12 @@ constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
 constexpr int32_t LONG_PRESS_DELAY = 300;
 } // namespace
 
-void SwiperIndicatorPattern::OnAttachToFrameNode() {}
+void SwiperIndicatorPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
+}
 
 void SwiperIndicatorPattern::OnModifyDone()
 {
@@ -654,5 +660,47 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     auto frameSize = geometryNode->GetFrameSize();
     auto axis = swiperPattern->GetDirection();
     return ((axis == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * 0.5f;
+}
+
+void SwiperIndicatorPattern::DumpAdvanceInfo()
+{
+    isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true") : DumpLog::GetInstance().AddDesc("isHover:false");
+    isPressed_ ? DumpLog::GetInstance().AddDesc("isPressed:true") : DumpLog::GetInstance().AddDesc("isPressed:false");
+    isClicked_ ? DumpLog::GetInstance().AddDesc("isClicked:true") : DumpLog::GetInstance().AddDesc("isClicked:false");
+    isRepeatClicked_ ? DumpLog::GetInstance().AddDesc("isRepeatClicked:true")
+                     : DumpLog::GetInstance().AddDesc("isRepeatClicked:false");
+    mouseClickIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("mouseClickIndex:" + std::to_string(mouseClickIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("mouseClickIndex:null");
+    switch (touchBottomType_) {
+        case TouchBottomType::NONE: {
+            DumpLog::GetInstance().AddDesc("TouchBottomType:NONE");
+            break;
+        }
+        case TouchBottomType::START: {
+            DumpLog::GetInstance().AddDesc("TouchBottomType:START");
+            break;
+        }
+        case TouchBottomType::END: {
+            DumpLog::GetInstance().AddDesc("TouchBottomType:END");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    switch (swiperIndicatorType_) {
+        case SwiperIndicatorType::DOT: {
+            DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DOT");
+            break;
+        }
+        case SwiperIndicatorType::DIGIT: {
+            DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

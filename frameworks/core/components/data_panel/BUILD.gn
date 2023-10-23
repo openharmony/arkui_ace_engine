@@ -17,12 +17,9 @@ import(
 build_component("data_panel") {
   sources = [
     "data_panel_component.cpp",
-    "flutter_render_data_panel.cpp",
     "render_data_panel.cpp",
     "render_data_panel_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_data_panel.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_data_panel.cpp" ]
 }

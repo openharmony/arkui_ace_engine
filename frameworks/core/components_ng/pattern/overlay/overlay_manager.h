@@ -34,6 +34,8 @@
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace {
@@ -100,13 +102,16 @@ public:
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId);
     RefPtr<FrameNode> GetMenuNode(int32_t targetId);
-    void HideMenuInSubWindow(bool showPreviewAnimation = true);
+    void HideMenuInSubWindow(bool showPreviewAnimation = true, bool startDrag = false);
     void CleanMenuInSubWindow();
     void CleanPreviewInSubWindow();
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
+    void ClearToastInSubwindow();
+    void ClearToast();
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft,
+        const ToastShowMode& showMode = ToastShowMode::DEFAULT);
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
@@ -278,6 +283,11 @@ public:
     void MarkDirty(PropertyChangeFlag flag);
     float GetRootHeight() const;
 
+    const WeakPtr<UINode>& GetRootNode() const
+    {
+        return rootNodeWeak_;
+    }
+
 private:
     void PopToast(int32_t targetId);
 
@@ -303,7 +313,7 @@ private:
     void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
 
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
-    void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true);
+    void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);

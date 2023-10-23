@@ -91,6 +91,18 @@ void WindowScene::OnAttachToFrameNode()
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
+    auto lostFocusCallback = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->LostFocus();
+    };
+    CHECK_NULL_VOID(session_);
+    session_->SetNotifyUILostFocusFunc(lostFocusCallback);
+
     WindowPattern::OnAttachToFrameNode();
 }
 
@@ -147,6 +159,7 @@ void WindowScene::BufferAvailableCallback()
             CHECK_NULL_VOID(context);
             auto rsNode = context->GetRSNode();
             CHECK_NULL_VOID(rsNode);
+            rsNode->MarkNodeGroup(true);
             auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
             rsNode->SetTransitionEffect(effect);
             Rosen::RSAnimationTimingProtocol protocol;
@@ -201,6 +214,15 @@ void WindowScene::OnActivation()
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+
+        if (self->session_ && self->session_->GetShowRecent() && self->startingNode_) {
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            host->AddChild(self->contentNode_, 0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            self->session_->GetSurfaceNode()->SetBufferAvailableCallback(self->callback_);
         }
     };
 
@@ -251,10 +273,6 @@ void WindowScene::OnForeground()
         host->RemoveChild(self->snapshotNode_);
         self->snapshotNode_.Reset();
         host->AddChild(self->contentNode_);
-        if (!self->session_->GetBufferAvailable() && !self->startingNode_) {
-            self->CreateStartingNode();
-            host->AddChild(self->startingNode_);
-        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 

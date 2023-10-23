@@ -71,6 +71,11 @@ public:
         return isHided_;
     }
 
+    void SetMenuHide()
+    {
+        isHided_ = true;
+    }
+
     bool IsContextMenu() const
     {
         auto menu = GetMenu();

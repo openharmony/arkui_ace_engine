@@ -82,7 +82,7 @@ DragEventActuator::DragEventActuator(
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
     longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
     previewLongPressRecognizer_ =
-        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, true);
+        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, false);
     isNotInPreviewState_ = false;
 }
 
@@ -133,6 +133,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
 #ifdef ENABLE_DRAG_FRAMEWORK
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
@@ -151,7 +156,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
-                SubwindowManager::GetInstance()->HideMenuNG(false);
+                SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 AnimationOption option;
                 option.SetDuration(PIXELMAP_ANIMATION_DURATION);
                 option.SetCurve(Curves::SHARP);
@@ -172,6 +177,17 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     frameNode->SetDraggable(true);
                     textDragCallback_(info.GetGlobalLocation());
                 }
+            } else if (!isNotInPreviewState_ && (gestureHub->GetPreviewMode() != MenuPreviewMode::NONE)) {
+                HideEventColumn();
+                HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+                HideFilter();
+                SubwindowManager::GetInstance()->HideMenuNG(false, true);
+                AnimationOption option;
+                option.SetDuration(PIXELMAP_ANIMATION_DURATION);
+                option.SetCurve(Curves::SHARP);
+                AnimationUtils::Animate(
+                    option, [renderContext]() { renderContext->UpdateOpacity(SCALE_NUMBER); },
+                    option.GetOnFinishEvent());
             }
         }
 
@@ -308,10 +324,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         result.emplace_back(SequencedRecognizer_);
         return;
     }
-    auto menuLongPress = gestureHub->GetLongPressRecognizer();
-    if (menuLongPress) {
-        menuLongPress->SetIsForDrag(true);
-    }
     auto longPressUpdateValue = [weak = WeakClaim(this)](GestureEvent& info) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragEvent longPressRecognizer onActionUpdate.");
@@ -319,11 +331,28 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
+        auto gestureHub = actuator->gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        if (gestureHub->GetPreviewMode() != MenuPreviewMode::NONE) {
+            actuator->SetIsNotInPreviewState(false);
+        }
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->ResetDragging();
     };
     longPressRecognizer_->SetOnActionUpdate(longPressUpdateValue);
     auto longPressUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragEvent previewLongPressRecognizer onActionUpdate.");
+        }
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
+            return;
         }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -345,8 +374,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
 
         actuator->SetFilter(actuator);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(manager);
         actuator->SetIsNotInPreviewState(false);

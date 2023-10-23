@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -89,6 +90,11 @@ void TextModelNG::SetFontWeight(Ace::FontWeight value)
 void TextModelNG::SetFontFamily(const std::vector<std::string>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
+}
+
+void TextModelNG::SetWordBreak(Ace::WordBreak value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value);
 }
 
 void TextModelNG::SetTextAlign(Ace::TextAlign value)
@@ -203,6 +209,22 @@ void TextModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptions
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     textPattern->SetMenuOptionItems(std::move(menuOptionsItems));
+}
+
+void TextModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
+void TextModelNG::SetTextSelection(int32_t startIndex, int32_t endIndex)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelection(startIndex, endIndex);
 }
 
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)

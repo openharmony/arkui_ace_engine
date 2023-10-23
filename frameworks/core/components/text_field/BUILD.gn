@@ -24,10 +24,6 @@ build_component("text_field") {
     "text_field_scroll_bar_controller.cpp",
   ]
 
-  if (!ace_use_new_skia) {
-    sources += [ "flutter_render_text_field.cpp" ]
-  }
-
   rosen_sources = [ "rosen_render_text_field.cpp" ]
 
   standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]

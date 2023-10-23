@@ -64,6 +64,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/image/image_file_cache.h"
 #ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
@@ -361,16 +362,6 @@ void UIContentImpl::InitializeInner(
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
-void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
-{
-    InitializeInner(window, url, reinterpret_cast<napi_value>(storage), false);
-}
-
-void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage)
-{
-    InitializeInner(window, name, reinterpret_cast<napi_value>(storage), true);
-}
-
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
     InitializeInner(window, url, storage, false);
@@ -379,12 +370,6 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
     InitializeInner(window, name, storage, true);
-}
-
-void UIContentImpl::Initialize(
-    OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId)
-{
-    Initialize(window, url, reinterpret_cast<napi_value>(storage), focusWindowId);
 }
 
 void UIContentImpl::Initialize(
@@ -406,11 +391,6 @@ void UIContentImpl::Initialize(
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
-NativeValue* UIContentImpl::GetUIContext()
-{
-    return reinterpret_cast<NativeValue*>(GetUINapiContext());
-}
-
 napi_value UIContentImpl::GetUINapiContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -429,11 +409,6 @@ napi_value UIContentImpl::GetUINapiContext()
     }
 
     return result;
-}
-
-void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
-{
-    Restore(window, contentInfo, reinterpret_cast<napi_value>(storage));
 }
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
@@ -1271,6 +1246,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     auto pipeline = container->GetPipelineContext();
+    // Use metadata to control the center-alignment of text at line height.
+    bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
+        [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
+    pipeline->SetHalfLeading(halfLeading);
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
@@ -1298,6 +1277,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     InitializeSafeArea(container);
+
+    // set container temp dir
+    if (abilityContext) {
+        if (!abilityContext->GetTempDir().empty()) {
+            container->SetTempDir(abilityContext->GetTempDir());
+        }
+    } else {
+        LOGI("UIContentImpl::OnStart abilityContext is null");
+    }
 
     LayoutInspector::SetCallback(instanceId_);
 }
@@ -1359,6 +1347,12 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
+
+    if (isFormRender_) {
+        LOGD("Remove card for bundle %{public}s, module %{public}s", bundleName_.c_str(), moduleName_.c_str());
+        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName_, moduleName_);
+    }
+
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
@@ -1445,10 +1439,18 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    LOGD("UIContentImpl ProcessPointerEvent begin");
     auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        auto info = Platform::AceContainer::GetContentInfo(instanceId_);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
+            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "ViewPosX = %{public}d, ViewPosY = %{public}d, ContentInfo = %{public}s",
+            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(),
+            container->GetViewPosY(), info.c_str());
+    }
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     return true;
@@ -1456,9 +1458,11 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGD("UIContentImpl: OnKeyUp called, keyEvent info: keyCode is %{public}d,"
-         "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-        touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
+        "keyEvent info: keyCode is %{public}d, "
+        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
+        touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(),
+        touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
@@ -1532,6 +1536,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
+        SubwindowManager::GetInstance()->ClearToastInSubwindow();
     };
     if (container->IsUseStageModel() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
         task();
@@ -1762,6 +1767,31 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
     auto density = pipelineContext->GetDensity();
     pipelineContext->SetRootSize(density, width, height);
     pipelineContext->OnSurfaceChanged(width, height);
+}
+
+void UIContentImpl::SetFormBackgroundColor(const std::string& color)
+{
+    LOGI("UIContentImpl: SetFormBackgroundColor color is %{public}s", color.c_str());
+    if (!Rosen::RSSystemProperties::GetUniRenderEnabled()) {
+        // cannot set transparent background effects in not-uniform-render mode
+        return;
+    }
+    Color bgColor;
+    if (!Color::ParseColorString(color, bgColor)) {
+        return;
+    }
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [container, bgColor]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetAppBgColor(bgColor);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,

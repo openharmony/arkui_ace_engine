@@ -65,7 +65,6 @@ std::string ScrollablePaintProperty::GetBarStateString() const
         case NG::DisplayMode::OFF:
             return "BarState.Off";
         default:
-            LOGE("mode %{public}d is not valid", mode);
             break;
     }
     return "BarState.Off";

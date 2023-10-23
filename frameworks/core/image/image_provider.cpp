@@ -15,14 +15,10 @@
 
 #include "core/image/image_provider.h"
 
-#ifdef NEW_SKIA
-#include "modules/svg/include/SkSVGDOM.h"
-#else
-#include "experimental/svg/model/SkSVGDOM.h"
-#endif
 #include "image_compressor.h"
 #include "include/core/SkGraphics.h"
 #include "include/core/SkStream.h"
+#include "modules/svg/include/SkSVGDOM.h"
 
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
@@ -55,11 +51,8 @@ std::unordered_map<std::string, std::vector<LoadCallback>> ImageProvider::loadin
 std::mutex ImageProvider::uploadMutex_;
 std::unordered_map<std::string, std::vector<LoadCallback>> ImageProvider::uploadingImage_;
 
-bool ImageProvider::TrySetLoadingImage(
-    const ImageSourceInfo& imageInfo,
-    const ImageObjSuccessCallback& successCallback,
-    const UploadSuccessCallback& uploadCallback,
-    const FailedCallback& failedCallback)
+bool ImageProvider::TrySetLoadingImage(const ImageSourceInfo& imageInfo, const ImageObjSuccessCallback& successCallback,
+    const UploadSuccessCallback& uploadCallback, const FailedCallback& failedCallback)
 {
     std::lock_guard lock(loadingImageMutex_);
     auto key = imageInfo.GetKey();
@@ -75,12 +68,8 @@ bool ImageProvider::TrySetLoadingImage(
     }
 }
 
-void ImageProvider::ProccessLoadingResult(
-    const RefPtr<TaskExecutor>& taskExecutor,
-    const ImageSourceInfo& imageInfo,
-    bool canStartUploadImageObj,
-    const RefPtr<ImageObject>& imageObj,
-    const RefPtr<PipelineBase>& context,
+void ImageProvider::ProccessLoadingResult(const RefPtr<TaskExecutor>& taskExecutor, const ImageSourceInfo& imageInfo,
+    bool canStartUploadImageObj, const RefPtr<ImageObject>& imageObj, const RefPtr<PipelineBase>& context,
     const std::string& errorMsg)
 {
     std::lock_guard lock(loadingImageMutex_);
@@ -91,27 +80,27 @@ void ImageProvider::ProccessLoadingResult(
         std::swap(callbacks, iter->second);
         for (const auto& callback : callbacks) {
             if (imageObj == nullptr) {
-                taskExecutor->PostTask([imageInfo, callback, errorMsg]() {
-                    if (callback.failedCallback) {
-                        callback.failedCallback(imageInfo, errorMsg);
-                    }
-                }, TaskExecutor::TaskType::UI);
+                taskExecutor->PostTask(
+                    [imageInfo, callback, errorMsg]() {
+                        if (callback.failedCallback) {
+                            callback.failedCallback(imageInfo, errorMsg);
+                        }
+                    },
+                    TaskExecutor::TaskType::UI);
                 return;
             }
             auto obj = imageObj->Clone();
-            taskExecutor->PostTask([obj, imageInfo, callback]() {
-                if (callback.successCallback) {
-                    callback.successCallback(imageInfo, obj);
-                }
-            }, TaskExecutor::TaskType::UI);
+            taskExecutor->PostTask(
+                [obj, imageInfo, callback]() {
+                    if (callback.successCallback) {
+                        callback.successCallback(imageInfo, obj);
+                    }
+                },
+                TaskExecutor::TaskType::UI);
             if (canStartUploadImageObj) {
                 bool forceResize = (!obj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
                 obj->UploadToGpuForRender(
-                    context,
-                    callback.uploadCallback,
-                    callback.failedCallback,
-                    obj->GetImageSize(),
-                    forceResize, true);
+                    context, callback.uploadCallback, callback.failedCallback, obj->GetImageSize(), forceResize, true);
             }
         }
     } else {
@@ -121,9 +110,7 @@ void ImageProvider::ProccessLoadingResult(
 }
 
 bool ImageProvider::TryUploadingImage(
-    const std::string& key,
-    const UploadSuccessCallback& successCallback,
-    const FailedCallback& failedCallback)
+    const std::string& key, const UploadSuccessCallback& successCallback, const FailedCallback& failedCallback)
 {
     std::lock_guard lock(uploadMutex_);
     auto iter = uploadingImage_.find(key);
@@ -137,12 +124,8 @@ bool ImageProvider::TryUploadingImage(
     }
 }
 
-void ImageProvider::ProccessUploadResult(
-    const RefPtr<TaskExecutor>& taskExecutor,
-    const ImageSourceInfo& imageInfo,
-    const Size& imageSize,
-    const RefPtr<NG::CanvasImage>& canvasImage,
-    const std::string& errorMsg)
+void ImageProvider::ProccessUploadResult(const RefPtr<TaskExecutor>& taskExecutor, const ImageSourceInfo& imageInfo,
+    const Size& imageSize, const RefPtr<NG::CanvasImage>& canvasImage, const std::string& errorMsg)
 {
     std::lock_guard lock(uploadMutex_);
     std::vector<LoadCallback> callbacks;
@@ -150,34 +133,30 @@ void ImageProvider::ProccessUploadResult(
     auto iter = uploadingImage_.find(key);
     if (iter != uploadingImage_.end()) {
         std::swap(callbacks, iter->second);
-        taskExecutor->PostTask([callbacks, imageInfo, canvasImage, errorMsg]() {
-            for (auto callback : callbacks) {
-                if (canvasImage) {
-                    callback.uploadCallback(imageInfo, canvasImage);
-                } else {
-                    callback.failedCallback(imageInfo, errorMsg);
+        taskExecutor->PostTask(
+            [callbacks, imageInfo, canvasImage, errorMsg]() {
+                for (auto callback : callbacks) {
+                    if (canvasImage) {
+                        callback.uploadCallback(imageInfo, canvasImage);
+                    } else {
+                        callback.failedCallback(imageInfo, errorMsg);
+                    }
                 }
-            }
-        }, TaskExecutor::TaskType::UI);
+            },
+            TaskExecutor::TaskType::UI);
     } else {
         LOGW("no uploading image: %{public}s", imageInfo.ToString().c_str());
     }
     uploadingImage_.erase(key);
 }
 
-void ImageProvider::FetchImageObject(
-    const ImageSourceInfo& imageInfo,
-    const ImageObjSuccessCallback& successCallback,
-    const UploadSuccessCallback& uploadSuccessCallback,
-    const FailedCallback& failedCallback,
-    const WeakPtr<PipelineBase>& context,
-    bool syncMode,
-    bool useSkiaSvg,
-    bool needAutoResize,
+void ImageProvider::FetchImageObject(const ImageSourceInfo& imageInfo, const ImageObjSuccessCallback& successCallback,
+    const UploadSuccessCallback& uploadSuccessCallback, const FailedCallback& failedCallback,
+    const WeakPtr<PipelineBase>& context, bool syncMode, bool useSkiaSvg, bool needAutoResize,
     const OnPostBackgroundTask& onBackgroundTaskPostCallback)
 {
-    auto task = [context, imageInfo, successCallback, failedCallback, useSkiaSvg,
-                    uploadSuccessCallback, needAutoResize, id = Container::CurrentId(), syncMode]() mutable {
+    auto task = [context, imageInfo, successCallback, failedCallback, useSkiaSvg, uploadSuccessCallback, needAutoResize,
+                    id = Container::CurrentId(), syncMode]() mutable {
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
@@ -199,8 +178,8 @@ void ImageProvider::FetchImageObject(
         }
         if (!imageObj) { // if it fails to generate an image object, trigger fail callback.
             if (syncMode) {
-                failedCallback(imageInfo,
-                    "Image data may be broken or absent, please check if image file or image data is valid");
+                failedCallback(
+                    imageInfo, "Image data may be broken or absent, please check if image file or image data is valid");
                 return;
             }
             ProccessLoadingResult(taskExecutor, imageInfo, false, nullptr, pipelineContext,
@@ -210,12 +189,8 @@ void ImageProvider::FetchImageObject(
         if (syncMode) {
             successCallback(imageInfo, imageObj);
         } else {
-            ProccessLoadingResult(
-                taskExecutor,
-                imageInfo,
-                !needAutoResize && (imageObj->GetFrameCount() == 1),
-                imageObj,
-                pipelineContext);
+            ProccessLoadingResult(taskExecutor, imageInfo, !needAutoResize && (imageObj->GetFrameCount() == 1),
+                imageObj, pipelineContext);
         }
     };
     if (syncMode) {
@@ -252,8 +227,7 @@ RefPtr<ImageObject> ImageProvider::GeneratorAceImageObject(
 }
 
 #ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> ImageProvider::LoadImageRawData(
-    const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase> context)
+sk_sp<SkData> ImageProvider::LoadImageRawData(const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase> context)
 #else
 std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
     const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase> context)
@@ -299,21 +273,19 @@ sk_sp<SkData> ImageProvider::LoadImageRawDataFromFileCache(
 #else
 std::shared_ptr<RSData> ImageProvider::LoadImageRawDataFromFileCache(
 #endif
-    const RefPtr<PipelineBase> context,
-    const std::string key,
-    const std::string suffix)
+    const RefPtr<PipelineBase> context, const std::string key, const std::string suffix)
 {
     ACE_FUNCTION_TRACE();
-        std::string cacheFilePath = ImageFileCache::GetInstance().GetImageCacheFilePath(key) + suffix;
-        auto data = ImageFileCache::GetInstance().GetDataFromCacheFile(cacheFilePath);
-        if (data) {
+    std::string cacheFilePath = ImageFileCache::GetInstance().GetImageCacheFilePath(key) + suffix;
+    auto data = ImageFileCache::GetInstance().GetDataFromCacheFile(cacheFilePath);
+    if (data) {
 #ifndef USE_ROSEN_DRAWING
-            const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(data->GetDataWrapper());
-            return *skData;
+        const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(data->GetDataWrapper());
+        return *skData;
 #else
-            return AceType::DynamicCast<NG::DrawingImageData>(data)->GetRsData();
+        return AceType::DynamicCast<NG::DrawingImageData>(data)->GetRsData();
 #endif
-        }
+    }
     return nullptr;
 }
 
@@ -571,12 +543,8 @@ std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
         return rawRSImage;
 #endif
     }
-#if defined(NEW_SKIA) || defined(FLUTTER_2_5)
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
             SkImage::kDisallow_CachingHint)) {
-#else
-    if (!rawImage->scalePixels(scaledBitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint)) {
-#endif
         LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
              " %{public}d], raw image size: [%{public}d x %{public}d]",
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());

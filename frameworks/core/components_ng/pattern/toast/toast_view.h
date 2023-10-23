@@ -20,12 +20,14 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ToastView {
 public:
-    static RefPtr<FrameNode> CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft);
+    static RefPtr<FrameNode> CreateToastNode(
+        const std::string& message, const std::string& bottom, bool isRightToLeft, const ToastShowMode& showMode);
 
 private:
     static void UpdateTextLayoutProperty(

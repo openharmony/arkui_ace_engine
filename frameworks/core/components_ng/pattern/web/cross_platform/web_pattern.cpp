@@ -87,6 +87,18 @@ void WebPattern::OnAttachToFrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+    auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto offset = Offset(webPattern->GetCoordinatePoint()->GetX(), webPattern->GetCoordinatePoint()->GetY());
+        auto host = webPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetContentRectToFrame(
+            RectF(offset.GetX(), offset.GetY(), webPattern->drawSize_.Width(), webPattern->drawSize_.Height()));
+    };
+    host->GetRenderContext()->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)

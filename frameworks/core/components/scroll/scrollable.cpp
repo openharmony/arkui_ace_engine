@@ -71,7 +71,6 @@ double Scrollable::sVelocityScale_ = VELOCITY_SCALE;
 void Scrollable::SetVelocityScale(double sVelocityScale)
 {
     if (LessOrEqual(sVelocityScale, 0.0)) {
-        LOGW("Invalid velocity scale: %{public}lf", sVelocityScale);
         return;
     }
     sVelocityScale_ = sVelocityScale;
@@ -80,7 +79,6 @@ void Scrollable::SetVelocityScale(double sVelocityScale)
 void Scrollable::SetFriction(double sFriction)
 {
     if (LessOrEqual(sFriction, 0.0)) {
-        LOGW("Invalid friction value: %{public}lf", sFriction);
         return;
     }
     sFriction_ = sFriction;
@@ -151,6 +149,10 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
                 scrollEvent.nodeId = scroll->nodeId_;
                 scrollEvent.eventType = "scrollend";
                 context->SendEventToAccessibility(scrollEvent);
+            }
+            if (scroll->actionEnd_) {
+                auto gestureEvent = info;
+                scroll->actionEnd_(gestureEvent);
             }
         }
     };
@@ -246,7 +248,6 @@ void Scrollable::SetAxis(Axis axis)
 
 void Scrollable::HandleTouchDown()
 {
-    LOGD("handle touch down");
     isTouching_ = true;
     // If animation still runs, first stop it.
     springController_->Stop();
@@ -261,12 +262,10 @@ void Scrollable::HandleTouchDown()
     if (!scrollSnapController_->IsStopped()) {
         scrollSnapController_->Stop();
     }
-    LOGD("handle touch down has already stopped the animation");
 }
 
 void Scrollable::HandleTouchUp()
 {
-    LOGD("handle touch up");
     isTouching_ = false;
     if (outBoundaryCallback_ && !outBoundaryCallback_()) {
         if (scrollSnapController_->IsStopped() && scrollSnapCallback_) {
@@ -275,14 +274,12 @@ void Scrollable::HandleTouchUp()
         return;
     }
     if (springController_->IsStopped() && scrollOverCallback_) {
-        LOGD("need scroll to boundary");
         ProcessScrollOverCallback(0.0);
     }
 }
 
 void Scrollable::HandleTouchCancel()
 {
-    LOGD("handle touch cancel");
     isTouching_ = false;
     if (springController_->IsStopped() && scrollOverCallback_) {
         ProcessScrollOverCallback(0.0);
@@ -365,14 +362,13 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     const auto dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
-    LOGD("HandleDragStart. LocalLocation: %{public}s, GlobalLocation: %{public}s",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, localLocation: %{public}s, globalLocation: %{public}s",
         info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding start.
     auto currentTime = GetSysTimestamp();
     auto increaseCpuTime = currentTime - startIncreaseTime_;
     if (!moved_ || increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
-        LOGI("HandleDragStart increase cpu frequency, moved_ = %{public}d", moved_);
         startIncreaseTime_ = currentTime;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         if (FrameReport::GetInstance().GetEnable()) {
@@ -576,7 +572,6 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     auto currentTime = GetSysTimestamp();
     auto increaseCpuTime = currentTime - startIncreaseTime_;
     if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
-        LOGI("HandleDragUpdate increase cpu frequency, moved_ = %{public}d", moved_);
         startIncreaseTime_ = currentTime;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         if (FrameReport::GetInstance().GetEnable()) {
@@ -584,7 +579,6 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
         }
     }
 #endif
-    LOGD("handle drag update, offset is %{public}lf", info.GetMainDelta());
     auto mainDelta = info.GetMainDelta();
     if (RelatedScrollEventPrepare(Offset(0.0, mainDelta))) {
         return;
@@ -596,7 +590,8 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
-    LOGD("handle drag end, position is %{public}lf and %{public}lf, velocity is %{public}lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, position is %{public}lf and %{public}lf, "
+        "velocity is %{public}lf",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
@@ -618,7 +613,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     RelatedEventEnd();
     double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
     if (!moved_ || info.GetInputEventType() == InputEventType::AXIS) {
-        LOGI("It is not moved now,  no need to handle drag end motion");
         if (calePredictSnapOffsetCallback_) {
             predictSnapOffset = calePredictSnapOffsetCallback_(0.0f);
             if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
@@ -630,13 +624,13 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         HandleScrollEnd();
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM
-        LOGI("springController stop increase cpu frequency");
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
         }
 #endif
-    } else if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
+    } else if (!Container::IsCurrentUseNewPipeline() && outBoundaryCallback_ && outBoundaryCallback_() &&
+               scrollOverCallback_) {
         ResetContinueDragCount();
         ProcessScrollOverCallback(correctVelocity);
     } else if (canOverScroll_) {
@@ -647,7 +641,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             springController_->Stop();
         }
         StopSnapController();
-        LOGD("[scrollMotion]position(%{public}lf), velocity(%{public}lf)", mainPosition, correctVelocity);
+        TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}lf, velocity is %{public}lf",
+            mainPosition, correctVelocity);
         double friction = friction_ > 0 ? friction_ : sFriction_;
         if (motion_) {
             motion_->Reset(friction, mainPosition, correctVelocity, FRICTION_VELOCITY_THRESHOLD);
@@ -794,8 +789,6 @@ void Scrollable::FixScrollMotion(double position)
 #ifdef WEARABLE_PRODUCT
     if (motion_ && needCenterFix_ && watchFixCallback_) {
         double finalPoisition = watchFixCallback_(motion_->GetFinalPosition(), position);
-        LOGD("final position before fix(%{public}lf), need to fix to position(%{public}lf)",
-            motion_->GetFinalPosition(), finalPoisition);
         if (!NearEqual(finalPoisition, motion_->GetFinalPosition(), DISTANCE_EPSILON)) {
             double velocity = motion_->GetVelocityByFinalPosition(finalPoisition);
             double friction = friction_ > 0 ? friction_ : sFriction_;
@@ -806,7 +799,6 @@ void Scrollable::FixScrollMotion(double position)
                 velocity = motion_->GetVelocityByFinalPosition(finalPoisition, 0.0);
                 motion_->Reset(friction, position, velocity, 0.0);
             }
-            LOGD("final position after fix (%{public}lf), ", motion_->GetFinalPosition());
         }
     }
 #endif
@@ -835,8 +827,9 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
 {
-    LOGD("ProcessScrollSnapSpringMotion scrollSnapDelta:%{public}f, scrollSnapVelocity:%{public}f", scrollSnapDelta,
-        scrollSnapVelocity);
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The snap delta of scroll motion is %{public}f, "
+        "The snap velocity of scroll motion is %{public}f",
+        scrollSnapDelta, scrollSnapVelocity);
     if (!snapController_) {
         snapController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
         snapController_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
@@ -887,7 +880,8 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
 
 void Scrollable::ProcessScrollSnapMotion(double position)
 {
-    LOGD("[scroll] currentPos_(%{public}lf), position(%{public}lf)", currentPos_, position);
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
+        currentPos_, position);
     currentVelocity_ = scrollSnapMotion_->GetCurrentVelocity();
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
@@ -931,7 +925,6 @@ void Scrollable::OnAnimateStop()
     }
     moved_ = false;
 #ifdef OHOS_PLATFORM
-    LOGI("springController stop increase cpu frequency");
     ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndListFling();
@@ -956,12 +949,12 @@ void Scrollable::OnAnimateStop()
 void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {
-    LOGD("[scroll] position(%{public}lf), mainVelocity(%{public}lf), minExtent(%{public}lf), maxExtent(%{public}lf), "
-         "initMinExtent(%{public}lf), initMaxExtent(%{public}lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, mainVelocity is %{public}lf, "
+        "minExtent is %{public}lf, maxExtent is %{public}lf, initMinExtent is %{public}lf, "
+        "initMaxExtent is %{public}lf",
         mainPosition, mainVelocity, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
     scrollMotion_ = AceType::MakeRefPtr<ScrollMotion>(mainPosition, mainVelocity, extent, initExtent, spring_);
     if (!scrollMotion_->IsValid()) {
-        LOGE("scrollMotion is invalid, no available spring motion.");
         return;
     }
     scrollMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
@@ -995,14 +988,12 @@ void Scrollable::ProcessScrollMotionStop()
         scrollPause_ = false;
         HandleOverScroll(currentVelocity_);
     } else {
-        currentVelocity_ = 0.0;
         if (isDragUpdateStop_) {
             return;
         }
         moved_ = false;
         HandleScrollEnd();
 #ifdef OHOS_PLATFORM
-        LOGI("controller stop increase cpu frequency");
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
@@ -1011,6 +1002,7 @@ void Scrollable::ProcessScrollMotionStop()
         if (scrollEnd_) {
             scrollEnd_();
         }
+        currentVelocity_ = 0.0;
 #if !defined(PREVIEW)
         LayoutInspector::SupportInspector();
 #endif
@@ -1019,7 +1011,8 @@ void Scrollable::ProcessScrollMotionStop()
 
 void Scrollable::ProcessSpringMotion(double position)
 {
-    LOGD("[scroll] currentPos_(%{public}lf), position(%{public}lf)", currentPos_, position);
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
+        currentPos_, position);
     currentVelocity_ = scrollMotion_->GetCurrentVelocity();
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
@@ -1045,7 +1038,8 @@ void Scrollable::ProcessScrollMotion(double position)
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
     }
-    LOGD("[scrolling] position(%{public}lf), currentVelocity_(%{public}lf), needScrollSnapChange_(%{public}u)",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, currentVelocity_ is %{public}lf, "
+        "needScrollSnapChange_ is %{public}u",
         position, currentVelocity_, needScrollSnapChange_);
     if ((NearEqual(currentPos_, position))) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION);
@@ -1066,7 +1060,7 @@ void Scrollable::ProcessScrollMotion(double position)
 
     // spring effect special process
     if ((IsSnapStopped() && canOverScroll_) || needScrollSnapChange_ ||
-        ((outBoundaryCallback_ && outBoundaryCallback_()))) {
+        (!Container::IsCurrentUseNewPipeline() && outBoundaryCallback_ && outBoundaryCallback_())) {
         scrollPause_ = true;
         controller_->Stop();
     }

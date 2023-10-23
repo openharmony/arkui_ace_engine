@@ -46,7 +46,7 @@ void GaugePattern::OnModifyDone()
     }
 
     if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (host->TotalChildCount() > 0) {
+        if ((host->TotalChildCount() > 0) && (!titleChildId_.has_value())) {
             auto firstChild = host->GetFirstChild();
             CHECK_NULL_VOID(firstChild);
             titleChildId_ = firstChild->GetId();

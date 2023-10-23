@@ -57,6 +57,32 @@ public:
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
     static void SetCustomKeyboard(const JSCallbackInfo& info);
 };
+
+class JSSearchController final : public Referenced {
+public:
+    JSSearchController() = default;
+    ~JSSearchController() override = default;
+
+    static void JSBind(BindingTarget globalObj);
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSSearchController* scroller);
+    void CaretPosition(int32_t caretPosition);
+    void StopEditing();
+    void SetController(const RefPtr<TextFieldControllerBase>& controller)
+    {
+        controller_ = controller;
+    }
+
+    void GetTextContentRect(const JSCallbackInfo& info);
+    void GetTextContentLinesNum(const JSCallbackInfo& info);
+
+private:
+    JSRef<JSObject> CreateRectangle(const Rect& info);
+
+    WeakPtr<TextFieldControllerBase> controller_;
+    ACE_DISALLOW_COPY_AND_MOVE(JSSearchController);
+};
+
 } // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEARCH_H

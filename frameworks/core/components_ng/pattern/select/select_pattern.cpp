@@ -77,9 +77,6 @@ void SelectPattern::OnModifyDone()
 void SelectPattern::ShowSelectMenu()
 {
     CHECK_NULL_VOID(!options_.empty());
-    if (menuWrapper_) {
-        LOGI("start executing click callback %d", menuWrapper_->GetId());
-    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
@@ -92,7 +89,6 @@ void SelectPattern::ShowSelectMenu()
     menuLayoutProps->UpdateTargetSize(selectSize_);
     auto offset = GetHost()->GetPaintRectOffset();
     offset.AddY(selectSize_.Height());
-    LOGD("select offset %{public}s size %{public}s", offset.ToString().c_str(), selectSize_.ToString().c_str());
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
 }
 
@@ -187,7 +183,6 @@ void SelectPattern::RegisterOnPress()
         CHECK_NULL_VOID(renderContext);
         // update press status, repaint background color
         if (touchType == TouchType::DOWN) {
-            LOGD("triggers option press");
             pattern->SetBgBlendColor(theme->GetClickedColor());
             pattern->PlayBgColorAnimation(false);
         }
@@ -313,7 +308,6 @@ void SelectPattern::SetSelected(int32_t index)
         return;
     }
     if (index >= options_.size() || index < 0) {
-        LOGW("newly selected index invalid");
         selected_ = -1;
         ResetOptionProps();
         return;
@@ -690,11 +684,13 @@ void SelectPattern::UpdateText(int32_t index)
     CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
+    if (index >= options_.size() || index < 0) {
+        return;
+    }
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(newSelected);
     textProps->UpdateContent(newSelected->GetText());
     text_->MarkModifyDone();
-    LOGD("new text = %s", newSelected->GetText().c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

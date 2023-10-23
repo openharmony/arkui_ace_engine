@@ -91,6 +91,7 @@ public:
     void StartCanceledAnimate();
     void Reset();
     void SetIsTouchDown(bool isTouchDown);
+    void UpdateBoundsRect();
 
 private:
     void DrawForApiNine(DrawingContext& context);

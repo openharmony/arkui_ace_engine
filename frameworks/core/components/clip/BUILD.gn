@@ -17,12 +17,9 @@ import(
 build_component("clip") {
   sources = [
     "clip_component.cpp",
-    "flutter_render_clip.cpp",
     "render_clip.cpp",
     "render_clip_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_clip.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_clip.cpp" ]
 }

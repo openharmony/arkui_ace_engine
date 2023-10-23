@@ -92,14 +92,14 @@ void SearchTestNg::SetThemeInCreate()
     auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
     auto iconTheme = AceType::MakeRefPtr<IconTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(textFieldTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(iconTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(textFieldTheme));
+        .WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+            if (type == SearchTheme::TypeId()) {
+                return searchTheme;
+            } else if (type == IconTheme::TypeId()) {
+                return iconTheme;
+            }
+            return textFieldTheme;
+        });
 }
 
 void SearchTestNg::SetSearchTheme()

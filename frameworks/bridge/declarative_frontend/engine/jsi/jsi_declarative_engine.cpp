@@ -888,6 +888,7 @@ napi_value JsiDeclarativeEngineInstance::GetContextValue()
 }
 
 std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
+panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
 // -----------------------
 // Start JsiDeclarativeEngine
@@ -1221,6 +1222,12 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
     return true;
 }
 
+bool JsiDeclarativeEngine::UpdateRootComponent()
+{
+    Framework::UpdateRootComponent(JsiDeclarativeEngine::obj_.ToLocal());
+    return true;
+}
+
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJs url : %s", url.c_str());
@@ -1513,7 +1520,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     arkRuntime->AddRootView(rootView);
 #endif
-    UpdateRootComponent(ret->ToObject(vm));
+    Framework::UpdateRootComponent(ret->ToObject(vm));
     JSViewStackProcessor::JsStopGetAccessRecording();
     LOGI("LoadNamedRouterSource name = %{public}s", namedRoute.c_str());
     return true;

@@ -608,6 +608,8 @@ private:
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
+    void UpdateParentAbsoluteOffset();
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();

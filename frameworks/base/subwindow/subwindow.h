@@ -40,7 +40,7 @@ public:
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
-    virtual void HideMenuNG(bool showPreviewAnimation = true) = 0;
+    virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
     virtual void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) = 0;
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) = 0;
     virtual void HidePopupNG(int32_t targetId) = 0;
@@ -81,7 +81,9 @@ public:
         return isAboveApps_;
     }
 
-    virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) = 0;
+    virtual void ClearToast() = 0;
+    virtual void ShowToast(
+        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode) = 0;
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) = 0;

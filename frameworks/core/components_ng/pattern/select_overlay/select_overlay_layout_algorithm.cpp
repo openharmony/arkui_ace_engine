@@ -33,9 +33,11 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(*info_) || (!info_->firstHandle.isShow && !info_->secondHandle.isShow)) {
+    if (!CheckInShowArea(*info_)) {
         menu->SetActive(false);
         return;
+    } else if (!info_->firstHandle.isShow && !info_->secondHandle.isShow) {
+        menu->SetActive(false);
     } else {
         menu->SetActive(true);
     }
@@ -140,6 +142,13 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         auto menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
         menuPosition = OffsetF((firstHandleRect.Left() + secondHandleRect.Left() - menuWidth) / 2.0f,
             static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
+
+        if (!info_->firstHandle.isShow && info_->secondHandle.isShow && !info_->handleReverse) {
+            menuPosition.SetY(secondHandleRect.Bottom() + menuSpacing);
+        }
+        if (info_->firstHandle.isShow && !info_->secondHandle.isShow && info_->handleReverse) {
+            menuPosition.SetY(firstHandleRect.Bottom() + menuSpacing);
+        }
     }
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();

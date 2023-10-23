@@ -49,12 +49,14 @@ void TxtParagraph::CreateBuilder()
     style.text_align = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.max_lines = paraStyle_.maxLines;
     style.font_size = paraStyle_.fontSize; // libtxt style.font_size
+    style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
 #else
     Rosen::TypographyStyle style;
     style.textDirection = Constants::ConvertTxtTextDirection(paraStyle_.direction);
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.maxLines = paraStyle_.maxLines;
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
+    style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
 #endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
@@ -274,7 +276,15 @@ int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
 
 bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result)
 {
-    if (!paragraph_ || (text_.empty() && placeHolderIndex_ == -1)) {
+    if (!paragraph_) {
+        return false;
+    }
+    if (text_.empty() && placeHolderIndex_ == -1) {
+        if (paragraph_->GetLineCount() > 0) {
+            result.offset.Reset();
+            result.height = paragraph_->GetHeight();
+            return true;
+        }
         return false;
     }
     if (static_cast<size_t>(extent) > GetParagraphLength()) {

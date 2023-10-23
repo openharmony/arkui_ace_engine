@@ -124,11 +124,12 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         if (recognizer) {
             auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
             if (!recognizerGroup && newIdx >= idx) {
-                recognizer->SetTransInfo(host->GetId());
+                recognizer->SetNodeId(host->GetId());
             }
             recognizer->BeginReferee(touchId);
             innerRecognizers.push_back(std::move(recognizer));
         } else {
+            eventTarget->SetNodeId(host->GetId());
             finalResult.push_back(eventTarget);
         }
         newIdx++; // not process previous recognizers
@@ -192,10 +193,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 if (groupRecognizer) {
                     groupRecognizer->SetCoordinateOffset(offset);
                 }
-                groupRecognizer->SetTransInfo(host->GetId());
+                groupRecognizer->SetNodeId(host->GetId());
             }
         } else {
-            recognizer->SetTransInfo(host->GetId());
+            recognizer->SetNodeId(host->GetId());
         }
         recognizer->SetSize(size.Height(), size.Width());
         recognizer->SetCoordinateOffset(offset);
@@ -875,7 +876,7 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
 
         // Only the onDrop callback of dragged frame node is triggered.
         // The onDrop callback of target frame node is triggered in PipelineContext::OnDragEvent.
-        if (eventHub->HasOnDrop()) {
+        if (eventHub->HasOnDrop() || eventHub->HasCustomerOnDrop()) {
             RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
             if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
                 LOGI("web on drag end");
@@ -887,7 +888,8 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
             }
             event->SetScreenX(info.GetScreenLocation().GetX());
             event->SetScreenY(info.GetScreenLocation().GetY());
-            eventHub->FireOnDrop(event, "");
+            eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event);
+            eventHub->HandleInternalOnDrop(event, "");
         }
     }
 
@@ -1133,6 +1135,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 if (eventManager) {
                     eventManager->DoMouseActionRelease();
                 }
+                eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }

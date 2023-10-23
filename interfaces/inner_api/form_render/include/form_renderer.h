@@ -59,14 +59,15 @@ public:
     void AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
 private:
-    void InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void ParseWant(const OHOS::AAFwk::Want& want);
     void SetRenderDelegate(const sptr<IRemoteObject>& renderRemoteObj);
-    void AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
     bool allowUpdate_ = true;
     float width_ = 0.0f;
     float height_ = 0.0f;
+    std::string backgroundColor_;
     std::vector<std::string> cachedInfos_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;

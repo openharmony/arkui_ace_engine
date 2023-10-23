@@ -44,15 +44,7 @@ sk_sp<SkShader> RosenRenderLinearTrack::BlendSkShader(const SkPoint pts, const S
     sk_sp<SkShader> backgroundShader;
     sk_sp<SkShader> blendShader;
     const SkPoint gradientPoints[2] = { { pts.fX - scanLeftOffset, pts.fY }, { pts.fX + scanRightOffset, pts.fY } };
-#ifdef USE_SYSTEM_SKIA
-    backgroundShader = SkShader::MakeColorShader(color);
-    scanShader = SkGradientShader::MakeLinear(gradientPoints, scanColors, scanPos, 3, SkShader::kDecal_TileMode);
-    if (useAnimator) {
-        blendShader = SkShader::MakeCompose(backgroundShader, scanShader, SkBlendMode::kSrcOver);
-    } else {
-        blendShader = backgroundShader;
-    }
-#else
+
     backgroundShader = SkShaders::Color(color);
     scanShader = SkGradientShader::MakeLinear(gradientPoints, scanColors, scanPos, 3, SkTileMode::kDecal);
     if (useAnimator) {
@@ -60,7 +52,6 @@ sk_sp<SkShader> RosenRenderLinearTrack::BlendSkShader(const SkPoint pts, const S
     } else {
         blendShader = backgroundShader;
     }
-#endif
     return blendShader;
 }
 #else
@@ -83,8 +74,7 @@ std::shared_ptr<RSShaderEffect> RosenRenderLinearTrack::BlendSkShader(
     scanShader = RSRecordingShaderEffect::CreateLinearGradient(
         gradientPoints[0], gradientPoints[1], scanColors, scanPos, RSTileMode::DECAL);
     if (useAnimator) {
-        blendShader = RSRecordingShaderEffect::CreateBlendShader(
-            *backgroundShader, *scanShader, RSBlendMode::SRC_OVER);
+        blendShader = RSRecordingShaderEffect::CreateBlendShader(*backgroundShader, *scanShader, RSBlendMode::SRC_OVER);
     } else {
         blendShader = backgroundShader;
     }
@@ -144,7 +134,7 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
         if (direction_ == Axis::VERTICAL) {
             startRect = isReverse_ ? offset.GetY() + GetLayoutSize().Height() : offset.GetY();
             endRect = isReverse_ ? startRect - trackHeight - trackLength * GetTotalRatio()
-                                : startRect + trackHeight + trackLength * GetTotalRatio();
+                                 : startRect + trackHeight + trackLength * GetTotalRatio();
             SkRRect selectRect = SkRRect::MakeRectXY({ offset.GetX(), startRect, offset.GetX() + trackHeight, endRect },
                 trackHeight * HALF, trackHeight * HALF);
             selectPaint.setShader(
@@ -159,8 +149,8 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
             startRect = offset.GetX() + GetLayoutSize().Width();
             endRect = startRect - trackHeight - trackLength * GetTotalRatio();
         }
-        SkRRect selectRect = SkRRect::MakeRectXY({ startRect, offset.GetY(), endRect, offset.GetY() + trackHeight },
-                trackHeight * HALF, trackHeight * HALF);
+        SkRRect selectRect = SkRRect::MakeRectXY(
+            { startRect, offset.GetY(), endRect, offset.GetY() + trackHeight }, trackHeight * HALF, trackHeight * HALF);
         selectPaint.setShader(BlendSkShader({ startRect + scanHighLightValue_ * trackLength, offset.GetY() },
             GetSelectColor().GetValue(), playAnimation_));
         canvas->drawRRect(selectRect, selectPaint);
@@ -173,9 +163,8 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
         const double startRect = leftToRight_ ? offset.GetX() : offset.GetX() + GetLayoutSize().Width();
         const double endRect = leftToRight_ ? startRect + trackHeight + trackLength * GetCachedRatio()
                                             : startRect - trackHeight - trackLength * GetCachedRatio();
-        RSRoundRect cachedRect(
-            RSRect(startRect, offset.GetY(), endRect, offset.GetY() + trackHeight), trackHeight * HALF,
-            trackHeight * HALF);
+        RSRoundRect cachedRect(RSRect(startRect, offset.GetY(), endRect, offset.GetY() + trackHeight),
+            trackHeight * HALF, trackHeight * HALF);
         RSRoundRect cachedRectRosen(cachedRect);
         canvas->AttachPen(cachedPen);
         canvas->DrawRoundRect(cachedRectRosen);
@@ -191,11 +180,10 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
             startRect = isReverse_ ? offset.GetY() + GetLayoutSize().Height() : offset.GetY();
             endRect = isReverse_ ? startRect - trackHeight - trackLength * GetTotalRatio()
                                  : startRect + trackHeight + trackLength * GetTotalRatio();
-            RSRoundRect selectRect(
-                RSRect(offset.GetX(), startRect, offset.GetX() + trackHeight, endRect),
+            RSRoundRect selectRect(RSRect(offset.GetX(), startRect, offset.GetX() + trackHeight, endRect),
                 trackHeight * HALF, trackHeight * HALF);
-            selectPen.SetShaderEffect(BlendSkShader(
-                RSPoint(offset.GetX(), startRect), GetSelectColor().GetValue(), playAnimation_));
+            selectPen.SetShaderEffect(
+                BlendSkShader(RSPoint(offset.GetX(), startRect), GetSelectColor().GetValue(), playAnimation_));
             canvas->AttachBrush(selectPen);
             canvas->DrawRoundRect(selectRect);
             canvas->DetachBrush();
@@ -208,12 +196,10 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
             startRect = offset.GetX() + GetLayoutSize().Width();
             endRect = startRect - trackHeight - trackLength * GetTotalRatio();
         }
-        RSRoundRect selectRect(
-            RSRect(startRect, offset.GetY(), endRect, offset.GetY() + trackHeight), trackHeight * HALF,
-            trackHeight * HALF);
-        selectPen.SetShaderEffect(
-            BlendSkShader(RSPoint(startRect + scanHighLightValue_ * trackLength, offset.GetY()),
-                GetSelectColor().GetValue(), playAnimation_));
+        RSRoundRect selectRect(RSRect(startRect, offset.GetY(), endRect, offset.GetY() + trackHeight),
+            trackHeight * HALF, trackHeight * HALF);
+        selectPen.SetShaderEffect(BlendSkShader(RSPoint(startRect + scanHighLightValue_ * trackLength, offset.GetY()),
+            GetSelectColor().GetValue(), playAnimation_));
         canvas->AttachBrush(selectPen);
         canvas->DrawRoundRect(selectRect);
         canvas->DetachBrush();
@@ -385,11 +371,9 @@ void RosenRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offs
     railPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     canvas->AttachPen(railPen);
     if (direction_ == Axis::VERTICAL) {
-        canvas->DrawLine(RSPoint(dxOffset, offset.GetY()),
-            RSPoint(dxOffset, offset.GetY() + trackLength));
+        canvas->DrawLine(RSPoint(dxOffset, offset.GetY()), RSPoint(dxOffset, offset.GetY() + trackLength));
     } else {
-        canvas->DrawLine(RSPoint(offset.GetX(), dyOffset),
-            RSPoint(offset.GetX() + trackLength, dyOffset));
+        canvas->DrawLine(RSPoint(offset.GetX(), dyOffset), RSPoint(offset.GetX() + trackLength, dyOffset));
     }
     canvas->DetachBrush();
 #endif
@@ -410,8 +394,8 @@ void RosenRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offs
         double toOffset = 0.0;
         if (direction_ == Axis::VERTICAL) {
             fromOffset = isReverse_ ? offset.GetY() + trackLength : offset.GetY();
-            toOffset = isReverse_ ?
-                fromOffset - trackLength * GetTotalRatio() : fromOffset + trackLength * GetTotalRatio();
+            toOffset =
+                isReverse_ ? fromOffset - trackLength * GetTotalRatio() : fromOffset + trackLength * GetTotalRatio();
             canvas->drawLine(dxOffset, fromOffset, dxOffset, toOffset, selectPaint);
             return;
         }
@@ -436,8 +420,8 @@ void RosenRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offs
         double toOffset = 0.0;
         if (direction_ == Axis::VERTICAL) {
             fromOffset = isReverse_ ? offset.GetY() + trackLength : offset.GetY();
-            toOffset = isReverse_ ?
-                fromOffset - trackLength * GetTotalRatio() : fromOffset + trackLength * GetTotalRatio();
+            toOffset =
+                isReverse_ ? fromOffset - trackLength * GetTotalRatio() : fromOffset + trackLength * GetTotalRatio();
             canvas->AttachPen(selectPen);
             canvas->DrawLine(RSPoint(dxOffset, fromOffset), RSPoint(dxOffset, toOffset));
             canvas->DetachPen();
@@ -477,20 +461,19 @@ void RosenRenderLinearTrack::PaintBackgroundTrack(SkCanvas* canvas, const Offset
     canvas->drawRRect(rrect, railPaint);
 }
 #else
-void RosenRenderLinearTrack::PaintBackgroundTrack(
-    RSCanvas* canvas, const Offset& offset, double trackHeight) const
+void RosenRenderLinearTrack::PaintBackgroundTrack(RSCanvas* canvas, const Offset& offset, double trackHeight) const
 {
     RSPen railPen;
     railPen.SetAntiAlias(true);
     railPen.SetColor(GetBackgroundColor().GetValue());
     RSRoundRect rrect;
     if (direction_ == Axis::VERTICAL) {
-        rrect = RSRoundRect(RSRect(offset.GetX(), offset.GetY(),
-            offset.GetX() + trackHeight, offset.GetY() + GetLayoutSize().Height()),
+        rrect = RSRoundRect(
+            RSRect(offset.GetX(), offset.GetY(), offset.GetX() + trackHeight, offset.GetY() + GetLayoutSize().Height()),
             trackHeight * HALF, trackHeight * HALF);
     } else {
-        rrect = RSRoundRect(RSRect(offset.GetX(), offset.GetY(),
-            offset.GetX() + GetLayoutSize().Width(), offset.GetY() + trackHeight),
+        rrect = RSRoundRect(
+            RSRect(offset.GetX(), offset.GetY(), offset.GetX() + GetLayoutSize().Width(), offset.GetY() + trackHeight),
             trackHeight * HALF, trackHeight * HALF);
     }
 

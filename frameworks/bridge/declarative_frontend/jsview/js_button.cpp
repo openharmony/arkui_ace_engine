@@ -18,7 +18,6 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
-#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
@@ -64,7 +63,6 @@ bool JSButton::isLabelButton_ = false;
 void JSButton::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto buttonTheme = GetTheme<ButtonTheme>();
@@ -88,7 +86,6 @@ void JSButton::SetFontStyle(int32_t value)
 {
     const std::vector<FontStyle> fontStyles = { FontStyle::NORMAL, FontStyle::ITALIC };
     if (value < 0 || value >= static_cast<int32_t>(fontStyles.size())) {
-        LOGE("Text fontStyle(%d) is invalid value", value);
         return;
     }
 
@@ -98,12 +95,10 @@ void JSButton::SetFontStyle(int32_t value)
 void JSButton::SetFontFamily(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
         return;
     }
 
@@ -113,12 +108,10 @@ void JSButton::SetFontFamily(const JSCallbackInfo& info)
 void JSButton::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        LOGI("Set text color is invalid, use default text color.");
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         textColor = buttonTheme->GetTextStyle().GetTextColor();
     }
@@ -138,14 +131,16 @@ void JSButton::SetType(const JSCallbackInfo& info)
     if ((ButtonType)value == ButtonType::CAPSULE || (ButtonType)value == ButtonType::CIRCLE ||
         (ButtonType)value == ButtonType::ARC || (ButtonType)value == ButtonType::NORMAL) {
         ButtonModel::GetInstance()->SetType(value);
-    } else {
-        LOGE("Setting button to non valid ButtonType %d", value);
     }
 }
 
-void JSButton::SetStateEffect(bool stateEffect)
+void JSButton::SetStateEffect(const JSCallbackInfo& info)
 {
-    ButtonModel::GetInstance()->SetStateEffect(stateEffect);
+    if (info.Length() < 1) {
+        return;
+    }
+    bool value = info[0]->IsBoolean() ? info[0]->ToBoolean() : true;
+    ButtonModel::GetInstance()->SetStateEffect(value);
 }
 
 void JSButton::HandleDifferentRadius(const JSRef<JSVal>& args)
@@ -245,7 +240,6 @@ void JSButton::CompleteParameters(ButtonParameters& buttonParameters)
 void JSButton::SetLableStyle(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
-        LOGE("info[0] not is Object");
         return;
     }
 
@@ -311,7 +305,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("fontStyle", &JSButton::SetFontStyle, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("fontFamily", &JSButton::SetFontFamily, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("type", &JSButton::SetType, MethodOptions::NONE);
-    JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect, MethodOptions::NONE);
+    JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect);
     JSClass<JSButton>::StaticMethod("labelStyle", &JSButton::SetLableStyle, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("onClick", &JSButton::JsOnClick);
     JSClass<JSButton>::StaticMethod("remoteMessage", &JSButton::JsRemoteMessage);
@@ -406,7 +400,6 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
 {
     Edge padding;
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not a string, number or object.");
         return padding;
     }
 
@@ -418,7 +411,6 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
     } else if (info[0]->IsObject()) {
         auto object = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!object) {
-            LOGE("Js Parse object failed. argsPtr is null.");
             return padding;
         }
         CalcDimension left = CalcDimension(0.0, DimensionUnit::VP);
@@ -528,14 +520,11 @@ NG::PaddingProperty JSButton::SetPaddings(const std::optional<CalcDimension>& to
 
 void JSButton::JsOnClick(const JSCallbackInfo& info)
 {
-    LOGD("JSButton JsOnClick");
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {
-        LOGD("JsOnClick callback is undefined");
         ViewAbstractModel::GetInstance()->DisableOnClick();
         return;
     }
     if (!info[0]->IsFunction()) {
-        LOGE("OnClick parameter need a function.");
         return;
     }
 
@@ -558,7 +547,6 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;
@@ -600,7 +588,6 @@ void JSButton::JsAspectRatio(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsAspectRatio(info);
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     double value = 0.0;
@@ -614,12 +601,10 @@ void JSButton::JsAspectRatio(const JSCallbackInfo& info)
 void JSButton::JsSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 0) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -641,7 +626,6 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 void JSButton::JsRadius(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension radius;
@@ -654,7 +638,6 @@ void JSButton::JsBorder(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorder(info);
     if (!info[0]->IsObject()) {
-        LOGE("args is not a object. %s", info[0]->ToString().c_str());
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
@@ -668,7 +651,6 @@ void JSButton::JsBorder(const JSCallbackInfo& info)
 CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return { -1.0 };
     }
     CalcDimension value;
@@ -681,7 +663,6 @@ CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)
 void JSButton::JsHoverEffect(const JSCallbackInfo& info)
 {
     if (!info[0]->IsNumber()) {
-        LOGE("The arg is not a number");
         return;
     }
 

@@ -60,7 +60,7 @@ public:
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
-    void HideMenuNG(bool showPreviewAnimation) override;
+    void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) override;
     void HidePopupNG(int32_t targetId) override;
@@ -77,8 +77,9 @@ public:
     }
 
     void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
-
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
+    void ClearToast() override;
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
@@ -112,6 +113,10 @@ public:
     Rect GetParentWindowRect() const override;
 
     void RequestFocus() override;
+    const sptr<OHOS::Rosen::Window>& GetSubWindow() const
+    {
+        return window_;
+    }
 
 private:
     RefPtr<StackElement> GetStack();
@@ -127,8 +132,10 @@ private:
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
     bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
-    void ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom);
-    void ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom);
+    void ShowToastForAbility(
+        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode);
+    void ShowToastForService(
+        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode);
     void ShowDialogForAbility(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);

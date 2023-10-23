@@ -82,11 +82,7 @@ SkPath SvgPath::AsPath(const Size& viewPort) const
     if (!component_->GetD().empty()) {
         SkParsePath::FromSVGString(component_->GetD().c_str(), &out);
         if (component_->GetDeclaration()->GetClipState().IsEvenodd()) {
-#ifndef NEW_SKIA
-            out.setFillType(SkPath::FillType::kEvenOdd_FillType);
-#else
             out.setFillType(SkPathFillType::kEvenOdd);
-#endif
         }
     }
     return out;

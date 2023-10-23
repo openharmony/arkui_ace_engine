@@ -19,12 +19,23 @@
 #include "napi/native_node_api.h"
 
 namespace OHOS::Ace::Napi {
+static constexpr uint32_t DEFAULT = 0;
+static constexpr uint32_t TOP_MOST = 1;
 static napi_value PromptActionExport(napi_env env, napi_value exports)
 {
+    napi_value showMode = nullptr;
+    napi_create_object(env, &showMode);
+    napi_value prop = nullptr;
+    napi_create_uint32(env, DEFAULT, &prop);
+    napi_set_named_property(env, showMode, "DEFAULT", prop);
+    napi_create_uint32(env, TOP_MOST, &prop);
+    napi_set_named_property(env, showMode, "TOP_MOST", prop);
+
     napi_property_descriptor promptDesc[] = {
         DECLARE_NAPI_FUNCTION("showToast", JSPromptShowToast),
         DECLARE_NAPI_FUNCTION("showDialog", JSPromptShowDialog),
         DECLARE_NAPI_FUNCTION("showActionMenu", JSPromptShowActionMenu),
+        DECLARE_NAPI_PROPERTY("ToastShowMode", showMode),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(promptDesc) / sizeof(promptDesc[0]), promptDesc));
     return exports;

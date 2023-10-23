@@ -36,7 +36,6 @@ void ViewAbstractModelNG::CreateCustomMenu(std::function<void()>& buildFunc, con
 {
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     if (!buildFunc) {
-        LOGW("buildFunc is null");
         return;
     }
     buildFunc();
@@ -147,6 +146,13 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         auto event = [builder = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
+            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto dragDropManager = pipelineContext->GetDragDropManager();
+            CHECK_NULL_VOID(dragDropManager);
+            if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
+                return;
+            }
             if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
                 auto context = targetNode->GetRenderContext();
                 CHECK_NULL_VOID(context);
@@ -157,8 +163,6 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             }
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
             auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
             menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
             CreateCustomMenu(builder, targetNode, menuPosition, previewBuildFunc, menuParam);
@@ -170,7 +174,6 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
 
         hub->SetLongPressEvent(longPress, false, true, LONG_PRESS_DURATION);
     } else {
-        LOGE("The arg responseType is invalid.");
         return;
     }
     RegisterContextMenuKeyEvent(targetNode, buildFunc, menuParam);
@@ -178,7 +181,6 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
 
     // delete menu when target node destroy
     auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
-        LOGI("BindContextMenu delete menu node from map");
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
         CHECK_NULL_VOID(subwindow);
         auto childContainerId = subwindow->GetChildContainerId();

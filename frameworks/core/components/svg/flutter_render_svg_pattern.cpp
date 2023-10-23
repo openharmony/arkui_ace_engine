@@ -56,19 +56,8 @@ bool FlutterRenderSvgPattern::OnAsPaint(const Offset& offset, const Rect& paintR
     if (!skPicture) {
         return false;
     }
-
-#ifdef USE_SYSTEM_SKIA
-    SkISize skISize = SkISize::Make(tileRect.Width(), tileRect.Height());
-    auto skImage = SkImage::MakeFromPicture(
-        std::move(skPicture), skISize, nullptr, nullptr, SkImage::BitDepth::kU8, SkColorSpace::MakeSRGB());
-    if (!skImage) {
-        return false;
-    }
-    skPaint.setShader(skImage->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &skMatrix4));
-#else
     SkRect skRect = SkRect::MakeXYWH(tileRect.Left(), tileRect.Top(), tileRect.Width(), tileRect.Height());
     skPaint.setShader(skPicture->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, &skMatrix4, &skRect));
-#endif
     return true;
 }
 
@@ -77,10 +66,8 @@ bool FlutterRenderSvgPattern::FitAttribute(const Rect& paintRect, Rect& tileRect
     if (LessOrEqual(width_.Value(), 0.0) || LessOrEqual(height_.Value(), 0.0)) {
         return false;
     }
-    tileRect = Rect(ParseUnitsAttr(x_, paintRect.Width()),
-                    ParseUnitsAttr(y_, paintRect.Height()),
-                    ParseUnitsAttr(width_, paintRect.Width()),
-                    ParseUnitsAttr(height_, paintRect.Height()));
+    tileRect = Rect(ParseUnitsAttr(x_, paintRect.Width()), ParseUnitsAttr(y_, paintRect.Height()),
+        ParseUnitsAttr(width_, paintRect.Width()), ParseUnitsAttr(height_, paintRect.Height()));
 
     if (NearZero(viewBox_.Width()) || NearZero(viewBox_.Height())) {
         ResetAttrOffset();
@@ -106,12 +93,11 @@ const Matrix4 FlutterRenderSvgPattern::GetTransform(const Rect& patternRect) con
     }
 
     if (transformInfo.hasRotateCenter) {
-        transformInfo.matrix4 = FlutterRenderTransform::GetTransformByOffset(
-            transformInfo.matrix4, transformInfo.rotateCenter);
+        transformInfo.matrix4 =
+            FlutterRenderTransform::GetTransformByOffset(transformInfo.matrix4, transformInfo.rotateCenter);
     }
 
-    transformInfo.matrix4 = FlutterRenderTransform::GetTransformByOffset(
-        transformInfo.matrix4, GetGlobalOffset());
+    transformInfo.matrix4 = FlutterRenderTransform::GetTransformByOffset(transformInfo.matrix4, GetGlobalOffset());
     return transformInfo.matrix4;
 }
 

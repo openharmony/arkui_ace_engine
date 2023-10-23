@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_svg_mask.h"
-#endif
 #include "rosen_render_svg_mask.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderSvgMask::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderSvgMask>();
-#else 
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

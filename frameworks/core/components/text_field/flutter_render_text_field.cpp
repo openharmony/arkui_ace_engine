@@ -18,12 +18,12 @@
 #include <cmath>
 
 #ifndef USE_GRAPHIC_TEXT_GINE
+#include "include/effects/SkGradientShader.h"
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
-#include "include/effects/SkGradientShader.h"
 #else
-#include "rosen_text/typography_create.h"
 #include "rosen_text/typography.h"
+#include "rosen_text/typography_create.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #endif
 #include "unicode/uchar.h"
@@ -200,8 +200,7 @@ void FlutterRenderTextField::PaintSelectCaret(SkCanvas* canvas)
         Offset startCaretOffset = Offset(
             boxes.back().rect.fRight - boxes.front().rect.fLeft, boxes.back().rect.fTop - boxes.front().rect.fTop);
 #else
-        Offset startCaretOffset = Offset(
-            boxes.back().rect.GetRight() - boxes.front().rect.GetLeft(),
+        Offset startCaretOffset = Offset(boxes.back().rect.GetRight() - boxes.front().rect.GetLeft(),
             boxes.back().rect.GetTop() - boxes.front().rect.GetTop());
 #endif
         if (start >= GetInitIndex() && end >= GetInitIndex()) {
@@ -298,8 +297,8 @@ void FlutterRenderTextField::DrawSelection(unsigned start, unsigned end, SkCanva
     const auto& boxes = paragraph_->GetRectsForRange(
         start, end, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-    const auto& boxes = paragraph_->GetTextRectsByBoundary(start, end,
-        Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    const auto& boxes = paragraph_->GetTextRectsByBoundary(
+        start, end, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
         return;
@@ -334,11 +333,11 @@ void FlutterRenderTextField::DrawSelection(unsigned start, unsigned end, SkCanva
                 selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom());
         }
 #else
-        auto rect = SkRect::MakeLTRB(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(),
-            selectionRect.Bottom());
+        auto rect =
+            SkRect::MakeLTRB(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom());
         if (box.direction == Rosen::TextDirection::LTR) {
-            rect = SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
-                selectionRect.Bottom());
+            rect = SkRect::MakeLTRB(
+                selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom());
         }
 #endif
         canvas->drawRect(rect, paint);
@@ -928,11 +927,8 @@ sk_sp<SkShader> FlutterRenderTextField::MakeGradientShader(double shadeWidth) co
             start = 2;
         }
     }
-#ifdef USE_SYSTEM_SKIA
-    return SkGradientShader::MakeLinear(pts, &colors[start], &pos[start], renderCount, SkShader::kClamp_TileMode);
-#else
+
     return SkGradientShader::MakeLinear(pts, &colors[start], &pos[start], renderCount, SkTileMode::kClamp);
-#endif
 }
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -1175,7 +1171,7 @@ double FlutterRenderTextField::GetBoundaryOfParagraph(bool isLeftBoundary) const
             rightBoundaryOfParagraph = box.rect.fRight;
 #else
         if (cursorPositionType_ == CursorPositionType::END &&
-                !NearEqual(box.rect.GetBottom(), bottomBoundaryOfParagraph)) {
+            !NearEqual(box.rect.GetBottom(), bottomBoundaryOfParagraph)) {
             bottomBoundaryOfParagraph = box.rect.GetBottom();
             leftBoundaryOfParagraph = box.rect.GetLeft();
             rightBoundaryOfParagraph = box.rect.GetRight();
@@ -1452,8 +1448,9 @@ int32_t FlutterRenderTextField::GetCursorPositionForMoveUp()
                                         caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
                                     .position);
 #else
-    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset).index);
+    return static_cast<int32_t>(
+        paragraph_->GetGlyphIndexByCoordinate(caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
+            .index);
 #endif
 }
 

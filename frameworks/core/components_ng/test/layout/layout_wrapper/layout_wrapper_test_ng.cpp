@@ -1664,21 +1664,21 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest042, TestSize.Level1)
 
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 1 });
     layoutWrapper->OffsetNodeToSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(-RK356_WIDTH, 1));
 
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 5 });
     layoutWrapper->OffsetNodeToSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(-RK356_WIDTH, 1));
 
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
     layoutWrapper->OffsetNodeToSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(-RK356_WIDTH, 1));
 
     layoutWrapper->layoutProperty_->UpdateSafeAreaInsets(
         SafeAreaInsets({ 0, 5 }, { 0, 1 }, {}, { RK356_HEIGHT - 1, RK356_HEIGHT }));
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
     layoutWrapper->OffsetNodeToSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(5, 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(-RK356_WIDTH, 1));
 }
 
 /**

@@ -44,7 +44,7 @@ let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class exte
 
     push(...t) {
         if (this.length + t.length > 5) throw new RangeError("Exceeded the maximum number of elements (5).");
-        this.changeStartIndex = this.length - 1;
+        this.changeStartIndex = this.length;
         this.deleteCount = 0;
         this.addLength = t.length;
         return super.push(...t.map((t => new SegmentButtonItemOptions(t))))
@@ -1532,7 +1532,7 @@ class SegmentButton extends ViewPU {
                 if (t.type === KeyType.Down) {
                     (t.keyCode === KeyCode.KEYCODE_DPAD_DOWN || t.keyCode === KeyCode.KEYCODE_DPAD_RIGHT) && this.focusIndex < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1 && (this.focusIndex = this.focusIndex + 1);
                     (t.keyCode === KeyCode.KEYCODE_DPAD_UP || t.keyCode === KeyCode.KEYCODE_DPAD_LEFT) && this.focusIndex > 0 && (this.focusIndex = this.focusIndex - 1);
-                    t.keyCode === KeyCode.KEYCODE_SPACE && (this.options.multiply ? -1 === this.selectedIndexes.indexOf(this.focusIndex) ? this.selectedIndexes.push(this.focusIndex) : this.selectedIndexes.splice(this.selectedIndexes.indexOf(this.focusIndex), 1) : this.selectedIndexes[0] = this.focusIndex)
+                    t.keyCode !== KeyCode.KEYCODE_SPACE && t.keyCode !== KeyCode.KEYCODE_ENTER && t.keyCode !== KeyCode.KEYCODE_NUMPAD_ENTER || (this.options.multiply ? -1 === this.selectedIndexes.indexOf(this.focusIndex) ? this.selectedIndexes.push(this.focusIndex) : this.selectedIndexes.splice(this.selectedIndexes.indexOf(this.focusIndex), 1) : this.selectedIndexes[0] = this.focusIndex)
                 }
             }));
             Gesture.create(GesturePriority.Low);
@@ -1568,6 +1568,7 @@ class SegmentButton extends ViewPU {
             SwipeGesture.pop();
             PanGesture.create();
             PanGesture.onActionStart((t => {
+                if ("capsule" === this.options.type && this.options.multiply) return;
                 let e = t.fingerList.find((t => null !== t));
                 if (void 0 === e) return;
                 let o = e.localX;
@@ -1595,14 +1596,28 @@ class SegmentButton extends ViewPU {
                     }
                 }
                 this.zoomScaleArray.forEach(((t, e) => {
-                        e === this.selectedIndexes[0] ? this.zoomScaleArray[e] = .95 : this.zoomScaleArray[e] = 1
+                        e === this.selectedIndexes[0] ? Context.animateTo({
+                        curve: curves.interpolatingSpring(10, 1, 410, 38)
+                    }, (() => {
+                        this.zoomScaleArray[e] = .95
+                    })) : Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, (() => {
+                        this.zoomScaleArray[e] = 1
+                    }))
                 }))
             }));
             PanGesture.onActionEnd((t => {
-                Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, (() => {
-                    this.zoomScaleArray[this.selectedIndexes[0]] = 1
-                }));
-                this.isCurrentPositionSelected = !1
+                if ("capsule" !== this.options.type || !this.options.multiply) {
+                    if (t.source === SourceType.Mouse) {
+                        let e = 0 !== t.offsetX ? t.offsetX : t.offsetY;
+                        this.doSelectedChangeAnimate = !0;
+                            e > 0 && this.selectedIndexes[0] > 0 ? this.selectedIndexes[0] -= 1 : e < 0 && this.selectedIndexes[0] < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1 && (this.selectedIndexes[0] += 1);
+                        this.doSelectedChangeAnimate = !1
+                    }
+                    Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, (() => {
+                        this.zoomScaleArray[this.selectedIndexes[0]] = 1
+                    }));
+                    this.isCurrentPositionSelected = !1
+                }
             }));
             PanGesture.pop();
             GestureGroup.pop();
@@ -1647,9 +1662,15 @@ class SegmentButton extends ViewPU {
         }));
         If.pop();
         this.observeComponentCreation(((t, e) => {
+            var o;
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Stack.create();
             Stack.size(ObservedObject.GetRawObject(this.componentSize));
+            Stack.clip(new Rect({
+                width: this.componentSize.width,
+                height: this.componentSize.height,
+                radius: null !== (o = "capsule" === this.options.type && this.options.multiply ? this.options.iconTextRadius : this.options.iconTextBackgroundRadius) && void 0 !== o ? o : this.componentSize.height / 2
+            }));
             e || Stack.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));

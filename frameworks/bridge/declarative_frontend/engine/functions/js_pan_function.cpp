@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_pan_function.h"
 
-#include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
 namespace OHOS::Ace::Framework {
@@ -34,14 +33,12 @@ JSRef<JSObject> JsPanFunction::createPanInfo(const TouchLocationInfo& info)
 
 void JsPanFunction::Execute(const DragStartInfo& info)
 {
-    LOGD("JsPanFunction: eventType[%s]", info.GetType().c_str());
     JSRef<JSVal> param = createPanInfo(static_cast<TouchLocationInfo>(info));
     JsFunction::ExecuteJS(1, &param);
 }
 
 void JsPanFunction::Execute(const DragUpdateInfo& info)
 {
-    LOGD("JsPanFunction: eventType[%s]", info.GetType().c_str());
     JSRef<JSObject> paramObj = createPanInfo(static_cast<TouchLocationInfo>(info));
     const OHOS::Ace::Offset& deltaLocation = info.GetDelta();
     JSRef<JSObject> deltaInfoObj = JSRef<JSObject>::New();
@@ -56,8 +53,6 @@ void JsPanFunction::Execute(const DragUpdateInfo& info)
 
 void JsPanFunction::Execute(const DragEndInfo& info)
 {
-    LOGD("JsPanFunction: eventType[%s]", info.GetType().c_str());
-
     JSRef<JSObject> paramObj = createPanInfo(static_cast<TouchLocationInfo>(info));
     const OHOS::Ace::Velocity& velocityLocation = info.GetVelocity();
     JSRef<JSObject> velocityInfoObj = JSRef<JSObject>::New();

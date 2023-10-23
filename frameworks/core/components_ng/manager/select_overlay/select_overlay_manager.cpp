@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/pipeline/base/element_register.h"
-
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host, bool animation)
@@ -84,6 +84,13 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
                 CHECK_NULL_VOID(node);
                 node->ShowSelectOverlay(animation);
             }
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weakNode = WeakPtr<FrameNode>(rootNode)]() {
+                auto hostNode = weakNode.Upgrade();
+                CHECK_NULL_VOID(hostNode);
+                hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+            });
         },
         TaskExecutor::TaskType::UI);
 
@@ -171,6 +178,17 @@ void SelectOverlayManager::Destroy(const RefPtr<FrameNode>& overlay)
     rootNode->RemoveChild(overlay);
     rootNode->MarkNeedSyncRenderTree();
     rootNode->RebuildRenderContextTree();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterRenderTask([weakNode = WeakPtr<UINode>(rootNode)]() {
+        auto hostNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(hostNode);
+        if (AceType::InstanceOf<FrameNode>(hostNode)) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(hostNode);
+            CHECK_NULL_VOID(frameNode);
+            frameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        }
+    });
 }
 
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)

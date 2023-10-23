@@ -46,12 +46,13 @@ protected:
     static RefPtr<FrameNode> BuildMenuItemPadding(PaddingProperty padding, RefPtr<FrameNode> node);
     static void ResetHoverTimer();
     static bool sIsMenuPending_;
-    static bool sIsHovering;
+    static bool sIsLeftMouse_;
     static bool enableSplit_;
+    static OffsetF menuOffset_;
     static CancelableCallback<void()> sContextTimer_;
 
 private:
-    static OffsetF RecalculateMenuOffset(OffsetF menuPosition);
+    static void CalculateMenuOffset(OffsetF menuPosition);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_VIEW_ENHANCE_H

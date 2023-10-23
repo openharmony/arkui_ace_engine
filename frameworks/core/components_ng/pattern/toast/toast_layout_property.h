@@ -21,6 +21,10 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+enum class ToastShowMode {
+    DEFAULT = 0,
+    TOP_MOST = 1,
+};
 class ACE_EXPORT ToastLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ToastLayoutProperty, LayoutProperty);
 
@@ -33,6 +37,7 @@ public:
         auto props = MakeRefPtr<ToastLayoutProperty>();
         props->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         props->propBottom_ = CloneBottom();
+        props->propShowMode_ = CloneShowMode();
         return props;
     }
 
@@ -40,14 +45,18 @@ public:
     {
         LayoutProperty::Reset();
         ResetBottom();
+        ResetShowMode();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Bottom, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowMode, ToastShowMode, PROPERTY_UPDATE_LAYOUT);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
         json->Put("Bottom", GetBottom()->ToString().c_str());
+        json->Put("ToastShowMode",
+            GetShowModeValue(ToastShowMode::DEFAULT) == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST");
     }
 
 private:

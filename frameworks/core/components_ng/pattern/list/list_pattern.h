@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/list/list_paint_method.h"
 #include "core/components_ng/pattern/list/list_paint_property.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/pattern/list/list_drag_status_listener.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -172,7 +173,6 @@ public:
     void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
     void OnAnimateStop() override;
-
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -187,6 +187,12 @@ public:
     {
         multiSelectable_ = multiSelectable;
     }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+    // dragStatusCallback
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+#endif // ENABLE_DRAG_FRAMEWORK
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
 
@@ -209,6 +215,7 @@ public:
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    void DumpAdvanceInfo() override;
 
 private:
     void OnScrollEndCallback() override;
@@ -261,7 +268,10 @@ private:
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
-
+    
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void InitNotifyDragEvent();
+#endif // ENABLE_DRAG_FRAMEWORK
     RefPtr<ListContentModifier> listContentModifier_;
 
     RefPtr<ListPositionController> positionController_;
@@ -314,6 +324,9 @@ private:
     RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::optional<RefPtr<ListDragStatusListener>> listDragStatusListener_;
+#endif // ENABLE_DRAG_FRAMEWORK
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
 };
 } // namespace OHOS::Ace::NG

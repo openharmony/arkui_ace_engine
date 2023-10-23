@@ -166,9 +166,7 @@ void JSSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSaveButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSSaveButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
     JSClass<JSSaveButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
-#if defined(PREVIEW)
     JSClass<JSSaveButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
-#endif
     JSClass<JSSaveButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

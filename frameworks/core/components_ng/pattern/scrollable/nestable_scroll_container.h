@@ -19,10 +19,11 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-class NestableScrollContainer : public virtual AceType {
-    DECLARE_ACE_TYPE(NestableScrollContainer, AceType)
+class NestableScrollContainer : public virtual Pattern {
+    DECLARE_ACE_TYPE(NestableScrollContainer, Pattern)
 public:
     NestableScrollContainer() = default;
     ~NestableScrollContainer() override = default;
@@ -30,12 +31,20 @@ public:
     virtual Axis GetAxis() const = 0;
 
     // regular scroll motion
+    // RETURN remaining offset
     virtual ScrollResult HandleScroll(float offset, int32_t source, NestedState state) = 0;
+
     // triggered by drag end velocity
+    // REQUIRES: scroll has reached the end
+    // RETURN true if velocity is consumed by Spring effect
     virtual bool HandleScrollVelocity(float velocity) = 0;
 
     virtual void OnScrollStartRecursive(float position) = 0;
     virtual void OnScrollEndRecursive() = 0;
+
+protected:
+    // helpers
+    RefPtr<NestableScrollContainer> SearchParent();
 
     ACE_DISALLOW_COPY_AND_MOVE(NestableScrollContainer);
 };

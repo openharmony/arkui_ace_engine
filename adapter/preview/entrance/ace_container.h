@@ -220,7 +220,7 @@ public:
         pageProfile_ = pageProfile;
     }
 
-    void InitializeStageAppConfig(const std::string& assetPath, const std::string& bundleName,
+    void InitializeAppConfig(const std::string& assetPath, const std::string& bundleName,
         const std::string& moduleName, const std::string& compileMode);
 
     void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) override
@@ -292,6 +292,16 @@ public:
         mockJsonInfo_ = mockJsonInfo;
     }
 
+    void SetBundleName(const std::string& bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+
+    void SetModuleName(const std::string& moduleName)
+    {
+        moduleName_ = moduleName;
+    }
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -326,6 +336,8 @@ private:
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
     void* sharedRuntime_ = nullptr;
+    std::string bundleName_;
+    std::string moduleName_;
 
     // Support to execute the ets code mocked by developer
     std::map<std::string, std::string> mockJsonInfo_;

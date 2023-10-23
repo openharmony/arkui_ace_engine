@@ -503,7 +503,8 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
             continue;
         }
         if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || hostNode->GetTag() == V2::IMAGE_ETS_TAG) {
-            RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+            RefPtr<GridColumnInfo> columnInfo =
+                GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CARD_TYPE);
             CHECK_NULL_RETURN(columnInfo, size);
             auto parent = columnInfo->GetParent();
             CHECK_NULL_RETURN(parent, size);
@@ -1136,14 +1137,8 @@ void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
     }
 }
 
-OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset()
+OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_RETURN(menuTheme, OffsetF(0.0f, 0.0f));
-    auto beforeAnimationScale = menuTheme->GetPreviewBeforeAnimationScale();
-    auto afterAnimationScale = menuTheme->GetPreviewAfterAnimationScale();
     auto beforeScalePreviewOffset = OffsetF((previewSize_ * ((1.0f - beforeAnimationScale) / 2)).Width(),
         (previewSize_ * ((1.0f - beforeAnimationScale) / 2)).Height());
     auto afterScalePreviewOffset = OffsetF((previewSize_ * ((afterAnimationScale - 1.0f) / 2)).Width(),
@@ -1153,38 +1148,41 @@ OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset()
     float y = 0.0f;
     switch (placement_) {
         case Placement::BOTTOM_LEFT:
-        case Placement::BOTTOM:
-        case Placement::LEFT_BOTTOM: {
+        case Placement::LEFT_BOTTOM:
             x += scaleOffset.GetX();
             y -= scaleOffset.GetY();
             break;
-        }
         case Placement::TOP_RIGHT:
-        case Placement::RIGHT:
-        case Placement::RIGHT_TOP: {
+        case Placement::RIGHT_TOP:
             x -= scaleOffset.GetX();
             y += scaleOffset.GetY();
             break;
-        }
         case Placement::TOP_LEFT:
-        case Placement::TOP:
         case Placement::LEFT_TOP:
-        case Placement::LEFT: {
             x += scaleOffset.GetX();
             y += scaleOffset.GetY();
             break;
-        }
         case Placement::BOTTOM_RIGHT:
-        case Placement::RIGHT_BOTTOM: {
+        case Placement::RIGHT_BOTTOM:
             x -= scaleOffset.GetX();
             y -= scaleOffset.GetY();
             break;
-        }
-        default: {
+        case Placement::BOTTOM:
+            y -= scaleOffset.GetY();
+            break;
+        case Placement::TOP:
+            y += scaleOffset.GetY();
+            break;
+        case Placement::LEFT:
+            x += scaleOffset.GetX();
+            break;
+        case Placement::RIGHT:
+            x -= scaleOffset.GetX();
+            break;
+        default:
             x += scaleOffset.GetX();
             y -= scaleOffset.GetY();
             break;
-        }
     }
     return OffsetF(x, y);
 }
@@ -1214,14 +1212,24 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
         SetMenuPlacementForAnimation(layoutWrapper);
-        auto menuOriginOffset = menuPosition - (previewOffset_ - previewOriginOffset_) + FixMenuOriginOffset();
-        menuPattern->SetOriginOffset(menuOriginOffset);
         arrowPosition_ = GetArrowPositionWithPlacement(size);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
             LayoutArrow(layoutWrapper);
         }
         LOGD("Menu layout, offset = %{public}s", menuPosition.ToString().c_str());
         geometryNode->SetFrameOffset(menuPosition);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        auto beforeAnimationScale = menuTheme->GetPreviewBeforeAnimationScale();
+        auto afterAnimationScale = menuTheme->GetPreviewAfterAnimationScale();
+        auto menuOriginOffset = menuPosition - (previewOffset_ - previewOriginOffset_) +
+                                FixMenuOriginOffset(beforeAnimationScale, afterAnimationScale);
+        menuPattern->SetOriginOffset(menuOriginOffset);
+        auto menuEndOffset =
+            menuPosition - (previewOffset_ - previewOriginOffset_) + FixMenuOriginOffset(1.0f, afterAnimationScale);
+        menuPattern->SetEndOffset(menuEndOffset);
     }
 
     // translate each option by the height of previous options

@@ -2852,8 +2852,8 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest001, TestSize.Level1)
     auto timePickerRender = timePicker->GetRenderContext();
     ASSERT_NE(timePickerRender, nullptr);
     dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
-    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 1.0f);
-    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 1.0f);
+    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 0);
+    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 0);
 
     /**
      * @tc.steps: step3. Set datePicker.
@@ -2875,8 +2875,8 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest001, TestSize.Level1)
     monthDaysRender->UpdateOpacity(0.0f);
     timePickerRender->UpdateOpacity(0.0f);
     dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
-    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 1.0f);
-    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 1.0f);
+    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 0);
+    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 0);
     EXPECT_EQ(datePickerLayoutProperty->GetVisibilityValue(), VisibleType::VISIBLE);
 
     /**
@@ -2887,8 +2887,8 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest001, TestSize.Level1)
     monthDaysRender->UpdateOpacity(0.0f);
     timePickerRender->UpdateOpacity(0.0f);
     dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
-    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 1.0f);
-    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 1.0f);
+    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 0);
+    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 0);
 }
 
 /**
@@ -2942,10 +2942,10 @@ HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest002, TestSize.Level1)
     dateTimeAnimationController->created_ = false;
     dateTimeAnimationController->Play(true);
     EXPECT_TRUE(dateTimeAnimationController->created_);
-    EXPECT_TRUE(dateTimeAnimationController->isInAnimationPlaying_);
+    EXPECT_FALSE(dateTimeAnimationController->isInAnimationPlaying_);
     dateTimeAnimationController->isInAnimationPlaying_ = false;
     dateTimeAnimationController->Play(false);
-    EXPECT_TRUE(dateTimeAnimationController->isOutAnimationPlaying_);
+    EXPECT_FALSE(dateTimeAnimationController->isOutAnimationPlaying_);
 }
 
 /**

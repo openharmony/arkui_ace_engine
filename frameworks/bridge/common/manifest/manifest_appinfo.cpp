@@ -32,17 +32,14 @@ std::string ParseI18nAppName(std::string& rawAppName)
 
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return rawAppName;
     }
     auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("pipelineContext is null!");
         return rawAppName;
     }
     auto themeManager = pipelineContext->GetThemeManager();
     if (!themeManager) {
-        LOGE("themeManager is null!");
         return rawAppName;
     }
 
@@ -51,7 +48,6 @@ std::string ParseI18nAppName(std::string& rawAppName)
     uint32_t resId = 0;
     auto ret = themeConstants->GetResourceIdByName(resourceName, "string", resId);
     if (!ret) {
-        LOGW("GetResourceIdByName failed");
         return rawAppName;
     }
     return themeConstants->GetString(resId);

@@ -45,6 +45,7 @@ public:
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
+    virtual void SetWordBreak(WordBreak wordBreak) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetTextOverflow(TextOverflow value) = 0;
     virtual void SetMaxLines(uint32_t value) = 0;
@@ -66,6 +67,7 @@ public:
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
+    virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
 
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
@@ -74,6 +76,8 @@ public:
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
     virtual void SetDraggable(bool draggable) = 0;
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
+
+    virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

@@ -114,7 +114,7 @@ public:
 
 private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart();
+    void HandleDragStart(bool isDrag = true);
     void HandleDragUpdate(float delta);
     void HandleDragEnd(float speed);
     void HandleDragCancel();
@@ -129,8 +129,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnExitAnimationFinish();
     void ResetLoadingProgressColor();
-    float GetFollowRatio();
-    float GetFadeAwayRatio();
+    float GetFollowRatio(float scrollOffset);
     float GetCustomBuilderOpacityRatio();
     float GetScrollOffset(float delta);
     bool ScrollComponentReactInMove();
@@ -153,7 +152,7 @@ private:
     void UpdateRefreshStatus(RefreshStatus newStatus);
     void UpdateRefreshDraw();
     void UpdateFirstChildPlacement(float deltaOffset);
-    void UpdateFirstChildDragStart();
+    void UpdateFirstChildDragStart(bool isDrag);
     void UpdateLoadingProgressTranslate(float loadingOffset);
     void UpdateLoadingProgressStatus(RefreshAnimationState state, float followToRecycleRatio = 0.0f);
     void UpdateBuilderHeight(float builderHeight);
@@ -166,10 +165,15 @@ private:
     void InitChildNode();
     void QuickFirstChildAppear();
     void QuickFirstChildDisappear();
+    float GetLoadingVisibleHeight();
+    void UpdateScrollTransition(float scrollOffset);
+    RefreshAnimationState GetLoadingProgressStatus();
+    void RefreshStatusChangeEffect();
+    float GetTargetOffset();
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;
-
+    bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
     float triggerLoadingDistance_ = 0.0f;

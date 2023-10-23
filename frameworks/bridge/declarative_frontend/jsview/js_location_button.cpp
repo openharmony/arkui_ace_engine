@@ -166,9 +166,7 @@ void JSLocationButton::JSBind(BindingTarget globalObj)
     JSClass<JSLocationButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSLocationButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
     JSClass<JSLocationButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
-#if defined(PREVIEW)
     JSClass<JSLocationButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
-#endif
     JSClass<JSLocationButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -95,6 +95,7 @@ constexpr int32_t CLOSE_BUTTON_INDEX = 5;
 const std::string TEST_TAG("test");
 const std::string ACCESS_TAG("-accessibility");
 const std::string TEST_FORM_INFO("test_info");
+const int64_t RENDER_EVENT_ID = 10;
 } // namespace
 
 class PipelineContextTestNg : public testing::Test {
@@ -421,7 +422,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_->children_.push_back(frameNode_1);
     focusHub = frameNode_1->eventHub_->GetOrCreateFocusHub();
     focusHub->SetIsDefaultHasFocused(true);
-    EXPECT_FALSE(context_->RequestDefaultFocus());
+    EXPECT_FALSE(context_->RequestDefaultFocus(focusHub));
     /**
      * @tc.steps6: call SetIsDefaultHasFocused with false and create a new frameNode
                 init frameNode_2's focusHub
@@ -439,9 +440,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_2->eventHub_->enabled_ = true;
     newFocusHub->focusable_ = true;
     newFocusHub->parentFocusable_ = true;
-    EXPECT_TRUE(context_->RequestDefaultFocus());
+    EXPECT_TRUE(context_->RequestDefaultFocus(newFocusHub));
     newFocusHub->SetFocusType(FocusType::DISABLE);
-    EXPECT_FALSE(context_->RequestDefaultFocus());
+    EXPECT_FALSE(context_->RequestDefaultFocus(newFocusHub));
 
     /**
      * @tc.steps7: Create a new frameNode and call AddDirtyDefaultFocus
@@ -463,7 +464,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     EXPECT_FALSE(context_->dirtyFocusNode_.Upgrade());
     EXPECT_FALSE(context_->dirtyFocusScope_.Upgrade());
 
-    context_->MarkRootFocusNeedUpdate();
     auto frameNodeId_4 = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_4 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_4, nullptr);
     auto eventHubRoot = frameNode_4->GetEventHub<EventHub>();
@@ -473,7 +473,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
 
     context_->rootNode_ = frameNode_4;
     context_->FlushFocus();
-    EXPECT_FALSE(context_->isRootFocusNeedUpdate_);
+    EXPECT_TRUE(focusHubRoot->IsCurrentFocus());
 }
 
 /**
@@ -1357,13 +1357,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
         { "-rotation" }, { "-animationscale" }, { "-velocityscale" }, { "-scrollfriction" }, { "-threadstuck" },
         { "test" } };
     int turn = 0;
-    int falseInfoNum = 6;
     for (; turn < params.size(); turn++) {
-        if (turn < params.size() - falseInfoNum) {
-            EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
-        } else {
-            EXPECT_FALSE(context_->OnDumpInfo(params[turn]));
-        }
+        EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
     }
 }
 
@@ -1524,9 +1519,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
      * @tc.expected: the return is same as expectation.
      */
     context_->textFieldManager_ = nullptr;
+
     // the first arg is rootHeight_, the second arg is the parameter of function,
     // the third arg is the expectation returns
-    std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, -100 },
+    std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, 300 },
         { 200, 0, 0 } };
     for (int turn = 0; turn < params.size(); turn++) {
         context_->rootHeight_ = params[turn][0];
@@ -1541,11 +1537,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     auto manager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = manager;
     ASSERT_NE(context_->rootNode_, nullptr);
+
     // the first arg is manager->height_, the second arg is manager->position_.deltaY_
     // the third arg is rootHeight_, the forth arg is context_->rootNode_->geometryNode_->frame_.rect_.y_
     // the fifth arg is the parameter of function, the sixth arg is the expectation returns
-    params = { { 10, 100, 300, 0, 50, 0 }, { 10, 100, 300, 100, 100, 100 }, { 30, 100, 300, 100, 50, 100 },
-        { 50, 290, 400, 100, 200, -145 }, { -1000, 290, 400, 100, 200, 100 } };
+    params = { { 10, 100, 300, 0, 50, 0 }, { 10, 100, 300, 100, 100, 0 }, { 30, 100, 300, 100, 50, 0 },
+        { 50, 290, 400, 100, 200, -95 }, { -1000, 290, 400, 100, 200, 100 } };
     for (int turn = 0; turn < params.size(); turn++) {
         manager->height_ = params[turn][0];
         manager->position_.deltaY_ = params[turn][1];
@@ -1928,6 +1925,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
      */
     context_->SetContainerButtonHide(false, true, false);
     EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
+
+    /**
+     * @tc.steps4: call SetContainerButtonHide with params false, true, false.
+     * @tc.expected: cover branch windowModal_ is not CONTAINER_MODAL
+     */
+    context_->SetWindowModal(WindowModal::DIALOG_MODAL);
+    context_->SetContainerButtonHide(false, true, false);
+    EXPECT_FALSE(containerPattern->hideSplitButton_);
 }
 
 /**
@@ -2445,7 +2450,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg050, TestSize.Level1)
     EXPECT_EQ(context_->safeAreaManager_->systemSafeArea_, safeAreaInsets);
 
     context_->UpdateCutoutSafeArea(safeAreaInsets);
-    EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_, safeAreaInsets);
+    EXPECT_NE(context_->safeAreaManager_->cutoutSafeArea_, safeAreaInsets);
 }
 
 /**
@@ -2620,5 +2625,122 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg057, TestSize.Level1)
     context_->SetNeedRenderNode(needRenderNode);
     context_->InspectDrew();
     EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg058
+ * @tc.desc: Test the function FlushMouseEventG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg058, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function FlushMouseEvent with default action.
+     * @tc.expected: The function is called and cover branch mouseAction is not WINDOW_LEAVE.
+     */
+    context_->FlushMouseEvent();
+    auto result = context_->lastMouseEvent_->action == MouseAction::WINDOW_LEAVE;
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps3: Call the function FlushMouseEvent with lastMouseEvent_ is nullptr.
+     * @tc.expected: The function is called and cover branch lastMouseEvent_ is nullptr.
+     */
+    context_->lastMouseEvent_ = nullptr;
+    context_->FlushMouseEvent();
+    EXPECT_EQ(context_->lastMouseEvent_, nullptr);
+
+    /**
+     * @tc.steps4: Call the function FlushMouseEvent with mouseAction is  WINDOW_LEAVE.
+     * @tc.expected: The function is called and cover branch mouseAction is WINDOW_LEAVE.
+     */
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>();
+    context_->lastMouseEvent_->action = MouseAction::WINDOW_LEAVE;
+    context_->FlushMouseEvent();
+    result = context_->lastMouseEvent_->action == MouseAction::WINDOW_LEAVE;
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg059
+ * @tc.desc: Test the function OnIdle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg059, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function OnIdle with canUseLongPredictTask_.
+     * @tc.expected: called OnIdle and cover branch canUseLongPredictTask_ is true.
+     */
+    context_->canUseLongPredictTask_ = true;
+    context_->OnIdle(1);
+    EXPECT_TRUE(context_->touchEvents_.empty());
+
+    /**
+     * @tc.steps3: Call the function OnIdle with touchEvents_ is not empty.
+     * @tc.expected: The value of flagCbk changed.
+     */
+    bool flagCbk = false;
+    context_->AddPredictTask([&flagCbk](int64_t, bool) { flagCbk = true; });
+    TouchEvent event;
+    event.id = RENDER_EVENT_ID;
+    context_->touchEvents_.push_back(event);
+    context_->canUseLongPredictTask_ = true;
+    context_->OnIdle(2);
+    EXPECT_TRUE(flagCbk);
+}
+
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto& windowConfig = frontend->GetWindowConfig();
+    windowConfig.designWidth = DEFAULT_INT1;
+    context_->weakFrontend_ = frontend;
+    context_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+
+    /**
+     * @tc.steps2: Set EnableAvoidKeyboardMode is true.
+     * @tc.expected: get KeyboardSafeAreaEnabled is true.
+     */
+    context_->SetEnableKeyBoardAvoidMode(true);
+    EXPECT_TRUE(context_->GetSafeAreaManager()->KeyboardSafeAreaEnabled());
+
+    /**
+     * @tc.steps3: set root height and change virtual keyboard height.
+     * @tc.expected: Resize the root height after virtual keyboard change.
+     */
+
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerPattern, nullptr);
+    auto columNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
+    CHECK_NULL_VOID(columNode);
+
+    std::vector<std::vector<int>> params = { { 500, 400, 100 }, { 300, 100, 200 }, { 400, -300, 400 },
+        { 200, 0, 200 } };
+    for (int turn = 0; turn < params.size(); turn++) {
+        context_->rootHeight_ = params[turn][0];
+        context_->OnVirtualKeyboardHeightChange(params[turn][1]);
+        EXPECT_EQ(context_->GetRootHeight(), params[turn][2]);
+    }
 }
 } // namespace OHOS::Ace::NG

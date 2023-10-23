@@ -30,7 +30,6 @@ void ScrollPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAl
     CHECK_NULL_VOID(pattern);
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
     CHECK_NULL_VOID(scrollPattern);
-    LOGW("jumpTo is not supported now");
 }
 
 void ScrollPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)

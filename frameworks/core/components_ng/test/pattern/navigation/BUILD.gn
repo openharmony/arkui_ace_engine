@@ -234,6 +234,7 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/mock/core/render/mock_font_collection.cpp",
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
     "bar_item_test_ng.cpp",
     "nav_bar_test_ng.cpp",

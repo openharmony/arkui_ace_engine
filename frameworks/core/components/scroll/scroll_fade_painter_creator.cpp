@@ -29,11 +29,7 @@ RefPtr<ScrollFadePainter> ScrollFadePainter::CreatePainter()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterScrollFadePainter>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

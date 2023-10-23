@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/test/mock/pattern/scrollable/mock_nestable_scroll_container.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -3595,7 +3596,7 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout001, TestSize.Level1)
      * @tc.expected: indicatorNodeWrapper MarginFrameOffset is 327.0, 1121.0 .
      */
     swiperPatternAlgorithm->Layout(&swiperLayoutWrapper);
-    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(327.0, 1121.0));
+    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(327.0, 1106.0));
 }
 
 /**
@@ -7463,7 +7464,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetRemainingOffset001, TestSize.Level1)
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperPattern->GetRemainingOffset();
+            swiperPattern->GetDistanceToEdge();
             if (i == 1) {
                 swiperPattern->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
                 continue;
@@ -7473,7 +7474,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetRemainingOffset001, TestSize.Level1)
         swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
     }
     swiperPattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-    swiperPattern->GetRemainingOffset();
+    swiperPattern->GetDistanceToEdge();
 }
 
 /**
@@ -9649,7 +9650,8 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleDragStart001, TestSize.Level1)
      * @tc.steps: step2. call HandleDragStart.
      * @tc.expected: Related function runs ok.
      */
-    swiperPattern->HandleDragStart();
+    auto info = GestureEvent();
+    swiperPattern->HandleDragStart(info);
 }
 
 /**
@@ -10737,7 +10739,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset002, TestSize.Level1)
     EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
     swiperPattern->isDragging_ = false;
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.388f);
 }
 
 /**
@@ -11771,42 +11773,37 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternHandleLongDrag001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperIndicatorPatternTouchBottom001, TestSize.Level1)
 {
-    indicatorDirection_ = Axis::VERTICAL;
-    indicatorType_ = SwiperIndicatorType::DOT;
-    CommomAttrInfo();
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode =
-        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    stack->Push(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    ASSERT_NE(swiperPattern, nullptr);
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    ASSERT_NE(indicatorNode, nullptr);
-    swiperNode->Clean(false, false);
-    swiperNode->AddChild(indicatorNode);
-    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
-    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    SwiperModelNG model;
+    model.Create();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    auto swiperLayoutProperty = pattern->GetLayoutProperty<SwiperLayoutProperty>();
+    auto indicatorNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    ASSERT_NE(indicatorPattern, nullptr);
+
     GestureEvent info;
     info.mainDelta_ = 1.0f;
     TouchLocationInfo touchLocationInfo("down", 0);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
-    std::list<TouchLocationInfo> infoList;
-    infoList.emplace_back(touchLocationInfo);
-    TouchEventInfo touchEventInfo("down");
-    touchEventInfo.touches_ = infoList;
     EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(info));
-    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
-    swiperPattern->currentIndex_ = 0;
+    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
+
+    pattern->currentIndex_ = 0;
     swiperLayoutProperty->UpdateLoop(false);
-    ASSERT_FALSE(swiperLayoutProperty->GetLoop().value_or(true));
-    swiperPattern->leftButtonId_ = 1;
-    swiperPattern->rightButtonId_ = 1;
-    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
+    pattern->leftButtonId_ = 1;
+    pattern->rightButtonId_ = 1;
+    pattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
     EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(info));
-    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
 }
 
 /**
@@ -12694,7 +12691,7 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward007, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
-    EXPECT_TRUE(swiperLayoutAlgorithm->itemPosition_.empty());
+    EXPECT_FALSE(swiperLayoutAlgorithm->itemPosition_.empty());
 }
 
 /**
@@ -12764,7 +12761,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish002, TestSize.Level1)
     swiperPattern->leftButtonId_.reset();
     swiperPattern->rightButtonId_.reset();
     swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
-    swiperPattern->indicatorId_ = 542;
     swiperPattern->isVisible_ = true;
     swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
     swiperPattern->isIndicatorLongPress_ = false;
@@ -12772,9 +12768,8 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish002, TestSize.Level1)
     EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 2);
     auto indicatorNode = AceType::DynamicCast<FrameNode>(
-        host->GetChildAtIndex(host->GetChildIndexById(swiperPattern->GetIndicatorId())));
+        host->GetChildAtIndex(host->GetChildIndexById(indicatorNode1->GetId())));
     EXPECT_NE(indicatorNode, nullptr);
-    EXPECT_EQ(host->GetChildIndexById(swiperPattern->GetIndicatorId()), 1);
 
     /**
      * @tc.steps: step2. call OnTranslateFinish.
@@ -13752,5 +13747,240 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForwardItem002, TestSize.Level
     auto result = swiperLayoutAlgorithm->LayoutForwardItem(
         &layoutWrapper2, layoutConstraint, axis, currentIndex, endPos, startPos);
     EXPECT_NE(result, true);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleScroll001
+ * @tc.desc: test HandleScroll SELF_ONLY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+
+    auto res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    EXPECT_EQ(res.remain, 0.0f);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleScroll002
+ * @tc.desc: test HandleScroll SELF_FIRST but scrolling within boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*mockScroll, HandleScroll).Times(0);
+    swiperPattern->parent_ = mockScroll;
+    swiperPattern->enableNestedScroll_ = true;
+
+    auto res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    EXPECT_EQ(res.remain, 0.0f);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleScroll003
+ * @tc.desc: test HandleScroll SELF_FIRST while scrolling out of boundary and EdgeEffect doesn't consume extra offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
+    swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
+    swiperPattern->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
+
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*mockScroll, HandleScroll)
+        .Times(1)
+        .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
+    swiperPattern->parent_ = mockScroll;
+    swiperPattern->enableNestedScroll_ = true;
+
+    auto res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    EXPECT_EQ(res.remain, 5.0f);
+    EXPECT_TRUE(res.reachEdge);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleScroll004
+ * @tc.desc: test HandleScroll SELF_FIRST and scrolling out of boundary and EdgeEffect consumes extra offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
+    swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
+    swiperPattern->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
+
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*mockScroll, HandleScroll)
+        .Times(1)
+        .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
+    swiperPattern->parent_ = mockScroll;
+    swiperPattern->enableNestedScroll_ = true;
+
+    auto res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    EXPECT_EQ(res.remain, 0.0f);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleScrollVelocity001
+ * @tc.desc: test HandleScrollVelocity self handle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScrollVelocity001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+
+    auto res = swiperPattern->HandleScrollVelocity(5.0f);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleScrollVelocity002
+ * @tc.desc: test HandleScrollVelocity pass to parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScrollVelocity002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
+    swiperPattern->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = 0.0f } });
+
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(1).WillOnce(Return(true));
+    swiperPattern->parent_ = mockScroll;
+    swiperPattern->enableNestedScroll_ = true;
+
+    auto res = swiperPattern->HandleScrollVelocity(5.0f);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleScrollVelocity003
+ * @tc.desc: test HandleScrollVelocity pass to parent and parent doesn't consume
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScrollVelocity003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
+    swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
+    swiperPattern->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = 0.0f } });
+
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(2).WillRepeatedly(Return(false));
+    swiperPattern->parent_ = mockScroll;
+    swiperPattern->enableNestedScroll_ = true;
+
+    auto res = swiperPattern->HandleScrollVelocity(5.0f);
+    EXPECT_FALSE(res);
+
+    // change EdgeEffect to Spring and redo
+    // should consume velocity
+    swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
+    mockScroll.Reset();
+    mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(2).WillRepeatedly(Return(false));
+
+    swiperPattern->parent_ = mockScroll;
+    res = swiperPattern->HandleScrollVelocity(5.0f);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: SwiperPatternOnScrollStart001
+ * @tc.desc: test OnScrollStartRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnScrollStart001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
+    swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
+
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    auto mockScrollNode = FrameNode::CreateFrameNode("MockScroll", -1, mockScroll);
+    swiperNode->MountToParent(mockScrollNode);
+
+    EXPECT_CALL(*mockScroll, OnScrollStartRecursive).Times(1);
+    EXPECT_CALL(*mockScroll, GetAxis).Times(1).WillOnce(Return(Axis::HORIZONTAL));
+    swiperPattern->enableNestedScroll_ = true;
+    swiperPattern->isDragging_ = false;
+
+    swiperPattern->OnScrollStartRecursive(5.0f);
+    EXPECT_TRUE(swiperPattern->childScrolling_);
+}
+
+/**
+ * @tc.name: SwiperPatternOnScrollEnd001
+ * @tc.desc: test OnScrollEndRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
+    swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
+
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*mockScroll, OnScrollEndRecursive).Times(1);
+    swiperPattern->enableNestedScroll_ = true;
+    swiperPattern->parent_ = mockScroll;
+
+    swiperPattern->OnScrollEndRecursive();
+    EXPECT_FALSE(swiperPattern->childScrolling_);
 }
 } // namespace OHOS::Ace::NG

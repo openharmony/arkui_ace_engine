@@ -16,6 +16,7 @@
 #include "navigator_event_hub.h"
 
 #include "base/utils/utils.h"
+#include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
@@ -43,7 +44,7 @@ void NavigatorEventHub::NavigatePage()
 void NavigatorEventHub::SetActive(bool active)
 {
     if (active) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->GetTaskExecutor()->PostTask(
             [weak = WeakClaim(this)] {
