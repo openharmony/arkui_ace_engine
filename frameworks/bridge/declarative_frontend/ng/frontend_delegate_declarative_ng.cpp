@@ -65,9 +65,7 @@ FrontendDelegateDeclarativeNG::FrontendDelegateDeclarativeNG(const RefPtr<TaskEx
     : taskExecutor_(taskExecutor), manifestParser_(AceType::MakeRefPtr<Framework::ManifestParser>()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create())
-{
-    LOGD("FrontendDelegateDeclarativeNG create");
-}
+{}
 
 void FrontendDelegateDeclarativeNG::SetMediaQueryCallback(MediaQueryCallback&& mediaQueryCallback)
 {
@@ -170,19 +168,17 @@ void FrontendDelegateDeclarativeNG::RunPage(
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage");
 
-    LOGI("FrontendDelegateDeclarativeNG RunPage url=%{public}s", url.c_str());
+    LOGI("Frontend delegate declarative run page, url=%{public}s", url.c_str());
     std::string jsonContent;
     if (GetAssetContent(MANIFEST_JSON, jsonContent)) {
         manifestParser_->Parse(jsonContent);
         manifestParser_->Printer();
     } else if (!profile.empty() && GetAssetContent(profile, jsonContent)) {
-        LOGI("Parse profile %{public}s", profile.c_str());
+        LOGD("Parse profile %{public}s", profile.c_str());
         manifestParser_->Parse(jsonContent);
     } else if (GetAssetContent(PAGES_JSON, jsonContent)) {
-        LOGI("Parse main_pages.json");
+        LOGD("Parse main_pages.json");
         manifestParser_->Parse(jsonContent);
-    } else {
-        LOGE("RunPage parse manifest.json failed");
     }
     std::string mainPagePath;
     if (!url.empty()) {
@@ -366,8 +362,6 @@ void FrontendDelegateDeclarativeNG::ClearTimer(const std::string& callbackId)
     if (timeoutTaskIter != timeoutTaskMap_.end()) {
         timeoutTaskIter->second.Cancel();
         timeoutTaskMap_.erase(timeoutTaskIter);
-    } else {
-        LOGW("ClearTimer callbackId not found");
     }
 }
 
@@ -478,7 +472,6 @@ void FrontendDelegateDeclarativeNG::NavigatePage(uint8_t type, const PageTarget&
             Back(target.url, params);
             break;
         default:
-            LOGE("Navigator type is invalid!");
             Back(target.url, params);
     }
 }
@@ -531,7 +524,6 @@ std::string FrontendDelegateDeclarativeNG::GetAssetPath(const std::string& url)
 
 void FrontendDelegateDeclarativeNG::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
-    LOGD("JSFrontend ChangeLocale");
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
         TaskExecutor::TaskType::PLATFORM);
@@ -787,8 +779,6 @@ RefPtr<RevSourceMap> FrontendDelegateDeclarativeNG::GetFaAppSourceMap()
     if (GetAssetContent("app.js.map", appMap)) {
         appSourceMap_ = AceType::MakeRefPtr<RevSourceMap>();
         appSourceMap_->Init(appMap);
-    } else {
-        LOGW("app map load failed!");
     }
     return appSourceMap_;
 }
@@ -800,14 +790,11 @@ void FrontendDelegateDeclarativeNG::GetStageSourceMap(
     if (GetAssetContent(MERGE_SOURCEMAPS_PATH, maps)) {
         auto SourceMap = AceType::MakeRefPtr<RevSourceMap>();
         SourceMap->StageModeSourceMapSplit(maps, sourceMaps);
-    } else {
-        LOGW("app map load failed!");
     }
 }
 
 void FrontendDelegateDeclarativeNG::CallPopPage()
 {
-    LOGI("CallPopPage begin");
     Back("", "");
 }
 
@@ -850,8 +837,6 @@ size_t FrontendDelegateDeclarativeNG::GetComponentsCount()
 void FrontendDelegateDeclarativeNG::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
-    LOGD("FrontendDelegateDeclarativeNG ShowToast.");
-
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
