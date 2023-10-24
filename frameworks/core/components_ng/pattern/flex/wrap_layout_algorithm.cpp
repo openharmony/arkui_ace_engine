@@ -138,6 +138,14 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         frameSize_ = SizeF(hasIdealWidth_ ? crossLengthLimit_ : totalCrossLength_, mainLengthLimit_);
     }
+    auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && calcLayoutConstraint) {
+        OptionalSizeF finalSize(frameSize_.Width(), frameSize_.Height());
+        finalSize = UpdateOptionSizeByCalcLayoutConstraint(finalSize, calcLayoutConstraint,
+            layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+        frameSize_.SetHeight(finalSize.Height().value_or(frameSize_.Height()));
+        frameSize_.SetWidth(finalSize.Width().value_or(frameSize_.Width()));
+    }
     AddPaddingToSize(padding_, frameSize_);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
     frameOffset_ = layoutWrapper->GetGeometryNode()->GetFrameOffset();
