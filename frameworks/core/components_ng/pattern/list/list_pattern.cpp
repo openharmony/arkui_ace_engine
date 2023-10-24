@@ -188,6 +188,12 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
+        if (lanesLayoutAlgorithm->GetLanes() != lanes_) {
+            auto item = swiperItem_.Upgrade();
+            if (item) {
+                item->SwiperReset();
+            }
+        }
         lanes_ = lanesLayoutAlgorithm->GetLanes();
         laneGutter_ = lanesLayoutAlgorithm->GetLaneGutter();
     }
@@ -1597,12 +1603,16 @@ bool ListPattern::IsItemSelected(const MouseInfo& info)
 
 void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
 {
-    if (swiperItem_ != swiperItem) {
-        auto item = swiperItem_.Upgrade();
-        if (item) {
-            item->SwiperReset();
+    // swiper item only can be replaced when no other items be dragged
+    if (canReplaceSwiperItem_) {
+        if (swiperItem != swiperItem_) {
+            auto item = swiperItem_.Upgrade();
+            if (item) {
+                item->SwiperReset();
+            }
+            swiperItem_ = std::move(swiperItem);
         }
-        swiperItem_ = std::move(swiperItem);
+        canReplaceSwiperItem_ = false;
     }
 }
 
