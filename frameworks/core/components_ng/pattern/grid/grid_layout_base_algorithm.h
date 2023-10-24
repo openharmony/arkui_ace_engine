@@ -19,6 +19,8 @@
 #include <utility>
 
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +35,36 @@ public:
     const GridLayoutInfo& GetGridLayoutInfo()
     {
         return std::move(gridLayoutInfo_);
+    }
+
+    virtual void UpdateRealGridItemPositionInfo(
+        const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t mainIndex, int32_t crossIndex)
+    {
+        auto gridItemLayoutProperty =
+            AceType::DynamicCast<GridItemLayoutProperty>(itemLayoutWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(gridItemLayoutProperty);
+        bool isItemAtExpectedPosition =
+            gridItemLayoutProperty->CheckWhetherCurrentItemAtExpectedPosition(gridLayoutInfo_.axis_);
+        auto gridItemNode = itemLayoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(gridItemNode);
+        auto gridItemPattern = gridItemNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(gridItemPattern);
+        if (isItemAtExpectedPosition) {
+            gridItemPattern->ResetGridItemInfo();
+        }
+        if (!isItemAtExpectedPosition) {
+            GridItemIndexInfo itemInfo;
+            itemInfo.mainIndex = mainIndex;
+            itemInfo.crossIndex = crossIndex;
+            itemInfo.mainSpan = gridItemLayoutProperty->GetRealRowSpan().value_or(-1);
+            itemInfo.crossSpan = gridItemLayoutProperty->GetRealColumnSpan().value_or(-1);
+            itemInfo.mainStart = mainIndex - itemInfo.mainSpan + 1;
+            itemInfo.mainEnd = mainIndex;
+            itemInfo.crossStart = crossIndex;
+            itemInfo.crossEnd = crossIndex + itemInfo.crossSpan - 1;
+            gridItemPattern->ResetGridItemInfo();
+            gridItemPattern->SetIrregularItemInfo(itemInfo);
+        }
     }
 
 protected:
