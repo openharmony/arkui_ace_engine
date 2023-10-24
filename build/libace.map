@@ -71,6 +71,7 @@
       OHOS::Ace::AceEngine::*;
       OHOS::Ace::UdmfClient::*;
       OHOS::Ace::DragEvent::*;
+      OHOS::Ace::ResourceManager::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

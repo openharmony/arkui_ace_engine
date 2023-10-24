@@ -175,6 +175,7 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        GaugeModel::GetInstance()->ResetGradientColors();
         return;
     }
 
@@ -183,6 +184,11 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
     std::vector<float> weights;
     if (info[0]->IsArray()) {
         auto jsColorsArray = JSRef<JSArray>::Cast(info[0]);
+        if (jsColorsArray->Length() == 0) {
+            GaugeModel::GetInstance()->ResetGradientColors();
+            return;
+        }
+
         for (size_t i = 0; i < jsColorsArray->Length(); ++i) {
             if (static_cast<int32_t>(i) >= NG::COLORS_MAX_COUNT) {
                 break;
@@ -201,11 +207,29 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
             ConvertGradientColor(jsColorValue, colors, type);
         }
         type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
+        SortColorStopOffset(colors);
         GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
         return;
     }
     ConvertGradientColor(info[0], colors, type);
+    SortColorStopOffset(colors);
     GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
+}
+
+void JSGauge::SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
+{
+    for (auto& colorStopArray : colors) {
+        std::sort(colorStopArray.begin(), colorStopArray.end(),
+            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
+                return left.second.Value() < right.second.Value();
+            });
+
+        auto iter = std::unique(colorStopArray.begin(), colorStopArray.end(),
+            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
+                return left.second.Value() == right.second.Value();
+            });
+        colorStopArray.erase(iter, colorStopArray.end());
+    }
 }
 
 void JSGauge::ConvertGradientColor(
@@ -223,7 +247,13 @@ void JSGauge::ConvertGradientColor(
     }
 
     type = NG::GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT;
-    colors.emplace_back(jsLinearGradient->GetGradient());
+    if (jsLinearGradient->GetGradient().size() == 0) {
+        NG::ColorStopArray colorStopArray;
+        colorStopArray.emplace_back(std::make_pair(Color::BLACK, Dimension(0.0)));
+        colors.emplace_back(colorStopArray);
+    } else {
+        colors.emplace_back(jsLinearGradient->GetGradient());
+    }
 }
 
 void JSGauge::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, std::vector<NG::ColorStopArray>& colors)
@@ -277,9 +307,13 @@ void JSGauge::SetShadowOptions(const JSCallbackInfo& info)
         GaugeModel::GetInstance()->SetShadowOptions(shadowOptions);
         return;
     }
+
     if (!info[0]->IsObject()) {
+        GaugeModel::GetInstance()->ResetShadowOptions();
+        GaugeModel::GetInstance()->SetIsShowIndicator(true);
         return;
     }
+
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
     JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
@@ -347,7 +381,9 @@ void JSGauge::SetIndicator(const JSCallbackInfo& info)
         return;
     }
 
-    if (info[0]->IsUndefined()) {
+    if (!info[0]->IsObject()) {
+        GaugeModel::GetInstance()->ResetIndicatorIconPath();
+        GaugeModel::GetInstance()->ResetIndicatorSpace();
         GaugeModel::GetInstance()->SetIsShowIndicator(true);
         return;
     }

@@ -42,6 +42,10 @@ public:
         const std::string& iconPath, const std::string& bundleName, const std::string& moduleName) override
     {}
     void SetIndicatorSpace(const Dimension& space) override {}
+    void ResetGradientColors() override {}
+    void ResetShadowOptions() override {}
+    void ResetIndicatorIconPath() override {}
+    void ResetIndicatorSpace() override {}
 };
 
 } // namespace OHOS::Ace::Framework

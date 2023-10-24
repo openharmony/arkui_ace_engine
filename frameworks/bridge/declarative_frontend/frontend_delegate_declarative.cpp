@@ -981,10 +981,8 @@ void FrontendDelegateDeclarative::AddRouterTask(const RouterTask& task)
 {
     if (routerQueue_.size() < MAX_ROUTER_STACK) {
         routerQueue_.emplace(task);
-        LOGI("router queue's size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
+        LOGD("router queue's size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
             static_cast<uint32_t>(task.action), task.target.url.c_str());
-    } else {
-        LOGW("router queue is full");
     }
 }
 

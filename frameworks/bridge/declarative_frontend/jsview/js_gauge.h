@@ -41,6 +41,7 @@ private:
         std::vector<OHOS::Ace::NG::ColorStopArray>& colors, OHOS::Ace::NG::GaugeType& type);
     static void ConvertResourceColor(
         const JsiRef<JsiValue>& itemParam, std::vector<OHOS::Ace::NG::ColorStopArray>& colors);
+    static void SortColorStopOffset(std::vector<NG::ColorStopArray>& colors);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GAUGE_H

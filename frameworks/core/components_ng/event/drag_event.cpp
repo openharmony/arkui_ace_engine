@@ -18,6 +18,8 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/interaction/interaction_data.h"
+#include "core/common/interaction/interaction_interface.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
@@ -144,8 +146,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto renderContext = frameNode->GetRenderContext();
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             if (gestureHub->GetTextDraggable()) {
-                auto pattern = frameNode->GetPattern<TextBase>();
-                CHECK_NULL_VOID(pattern);
                 if (gestureHub->GetIsTextDraggable()) {
                     SetTextPixelMap(gestureHub);
                 }
@@ -794,7 +794,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("In removeColumnNode callback, set DragWindowVisible true.");
         }
-        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetPixelMap(nullptr);
