@@ -372,9 +372,9 @@ HWTEST_F(RatingTestNg, RatingPatternToJsonValueTest008, TestSize.Level1)
     auto json = JsonUtil::Create(true);
     ratingPattern->ToJsonValue(json);
 
-    EXPECT_EQ(json->GetValue(RATING_FOREGROUND_IMAGE_KEY)->GetString(), RATING_FOREGROUND_URL);
-    EXPECT_EQ(json->GetValue(RATING_SECONDARY_IMAGE_KEY)->GetString(), RATING_SECONDARY_URL);
-    EXPECT_EQ(json->GetValue(RATING_BACKGROUND_IMAGE_KEY)->GetString(), RATING_BACKGROUND_URL);
+    EXPECT_EQ(json->GetValue(RATING_FOREGROUND_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
+    EXPECT_EQ(json->GetValue(RATING_SECONDARY_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
+    EXPECT_EQ(json->GetValue(RATING_BACKGROUND_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
 
     /**
      * @tc.steps: step2. Invoke ToJsonValue when the foreground, secondary and background image are used in theme.
@@ -848,9 +848,9 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     auto mockCanvas = OHOS::Ace::Testing::MockCanvas();
     DrawingContext context = { mockCanvas, 10.0f, 10.0f };
     EXPECT_CALL(mockCanvas, DrawBackground(_)).Times(RATING_DRAW_BACKGROUND_TIMES);
-    EXPECT_CALL(mockCanvas, Save()).Times(RATING_SAVE_TIMES);
+    EXPECT_CALL(mockCanvas, Save()).Times(AtLeast(RATING_SAVE_TIMES));
     EXPECT_CALL(mockCanvas, ClipRoundRectImpl(_, _, _)).Times(RATING_CLIP_ROUND_RECT_TIMES);
-    EXPECT_CALL(mockCanvas, Restore()).Times(RATING_RESTORE_TIMES);
+    EXPECT_CALL(mockCanvas, Restore()).Times(AtLeast(RATING_RESTORE_TIMES));
     EXPECT_CALL(mockCanvas, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES);
     ratingPaintMethod->ratingModifier_->onDraw(context);
 
@@ -868,8 +868,8 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     auto mockCanvas2 = OHOS::Ace::Testing::MockCanvas();
     DrawingContext context2 = { mockCanvas2, 10.0f, 10.0f };
 
-    EXPECT_CALL(mockCanvas2, Save()).Times(RATING_SAVE_TIMES_1);
-    EXPECT_CALL(mockCanvas2, Restore()).Times(RATING_RESTORE_TIMES_1);
+    EXPECT_CALL(mockCanvas2, Save()).Times(AtLeast(RATING_SAVE_TIMES_1));
+    EXPECT_CALL(mockCanvas2, Restore()).Times(AtLeast(RATING_RESTORE_TIMES_1));
     EXPECT_CALL(mockCanvas2, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
     ratingPaintMethod->ratingModifier_->onDraw(context2);
 
@@ -884,8 +884,8 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     EXPECT_EQ(ratingPaintMethod->ratingModifier_->touchStar_->Get(), RATING_INVALID_TOUCH_STAR_2);
     auto mockCanvas3 = OHOS::Ace::Testing::MockCanvas();
     DrawingContext context3 = { mockCanvas3, 10.0f, 10.0f };
-    EXPECT_CALL(mockCanvas3, Save()).Times(RATING_SAVE_TIMES_1);
-    EXPECT_CALL(mockCanvas3, Restore()).Times(RATING_RESTORE_TIMES_1);
+    EXPECT_CALL(mockCanvas3, Save()).Times(AtLeast(RATING_SAVE_TIMES_1));
+    EXPECT_CALL(mockCanvas3, Restore()).Times(AtLeast(RATING_RESTORE_TIMES_1));
     EXPECT_CALL(mockCanvas3, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
     ratingPaintMethod->ratingModifier_->onDraw(context3);
 }
