@@ -711,7 +711,12 @@ void PipelineContext::StartWindowMaximizeAnimation(
     }
 #endif
     AnimationOption option;
-    constexpr int32_t duration = 400;
+    int32_t duration = 400;
+    MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL
+        || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        duration = 0;
+    }
     option.SetDuration(duration);
     auto curve = Curves::EASE_OUT;
     option.SetCurve(curve);
@@ -1654,7 +1659,20 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    containerPattern->ShowTitle(isShow, hasDeco);
+    auto callback = [weakPattern = WeakClaim(RawPtr(containerPattern)), isShow, hasDeco]() {
+        auto pattern = weakPattern.Upgrade();
+        if (pattern != nullptr) {
+            pattern->ShowTitle(isShow, hasDeco);
+        }
+    };
+    MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL
+        || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        constexpr int32_t delayedTime = 50;
+        taskExecutor_->PostDelayedTask(callback, TaskExecutor::TaskType::UI, delayedTime);
+    } else {
+        callback();
+    }
 }
 
 void PipelineContext::SetContainerWindow(bool isShow)
