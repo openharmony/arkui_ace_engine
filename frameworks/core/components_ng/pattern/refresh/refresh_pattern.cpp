@@ -511,7 +511,13 @@ void RefreshPattern::HandleDragEnd(float speed)
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
-    LoadingProgressExit();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAnimationClosure([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->LoadingProgressExit();
+    });
 }
 
 void RefreshPattern::HandleDragCancel()
