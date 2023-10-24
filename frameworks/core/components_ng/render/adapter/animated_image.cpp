@@ -20,6 +20,7 @@
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_bitmap.h"
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 #endif
 
 #include "core/animation/animator.h"
@@ -225,8 +226,8 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
 #ifndef USE_ROSEN_DRAWING
         bitmap.allocPixels(imageInfo);
 #else
-        auto& skBitmap = const_cast<SkBitmap&>(bitmap.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap());
-        skBitmap.allocPixels(imageInfo);
+        auto info = Rosen::Drawing::ConvertToRSImageInfo(imageInfo);
+        bitmap.Build(info);
 #endif
     }
 
@@ -234,8 +235,7 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
 #ifndef USE_ROSEN_DRAWING
     auto res = codec_->getPixels(imageInfo, bitmap.getPixels(), bitmap.rowBytes(), &options);
 #else
-    auto& skBitmap = bitmap.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
-    auto res = codec_->getPixels(imageInfo, skBitmap.getPixels(), skBitmap.rowBytes(), &options);
+    auto res = codec_->getPixels(imageInfo, bitmap.GetPixels(), bitmap.GetRowBytes(), &options);
 #endif
     CHECK_NULL_VOID(res == SkCodec::kSuccess);
 

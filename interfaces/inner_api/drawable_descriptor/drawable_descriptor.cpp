@@ -259,6 +259,7 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetMask()
     return nullptr;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void LayeredDrawableDescriptor::DrawOntoCanvas(
     const std::shared_ptr<SkBitmap>& bitMap, float width, float height, SkCanvas& canvas, const SkPaint& paint)
 {
@@ -270,7 +271,22 @@ void LayeredDrawableDescriptor::DrawOntoCanvas(
     canvas.drawImageRect(
         SkImage::MakeFromBitmap(*bitMap), rect1, rect2, SkSamplingOptions(), &paint, SkCanvas::kFast_SrcRectConstraint);
 }
+#else
+void LayeredDrawableDescriptor::DrawOntoCanvas(
+    const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap, float width, float height, Rosen::Drawing::Canvas& canvas)
+{
+    auto x = static_cast<float>((bitMap->GetWidth() - static_cast<float>(width)) / 2);
+    auto y = static_cast<float>((bitMap->GetHeight() - static_cast<float>(height)) / 2);
+    Rosen::Drawing::Rect rect1(x, y, static_cast<float>(width) + x, static_cast<float>(width) + y);
+    Rosen::Drawing::Rect rect2(0, 0, static_cast<float>(width), static_cast<float>(width));
+    Rosen::Drawing::Image image;
+    image.BuildFromBitmap(*bitMap);
+    canvas.DrawImageRect(image, rect1, rect2, Rosen::Drawing::SamplingOptions(),
+        Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 bool LayeredDrawableDescriptor::CreatePixelMap()
 {
     std::shared_ptr<SkBitmap> foreground;
@@ -327,6 +343,65 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<SkBitmap>(tempCache), opts);
     return true;
 }
+#else
+bool LayeredDrawableDescriptor::CreatePixelMap()
+{
+    std::shared_ptr<Rosen::Drawing::Bitmap> foreground;
+    if (foreground_.has_value() || GetPixelMapFromJsonBuf(false)) {
+        foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
+    } else {
+        HILOG_INFO("Get pixelMap of foreground failed.");
+        return false;
+    }
+
+    std::shared_ptr<Rosen::Drawing::Bitmap> background;
+    if (background_.has_value() || GetPixelMapFromJsonBuf(true)) {
+        background = ImageConverter::PixelMapToBitmap(background_.value());
+    } else {
+        HILOG_ERROR("Get pixelMap of background failed.");
+        return false;
+    }
+
+    std::shared_ptr<Rosen::Drawing::Bitmap> mask;
+    if (mask_.has_value() || GetDefaultMask()) {
+        mask = ImageConverter::PixelMapToBitmap(mask_.value());
+    } else {
+        HILOG_ERROR("Get pixelMap of mask failed.");
+        return false;
+    }
+
+    Rosen::Drawing::Brush brush;
+    brush.SetAntiAlias(true);
+    auto colorType = ImageConverter::PixelFormatToColorType(background_.value()->GetPixelFormat());
+    auto alphaType = ImageConverter::AlphaTypeToAlphaType(background_.value()->GetAlphaType());
+    Rosen::Drawing::ImageInfo imageInfo(SIDE, SIDE, colorType, alphaType);
+    Rosen::Drawing::Bitmap tempCache;
+    tempCache.Build(imageInfo);
+    Rosen::Drawing::Canvas bitmapCanvas;
+    bitmapCanvas.Bind(tempCache);
+
+    brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC);
+    bitmapCanvas.AttachBrush(brush);
+    DrawOntoCanvas(background, SIDE, SIDE, bitmapCanvas);
+    bitmapCanvas.DetachBrush();
+    brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+    bitmapCanvas.AttachBrush(brush);
+    DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas);
+    bitmapCanvas.DetachBrush();
+    brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
+    bitmapCanvas.AttachBrush(brush);
+    DrawOntoCanvas(foreground, SIDE, SIDE, bitmapCanvas);
+    bitmapCanvas.DetachBrush();
+    bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
+
+    // convert bitmap back to pixelMap
+    Media::InitializationOptions opts;
+    opts.alphaType = background_.value()->GetAlphaType();
+    opts.pixelFormat = Media::PixelFormat::BGRA_8888;
+    layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<Rosen::Drawing::Bitmap>(tempCache), opts);
+    return true;
+}
+#endif
 
 std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
 {
