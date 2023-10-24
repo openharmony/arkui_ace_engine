@@ -105,7 +105,7 @@ public:
 
 private:
     /*
-     * Drag the built-in or external scroll bar to slide the Scroll. 
+     * Drag the built-in or external scroll bar to slide the Scroll.
      * When the sliding stops and the fingers are not raised, prevent scrolling to the limit point
      */
     bool scrollSnapTrigger_ = false;
