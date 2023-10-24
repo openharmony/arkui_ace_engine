@@ -1116,6 +1116,9 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
     }
     auto currentIndex = gridLayoutInfo_.endIndex_ + 1;
     currentMainLineIndex_++; // if it fails to fill a new line backward, do [currentMainLineIndex_--]
+    if (gridLayoutInfo_.gridMatrix_.find(currentMainLineIndex_) != gridLayoutInfo_.gridMatrix_.end()) {
+        cellAveLength_ = gridLayoutInfo_.lineHeightMap_.find(currentMainLineIndex_ - 1)->second;
+    }
     lastCross_ = 0;
     bool hasNormalItem = false;
     bool doneFillLine = false;
@@ -1152,7 +1155,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         doneFillLine = true;
     }
 
-    if (doneFillLine) {
+    if (doneFillLine || gridLayoutInfo_.gridMatrix_.find(currentMainLineIndex_) != gridLayoutInfo_.gridMatrix_.end()) {
         gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = cellAveLength_;
         gridLayoutInfo_.endMainLineIndex_ = currentMainLineIndex_;
     } else {
