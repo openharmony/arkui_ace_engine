@@ -1329,12 +1329,17 @@ void ListPattern::UpdateScrollBarOffset()
 
 float ListPattern::GetTotalHeight() const
 {
+    auto currentOffset = GetTotalOffset();
+    if (endIndex_ >= maxListItemIndex_) {
+        return currentOffset + endMainPos_;
+    }
     if (itemPosition_.empty()) {
         return 0.0f;
     }
-
+    int32_t remainCount = maxListItemIndex_ - endIndex_;
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
-    return itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+    float remainOffset = itemsSize / itemPosition_.size() * remainCount - spaceWidth_;
+    return currentOffset + endMainPos_ + remainOffset;
 }
 
 void ListPattern::SetChainAnimation()

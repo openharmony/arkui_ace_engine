@@ -977,11 +977,11 @@ void ScrollablePattern::SelectWithScroll()
         selectMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
             auto pattern = weakScroll.Upgrade();
             CHECK_NULL_VOID(pattern);
+            offset = pattern->GetOffsetWithLimit(offset);
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
             pattern->UpdateMouseStart(offset);
         });
     } else {
-        offset = GetOffsetWithLimit(mouseStartOffset_.GetMainOffset(axis_), offset);
         selectMotion_->Reset(offset);
     }
 
@@ -1062,12 +1062,6 @@ bool ScrollablePattern::ShouldSelectScrollBeStopped()
         return true;
     }
 
-    offset = GetOffsetWithLimit(lastMouseStart_.GetMainOffset(axis_), offset);
-    if (axis_ == Axis::VERTICAL) {
-        lastMouseStart_.AddY(offset);
-    } else {
-        lastMouseStart_.AddX(offset);
-    }
     if (selectMotion_) {
         selectMotion_->Reset(offset);
     }
@@ -1111,22 +1105,18 @@ float ScrollablePattern::GetOutOfScrollableOffset() const
 }
 
 // avoid start position move when offset is bigger then item height
-float ScrollablePattern::GetOffsetWithLimit(float position, float offset) const
+float ScrollablePattern::GetOffsetWithLimit(float offset) const
 {
-    auto limitedOffset = offset;
     if (Positive(offset)) {
-        if (LessNotEqual(totalOffsetOfMousePressed_, position + offset)) {
-            limitedOffset = totalOffsetOfMousePressed_ - position;
-        }
-    } else {
+        auto totalOffset = GetTotalOffset();
+        return std::min(totalOffset, offset);
+    } else if (Negative(offset)) {
         auto hostSize = GetHostFrameSize();
         CHECK_NULL_RETURN(hostSize.has_value(), true);
-        auto minStartOffset = -(GetTotalHeight() - totalOffsetOfMousePressed_ - hostSize->MainSize(axis_));
-        if (GreatNotEqual(minStartOffset, position + offset)) {
-            limitedOffset = minStartOffset - position;
-        }
+        auto remainHeight = GetTotalHeight() - GetTotalOffset() - hostSize->MainSize(axis_);
+        return std::max(offset, -remainHeight);
     }
-    return limitedOffset;
+    return 0;
 }
 
 void ScrollablePattern::LimitMouseEndOffset()
