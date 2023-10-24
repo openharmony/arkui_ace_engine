@@ -215,14 +215,13 @@ void SwiperPattern::OnModifyDone()
             }
         }
     }
-    if (IsDisableSwipe()) {
-        if (panEvent_) {
-            gestureHub->RemovePanEvent(panEvent_);
-            panEvent_.Reset();
-        }
-        return;
+    if (!IsDisableSwipe()) {
+        InitPanEvent(gestureHub);
+    } else if (panEvent_) {
+        gestureHub->RemovePanEvent(panEvent_);
+        panEvent_.Reset();
     }
-    InitPanEvent(gestureHub);
+
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
