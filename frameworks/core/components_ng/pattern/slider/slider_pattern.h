@@ -145,6 +145,7 @@ private:
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
     Axis GetDirection() const;
 
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
