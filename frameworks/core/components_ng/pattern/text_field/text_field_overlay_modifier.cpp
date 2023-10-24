@@ -31,6 +31,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(
     cursorWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
     selectedColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color()));
     cursorVisible_ = AceType::MakeRefPtr<PropertyBool>(false);
+    showSelect_ = AceType::MakeRefPtr<PropertyBool>(false);
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
@@ -48,6 +49,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(
     AttachProperty(cursorWidth_);
     AttachProperty(selectedColor_);
     AttachProperty(cursorVisible_);
+    AttachProperty(showSelect_);
     AttachProperty(contentSize_);
     AttachProperty(contentOffset_);
     AttachProperty(cursorOffset_);
@@ -109,6 +111,9 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
 
 void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
 {
+    if (!showSelect_->Get() && !needPaintSelect_) {
+        return;
+    }
     auto& canvas = context.canvas;
     canvas.Save();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
@@ -269,5 +274,11 @@ void TextFieldOverlayModifier::SetChangeSelectedRects(bool value)
     if (value) {
         changeSelectedRects_->Set(!changeSelectedRects_->Get());
     }
+    needPaintSelect_ = value;
+}
+
+void TextFieldOverlayModifier::SetShowSelect(bool value)
+{
+    showSelect_->Set(value);
 }
 } // namespace OHOS::Ace::NG

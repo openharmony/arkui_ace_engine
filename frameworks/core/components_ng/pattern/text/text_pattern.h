@@ -177,9 +177,9 @@ public:
 
     OffsetF GetTextPaintOffset() const;
 
-    RefPtr<FrameNode> MoveDragNode() override
+    const RefPtr<FrameNode>& MoveDragNode() override
     {
-        return std::move(dragNode_);
+        return dragNode_;
     }
 
     ParagraphT GetDragParagraph() const override

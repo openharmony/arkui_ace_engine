@@ -1142,6 +1142,10 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         CHECK_NULL_RETURN(host, itemInfo);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, itemInfo);
+        if (pattern->SelectOverlayIsOn() || pattern->imeAttached_ || pattern->showSelect_) {
+            pattern->CloseHandleAndSelect();
+            pattern->CloseKeyboard(true);
+        }
         pattern->dragStatus_ = DragStatus::DRAGGING;
         pattern->textFieldContentModifier_->ChangeDragStatus();
         auto contentController = pattern->contentController_;
@@ -1166,7 +1170,7 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
 
 std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> TextFieldPattern::OnDragDrop()
 {
-    auto onDrop = [weakPtr = WeakClaim(this)](
+    return [weakPtr = WeakClaim(this)](
                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1190,7 +1194,9 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         for (const auto& record : records) {
             str += record;
         }
-        pattern->needToRequestKeyboardInner_ = true;
+        if (pattern->dragStatus_ == DragStatus::NONE) {
+            pattern->needToRequestKeyboardInner_ = true;
+        }
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {
             return;
@@ -1214,7 +1220,6 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
     };
-    return onDrop;
 }
 
 void TextFieldPattern::InitDragDropEvent()
@@ -1872,6 +1877,7 @@ void TextFieldPattern::ShowSelectOverlay(const ShowSelectOverlayParams& showOver
     if (isTransparent_) {
         return;
     }
+    showSelect_ = true;
     auto hasDataCallback = [weak = WeakClaim(this), params = showOverlayParams](bool hasData) {
         LOGI("HasData callback from clipboard, data available ? %{public}d", hasData);
         auto pattern = weak.Upgrade();
@@ -4840,5 +4846,11 @@ int32_t TextFieldPattern::GetLineCount() const
         return paragraph_->GetLineCount();
     }
     return 0;
+}
+
+void TextFieldPattern::CloseHandleAndSelect()
+{
+    CloseSelectOverlay(true);
+    showSelect_ = false;
 }
 } // namespace OHOS::Ace::NG

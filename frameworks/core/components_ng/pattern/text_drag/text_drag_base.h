@@ -44,11 +44,15 @@ public:
     virtual std::vector<RectF> GetTextBoxes() = 0;
     virtual OffsetF GetParentGlobalOffset() const = 0;
 
-    virtual RefPtr<FrameNode> MoveDragNode() = 0;
+    virtual const RefPtr<FrameNode>& MoveDragNode() = 0;
 
     virtual ParagraphT GetDragParagraph() const = 0;
 
     virtual void CloseSelectOverlay() = 0;
+    virtual void CloseHandleAndSelect()
+    {
+        CloseSelectOverlay();
+    }
     virtual void CreateHandles() {};
     virtual bool CloseKeyboard(bool forceClose) = 0;
     virtual OffsetF GetDragUpperLeftCoordinates() = 0;
