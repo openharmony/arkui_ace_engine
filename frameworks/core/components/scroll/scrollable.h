@@ -505,6 +505,7 @@ private:
     bool touchUp_ = false;
     bool moved_ = false;
     bool isTouching_ = false;
+    bool isDragging_ = false;
     bool available_ = true;
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;

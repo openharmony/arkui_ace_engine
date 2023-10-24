@@ -346,7 +346,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (gridLayoutInfo_.offsetEnd_) {
         overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
+            auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
             overScroll += offset * friction;
@@ -366,7 +366,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     if (gridLayoutInfo_.reachStart_) {
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction = CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
+            auto friction = ScrollablePattern::CalculateFriction(
+                std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
         } else {
