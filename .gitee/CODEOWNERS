@@ -76,7 +76,7 @@ frameworks/core/components_ng/pattern/marquee/  @aryawang
 frameworks/core/components_ng/pattern/menu/  @cheng-feiwang
 frameworks/core/components_ng/pattern/model/  @
 frameworks/core/components_ng/pattern/navigation/  @tsj_2020
-frameworks/core/components_ng/pattern/navigator/  @Armstrong15
+frameworks/core/components_ng/pattern/navigator/  @tsj_2020
 frameworks/core/components_ng/pattern/navrouter/  @tsj_2020
 frameworks/core/components_ng/pattern/option/  @cheng-feiwang
 frameworks/core/components_ng/pattern/overlay/  @yangfan229
@@ -175,8 +175,8 @@ frameworks/core/components/marquee/  @aryawang
 frameworks/core/components/menu/  @cheng-feiwang
 frameworks/core/components/mouse_listener/  @catpoison
 frameworks/core/components/multimodal/  @
-frameworks/core/components/navigation_bar/  @Armstrong15
-frameworks/core/components/navigator/  @Armstrong15
+frameworks/core/components/navigation_bar/  @tsj_2020
+frameworks/core/components/navigator/  @tsj_2020
 frameworks/core/components/option/  @cheng-feiwang
 frameworks/core/components/overlay/  @yangfan229
 frameworks/core/components/padding/  @yangfan229
@@ -353,7 +353,7 @@ frameworks/core/components_ng/test/pattern/marquee/  @aryawang
 frameworks/core/components_ng/test/pattern/menu/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/model/ @
 frameworks/core/components_ng/test/pattern/navigation/  @tsj_2020
-frameworks/core/components_ng/test/pattern/navigator/  @Armstrong15
+frameworks/core/components_ng/test/pattern/navigator/  @tsj_2020
 frameworks/core/components_ng/test/pattern/navrouter/  @tsj_2020
 frameworks/core/components_ng/test/pattern/option/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/overlay/  @yangfan229
