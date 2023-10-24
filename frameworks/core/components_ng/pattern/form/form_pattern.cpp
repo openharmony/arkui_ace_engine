@@ -870,7 +870,8 @@ void FormPattern::OnActionEvent(const std::string& action)
         return;
     }
     auto uri = eventAction->GetValue("uri");
-    if (uri->IsValid()) {
+    auto abilityName = eventAction->GetValue("abilityName");
+    if (uri->IsValid() && !abilityName->IsValid()) {
         formManagerBridge_->OnActionEvent(action);
         return;
     }
