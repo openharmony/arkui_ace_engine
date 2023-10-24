@@ -10252,7 +10252,7 @@ HWTEST_F(TabsTestNg, TabBarPatternOnDirtyLayoutWrapperSwap002, TestSize.Level1)
     EXPECT_EQ(tabBarPattern->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
     tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(tabBarPattern->indicator_, 0);
-    
+
     /**
      * @tc.steps: step2. creat different conditions and invoke OnDirtyLayoutWrapperSwap.
      * @tc.expected: step2. expect The function is run ok.

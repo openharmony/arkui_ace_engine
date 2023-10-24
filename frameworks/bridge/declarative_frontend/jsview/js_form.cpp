@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/log_wrapper.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
@@ -59,7 +60,6 @@ namespace OHOS::Ace::Framework {
 void JSForm::Create(const JSCallbackInfo& info)
 {
     if (info.Length() == 0 || !info[0]->IsObject()) {
-        LOGE("form create fail due to FormComponent construct param is empty or type is not Object");
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -72,7 +72,8 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> temporary = obj->GetProperty("temporary");
     JSRef<JSVal> wantValue = obj->GetProperty("want");
 
-    LOGD("js form create id:%{public}d, name:%{public}s, bundle:%{public}s, ability:%{public}s, module:%{public}s, "
+    TAG_LOGD(AceLogTag::ACE_FORM,
+        "js form create id:%{public}d, name:%{public}s, bundle:%{public}s, ability:%{public}s, module:%{public}s, "
          "temporary:%{public}s",
         id->ToNumber<int32_t>(), name->ToString().c_str(), bundle->ToString().c_str(), ability->ToString().c_str(),
         module->ToString().c_str(), temporary->ToString().c_str());
@@ -98,7 +99,6 @@ void JSForm::SetSize(const JSCallbackInfo& info)
     JSViewAbstract::JsSize(info);
 
     if (info.Length() == 0 || !info[0]->IsObject()) {
-        LOGW("form set size fail due to FormComponent construct param is empty or type is not Object");
         return;
     }
     Dimension width = 0.0_vp;
@@ -133,7 +133,6 @@ void JSForm::SetDimension(int32_t value)
 void JSForm::AllowUpdate(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0 || !info[0]->IsBoolean()) {
-        LOGE("param is not valid");
         return;
     }
 
@@ -144,7 +143,6 @@ void JSForm::AllowUpdate(const JSCallbackInfo& info)
 void JSForm::SetVisibility(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0 || !info[0]->IsNumber()) {
-        LOGE("param is not valid");
         return;
     }
 
@@ -155,7 +153,6 @@ void JSForm::SetVisibility(const JSCallbackInfo& info)
 void JSForm::SetModuleName(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0 || !info[0]->IsString()) {
-        LOGE("param is not valid");
         return;
     }
 
@@ -221,7 +218,6 @@ void JSForm::JsOnRouter(const JSCallbackInfo& info)
 
 void JSForm::JsOnLoad(const JSCallbackInfo& info)
 {
-    LOGI("JsOnLoad");
     if (info[0]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onLoad = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {

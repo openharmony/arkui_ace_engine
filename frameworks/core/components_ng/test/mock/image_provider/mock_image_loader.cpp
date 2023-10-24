@@ -57,4 +57,9 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 {
     return nullptr;
 }
+
+bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
+{
+    return false;
+}
 } // namespace OHOS::Ace

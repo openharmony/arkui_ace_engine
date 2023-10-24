@@ -173,6 +173,7 @@ void SearchPattern::OnModifyDone()
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldMouseEvent();
+    InitTextFieldValueChangeEvent();
     InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
     InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
     InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
@@ -182,6 +183,23 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+}
+
+void SearchPattern::InitTextFieldValueChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->GetOnChange()) {
+        auto searchChangeFunc = [weak = AceType::WeakClaim(this)](const std::string& value) {
+            auto searchPattern = weak.Upgrade();
+            searchPattern->UpdateChangeEvent(value);
+        };
+        eventHub->SetOnChange(std::move(searchChangeFunc));
+    }
 }
 
 void SearchPattern::InitButtonAndImageClickEvent()
@@ -348,8 +366,8 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    auto text = textFieldPattern->GetEditingValue();
-    searchEventHub->UpdateSubmitEvent(text.text);
+    auto text = textFieldPattern->GetTextValue();
+    searchEventHub->UpdateSubmitEvent(text);
     textFieldPattern->CloseKeyboard(true);
 }
 
@@ -362,7 +380,6 @@ void SearchPattern::OnClickCancelButton()
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->InitEditingValueText("");
-    textFieldPattern->InitCaretPosition("");
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetLeft(0.0f);
     textFieldPattern->SetTextRect(textRect);
@@ -776,7 +793,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
 
-    json->Put("value", textFieldPattern->GetTextEditingValue().text.c_str());
+    json->Put("value", textFieldPattern->GetTextValue().c_str());
     json->Put("placeholder", textFieldPattern->GetPlaceHolder().c_str());
     json->Put("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str());
     json->Put("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str());

@@ -28,10 +28,7 @@ class JsTouchFunction : public virtual JsFunction {
 
 public:
     explicit JsTouchFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
-    ~JsTouchFunction() override
-    {
-        LOGD("Destroy: JsTouchFunction");
-    };
+    ~JsTouchFunction() override {};
 
     void Execute() override
     {

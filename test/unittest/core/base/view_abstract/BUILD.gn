@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("view_abstract_test_ng") {
@@ -92,6 +91,9 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
     "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_client.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",
@@ -206,8 +208,6 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_manager.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/nav_bar/mock_nav_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",

@@ -197,11 +197,11 @@ void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t tar
     }
 }
 
-void SubwindowManager::HideMenuNG(bool showPreviewAnimation)
+void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->HideMenuNG(showPreviewAnimation);
+        subwindow->HideMenuNG(showPreviewAnimation, startDrag);
     }
 }
 

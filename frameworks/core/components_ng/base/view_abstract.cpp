@@ -48,7 +48,6 @@ namespace {
 // common function to bind menu
 void BindMenu(const RefPtr<FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset)
 {
-    LOGD("ViewAbstract::BindMenu");
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
@@ -60,14 +59,12 @@ void BindMenu(const RefPtr<FrameNode>& menuNode, int32_t targetId, const NG::Off
 
     // pass in menuNode to register it in OverlayManager
     overlayManager->ShowMenu(targetId, offset, menuNode);
-    LOGD("ViewAbstract BindMenu finished %{public}d", menuNode->GetId());
 }
 } // namespace
 
 void ViewAbstract::SetWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -86,7 +83,6 @@ void ViewAbstract::SetWidth(const CalcLength& width)
 void ViewAbstract::SetHeight(const CalcLength& height)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -105,7 +101,6 @@ void ViewAbstract::SetHeight(const CalcLength& height)
 void ViewAbstract::SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ClickEffectInfo clickEffectInfo;
@@ -117,7 +112,6 @@ void ViewAbstract::SetClickEffectLevel(const ClickEffectLevel& level, float scal
 void ViewAbstract::ClearWidthOrHeight(bool isWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -130,7 +124,6 @@ void ViewAbstract::ClearWidthOrHeight(bool isWidth)
 void ViewAbstract::SetMinWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -143,7 +136,6 @@ void ViewAbstract::SetMinWidth(const CalcLength& width)
 void ViewAbstract::SetMinHeight(const CalcLength& height)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -156,7 +148,6 @@ void ViewAbstract::SetMinHeight(const CalcLength& height)
 void ViewAbstract::ResetMinSize(bool resetWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -169,7 +160,6 @@ void ViewAbstract::ResetMinSize(bool resetWidth)
 void ViewAbstract::SetMaxWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -182,7 +172,6 @@ void ViewAbstract::SetMaxWidth(const CalcLength& width)
 void ViewAbstract::SetMaxHeight(const CalcLength& height)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -195,7 +184,6 @@ void ViewAbstract::SetMaxHeight(const CalcLength& height)
 void ViewAbstract::ResetMaxSize(bool resetWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -208,7 +196,6 @@ void ViewAbstract::ResetMaxSize(bool resetWidth)
 void ViewAbstract::SetAspectRatio(float ratio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, ratio);
@@ -217,7 +204,6 @@ void ViewAbstract::SetAspectRatio(float ratio)
 void ViewAbstract::ResetAspectRatio()
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, AspectRatio);
@@ -226,7 +212,6 @@ void ViewAbstract::ResetAspectRatio()
 void ViewAbstract::SetBackgroundAlign(const Alignment& align)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundAlign, align);
@@ -235,7 +220,6 @@ void ViewAbstract::SetBackgroundAlign(const Alignment& align)
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
@@ -244,7 +228,6 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
@@ -253,7 +236,6 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
 void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat);
@@ -262,7 +244,6 @@ void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
 void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize);
@@ -271,7 +252,6 @@ void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
 void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition);
@@ -280,7 +260,6 @@ void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgI
 void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -300,7 +279,6 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
 void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -320,7 +298,6 @@ void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
 void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -337,7 +314,6 @@ void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
 void ViewAbstract::SetSphericalEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(SphericalEffect, radio);
@@ -346,7 +322,6 @@ void ViewAbstract::SetSphericalEffect(double radio)
 void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
@@ -355,7 +330,6 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
 void ViewAbstract::SetLightUpEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(LightUpEffect, radio);
@@ -364,7 +338,6 @@ void ViewAbstract::SetLightUpEffect(double radio)
 void ViewAbstract::SetLayoutWeight(int32_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
@@ -373,7 +346,6 @@ void ViewAbstract::SetLayoutWeight(int32_t value)
 void ViewAbstract::SetLayoutDirection(TextDirection value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutDirection, value);
@@ -382,7 +354,6 @@ void ViewAbstract::SetLayoutDirection(TextDirection value)
 void ViewAbstract::SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules);
@@ -391,7 +362,6 @@ void ViewAbstract::SetAlignRules(const std::map<AlignDirection, AlignRule>& alig
 void ViewAbstract::SetAlignSelf(FlexAlign value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, value);
@@ -400,7 +370,6 @@ void ViewAbstract::SetAlignSelf(FlexAlign value)
 void ViewAbstract::SetFlexShrink(float value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, value);
@@ -409,7 +378,6 @@ void ViewAbstract::SetFlexShrink(float value)
 void ViewAbstract::ResetFlexShrink()
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, FlexShrink);
@@ -418,7 +386,6 @@ void ViewAbstract::ResetFlexShrink()
 void ViewAbstract::SetFlexGrow(float value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, value);
@@ -427,7 +394,6 @@ void ViewAbstract::SetFlexGrow(float value)
 void ViewAbstract::SetFlexBasis(const Dimension& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     if (LessNotEqual(value.Value(), 0.0f)) {
@@ -440,7 +406,6 @@ void ViewAbstract::SetFlexBasis(const Dimension& value)
 void ViewAbstract::SetDisplayIndex(int32_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, DisplayIndex, value);
@@ -449,7 +414,6 @@ void ViewAbstract::SetDisplayIndex(int32_t value)
 void ViewAbstract::SetPadding(const CalcLength& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     PaddingProperty padding;
@@ -460,7 +424,6 @@ void ViewAbstract::SetPadding(const CalcLength& value)
 void ViewAbstract::SetPadding(const PaddingProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, value);
@@ -469,7 +432,6 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
 void ViewAbstract::SetMargin(const CalcLength& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     MarginProperty margin;
@@ -480,7 +442,6 @@ void ViewAbstract::SetMargin(const CalcLength& value)
 void ViewAbstract::SetMargin(const MarginProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Margin, value);
@@ -489,7 +450,6 @@ void ViewAbstract::SetMargin(const MarginProperty& value)
 void ViewAbstract::SetBorderRadius(const Dimension& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     BorderRadiusProperty borderRadius;
@@ -501,7 +461,6 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
 void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, value);
@@ -510,7 +469,6 @@ void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
 void ViewAbstract::SetBorderColor(const Color& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     BorderColorProperty borderColor;
@@ -521,7 +479,6 @@ void ViewAbstract::SetBorderColor(const Color& value)
 void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderColor, value);
@@ -530,13 +487,11 @@ void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
 void ViewAbstract::SetBorderWidth(const Dimension& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     BorderWidthProperty borderWidth;
     if (Negative(value.Value())) {
         borderWidth.SetBorderWidth(Dimension(0));
-        LOGW("border width is negative, reset to 0");
     } else {
         borderWidth.SetBorderWidth(value);
     }
@@ -547,7 +502,6 @@ void ViewAbstract::SetBorderWidth(const Dimension& value)
 void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value);
@@ -557,7 +511,6 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
 void ViewAbstract::SetBorderStyle(const BorderStyle& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     BorderStyleProperty borderStyle;
@@ -568,7 +521,6 @@ void ViewAbstract::SetBorderStyle(const BorderStyle& value)
 void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderStyle, value);
@@ -576,7 +528,6 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 
 void ViewAbstract::DisableOnClick()
 {
-    LOGD("Disable OnClick event");
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->ClearUserOnClick();
@@ -584,7 +535,6 @@ void ViewAbstract::DisableOnClick()
 
 void ViewAbstract::DisableOnTouch()
 {
-    LOGD("Disable OnTouch event");
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->ClearUserOnTouch();
@@ -592,7 +542,6 @@ void ViewAbstract::DisableOnTouch()
 
 void ViewAbstract::DisableOnKeyEvent()
 {
-    LOGD("Disable OnKey event");
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearUserOnKey();
@@ -600,7 +549,6 @@ void ViewAbstract::DisableOnKeyEvent()
 
 void ViewAbstract::DisableOnHover()
 {
-    LOGD("Disable OnHover event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnHover();
@@ -608,7 +556,6 @@ void ViewAbstract::DisableOnHover()
 
 void ViewAbstract::DisableOnMouse()
 {
-    LOGD("Disable OnMouse event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnMouse();
@@ -616,7 +563,6 @@ void ViewAbstract::DisableOnMouse()
 
 void ViewAbstract::DisableOnAppear()
 {
-    LOGD("Disable OnAppear event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnAppear();
@@ -624,7 +570,6 @@ void ViewAbstract::DisableOnAppear()
 
 void ViewAbstract::DisableOnDisAppear()
 {
-    LOGD("Disable OnDisAppear event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnDisAppear();
@@ -632,7 +577,6 @@ void ViewAbstract::DisableOnDisAppear()
 
 void ViewAbstract::DisableOnAreaChange()
 {
-    LOGD("Disable OnAreaChange event");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -642,7 +586,6 @@ void ViewAbstract::DisableOnAreaChange()
 
 void ViewAbstract::DisableOnFocus()
 {
-    LOGD("Disable OnFocus event");
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearUserOnFocus();
@@ -650,7 +593,6 @@ void ViewAbstract::DisableOnFocus()
 
 void ViewAbstract::DisableOnBlur()
 {
-    LOGD("Disable OnBlur event");
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearUserOnBlur();
@@ -929,7 +871,6 @@ void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragE
 void ViewAbstract::SetAlign(Alignment alignment)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
@@ -938,7 +879,6 @@ void ViewAbstract::SetAlign(Alignment alignment)
 void ViewAbstract::SetVisibility(VisibleType visible)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -967,7 +907,6 @@ void ViewAbstract::SetGeometryTransition(const std::string& id, bool followWitho
 void ViewAbstract::SetOpacity(double opacity)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
@@ -982,7 +921,6 @@ void ViewAbstract::SetAllowDrop(const std::set<std::string>& allowDrop)
 void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
@@ -991,7 +929,6 @@ void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
 void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Offset, value);
@@ -1000,7 +937,6 @@ void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
 void ViewAbstract::MarkAnchor(const OffsetT<Dimension>& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Anchor, value);
@@ -1009,7 +945,6 @@ void ViewAbstract::MarkAnchor(const OffsetT<Dimension>& value)
 void ViewAbstract::SetZIndex(int32_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ZIndex, value);
@@ -1018,7 +953,6 @@ void ViewAbstract::SetZIndex(int32_t value)
 void ViewAbstract::SetScale(const NG::VectorF& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(TransformScale, value);
@@ -1027,7 +961,6 @@ void ViewAbstract::SetScale(const NG::VectorF& value)
 void ViewAbstract::SetPivot(const DimensionOffset& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(TransformCenter, value);
@@ -1036,7 +969,6 @@ void ViewAbstract::SetPivot(const DimensionOffset& value)
 void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(TransformTranslate, value);
@@ -1045,7 +977,6 @@ void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
 void ViewAbstract::SetRotate(const NG::Vector5F& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
@@ -1054,7 +985,6 @@ void ViewAbstract::SetRotate(const NG::Vector5F& value)
 void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(TransformMatrix, matrix);
@@ -1097,7 +1027,6 @@ void ViewAbstract::BindPopup(
         // Entering / Normal / Exiting
         bool popupShowing = popupPattern ? popupPattern->IsOnShow() : false;
         if (popupShowing == isShow) {
-            LOGI("No need to change popup show flag, current show %{public}d", isShow);
             return;
         }
         if (!popupShowing && isShow) {
@@ -1108,7 +1037,6 @@ void ViewAbstract::BindPopup(
     } else {
         // Invisable
         if (!isShow) {
-            LOGI("No need to change popup show flag, current show %{public}d", isShow);
             return;
         }
         popupInfo.markNeedUpdate = true;
@@ -1153,11 +1081,9 @@ void ViewAbstract::BindPopup(
         if (!isUseCustom) {
             BubbleView::UpdatePopupParam(popupId, param, targetNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            LOGI("Update normal Popup node.");
         } else {
             BubbleView::UpdateCustomPopupParam(popupId, param);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            LOGI("Update Custom Popup node.");
         }
     }
     // update PopupInfo props
@@ -1173,7 +1099,6 @@ void ViewAbstract::BindPopup(
     popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
     if (showInSubWindow) {
         if (isShow) {
-            LOGI("Popup now show in subwindow.");
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
             if (popupPattern) {
                 popupPattern->SetContainerId(Container::CurrentId());
@@ -1182,7 +1107,6 @@ void ViewAbstract::BindPopup(
         } else {
             if (popupPattern) {
                 popupPattern->StartExitingAnimation([targetId]() {
-                    LOGI("Popup now hide in subwindow.");
                     SubwindowManager::GetInstance()->HidePopupNG(targetId);
                 });
             }
@@ -1194,7 +1118,6 @@ void ViewAbstract::BindPopup(
             AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     if (isShow) {
-        LOGI("begin to update popup node.");
         overlayManager->UpdatePopupNode(targetId, popupInfo);
         if (popupPattern) {
             popupPattern->StartEnteringAnimation(nullptr);
@@ -1205,7 +1128,6 @@ void ViewAbstract::BindPopup(
                 [targetId, popupInfo, weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
                     auto overlay = weakOverlayManger.Upgrade();
                     CHECK_NULL_VOID(overlay);
-                    LOGI("begin to update popup node.");
                     overlay->UpdatePopupNode(targetId, popupInfo);
                 });
         }
@@ -1218,7 +1140,6 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
     CHECK_NULL_VOID(targetNode);
 
     if (params.empty()) {
-        LOGD("menu params is empty");
         return;
     }
     auto menuNode =
@@ -1229,7 +1150,6 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
 void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
     const NG::OffsetF& offset, const MenuParam& menuParam, const RefPtr<UINode>& previewCustomNode)
 {
-    LOGD("ViewAbstract::BindMenuWithCustomNode");
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
     auto type = menuParam.type;
@@ -1252,7 +1172,6 @@ void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool is
         SubwindowManager::GetInstance()->ShowMenuNG(nullptr, targetId, offset);
         return;
     }
-    LOGD("ViewAbstract::ShowMenu");
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
@@ -1268,7 +1187,6 @@ void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool is
 void ViewAbstract::SetBackdropBlur(const Dimension& radius)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1288,7 +1206,6 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
 void ViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(LinearGradientBlur, blurPara);
@@ -1297,7 +1214,6 @@ void ViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
 void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpRate, rate);
@@ -1307,7 +1223,6 @@ void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
 void ViewAbstract::SetFrontBlur(const Dimension& radius)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1324,7 +1239,6 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius)
 void ViewAbstract::SetBackShadow(const Shadow& shadow)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
@@ -1333,7 +1247,6 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
 void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
@@ -1342,7 +1255,6 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
 void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
@@ -1351,7 +1263,6 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
 void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
@@ -1399,7 +1310,6 @@ void ViewAbstract::Pop()
 void ViewAbstract::SetTransition(const TransitionOptions& options)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Transition, options);
@@ -1408,7 +1318,6 @@ void ViewAbstract::SetTransition(const TransitionOptions& options)
 void ViewAbstract::SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ChainedTransition, effect);
@@ -1417,7 +1326,6 @@ void ViewAbstract::SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect
 void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ClipShape, basicShape);
@@ -1426,7 +1334,6 @@ void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
 void ViewAbstract::SetClipEdge(bool isClip)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ClipEdge, isClip);
@@ -1435,7 +1342,6 @@ void ViewAbstract::SetClipEdge(bool isClip)
 void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ClipMask, basicShape);
@@ -1444,7 +1350,6 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
 void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ProgressMask, progress);
@@ -1453,7 +1358,6 @@ void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
 void ViewAbstract::SetBrightness(const Dimension& brightness)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontBrightness, brightness);
@@ -1462,7 +1366,6 @@ void ViewAbstract::SetBrightness(const Dimension& brightness)
 void ViewAbstract::SetGrayScale(const Dimension& grayScale)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontGrayScale, grayScale);
@@ -1471,7 +1374,6 @@ void ViewAbstract::SetGrayScale(const Dimension& grayScale)
 void ViewAbstract::SetContrast(const Dimension& contrast)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontContrast, contrast);
@@ -1480,7 +1382,6 @@ void ViewAbstract::SetContrast(const Dimension& contrast)
 void ViewAbstract::SetSaturate(const Dimension& saturate)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontSaturate, saturate);
@@ -1489,7 +1390,6 @@ void ViewAbstract::SetSaturate(const Dimension& saturate)
 void ViewAbstract::SetSepia(const Dimension& sepia)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontSepia, sepia);
@@ -1498,7 +1398,6 @@ void ViewAbstract::SetSepia(const Dimension& sepia)
 void ViewAbstract::SetInvert(const Dimension& invert)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontInvert, invert);
@@ -1507,7 +1406,6 @@ void ViewAbstract::SetInvert(const Dimension& invert)
 void ViewAbstract::SetHueRotate(float hueRotate)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontHueRotate, hueRotate);
@@ -1516,7 +1414,6 @@ void ViewAbstract::SetHueRotate(float hueRotate)
 void ViewAbstract::SetColorBlend(const Color& colorBlend)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontColorBlend, colorBlend);
@@ -1525,7 +1422,6 @@ void ViewAbstract::SetColorBlend(const Color& colorBlend)
 void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderImage, borderImage);
@@ -1534,7 +1430,6 @@ void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
 void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ImageSourceInfo imageSourceInfo(bdImageSrc);
@@ -1544,7 +1439,6 @@ void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
 void ViewAbstract::SetHasBorderImageSlice(bool tag)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(HasBorderImageSlice, tag);
@@ -1553,7 +1447,6 @@ void ViewAbstract::SetHasBorderImageSlice(bool tag)
 void ViewAbstract::SetHasBorderImageWidth(bool tag)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(HasBorderImageWidth, tag);
@@ -1562,7 +1455,6 @@ void ViewAbstract::SetHasBorderImageWidth(bool tag)
 void ViewAbstract::SetHasBorderImageOutset(bool tag)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(HasBorderImageOutset, tag);
@@ -1571,7 +1463,6 @@ void ViewAbstract::SetHasBorderImageOutset(bool tag)
 void ViewAbstract::SetHasBorderImageRepeat(bool tag)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(HasBorderImageRepeat, tag);
@@ -1580,7 +1471,6 @@ void ViewAbstract::SetHasBorderImageRepeat(bool tag)
 void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
@@ -1589,7 +1479,6 @@ void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(OverlayText, overlay);
@@ -1598,7 +1487,6 @@ void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
 void ViewAbstract::SetMotionPath(const MotionPathOption& motionPath)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(MotionPath, motionPath);
@@ -1619,7 +1507,6 @@ void ViewAbstract::SetSharedTransition(
 void ViewAbstract::SetUseEffect(bool useEffect)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
@@ -1628,7 +1515,6 @@ void ViewAbstract::SetUseEffect(bool useEffect)
 void ViewAbstract::SetForegroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
@@ -1639,7 +1525,6 @@ void ViewAbstract::SetForegroundColor(const Color& color)
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& strategy)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
@@ -1659,17 +1544,14 @@ void ViewAbstract::SetKeyboardShortcut(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (value.empty() || (keys.size() == 0 && value.length() == 1)) {
-        LOGI("KeyboardShortcut value and keys is invalid, return");
         eventHub->SetKeyboardShortcut("", 0, nullptr);
         return;
     }
     auto key = eventManager->GetKeyboardShortcutKeys(keys);
     if ((key == 0 && value.length() == 1) || (key == 0 && keys.size() > 0 && value.length() > 1)) {
-        LOGI("KeyboardShortcut's keys are the same, return");
         return;
     }
     if (eventManager->IsSameKeyboardShortcutNode(value, key)) {
-        LOGI("KeyboardShortcut is the same, return");
         return;
     }
     eventHub->SetKeyboardShortcut(value, key, std::move(onKeyboardShortcutAction));
@@ -1711,7 +1593,6 @@ void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propert
 void ViewAbstract::SetObscured(const std::vector<ObscuredReasons>& reasons)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Obscured, reasons);
@@ -1723,7 +1604,6 @@ void ViewAbstract::SetObscured(const std::vector<ObscuredReasons>& reasons)
 void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaExpandOpts, opts);
@@ -1732,7 +1612,6 @@ void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
 void ViewAbstract::SetRenderGroup(bool isRenderGroup)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RenderGroup, isRenderGroup);
@@ -1741,7 +1620,6 @@ void ViewAbstract::SetRenderGroup(bool isRenderGroup)
 void ViewAbstract::SetRenderFit(RenderFit renderFit)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);

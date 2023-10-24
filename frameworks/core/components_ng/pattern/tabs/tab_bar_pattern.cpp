@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -1965,5 +1966,66 @@ float TabBarPattern::GetLeftPadding() const
         return 0.0f;
     }
     return geometryNode->GetPadding()->left.value_or(0.0f);
+}
+
+void TabBarPattern::DumpAdvanceInfo()
+{
+    isRTL_ ? DumpLog::GetInstance().AddDesc("isRTL:true") : DumpLog::GetInstance().AddDesc("isRTL:false");
+    touching_ ? DumpLog::GetInstance().AddDesc("touching:true") : DumpLog::GetInstance().AddDesc("touching:false");
+    isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true") : DumpLog::GetInstance().AddDesc("isHover:false");
+    isMaskAnimationByCreate_ ? DumpLog::GetInstance().AddDesc("isMaskAnimationByCreate:true")
+                             : DumpLog::GetInstance().AddDesc("isMaskAnimationByCreate:false");
+    touchingIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("touchingIndex:" + std::to_string(touchingIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("touchingIndex:null");
+    hoverIndex_.has_value() ? DumpLog::GetInstance().AddDesc("hoverIndex:" + std::to_string(hoverIndex_.value()))
+                            : DumpLog::GetInstance().AddDesc("hoverIndex:null");
+    animationDuration_.has_value()
+        ? DumpLog::GetInstance().AddDesc("animationDuration:" + std::to_string(animationDuration_.value()))
+        : DumpLog::GetInstance().AddDesc("animationDuration:null");
+    isFirstFocus_ ? DumpLog::GetInstance().AddDesc("isFirstFocus:true")
+                  : DumpLog::GetInstance().AddDesc("isFirstFocus:false");
+    isTouchingSwiper_ ? DumpLog::GetInstance().AddDesc("isTouchingSwiper:true")
+                      : DumpLog::GetInstance().AddDesc("isTouchingSwiper:false");
+    isAnimating_ ? DumpLog::GetInstance().AddDesc("isAnimating:true")
+                 : DumpLog::GetInstance().AddDesc("isAnimating:false");
+    changeByClick_ ? DumpLog::GetInstance().AddDesc("changeByClick:true")
+                   : DumpLog::GetInstance().AddDesc("changeByClick:false");
+    needSetCentered_ ? DumpLog::GetInstance().AddDesc("needSetCentered:true")
+                     : DumpLog::GetInstance().AddDesc("needSetCentered:false");
+    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(currentOffset_));
+    DumpLog::GetInstance().AddDesc("childrenMainSize:" + std::to_string(childrenMainSize_));
+    DumpLog::GetInstance().AddDesc("indicator:" + std::to_string(indicator_));
+    DumpLog::GetInstance().AddDesc("focusIndicator:" + std::to_string(focusIndicator_));
+    DumpLog::GetInstance().AddDesc("currentIndicatorOffset:" + std::to_string(currentIndicatorOffset_));
+    DumpLog::GetInstance().AddDesc("turnPageRate:" + std::to_string(turnPageRate_));
+    DumpLog::GetInstance().AddDesc("swiperStartIndex:" + std::to_string(swiperStartIndex_));
+    DumpLog::GetInstance().AddDesc("scrollMargin:" + std::to_string(scrollMargin_));
+    std::string regionString = std::string("region:");
+    for (auto item : gradientRegions_) {
+        item ? regionString.append("true ") : regionString.append("false ");
+    }
+    DumpLog::GetInstance().AddDesc(regionString);
+    switch (axis_) {
+        case Axis::NONE: {
+            DumpLog::GetInstance().AddDesc("Axis:NONE");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            DumpLog::GetInstance().AddDesc("Axis:HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            DumpLog::GetInstance().AddDesc("Axis:FREE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            DumpLog::GetInstance().AddDesc("Axis:VERTICAL");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

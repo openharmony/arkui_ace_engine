@@ -331,10 +331,8 @@ public:
 
     void GetAndPushFrameNode(const std::string& tag, int32_t elmtId)
     {
-        LOGD("NG ViewStackProcessor GetAndPushFrameNode() tag: %s, elmtId: %d", tag.c_str(), elmtId);
         auto frameNode = FrameNode::GetFrameNode(tag, elmtId);
         if (!frameNode) {
-            LOGE("GetFrameNode feild, tag: %s, elmtId: %d", tag.c_str(), elmtId);
             return;
         }
         Push(frameNode);

@@ -1820,6 +1820,12 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
+    if (info.Length() > 0 && (info[0]->IsUndefined())) {
+        ViewAbstractModel::GetInstance()->SetOverlay(
+            "", nullptr, Alignment::CENTER, CalcDimension(0), CalcDimension(0));
+        return;
+    }
+
     if (info.Length() <= 0 || (!info[0]->IsString() && !info[0]->IsObject())) {
         return;
     }

@@ -66,11 +66,25 @@ void SelectOverlayProxy::UpdateSelectMenuInfo(const SelectMenuInfo& info) const
     pattern->UpdateSelectMenuInfo(info);
 }
 
+void SelectOverlayProxy::UpdateSelectMenuInfo(std::function<void(SelectMenuInfo& menuInfo)> updateAction) const
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateSelectMenuInfo(updateAction);
+}
+
 void SelectOverlayProxy::UpdateShowArea(const RectF& area) const
 {
     auto pattern = GetSelectOverlayPattern(selectOverlayId_);
     CHECK_NULL_VOID(pattern);
     pattern->UpdateShowArea(area);
+}
+
+void SelectOverlayProxy::SetSelectRegionVisible(bool isSelectRegionVisible)
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectRegionVisible(isSelectRegionVisible);
 }
 
 void SelectOverlayProxy::SetHandleReverse(bool reverse)
@@ -131,5 +145,12 @@ bool SelectOverlayProxy::IsHandleShow()
     auto pattern = GetSelectOverlayPattern(selectOverlayId_);
     CHECK_NULL_RETURN(pattern, false);
     return pattern->IsHandleShow();
+}
+
+bool SelectOverlayProxy::IsSingleHandle()
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsSingleHandle();
 }
 } // namespace OHOS::Ace::NG

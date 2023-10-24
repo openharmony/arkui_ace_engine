@@ -94,7 +94,7 @@ size_t TextLayoutAlgorithm::GetLineCount() const
 
 void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper) {}
 
-void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<Rect>& rects) {}
+void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects) {}
 
 ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
 {

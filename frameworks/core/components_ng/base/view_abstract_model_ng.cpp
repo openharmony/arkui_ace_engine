@@ -36,7 +36,6 @@ void ViewAbstractModelNG::CreateCustomMenu(std::function<void()>& buildFunc, con
 {
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     if (!buildFunc) {
-        LOGW("buildFunc is null");
         return;
     }
     buildFunc();
@@ -175,7 +174,6 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
 
         hub->SetLongPressEvent(longPress, false, true, LONG_PRESS_DURATION);
     } else {
-        LOGE("The arg responseType is invalid.");
         return;
     }
     RegisterContextMenuKeyEvent(targetNode, buildFunc, menuParam);
@@ -183,7 +181,6 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
 
     // delete menu when target node destroy
     auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
-        LOGI("BindContextMenu delete menu node from map");
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
         CHECK_NULL_VOID(subwindow);
         auto childContainerId = subwindow->GetChildContainerId();

@@ -40,7 +40,7 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_NULL_VOID(dirty);
     auto result = dirtyRenderNodes_[dirty->GetPageId()].emplace(dirty);
     if (!result.second) {
-        LOGW("fail to emplace %{public}s render node", dirty->GetTag().c_str());
+        LOGW("Fail to emplace %{public}s render node", dirty->GetTag().c_str());
     }
 }
 
@@ -99,8 +99,6 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
                     if (frameInfo_ != nullptr) {
                         frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::RENDER);
                     }
-                } else {
-                    LOGW("need to use multithread feature");
                 }
             }
         }

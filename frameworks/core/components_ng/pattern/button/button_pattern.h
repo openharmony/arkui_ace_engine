@@ -189,7 +189,7 @@ public:
                 result = "ButtonType.Circle";
                 break;
             default:
-                LOGD("The input does not match any ButtonType");
+                break;
         }
         return result;
     }

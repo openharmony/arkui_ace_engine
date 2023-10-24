@@ -91,6 +91,18 @@ void WindowScene::OnAttachToFrameNode()
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
+    auto lostFocusCallback = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->LostFocus();
+    };
+    CHECK_NULL_VOID(session_);
+    session_->SetNotifyUILostFocusFunc(lostFocusCallback);
+
     WindowPattern::OnAttachToFrameNode();
 }
 

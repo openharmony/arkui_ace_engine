@@ -85,5 +85,17 @@ void SystemWindowScene::OnAttachToFrameNode()
         session->TransferPointerEvent(pointerEvent);
     };
     mouseEventHub->SetMouseEvent(std::move(mouseCallback));
+
+    auto lostFocusCallback = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->LostFocus();
+    };
+    CHECK_NULL_VOID(session_);
+    session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }
 } // namespace OHOS::Ace::NG

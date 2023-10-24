@@ -134,6 +134,7 @@ void NGGestureRecognizer::Transform(PointF& localPointF, int id)
         return;
     }
     std::vector<int32_t> vTrans {};
+    vTrans.emplace_back(id);
     while (translateIter != translateIds.end()) {
         int32_t translateId = translateIter->second.parentId;
         if (translateCfg.find(translateId) != translateCfg.end()) {

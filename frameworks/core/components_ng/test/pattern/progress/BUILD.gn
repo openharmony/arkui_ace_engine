@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("progress_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
-    "progress_test_ng.cpp",
-  ]
+  sources = [ "progress_test_ng.cpp" ]
 }

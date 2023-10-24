@@ -39,5 +39,6 @@ void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHove
     isHover_ = isHovered;
 }
 void SwiperArrowPattern::SetButtonVisible(bool visible) {}
+void SwiperArrowPattern::DumpAdvanceInfo() {}
 void SwiperArrowPattern::UpdateArrowContent() {}
 } // namespace OHOS::Ace::NG

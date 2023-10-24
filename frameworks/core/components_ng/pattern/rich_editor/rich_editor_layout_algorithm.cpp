@@ -125,7 +125,7 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     TextLayoutAlgorithm::Layout(layoutWrapper);
 }
 
-void RichEditorLayoutAlgorithm::GetPlaceholderRects(std::vector<Rect>& rects)
+void RichEditorLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects)
 {
     rects = pManager_->GetPlaceholderRects();
 }

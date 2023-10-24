@@ -115,4 +115,26 @@ void GaugeModelNG::SetIndicatorSpace(const Dimension& space)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, IndicatorSpace, space);
 }
+
+void GaugeModelNG::ResetGradientColors()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, GradientColors, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, Values, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, GaugeType, PROPERTY_UPDATE_RENDER);
+}
+
+void GaugeModelNG::ResetShadowOptions()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, ShadowOptions, PROPERTY_UPDATE_RENDER);
+}
+
+void GaugeModelNG::ResetIndicatorIconPath()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorIconSourceInfo, PROPERTY_UPDATE_RENDER);
+}
+
+void GaugeModelNG::ResetIndicatorSpace()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorSpace, PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG

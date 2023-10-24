@@ -16,10 +16,12 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 #include "base/geometry/axis.h"
+#include "base/log/dump_log.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -621,23 +623,23 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     CHECK_NULL_RETURN(curItemPattern, nullptr);
     auto curItemProperty = curItemPattern->GetLayoutProperty<GridItemLayoutProperty>();
     CHECK_NULL_RETURN(curItemProperty, nullptr);
-    auto scrollIrregularInfo = curItemPattern->GetScrollIrregularItemInfo();
-    bool hasIrregularItemInScroll = scrollIrregularInfo.has_value();
+    auto irregularInfo = curItemPattern->GetIrregularItemInfo();
+    bool hasIrregularItemInfo = irregularInfo.has_value();
 
     auto curMainIndex = curItemProperty->GetMainIndex().value_or(-1);
     auto curCrossIndex = curItemProperty->GetCrossIndex().value_or(-1);
-    auto curMainSpan = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainSpan
-                                                : curItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
-    auto curCrossSpan = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossSpan
-                                                 : curItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
-    auto curMainStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainStart
-                                                 : curItemProperty->GetMainStart(gridLayoutInfo_.axis_);
-    auto curCrossStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossStart
-                                                  : curItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
-    auto curMainEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainEnd
-                                               : curItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
-    auto curCrossEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossEnd
-                                                : curItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
+    auto curMainSpan =
+        hasIrregularItemInfo ? irregularInfo.value().mainSpan : curItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
+    auto curCrossSpan =
+        hasIrregularItemInfo ? irregularInfo.value().crossSpan : curItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
+    auto curMainStart =
+        hasIrregularItemInfo ? irregularInfo.value().mainStart : curItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+    auto curCrossStart =
+        hasIrregularItemInfo ? irregularInfo.value().crossStart : curItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
+    auto curMainEnd =
+        hasIrregularItemInfo ? irregularInfo.value().mainEnd : curItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
+    auto curCrossEnd =
+        hasIrregularItemInfo ? irregularInfo.value().crossEnd : curItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
 
     curFocusIndexInfo_.mainIndex = curMainIndex;
     curFocusIndexInfo_.crossIndex = curCrossIndex;
@@ -683,7 +685,7 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         auto flag = (step == FocusStep::LEFT_END) || (step == FocusStep::RIGHT_END);
         auto weakChild = gridLayoutInfo_.hasBigItem_ ? SearchIrregularFocusableChild(nextMainIndex, nextCrossIndex)
                                                      : SearchFocusableChildInCross(nextMainIndex, nextCrossIndex,
-                                                         nextMaxCrossCount, flag ? -1 : curMainIndex, curCrossIndex);
+                                                           nextMaxCrossCount, flag ? -1 : curMainIndex, curCrossIndex);
         auto child = weakChild.Upgrade();
         if (child && child->IsFocusable()) {
             ScrollToFocusNode(weakChild);
@@ -892,19 +894,19 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
         if (!childItemProperty) {
             continue;
         }
-        auto scrollIrregularInfo = childPattern->GetScrollIrregularItemInfo();
-        bool hasIrregularItemInScroll = scrollIrregularInfo.has_value();
+        auto irregularInfo = childPattern->GetIrregularItemInfo();
+        bool hasIrregularItemInfo = irregularInfo.has_value();
 
         auto childMainIndex = childItemProperty->GetMainIndex().value_or(-1);
         auto childCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
-        auto chidlMainStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainStart
-                                                       : childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
-        auto chidlMainEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().mainEnd
-                                                     : childItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
-        auto chidCrossStart = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossStart
-                                                       : childItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
-        auto chidCrossEnd = hasIrregularItemInScroll ? scrollIrregularInfo.value().crossEnd
-                                                     : childItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
+        auto chidlMainStart = hasIrregularItemInfo ? irregularInfo.value().mainStart
+                                                   : childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+        auto chidlMainEnd =
+            hasIrregularItemInfo ? irregularInfo.value().mainEnd : childItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
+        auto chidCrossStart = hasIrregularItemInfo ? irregularInfo.value().crossStart
+                                                   : childItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
+        auto chidCrossEnd = hasIrregularItemInfo ? irregularInfo.value().crossEnd
+                                                 : childItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
 
         GridItemIndexInfo childInfo;
         childInfo.mainIndex = childMainIndex;
@@ -914,7 +916,8 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
         childInfo.crossStart = chidCrossStart;
         childInfo.crossEnd = chidCrossEnd;
 
-        if ((isLeftStep_ && (childCrossIndex == tarCrossIndex || chidCrossEnd == tarCrossIndex)) ||
+        if ((isLeftStep_ &&
+                ((childCrossIndex == tarCrossIndex && chidCrossEnd == -1) || chidCrossEnd == tarCrossIndex)) ||
             (isRightStep_ && childCrossIndex == tarCrossIndex)) {
             double nearestDistance = GetNearestDistanceFromChildToCurFocusItemInMainAxis(tarCrossIndex, childInfo);
             int32_t intersectAreaSize = CalcIntersectAreaInTargetDirectionShadow(childInfo, true);
@@ -928,7 +931,8 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
                 targetFocusHubWeak = AceType::WeakClaim(AceType::RawPtr(childFocus));
             }
         } else if ((isUpStep_ && childMainIndex == tarMainIndex) ||
-                   (isDownStep_ && (childMainIndex == tarMainIndex || chidlMainStart == tarMainIndex))) {
+                   (isDownStep_ &&
+                       ((childMainIndex == tarMainIndex && chidlMainStart == -1) || chidlMainStart == tarMainIndex))) {
             double nearestDistance = GetNearestDistanceFromChildToCurFocusItemInCrossAxis(tarMainIndex, childInfo);
             int32_t intersectAreaSize = CalcIntersectAreaInTargetDirectionShadow(childInfo, false);
             if (LessNotEqual(nearestDistance, minDistance) ||
@@ -1675,16 +1679,123 @@ void GridPattern::SetAccessibilityAction()
     });
 }
 
-void GridPattern::DumpInfo()
+void GridPattern::DumpAdvanceInfo()
 {
-    LOGI("reachStart:%{public}d,reachEnd:%{public}d,offsetEnd:%{public}d", gridLayoutInfo_.reachStart_,
-        gridLayoutInfo_.reachEnd_, gridLayoutInfo_.offsetEnd_);
     auto property = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(property);
-    LOGI("startIndex:%{public}d,endIndex:%{public}d,startMainLine:%{public}d,endMainLine:%{public}d,cachedCount:%{"
-         "public}d",
-        gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.startMainLineIndex_,
-        gridLayoutInfo_.endMainLineIndex_, property->GetCachedCountValue(1));
+    supportAnimation_ ? DumpLog::GetInstance().AddDesc("supportAnimation:true")
+                      : DumpLog::GetInstance().AddDesc("supportAnimation:false");
+    isConfigScrollable_ ? DumpLog::GetInstance().AddDesc("isConfigScrollable:true")
+                        : DumpLog::GetInstance().AddDesc("isConfigScrollable:false");
+    scrollable_ ? DumpLog::GetInstance().AddDesc("scrollable:true")
+                : DumpLog::GetInstance().AddDesc("scrollable:false");
+    firstShow_ ? DumpLog::GetInstance().AddDesc("firstShow:true") : DumpLog::GetInstance().AddDesc("firstShow:false");
+    gridLayoutInfo_.lastCrossCount_.has_value()
+        ? DumpLog::GetInstance().AddDesc("lastCrossCount:" + std::to_string(gridLayoutInfo_.lastCrossCount_.value()))
+        : DumpLog::GetInstance().AddDesc("lastCrossCount:null");
+    gridLayoutInfo_.reachEnd_ ? DumpLog::GetInstance().AddDesc("reachEnd:true")
+                              : DumpLog::GetInstance().AddDesc("reachEnd:false");
+    gridLayoutInfo_.reachStart_ ? DumpLog::GetInstance().AddDesc("reachStart:true")
+                                : DumpLog::GetInstance().AddDesc("reachStart:false");
+    gridLayoutInfo_.offsetEnd_ ? DumpLog::GetInstance().AddDesc("offsetEnd:true")
+                               : DumpLog::GetInstance().AddDesc("offsetEnd:false");
+    gridLayoutInfo_.hasBigItem_ ? DumpLog::GetInstance().AddDesc("hasBigItem:true")
+                                : DumpLog::GetInstance().AddDesc("hasBigItem:false");
+    gridLayoutInfo_.offsetUpdated_ ? DumpLog::GetInstance().AddDesc("offsetUpdated:true")
+                                   : DumpLog::GetInstance().AddDesc("offsetUpdated:false");
+    DumpLog::GetInstance().AddDesc("animatorOffset:" + std::to_string(animatorOffset_));
+    DumpLog::GetInstance().AddDesc("scrollStop:" + std::to_string(scrollStop_));
+    DumpLog::GetInstance().AddDesc("initialIndex:" + std::to_string(initialIndex_));
+    DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(prevHeight_));
+    DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(currentHeight_));
+    DumpLog::GetInstance().AddDesc("endHeight:" + std::to_string(endHeight_));
+    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(gridLayoutInfo_.currentOffset_));
+    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(gridLayoutInfo_.prevOffset_));
+    DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(gridLayoutInfo_.lastMainSize_));
+    DumpLog::GetInstance().AddDesc(
+        "totalHeightOfItemsInView:" + std::to_string(gridLayoutInfo_.totalHeightOfItemsInView_));
+    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(gridLayoutInfo_.startIndex_));
+    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(gridLayoutInfo_.endIndex_));
+    DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(gridLayoutInfo_.jumpIndex_));
+    DumpLog::GetInstance().AddDesc("crossCount:" + std::to_string(gridLayoutInfo_.crossCount_));
+    DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(gridLayoutInfo_.childrenCount_));
+    DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
+    DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
+    property->GetCachedCount().has_value()
+        ? DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value()))
+        : DumpLog::GetInstance().AddDesc("CachedCount:null");
+    property->GetMaxCount().has_value()
+        ? DumpLog::GetInstance().AddDesc("MaxCount:" + std::to_string(property->GetMaxCount().value()))
+        : DumpLog::GetInstance().AddDesc("MaxCount:null");
+    property->GetMinCount().has_value()
+        ? DumpLog::GetInstance().AddDesc("MinCount:" + std::to_string(property->GetMinCount().value()))
+        : DumpLog::GetInstance().AddDesc("MinCount:null");
+    property->GetCellLength().has_value()
+        ? DumpLog::GetInstance().AddDesc("CellLength:" + std::to_string(property->GetCellLength().value()))
+        : DumpLog::GetInstance().AddDesc("CellLength:null");
+    property->GetEditable().has_value()
+        ? DumpLog::GetInstance().AddDesc("Editable:" + std::to_string(property->GetEditable().value()))
+        : DumpLog::GetInstance().AddDesc("Editable:null");
+    property->GetScrollEnabled().has_value()
+        ? DumpLog::GetInstance().AddDesc("ScrollEnabled:" + std::to_string(property->GetScrollEnabled().value()))
+        : DumpLog::GetInstance().AddDesc("ScrollEnabled:null");
+    switch (gridLayoutInfo_.scrollAlign_) {
+        case ScrollAlign::NONE: {
+            DumpLog::GetInstance().AddDesc("ScrollAlign:NONE");
+            break;
+        }
+        case ScrollAlign::CENTER: {
+            DumpLog::GetInstance().AddDesc("ScrollAlign:CENTER");
+            break;
+        }
+        case ScrollAlign::END: {
+            DumpLog::GetInstance().AddDesc("ScrollAlign:END");
+            break;
+        }
+        case ScrollAlign::START: {
+            DumpLog::GetInstance().AddDesc("ScrollAlign:START");
+            break;
+        }
+        case ScrollAlign::AUTO: {
+            DumpLog::GetInstance().AddDesc("ScrollAlign:AUTO");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    if (!gridLayoutInfo_.gridMatrix_.empty()) {
+        DumpLog::GetInstance().AddDesc("-----------start print gridMatrix------------");
+        std::string res = std::string("");
+        for (auto item : gridLayoutInfo_.gridMatrix_) {
+            res.append(std::to_string(item.first));
+            res.append(": ");
+            for (auto index : item.second) {
+                res.append("[")
+                    .append(std::to_string(index.first))
+                    .append(",")
+                    .append(std::to_string(index.second))
+                    .append("] ");
+            }
+            DumpLog::GetInstance().AddDesc(res);
+            res.clear();
+        }
+        DumpLog::GetInstance().AddDesc("-----------end print gridMatrix------------");
+    }
+    if (!gridLayoutInfo_.lineHeightMap_.empty()) {
+        DumpLog::GetInstance().AddDesc("-----------start print lineHeightMap------------");
+        for (auto item : gridLayoutInfo_.lineHeightMap_) {
+            DumpLog::GetInstance().AddDesc(std::to_string(item.first).append(" :").append(std::to_string(item.second)));
+        }
+        DumpLog::GetInstance().AddDesc("-----------end print lineHeightMap------------");
+    }
+    if (!gridLayoutInfo_.irregularItemsPosition_.empty()) {
+        DumpLog::GetInstance().AddDesc("-----------start print irregularItemsPosition_------------");
+        for (auto item : gridLayoutInfo_.irregularItemsPosition_) {
+            DumpLog::GetInstance().AddDesc(std::to_string(item.first).append(" :").append(std::to_string(item.second)));
+        }
+        DumpLog::GetInstance().AddDesc("-----------end print irregularItemsPosition_------------");
+    }
 }
 
 std::string GridPattern::ProvideRestoreInfo()

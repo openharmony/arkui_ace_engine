@@ -338,6 +338,14 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
     }
 }
 
+void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
+{
+    CHECK_NULL_VOID(rsNode_ && paintRect.IsValid());
+    RSNode::ExecuteWithoutAnimation([&]() {
+        rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    });
+}
+
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool needRoundToPixelGrid)
 {
     CHECK_NULL_VOID(rsNode_);
