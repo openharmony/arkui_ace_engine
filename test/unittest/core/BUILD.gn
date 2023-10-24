@@ -22,6 +22,7 @@ group("core_unittest") {
     "common:core_common_unittest",
     "gestures:gestures_test_ng",
     "pattern:core_pattern_unittest",
+    "pipeline:pipeline_context_test_ng",
     "property:core_property_unittest",
     "render:render_unittest",
   ]

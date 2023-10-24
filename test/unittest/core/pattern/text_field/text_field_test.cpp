@@ -14,15 +14,12 @@
  */
 
 #include <array>
+#include <memory>
 #include <optional>
 #include <string>
 #include <utility>
 
 #include "gtest/gtest.h"
-
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
 
 #define private public
 #define protected public
@@ -32,7 +29,14 @@
 #include "test/mock/core/render/mock_paragraph.h"
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "base/utils/string_utils.h"
+#include "core/common/ime/constant.h"
+#include "core/common/ime/text_editing_value.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/ime/text_selection.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
@@ -71,6 +75,7 @@ constexpr double ICON_SIZE = 24;
 constexpr double ICON_HOT_ZONE_SIZE = 40;
 constexpr double FONT_SIZE = 16;
 constexpr int32_t DEFAULT_NODE_ID = 1;
+constexpr int32_t MAX_BACKWARD_NUMBER = 30;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
 const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 using TextFiledModelUpdater = std::function<void(TextFieldModelNG&)>;
@@ -82,14 +87,11 @@ protected:
     static void TearDownTestSuite();
     void TearDown() override;
 
-    void CreateTextFieldNode(const std::string& text, const std::string& placeHolder, bool isTextArea,
-        std::function<void(TextFieldModelNG&)>&& modelUpdater);
-    void RunMeasureAndLayout();
-    void GetFocus();
-
-    RefPtr<MockParagraph> paragraph_;
-    RefPtr<FrameNode> frameNode_;
-    RefPtr<TextFieldPattern> pattern_;
+    RefPtr<FrameNode> CreateTextFieldNode(
+        const std::string& text, const std::string& placeHolder, std::function<void(TextFieldModelNG&)>&& modelUpdater);
+    void RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode);
+    RefPtr<TextFieldPattern> GetPattern(const RefPtr<FrameNode>& frameNode);
+    void GetFocus(const RefPtr<FrameNode>& frameNode);
 };
 
 void TextFieldTestBase::SetUpTestSuite()
@@ -116,16 +118,6 @@ void TextFieldTestBase::SetUpTestSuite()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
-void TextFieldTestBase::RunMeasureAndLayout()
-{
-    frameNode_->SetRootMeasureNode(true);
-    frameNode_->UpdateLayoutPropertyFlag();
-    frameNode_->SetSkipSyncGeometryNode(false);
-    frameNode_->Measure(frameNode_->GetLayoutConstraint());
-    frameNode_->Layout();
-    frameNode_->SetRootMeasureNode(false);
-}
-
 void TextFieldTestBase::TearDownTestSuite()
 {
     MockContainer::TearDown();
@@ -133,42 +125,55 @@ void TextFieldTestBase::TearDownTestSuite()
     MockParagraph::TearDown();
 }
 
-void TextFieldTestBase::TearDown()
-{
-    pattern_ = nullptr;
-    frameNode_ = nullptr;
-}
+void TextFieldTestBase::TearDown() {}
 
-void TextFieldTestBase::CreateTextFieldNode(const std::string& text, const std::string& placeHolder, bool isTextArea,
-    std::function<void(TextFieldModelNG&)>&& modelUpdater)
+RefPtr<FrameNode> TextFieldTestBase::CreateTextFieldNode(
+    const std::string& text, const std::string& placeHolder, std::function<void(TextFieldModelNG&)>&& modelUpdater)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateNode(placeHolder, text, isTextArea);
+    textFieldModelNG.CreateTextInput(placeHolder, text);
     if (modelUpdater) {
         modelUpdater(textFieldModelNG);
     }
     stack->StopGetAccessRecording();
-    frameNode_ = AceType::DynamicCast<FrameNode>(stack->Finish());
-    pattern_ = frameNode_->GetPattern<TextFieldPattern>();
-    paragraph_ = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph_, PushStyle(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph_, AddText(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph_, PopStyle()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph_, Build()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph_, Layout(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph_, GetHeight()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph_, GetLongestLine()).Times(AnyNumber());
-    RunMeasureAndLayout();
+    auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, GetHeight()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, GetLongestLine()).Times(AnyNumber());
+    RunMeasureAndLayout(frameNode);
+    return frameNode;
 }
 
-void TextFieldTestBase::GetFocus()
+void TextFieldTestBase::RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode)
 {
-    auto focushHub = pattern_->GetFocusHub();
+    frameNode->SetActive();
+    frameNode->SetRootMeasureNode(true);
+    frameNode->UpdateLayoutPropertyFlag();
+    frameNode->SetSkipSyncGeometryNode(false);
+    frameNode->Measure(frameNode->GetLayoutConstraint());
+    frameNode->Layout();
+    frameNode->SetRootMeasureNode(false);
+}
+
+void TextFieldTestBase::GetFocus(const RefPtr<FrameNode>& frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto focushHub = pattern->GetFocusHub();
     focushHub->currentFocus_ = true;
-    pattern_->HandleFocusEvent();
-    RunMeasureAndLayout();
+    pattern->HandleFocusEvent();
+    RunMeasureAndLayout(frameNode);
+}
+
+RefPtr<TextFieldPattern> TextFieldTestBase::GetPattern(const RefPtr<FrameNode>& frameNode)
+{
+    return frameNode->GetPattern<TextFieldPattern>();
 }
 
 class TextFieldCaretTest : public TextFieldTestBase {};
@@ -185,23 +190,24 @@ HWTEST_F(TextFieldCaretTest, CaretPosition001, TestSize.Level1)
     /**
      * @tc.steps: Create Text filed node with default text and placeholder
      */
-    CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, false, nullptr);
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
 
     /**
      * @tc.expected: Current caret position is end of text
      */
-    EXPECT_EQ(pattern_->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.size());
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.size());
 
     /**
      * @tc.steps: Changed new text and remeasure and layout
      */
-    pattern_->InsertValue("new");
-    RunMeasureAndLayout();
+    pattern->InsertValue("new");
+    RunMeasureAndLayout(frameNode);
 
     /**
      * @tc.expected: Current caret position is end of text
      */
-    EXPECT_EQ(pattern_->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.size() + 3);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.size() + 3);
 }
 
 /**
@@ -226,44 +232,57 @@ HWTEST_F(TextFieldCaretTest, CaretPosition002, TestSize.Level1)
      * @tc.expected: Check if the text filter rules for the input box are compliant
      */
     for (const auto& testItem : testItems) {
-        CreateTextFieldNode(
-            text, DEFAULT_PLACE_HOLDER, false, [testItem](TextFieldModelNG& model) { model.SetType(testItem.item); });
-        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern_->GetTextValue();
-        EXPECT_EQ(pattern_->GetTextSelectController()->GetCaretIndex(), testItem.expected) << errorMessage;
+        auto frameNode = CreateTextFieldNode(
+            text, DEFAULT_PLACE_HOLDER, [testItem](TextFieldModelNG& model) { model.SetType(testItem.item); });
+        auto pattern = GetPattern(frameNode);
+        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern->GetTextValue();
+        EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), testItem.expected) << errorMessage;
     }
 }
 
 /**
  * @tc.name: CaretPosition003
- * @tc.desc: Test caret position on SetCaretPosition and SetMaxLength
+ * @tc.desc: Test caret position on SetCaretPosition
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldCaretTest, CaretPosition003, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create Text filed node with default text and placeholder
+     * @tc.steps: Create Text filed node with default text
      * @tc.expected: Cursor movement position matches the actual position
      */
-    CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, false, nullptr);
-    auto controller = pattern_->GetTextFieldController();
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    auto controller = pattern->GetTextFieldController();
     controller->CaretPosition(static_cast<int>(DEFAULT_TEXT.size() - 2));
-    EXPECT_EQ(pattern_->GetTextSelectController()->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size() - 2));
-
-    /**
-     * @tc.steps: Create Text filed node with default text and placeholder
-     * @tc.expected: Cursor movement position matches the actual position
-     */
-    CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, false,
-        [](TextFieldModelNG& model) { model.SetMaxLength(DEFAULT_TEXT.size() - 2); });
-    EXPECT_EQ(pattern_->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.size() - 2);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size() - 2));
 }
 
 /**
  * @tc.name: CaretPosition004
- * @tc.desc: Test caret position on SetInputFilter.
+ * @tc.desc: Test caret position on SetMaxLength
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldCaretTest, CaretPosition004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     * @tc.expected: Cursor movement position matches the actual position
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER,
+        [](TextFieldModelNG& model) { model.SetMaxLength(DEFAULT_TEXT.size() - 2); });
+    auto pattern = GetPattern(frameNode);
+    auto controller = pattern->GetTextFieldController();
+    controller->CaretPosition(static_cast<int>(DEFAULT_TEXT.size() - 2));
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size() - 2));
+}
+
+/**
+ * @tc.name: CaretPosition005
+ * @tc.desc: Test caret position on SetInputFilter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, CaretPosition005, TestSize.Level1)
 {
     /**
      * @tc.steps: Initialize text and filter patterns
@@ -279,10 +298,11 @@ HWTEST_F(TextFieldCaretTest, CaretPosition004, TestSize.Level1)
      * @tc.expected: Check if the text filter patterns for the input box are compliant
      */
     for (const auto& testItem : testItems) {
-        CreateTextFieldNode(text, DEFAULT_PLACE_HOLDER, false,
+        auto frameNode = CreateTextFieldNode(text, DEFAULT_PLACE_HOLDER,
             [testItem](TextFieldModelNG& model) { model.SetInputFilter(testItem.item, nullptr); });
-        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern_->GetTextValue();
-        EXPECT_EQ(pattern_->GetTextSelectController()->GetCaretIndex(), testItem.expected) << errorMessage;
+        auto pattern = GetPattern(frameNode);
+        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern->GetTextValue();
+        EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), testItem.expected) << errorMessage;
     }
 }
 
@@ -291,21 +311,22 @@ HWTEST_F(TextFieldCaretTest, CaretPosition004, TestSize.Level1)
  * @tc.desc: Test input string at the cursor position
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldCaretTest, CaretPosition005, TestSize.Level1)
+HWTEST_F(TextFieldCaretTest, CaretPosition006, TestSize.Level1)
 {
     /**
      * @tc.steps: Initialize text input and get select controller, update caret position and insert value
      */
-    CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, false, nullptr);
-    auto controller = pattern_->GetTextSelectController();
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    auto controller = pattern->GetTextSelectController();
     controller->UpdateCaretIndex(2);
-    pattern_->InsertValue("new");
-    RunMeasureAndLayout();
+    pattern->InsertValue("new");
+    RunMeasureAndLayout(frameNode);
 
     /**
      * @tc.expected: Check if the text and cursor position are correct
      */
-    EXPECT_EQ(pattern_->contentController_->GetTextValue(), "abnewcdefghijklmnopqrstuvwxyz");
+    EXPECT_EQ(pattern->contentController_->GetTextValue(), "abnewcdefghijklmnopqrstuvwxyz");
     EXPECT_EQ(controller->GetCaretIndex(), 5);
 }
 
@@ -314,66 +335,155 @@ HWTEST_F(TextFieldCaretTest, CaretPosition005, TestSize.Level1)
  * @tc.desc: Test stop edting input mode
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldCaretTest, CaretPosition006, TestSize.Level1)
+HWTEST_F(TextFieldCaretTest, CaretPosition007, TestSize.Level1)
 {
     /**
      * @tc.steps: Initialize text input node
      */
-    CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, false, nullptr);
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
 
     /**
      * @tc.expected: The cursor is neither blinking nor visible when unfocused
      */
-    EXPECT_EQ(pattern_->caretStatus_, CaretStatus::NONE);
-    EXPECT_FALSE(pattern_->GetCursorVisible());
+    EXPECT_EQ(pattern->caretStatus_, CaretStatus::NONE);
+    EXPECT_FALSE(pattern->GetCursorVisible());
 
     /**
      * @tc.steps: Manually trigger focus and perform measure and layout again
      * @tc.expected: Check if the cursor is twinking
      */
-    GetFocus();
-    EXPECT_EQ(pattern_->caretStatus_, CaretStatus::SHOW);
-    EXPECT_TRUE(pattern_->GetCursorVisible());
+    GetFocus(frameNode);
+    EXPECT_EQ(pattern->caretStatus_, CaretStatus::SHOW);
+    EXPECT_TRUE(pattern->GetCursorVisible());
 
     /**
      * @tc.steps: Get text filed controller and stop editing
      */
-    auto controller = pattern_->GetTextFieldController();
+    auto controller = pattern->GetTextFieldController();
     controller->StopEditing();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode);
 
     /**
      * @tc.expected: Check if the cursor stop twinking
      */
-    EXPECT_EQ(pattern_->caretStatus_, CaretStatus::HIDE);
-    EXPECT_FALSE(pattern_->GetCursorVisible());
+    EXPECT_EQ(pattern->caretStatus_, CaretStatus::HIDE);
+    EXPECT_FALSE(pattern->GetCursorVisible());
 }
 
 /**
- * @tc.name: CaretPosition007
- * @tc.desc: Test the text selection mode of the text controller
+ * @tc.name: OnTextChangedListenerCaretPosition001
+ * @tc.desc: Test the soft keyboard interface
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldCaretTest, CaretPosition007, TestSize.Level1)
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition001, TestSize.Level1)
 {
     /**
-     * @tc.steps: Initialize text input node and get focus
+     * @tc.steps: Initialize text input node and call text changed listener update edting value
      */
-    CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, false, nullptr);
-    GetFocus();
-
-    EXPECT_CALL(*paragraph_, GetRectsForRange(_, _, _)).Times(1);
-    auto controller = pattern_->GetTextFieldController();
-    controller->SetTextSelection(3, 5);
-    RunMeasureAndLayout();
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    GetFocus(frameNode);
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "new text";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    RunMeasureAndLayout(frameNode);
 
     /**
-     * @tc.expected: Check if the cursor stop twinking and
-     *               get select first and second handle info index
+     * @tc.expected: Check if the new text and cursor position are correct
      */
-    auto selectController = pattern_->GetTextSelectController();
-    EXPECT_EQ(selectController->GetStartIndex(), 3);
-    EXPECT_EQ(selectController->GetEndIndex(), 5);
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare("new text"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), value.text.length());
+}
+
+/**
+ * @tc.name: OnTextChangedListenerCaretPosition002
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text input node and call delete backward
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    GetFocus(frameNode);
+    pattern->DeleteBackward(3);
+    pattern->DeleteBackward(2);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare("abcdefghijklmnopqrstu"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.length() - 5);
+
+    /**
+     * @tc.steps: Move the cursor and then delete text
+     */
+    auto textFiledController = pattern->GetTextFieldController();
+    textFiledController->CaretPosition(5);
+    pattern->DeleteBackward(5);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare("fghijklmnopqrstu"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 0);
+
+    /**
+     * @tc.steps: Trigger a backspace key press that exceeds the length of the text
+     */
+    pattern->DeleteBackward(MAX_BACKWARD_NUMBER);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare("fghijklmnopqrstu"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: OnTextChangedListenerCaretPosition003
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize insert text and expected values
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    pattern->DeleteForward(3);
+    pattern->DeleteForward(2);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare(DEFAULT_TEXT), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.length());
+
+    /**
+     * @tc.steps: Move the cursor and then delete text forward.
+     */
+    auto textFiledController = pattern->GetTextFieldController();
+    textFiledController->CaretPosition(5);
+    pattern->DeleteForward(30);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare("abcde"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 5);
 }
 
 /**
@@ -407,13 +517,13 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
      */
     int index = 0;
     for (const auto& testItem : testItems) {
-        CreateTextFieldNode(
-            "", DEFAULT_PLACE_HOLDER, false, [testItem](TextFieldModelNG& model) { model.SetType(testItem.item); });
-        auto controller = pattern_->contentController_;
-        controller->InsertValue(0, insertValues[index]);
+        auto frameNode = CreateTextFieldNode(
+            "", DEFAULT_PLACE_HOLDER, [testItem](TextFieldModelNG& model) { model.SetType(testItem.item); });
+        auto pattern = GetPattern(frameNode);
+        pattern->contentController_->InsertValue(0, insertValues[index]);
         index++;
-        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern_->GetTextValue();
-        EXPECT_EQ(controller->GetTextValue().compare(testItem.expected), 0) << errorMessage;
+        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern->GetTextValue();
+        EXPECT_EQ(pattern->contentController_->GetTextValue().compare(testItem.expected), 0) << errorMessage;
     }
 }
 
@@ -438,12 +548,12 @@ HWTEST_F(TextFieldControllerTest, ContentController002, TestSize.Level1)
      * @tc.expected: Check if the text filter patterns for the input box are compliant
      */
     for (const auto& testItem : testItems) {
-        CreateTextFieldNode("", DEFAULT_PLACE_HOLDER, false,
+        auto frameNode = CreateTextFieldNode("", DEFAULT_PLACE_HOLDER,
             [testItem](TextFieldModelNG& model) { model.SetInputFilter(testItem.item, nullptr); });
-        auto controller = pattern_->contentController_;
-        controller->InsertValue(0, text);
-        auto errorMessage = testItem.error + ", text is " + pattern_->GetTextValue();
-        EXPECT_EQ(controller->GetTextValue().compare(testItem.expected), 0) << errorMessage;
+        auto pattern = GetPattern(frameNode);
+        pattern->contentController_->InsertValue(0, text);
+        auto errorMessage = testItem.error + ", text is " + pattern->GetTextValue();
+        EXPECT_EQ(pattern->contentController_->GetTextValue().compare(testItem.expected), 0) << errorMessage;
     }
 }
 
@@ -457,25 +567,25 @@ HWTEST_F(TextFieldControllerTest, ContentController003, TestSize.Level1)
     /**
      * @tc.steps: Initialize text and filter patterns
      */
-    CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, false, nullptr);
-    auto controller = pattern_->contentController_;
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
 
     /**
      * @tc.expected: Check if text is selected based on corresponding left and right coordinates
      */
-    auto selectedValue = controller->GetSelectedValue(1, 4);
+    auto selectedValue = pattern->contentController_->GetSelectedValue(1, 4);
     EXPECT_EQ(selectedValue.compare("bcd"), 0) << "Text is " + selectedValue;
 
     /**
      * @tc.expected: Check if text is selected based on preceding coordinates
      */
-    auto beforeSelectedValue = controller->GetValueBeforeIndex(3);
+    auto beforeSelectedValue = pattern->contentController_->GetValueBeforeIndex(3);
     EXPECT_EQ(beforeSelectedValue.compare("abc"), 0) << "Text is " + beforeSelectedValue;
 
     /**
      * @tc.expected: Check if text is selected based on trailing coordinates
      */
-    auto afterSelectedValue = controller->GetValueAfterIndex(3);
+    auto afterSelectedValue = pattern->contentController_->GetValueAfterIndex(3);
     EXPECT_EQ(afterSelectedValue.compare("defghijklmnopqrstuvwxyz"), 0) << "Text is " + afterSelectedValue;
 }
 } // namespace OHOS::Ace::NG
