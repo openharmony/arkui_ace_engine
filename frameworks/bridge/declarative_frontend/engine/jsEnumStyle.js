@@ -250,6 +250,13 @@ var Alignment;
   Alignment[Alignment["BottomEnd"] = 8] = "BottomEnd";
 })(Alignment || (Alignment = {}));
 
+var BlendMode;
+(function (BlendMode) {
+  BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
+  BlendMode[BlendMode["DESTINATION_IN"] = 1] = "DESTINATION_IN";
+  BlendMode[BlendMode["SOURCE_IN"] = 2] = "SOURCE_IN";
+})(BlendMode || (BlendMode = {}));
+
 var TextOverflow;
 (function (TextOverflow) {
   TextOverflow[TextOverflow["None"] = 0] = "None";

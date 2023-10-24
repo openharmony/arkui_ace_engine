@@ -412,6 +412,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpRate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
 
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
@@ -538,6 +539,7 @@ protected:
     virtual void OnDynamicLightUpRateUpdate(const float rate) {}
     virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
+    virtual void OnBackBlendModeUpdate(BlendMode blendMode) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}

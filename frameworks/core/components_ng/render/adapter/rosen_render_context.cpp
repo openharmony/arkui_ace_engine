@@ -2673,6 +2673,24 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::RSColorBlendModeType blendModeType = Rosen::RSColorBlendModeType::NONE;
+    switch (blendMode) {
+        case BlendMode::SOURCE_IN:
+            blendModeType = Rosen::RSColorBlendModeType::SRC_IN;
+            break;
+        case BlendMode::DESTINATION_IN:
+            blendModeType = Rosen::RSColorBlendModeType::DST_IN;
+            break;
+        default:
+            blendModeType = Rosen::RSColorBlendModeType::NONE;
+    }
+    rsNode_->SetColorBlendMode(blendModeType);
+    RequestNextFrame();
+}
+
 // called when frameNode size changes
 void RosenRenderContext::PaintGraphics()
 {

@@ -248,6 +248,7 @@ public:
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void JsMotionPath(const JSCallbackInfo& info);
     static void JsShadow(const JSCallbackInfo& info);
+    static void JsBlendMode(const JSCallbackInfo& info);
     static void JsGrayScale(const JSCallbackInfo& info);
     static void JsBrightness(const JSCallbackInfo& info);
     static void JsContrast(const JSCallbackInfo& info);

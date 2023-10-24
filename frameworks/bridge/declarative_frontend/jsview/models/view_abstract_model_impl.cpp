@@ -955,6 +955,12 @@ void ViewAbstractModelImpl::SetBackShadow(const std::vector<Shadow>& shadows)
     backDecoration->SetShadows(shadows);
 }
 
+void ViewAbstractModelImpl::SetBlendMode(BlendMode blendMode)
+{
+    auto backDecoration = GetBackDecoration();
+    backDecoration->SetBlendMode(blendMode);
+}
+
 void ViewAbstractModelImpl::SetColorBlend(const Color& value)
 {
     auto decoration = GetFrontDecoration();
