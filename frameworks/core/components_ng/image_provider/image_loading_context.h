@@ -69,6 +69,7 @@ public:
     void DataReadyCallback(const RefPtr<ImageObject>& imageObj);
     void SuccessCallback(const RefPtr<CanvasImage>& canvasImage);
     void FailCallback(const std::string& errorMsg);
+    const std::string GetCurrentLoadingState();
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
@@ -100,7 +101,7 @@ private:
     {
         return dstSize_.IsPositive() && dstSize != dstSize_;
     }
-    
+
     const ImageSourceInfo src_;
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
