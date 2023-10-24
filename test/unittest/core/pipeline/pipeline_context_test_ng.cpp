@@ -2234,6 +2234,39 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UITaskSchedulerTestNg002
+ * @tc.desc: Test FlushAfterLayoutTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call FlushAfterLayoutTask.
+     */
+    taskScheduler.FlushAfterLayoutTask();
+
+    /**
+     * @tc.steps3: Call AddAfterLayoutTask.
+     * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 2.
+     */
+    taskScheduler.AddPersistAfterLayoutTask([]() {});
+    taskScheduler.AddPersistAfterLayoutTask(nullptr);
+    EXPECT_EQ(taskScheduler.persistAfterLayoutTasks_.size(), 2);
+
+    /**
+     * @tc.steps4: Call FlushTask.
+     * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 0.
+     */
+    taskScheduler.FlushTask();
+    EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 2);
+}
+
+/**
  * @tc.name: PipelineContextTestNg043
  * @tc.desc: Test SetCloseButtonStatus function.
  * @tc.type: FUNC

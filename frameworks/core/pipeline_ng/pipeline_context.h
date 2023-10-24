@@ -208,6 +208,8 @@ public:
 
     void AddAfterLayoutTask(std::function<void()>&& task);
 
+    void AddPersistAfterLayoutTask(std::function<void()>&& task);
+
     void AddAfterRenderTask(std::function<void()>&& task);
 
     void FlushDirtyNodeUpdate();
