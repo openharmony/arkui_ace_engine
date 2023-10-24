@@ -91,6 +91,7 @@ enum class AceLogTag : uint8_t {
     ACE_WEB,
     ACE_IMAGE,
     ACE_RATING,
+    ACE_SIDE_BAR_CONTAINER,
 };
 
 enum class LogDomain : uint32_t {

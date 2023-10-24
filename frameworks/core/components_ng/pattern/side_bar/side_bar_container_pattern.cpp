@@ -105,13 +105,13 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
 
     auto children = host->GetChildren();
     if (children.empty()) {
-        LOGE("OnUpdateShowControlButton: children is empty.");
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Children is empty.");        
         return;
     }
 
     auto controlButtonNode = children.back();
     if (controlButtonNode->GetTag() != V2::BUTTON_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
-        LOGE("OnUpdateShowControlButton: Get control button failed.");
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Get control button failed.");        
         return;
     }
 
@@ -120,7 +120,7 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
     auto imageNode = controlButtonNode->GetFirstChild();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
     if (!imageFrameNode || imageFrameNode ->GetTag() != V2::IMAGE_ETS_TAG) {
-        LOGW("OnUpdateShowControlButton: Get control image node failed.");
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Get control image failed.");        
         return;
     }
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -147,7 +147,8 @@ void SideBarContainerPattern::OnUpdateShowDivider(
 
     auto children = host->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("OnUpdateShowDivider: children's size is less than 3.");
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Children's size is less than default min size(%{public}d).",
+            DEFAULT_MIN_CHILDREN_SIZE);
         return;
     }
 
@@ -155,7 +156,7 @@ void SideBarContainerPattern::OnUpdateShowDivider(
     auto dividerNode = *(++begin);
     CHECK_NULL_VOID(dividerNode);
     if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
-        LOGE("OnUpdateShowDivider: Get divider failed.");
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Get divider failed.");        
         return;
     }
 
@@ -194,6 +195,7 @@ RefPtr<FrameNode> SideBarContainerPattern::GetContentNode(const RefPtr<FrameNode
 
     const auto& children = host->GetChildren();
     if (children.size() <= CONTENT_INDEX) {
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Get content failed, no content included.");        
         return nullptr;
     }
 
@@ -211,6 +213,8 @@ RefPtr<FrameNode> SideBarContainerPattern::GetSideBarNode(const RefPtr<FrameNode
 
     const auto& children = host->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, 
+            "Get side bar failed, children's size is less than default min size(%{public}d).", DEFAULT_MIN_CHILDREN_SIZE);
         return nullptr;
     }
 
@@ -229,21 +233,25 @@ RefPtr<FrameNode> SideBarContainerPattern::GetControlImageNode() const
 
     auto children = host->GetChildren();
     if (children.empty()) {
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Get control image failed, children is empty.");
         return nullptr;
     }
 
     auto controlButtonNode = children.back();
     if (controlButtonNode->GetTag() != V2::BUTTON_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Get control image failed, control button invalid.");
         return nullptr;
     }
 
     auto buttonChildren = controlButtonNode->GetChildren();
     if (buttonChildren.empty()) {
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Get control image failed, control button' child is empty.");
         return nullptr;
     }
 
     auto imageNode = buttonChildren.front();
     if (imageNode->GetTag() != V2::IMAGE_ETS_TAG || !AceType::InstanceOf<FrameNode>(imageNode)) {
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Get control image failed, control image invalid.");
         return nullptr;
     }
     return AceType::DynamicCast<FrameNode>(imageNode);
@@ -255,7 +263,8 @@ RefPtr<FrameNode> SideBarContainerPattern::GetDividerNode() const
     CHECK_NULL_RETURN(host, nullptr);
     auto children = host->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("GetDividerNode: children's size is less than 3.");
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Children's size is less than default min size(%{public}d).",
+            DEFAULT_MIN_CHILDREN_SIZE);
         return nullptr;
     }
 
@@ -263,7 +272,7 @@ RefPtr<FrameNode> SideBarContainerPattern::GetDividerNode() const
     auto dividerNode = *(++begin);
     CHECK_NULL_RETURN(dividerNode, nullptr);
     if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
-        LOGE("GetDividerNode: Get divider failed.");
+        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Get divider failed.");        
         return nullptr;
     }
 
@@ -336,10 +345,13 @@ void SideBarContainerPattern::CreateAndMountNodes()
 
     auto children = host->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
+        TAG_LOGD(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Children's size is less than default min size(%{public}d).",
+            DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER);
         return;
     }
 
     if (HasControlButton()) {
+        TAG_LOGD(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Already has control button.");
         return;
     }
 
@@ -805,6 +817,7 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
 {
     CHECK_NULL_VOID(layoutAlgorithm);
     if (realDividerWidth_ <= 0.0f) {
+        TAG_LOGD(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Add divider failed, divider width invalid.");
         return;
     }
 
@@ -947,6 +960,7 @@ void SideBarContainerPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(layoutProperty);
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
     if (dividerStrokeWidth.Value() <= 0.0f) {
+        TAG_LOGD(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Hover failed, divider stroke width invalid.");
         return;
     }
 
