@@ -52,8 +52,6 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateDefaultValueByVersion();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Children's size is less than default min size(%{public}d)",
-            DEFAULT_MIN_CHILDREN_SIZE);
         return;
     }
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -94,6 +92,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             type_ = SideBarContainerType::OVERLAY;
         } else {
             sideBarStatus_ = SideBarStatus::HIDDEN;
+            TAG_LOGI(AceLogTag::ACE_SIDE_BAR_CONTAINER, "SideBarContainer current status is HIDDEN.");
             autoHide_ = true;
         }
     }
@@ -541,8 +540,6 @@ void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        TAG_LOGW(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Children's size is less than default min size(%{public}d)",
-            DEFAULT_MIN_CHILDREN_SIZE);
         return;
     }
 

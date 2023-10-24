@@ -45,6 +45,7 @@ ImageSourceInfo CreateSourceInfo(const std::string& src, bool isPixelMap, RefPtr
 
 void SideBarContainerModelNG::Create()
 {
+    TAG_LOGI(AceLogTag::ACE_SIDE_BAR_CONTAINER, "Start create SideBarContainer.");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
