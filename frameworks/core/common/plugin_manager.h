@@ -65,14 +65,14 @@ public:
 
 private:
     std::mutex mutex_;
-    static std::map<int64_t, RefPtr<PluginSubContainer>> pluginSubContainerMap_;
+    std::map<int64_t, RefPtr<PluginSubContainer>> pluginSubContainerMap_;
     std::mutex nonmatchedContainerMutex_;
     std::unordered_map<std::string, RefPtr<PluginSubContainer>> nonmatchedContainerMap_;
     std::mutex parentContainerMutex_;
     std::unordered_map<int64_t, int32_t> parentContainerMap_;
     Framework::JsEngineLoader* jsEngineLoader_ = nullptr;
     void* aceAbility_ = nullptr;
-    static std::shared_ptr<PluginUtils> pluginUtils_;
+    std::shared_ptr<PluginUtils> pluginUtils_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PLUGIN_MANAGER_H
