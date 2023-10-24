@@ -104,7 +104,11 @@ public:
     }
 
 private:
-    bool scrollSnapTrigger_ = false; // Used to handle the triggering problem of snap scroll
+    /*
+     * Drag the built-in or external scroll bar to slide the Scroll. 
+     * When the sliding stops and the fingers are not raised, prevent scrolling to the limit point
+     */
+    bool scrollSnapTrigger_ = false;
     std::list<ScrollableNodeInfo> scrollableNodes_;  // Scrollable nodes, like list, grid, scroll, etc.
     std::list<WeakPtr<ScrollBarPattern>> scrollBars_; // ScrollBar should effect with scrollable node.
 };
