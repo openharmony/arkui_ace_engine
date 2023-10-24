@@ -42,8 +42,9 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "sourceInfo does not match, ignore current callback. "
-                 "current: %{public}s vs callback's: %{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "sourceInfo does not match, ignore current callback. "
+                "current: %{public}s vs callback's: %{public}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -61,8 +62,9 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "sourceInfo does not match, ignore current callback. "
-                 "current: %{public}s vs callback's: %{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "sourceInfo does not match, ignore current callback. "
+                "current: %{public}s vs callback's: %{public}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -80,8 +82,9 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "sourceInfo does not match, ignore current callback. "
-                 "current: %{public}s vs callback's: %{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "sourceInfo does not match, ignore current callback. "
+                "current: %{public}s vs callback's: %{public}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -349,8 +352,9 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "alt image sourceInfo does not match, ignore current callback. "
-                 "current: %{public}s vs callback's: %{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "alt image sourceInfo does not match, ignore current callback. "
+                "current: %{public}s vs callback's: %{public}s",
                 currentAltSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -381,8 +385,9 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
         auto currentAltSrc = layoutProps->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSrc != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "alt image sourceInfo does not match, ignore current callback. "
-                 "current: %{public}s vs callback's: %{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "alt image sourceInfo does not match, ignore current callback. "
+                "current: %{public}s vs callback's: %{public}s",
                 currentAltSrc.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -512,8 +517,8 @@ void ImagePattern::EnableDrag()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
-                         const std::string& /*extraParams*/) -> DragDropInfo {
+    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string &
+                         /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
         auto imagePattern = weak.Upgrade();
         CHECK_NULL_RETURN(imagePattern && imagePattern->loadingCtx_, info);
@@ -705,10 +710,13 @@ void ImagePattern::DumpAdvanceInfo()
 {
     auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
-    if (layoutProp->GetImageSourceInfo().has_value()) {
-        DumpLog::GetInstance().AddDesc(std::string("url: ").append(layoutProp->GetImageSourceInfo()->ToString()));
-    }
+    auto src = layoutProp->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    DumpLog::GetInstance().AddDesc(std::string("url: ").append(src.ToString()));
     syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
+    if (loadingCtx_) {
+        auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
+        DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
+    }
 }
 
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
