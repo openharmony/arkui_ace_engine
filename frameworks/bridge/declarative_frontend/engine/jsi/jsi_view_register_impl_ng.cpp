@@ -411,6 +411,7 @@ void JsBindViews(BindingTarget globalObj)
     JSSwiper::JSBind(globalObj);
     JSImageSpan::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
+    JSListScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj);
     JSButton::JSBind(globalObj);
     JSRadio::JSBind(globalObj);

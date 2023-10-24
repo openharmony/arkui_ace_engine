@@ -18,6 +18,7 @@
 #include <string>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_constants.h"
@@ -602,7 +603,7 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
     if (firstIsGroup) {
         auto itemGroup = (*childrens.begin())->GetPattern<ListItemGroupPattern>();
         if (itemGroup) {
-            groupAtStart = itemGroup->GetDiasplayStartIndexInGroup() == 0;
+            groupAtStart = itemGroup->GetDisplayStartIndexInGroup() == 0;
         }
     }
     if (lastIsGroup) {
@@ -1299,6 +1300,52 @@ Offset ListPattern::GetCurrentOffset() const
     return { 0.0, GetTotalOffset() };
 }
 
+Rect ListPattern::GetItemRect(int32_t index) const
+{
+    if (index < 0 || index < startIndex_ || index > endIndex_) {
+        return Rect();
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Rect());
+    auto item = host->GetChildByIndex(index);
+    CHECK_NULL_RETURN(item, Rect());
+    auto itemGeometry = item->GetGeometryNode();
+    CHECK_NULL_RETURN(itemGeometry, Rect());
+    return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
+        itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
+
+Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
+{
+    if (index < 0 || indexInGroup < 0 || index < startIndex_ || index > endIndex_) {
+        return Rect();
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Rect());
+    auto itemGroupWrapper = host->GetChildByIndex(index);
+    CHECK_NULL_RETURN(itemGroupWrapper, Rect());
+    auto itemGroup = itemGroupWrapper->GetHostNode();
+    CHECK_NULL_RETURN(itemGroup, Rect());
+    if (!(itemGroup->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG)) {
+        return Rect();
+    }
+    auto itemGroupGeometry = itemGroup->GetGeometryNode();
+    CHECK_NULL_RETURN(itemGroupGeometry, Rect());
+    auto groupPattern = itemGroup->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(groupPattern, Rect());
+    if (indexInGroup < groupPattern->GetDisplayStartIndexInGroup() ||
+        indexInGroup > groupPattern->GetDisplayEndIndexInGroup()) {
+        return Rect();
+    }
+    auto groupItem = itemGroup->GetChildByIndex(indexInGroup);
+    CHECK_NULL_RETURN(groupItem, Rect());
+    auto groupItemGeometry = groupItem->GetGeometryNode();
+    CHECK_NULL_RETURN(groupItemGeometry, Rect());
+    return Rect(itemGroupGeometry->GetFrameRect().GetX() + groupItemGeometry->GetFrameRect().GetX(),
+        itemGroupGeometry->GetFrameRect().GetY() + groupItemGeometry->GetFrameRect().GetY(),
+        groupItemGeometry->GetFrameRect().Width(), groupItemGeometry->GetFrameRect().Height());
+}
+
 void ListPattern::UpdateScrollBarOffset()
 {
     if (itemPosition_.empty()) {
@@ -1691,7 +1738,7 @@ ListItemGroupPara ListPattern::GetListItemGroupParameter(const RefPtr<FrameNode>
         auto itemGroupPattern = curFrameParentNode->GetPattern<ListItemGroupPattern>();
         CHECK_NULL_RETURN(itemGroupPattern, listItemGroupPara);
         listItemGroupPara.displayEndIndex = itemGroupPattern->GetDisplayEndIndexInGroup();
-        listItemGroupPara.displayStartIndex = itemGroupPattern->GetDiasplayStartIndexInGroup();
+        listItemGroupPara.displayStartIndex = itemGroupPattern->GetDisplayStartIndexInGroup();
         listItemGroupPara.lanes = itemGroupPattern->GetLanesInGroup();
         listItemGroupPara.itemEndIndex = itemGroupPattern->GetEndIndexInGroup();
         LOGD("TListPattern::GetListItemGroupParameter(%{public}d,%{public}d,%{public}d,%{public}d).",

@@ -74,4 +74,11 @@ bool GridPositionController::IsAtEnd() const
     CHECK_NULL_RETURN(gridPattern, false);
     return gridPattern->IsAtBottom();
 }
+
+Rect GridPositionController::GetItemRect(int32_t index) const
+{
+    auto gridPattern = AceType::DynamicCast<GridPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN(gridPattern, Rect());
+    return gridPattern->GetItemRect(index);
+}
 } // namespace OHOS::Ace::NG

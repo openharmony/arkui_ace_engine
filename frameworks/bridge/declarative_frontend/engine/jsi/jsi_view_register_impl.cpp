@@ -618,6 +618,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PanGestureOptions", JSPanGestureOption::JSBind },
     { "CustomDialogController", JSCustomDialogController::JSBind },
     { "Scroller", JSScroller::JSBind },
+    { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "TabsController", JSTabsController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
@@ -691,6 +692,7 @@ void RegisterAllModule(BindingTarget globalObj)
     JSSwiperController::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
+    JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
@@ -729,6 +731,7 @@ void RegisterAllFormModule(BindingTarget globalObj)
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
+    JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
@@ -878,6 +881,7 @@ void JsBindFormViews(
         JSTouchHandler::JSBind(globalObj);
         JSPersistent::JSBind(globalObj);
         JSScroller::JSBind(globalObj);
+        JSListScroller::JSBind(globalObj);
 
         JSProfiler::JSBind(globalObj);
         JSCommonView::JSBind(globalObj);
@@ -918,6 +922,7 @@ void JsBindViews(BindingTarget globalObj)
     JSShareData::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
+    JSListScroller::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);

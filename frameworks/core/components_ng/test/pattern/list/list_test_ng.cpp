@@ -5628,4 +5628,108 @@ HWTEST_F(ListTestNg, ListPattern_Distributed001, TestSize.Level1)
     pattern_->OnRestoreInfo(ret);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 }
+
+/**
+ * @tc.name: ListPattern_GetItemRect001
+ * @tc.desc: Test the GetItemRect function of List.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_GetItemRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List then slide List by Scroller.
+     */
+    CreateList([](ListModelNG listModelNG) {
+        listModelNG.SetInitialIndex(1);
+        CreateListItem(TOTAL_NUMBER * 2);
+    });
+    pattern_->ScrollBy(ITEM_HEIGHT / 2.0f);
+    RunMeasureAndLayout(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get invalid ListItem Rect.
+     * @tc.expected: Return 0 when input invalid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(-1), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(TOTAL_NUMBER * 2 - 1), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(TOTAL_NUMBER * 2), Rect()));
+
+    /**
+     * @tc.steps: step3. Get ListItem Rect by GetItemRectInGroup.
+     * @tc.expected: Return 0 when get ListItem Rect by GetItemRectInGroup.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(1, 0), Rect()));
+
+    /**
+     * @tc.steps: step4. Get valid ListItem Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1),
+        Rect(0, -ITEM_HEIGHT / 2.0f, FILL_LENGTH.Value() * DEVICE_WIDTH, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3),
+        Rect(0, -ITEM_HEIGHT / 2.0f + ITEM_HEIGHT * 2, FILL_LENGTH.Value() * DEVICE_WIDTH, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(9),
+        Rect(0, -ITEM_HEIGHT / 2.0f + ITEM_HEIGHT * 8, FILL_LENGTH.Value() * DEVICE_WIDTH, ITEM_HEIGHT)));
+    /**
+     * @tc.steps: step5. Slide List by Scroller.
+     */
+    pattern_->ScrollToIndex(10);
+    RunMeasureAndLayout(frameNode_);
+    /**
+     * @tc.steps: step6. Get invalid ListItem Rect.
+     * @tc.expected: Return 0 when input invalid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(9), Rect()));
+
+    /**
+     * @tc.steps: step7. Get valid ListItem Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(pattern_->GetEndIndex()),
+        Rect(0, DEVICE_HEIGHT - ITEM_HEIGHT, FILL_LENGTH.Value() * DEVICE_WIDTH, ITEM_HEIGHT)));
+}
+
+/**
+ * @tc.name: ListPattern_GetItemRectInGroup001
+ * @tc.desc: Test the GetItemRectInGroup function of List.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_GetItemRectInGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List then slide List by Scroller.
+     */
+    CreateList([](ListModelNG listModelNG) {
+        listModelNG.SetInitialIndex(1);
+        CreateGroup(TOTAL_NUMBER, Axis::VERTICAL);
+    });
+    pattern_->ScrollBy(ITEM_HEIGHT * 2);
+    RunMeasureAndLayout(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get invalid group item Rect.
+     * @tc.expected: Return 0 when input invalid group index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(-1, 0), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(2, -1), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(0, 0), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(TOTAL_NUMBER - 1, 0), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(1, 0), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(1, GROUP_ITEM_NUMBER), Rect()));
+
+    /**
+     * @tc.steps: step3. Get valid group item Rect.
+     * @tc.expected: Return actual Rect when input valid group index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(2, 0),
+        Rect(0, ITEM_HEIGHT * 2, FILL_LENGTH.Value() * DEVICE_WIDTH, ITEM_HEIGHT)));
+
+    /**
+     * @tc.steps: step4. Get valid ListItemGroup Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2),
+        Rect(0, ITEM_HEIGHT * 2, FILL_LENGTH.Value() * DEVICE_WIDTH, ITEM_HEIGHT * GROUP_ITEM_NUMBER)));
+}
 } // namespace OHOS::Ace::NG

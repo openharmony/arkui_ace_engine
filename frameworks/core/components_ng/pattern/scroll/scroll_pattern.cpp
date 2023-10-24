@@ -829,4 +829,19 @@ void ScrollPattern::OnRestoreInfo(const std::string& restoreInfo)
     Dimension dimension = StringUtils::StringToDimension(restoreInfo, true);
     currentOffset_ = dimension.ConvertToPx();
 }
+
+Rect ScrollPattern::GetItemRect(int32_t index) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Rect());
+    if (index != 0 || host->TotalChildCount() != 1) {
+        return Rect();
+    }
+    auto item = host->GetChildByIndex(index);
+    CHECK_NULL_RETURN(item, Rect());
+    auto itemGeometry = item->GetGeometryNode();
+    CHECK_NULL_RETURN(itemGeometry, Rect());
+    return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
+        itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
 } // namespace OHOS::Ace::NG

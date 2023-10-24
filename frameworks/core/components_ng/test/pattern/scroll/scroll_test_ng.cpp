@@ -2680,4 +2680,31 @@ HWTEST_F(ScrollTestNg, Distributed001, TestSize.Level1)
     pattern_->OnRestoreInfo(ret);
     EXPECT_DOUBLE_EQ(pattern_->currentOffset_, 1.0f);
 }
+
+/**
+ * @tc.name: ScrollGetItemRect001
+ * @tc.desc: Test Scroll GetItemRect function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Scroll.
+     */
+    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::HORIZONTAL); });
+
+    /**
+     * @tc.steps: step2. Get invalid ScrollItem Rect.
+     * @tc.expected: Return 0 when input invalid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(-1), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect()));
+
+    /**
+     * @tc.steps: step3. Get valid ScrollItem Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0),
+        Rect(0, 0, TOTAL_NUMBER * HORIZONTAL_LENGTH, FILL_LENGTH.Value() * DEVICE_HEIGHT)));
+}
 } // namespace OHOS::Ace::NG

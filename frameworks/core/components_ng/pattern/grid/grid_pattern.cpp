@@ -1808,4 +1808,19 @@ void GridPattern::OnRestoreInfo(const std::string& restoreInfo)
     gridLayoutInfo_.jumpIndex_ = StringUtils::StringToInt(restoreInfo);
     gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
 }
+
+Rect GridPattern::GetItemRect(int32_t index) const
+{
+    if (index < 0 || index < gridLayoutInfo_.startIndex_ || index > gridLayoutInfo_.endIndex_) {
+        return Rect();
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Rect());
+    auto item = host->GetChildByIndex(index);
+    CHECK_NULL_RETURN(item, Rect());
+    auto itemGeometry = item->GetGeometryNode();
+    CHECK_NULL_RETURN(itemGeometry, Rect());
+    return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
+        itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
 } // namespace OHOS::Ace::NG

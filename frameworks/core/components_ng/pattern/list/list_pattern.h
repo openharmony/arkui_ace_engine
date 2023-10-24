@@ -172,6 +172,8 @@ public:
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
+    Rect GetItemRect(int32_t index) const;
+    Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
     void OnAnimateStop() override;
     void UpdateScrollBarOffset() override;
     // chain animation

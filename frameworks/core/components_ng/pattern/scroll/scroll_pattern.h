@@ -180,6 +180,7 @@ public:
     bool ScrollPageCheck(float delta, int32_t source);
     void AdjustOffset(float& delta, int32_t source);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    Rect GetItemRect(int32_t index) const;
 
     // scrollSnap
     std::optional<float> CalePredictSnapOffset(float delta) override;

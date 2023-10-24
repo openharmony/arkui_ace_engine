@@ -5193,4 +5193,74 @@ HWTEST_F(GridTestNg, SearchIrregularFocusableChildInNormalGrid001, TestSize.Leve
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
 }
+
+/**
+ * @tc.name: GridPattern_GetItemRect001
+ * @tc.desc: Test the GetItemRect function of Grid.
+ * @tc.type: FUNCgetitemre
+ */
+HWTEST_F(GridTestNg, GridPattern_GetItemRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Grid then slide Grid by Scroller.
+     */
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 1, 3 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) {
+        GridItemSize gridItemSize { 1, 2 };
+        return gridItemSize;
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    CreateGrid([option](GridModelNG gridModelNG) {
+        gridModelNG.SetColumnsTemplate("1fr 1fr");
+        gridModelNG.SetLayoutOptions(option);
+        CreateVerticalItem(10);
+    });
+    pattern_->UpdateStartIndex(3, ScrollAlign::START);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, ITEM_HEIGHT * 3);
+
+    /**
+     * @tc.steps: step2. Get invalid GridItem Rect.
+     * @tc.expected: Return 0 when input invalid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(-1), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(10), Rect()));
+
+    /**
+     * @tc.steps: step3. Get valid GridItem Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3), Rect(0, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(4), Rect(0, ITEM_HEIGHT, DEVICE_WIDTH / 2, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(7),
+        Rect(DEVICE_WIDTH / 2, ITEM_HEIGHT * 2, DEVICE_WIDTH / 2, ITEM_HEIGHT)));
+
+    /**
+     * @tc.steps: step4. Slide Grid by Scroller.
+     */
+    UpdateCurrentOffset(ITEM_HEIGHT + ITEM_HEIGHT / 2);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, ITEM_HEIGHT * 3);
+
+    /**
+     * @tc.steps: step5. Get invalid GridItem Rect.
+     * @tc.expected: Return 0 when input invalid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(-1), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(10), Rect()));
+
+    /**
+     * @tc.steps: step6. Get valid GridItem Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(0, -ITEM_HEIGHT / 2, DEVICE_WIDTH, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(0, ITEM_HEIGHT / 2, DEVICE_WIDTH / 2, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3),
+        Rect(0, ITEM_HEIGHT + ITEM_HEIGHT / 2, DEVICE_WIDTH, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5),
+        Rect(DEVICE_WIDTH / 2, ITEM_HEIGHT * 2 + ITEM_HEIGHT / 2, DEVICE_WIDTH / 2, ITEM_HEIGHT)));
+}
 } // namespace OHOS::Ace::NG
