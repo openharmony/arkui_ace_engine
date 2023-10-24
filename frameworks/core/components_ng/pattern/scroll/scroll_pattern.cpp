@@ -129,7 +129,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         FireOnScrollStop();
         scrollStop_ = false;
     }
-    if (!scrollBarProxy->IsScrollSnapTrigger() && !scrollBar->IsPressed() && ScrollableIdle() && !AnimateRunning()) {
+    bool scrollSnapTriggerIn = !scrollBar || (scrollBar && !scrollBar->IsPressed());
+    bool scrollSnapTriggerOut = !scrollBarProxy || (scrollBarProxy && !scrollBarProxy->IsScrollSnapTrigger());
+    if (scrollSnapTriggerIn && scrollSnapTriggerOut && ScrollableIdle() && !AnimateRunning()) {
         auto predictSnapOffset = CalePredictSnapOffset(0.0);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
