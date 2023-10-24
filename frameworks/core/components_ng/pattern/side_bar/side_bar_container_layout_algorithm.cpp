@@ -92,7 +92,6 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             type_ = SideBarContainerType::OVERLAY;
         } else {
             sideBarStatus_ = SideBarStatus::HIDDEN;
-            TAG_LOGI(AceLogTag::ACE_SIDE_BAR_CONTAINER, "SideBarContainer current status is HIDDEN.");
             autoHide_ = true;
         }
     }

@@ -38,7 +38,6 @@ void StepperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize =
         CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
-        LOGW("Size is infinity.");
         geometryNode->SetFrameSize(SizeF());
         return;
     }
@@ -164,7 +163,6 @@ void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
     if (!frameSize.IsPositive()) {
-        LOGW("Frame size is not positive.");
         return;
     }
     LayoutSwiper(layoutWrapper);

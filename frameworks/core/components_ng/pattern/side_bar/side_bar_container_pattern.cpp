@@ -150,7 +150,7 @@ void SideBarContainerPattern::OnUpdateShowDivider(
     auto begin = children.rbegin();
     auto dividerNode = *(++begin);
     CHECK_NULL_VOID(dividerNode);
-    if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) { 
+    if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
         return;
     }
 
@@ -587,7 +587,6 @@ void SideBarContainerPattern::DoAnimation()
 
     if (autoHide_) {
         sideBarStatus_ = SideBarStatus::HIDDEN;
-        TAG_LOGI(AceLogTag::ACE_SIDE_BAR_CONTAINER, "SideBarContainer current status is HIDDEN.");
     }
 
     UpdateAnimDir();
@@ -599,8 +598,6 @@ void SideBarContainerPattern::DoAnimation()
 
     auto sideBarStatus = sideBarStatus_;
     sideBarStatus_ = SideBarStatus::CHANGING;
-    TAG_LOGI(AceLogTag::ACE_SIDE_BAR_CONTAINER, "SideBarContainer current status is CHANGING.");
-
     UpdateControlButtonIcon();
 
     // fire before animation to include user changes in onChange event
@@ -613,11 +610,9 @@ void SideBarContainerPattern::DoAnimation()
         if (pattern) {
             if (sideBarStatus == SideBarStatus::HIDDEN) {
                 pattern->SetSideBarStatus(SideBarStatus::SHOW);
-                TAG_LOGI(AceLogTag::ACE_SIDE_BAR_CONTAINER, "SideBarContainer current status is SHOW.");
                 pattern->UpdateControlButtonIcon();
             } else {
                 pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
-                TAG_LOGI(AceLogTag::ACE_SIDE_BAR_CONTAINER, "SideBarContainer current status is HIDDEN.");
                 pattern->UpdateControlButtonIcon();
             }
         }
@@ -683,7 +678,6 @@ void SideBarContainerPattern::DoSideBarAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->SetSideBarStatus(SideBarStatus::SHOW);
-            TAG_LOGI(AceLogTag::ACE_SIDE_BAR_CONTAINER, "SideBarContainer current status is SHOW.");
             pattern->UpdateControlButtonIcon();
         });
     } else {
@@ -692,7 +686,6 @@ void SideBarContainerPattern::DoSideBarAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
-            TAG_LOGI(AceLogTag::ACE_SIDE_BAR_CONTAINER, "SideBarContainer current status is HIDDEN.");
             pattern->UpdateControlButtonIcon();
         });
     }
@@ -707,7 +700,6 @@ void SideBarContainerPattern::UpdateSideBarPosition(float value)
 
     if (sideBarStatus_ != SideBarStatus::CHANGING) {
         sideBarStatus_ = SideBarStatus::CHANGING;
-        TAG_LOGI(AceLogTag::ACE_SIDE_BAR_CONTAINER, "SideBarContainer current status is CHANGING.");
         UpdateControlButtonIcon();
     }
 
