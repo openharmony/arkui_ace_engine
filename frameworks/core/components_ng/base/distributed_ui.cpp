@@ -68,7 +68,6 @@ void RestorePageNode(const RefPtr<NG::FrameNode>& pageNode)
 
 SerializeableObjectArray DistributedUI::DumpUITree()
 {
-    LOGD("UITree interface start");
 #ifdef ACE_DEBUG_LOG
     auto timeStart = std::chrono::high_resolution_clock::now();
 #endif
@@ -80,7 +79,6 @@ SerializeableObjectArray DistributedUI::DumpUITree()
     auto pageRootNode = currentPageId_ ? context->GetStageManager()->GetPageById(currentPageId_)
                                        : context->GetStageManager()->GetLastPage();
     CHECK_NULL_RETURN(pageRootNode, SerializeableObjectArray());
-    LOGD("UITree Dump page: %{public}d", pageRootNode->GetPageId());
 
     SerializeableObjectArray objectArray;
     auto children = pageRootNode->GetChildren();
@@ -100,7 +98,6 @@ SerializeableObjectArray DistributedUI::DumpUITree()
 
 void DistributedUI::SubscribeUpdate(const std::function<void(int32_t, SerializeableObjectArray&)>& onUpdate)
 {
-    LOGD("UITree Subscribe Update");
     onUpdateCb_ = std::move(onUpdate);
 }
 
@@ -112,7 +109,6 @@ void DistributedUI::UnSubscribeUpdate()
 
 void DistributedUI::ProcessSerializeableInputEvent(const SerializeableObjectArray& array)
 {
-    LOGD("UITree interface start");
 #ifdef ACE_DEBUG_LOG
     auto timeStart = std::chrono::high_resolution_clock::now();
 #endif
@@ -136,7 +132,6 @@ void DistributedUI::ProcessSerializeableInputEvent(const SerializeableObjectArra
 
 void DistributedUI::RestoreUITree(const SerializeableObjectArray& array)
 {
-    LOGD("UITree interface start");
 #ifdef ACE_DEBUG_LOG
     auto timeStart = std::chrono::high_resolution_clock::now();
 #endif
@@ -153,9 +148,7 @@ void DistributedUI::RestoreUITree(const SerializeableObjectArray& array)
 
 void DistributedUI::UpdateUITree(const SerializeableObjectArray& array)
 {
-    LOGD("UITree interface start");
     if (status_ != StateMachine::SINK_START) {
-        LOGE("UpdateUITree failed. status=%{public}d", static_cast<uint8_t>(status_));
         return;
     }
     pendingUpdates_.emplace_back(std::move((SerializeableObjectArray&)array));
@@ -167,7 +160,6 @@ void DistributedUI::UpdateUITree(const SerializeableObjectArray& array)
 
 void DistributedUI::SubscribeInputEventProcess(const std::function<void(SerializeableObjectArray&)>& onEvent)
 {
-    LOGD("UITree Subscribe Event");
     onEventCb_ = std::move(onEvent);
 }
 
@@ -224,7 +216,6 @@ void DistributedUI::OnTreeUpdate()
         return;
     }
 
-    LOGD("UITree interface start");
 #ifdef ACE_DEBUG_LOG
     auto timeStart = std::chrono::high_resolution_clock::now();
 #endif
@@ -232,7 +223,6 @@ void DistributedUI::OnTreeUpdate()
     DistributedUI::UpdateType updateType;
     SerializeableObjectArray update;
     if (pageChangeFlag_) {
-        LOGD("UITree page changed. dump currentPage:%{public}d", currentPageId_);
         pageChangeFlag_ = false;
         ResetDirtyNodes();
         update = DumpUITree();
@@ -240,7 +230,6 @@ void DistributedUI::OnTreeUpdate()
     } else {
         update = DumpUpdate();
         if (update.empty()) {
-            LOGD("UITree no need to update");
             return;
         }
         updateType = UpdateType::PAGE_UPDATE;
@@ -270,7 +259,6 @@ void DistributedUI::OnPageChanged(int32_t pageId)
         pageChangeFlag_ = true;
     }
     currentPageId_ = pageId;
-    LOGD("UITree OnPageChanged to %{public}d", pageId);
 }
 
 int32_t DistributedUI::GetCurrentPageId()
@@ -280,7 +268,6 @@ int32_t DistributedUI::GetCurrentPageId()
 
 void DistributedUI::BypassEvent(const TouchEvent& point, bool isSubPipe)
 {
-    LOGD("UITree interface start");
 #ifdef ACE_DEBUG_LOG
     auto timeStart = std::chrono::high_resolution_clock::now();
 #endif
@@ -319,12 +306,10 @@ bool DistributedUI::IsSinkMode()
 
 void DistributedUI::ApplyOneUpdate()
 {
-    LOGD("UITree interface start");
 #ifdef ACE_DEBUG_LOG
     auto timeStart = std::chrono::high_resolution_clock::now();
 #endif
 
-    LOGD("UITree pendingUpdates.size=%{public}zu", pendingUpdates_.size());
     for (int i = 0; i < HANDLE_UPDATE_PER_VSYNC; i++) {
         if (pendingUpdates_.empty()) {
             return;
@@ -347,13 +332,11 @@ void DistributedUI::DumpDirtyRenderNodes(SerializeableObjectArray& objectArray)
     for (const auto& nodeId : dirtyRenderNodes_) {
         auto node = ElementRegister::GetInstance()->GetUINodeById(nodeId);
         if (!node || !IsInCurrentPage(node, currentPageId_) || node->GetTag() == V2::PAGE_ETS_TAG) {
-            LOGE("UITree |ERROR| Node not found or not in current page. %{public}d", nodeId);
             continue;
         }
         if (IsNewNode(nodeId)) {
             continue;
         }
-        LOGD("UITree dirty Render node: %{public}s%{public}d", node->GetTag().c_str(), nodeId);
         auto nodeObject = NodeObject::Create();
         DumpNode(node, -1, OperationType::OP_MODIFY, nodeObject);
         if (IsRecordHash(nodeId, nodeObject->Hash())) {
@@ -367,13 +350,11 @@ void DistributedUI::DumpDirtyLayoutNodes(SerializeableObjectArray& objectArray)
     for (const auto& nodeId : dirtyLayoutNodes_) {
         auto node = ElementRegister::GetInstance()->GetUINodeById(nodeId);
         if (!node || !IsInCurrentPage(node, currentPageId_)) {
-            LOGE("UITree Node not found or not in current page. %{public}d", nodeId);
             continue;
         }
         if (IsNewNode(nodeId)) {
             continue;
         }
-        LOGD("UITree dirty Layout node: %{public}s%{public}d", node->GetTag().c_str(), nodeId);
         auto nodeObject = NodeObject::Create();
         DumpNode(node, -1, OperationType::OP_MODIFY, nodeObject);
         if (IsRecordHash(nodeId, nodeObject->Hash())) {
@@ -386,14 +367,9 @@ void DistributedUI::DumpNewNodes(SerializeableObjectArray& objectArray)
 {
     for (const auto& nodeId : newNodes_) {
         auto node = ElementRegister::GetInstance()->GetUINodeById(nodeId);
-        if (node) {
-            LOGD("UITree node");
-        }
         if (!node || !IsInCurrentPage(node, currentPageId_)) {
-            LOGE("UITree |ERROR| Node not found or not in current page. %{public}d", nodeId);
             continue;
         }
-        LOGD("UITree new node: %{public}s%{public}d", node->GetTag().c_str(), nodeId);
         auto nodeObject = NodeObject::Create();
         DumpNode(node, -1, OperationType::OP_ADD, nodeObject);
         AddNodeHash(nodeId, nodeObject->Hash());
@@ -404,7 +380,6 @@ void DistributedUI::DumpNewNodes(SerializeableObjectArray& objectArray)
 void DistributedUI::DumpDelNodes(SerializeableObjectArray& objectArray)
 {
     for (const auto& nodeId : deletedNodes_) {
-        LOGD("UITree del node: %{public}d", nodeId);
         auto nodeObject = NodeObject::Create();
         nodeObject->Put(DISTRIBUTE_UI_ID, nodeId);
         nodeObject->Put(DISTRIBUTE_UI_OPERATION, static_cast<int32_t>(OperationType::OP_DELETE));
@@ -464,10 +439,9 @@ bool DistributedUI::ReadyToDumpUpdate()
 void DistributedUI::SetIdMapping(int32_t srcNodeId, int32_t sinkNodeId)
 {
     if (nodeIdMapping_.count(srcNodeId)) {
-        LOGW("UITree |WARN| has mapping [%{public}d, %{public}d]", srcNodeId, nodeIdMapping_[srcNodeId]);
+        LOGD("UITree |WARN| has mapping [%{public}d, %{public}d]", srcNodeId, nodeIdMapping_[srcNodeId]);
     }
     nodeIdMapping_[srcNodeId] = sinkNodeId;
-    LOGD("UITree set mapping [%{public}d, %{public}d]", srcNodeId, nodeIdMapping_[srcNodeId]);
 }
 
 int32_t DistributedUI::GetIdMapping(int32_t srcNodeId)
@@ -476,20 +450,17 @@ int32_t DistributedUI::GetIdMapping(int32_t srcNodeId)
     if (nodeIdMapping_.count(srcNodeId)) {
         sinkNodeId = nodeIdMapping_[srcNodeId];
     }
-    LOGD("UITree get mapping [%{public}d, %{public}d]", srcNodeId, sinkNodeId);
     return sinkNodeId;
 }
 
 void DistributedUI::AddNodeHash(int32_t nodeId, std::size_t hashValue)
 {
     nodeHashs_[nodeId] = hashValue;
-    LOGD("UITree add hash [%{public}d, %{public}zu]", nodeId, nodeHashs_.at(nodeId));
 }
 
 void DistributedUI::DelNodeHash(int32_t nodeId)
 {
     if (nodeHashs_.count(nodeId)) {
-        LOGD("UITree del hash [%{public}d, %{public}zu]", nodeId, nodeHashs_.at(nodeId));
         nodeHashs_.erase(nodeId);
     }
 }
@@ -510,7 +481,7 @@ void DistributedUI::DumpNode(
     nodeObject->Put(DISTRIBUTE_UI_ID, node->GetId());
     auto parent = node->GetParent();
     if (!parent) {
-        LOGE("UITree |ERROR| parent not found %{public}d", node->GetId());
+        LOGD("UITree |ERROR| parent not found %{public}d", node->GetId());
         nodeObject->Put(DISTRIBUTE_UI_PARENT, -1);
     } else {
         nodeObject->Put(DISTRIBUTE_UI_PARENT, parent->GetId());
@@ -527,7 +498,6 @@ void DistributedUI::DumpTreeInner(const RefPtr<NG::UINode>& node, SerializeableO
 {
     auto nodeObject = NodeObject::Create();
     DumpNode(node, depth, OperationType::OP_ADD, nodeObject);
-    LOGD("UITree EstimateBufferSize=%{public}d", nodeObject->EstimateBufferSize());
     AddNodeHash(node->GetId(), nodeObject->Hash());
     objectArray.push_back(std::move(nodeObject));
 
@@ -634,8 +604,6 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
     auto srcNodeId = nodeObject->GetInt(DISTRIBUTE_UI_ID);
     auto srcParentNodeId = nodeObject->GetInt(DISTRIBUTE_UI_PARENT);
     auto depth = nodeObject->GetInt(DISTRIBUTE_UI_DEPTH);
-    LOGD("UITree process type %{public}s id %{public}d pid %{public}d depth %{public}d", type.c_str(), srcNodeId,
-        srcParentNodeId, depth);
 
     if (!nodeCreate.count(type)) {
         LOGE("UITree |ERROR| found no type %{public}s id %{public}d pid %{public}d depth %{public}d", type.c_str(),
@@ -644,14 +612,14 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
     }
 
     if (!nodeObject->Contains(DISTRIBUTE_UI_ATTRS)) {
-        LOGE("UITree |ERROR| found no attrs");
+        LOGW("UITree |ERROR| found no attrs");
         return nullptr;
     }
     auto attrs = nodeObject->GetValue(DISTRIBUTE_UI_ATTRS);
 
     auto sinkNodeId = srcNodeId == -1 ? -1 : ElementRegister::GetInstance()->MakeUniqueId();
     if (ElementRegister::GetInstance()->GetUINodeById(sinkNodeId)) {
-        LOGE("UITree |ERROR| uiNode exist! id: %{public}d", sinkNodeId);
+        LOGD("UITree |ERROR| uiNode exist! id: %{public}d", sinkNodeId);
         return nullptr;
     }
 
@@ -664,7 +632,6 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
         uiNode = nodeCreate.at(type)(type, sinkNodeId);
     }
     if (!uiNode) {
-        LOGE("UITree |ERROR| node create failed!");
         return nullptr;
     }
 
@@ -682,18 +649,14 @@ void DistributedUI::AttachToTree(
     RefPtr<UINode> root, RefPtr<UINode> uiNode, const std::unique_ptr<NodeObject>& nodeObject)
 {
     auto depth = nodeObject->GetInt(DISTRIBUTE_UI_DEPTH);
-    auto sinkNodeId = uiNode->GetId();
     auto sinkParentNodeId = GetIdMapping(nodeObject->GetInt(DISTRIBUTE_UI_PARENT));
     LOGD("UITree process [%{public}d, %{public}d, %{public}d]", depth, sinkNodeId, sinkParentNodeId);
 
     if (depth == 1) {
-        LOGI("UITree attach %{public}d to root", sinkNodeId);
         root->AddChild(uiNode);
     } else {
-        LOGI("UITree attach %{public}d to %{public}d", sinkNodeId, sinkParentNodeId);
         auto parent = ElementRegister::GetInstance()->GetUINodeById(sinkParentNodeId);
         if (!parent) {
-            LOGE("UITree |ERROR| found no sinkParentNodeId %{public}d", sinkParentNodeId);
             return;
         }
         parent->AddChild(uiNode);
@@ -704,10 +667,8 @@ void DistributedUI::AddNode(const std::unique_ptr<NodeObject>& nodeObject, RefPt
 {
     auto uiNode = RestoreNode(nodeObject);
     if (!uiNode) {
-        LOGE("UITree |ERROR| Frame Node is Null.");
         return;
     }
-    LOGD("UITree new node: %{public}s%{public}d", uiNode->GetTag().c_str(), uiNode->GetId());
     AttachToTree(pageRootNode, uiNode, nodeObject);
 }
 
@@ -716,10 +677,8 @@ void DistributedUI::ModNode(const std::unique_ptr<NodeObject>& nodeObject)
     auto sinkNodeId = GetIdMapping(nodeObject->GetInt(DISTRIBUTE_UI_ID));
     auto sinkNode = ElementRegister::GetInstance()->GetUINodeById(sinkNodeId);
     if (!sinkNode) {
-        LOGE("UITree |ERROR| node not found %{public}d", sinkNodeId);
         return;
     }
-    LOGD("UITree modify node: %{public}s%{public}d", sinkNode->GetTag().c_str(), sinkNode->GetId());
     auto attrs = nodeObject->GetValue(DISTRIBUTE_UI_ATTRS);
     sinkNode->FromJson(attrs);
     sinkNode->MarkDirtyNode();
@@ -728,15 +687,12 @@ void DistributedUI::ModNode(const std::unique_ptr<NodeObject>& nodeObject)
 void DistributedUI::DelNode(const std::unique_ptr<NodeObject>& nodeObject)
 {
     auto sinkNodeId = GetIdMapping(nodeObject->GetInt(DISTRIBUTE_UI_ID));
-    LOGD("UITree delete node: %{public}d", sinkNodeId);
     auto sinkNode = ElementRegister::GetInstance()->GetUINodeById(sinkNodeId);
     if (!sinkNode) {
-        LOGE("UITree |ERROR| node not found %{public}d", sinkNodeId);
         return;
     }
     auto parent = sinkNode->GetParent();
     if (!parent) {
-        LOGE("UITree |ERROR| parent node not found.");
         return;
     }
     parent->RemoveChild(sinkNode);
@@ -776,7 +732,6 @@ void DistributedUI::UpdateUITreeInner(SerializeableObjectArray& nodeArray)
 void DistributedUI::RestoreUITreeInner(const SerializeableObjectArray& nodeArray)
 {
     if (nodeArray.empty()) {
-        LOGE("UITree |ERROR| nodeArray is empty.");
         return;
     }
 
@@ -800,7 +755,6 @@ void DistributedUI::RestoreUITreeInner(const SerializeableObjectArray& nodeArray
 bool DistributedUI::IsInCurrentPage(RefPtr<NG::UINode> node, int32_t pageId)
 {
     if (node->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
-        LOGD("UITree true");
         return true;
     }
     if (pageId != 0 && node->GetPageId() != pageId) {

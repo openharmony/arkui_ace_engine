@@ -511,6 +511,14 @@ public:
         return nodeName_;
     }
 
+    void SetNodeId(int id)
+    {
+        if (nodeId_ != -1) {
+            return;
+        }
+        nodeId_ = id;
+    }
+
     int32_t GetNodeId() const
     {
         return nodeId_;

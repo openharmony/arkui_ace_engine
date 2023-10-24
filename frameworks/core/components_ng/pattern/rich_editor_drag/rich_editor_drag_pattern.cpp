@@ -60,7 +60,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     auto rectsForPlaceholders = richEditor->GetRectsForPlaceholders();
 
     size_t index = 0;
-    std::vector<Rect> realRectsForPlaceholders;
+    std::vector<RectF> realRectsForPlaceholders;
     std::list<RefPtr<FrameNode>> realImageChildren;
     auto boxes = hostPattern->GetTextBoxes();
     for (const auto& child : imageChildren) {
@@ -68,24 +68,15 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
         auto rect = rectsForPlaceholders.at(imageIndex);
 
         for (const auto& box : boxes) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            if (LessOrEqual(box.rect_.GetLeft(), rect.Left()) && GreatOrEqual(box.rect_.GetRight(), rect.Right()) &&
-                LessOrEqual(box.rect_.GetTop(), rect.Top()) && GreatOrEqual(box.rect_.GetBottom(), rect.Bottom())) {
-#else
-            if (LessOrEqual(box.rect.GetLeft(), rect.Left()) && GreatOrEqual(box.rect.GetRight(), rect.Right()) &&
-                LessOrEqual(box.rect.GetTop(), rect.Top()) && GreatOrEqual(box.rect.GetBottom(), rect.Bottom())) {
-#endif
+            if (LessOrEqual(box.Left(), rect.Left()) && GreatOrEqual(box.Right(), rect.Right()) &&
+                LessOrEqual(box.Top(), rect.Top()) && GreatOrEqual(box.Bottom(), rect.Bottom())) {
                 realImageChildren.emplace_back(child);
                 realRectsForPlaceholders.emplace_back(rect);
             }
         }
         ++index;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    dragPattern->SetLastLineHeight(boxes.back().rect_.GetHeight());
-#else
-    dragPattern->SetLastLineHeight(boxes.back().rect.GetHeight());
-#endif
+    dragPattern->SetLastLineHeight(boxes.back().Height());
     dragPattern->InitSpanImageLayout(realImageChildren, realRectsForPlaceholders);
     return dragNode;
 }

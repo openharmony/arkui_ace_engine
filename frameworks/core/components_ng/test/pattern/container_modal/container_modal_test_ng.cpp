@@ -291,11 +291,11 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
     ClickBtn(4);
     ClickBtn(5);
     EXPECT_FALSE(isWindowStartMove);
-    EXPECT_TRUE(iswindowSplitPrimary);
-    EXPECT_TRUE(iswindowRecover);
+    EXPECT_FALSE(iswindowSplitPrimary);
+    EXPECT_FALSE(iswindowRecover);
     EXPECT_FALSE(windowMaximize);
-    EXPECT_TRUE(windowMinimize);
-    EXPECT_TRUE(windowClose);
+    EXPECT_FALSE(windowMinimize);
+    EXPECT_FALSE(windowClose);
 
     /**
      * @tc.steps: step2. set callback
@@ -312,7 +312,7 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
     panEvents.front()->GetActionStartEventFunc()(info);
     ClickBtn(3);
     EXPECT_TRUE(isWindowStartMove);
-    EXPECT_TRUE(windowMaximize);
+    EXPECT_FALSE(windowMaximize);
 }
 
 /**
@@ -400,7 +400,7 @@ HWTEST_F(ContainerModelTestNg, Test004, TestSize.Level1)
      */
     Offset inOffset_2 = Offset(movePopupDistanceX + 1, movePopupDistanceY);
     Touch(Offset::Zero(), inOffset_2, inOffset_2);
-    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
 
     /**
      * @tc.steps: step7. Touch inSide

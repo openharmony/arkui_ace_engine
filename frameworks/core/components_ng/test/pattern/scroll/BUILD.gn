@@ -17,7 +17,6 @@ ace_unittest("scroll_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_ng/test/pattern/test_ng.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "scroll_test_ng.cpp",
   ]
 }

@@ -71,6 +71,8 @@ public:
 
     void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
 
+    void SetFrameWithoutAnimation(const RectF& paintRect) override;
+
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
@@ -208,6 +210,8 @@ public:
     // append translate value and return origin value.
     void UpdateTranslateInXY(const OffsetF& offset) override;
     OffsetF GetShowingTranslateProperty() override;
+
+    Matrix4 GetLocalTransformMatrix() override;
 
     void GetPointWithRevert(PointF& point) override;
 
@@ -434,6 +438,7 @@ private:
 
     float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
+    Matrix4 GetRevertMatrix();
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;

@@ -567,6 +567,7 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
+                navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             },
             TaskExecutor::TaskType::UI);
     });
@@ -647,6 +648,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
                 if (isNavBar) {
                     navigation->SetNeedSetInvisible(false);
                 }
+                navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             },
             TaskExecutor::TaskType::UI);
     });

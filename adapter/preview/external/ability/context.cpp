@@ -40,7 +40,7 @@ RefPtr<Context> Context::CreateContext(bool isStage, const std::string& rootDir)
     std::ostringstream formatMessage;
     std::ifstream fin(filename, std::ios::in);
     if (!fin) {
-        LOGE("Unable to open input file: %{public}s", filename.c_str());
+        LOGW("Unable to open input file: %{public}s", filename.c_str());
         return nullptr;
     }
     while (fin >> contents) {

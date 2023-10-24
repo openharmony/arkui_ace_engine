@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 
-#include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
 namespace OHOS::Ace::Framework {
@@ -58,9 +57,6 @@ void JsClickFunction::Execute(const ClickInfo& info)
     }
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
 
-    LOGD("globalOffset.GetX() = %lf, globalOffset.GetY() = %lf, localOffset.GetX() = %lf, localOffset.GetY() = %lf",
-        globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
-
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);
 }
@@ -91,9 +87,6 @@ void JsClickFunction::Execute(const GestureEvent& info)
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
-
-    LOGD("globalOffset.GetX() = %lf, globalOffset.GetY() = %lf, localOffset.GetX() = %lf, localOffset.GetY() = %lf",
-        globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
 
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);
@@ -132,9 +125,6 @@ void JsClickFunction::Execute(MouseInfo& info)
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->Wrap<MouseInfo>(&info);
-
-    LOGD("button = %d, action = %d, globalOffset = (%lf, %lf), localOffset = (%lf, %lf),", info.GetButton(),
-        info.GetAction(), globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
     JsFunction::ExecuteJS(1, &param);

@@ -87,6 +87,7 @@ struct SelectOverlayInfo {
     bool handleReverse = false;
     // Used to determine the range of judgment that is parallel to the first and second handles.
     float singleLineHeight = 10.0f;
+    bool isSelectRegionVisible = false;
     SelectHandleInfo firstHandle;
     SelectHandleInfo secondHandle;
     HitTestMode hitTestMode = HitTestMode::HTMTRANSPARENT_SELF;

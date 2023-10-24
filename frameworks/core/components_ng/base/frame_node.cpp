@@ -292,6 +292,9 @@ FrameNode::~FrameNode()
         auto dragManager = pipeline->GetDragDropManager();
         if (dragManager) {
             dragManager->RemoveDragFrameNode(GetId());
+#ifdef ENABLE_DRAG_FRAMEWORK
+            dragManager->UnRegisterDragStatusListener(GetId());
+#endif // ENABLE_DRAG_FRAMEWORK
         }
     }
 }
@@ -320,7 +323,6 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     if (frameNode->GetTag() != tag) {
-        LOGE("the tag is changed");
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
         auto parent = frameNode->GetParent();
         if (parent) {
@@ -585,19 +587,13 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     if (renderContext_) {
-        LOGD("UITree start decode renderContext");
         renderContext_->FromJson(json);
     }
-    LOGD("UITree start decode accessibilityProperty");
     accessibilityProperty_->FromJson(json);
-    LOGD("UITree start decode layoutProperty");
     layoutProperty_->FromJson(json);
-    LOGD("UITree start decode paintProperty");
     paintProperty_->FromJson(json);
-    LOGD("UITree start decode pattern");
     pattern_->FromJson(json);
     if (eventHub_) {
-        LOGD("UITree start decode eventHub");
         eventHub_->FromJson(json);
     }
 }
@@ -666,7 +662,6 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
 {
-    LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
     CHECK_NULL_VOID(dirty);
 
     // update new layout constrain.
@@ -675,7 +670,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     // active change flag judge.
     SetActive(dirty->IsActive());
     if (!isActive_) {
-        LOGD("current node is inactive, don't need to render");
         return;
     }
 
@@ -855,8 +849,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
         return;
     }
 
-    auto frameRect = renderContext_->GetPaintRectWithTransform();
-    frameRect.SetOffset(GetOffsetRelativeToWindow());
+    auto frameRect = GetTransformRectRelativeToWindow();
     auto visibleRect = frameRect;
     RectF parentRect;
     auto parentUi = GetParent();
@@ -870,8 +863,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
             parentUi = parentUi->GetParent();
             continue;
         }
-        parentRect = parentFrame->GetRenderContext()->GetPaintRectWithTransform();
-        parentRect.SetOffset(parentFrame->GetOffsetRelativeToWindow());
+        parentRect = parentFrame->GetTransformRectRelativeToWindow();
         visibleRect = visibleRect.Constrain(parentRect);
         parentUi = parentUi->GetParent();
     }
@@ -983,7 +975,6 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
         Layout();
     }
     SetRootMeasureNode(false);
-    return;
 }
 
 std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
@@ -1108,8 +1099,8 @@ RefPtr<LayoutWrapperNode> FrameNode::UpdateLayoutWrapper(
     } else {
         layoutWrapper->Update(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     }
-    LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
-        forceLayout);
+    LOGD("%{public}s create layout wrapper: flag = %{public}x, forceMeasure = %{public}d, forceLayout = %{public}d",
+        GetTag().c_str(), flag, forceMeasure, forceLayout);
     do {
         if (CheckNeedMeasure(flag) || forceMeasure) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
@@ -1277,8 +1268,6 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     // If it has dirtyLayoutBox, need to mark dirty after layout done.
     paintProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
     if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
-        LOGD("this node has already mark dirty, %{public}s, %{public}d, %{public}d", GetTag().c_str(),
-            isRenderDirtyMarked_, isLayoutDirtyMarked_);
         return;
     }
     isRenderDirtyMarked_ = true;
@@ -1302,7 +1291,6 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
     auto paintFlag = paintProperty_->GetPropertyChangeFlag();
     if (CheckNoChanged(layoutFlag | paintFlag)) {
-        LOGD("MarkDirtyNode: flag not changed, node tag: %{public}s", GetTag().c_str());
         return;
     }
     auto context = GetContext();
@@ -1317,7 +1305,6 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
             }
         }
         if (isLayoutDirtyMarked_) {
-            LOGD("MarkDirtyNode: isLayoutDirtyMarked is true");
             return;
         }
         isLayoutDirtyMarked_ = true;
@@ -1335,7 +1322,6 @@ bool FrameNode::IsNeedRequestParentMeasure() const
         const auto& calcLayoutConstraint = layoutProperty_->GetCalcLayoutConstraint();
         if (calcLayoutConstraint && calcLayoutConstraint->selfIdealSize &&
             calcLayoutConstraint->selfIdealSize->IsValid()) {
-            LOGD("make self measure boundary");
             return false;
         }
     }
@@ -1486,12 +1472,13 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    auto localMat = renderContext_->GetLocalTransformMatrix();
     auto param = renderContext_->GetTrans();
     if (param.empty()) {
-        translateCfg[GetId()] = { .id = GetId() };
+        translateCfg[GetId()] = { .id = GetId(), .localMat = localMat };
     } else {
         translateCfg[GetId()] = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7],
-            param[8], GetId() };
+            param[8], GetId(), localMat };
     }
     auto parent = GetAncestorNodeOfFrame();
     if (parent) {
@@ -2089,7 +2076,6 @@ void FrameNode::CreateAnimatablePropertyFloat(
     CHECK_NULL_VOID(context);
     auto iter = nodeAnimatablePropertyMap_.find(propertyName);
     if (iter != nodeAnimatablePropertyMap_.end()) {
-        LOGW("AnimatableProperty already exists!");
         return;
     }
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(value, std::move(onCallbackEvent));
@@ -2101,7 +2087,6 @@ void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, f
 {
     auto iter = nodeAnimatablePropertyMap_.find(propertyName);
     if (iter == nodeAnimatablePropertyMap_.end()) {
-        LOGW("AnimatableProperty not exists!");
         return;
     }
     auto property = AceType::DynamicCast<NodeAnimatablePropertyFloat>(iter->second);
@@ -2117,7 +2102,6 @@ void FrameNode::CreateAnimatableArithmeticProperty(const std::string& propertyNa
     CHECK_NULL_VOID(context);
     auto iter = nodeAnimatablePropertyMap_.find(propertyName);
     if (iter != nodeAnimatablePropertyMap_.end()) {
-        LOGW("AnimatableProperty already exists!");
         return;
     }
     auto property = AceType::MakeRefPtr<NodeAnimatableArithmeticProperty>(value, std::move(onCallbackEvent));
@@ -2130,7 +2114,6 @@ void FrameNode::UpdateAnimatableArithmeticProperty(
 {
     auto iter = nodeAnimatablePropertyMap_.find(propertyName);
     if (iter == nodeAnimatablePropertyMap_.end()) {
-        LOGW("AnimatableProperty not exists!");
         return;
     }
     auto property = AceType::DynamicCast<NodeAnimatableArithmeticProperty>(iter->second);
@@ -2284,7 +2267,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this))) {
         geometryTransition->WillLayout(Claim(this));
     }
     auto preConstraint = layoutProperty_->GetLayoutConstraint();
@@ -2399,7 +2382,6 @@ void FrameNode::SyncGeometryNode()
     bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
 
     if (!isActive_ && !hasTransition) {
-        LOGD("current node is inactive, don't need to render");
         layoutAlgorithm_.Reset();
         return;
     }

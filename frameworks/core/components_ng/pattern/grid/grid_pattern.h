@@ -197,7 +197,7 @@ public:
     float EstimateHeight() const;
     float GetAverageHeight() const;
 
-    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;

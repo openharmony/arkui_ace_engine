@@ -105,4 +105,28 @@ int32_t GridItemLayoutProperty::GetCrossEnd(Axis axis) const
     }
     return propRowEnd_.value_or(-1);
 }
+
+bool GridItemLayoutProperty::CheckWhetherCurrentItemAtExpectedPosition(Axis axis) const
+{
+    auto realMainSpan = propRealRowSpan_.value_or(-1);
+    auto realCrossSpan = propRealColumnSpan_.value_or(-1);
+    auto realMainIndex = propMainIndex_.value_or(-1);
+    auto realCrossIndex = propCrossIndex_.value_or(-1);
+
+    auto realMainStart = realMainIndex - realMainSpan + 1;
+    auto realMainEnd = realMainIndex;
+    auto realCrossStart = realCrossIndex;
+    auto realCrossEnd = realCrossIndex + realCrossSpan - 1;
+
+    auto expectMainStart = axis == Axis::VERTICAL ? propRowStart_.value_or(-1) : propColumnStart_.value_or(-1);
+    auto expectMainEnd = axis == Axis::VERTICAL ? propRowEnd_.value_or(-1) : propColumnEnd_.value_or(-1);
+    auto expectCrossStart = axis == Axis::VERTICAL ? propColumnStart_.value_or(-1) : propRowStart_.value_or(-1);
+    auto expectCrossEnd = axis == Axis::VERTICAL ? propColumnEnd_.value_or(-1) : propRowEnd_.value_or(-1);
+
+    if (realMainStart != expectMainStart || realMainEnd != expectMainEnd || realCrossStart != expectCrossStart ||
+        realCrossEnd != expectCrossEnd) {
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

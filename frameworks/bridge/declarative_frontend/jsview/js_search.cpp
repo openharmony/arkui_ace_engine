@@ -716,8 +716,6 @@ void JSSearchController::GetCaretOffset(const JSCallbackInfo& info)
         caretObj->SetProperty<float>("y", caretOffset.GetY());
         JSRef<JSVal> ret = JSRef<JSObject>::Cast(caretObj);
         info.SetReturnValue(ret);
-    } else {
-        LOGE("GetCaretOffset: The JSSearchController is NULL");
     }
 }
 

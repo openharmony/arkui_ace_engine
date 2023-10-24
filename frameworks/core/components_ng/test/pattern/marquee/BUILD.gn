@@ -16,8 +16,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("marquee_test_ng") {
   type = "new"
   flutter_skia = true
-  sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
-    "marquee_test_ng.cpp",
-  ]
+  sources = [ "marquee_test_ng.cpp" ]
 }

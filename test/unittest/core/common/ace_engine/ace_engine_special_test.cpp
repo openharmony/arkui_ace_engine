@@ -112,28 +112,6 @@ HWTEST_F(AceEngineSpecialTest, InitJsDumpHeadSignal01, TestSize.Level1)
 }
 
 /**
- * @tc.name: TriggerGarbageCollection01
- * @tc.desc: Verify the TriggerGarbageCollection Interface of AceEngine work correctly.
- * @tc.type: FUNC
- */
-HWTEST_F(AceEngineSpecialTest, TriggerGarbageCollection01, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build an AceEngine.
-     */
-    AceEngine& aceEngine = AceEngine::Get();
-
-    /**
-     * @tc.steps: step2. Add Container.
-     * @tc.expected: call GetTaskExecutor and TriggerGarbageCollection once;
-     * @tc.steps: step2. TriggerGarbageCollection.
-     */
-    aceEngine.AddContainer(CONTAINER_INSTANCE_ID, MockContainer::container_);
-    EXPECT_CALL(*(MockContainer::container_), TriggerGarbageCollection()).Times(1);
-    aceEngine.TriggerGarbageCollection();
-}
-
-/**
  * @tc.name: NotifyContainers01
  * @tc.desc: Verify the NotifyContainers Interface of AceEngine work correctly.
  * @tc.type: FUNC

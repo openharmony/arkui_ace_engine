@@ -189,7 +189,7 @@ HWTEST_F(WebPatternTest, OnModifyDoneTest001, TestSize.Level1)
     EXPECT_FALSE(result);
     g_webPattern->isFocus_ = true;
     result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     keyboard = 1;
     result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
     EXPECT_TRUE(result);

@@ -42,7 +42,6 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
 
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
 {
-    LOGI("creating select component");
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     auto select = FrameNode::GetOrCreateFrameNode(

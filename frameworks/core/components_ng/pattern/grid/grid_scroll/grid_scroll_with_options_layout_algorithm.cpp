@@ -24,7 +24,7 @@ void UpdateGridItemRowAndColumnInfo(const RefPtr<LayoutWrapper>& itemLayoutWrapp
     CHECK_NULL_VOID(gridItemHost);
     auto gridItemPattern = gridItemHost->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(gridItemPattern);
-    gridItemPattern->SetScrollIrregularItemInfo(irregualItemInfo);
+    gridItemPattern->SetIrregularItemInfo(irregualItemInfo);
 }
 } // namespace
 

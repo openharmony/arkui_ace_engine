@@ -39,6 +39,8 @@ public:
 
     static void ResetGlobalTransCfg();
 
+    static void Transform(PointF& localPointF, int id);
+
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
     void BeginReferee(int32_t touchId, bool needUpdateChild = false)
     {
@@ -210,7 +212,6 @@ public:
     }
 
     void SetTransInfo(int id);
-    void Transform(PointF& windowPointF, PointF& originPointF);
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {

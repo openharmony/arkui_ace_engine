@@ -143,6 +143,8 @@ public:
 
     void HandleVisibleAreaChangeEvent();
 
+    void HandleSubwindow(bool isShow);
+
     void Destroy() override;
 
     void OnShow() override;
@@ -288,14 +290,9 @@ public:
         return onShow_;
     }
 
-    void MarkRootFocusNeedUpdate()
-    {
-        isRootFocusNeedUpdate_ = true;
-    }
-
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
 
-    bool RequestDefaultFocus();
+    bool RequestDefaultFocus(const RefPtr<FocusHub>& mainView);
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyDefaultFocus(const RefPtr<FrameNode>& node);
@@ -515,9 +512,7 @@ private:
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
     bool isTabJustTriggerOnKeyEvent_ = false;
-    bool isRootFocusNeedUpdate_ = false;
     bool onShow_ = false;
-    bool onFocus_ = true;
     bool isNeedFlushMouseEvent_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;

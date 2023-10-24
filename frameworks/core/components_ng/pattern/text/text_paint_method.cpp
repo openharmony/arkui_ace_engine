@@ -71,7 +71,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto spanItemChildren = pattern->GetSpanItemChildren();
     textContentModifier_->SetIfHaveSpanItemChildren(!spanItemChildren.empty());
     auto wideTextLength = pattern->GetDisplayWideTextLength();
-    std::vector<Rect> drawObscuredRects;
+    std::vector<RectF> drawObscuredRects;
     if (wideTextLength != 0) {
         paragraph_->GetRectsForRange(0, wideTextLength, drawObscuredRects);
     }
@@ -108,7 +108,7 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     const auto& selection = textPattern->GetTextSelector();
-    std::vector<Rect> selectedRects;
+    std::vector<RectF> selectedRects;
     if (selection.GetTextStart() != selection.GetTextEnd()) {
         paragraph_->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
     }

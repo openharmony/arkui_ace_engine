@@ -40,7 +40,7 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
 
 private:
-    void GetPlaceholderRects(std::vector<Rect>& rects) override;
+    void GetPlaceholderRects(std::vector<RectF>& rectF) override;
     int32_t GetPreviousLength() const override;
     ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const override;
 

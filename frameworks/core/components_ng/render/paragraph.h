@@ -52,6 +52,32 @@ struct ParagraphStyle {
     double fontSize = 14.0;
 };
 
+struct CaretMetricsF {
+    CaretMetricsF() = default;
+    CaretMetricsF(const OffsetF& position, float h)
+    {
+        offset = position;
+        height = h;
+    }
+    void Reset()
+    {
+        offset.Reset();
+        height = 0.0;
+    }
+
+    OffsetF offset;
+    // When caret is close to different glyphs, the height will be different.
+    float height = 0.0f;
+    std::string ToString() const
+    {
+        std::string result = "Offset: ";
+        result += offset.ToString();
+        result += ", height: ";
+        result += std::to_string(height);
+        return result;
+    }
+};
+
 // Paragraph is interface for drawing text and text paragraph.
 class Paragraph : public virtual AceType {
     DECLARE_ACE_TYPE(NG::Paragraph, AceType)
@@ -80,13 +106,18 @@ public:
     virtual float GetLongestLine() = 0;
     virtual float GetMaxWidth() = 0;
     virtual float GetAlphabeticBaseline() = 0;
-    virtual int32_t GetHandlePositionForClick(const Offset& offset) = 0;
-    virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects) = 0;
-    virtual void GetRectsForPlaceholders(std::vector<Rect>& selectedRects) = 0;
-    virtual bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) = 0;
-    virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) = 0;
+    virtual int32_t GetGlyphIndexByCoordinate(const Offset& offset) = 0;
+    virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
+    virtual void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) = 0;
+    virtual bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result) = 0;
+    virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) = 0;
+    virtual bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) = 0;
+    virtual bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset) = 0;
     virtual void SetIndents(const std::vector<float>& indents) = 0;
     virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
+    virtual std::u16string GetParagraphText() = 0;
 
     // interfaces for painting
     virtual void Paint(RSCanvas& canvas, float x, float y) = 0;

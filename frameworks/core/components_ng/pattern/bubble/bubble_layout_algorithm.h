@@ -90,8 +90,6 @@ public:
         return arrowPlacement_;
     }
 
-    OffsetT<Dimension> GetChildOffsetAfterLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
-
 protected:
     OffsetF positionOffset_;
 

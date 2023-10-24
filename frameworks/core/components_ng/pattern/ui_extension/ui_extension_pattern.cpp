@@ -491,7 +491,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
-    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
+    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
