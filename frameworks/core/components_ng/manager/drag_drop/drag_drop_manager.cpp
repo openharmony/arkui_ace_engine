@@ -1077,6 +1077,7 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     event->SetY(point.GetY());
     event->SetScreenX(point.GetScreenX());
     event->SetScreenY(point.GetScreenY());
+    event->SetVelocity(velocityTracker_.GetVelocity());
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::string udKey;
     InteractionManager::GetInstance()->GetUdKey(udKey);
