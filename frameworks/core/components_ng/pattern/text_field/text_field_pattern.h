@@ -796,7 +796,10 @@ public:
     {
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
-    void SetUnitNode(const RefPtr<NG::UINode>& unitNode);
+    void SetUnitNode(const RefPtr<NG::UINode>& unitNode)
+    {
+        unitNode_ = unitNode;
+    }
     void AddCounterNode();
     void ClearCounterNode();
     void SetShowError();
@@ -958,19 +961,12 @@ public:
         return GetHost();
     }
 
-    void SetResponseArea(const RefPtr<TextInputResponseArea>& responseArea)
-    {
-        if (responseArea_) {
-            responseArea_->DestoryArea();
-            responseArea_.Reset();
-        }
-        responseArea_ = responseArea;
-    }
-
     const RefPtr<TextInputResponseArea>& GetResponseArea()
     {
         return responseArea_;
     }
+    bool IsShowUnit() const;
+    bool IsShowPasswordIcon() const;
 
     bool GetShowSelect() const
     {
@@ -1100,6 +1096,7 @@ private:
     }
     void NotifyOnEditChanged(bool isChanged);
     void StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste = false);
+    void ProcessResponseArea();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1236,6 +1233,7 @@ private:
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
     CaretStatus caretStatus_ = CaretStatus::NONE;
+    RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
 };
 } // namespace OHOS::Ace::NG

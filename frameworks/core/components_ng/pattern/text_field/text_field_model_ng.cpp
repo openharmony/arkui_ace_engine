@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text_field/text_input_response_area.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -164,19 +163,6 @@ void TextFieldModelNG::SetType(TextInputType value)
         layoutProperty->UpdateTypeChanged(true);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto responseArea = textFieldPattern->GetResponseArea();
-    auto passwordResponseArea = AceType::DynamicCast<PasswordResponseArea>(responseArea);
-    if (value == TextInputType::VISIBLE_PASSWORD) {
-        CHECK_NULL_VOID(!passwordResponseArea);
-        auto responseArea = AceType::MakeRefPtr<PasswordResponseArea>();
-        responseArea->SetObscured(textFieldPattern->GetTextObscured());
-        textFieldPattern->SetResponseArea(responseArea);
-    } else {
-        CHECK_NULL_VOID(passwordResponseArea);
-        textFieldPattern->SetResponseArea(nullptr);
-    }
 }
 
 void TextFieldModelNG::SetPlaceholderColor(const Color& value)
@@ -427,15 +413,7 @@ void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)
         unitNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
     if (unitNode) {
-        auto responseArea = pattern->GetResponseArea();
-        auto unitResponseArea = AceType::DynamicCast<UnitResponseArea>(responseArea);
-        if (unitResponseArea) {
-            unitResponseArea->SetUnitNode(unitNode);
-        } else {
-            unitResponseArea = AceType::MakeRefPtr<UnitResponseArea>(unitNode);
-            pattern->SetResponseArea(unitResponseArea);
-        }
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        pattern->SetUnitNode(unitNode);
     }
 }
 
