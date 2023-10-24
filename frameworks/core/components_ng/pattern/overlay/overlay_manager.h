@@ -90,10 +90,7 @@ public:
 
     bool HasPopupInfo(int32_t targetId) const
     {
-        if (popupMap_.find(targetId) != popupMap_.end()) {
-            return true;
-        }
-        return false;
+        return popupMap_.find(targetId) != popupMap_.end();
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
@@ -108,6 +105,7 @@ public:
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
 
+    void ClearToastInSubwindow();
     void ClearToast();
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft,
         const ToastShowMode& showMode = ToastShowMode::DEFAULT);
@@ -255,12 +253,12 @@ public:
     void RemoveEventColumn();
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle,
-        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, int32_t targetId);
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, int32_t targetId);
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::SheetStyle& sheetStyle,
-        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, int32_t targetId);
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, int32_t targetId);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
 
@@ -281,6 +279,11 @@ public:
 
     void MarkDirty(PropertyChangeFlag flag);
     float GetRootHeight() const;
+
+    const WeakPtr<UINode>& GetRootNode() const
+    {
+        return rootNodeWeak_;
+    }
 
 private:
     void PopToast(int32_t targetId);
@@ -343,14 +346,14 @@ private:
     std::stack<WeakPtr<FrameNode>> modalStack_;
     std::list<WeakPtr<FrameNode>> modalList_;
     WeakPtr<FrameNode> lastModalNode_;
-    float sheetHeight_ {0.0};
+    float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
 #ifdef ENABLE_DRAG_FRAMEWORK
-    bool hasPixelMap_ {false};
-    bool hasFilter_ {false};
-    bool hasEvent_ {false};
-    bool isOnAnimation_ {false};
+    bool hasPixelMap_ { false };
+    bool hasFilter_ { false };
+    bool hasEvent_ { false };
+    bool isOnAnimation_ { false };
     WeakPtr<FrameNode> pixmapColumnNodeWeak_;
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;

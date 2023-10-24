@@ -442,6 +442,7 @@ class MultiSelectItemArray extends ViewPU {
             length: 5
         }, (() => Color.Transparent)), this, "multiColor");
         this.setInitiallyProvidedValue(e);
+        this.declareWatch("options", this.optionsChange);
         this.declareWatch("selectedIndexes", this.selectedChange)
     }
 
@@ -524,6 +525,10 @@ class MultiSelectItemArray extends ViewPU {
 
     set multiColor(t) {
         this.__multiColor.set(t)
+    }
+
+    optionsChange() {
+        for (let t = 0;t < this.selectedIndexes.length; t++) this.multiColor[this.selectedIndexes[t]] = this.options.selectedBackgroundColor
     }
 
     selectedChange() {

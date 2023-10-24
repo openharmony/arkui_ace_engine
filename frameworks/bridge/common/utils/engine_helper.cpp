@@ -75,7 +75,6 @@ ScopedDelegate EngineHelper::GetCurrentDelegate()
     if (engine) {
         return { engine->GetFrontend(), Container::CurrentId() };
     }
-    LOGW("Can't find current engine, using active one");
     auto container = Container::GetActive();
     if (!container) {
         return { nullptr, -1 };

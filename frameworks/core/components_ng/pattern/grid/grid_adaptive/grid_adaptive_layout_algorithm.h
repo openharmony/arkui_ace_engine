@@ -38,7 +38,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    OffsetF CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper) const;
+    OffsetF CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper);
 
     // cell size of grid.
     SizeF gridCellSize_;
@@ -48,6 +48,9 @@ private:
     int32_t crossCount_ = 0;
     // total count has shown.
     int32_t displayCount_ = 0;
+
+    int32_t rowCount_ = 0;
+    int32_t columnCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridAdaptiveLayoutAlgorithm);
 };

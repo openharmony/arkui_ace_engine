@@ -759,19 +759,6 @@ inline bool IsPopupSupported(const RefPtr<NG::PipelineContext>& pipeline, int32_
 void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
     CHECK_NULL_VOID(node);
-    auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
-    if (gestureEventHub) {
-        nodeInfo.SetClickable(gestureEventHub->IsAccessibilityClickable());
-        if (gestureEventHub->IsAccessibilityClickable()) {
-            AccessibleAction action(ACCESSIBILITY_ACTION_CLICK, "ace");
-            nodeInfo.AddAction(action);
-        }
-        nodeInfo.SetLongClickable(gestureEventHub->IsAccessibilityLongClickable());
-        if (gestureEventHub->IsAccessibilityLongClickable()) {
-            AccessibleAction action(ACCESSIBILITY_ACTION_LONG_CLICK, "ace");
-            nodeInfo.AddAction(action);
-        }
-    }
     if (nodeInfo.IsFocusable()) {
         if (nodeInfo.IsFocused()) {
             AccessibleAction action(ACCESSIBILITY_ACTION_CLEAR_FOCUS, "ace");
@@ -787,6 +774,20 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
         nodeInfo.AddAction(action);
     } else {
         AccessibleAction action(ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, "ace");
+        nodeInfo.AddAction(action);
+    }
+    auto eventHub = node->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    nodeInfo.SetClickable(gestureEventHub->IsAccessibilityClickable());
+    if (gestureEventHub->IsAccessibilityClickable()) {
+        AccessibleAction action(ACCESSIBILITY_ACTION_CLICK, "ace");
+        nodeInfo.AddAction(action);
+    }
+    nodeInfo.SetLongClickable(gestureEventHub->IsAccessibilityLongClickable());
+    if (gestureEventHub->IsAccessibilityLongClickable()) {
+        AccessibleAction action(ACCESSIBILITY_ACTION_LONG_CLICK, "ace");
         nodeInfo.AddAction(action);
     }
 }

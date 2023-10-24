@@ -254,6 +254,14 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 #endif
 }
 
+// NG ImageLoader entrance
+bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
+{
+    auto container = Container::Current();
+    return sync ? DownloadManagerV2::DownloadSync(std::move(downloadCallback), src)
+                : DownloadManagerV2::DownloadAsync(std::move(downloadCallback), src, Container::CurrentId());
+}
+
 #ifndef USE_ROSEN_DRAWING
 sk_sp<SkData> FileImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& /* context */)

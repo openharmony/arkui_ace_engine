@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_BAR_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_BAR_THEME_H
 
+#include <cstdint>
+#include "base/utils/string_utils.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -88,6 +90,9 @@ public:
                 theme->defaultPaddingStart_ = pattern->GetAttr<Dimension>("back_button_left_spacing", 0.0_vp);
                 theme->backButtonIconColor_ = pattern->GetAttr<Color>("back_button_icon_color", Color::WHITE);
                 theme->alphaDisabled_ = pattern->GetAttr<double>("button_alpha_disabled", 0.0);
+                auto dividerShadowEnable = pattern->GetAttr<std::string>("divider_shadow_enable", "0");
+                theme->dividerShadowEnable_ = StringUtils::StringToInt(dividerShadowEnable);
+                theme->navigationGroupColor_ = pattern->GetAttr<Color>("navigation_group_color", Color::TRANSPARENT);
             }
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
@@ -119,6 +124,9 @@ public:
                 pattern->GetAttr<Color>("toolbar_item_active_icon_color", Color(0xff007dff));
             theme->toolbarActiveTextColor_ =
                 pattern->GetAttr<Color>("toolbar_item_active_text_color", Color(0xff007dff));
+            auto dividerShadowEnable = pattern->GetAttr<std::string>("divider_shadow_enable", "0");
+            theme->dividerShadowEnable_ = StringUtils::StringToInt(dividerShadowEnable);
+            theme->navigationGroupColor_ = pattern->GetAttr<Color>("navigation_group_color", Color::TRANSPARENT);
         }
     };
 
@@ -343,7 +351,14 @@ public:
     {
         return toolbarLimitGridCount_;
     }
-
+    uint32_t GetDividerShadowEnable() const
+    {
+        return dividerShadowEnable_;
+    }
+    const Color& GetNavigationGroupColor() const
+    {
+        return navigationGroupColor_;
+    }
 protected:
     NavigationBarTheme() = default;
 
@@ -404,6 +419,8 @@ private:
     Dimension toolbarItemMargin_ = 4.0_vp;
     Dimension toolbarItemSpecialMargin_ = 0.0_vp;
     uint32_t toolbarLimitGridCount_ = 8;
+    uint32_t dividerShadowEnable_ = 0;
+    Color navigationGroupColor_ = Color::TRANSPARENT;
 };
 
 } // namespace OHOS::Ace

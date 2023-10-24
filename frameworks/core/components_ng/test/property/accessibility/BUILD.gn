@@ -29,6 +29,8 @@ ohos_unittest("accessibility_property_test_ng") {
     "$ace_root/frameworks/base/utils/time_util.cpp",
 
     # components
+    "$ace_root/frameworks/core/common/container.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",

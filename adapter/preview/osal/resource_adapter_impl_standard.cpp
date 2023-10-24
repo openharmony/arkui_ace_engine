@@ -317,6 +317,22 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
     return "";
 }
 
+std::string ResourceAdapterImpl::GetMediaPathByName(const std::string& resName)
+{
+    std::string mediaPath = "";
+    auto actualResName = GetActualResourceName(resName);
+    if (resourceManager_) {
+        auto state = resourceManager_->GetMediaByName(actualResName.c_str(), mediaPath);
+        if (state != Global::Resource::SUCCESS) {
+            LOGE("GetMediaPathByName error, resName=%{public}s, errorCode=%{public}u", resName.c_str(), state);
+            return "";
+        }
+        // The Media file directory starts with file// on the PC Preview
+        return "file://" + mediaPath;
+    }
+    return "";
+}
+
 std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
 {
     // The rawfile file directory starts with file// on the PC Preview
@@ -341,5 +357,15 @@ bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, 
 void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, const std::string& moduleName)
 {
     return;
+}
+
+std::string ResourceAdapterImpl::GetActualResourceName(const std::string& resName)
+{
+    auto index = resName.find_last_of('.');
+    if (index == std::string::npos) {
+        LOGE("GetActualResourceName error, incorrect resName format.");
+        return {};
+    }
+    return resName.substr(index + 1, resName.length() - index - 1);
 }
 } // namespace OHOS::Ace

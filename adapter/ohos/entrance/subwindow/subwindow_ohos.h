@@ -113,6 +113,10 @@ public:
     Rect GetParentWindowRect() const override;
 
     void RequestFocus() override;
+    const sptr<OHOS::Rosen::Window>& GetSubWindow() const
+    {
+        return window_;
+    }
 
 private:
     RefPtr<StackElement> GetStack();

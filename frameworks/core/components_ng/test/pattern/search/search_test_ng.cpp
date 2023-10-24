@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "gtest/gtest.h"
-#include "gmock/gmock-actions.h"
 
 #define protected public
 #define private public
@@ -46,6 +46,9 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#undef protected
+#undef private
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -91,15 +94,15 @@ void SearchTestNg::SetThemeInCreate()
     auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
     auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
     auto iconTheme = AceType::MakeRefPtr<IconTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
-            if (type == SearchTheme::TypeId()) {
-                return searchTheme;
-            } else if (type == IconTheme::TypeId()) {
-                return iconTheme;
-            }
-            return textFieldTheme;
-        });
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        if (type == SearchTheme::TypeId()) {
+            return searchTheme;
+        }
+        if (type == IconTheme::TypeId()) {
+            return iconTheme;
+        }
+        return textFieldTheme;
+    });
 }
 
 void SearchTestNg::SetSearchTheme()
@@ -800,7 +803,6 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate011, TestSize.Level1)
      */
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
-    textFieldPattern->InitCaretPosition("");
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetTop(0.0);
     textFieldPattern->SetTextRect(textRect);
@@ -861,7 +863,6 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate012, TestSize.Level1)
      * @tc.step: step4. call HandleTextContentLines.
      * @tc.expected: cover branch IsOperation is true and GetLineHeight value is 0.
      */
-    textFieldPattern->SetCaretOffsetX(0.0);
     textFieldPattern->UpdateEditingValue("aaa", 0);
     result = pattern->HandleTextContentLines();
     EXPECT_EQ(result, 0);
@@ -1592,7 +1593,7 @@ HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
     pattern->clickListener_->GetGestureEventFunc()(gestureEvent);
 }
 
-    /**
+/**
  * @tc.name: OnColorConfigurationUpdate001
  * @tc.desc: test Oncolorconfigurationupdate
  * @tc.type: FUNC

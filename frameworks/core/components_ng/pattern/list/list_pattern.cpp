@@ -86,11 +86,9 @@ void ListPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (!listDragStatusListener_.has_value()) {
         InitNotifyDragEvent();
     }
-#endif // ENABLE_DRAG_FRAMEWORK
     SetAccessibilityAction();
 }
 
@@ -1727,7 +1725,6 @@ bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
     return false;
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void ListPattern::InitNotifyDragEvent()
 {
     auto host = GetHost();
@@ -1769,7 +1766,6 @@ void ListPattern::HandleOnDragStatusCallback(
             break;
     }
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 
 void ListPattern::RefreshLanesItemRange()
 {

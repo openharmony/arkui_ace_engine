@@ -112,16 +112,15 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     CalcDimension size;
     if (!JSContainerBase::ParseJsDimensionFp(fontSize, size) || fontSize->IsNull()) {
         font.fontSize = std::nullopt;
+    }
+    if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        font.fontSize = theme->GetTextStyle().GetFontSize();
     } else {
-        if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<TextTheme>();
-            CHECK_NULL_VOID(theme);
-            font.fontSize = theme->GetTextStyle().GetFontSize();
-        } else {
-            font.fontSize = size;
-        }
+        font.fontSize = size;
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");

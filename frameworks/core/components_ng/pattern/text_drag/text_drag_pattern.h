@@ -156,7 +156,7 @@ public:
     }
 
     void InitSpanImageLayout(
-        const std::list<RefPtr<FrameNode>>& imageChildren, const std::vector<Rect>& rectsForPlaceholders)
+        const std::list<RefPtr<FrameNode>>& imageChildren, const std::vector<RectF>& rectsForPlaceholders)
     {
         imageChildren_ = imageChildren;
         rectsForPlaceholders_ = rectsForPlaceholders;
@@ -172,7 +172,7 @@ public:
         contentOffset_ = contentOffset;
     }
 
-    const std::vector<Rect>& GetRectsForPlaceholders()
+    const std::vector<RectF>& GetRectsForPlaceholders()
     {
         return rectsForPlaceholders_;
     }
@@ -200,7 +200,7 @@ private:
     std::shared_ptr<RSPath> clipPath_;
     std::shared_ptr<RSPath> backGroundPath_;
     std::list<RefPtr<FrameNode>> imageChildren_;
-    std::vector<Rect> rectsForPlaceholders_;
+    std::vector<RectF> rectsForPlaceholders_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragPattern);
 };

@@ -22,6 +22,7 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
@@ -41,6 +42,10 @@ void ScrollablePattern::SetAxis(Axis axis)
     axis_ = axis;
     if (scrollBar_) {
         scrollBar_->SetPositionMode(axis_ == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
+    }
+    if (scrollBarOverlayModifier_) {
+        scrollBarOverlayModifier_->SetPositionMode(
+            axis_ == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
     }
     auto gestureHub = GetGestureHub();
     CHECK_NULL_VOID(gestureHub);
@@ -244,6 +249,7 @@ void ScrollablePattern::OnScrollEnd()
     }
 
     OnScrollEndCallback();
+    SelectOverlayScrollNotifier::NotifyOnScrollEnd(WeakClaim(this));
 }
 
 void ScrollablePattern::AddScrollEvent()
@@ -486,6 +492,9 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         // set the scroll bar style
         if (GetAxis() == Axis::HORIZONTAL) {
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+            if (scrollBarOverlayModifier_) {
+                scrollBarOverlayModifier_->SetPositionMode(PositionMode::BOTTOM);
+            }
         }
         RegisterScrollBarEventTask();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -613,6 +622,7 @@ void ScrollablePattern::CreateScrollBarOverlayModifier()
     CHECK_NULL_VOID(!scrollBarOverlayModifier_);
     scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
     scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect());
+    scrollBarOverlayModifier_->SetPositionMode(scrollBar_->GetPositionMode());
 }
 
 void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)
@@ -1178,7 +1188,9 @@ bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
     if (!OnScrollPosition(offset, source)) {
         return false;
     }
-    return OnScrollCallback(offset, source);
+    auto result = OnScrollCallback(offset, source);
+    SelectOverlayScrollNotifier::NotifyOnScrollCallback(WeakClaim(this), offset, source);
+    return result;
 }
 
 void ScrollablePattern::NotifyMoved(bool value)

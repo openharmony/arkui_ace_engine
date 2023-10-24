@@ -445,7 +445,9 @@ public:
     void StartAutoPlay();
     void StopTranslateAnimation();
     void StopSpringAnimation();
+    void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

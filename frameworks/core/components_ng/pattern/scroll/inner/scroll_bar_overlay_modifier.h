@@ -50,6 +50,7 @@ enum class HoverAnimationType {
      */
     SHRINK,
 };
+
 class ScrollBarOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(ScrollBarOverlayModifier, OverlayModifier)
 
@@ -122,6 +123,11 @@ public:
     void SetCrossModeOffset(const Offset& offset);
 
     void SetBarColor(Color barColor);
+
+    void SetPositionMode(const PositionMode& positionMode)
+    {
+        positionMode_ = positionMode;
+    }
 
 private:
     // Animatable

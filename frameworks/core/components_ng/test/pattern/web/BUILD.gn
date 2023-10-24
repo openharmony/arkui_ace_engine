@@ -61,6 +61,7 @@ template("web_pattern_unit_source_set") {
     }
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
       sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
+      sources += [ "$ace_root/test/mock/core/common/mock_interaction.cpp" ]
       defines += [ "ENABLE_DRAG_FRAMEWORK" ]
     }
   }

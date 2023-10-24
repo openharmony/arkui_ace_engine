@@ -5955,9 +5955,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest007, TestSize.Level1)
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->GetShiftDistance(COLUMN_INDEX_0, dir);
-    double distance = 0.0f - textPickerColumnPattern_->optionProperties_[COLUMN_INDEX_0].height;
-    EXPECT_EQ(textPickerColumnPattern_->GetShiftDistance(COLUMN_INDEX_0, dir), distance);
+    EXPECT_EQ(textPickerColumnPattern->GetShiftDistance(COLUMN_INDEX_0, dir), 0.0f);
 }
 
 /**

@@ -44,8 +44,8 @@ public:
     }
     void Reset();
 
-    std::vector<Rect> GetRects(int32_t start, int32_t end) const;
-    std::vector<Rect> GetPlaceholderRects() const;
+    std::vector<RectF> GetRects(int32_t start, int32_t end) const;
+    std::vector<RectF> GetPlaceholderRects() const;
     OffsetF ComputeCursorOffset(int32_t index, float& selectLineHeight) const;
 
     void AddParagraph(ParagraphInfo&& info)

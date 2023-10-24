@@ -154,7 +154,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     float leftPadding = padding.left.value_or(0.0f);
     float rightPadding = padding.right.value_or(0.0f);
     auto textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
-        searchTheme->GetSearchIconRightSpace().ConvertToPx() - leftPadding - rightPadding;
+                          searchTheme->GetSearchIconRightSpace().ConvertToPx() - leftPadding - rightPadding;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
                          searchTheme->GetSearchIconRightSpace().ConvertToPx();

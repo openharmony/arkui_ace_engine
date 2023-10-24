@@ -18,6 +18,8 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/point.h"
 #include "base/utils/utils.h"
+#include "core/common/interaction/interaction_data.h"
+#include "core/common/interaction/interaction_interface.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -28,7 +30,6 @@
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
-#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "core/common/udmf/udmf_client.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -300,31 +301,19 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
+        InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::MOVE);
         return;
     }
     for (const auto& it : summaryMap_) {
         if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
-            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
+            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
             return;
         }
     }
-    InteractionManager::GetInstance()->UpdateDragStyle(isCopy ? DragCursorStyle::COPY : DragCursorStyle::MOVE);
+    InteractionInterface::GetInstance()->UpdateDragStyle(
+        isCopy ? DragCursorStyleCore::COPY : DragCursorStyleCore::MOVE);
 }
 #endif // ENABLE_DRAG_FRAMEWORK
-
-void DragDropManager::RegisterDragStatusListener(int32_t nodeId, const WeakPtr<FrameNode>& node)
-{
-    auto ret = nodesForDragNotify_.try_emplace(nodeId, node);
-    if (!ret.second) {
-        nodesForDragNotify_[nodeId] = node;
-    }
-}
-
-void DragDropManager::UnRegisterDragStatusListener(int32_t nodeId)
-{
-    nodesForDragNotify_.erase(nodeId);
-}
 
 bool CheckParentVisible(const RefPtr<FrameNode>& frameNode)
 {
@@ -410,14 +399,12 @@ void DragDropManager::NotifyDragRegisterFrameNode(std::unordered_map<int32_t, We
         }
         auto pattern = frameNode->GetPattern<Pattern>();
         CHECK_NULL_VOID(pattern);
-#ifdef ENABLE_DRAG_FRAMEWORK
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragDropManager NotifyDragRegisterFrameNode. Dragged frameNode is %{public}s, depth is %{public}d, "
                  "DragEventType is %{public}d.",
                 frameNode->GetTag().c_str(), frameNode->GetDepth(), static_cast<int32_t>(dragEventType));
         }
         pattern->HandleOnDragStatusCallback(dragEventType, notifyEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
     }
 }
 
@@ -483,7 +470,7 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
 
 #ifdef ENABLE_DRAG_FRAMEWORK
         if (!isMouseDragged_ || isDragWindowShow_) {
-            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
+            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::MOVE);
         }
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
@@ -504,22 +491,6 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
     preTargetFrameNode_ = dragFrameNode;
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
-DragResult TranslateDragResult(DragRet dragResult)
-{
-    switch (dragResult) {
-        case DragRet::DRAG_SUCCESS:
-            return DragResult::DRAG_SUCCESS;
-        case DragRet::DRAG_FAIL:
-            return DragResult::DRAG_FAIL;
-        case DragRet::DRAG_CANCEL:
-            return DragResult::DRAG_CANCEL;
-        default:
-            return DragResult::DRAG_SUCCESS;
-    }
-}
-#endif // ENABLE_DRAG_FRAMEWORK
-
 void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo)
 {
     dragDropState_ = DragDropMgrState::IDLE;
@@ -536,9 +507,9 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragDropManager is dragCancel, finish drag. WindowId is %{public}d.", container->GetWindowId());
         }
-        InteractionManager::GetInstance()->SetDragWindowVisible(false);
-        DragDropResult dropResult { DragResult::DRAG_CANCEL, false, container->GetWindowId() };
-        InteractionManager::GetInstance()->StopDrag(dropResult);
+        InteractionInterface::GetInstance()->SetDragWindowVisible(false);
+        DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId() };
+        InteractionInterface::GetInstance()->StopDrag(dragDropRet);
         RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
         UpdateNotifyDragEvent(notifyEvent, point, DragEventType::DROP);
         notifyEvent->SetResult(DragRet::DRAG_CANCEL);
@@ -568,8 +539,8 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
             LOGW("DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d.",
                 container->GetWindowId());
         }
-        DragDropResult dropResult { DragResult::DRAG_FAIL, isMouseDragged_, container->GetWindowId() };
-        InteractionManager::GetInstance()->StopDrag(dropResult);
+        DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, container->GetWindowId() };
+        InteractionInterface::GetInstance()->StopDrag(dragDropRet);
         RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
         UpdateNotifyDragEvent(notifyEvent, point, DragEventType::DROP);
         notifyEvent->SetResult(DragRet::DRAG_FAIL);
@@ -592,18 +563,18 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     SetIsDragged(false);
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("DragDropManager finish drop, start do drop animation. UseCustomAnimation is %{public}d."
-        " WindowId is %{public}d.",
-            event->IsUseCustomAnimation(), container->GetWindowId());
+            " WindowId is %{public}d.", event->IsUseCustomAnimation(), container->GetWindowId());
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto dragResult = TranslateDragResult(event->GetResult());
+    auto dragResult = event->GetResult();
     auto useCustomAnimation = event->IsUseCustomAnimation();
     auto windowId = container->GetWindowId();
     pipeline->SetDragCleanTask([dragResult, useCustomAnimation, isMouseDragged = isMouseDragged_, windowId]() {
-        InteractionManager::GetInstance()->SetDragWindowVisible(isMouseDragged ? !isMouseDragged : !useCustomAnimation);
-        DragDropResult dropResult { dragResult, isMouseDragged ? isMouseDragged : useCustomAnimation, windowId };
-        InteractionManager::GetInstance()->StopDrag(dropResult);
+        InteractionInterface::GetInstance()->SetDragWindowVisible(
+            isMouseDragged ? !isMouseDragged : !useCustomAnimation);
+        DragDropRet dragDropRet { dragResult, isMouseDragged ? isMouseDragged : useCustomAnimation, windowId };
+        InteractionInterface::GetInstance()->StopDrag(dragDropRet);
     });
     RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
     UpdateNotifyDragEvent(notifyEvent, point, DragEventType::DROP);
@@ -619,7 +590,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 void DragDropManager::RequireSummary()
 {
     std::string udKey;
-    InteractionManager::GetInstance()->GetUdKey(udKey);
+    InteractionInterface::GetInstance()->GetUdKey(udKey);
     if (SystemProperties::GetDebugEnabled()) {
         if (udKey.empty()) {
             LOGW("Requiry summary get empty udKey.");
@@ -653,11 +624,12 @@ Rect DragDropManager::GetDragWindowRect(const Point& point)
         int y = -1;
         int width = -1;
         int height = -1;
-        int retOffset = InteractionManager::GetInstance()->GetShadowOffset(x, y, width, height);
+        ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
+        int retOffset = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
         if (retOffset == 0) {
             previewRect_ = Rect(x, y, width, height);
         } else if (SystemProperties::GetDebugEnabled()) {
-            LOGW("InteractionManager GetShadowOffset is failed:%{public}d", retOffset);
+            LOGW("InteractionInterface GetShadowOffset is failed:%{public}d", retOffset);
         }
     }
     return previewRect_ + Offset(point.GetX(), point.GetY());
@@ -750,12 +722,12 @@ void DragDropManager::FireOnDragEvent(
     }
     if (event->GetResult() == DragRet::ENABLE_DROP) {
         if (event->IsCopy()) {
-            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
+            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::COPY);
         } else {
-            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
+            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::MOVE);
         }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
-        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
+        InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
     } else {
         UpdateDragAllowDrop(frameNode, event->IsCopy());
     }
@@ -1092,11 +1064,12 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     event->SetY(point.GetY());
     event->SetScreenX(point.GetScreenX());
     event->SetScreenY(point.GetScreenY());
+    event->SetVelocity(velocityTracker_.GetVelocity());
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::string udKey;
-    InteractionManager::GetInstance()->GetUdKey(udKey);
+    InteractionInterface::GetInstance()->GetUdKey(udKey);
     if (udKey.empty()) {
-        LOGW("InteractionManager GetUdkey is null");
+        LOGW("InteractionInterface GetUdkey is null");
         event->SetIsGetDataSuccess(false);
     } else {
         event->SetUdKey(udKey);
@@ -1116,14 +1089,15 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     int y = -1;
     int width = -1;
     int height = -1;
-    int retOffset = InteractionManager::GetInstance()->GetShadowOffset(x, y, width, height);
+    ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
+    int retOffset = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
     if (retOffset == 0) {
         previewRect_ = Rect(point.GetX() + x, point.GetY() + y, width, height);
         event->SetPreviewRect(previewRect_);
     } else {
         previewRect_ = Rect(x, y, width, height);
         event->SetPreviewRect(previewRect_);
-        LOGW("InteractionManager GetShadowOffset is failed:%{public}d", retOffset);
+        LOGW("InteractionInterface GetShadowOffset is failed:%{public}d", retOffset);
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 }

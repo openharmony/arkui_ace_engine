@@ -30,10 +30,7 @@ class JsClickFunction : public JsFunction {
 public:
     explicit JsClickFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
-    ~JsClickFunction() override
-    {
-        LOGD("Destroy: JsClickFunction");
-    };
+    ~JsClickFunction() override {};
     void Execute() override;
     void Execute(const ClickInfo& info);
     void Execute(const GestureEvent& info);

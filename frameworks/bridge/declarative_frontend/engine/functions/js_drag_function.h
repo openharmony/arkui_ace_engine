@@ -28,10 +28,7 @@ public:
     explicit JsDragFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
     static void JSBind(BindingTarget globalObj);
 
-    ~JsDragFunction() override
-    {
-        LOGD("Destroy: JsDragFunction");
-    };
+    ~JsDragFunction() override {};
     void Execute() override;
     JSRef<JSVal> Execute(const RefPtr<DragEvent>& info);
     JSRef<JSVal> ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex);

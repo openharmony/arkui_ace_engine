@@ -100,6 +100,7 @@ public:
     MOCK_METHOD1(UpdateSystemSafeArea, void(const SafeAreaInsets& systemSafeArea));
     MOCK_METHOD1(UpdateCutoutSafeArea, void(const SafeAreaInsets& cutoutSafeArea));
     MOCK_METHOD0(NotifyConfigurationChange, void());
+    MOCK_CONST_METHOD0(GetTaskExecutor, RefPtr<TaskExecutor>());
 
     static RefPtr<MockPipelineBase> pipeline_;
 
@@ -107,6 +108,7 @@ public:
 
 protected:
     double dipScale_ = 1.0;
+    RefPtr<TaskExecutor> taskExecutor_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H

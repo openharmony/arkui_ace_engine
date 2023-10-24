@@ -312,8 +312,11 @@ void FlexLayoutAlgorithm::MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrappe
 {
     const auto& layoutConstrain = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (const auto& child : outOfLayoutChildren_) {
-        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
-            child->GetHostNode()->GetId(), child->GetHostNode()->GetParent()->GetId());
+        if (child->GetHostNode()) {
+            ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
+                child->GetHostNode()->GetId(), child->GetHostNode()->GetParent() ?
+                    child->GetHostNode()->GetParent()->GetId() : 0);
+        }
         child->Measure(layoutConstrain);
     }
 }
@@ -352,9 +355,13 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                             continue;
                         }
                         {
-                            ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]",
-                                childLayoutWrapper->GetHostTag().c_str(), childLayoutWrapper->GetHostNode()->GetId(),
-                                childLayoutWrapper->GetHostNode()->GetParent()->GetId());
+                            if (childLayoutWrapper->GetHostNode()) {
+                                ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]",
+                                    childLayoutWrapper->GetHostTag().c_str(),
+                                    childLayoutWrapper->GetHostNode()->GetId(),
+                                    childLayoutWrapper->GetHostNode()->GetParent() ?
+                                        childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
+                            }
                             childLayoutWrapper->Measure(child.layoutConstraint);
                         }
                         UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
@@ -454,9 +461,12 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                     continue;
                 }
                 {
-                    ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
-                        childLayoutWrapper->GetHostNode()->GetId(),
-                        childLayoutWrapper->GetHostNode()->GetParent()->GetId());
+                    if (childLayoutWrapper->GetHostNode()) {
+                        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
+                            childLayoutWrapper->GetHostNode()->GetId(),
+                            childLayoutWrapper->GetHostNode()->GetParent() ?
+                                childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
+                    }
                     childLayoutWrapper->Measure(child.layoutConstraint);
                 }
                 UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
@@ -484,9 +494,12 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 auto childLayoutConstraint = child.layoutConstraint;
                 UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, childLayoutConstraint);
                 {
-                    ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
-                        childLayoutWrapper->GetHostNode()->GetId(),
-                        childLayoutWrapper->GetHostNode()->GetParent()->GetId());
+                    if (childLayoutWrapper->GetHostNode()) {
+                        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
+                            childLayoutWrapper->GetHostNode()->GetId(),
+                            childLayoutWrapper->GetHostNode()->GetParent() ?
+                                childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
+                    }
                     childLayoutWrapper->Measure(childLayoutConstraint);
                 }
                 UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
@@ -528,9 +541,12 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 const auto& childLayoutWrapper = child.layoutWrapper;
                 UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
                 {
-                    ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
-                        childLayoutWrapper->GetHostNode()->GetId(),
-                        childLayoutWrapper->GetHostNode()->GetParent()->GetId());
+                    if (childLayoutWrapper->GetHostNode()) {
+                        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
+                            childLayoutWrapper->GetHostNode()->GetId(),
+                            childLayoutWrapper->GetHostNode()->GetParent() ?
+                                childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
+                    }
                     childLayoutWrapper->Measure(child.layoutConstraint);
                 }
                 if (child.layoutWrapper && child.layoutWrapper->GetHostNode() &&
@@ -564,7 +580,16 @@ bool FlexLayoutAlgorithm::HandleBlankFirstTimeMeasure(
 
     // if constainer is self adaptive, secondaryMeasure won't happen, blank can call Measure directly
     if (selfAdaptive_ || isInfiniteLayout_) {
-        childLayoutWrapper->Measure(child.layoutConstraint);
+        {
+            if (childLayoutWrapper->GetHostNode()) {
+                ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
+                    childLayoutWrapper->GetHostNode()->GetId(),
+                    childLayoutWrapper->GetHostNode()->GetParent() ?
+                    childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
+            }
+            childLayoutWrapper->Measure(child.layoutConstraint);
+        }
+        
         UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
         CheckSizeValidity(childLayoutWrapper);
         if (!isInfiniteLayout_) {
@@ -727,8 +752,11 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             continue;
         }
         {
-            ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
-                childLayoutWrapper->GetHostNode()->GetId(), childLayoutWrapper->GetHostNode()->GetParent()->GetId());
+            if (childLayoutWrapper->GetHostNode()) {
+                ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
+                    childLayoutWrapper->GetHostNode()->GetId(), childLayoutWrapper->GetHostNode()->GetParent() ?
+                        childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
+            }
             childLayoutWrapper->Measure(child.layoutConstraint);
         }
         crossAxisSize_ = std::max(crossAxisSize_, GetChildCrossAxisSize(childLayoutWrapper));
@@ -1030,8 +1058,11 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     for (auto&& child : children) {
         if (!child->IsOutOfLayout() && child->IsActive()) {
-            ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
-                child->GetHostNode()->GetId(), child->GetHostNode()->GetParent()->GetId());
+            if (child->GetHostNode()) {
+                ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
+                    child->GetHostNode()->GetId(), child->GetHostNode()->GetParent() ?
+                        child->GetHostNode()->GetParent()->GetId() : 0);
+            }
             child->Layout();
         }
     }
@@ -1085,8 +1116,11 @@ void FlexLayoutAlgorithm::PlaceChildren(
         if (child->IsOutOfLayout() || !child->IsActive()) {
             // adjust by postion property.
             child->GetGeometryNode()->SetMarginFrameOffset({});
-            ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
-                child->GetHostNode()->GetId(), child->GetHostNode()->GetParent()->GetId());
+            if (child->GetHostNode()) {
+                ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
+                    child->GetHostNode()->GetId(), child->GetHostNode()->GetParent() ?
+                        child->GetHostNode()->GetParent()->GetId() : 0);
+            }
             child->Layout();
             continue;
         }

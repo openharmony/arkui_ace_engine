@@ -67,7 +67,7 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 {
     RouterPageInfo info = target;
     info.path = info.url + ".js";
-    LOGD("router.Push pagePath = %{private}s", info.url.c_str());
+    LOGD("Router push pagePath = %{private}s", info.url.c_str());
     RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info);
 }
@@ -98,7 +98,7 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
             ContainerScope scope(instanceId);
             taskExecutor->PostTask(
                 [errorCode, errorMsg]() {
-                    LOGE("Run page error = %{public}d, errorMsg = %{public}s", errorCode, errorMsg.c_str());
+                    LOGW("Run page error = %{public}d, errorMsg = %{public}s", errorCode, errorMsg.c_str());
                 },
                 TaskExecutor::TaskType::JS);
         };
@@ -110,21 +110,20 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
     if (!info.url.empty()) {
         info.path = manifestParser_->GetRouter()->GetPagePath(url);
         if (info.path.empty()) {
-            LOGE("[Engine Log] this uri not support in route push.");
             return;
         }
     } else {
         info.path = manifestParser_->GetRouter()->GetEntry();
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
-    LOGD("router.RunPage pagePath = %{private}s", info.url.c_str());
+    LOGD("Router start run page, pagePath = %{private}s", info.url.c_str());
     RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info);
 }
 
 void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
-    LOGD("router.RunPage pagePath = %{private}s", info.url.c_str());
+    LOGD("Router start run page by name, pagePath = %{private}s", info.url.c_str());
     RouterPageInfo info { name, params };
     info.isNamedRouterMode = true;
     RouterOptScope scope(this);
@@ -150,7 +149,6 @@ void PageRouterManager::Push(const RouterPageInfo& target)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
-        LOGI("in router opt, post push router task");
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent(
@@ -170,7 +168,6 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
-        LOGI("in router opt, post push named route router task");
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent(
@@ -184,7 +181,7 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
     }
     RouterOptScope scope(this);
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
-        LOGE("router stack size is larger than max size 32.");
+        LOGW("router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", Framework::ERROR_CODE_PAGE_STACK_FULL);
         }
@@ -208,7 +205,6 @@ void PageRouterManager::Replace(const RouterPageInfo& target)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
-        LOGI("in router opt, post replace router task");
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent(
@@ -228,7 +224,6 @@ void PageRouterManager::ReplaceNamedRoute(const RouterPageInfo& target)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
-        LOGI("in router opt, post replace named route router task");
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent(
@@ -259,9 +254,8 @@ void PageRouterManager::ReplaceNamedRoute(const RouterPageInfo& target)
 void PageRouterManager::BackWithTarget(const RouterPageInfo& target)
 {
     CHECK_RUN_ON(JS);
-    LOGI("router.Back path = %{private}s", target.url.c_str());
+    LOGI("Router back path = %{private}s", target.url.c_str());
     if (inRouterOpt_) {
-        LOGI("in router opt, post back router task");
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent(
@@ -281,7 +275,6 @@ void PageRouterManager::Clear()
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
-        LOGI("in router opt, post clear router task");
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent(
@@ -314,7 +307,7 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
         .onSuccess =
             [weak = AceType::WeakClaim(this), weakPageInfo = AceType::WeakClaim(AceType::RawPtr(pageInfo))](
                 int32_t successType, int32_t successIndex) {
-                LOGI("showDialog successType: %{public}d, successIndex: %{public}d", successType, successIndex);
+                LOGD("Dialog show success, Type: %{public}d, Index: %{public}d", successType, successIndex);
                 auto pageInfo = weakPageInfo.Upgrade();
                 if (pageInfo && pageInfo->GetAlertCallback() && !successType) {
                     pageInfo->GetAlertCallback()(successIndex);
@@ -345,14 +338,12 @@ void PageRouterManager::DisableAlertBeforeBackPage()
 void PageRouterManager::StartClean()
 {
     if (pageRouterStack_.size() <= 1) {
-        LOGW("current page stack can not clean, %{public}d", static_cast<int32_t>(pageRouterStack_.size()));
         return;
     }
     std::list<WeakPtr<FrameNode>> temp;
     std::swap(temp, pageRouterStack_);
     pageRouterStack_.emplace_back(temp.back());
     if (!OnCleanPageStack()) {
-        LOGE("fail to clean page");
         std::swap(temp, pageRouterStack_);
     }
 }
@@ -360,9 +351,7 @@ void PageRouterManager::StartClean()
 bool PageRouterManager::Pop()
 {
     CHECK_RUN_ON(JS);
-    LOGI("router pop be called");
     if (inRouterOpt_) {
-        LOGE("in router opt, post Pop router task failed");
         return false;
     }
     RouterOptScope scope(this);
@@ -395,7 +384,6 @@ bool PageRouterManager::StartPop()
     auto topNode = pageRouterStack_.back();
     pageRouterStack_.pop_back();
     if (!OnPopPage(true, true)) {
-        LOGE("fail to pop page");
         pageRouterStack_.emplace_back(topNode);
         return false;
     }
@@ -422,7 +410,6 @@ void PageRouterManager::StartRestore(const RouterPageInfo& target)
             tempStack.pop_back();
         }
         if (tempStack.empty()) {
-            LOGW("this url not find in current restore stack");
             return;
         }
         tempStack.pop_back();
@@ -444,7 +431,6 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
 {
     CHECK_RUN_ON(JS);
     if (pageRouterStack_.empty()) {
-        LOGE("fail to get page state due to stack is null");
         return;
     }
     index = static_cast<int32_t>(pageRouterStack_.size());
@@ -470,7 +456,6 @@ std::string PageRouterManager::GetParams() const
 {
     CHECK_RUN_ON(JS);
     if (pageRouterStack_.empty()) {
-        LOGE("fail to get page param due to stack is null");
         return "";
     }
     auto pageNode = pageRouterStack_.back().Upgrade();
@@ -486,7 +471,6 @@ std::string PageRouterManager::GetCurrentPageUrl()
 {
     CHECK_RUN_ON(JS);
     if (pageRouterStack_.empty()) {
-        LOGW("current page stack is empty");
         return "";
     }
     auto pageNode = pageRouterStack_.back().Upgrade();
@@ -503,7 +487,6 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
 {
     CHECK_RUN_ON(JS);
     if (pageRouterStack_.empty()) {
-        LOGW("current page stack is empty");
         return nullptr;
     }
     auto pageNode = pageRouterStack_.back().Upgrade();
@@ -541,7 +524,6 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
             return faPageMap;
         }
     }
-    LOGW("js source map load failed!");
     return nullptr;
 }
 
@@ -575,12 +557,10 @@ std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo()
 std::string PageRouterManager::RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo)
 {
     if (!stackInfo->IsValid() || !stackInfo->IsArray()) {
-        LOGW("restore contentInfo is invalid");
         return "";
     }
     int32_t stackSize = stackInfo->GetArraySize();
     if (stackSize < 1) {
-        LOGW("restore stack size is invalid");
         return "";
     }
 
@@ -631,7 +611,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
 {
     RouterOptScope scope(this);
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
-        LOGE("router stack size is larger than max size 32.");
+        LOGW("Router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", Framework::ERROR_CODE_PAGE_STACK_FULL);
         }
@@ -639,7 +619,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     }
     RouterPageInfo info = target;
     info.path = info.url + ".js";
-    LOGD("router.Push pagePath = %{private}s", info.path.c_str());
+    LOGD("Router push page, path = %{private}s", info.path.c_str());
 
     if (target.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -666,7 +646,6 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     CHECK_RUN_ON(JS);
     RouterOptScope scope(this);
     if (target.url.empty()) {
-        LOGE("router.Push uri is empty");
         return;
     }
 #if !defined(PREVIEW)
@@ -698,11 +677,10 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
 #endif
     if (!manifestParser_) {
-        LOGE("the router manifest parser is null.");
         return;
     }
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
-        LOGE("router stack size is larger than max size 32.");
+        LOGW("Router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", Framework::ERROR_CODE_PAGE_STACK_FULL);
         }
@@ -710,9 +688,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
     RouterPageInfo info = target;
     info.path = manifestParser_->GetRouter()->GetPagePath(info.url);
-    LOGD("router.Push pagePath = %{private}s", info.path.c_str());
+    LOGD("Router push page, path = %{private}s", info.path.c_str());
     if (info.path.empty()) {
-        LOGE("[Engine Log] this uri not support in route push.");
+        LOGW("[Engine Log] this uri is empty, not support in route push.");
         if (info.errorCallback != nullptr) {
             info.errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
         }
@@ -738,7 +716,7 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
     RouterOptScope scope(this);
     RouterPageInfo info = target;
     info.path = info.url + ".js";
-    LOGD("router.Push pagePath = %{private}s", info.path.c_str());
+    LOGD("Router push page, path = %{private}s", info.path.c_str());
 
     PopPage("", false, false);
 
@@ -768,7 +746,6 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
     CleanPageOverlay();
     RouterOptScope scope(this);
     if (target.url.empty()) {
-        LOGE("router.Push uri is empty");
         return;
     }
 #if !defined(PREVIEW)
@@ -800,14 +777,13 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
     }
 #endif
     if (!manifestParser_) {
-        LOGE("the router manifest parser is null.");
         return;
     }
     RouterPageInfo info = target;
     info.path = manifestParser_->GetRouter()->GetPagePath(info.url);
-    LOGD("router.Push pagePath = %{private}s", info.path.c_str());
+    LOGD("Router push pagePath = %{private}s", info.path.c_str());
     if (info.path.empty()) {
-        LOGE("[Engine Log] this uri not support in route push.");
+        LOGW("[Engine Log] this uri is empty, not support in route push.");
         if (info.errorCallback != nullptr) {
             info.errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR_LITE);
         }
@@ -838,7 +814,6 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
                 StartRestore(RouterPageInfo());
                 return;
             }
-            LOGI("router stack is only one, back to desktop");
             ExitToDesktop();
             return;
         }
@@ -853,26 +828,24 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
 #if !defined(PREVIEW)
         if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
             info.path = info.url + ".js";
-            LOGD("router.Push pagePath = %{private}s", info.path.c_str());
+            LOGD("Router push pagePath = %{private}s", info.path.c_str());
             PopPageToIndex(pageInfo.first, info.params, true, true);
             return;
         }
 #endif
         if (!manifestParser_) {
-            LOGE("the router manifest parser is null.");
             return;
         }
 
         info.path = manifestParser_->GetRouter()->GetPagePath(info.url);
-        LOGD("router.Push pagePath = %{private}s", info.path.c_str());
+        LOGD("Router push pagePath = %{private}s", info.path.c_str());
         if (info.path.empty()) {
-            LOGE("[Engine Log] this uri not support in route push.");
+            LOGW("[Engine Log] this uri is empty, not support in route push.");
             return;
         }
         PopPageToIndex(pageInfo.first, info.params, true, true);
         return;
     }
-    LOGW("fail to find specified page to pop");
     if (!restorePageStack_.empty()) {
         StartRestore(target);
     }
@@ -882,7 +855,6 @@ void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)
 {
     RouterOptScope scope(this);
     if (pageRouterStack_.empty()) {
-        LOGI("page route stack is empty");
         return;
     }
     auto currentPage = pageRouterStack_.back().Upgrade();
@@ -907,7 +879,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
 {
     ACE_SCOPED_TRACE("PageRouterManager::LoadPage");
     CHECK_RUN_ON(JS);
-    LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s.", pageId, target.url.c_str());
+    LOGI("Page router manager is loading page[%{public}d]: %{public}s.", pageId, target.url.c_str());
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, target.params);
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
     std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
@@ -928,7 +900,6 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     if (!result) {
-        LOGE("fail to load page file");
         pageRouterStack_.pop_back();
         return;
     }
@@ -938,13 +909,11 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     if (!OnPageReady(pageNode, needHideLast, needTransition)) {
-        LOGE("fail to mount page");
         pageRouterStack_.pop_back();
         return;
     }
     AccessibilityEventType type = AccessibilityEventType::CHANGE;
     pageNode->OnAccessibilityEvent(type);
-    LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s. success", pageId, target.url.c_str());
 }
 
 void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
@@ -959,18 +928,15 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
     pageRouterStack_.emplace_back(pageNode);
 
     if (!loadCard_) {
-        LOGE("PageRouterManager loadCard_ is nullptr");
         return;
     }
     auto result = loadCard_(target.url, cardId);
     if (!result) {
-        LOGE("fail to load page file");
         pageRouterStack_.pop_back();
         return;
     }
 
     if (!OnPageReady(pageNode, needHideLast, false, isCardRouter_, cardId)) {
-        LOGE("fail to mount page");
         pageRouterStack_.pop_back();
         return;
     }
@@ -979,7 +945,7 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
 void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const RouterPageInfo& target,
     bool needHideLast, bool forceShowCurrent, bool needTransition)
 {
-    LOGI("MovePageToFront to index: %{public}d", index);
+    LOGI("Move page to front to index: %{public}d", index);
     if (target.errorCallback != nullptr) {
         target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }
@@ -992,7 +958,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     CHECK_NULL_VOID(pageInfo);
 
     if (index == static_cast<int32_t>(pageRouterStack_.size() - 1)) {
-        LOGD("already on the top");
+        LOGD("Current page is already on the top");
         pageInfo->ReplacePageParams(target.params);
         if (forceShowCurrent) {
             pageNode->GetRenderContext()->ResetPageTransitionEffect();
@@ -1018,7 +984,6 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     std::string tempParam;
     tempParam = pageInfo->ReplacePageParams(target.params);
     if (!stageManager->MovePageToFront(pageNode, needHideLast, needTransition)) {
-        LOGE("fail to move page to front");
         // restore position and param.
         pageRouterStack_.pop_back();
         pageRouterStack_.insert(last, pageNode);
@@ -1041,18 +1006,16 @@ void PageRouterManager::PopPage(const std::string& params, bool needShowNext, bo
 {
     CHECK_RUN_ON(JS);
     if (pageRouterStack_.empty()) {
-        LOGE("page router stack size is illegal");
         return;
     }
     if (needShowNext && (pageRouterStack_.size() == 1)) {
-        LOGE("page router stack size is only one, can not show next");
+        LOGW("Page router stack size is only one, can not show next");
         return;
     }
     auto topNode = pageRouterStack_.back();
     pageRouterStack_.pop_back();
     if (!needShowNext) {
         if (!OnPopPage(needShowNext, needTransition)) {
-            LOGE("fail to pop page");
             pageRouterStack_.emplace_back(topNode);
         }
         return;
@@ -1070,7 +1033,6 @@ void PageRouterManager::PopPage(const std::string& params, bool needShowNext, bo
     if (OnPopPage(needShowNext, needTransition)) {
         return;
     }
-    LOGE("fail to pop page");
     // restore stack and pageParam.
     pageRouterStack_.emplace_back(topNode);
     pageInfo->ReplacePageParams(temp);
@@ -1099,7 +1061,6 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
     if (OnPopPageToIndex(index, needShowNext, needTransition)) {
         return;
     }
-    LOGE("fail to pop page to index");
     // restore stack and pageParam.
     std::swap(temp, pageRouterStack_);
     pageInfo->ReplacePageParams(tempParam);
@@ -1125,7 +1086,6 @@ bool PageRouterManager::OnPageReady(
     if (stageManager) {
         return stageManager->PushPage(pageNode, needHideLast, needTransition);
     }
-    LOGE("fail to push page due to stage manager is nullptr");
     return false;
 }
 
@@ -1140,7 +1100,6 @@ bool PageRouterManager::OnPopPage(bool needShowNext, bool needTransition)
     if (stageManager) {
         return stageManager->PopPage(needShowNext, needTransition);
     }
-    LOGE("fail to pop page due to stage manager is nullptr");
     return false;
 }
 
@@ -1155,7 +1114,6 @@ bool PageRouterManager::OnPopPageToIndex(int32_t index, bool needShowNext, bool 
     if (stageManager) {
         return stageManager->PopPageToIndex(index, needShowNext, needTransition);
     }
-    LOGE("fail to pop page to index due to stage manager is nullptr");
     return false;
 }
 
@@ -1170,7 +1128,6 @@ bool PageRouterManager::OnCleanPageStack()
     if (stageManager) {
         return stageManager->CleanPageStack();
     }
-    LOGE("fail to pop page to index due to stage manager is nullptr");
     return false;
 }
 
@@ -1191,8 +1148,6 @@ void PageRouterManager::CleanPageOverlay()
         sharedManager->StopSharedTransition();
     }
 
-    if (overlayManager->RemoveOverlay(true, true)) {
-        LOGI("clean page overlay.");
-    }
+    overlayManager->RemoveOverlay(true, true);
 }
 } // namespace OHOS::Ace::NG

@@ -765,6 +765,9 @@ bool SubwindowOhos::CreateEventRunner()
 
 void SubwindowOhos::ClearToast()
 {
+    if (!IsToastWindow()) {
+        return;
+    }
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -782,7 +785,7 @@ void SubwindowOhos::ShowToastForAbility(
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos ShowToastForAbility Show the toast");
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
-
+    SetIsToastWindow(showMode == NG::ToastShowMode::TOP_MOST);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     if (!aceContainer) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Get container failed, it is null");
