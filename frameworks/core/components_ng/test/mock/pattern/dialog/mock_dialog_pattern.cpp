@@ -84,7 +84,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& 
     return nullptr;
 }
 
-RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& buttons)
+RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& buttons, bool hasTitle)
 {
     return nullptr;
 }
