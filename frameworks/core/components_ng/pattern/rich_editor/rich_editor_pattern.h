@@ -388,6 +388,7 @@ private:
     std::optional<RichEditorType> selectedType_;
     
     std::function<void()> customKeyboardBuilder_;
+    Offset selectionMenuOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

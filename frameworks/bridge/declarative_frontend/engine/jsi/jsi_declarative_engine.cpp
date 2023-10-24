@@ -1224,7 +1224,12 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 
 bool JsiDeclarativeEngine::UpdateRootComponent()
 {
-    Framework::UpdateRootComponent(JsiDeclarativeEngine::obj_.ToLocal());
+    if (!JsiDeclarativeEngine::obj_.IsEmpty()) {
+        Framework::UpdateRootComponent(JsiDeclarativeEngine::obj_.ToLocal());
+        // Clear the global object to avoid load this obj next time
+        JsiDeclarativeEngine::obj_.FreeGlobalHandleAddr();
+        JsiDeclarativeEngine::obj_.Empty();
+    }
     return true;
 }
 

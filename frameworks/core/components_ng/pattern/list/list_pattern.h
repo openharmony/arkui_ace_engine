@@ -188,11 +188,9 @@ public:
         multiSelectable_ = multiSelectable;
     }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     // dragStatusCallback
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-#endif // ENABLE_DRAG_FRAMEWORK
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
 
@@ -269,9 +267,7 @@ private:
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
     
-#ifdef ENABLE_DRAG_FRAMEWORK
     void InitNotifyDragEvent();
-#endif // ENABLE_DRAG_FRAMEWORK
     RefPtr<ListContentModifier> listContentModifier_;
 
     RefPtr<ListPositionController> positionController_;
@@ -324,9 +320,7 @@ private:
     RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
-#ifdef ENABLE_DRAG_FRAMEWORK
     std::optional<RefPtr<ListDragStatusListener>> listDragStatusListener_;
-#endif // ENABLE_DRAG_FRAMEWORK
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
 };
 } // namespace OHOS::Ace::NG

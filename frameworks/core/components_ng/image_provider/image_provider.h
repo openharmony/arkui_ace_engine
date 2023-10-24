@@ -83,6 +83,8 @@ public:
     // cancel a scheduled background task
     static void CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
 
+    static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
+
 private:
     /** Check if task is already running and register task in the task map,
      * making sure the same task runs only once (CreateImageObject with same
@@ -96,8 +98,6 @@ private:
 
     // mark a task as finished, erase from map and retrieve corresponding ctxs
     static std::set<WeakPtr<ImageLoadingContext>> EndTask(const std::string& key);
-
-    static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
 
     static RefPtr<ImageObject> QueryThumbnailCache(const ImageSourceInfo& src);
 

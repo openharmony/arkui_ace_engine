@@ -89,6 +89,7 @@ private:
     void OnMakeCanvasImage();
     void OnLoadSuccess();
     void OnLoadFail();
+    void DownloadImage();
 
     // round up int to the nearest 2-fold proportion of image width
     // REQUIRE: value > 0, image width > 0

@@ -1215,7 +1215,6 @@ void RichEditorPattern::OnVisibleChange(bool isVisible)
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
 {
     if (forceClose) {
-        isKeyboardClosedByUser_ = false;
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
         }
@@ -1278,6 +1277,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     UpdateSelectionType(textSelectInfo);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay();
+    selectionMenuOffset_ = info.GetGlobalLocation();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
@@ -1932,6 +1932,8 @@ void RichEditorPattern::CreateTextSpanNode(
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     spanNode->MountToParent(host, info.GetSpanIndex());
+    auto spanItem = spanNode->GetSpanItem();
+    AddSpanItem(spanItem, info.GetSpanIndex());
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
         auto spanItem = spanNode->GetSpanItem();
@@ -2069,10 +2071,6 @@ void RichEditorPattern::SetInputMethodStatus(bool keyboardShown)
 {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     imeShown_ = keyboardShown;
-    if (!keyboardShown && isKeyboardClosedByUser_) {
-        FocusHub::LostFocusToViewRoot();
-    }
-    isKeyboardClosedByUser_ = true;
 #endif
 }
 
@@ -2311,6 +2309,17 @@ bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
             return true;
         } else if (keyEvent.IsNumberKey() && !keyEvent.IsCombinationKey()) {
             appendElement = keyEvent.ConvertCodeToString();
+        } else if (keyEvent.IsLetterKey()) {
+            if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
+                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
+                HandleOnSelectAll();
+            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
+                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
+                HandleOnCopy();
+            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
+                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
+                HandleOnPaste();
+            }
         }
         if (keyEvent.code == KeyCode::KEY_DEL) {
 #if defined(PREVIEW)
@@ -2348,30 +2357,6 @@ bool RichEditorPattern::HandleShiftPressedEvent(const KeyEvent& event)
             keyChar = iterCode->second;
         } else {
             return false;
-        }
-        if (event.IsLetterKey()) {
-            if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
-                HandleOnSelectAll();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
-                HandleOnCopy();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
-                HandleOnPaste();
-            }
-            return true;
-        }
-        auto visibilityCode = event.ConvertInputCodeToString();
-        if (visibilityCode != std::string("")) {
-            if ((event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
-                    event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT) &&
-                visibilityCode.length() > 1) {
-                InsertValue(visibilityCode.substr(1, 1));
-            } else {
-                InsertValue(visibilityCode.substr(0, 1).c_str());
-            }
-            return true;
         }
     } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
                                                                event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
@@ -2826,6 +2811,11 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
 
     if (menuParams == nullptr) {
         return;
+    }
+
+    // long pressing on the image needs to set the position of the pop-up menu following the long pressing position
+    if (selectType == RichEditorType::IMAGE && !selectInfo.isUsingMouse) {
+        selectInfo.menuInfo.menuOffset = OffsetF(selectionMenuOffset_.GetX(), selectionMenuOffset_.GetY());
     }
 
     selectInfo.menuInfo.menuBuilder = menuParams->buildFunc;
