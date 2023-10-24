@@ -48,14 +48,16 @@ interface CommonSegmentButtonOptions {
   textMargin?: Margin | Dimension
 }
 
+type ItemRestriction<T> = [T, T, T?, T?, T?]
+type SegmentButtonItemTuple = ItemRestriction<SegmentButtonTextItem> | ItemRestriction<SegmentButtonIconItem> | ItemRestriction<SegmentButtonIconTextItem>
 type SegmentButtonItemArray = Array<SegmentButtonTextItem> | Array<SegmentButtonIconItem> | Array<SegmentButtonIconTextItem>
 
 export interface TabSegmentButtonConstructionOptions extends CommonSegmentButtonOptions {
-  buttons: Array<SegmentButtonTextItem>
+  buttons: ItemRestriction<SegmentButtonTextItem>
 }
 
 export interface CapsuleSegmentButtonConstructionOptions extends CommonSegmentButtonOptions {
-  buttons: SegmentButtonItemArray
+  buttons: SegmentButtonItemTuple
   multiply?: boolean
 }
 
@@ -92,13 +94,8 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
   deleteCount: number = void 0
   addLength: number = void 0
 
-  constructor(elements: SegmentButtonItemArray) {
+  constructor(elements: SegmentButtonItemTuple) {
     super()
-    if (elements.length < MIN_ITEM_COUNT) {
-      throw new RangeError("Below the minimum number of elements (2).")
-    } else if (elements.length > MAX_ITEM_COUNT) {
-      throw new RangeError("Exceeded the maximum number of elements (5).")
-    }
     super.push(...elements.map(element => new SegmentButtonItemOptions(element)))
   }
 
@@ -155,7 +152,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
     return super.splice(start, deleteCount, ...items)
   }
 
-  static create(elements: SegmentButtonItemArray): SegmentButtonItemOptionsArray {
+  static create(elements: SegmentButtonItemTuple): SegmentButtonItemOptionsArray {
     return new SegmentButtonItemOptionsArray(elements)
   }
 }

@@ -37,8 +37,6 @@ let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class exte
         this.changeStartIndex = void 0;
         this.deleteCount = void 0;
         this.addLength = void 0;
-        if (t.length < 2) throw new RangeError("Below the minimum number of elements (2).");
-        if (t.length > 5) throw new RangeError("Exceeded the maximum number of elements (5).");
         super.push(...t.map((t => new SegmentButtonItemOptions(t))))
     }
 
