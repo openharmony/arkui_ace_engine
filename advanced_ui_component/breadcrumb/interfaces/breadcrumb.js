@@ -57,6 +57,7 @@ export class Breadcrumb extends ViewPU {
     this.iconWidth = 24;
     this.labelSpace = 4;
     this.labelHeight = 40;
+    this.labelBorderWidth = 2;
     this.setInitiallyProvidedValue(t);
     this.declareWatch("labelInfo", this.onInfoChanged)
   }
@@ -92,7 +93,8 @@ export class Breadcrumb extends ViewPU {
     void 0 !== e.labelPadding && (this.labelPadding = e.labelPadding);
     void 0 !== e.iconWidth && (this.iconWidth = e.iconWidth);
     void 0 !== e.labelSpace && (this.labelSpace = e.labelSpace);
-    void 0 !== e.labelHeight && (this.labelHeight = e.labelHeight)
+    void 0 !== e.labelHeight && (this.labelHeight = e.labelHeight);
+    void 0 !== e.labelBorderWidth && (this.labelBorderWidth = e.labelBorderWidth)
   }
   updateStateVars(e) {}
   purgeVariableDependenciesOnElmtId(e) {
@@ -176,12 +178,19 @@ export class Breadcrumb extends ViewPU {
   }
   onPlaceChildren(e, t, i) {
     let s = 0;
+    let h = {
+      x: -999999,
+      y: -999999
+    };
     t.forEach(((e, t) => {
-      e.layout({
-        x: s,
-        y: 0
-      });
-      s += e.measureResult.width
+      let i = e.measureResult.width;
+      if (t % 2 != 0 || i !== 2 * this.labelBorderWidth) {
+        e.layout({
+          x: s,
+          y: 0
+        });
+        s += i
+      } else e.layout(h)
     }))
   }
   onMeasureSize(e, t, i) {
@@ -554,7 +563,7 @@ export class Breadcrumb extends ViewPU {
             this.observeComponentCreation(((e, i) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
               Button.createWithChild();
-              Button.borderWidth(2);
+              Button.borderWidth(this.labelBorderWidth);
               Button.clip(!0);
               Button.type(ButtonType.Normal);
               Button.backgroundColor(ObservedObject.GetRawObject(this.bgColor));
@@ -704,7 +713,7 @@ export class Breadcrumb extends ViewPU {
                   Button.createWithChild();
                   Button.clip(!0);
                   Button.type(ButtonType.Normal);
-                  Button.borderWidth(2);
+                  Button.borderWidth(this.labelBorderWidth);
                   Button.backgroundColor(ObservedObject.GetRawObject(this.bgColor));
                   Button.borderRadius({
                     id: -1,
