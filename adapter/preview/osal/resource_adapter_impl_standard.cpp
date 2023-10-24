@@ -202,6 +202,20 @@ Color ResourceAdapterImpl::GetColor(uint32_t resId)
     return Color(result);
 }
 
+Color ResourceAdapterImpl::GetColorByName(const std::string& resName)
+{
+    uint32_t result = 0;
+    if (resourceManager_) {
+        auto index = resName.find_last_of('.');
+        auto actualResName = resName.substr(index + 1, resName.length() - index - 1);
+        auto state = resourceManager_->GetColorByName(actualResName.c_str(), result);
+        if (state != Global::Resource::SUCCESS) {
+            LOGE("GetColorByName error, name=%{public}s", resName.c_str());
+        }
+    }
+    return Color(result);
+}
+
 Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
 {
     float dimensionFloat = 0.0f;
@@ -210,6 +224,21 @@ Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
         auto state = resourceManager_->GetFloatById(resId, dimensionFloat, unit);
         if (state != Global::Resource::SUCCESS) {
             LOGW("GetDimension error, id=%{public}u", resId);
+        }
+    }
+    return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
+}
+
+Dimension ResourceAdapterImpl::GetDimensionByName(const std::string& resName)
+{
+    float dimensionFloat = 0.0f;
+    std::string unit = "";
+    if (resourceManager_) {
+        auto index = resName.find_last_of('.');
+        auto actualResName = resName.substr(index + 1, resName.length() - index - 1);
+        auto state = resourceManager_->GetFloatByName(actualResName.c_str(), dimensionFloat, unit);
+        if (state != Global::Resource::SUCCESS) {
+            LOGE("GetDimensionByName error, name=%{public}s", resName.c_str());
         }
     }
     return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
