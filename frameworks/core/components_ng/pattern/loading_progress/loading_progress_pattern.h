@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_PATTERN_H
 
-#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_method.h"

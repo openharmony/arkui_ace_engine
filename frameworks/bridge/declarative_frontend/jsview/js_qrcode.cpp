@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 
-#include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/qrcode_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -60,7 +59,6 @@ void JSQRCode::Create(const std::string& value)
 void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color qrcodeColor;
@@ -75,7 +73,6 @@ void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
 void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;

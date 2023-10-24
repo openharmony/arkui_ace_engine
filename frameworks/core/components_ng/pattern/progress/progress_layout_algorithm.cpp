@@ -97,8 +97,6 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
             width_ = std::min(width_, strokeWidth_);
         }
     }
-    LOGD("ProgressLayoutAlgorithm::Type:%{public}d MeasureContent: width_: %{public}fl ,height_: %{public}fl", type_,
-        width_, height_);
     return SizeF(width_, height_);
 }
 
@@ -150,8 +148,6 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContentForApiNine(
         strokeWidth_ = std::min(strokeWidth_, height_ / 2.0f);
         strokeWidth_ = std::min(strokeWidth_, width_ / 2.0f);
     }
-    LOGD("ProgressLayoutAlgorithm::Type:%{public}d MeasureContent: width_: %{public}fl ,height_: %{public}fl", type_,
-        width_, height_);
     return SizeF(width_, height_);
 }
 
