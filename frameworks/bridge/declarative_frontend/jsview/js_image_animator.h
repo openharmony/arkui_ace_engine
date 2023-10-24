@@ -30,13 +30,13 @@ public:
     static void JSBind(BindingTarget globalObj);
 
     static void SetImages(const JSCallbackInfo& info);
-    static void SetState(int32_t state);
-    static void SetDuration(int32_t duration);
-    static void SetIteration(int32_t iteration);
-    static void SetFillMode(int32_t fillMode);
-    static void SetPreDecode(int32_t preDecode);
-    static void SetIsReverse(bool isReverse);
-    static void SetFixedSize(bool fixedSize);
+    static void SetState(const JSCallbackInfo& info);
+    static void SetDuration(const JSCallbackInfo& info);
+    static void SetIteration(const JSCallbackInfo& info);
+    static void SetFillMode(const JSCallbackInfo& info);
+    static void SetPreDecode(const JSCallbackInfo& info);
+    static void SetIsReverse(const JSCallbackInfo& info);
+    static void SetFixedSize(const JSCallbackInfo& info);
 
     static void OnStart(const JSCallbackInfo& info);
     static void OnPause(const JSCallbackInfo& info);
