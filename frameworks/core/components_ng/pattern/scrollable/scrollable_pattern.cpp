@@ -22,6 +22,7 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
@@ -248,6 +249,7 @@ void ScrollablePattern::OnScrollEnd()
     }
 
     OnScrollEndCallback();
+    SelectOverlayScrollNotifier::NotifyOnScrollEnd(WeakClaim(this));
 }
 
 void ScrollablePattern::AddScrollEvent()
@@ -1186,7 +1188,9 @@ bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
     if (!OnScrollPosition(offset, source)) {
         return false;
     }
-    return OnScrollCallback(offset, source);
+    auto result = OnScrollCallback(offset, source);
+    SelectOverlayScrollNotifier::NotifyOnScrollCallback(WeakClaim(this), offset, source);
+    return result;
 }
 
 void ScrollablePattern::NotifyMoved(bool value)

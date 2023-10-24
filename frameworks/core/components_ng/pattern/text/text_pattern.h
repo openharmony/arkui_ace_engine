@@ -172,12 +172,10 @@ public:
     }
     float GetLineHeight() const override;
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
-#else
-    std::vector<RSTextRect> GetTextBoxes() override;
-#endif
+    std::vector<RectF> GetTextBoxes() override;
     OffsetF GetParentGlobalOffset() const override;
+
+    OffsetF GetTextPaintOffset() const;
 
     RefPtr<FrameNode> MoveDragNode() override
     {
@@ -237,7 +235,7 @@ public:
 #endif
 
     void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
-        const std::vector<Rect>& rectsForPlaceholders, OffsetF contentOffset) override
+        const std::vector<RectF>& rectsForPlaceholders, OffsetF contentOffset) override
     {
         placeHolderIndex_ = placeHolderIndex;
         imageOffset_ = contentOffset;
@@ -249,7 +247,7 @@ public:
         return placeHolderIndex_;
     }
 
-    const std::vector<Rect>& GetRectsForPlaceholders()
+    const std::vector<RectF>& GetRectsForPlaceholders()
     {
         return rectsForPlaceholders_;
     }
@@ -288,6 +286,27 @@ public:
 #else
     static RSTextRect ConvertRect(const Rect& rect);
 #endif
+    // override SelectOverlayClient methods
+    void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
+    void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
+    void OnSelectOverlayMenuClicked(SelectOverlayMenuId menuId) override
+    {
+        switch (menuId) {
+            case SelectOverlayMenuId::COPY:
+                HandleOnCopy();
+                return;
+            case SelectOverlayMenuId::SELECT_ALL:
+                HandleOnSelectAll();
+                return;
+            default:
+                return;
+        }
+    }
+
+    RefPtr<FrameNode> GetClientHost() const override
+    {
+        return GetHost();
+    }
 
 protected:
     virtual void HandleOnCopy();
@@ -304,15 +323,13 @@ protected:
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
-    int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelectAll();
-    virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
-    virtual void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::wstring GetWideText() const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
+    void CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
 
     bool showSelectOverlay_ = false;
     bool mouseEventInitialized_ = false;
@@ -335,11 +352,7 @@ protected:
     float baselineOffset_ = 0.0f;
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> dragBoxes_;
-#else
-    std::vector<RSTextRect> dragBoxes_;
-#endif
+    std::vector<RectF> dragBoxes_;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -371,7 +384,7 @@ private:
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeHolderIndex_;
-    std::vector<Rect> rectsForPlaceholders_;
+    std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;
 
     OffsetF contentOffset_;

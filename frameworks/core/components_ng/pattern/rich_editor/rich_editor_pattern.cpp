@@ -2467,7 +2467,7 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
         mouseStatus_ = MouseStatus::MOVE;
         if (isFirstMouseSelect_) {
             int32_t extend = paragraphs_.GetIndex(textOffset);
-            int32_t extendEnd = extend + GetGraphemeClusterLength(extend);
+            int32_t extendEnd = extend + GetGraphemeClusterLength(GetWideText(), extend);
             textSelector_.Update(extend, extendEnd);
             isFirstMouseSelect_ = false;
         } else {
@@ -3299,7 +3299,7 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
         auto panOffset = OffsetF(localOffset.GetX(), localOffset.GetY()) - contentRect_.GetOffset() +
                          OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         for (const auto& selectedRect : selectedRects) {
-            if (selectedRect.IsInRegion(Point(panOffset.GetX(), panOffset.GetY()))) {
+            if (selectedRect.IsInRegion(PointF(panOffset.GetX(), panOffset.GetY()))) {
                 return true;
             }
         }
@@ -3361,7 +3361,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
 {
     int32_t currentPosition = paragraphs_.GetIndex(pos);
     currentPosition = std::min(currentPosition, GetTextContentLength());
-    int32_t nextPosition = currentPosition + GetGraphemeClusterLength(currentPosition);
+    int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
@@ -3441,28 +3441,6 @@ RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
 int32_t RichEditorPattern::GetHandleIndex(const Offset& offset) const
 {
     return paragraphs_.GetIndex(offset);
-}
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-std::vector<RSTypographyProperties::TextBox> RichEditorPattern::GetTextBoxes()
-#else
-std::vector<RSTextRect> RichEditorPattern::GetTextBoxes()
-#endif
-{
-    auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> res;
-#else
-    std::vector<RSTextRect> res;
-#endif
-    res.reserve(selectedRects.size());
-    for (auto&& rect : selectedRects) {
-        if (NearZero(rect.Width())) {
-            continue;
-        }
-        res.emplace_back(ConvertRect(rect));
-    }
-    return res;
 }
 
 float RichEditorPattern::GetLineHeight() const

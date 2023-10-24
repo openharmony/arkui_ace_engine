@@ -56,11 +56,4 @@ uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityPr
     }
     return actions;
 }
-
-void TestNG::MockGetPaintRectWithTransform(const RefPtr<FrameNode>& frameNode, RectF paintRect)
-{
-    RefPtr<MockRenderContext> renderContext = AceType::DynamicCast<MockRenderContext>(MockRenderContext::Create());
-    EXPECT_CALL(*renderContext, GetPaintRectWithTransform()).WillRepeatedly(Return(paintRect));
-    frameNode->renderContext_ = renderContext;
-}
 } // namespace OHOS::Ace::NG

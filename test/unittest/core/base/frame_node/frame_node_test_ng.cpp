@@ -316,7 +316,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest, TestSize.Level1)
     auto globalPoint = PointF(10, 10);
     auto touchTestResult = std::list<RefPtr<TouchEventTarget>>();
 
-    EXPECT_CALL(*mockRenderContext, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF(0, 0, 100, 100)));
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
     EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
 
     /**
@@ -326,7 +326,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest, TestSize.Level1)
     childNode->SetExclusiveEventForChild(true);
     auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
     childNode->renderContext_ = mockRenderContextforChild;
-    EXPECT_CALL(*mockRenderContextforChild, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF(0, 0, 100, 100)));
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
     EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
         .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
     childNode->GetOrCreateGestureEventHub();
@@ -347,7 +347,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest, TestSize.Level1)
     auto grandChildNode = FrameNode::CreateFrameNode("main", 3, AceType::MakeRefPtr<Pattern>(), true);
     grandChildNode->SetExclusiveEventForChild(true);
     grandChildNode->renderContext_ = mockRenderContextforChild;
-    EXPECT_CALL(*mockRenderContextforChild, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF(0, 0, 100, 100)));
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
     EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
         .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
     grandChildNode->GetOrCreateGestureEventHub();
@@ -1616,7 +1616,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest042, TestSize.Level1)
     auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
     childNode->renderContext_ = mockRenderContextforChild;
     auto localPoint = PointF(10, 10);
-    EXPECT_CALL(*mockRenderContextforChild, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF(0, 0, 100, 100)));
+    mockRenderContextforChild->rect_ = RectF(0, 0, 100, 100);
     EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
         .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
     auto childEventHub = childNode->GetOrCreateGestureEventHub();

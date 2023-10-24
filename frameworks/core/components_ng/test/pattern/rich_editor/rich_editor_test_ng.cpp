@@ -530,7 +530,7 @@ HWTEST_F(RichEditorTestNg, RichEditorCursorMove001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto paragraph = AceType::MakeRefPtr<MockParagraph>();
     richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph });
-    EXPECT_CALL(*paragraph, GetHandlePositionForClick).Times(2).WillRepeatedly(Return(2));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate).Times(2).WillRepeatedly(Return(2));
     AddSpan(INIT_VALUE_1);
     richEditorPattern->caretPosition_ = 2;
     richEditorPattern->CursorMoveLeft();

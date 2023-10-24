@@ -62,7 +62,6 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetDraggable(bool draggable) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
-    
 };
 } // namespace OHOS::Ace::NG
 

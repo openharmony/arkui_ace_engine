@@ -72,6 +72,7 @@ template("ace_unittest") {
     ace_unittest_deps += invoker.extra_deps
   }
 
+  # ----------------------------  temporary support
   if (render) {
     ace_unittest_deps += [
       "$graphic_2d_path/rosen/modules/render_service_base:librender_service_base",
@@ -101,6 +102,8 @@ template("ace_unittest") {
     ace_unittest_config += [ "$ace_flutter_engine_root:flutter_config" ]
     flutter_external_deps = [ "eventhandler:libeventhandler" ]
   }
+
+  # ----------------------------
 
   if (type == "components") {
     ohos_unittest(ace_unittest_name) {

@@ -17,7 +17,6 @@ ace_unittest("select_pattern_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_v2/inspector/utils.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "select_pattern_test_ng.cpp",
   ]
 }
