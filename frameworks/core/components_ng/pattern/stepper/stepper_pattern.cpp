@@ -430,9 +430,12 @@ void StepperPattern::InitButtonOnHoverEvent(RefPtr<FrameNode> buttonNode, bool i
     CHECK_NULL_VOID(buttonNode);
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(buttonInputHub);
-    auto hoverCallback = [weak = WeakClaim(this), buttonNode, isLeft](bool isHovered) {
+    auto hoverCallback = [weak = WeakClaim(this), buttonNodeWeak = WeakPtr<FrameNode>(buttonNode), isLeft](
+                             bool isHovered) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto buttonNode = buttonNodeWeak.Upgrade();
+        CHECK_NULL_VOID(buttonNode);
         pattern->ButtonOnHover(buttonNode, isHovered, isLeft);
     };
     buttonOnHoverListenr_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
@@ -496,9 +499,12 @@ void StepperPattern::InitButtonTouchEvent(RefPtr<FrameNode> buttonNode)
     buttonEventHub->SetStateEffect(false);
     auto buttonGestureHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(buttonGestureHub);
-    auto touchCallback = [weak = WeakClaim(this), buttonNode](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this), buttonNodeWeak = WeakPtr<FrameNode>(buttonNode)](
+                             const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto buttonNode = buttonNodeWeak.Upgrade();
+        CHECK_NULL_VOID(buttonNode);
         pattern->ButtonOnTouch(buttonNode, info.GetTouches().front().GetTouchType());
     };
     buttonTouchListenr_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
