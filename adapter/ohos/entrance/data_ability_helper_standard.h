@@ -18,24 +18,27 @@
 
 #include "base/resource/data_ability_helper.h"
 
+#ifdef MEDIA_LIBRARY_EXISTS
 #include "media_library_manager.h"
+#endif
+
 #include "pixel_map.h"
 
 namespace OHOS::AppExecFwk {
-    class DataAbilityHelper;
-    class Context;
-}
+class DataAbilityHelper;
+class Context;
+} // namespace OHOS::AppExecFwk
 
 namespace OHOS::AbilityRuntime {
-    class Context;
+class Context;
 }
 
 namespace OHOS::DataShare {
-    class DataShareHelper;
+class DataShareHelper;
 }
 
 namespace OHOS {
-    class Uri;
+class Uri;
 }
 
 namespace OHOS::Ace {
@@ -60,7 +63,9 @@ private:
     std::shared_ptr<AppExecFwk::DataAbilityHelper> dataAbilityHelper_;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
     std::weak_ptr<OHOS::AppExecFwk::Context> context_;
+#ifdef MEDIA_LIBRARY_EXISTS
     OHOS::Media::MediaLibraryManager mgr_;
+#endif
 };
 
 } // namespace OHOS::Ace
