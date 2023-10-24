@@ -525,7 +525,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
             info.GetLocalLocation().GetY() - textContentRect.GetY() };
         auto position = paragraph_->GetHandlePositionForClick(textOffset);
         for (const auto& item : spans_) {
-            if (item && position < item->position) {
+            if (item && position <= item->position) {
                 if (!item->onClick) {
                     break;
                 }
