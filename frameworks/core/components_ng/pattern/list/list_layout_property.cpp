@@ -22,7 +22,6 @@ namespace OHOS::Ace::NG {
 namespace {
 V2::ItemDivider ItemDividerFromJson(const std::unique_ptr<JsonValue>& json)
 {
-    LOGD("UITree json=%{public}s", json->ToString().c_str());
     V2::ItemDivider divider;
     divider.strokeWidth = Dimension::FromString(json->GetString("strokeWidth"));
     divider.startMargin = Dimension::FromString(json->GetString("startMargin"));
