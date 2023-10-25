@@ -421,6 +421,8 @@ private:
      *  End of NestableScrollContainer implementations
      *******************************************************************************/
 
+    bool HandleOverScroll(float velocity);
+
     void CreateRefreshCoordination()
     {
         if (!refreshCoordination_) {
