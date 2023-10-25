@@ -82,7 +82,7 @@ std::string GridLayoutProperty::GetGridDirectionStr() const
         case FlexDirection::COLUMN_REVERSE:
             return "GridDirection.ColumnReverse";
         default:
-            LOGE("grid direction %{public}d is not valid", gridDirection);
+            TAG_LOGW(AceLogTag::ACE_GRID, "grid direction %{public}d is not valid", gridDirection);
             break;
     }
     return "GridDirection.Row";
