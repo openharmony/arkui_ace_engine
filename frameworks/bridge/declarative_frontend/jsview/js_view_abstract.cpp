@@ -2748,7 +2748,6 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorder", info, checkList)) {
-        LOGE("args is not a object. %s", info[0]->ToString().c_str());
         CalcDimension borderWidth;
         ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
         ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
@@ -2780,7 +2779,6 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderWidth", info, checkList)) {
-        LOGW("args need a string or number or object");
         ViewAbstractModel::GetInstance()->SetBorderWidth({});
         return;
     }
@@ -2790,7 +2788,6 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
     std::optional<CalcDimension> leftDimen;
@@ -2838,7 +2835,6 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
         }
         ViewAbstractModel::GetInstance()->SetBorderWidth(leftDimen, rightDimen, topDimen, bottomDimen);
     } else {
-        LOGE("args format error. %{public}s", args->ToString().c_str());
         return;
     }
 }
@@ -2884,7 +2880,6 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderImage", info, checkList)) {
-        LOGE("args is not a object. %{public}s", info[0]->ToString().c_str());
         RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
         uint8_t imageBorderBitsets = 0;
         ViewAbstractModel::GetInstance()->SetBorderImage(borderImage, imageBorderBitsets);
@@ -2900,7 +2895,6 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
 
     auto valueSource = object->GetProperty("source");
     if (!valueSource->IsString() && !valueSource->IsObject()) {
-        LOGE("Border image source type not recognized");
         return;
     }
     std::string srcResult;
@@ -2970,7 +2964,6 @@ void JSViewAbstract::ParseBorderImageDimension(
                     borderImageDimension.bottomDimension = currentDimension;
                     break;
                 default:
-                    LOGE("Unsupported border image direction");
                     break;
             }
         }
@@ -3134,7 +3127,6 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        LOGI("args(%{public}s) is invalid, use default value.", args->ToString().c_str());
         ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
         return;
     }
@@ -3166,7 +3158,6 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
 
         ViewAbstractModel::GetInstance()->SetBorderColor(leftColor, rightColor, topColor, bottomColor);
     } else {
-        LOGE("args format error. %{public}s", args->ToString().c_str());
         return;
     }
 }
@@ -3231,7 +3222,6 @@ BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
     if (style < BorderStyle::SOLID || style > BorderStyle::NONE) {
-        LOGW("border style(%{public}d) is invalid, use default value.", value);
         style = BorderStyle::SOLID;
     }
     return style;
@@ -3241,7 +3231,6 @@ BorderStyle ConvertBorderStyle(int32_t value)
 void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber()) {
-        LOGD("args(%{public}s) is invalid, use default value.", args->ToString().c_str());
         ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
         return;
     }

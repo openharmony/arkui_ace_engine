@@ -36,7 +36,6 @@ void JSColumnSplit::JsResizeable(bool resizeable)
 void JSColumnSplit::JsDivider(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        LOGW("Invalid params");
         return;
     }
 
@@ -58,7 +57,6 @@ void JSColumnSplit::JsClip(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (clipShape == nullptr) {
-            LOGD("clipShape is null");
             return;
         }
         ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());

@@ -105,7 +105,10 @@ enum class AceLogTag : uint8_t {
     ACE_QRCODE,
     ACE_ACCESSIBILITY,
     ACE_ROUTER,
-    ACE_THEME
+    ACE_THEME,
+    ACE_BORDER,
+    ACE_BORDER_IMAGE,
+    ACE_LINEAR_SPLIT,
 };
 
 enum class LogDomain : uint32_t {
