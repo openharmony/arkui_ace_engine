@@ -5116,12 +5116,14 @@ class ViewPU extends NativeViewPartialUpdate {
         const _popFunc = (classObject && "pop" in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             
+            this.syncInstanceId();
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
             }
             ViewStackProcessor.StopGetAccessRecording();
+            this.restoreInstanceId();
             
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
