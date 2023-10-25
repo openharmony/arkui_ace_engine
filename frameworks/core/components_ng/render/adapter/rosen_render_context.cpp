@@ -2288,6 +2288,7 @@ void RosenRenderContext::PaintFocusState(
         pen.SetWidth(borderWidthPx);
         rsCanvas.AttachPen(pen);
         rsCanvas.DrawRoundRect(rrect);
+        rsCanvas.DetachPen();
     };
     std::shared_ptr<Rosen::RectF> overlayRect = std::make_shared<Rosen::RectF>(
         paintRect.GetRect().Left() - borderWidthPx / 2, paintRect.GetRect().Top() - borderWidthPx / 2,
@@ -3467,6 +3468,7 @@ void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fi
         pen.SetColor(ToRSColor(strokeColor));
         rsCanvas.AttachPen(pen);
         rsCanvas.DrawRect(ToRSRect(rect));
+        rsCanvas.DetachPen();
     };
 
     mouseSelectModifier_ = std::make_shared<MouseSelectModifier>();

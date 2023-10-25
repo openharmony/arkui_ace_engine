@@ -274,6 +274,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
             radiusXY);
         canvas.DrawRoundRect(rSRoundRect);
     }
+    canvas.DetachBrush();
 }
 
 void TextContentModifier::ModifyFontSizeInTextStyle(TextStyle& textStyle)

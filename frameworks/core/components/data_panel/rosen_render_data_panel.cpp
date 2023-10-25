@@ -324,7 +324,7 @@ void PaintProgress(
         canvas->Rotate(startAngle - QUARTER_CIRCLE, center.GetX(), center.GetY());
         canvas->AttachPen(gradientPen);
         canvas->DrawPath(botPath);
-        canvas->DetachBrush();
+        canvas->DetachPen();
         canvas->Restore();
 
         canvas->Save();
@@ -376,7 +376,7 @@ void PaintProgress(
         }
         canvas->AttachPen(gradientPen);
         canvas->DrawPath(botPath);
-        canvas->DetachBrush();
+        canvas->DetachPen();
         canvas->Restore();
     }
     canvas->Restore();

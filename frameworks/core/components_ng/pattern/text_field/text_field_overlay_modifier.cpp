@@ -156,6 +156,7 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
                 : textFieldPattern->GetFrameRect().Height()));
 #endif
     }
+    canvas.DetachBrush();
     canvas.Restore();
 }
 
