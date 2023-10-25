@@ -49,7 +49,6 @@ void JSRemoteWindow::Create(const JSCallbackInfo& info)
     std::shared_ptr<Rosen::RSNode> rsNode;
 #ifdef ENABLE_ROSEN_BACKEND
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     rsNode = CreateRSNodeFromNapiValue(info[0]);

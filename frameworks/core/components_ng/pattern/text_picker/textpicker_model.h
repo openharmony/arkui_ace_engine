@@ -68,6 +68,8 @@ public:
     virtual void SetHasSelectAttr(bool value) = 0;
     virtual void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) = 0;
     virtual void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) = 0;
+    virtual void SetSingleRange(bool isSingleRange) = 0;
+    virtual bool GetSingleRange() = 0;
 
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;

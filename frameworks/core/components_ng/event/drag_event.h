@@ -158,11 +158,6 @@ public:
         return isNotInPreviewState_;
     }
 
-    void ResetTextReceivedLongPress()
-    {
-        isTextReceivedLongPress_ = false;
-    }
-
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;
@@ -179,7 +174,6 @@ private:
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
-    bool isTextReceivedLongPress_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

@@ -64,6 +64,8 @@ public:
         instanceId_ = instanceId;
     }
 
+    void SetSurfaceDefaultSize(int32_t width, int32_t height) override;
+
     void ConsumeBuffer();
 
 #ifdef OHOS_PLATFORM

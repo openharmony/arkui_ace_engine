@@ -20,11 +20,18 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+void ModelPattern::OnRebuildFrame()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    modelAdapter_->OnRebuildFrame(context);
+}
 
-ModelPattern::ModelPattern(uint32_t key) : key_(key)
+ModelPattern::ModelPattern(uint32_t key, Render3D::SurfaceType surfaceType) : key_(key)
 {
     LOGD("MODEL_NG: ModelPattern::ModelPattern(%d)", key);
-    modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_);
+    modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, surfaceType);
     modelAdapter_->SetPaintFinishCallback([weak = WeakClaim(this)]() {
             auto model = weak.Upgrade();
             if (model) {
@@ -66,28 +73,33 @@ void ModelPattern::OnModifyDone()
 
 bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    bool measure = (config.skipMeasure || dirty->SkipMeasureContent()) ? false : true;
+    CHECK_NULL_RETURN(modelAdapter_, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(dirty, false);
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
 
-    CHECK_NULL_RETURN(modelAdapter_, measure);
-    if (!modelAdapter_->IsInitialized()) {
-        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    auto contentSize = geometryNode->GetContentSize();
+    auto contentOffset = geometryNode->GetContentOffset();
+
+    bool measure = (config.skipMeasure || dirty->SkipMeasureContent()) ? false : true;
+    float width = contentSize.Width();
+    float height = contentSize.Height();
+    float scale = PipelineContext::GetCurrentContext()->GetViewScale();
+    modelAdapter_->OnDirtyLayoutWrapperSwap(contentOffset.GetX(), contentOffset.GetY(), width, height, scale,
+        config.contentSizeChange);
+    host->MarkNeedSyncRenderTree();
 
     return measure;
 }
 
 void ModelPattern::OnAttachToFrameNode()
 {
-    LOGD("MODEL_NG: ModelPattern::OnAttachToFrameNode()");
-#ifdef ENABLE_ROSEN_BACKEND
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
-    CHECK_NULL_VOID(context);
-    auto rsNode = context->GetRSNode();
-    CHECK_NULL_VOID(rsNode);
-    rsNode->SetFrameGravity(OHOS::Rosen::Gravity::RESIZE);
-#endif
+    CHECK_NULL_VOID(modelAdapter_);
+    modelAdapter_->OnAttachToFrameNode(host->GetRenderContext());
 }
 
 void ModelPattern::OnDetachFromFrameNode(FrameNode* node)

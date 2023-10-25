@@ -16,7 +16,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_curves_module.h"
 
 #include "base/json/json_util.h"
-#include "base/log/log.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
@@ -51,7 +50,6 @@ shared_ptr<JsValue> CurvesInterpolate(const shared_ptr<JsRuntime>& runtime, cons
         animationCurve = CreateCurve(customCallBack);
     }
     if (!animationCurve) {
-        LOGW("created animationCurve is null, curveString:%{public}s", curveString.c_str());
         return runtime->NewNull();
     }
     double curveValue = animationCurve->Move(time);
@@ -64,7 +62,6 @@ shared_ptr<JsValue> CurvesInitInternal(const shared_ptr<JsRuntime>& runtime, con
     auto curveObj = runtime->NewObject();
     curveObj->SetProperty(runtime, CURVE_INTERPOLATE, runtime->NewFunction(CurvesInterpolate));
     if (argc != 1 && argc != 0) {
-        LOGE("CurvesInit args count is invalid");
         return runtime->NewNull();
     }
     RefPtr<Curve> curve;
@@ -82,9 +79,7 @@ shared_ptr<JsValue> CurvesInitInternal(const shared_ptr<JsRuntime>& runtime, con
 
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     int32_t pageId = -1;
-    if (page == nullptr) {
-        LOGW("page is nullptr");
-    } else {
+    if (page) {
         pageId = page->GetPageId();
     }
     curveObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));
@@ -107,7 +102,6 @@ bool CreateSpringCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
 {
     if (argc != 4) {
-        LOGE("Spring curve: the number of parameters is illegal");
         return false;
     }
     double velocity = 0.0;
@@ -120,21 +114,18 @@ bool CreateSpringCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
     if (argv[1]->IsNumber(runtime)) {
         mass = argv[1]->ToDouble(runtime);
         if (LessNotEqual(mass, 0)) {
-            LOGW("Spring curve: mass is illegal, value:%{public}f, use default", mass);
             mass = 1.0;
         }
     }
     if (argv[2]->IsNumber(runtime)) {
         stiffness = argv[2]->ToDouble(runtime);
         if (LessNotEqual(stiffness, 0)) {
-            LOGW("Spring curve: stiffness is illegal, value:%{public}f, use default", stiffness);
             stiffness = 1.0;
         }
     }
     if (argv[3]->IsNumber(runtime)) {
         damping = argv[3]->ToDouble(runtime);
         if (LessNotEqual(damping, 0)) {
-            LOGW("Spring curve: damping is illegal, value:%{public}f, use default", damping);
             damping = 1.0;
         }
     }
@@ -146,7 +137,6 @@ bool CreateInterpolatingSpring(const shared_ptr<JsRuntime>& runtime, const share
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
 {
     if (argc != 4) {
-        LOGE("interpolating Spring: the number of parameters is illegal");
         return false;
     }
     float velocity = static_cast<float>(argv[0]->IsNumber(runtime) ? argv[0]->ToDouble(runtime) : 0.0);
@@ -154,15 +144,12 @@ bool CreateInterpolatingSpring(const shared_ptr<JsRuntime>& runtime, const share
     float stiffness = static_cast<float>(argv[2]->IsNumber(runtime) ? argv[2]->ToDouble(runtime) : 1.0);
     float damping = static_cast<float>(argv[3]->IsNumber(runtime) ? argv[3]->ToDouble(runtime) : 1.0);
     if (LessNotEqual(mass, 0)) {
-        LOGW("interpolating Spring: mass is illegal, value:%{public}f, use default", mass);
         mass = 1.0;
     }
     if (LessNotEqual(stiffness, 0)) {
-        LOGW("interpolating Spring: stiffness is illegal, value:%{public}f, use default", stiffness);
         stiffness = 1.0;
     }
     if (LessNotEqual(damping, 0)) {
-        LOGW("interpolating Spring: damping is illegal, value:%{public}f, use default", damping);
         damping = 1.0;
     }
     curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
@@ -173,7 +160,6 @@ bool CreateCubicCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
 {
     if (argc != 4) {
-        LOGE("Cubic curve: the number of parameters is illegal");
         return false;
     }
     double x0 = 0.0;
@@ -203,14 +189,12 @@ bool CreateStepsCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
 {
     if (argc != 1 && argc != 2) {
-        LOGE("Steps curve: the number of parameters is illegal");
         return false;
     }
     int32_t stepSize = 1;
     if (argv[0]->IsNumber(runtime)) {
         stepSize = argv[0]->ToInt32(runtime);
         if (stepSize < 1) {
-            LOGW("Steps curve: the value of the stepSize is illegal, use default value");
             stepSize = 1;
         }
     }
@@ -231,7 +215,6 @@ bool CreateSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, const shared_
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
 {
     if (argc > 3) {
-        LOGW("SpringMotionCurve: the number of parameters is illegal");
         return false;
     }
     float response = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
@@ -241,21 +224,18 @@ bool CreateSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, const shared_
         response = static_cast<float>(argv[0]->ToDouble(runtime));
         if (LessNotEqual(response, 0)) {
             response = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
-            LOGW("SpringMotion: response is illegal, use default value:%{public}f", response);
         }
     }
     if (argc > 1 && argv[1]->IsNumber(runtime)) {
         dampingRatio = static_cast<float>(argv[1]->ToDouble(runtime));
         if (LessNotEqual(dampingRatio, 0)) {
             dampingRatio = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO;
-            LOGW("SpringMotion: dampingRatio is illegal, use default value:%{public}f", dampingRatio);
         }
     }
     if (argc > 2 && argv[2]->IsNumber(runtime)) {
         blendDuration = static_cast<float>(argv[2]->ToDouble(runtime));
         if (LessNotEqual(blendDuration, 0)) {
             blendDuration = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
-            LOGW("SpringMotion: blendDuration is illegal, use default value:%{public}f", blendDuration);
         }
     }
     curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
@@ -266,7 +246,6 @@ bool CreateResponsiveSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, con
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
 {
     if (argc > 3) {
-        LOGW("ResponsiveSpringMotionCurve: the number of parameters is illegal");
         return false;
     }
     float response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
@@ -276,21 +255,18 @@ bool CreateResponsiveSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, con
         response = static_cast<float>(argv[0]->ToDouble(runtime));
         if (LessNotEqual(response, 0)) {
             response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
-            LOGW("ResponsiveSpringMotion: response is illegal, use default value:%{public}f", response);
         }
     }
     if (argc > 1 && argv[1]->IsNumber(runtime)) {
         dampingRatio = static_cast<float>(argv[1]->ToDouble(runtime));
         if (LessNotEqual(dampingRatio, 0)) {
             dampingRatio = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
-            LOGW("ResponsiveSpringMotion: dampingRatio is illegal, use default value:%{public}f", dampingRatio);
         }
     }
     if (argc > 2 && argv[2]->IsNumber(runtime)) {
         blendDuration = static_cast<float>(argv[2]->ToDouble(runtime));
         if (LessNotEqual(blendDuration, 0)) {
             blendDuration = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
-            LOGW("ResponsiveSpringMotion: blendDuration is illegal, use default value:%{public}f", blendDuration);
         }
     }
     curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
@@ -323,10 +299,8 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
             curveObj->SetProperty(runtime, "__curveCustomFunc", argv[0]);
         } else {
             curveCreated = false;
-            LOGW("customCruve argv is not function argv[0] = %{public}s", argv[0]->ToString(runtime).c_str());
         }
     } else {
-        LOGE("curve params: %{public}s is illegal", curveString.c_str());
         return runtime->NewNull();
     }
     if (!curveCreated) {
@@ -339,9 +313,7 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
     }
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     int32_t pageId = -1;
-    if (page == nullptr) {
-        LOGW("page is nullptr");
-    } else {
+    if (page) {
         pageId = page->GetPageId();
     }
     curveObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));

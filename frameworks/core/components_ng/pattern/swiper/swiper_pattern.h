@@ -427,6 +427,13 @@ public:
     {
         isIndicatorLongPress_ = isIndicatorLongPress;
     }
+    void SetCachedCount(int32_t cachedCount)
+    {
+        if (cachedCount_.has_value() && cachedCount_.value() != cachedCount) {
+            SetLazyLoadFeature(true);
+        }
+        cachedCount_ = cachedCount;
+    }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
@@ -445,7 +452,9 @@ public:
     void StartAutoPlay();
     void StopTranslateAnimation();
     void StopSpringAnimation();
+    void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -472,7 +481,7 @@ private:
     void InitIndicator();
     void InitArrow();
 
-    void HandleDragStart();
+    void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
 
@@ -685,6 +694,7 @@ private:
     bool isTouchPad_ = false;
 
     float mainDeltaSum_ = 0.0f;
+    std::optional<int32_t> cachedCount_;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;

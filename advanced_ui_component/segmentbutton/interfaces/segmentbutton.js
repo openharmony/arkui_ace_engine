@@ -442,6 +442,7 @@ class MultiSelectItemArray extends ViewPU {
             length: 5
         }, (() => Color.Transparent)), this, "multiColor");
         this.setInitiallyProvidedValue(e);
+        this.declareWatch("options", this.optionsChange);
         this.declareWatch("selectedIndexes", this.selectedChange)
     }
 
@@ -524,6 +525,10 @@ class MultiSelectItemArray extends ViewPU {
 
     set multiColor(t) {
         this.__multiColor.set(t)
+    }
+
+    optionsChange() {
+        for (let t = 0;t < this.selectedIndexes.length; t++) this.multiColor[this.selectedIndexes[t]] = this.options.selectedBackgroundColor
     }
 
     selectedChange() {
@@ -1662,9 +1667,15 @@ class SegmentButton extends ViewPU {
         }));
         If.pop();
         this.observeComponentCreation(((t, e) => {
+            var o;
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Stack.create();
             Stack.size(ObservedObject.GetRawObject(this.componentSize));
+            Stack.clip(new Rect({
+                width: this.componentSize.width,
+                height: this.componentSize.height,
+                radius: null !== (o = "capsule" === this.options.type && this.options.multiply ? this.options.iconTextRadius : this.options.iconTextBackgroundRadius) && void 0 !== o ? o : this.componentSize.height / 2
+            }));
             e || Stack.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));

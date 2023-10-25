@@ -58,6 +58,16 @@ public:
         return maxCount_;
     }
 
+    void SetSingleRange(bool isSingleRange) override
+    {
+        isSingleRange_ = isSingleRange;
+    }
+
+    bool GetSingleRange() override
+    {
+        return isSingleRange_;
+    }
+
     void SetHasSelectAttr(bool value) override;
     bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override;
     void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override;
@@ -76,6 +86,7 @@ private:
     std::vector<NG::RangeContent> rangeValue_;
     std::vector<NG::TextCascadePickerOptions> options_;
     uint32_t maxCount_ = 0;
+    bool isSingleRange_ = true;
 };
 
 class ACE_EXPORT TextPickerDialogModelNG : public TextPickerDialogModel {

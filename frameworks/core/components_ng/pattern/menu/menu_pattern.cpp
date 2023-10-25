@@ -671,20 +671,24 @@ Offset MenuPattern::GetTransformCenter() const
     switch (placement) {
         case Placement::BOTTOM_LEFT:
         case Placement::RIGHT_TOP:
-        case Placement::BOTTOM:
-        case Placement::RIGHT:
             return Offset();
         case Placement::BOTTOM_RIGHT:
         case Placement::LEFT_TOP:
-        case Placement::LEFT:
             return Offset(size.Width(), 0.0f);
         case Placement::TOP_LEFT:
         case Placement::RIGHT_BOTTOM:
-        case Placement::TOP:
             return Offset(0.0f, size.Height());
         case Placement::TOP_RIGHT:
         case Placement::LEFT_BOTTOM:
             return Offset(size.Width(), size.Height());
+        case Placement::BOTTOM:
+            return Offset(size.Width() / 2, 0.0f);
+        case Placement::LEFT:
+            return Offset(size.Width(), size.Height() / 2);
+        case Placement::TOP:
+            return Offset(size.Width() / 2, size.Height());
+        case Placement::RIGHT:
+            return Offset(0.0f, size.Height() / 2);
         default:
             return Offset();
     }

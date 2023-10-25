@@ -1820,6 +1820,12 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
+    if (info.Length() > 0 && (info[0]->IsUndefined())) {
+        ViewAbstractModel::GetInstance()->SetOverlay(
+            "", nullptr, Alignment::CENTER, CalcDimension(0), CalcDimension(0));
+        return;
+    }
+
     if (info.Length() <= 0 || (!info[0]->IsString() && !info[0]->IsObject())) {
         return;
     }
@@ -2607,7 +2613,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
     ParseMenuParam(info, menuContentOptions, menuParam);
     RefPtr<JsFunction> previewBuilderFunc;
     auto preview = menuContentOptions->GetProperty("preview");
-    if (!preview->IsObject() && !preview->IsNumber()) {
+    if (!preview->IsFunction() && !preview->IsNumber()) {
         return;
     }
 
@@ -2616,12 +2622,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
             menuParam.previewMode = MenuPreviewMode::IMAGE;
         }
     } else {
-        auto previewObj = JSRef<JSObject>::Cast(preview);
-        auto previewBuilder = previewObj->GetProperty("builder");
-        if (!previewBuilder->IsFunction()) {
-            return;
-        }
-        previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(previewBuilder));
+        previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
         CHECK_NULL_VOID(previewBuilderFunc);
         previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

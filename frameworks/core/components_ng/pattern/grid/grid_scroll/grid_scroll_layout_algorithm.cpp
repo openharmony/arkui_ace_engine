@@ -221,6 +221,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(gridItemLayoutProperty);
             gridItemLayoutProperty->UpdateMainIndex(line->first);
             gridItemLayoutProperty->UpdateCrossIndex(iter->first);
+            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
@@ -294,31 +295,9 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         gridLayoutInfo_.ResetPositionFlags();
         isChildrenUpdated_ = true;
-        CHECK_NULL_VOID(gridLayoutInfo_.childrenCount_ > 0);
-        int32_t currentItemIndex = gridLayoutInfo_.startIndex_;
-        auto firstItem = GetStartingItem(layoutWrapper, currentItemIndex);
-        gridLayoutInfo_.startIndex_ = firstItem;
-        currentMainLineIndex_ = (firstItem == 0 ? 0 : gridLayoutInfo_.startMainLineIndex_) - 1;
-        gridLayoutInfo_.endIndex_ = firstItem - 1;
-        LOGI("data reload begin, firstItem:%{public}d, currentItemIndex:%{public}d", firstItem, currentItemIndex);
-        while (gridLayoutInfo_.endIndex_ < currentItemIndex) {
-            auto lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-            if (LessNotEqual(lineHeight, 0.0)) {
-                gridLayoutInfo_.reachEnd_ = true;
-                break;
-            }
+        if (gridLayoutInfo_.childrenCount_ > 0) {
+            ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
         }
-        gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_;
-        gridLayoutInfo_.UpdateStartIndexByStartLine();
-        // FillNewLineBackward sometimes make startIndex_ > currentItemIndex
-        while (gridLayoutInfo_.startIndex_ > currentItemIndex &&
-               gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_) !=
-                   gridLayoutInfo_.gridMatrix_.end()) {
-            gridLayoutInfo_.startMainLineIndex_--;
-            gridLayoutInfo_.UpdateStartIndexByStartLine();
-        }
-        LOGI("data reload end, startIndex_:%{public}d, startMainLineIndex_:%{public}d", gridLayoutInfo_.startIndex_,
-            gridLayoutInfo_.startMainLineIndex_);
     }
 
     if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER || gridLayoutInfo_.scrollAlign_ == ScrollAlign::END) {
@@ -360,6 +339,34 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     }
 
     layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
+}
+
+void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
+{
+    int32_t currentItemIndex = gridLayoutInfo_.startIndex_;
+    auto firstItem = GetStartingItem(layoutWrapper, currentItemIndex);
+    gridLayoutInfo_.startIndex_ = firstItem;
+    currentMainLineIndex_ = (firstItem == 0 ? 0 : gridLayoutInfo_.startMainLineIndex_) - 1;
+    gridLayoutInfo_.endIndex_ = firstItem - 1;
+    LOGI("data reload begin, firstItem:%{public}d, currentItemIndex:%{public}d", firstItem, currentItemIndex);
+    while (gridLayoutInfo_.endIndex_ < currentItemIndex) {
+        auto lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
+        if (LessNotEqual(lineHeight, 0.0)) {
+            gridLayoutInfo_.reachEnd_ = true;
+            break;
+        }
+    }
+    gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_;
+    gridLayoutInfo_.UpdateStartIndexByStartLine();
+    // FillNewLineBackward sometimes make startIndex_ > currentItemIndex
+    while (gridLayoutInfo_.startIndex_ > currentItemIndex &&
+        gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_) !=
+            gridLayoutInfo_.gridMatrix_.end()) {
+        gridLayoutInfo_.startMainLineIndex_--;
+        gridLayoutInfo_.UpdateStartIndexByStartLine();
+    }
+    LOGI("data reload end, startIndex_:%{public}d, startMainLineIndex_:%{public}d", gridLayoutInfo_.startIndex_,
+        gridLayoutInfo_.startMainLineIndex_);
 }
 
 bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
@@ -576,6 +583,9 @@ void GridScrollLayoutAlgorithm::AdjustRowColSpan(
     if (currentItemRowSpan_ > 1 || currentItemColSpan_ > 1) {
         gridLayoutInfo_.hasBigItem_ = true;
     }
+
+    itemLayoutProperty->UpdateRealRowSpan(currentItemRowSpan_);
+    itemLayoutProperty->UpdateRealColumnSpan(currentItemColSpan_);
 }
 
 void GridScrollLayoutAlgorithm::LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem)

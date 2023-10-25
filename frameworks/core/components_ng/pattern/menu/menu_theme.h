@@ -63,11 +63,13 @@ public:
                 LOGE("Pattern of menu is null, please check!");
                 return;
             }
+            theme->previewMenuMaskColor_ = pattern->GetAttr<Color>("preview_menu_mask_color", Color(0x33182431));
             theme->filterAnimationDuration_ = 250;
             theme->previewAnimationDuration_ = 300;
             theme->previewBeforeAnimationScale_ = 0.95f;
             theme->previewAfterAnimationScale_ = 1.1f;
             theme->menuAnimationScale_ = 0.4f;
+            theme->menuDragAnimationScale_ = 0.95f;
             theme->springMotionResponse_ = 0.416f;
             theme->springMotionDampingFraction_ = 0.73f;
             theme->contextMenuAppearDuration_ = 250;
@@ -76,6 +78,7 @@ public:
             theme->previewDisappearSpringMotionDampingFraction_ = 0.97f;
             theme->filterRadius_ = Dimension(100.0f);
             theme->previewBorderRadius_ = 16.0_vp;
+            theme->previewMenuScaleNumber_ = 0.95f;
         }
     };
 
@@ -104,6 +107,11 @@ public:
     float GetMenuAnimationScale() const
     {
         return menuAnimationScale_;
+    }
+
+    float GetMenuDragAnimationScale() const
+    {
+        return menuDragAnimationScale_;
     }
 
     float GetSpringMotionResponse() const
@@ -136,6 +144,11 @@ public:
         return previewDisappearSpringMotionDampingFraction_;
     }
 
+    float GetPreviewMenuScaleNumber() const
+    {
+        return previewMenuScaleNumber_;
+    }
+
     Dimension GetFilterRadius() const
     {
         return filterRadius_;
@@ -144,6 +157,11 @@ public:
     Dimension GetPreviewBorderRadius() const
     {
         return previewBorderRadius_;
+    }
+
+    Color GetPreviewMenuMaskColor() const
+    {
+        return previewMenuMaskColor_;
     }
 
 protected:
@@ -155,14 +173,17 @@ private:
     float previewBeforeAnimationScale_ = 1.0f;
     float previewAfterAnimationScale_ = 1.0f;
     float menuAnimationScale_ = 1.0f;
+    float menuDragAnimationScale_ = 1.0f;
     float springMotionResponse_ = 0.0f;
     float springMotionDampingFraction_ = 0.0f;
     int32_t contextMenuAppearDuration_ = 0;
     int32_t disappearDuration_ = 0;
     float previewDisappearSpringMotionResponse_ = 0.0f;
     float previewDisappearSpringMotionDampingFraction_ = 0.0f;
+    float previewMenuScaleNumber_ = 0.0f;
     Dimension filterRadius_;
     Dimension previewBorderRadius_;
+    Color previewMenuMaskColor_;
 };
 
 } // namespace OHOS::Ace::NG

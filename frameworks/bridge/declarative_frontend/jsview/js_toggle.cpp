@@ -96,8 +96,7 @@ void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
 
 void JSToggle::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("toggle create error, info is non-valid");
+    if (!info[0]->IsObject()) {
         return;
     }
 
@@ -132,7 +131,6 @@ void JSToggle::Create(const JSCallbackInfo& info)
 void JSToggle::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -164,7 +162,6 @@ void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
 void JSToggle::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -209,13 +206,7 @@ void JSToggle::JsResponseRegion(const JSCallbackInfo& info)
 
 void JSToggle::JsSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -226,8 +217,7 @@ void JSToggle::JsSize(const JSCallbackInfo& info)
 
 void JSToggle::OnChange(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+    if (!args[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
@@ -244,7 +234,6 @@ void JSToggle::OnChange(const JSCallbackInfo& args)
 void JSToggle::SelectedColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     Color color;
@@ -259,7 +248,6 @@ void JSToggle::SelectedColor(const JSCallbackInfo& info)
 void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     Color color;
@@ -276,7 +264,6 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
 void JSToggle::JsPadding(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     NG::PaddingPropertyF oldPadding = GetOldPadding(info);
@@ -290,7 +277,6 @@ NG::PaddingPropertyF JSToggle::GetOldPadding(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
             return padding;
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
@@ -398,7 +384,6 @@ NG::PaddingProperty JSToggle::GetPadding(const std::optional<CalcDimension>& top
 void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;

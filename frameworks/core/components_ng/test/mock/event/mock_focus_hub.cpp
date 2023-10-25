@@ -16,7 +16,7 @@
 #include "core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
-void FocusHub::RemoveSelf() {}
+void FocusHub::RemoveSelf(BlurReason reason) {}
 
 bool FocusHub::IsEnabled() const
 {
@@ -30,7 +30,7 @@ bool FocusHub::IsFocusable()
 
 void FocusHub::SetFocusable(bool focusable) {}
 
-bool FocusHub::RequestFocusImmediately(bool isWholePathFocusable)
+bool FocusHub::RequestFocusImmediately()
 {
     return true;
 }
@@ -39,8 +39,6 @@ bool FocusHub::OnClick(const KeyEvent& event)
 {
     return false;
 }
-
-void FocusHub::MarkRootFocusNeedUpdate() {}
 
 bool FocusHub::PaintFocusState(bool isNeedStateStyles)
 {

@@ -86,11 +86,9 @@ void ListPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (!listDragStatusListener_.has_value()) {
         InitNotifyDragEvent();
     }
-#endif // ENABLE_DRAG_FRAMEWORK
     SetAccessibilityAction();
 }
 
@@ -708,7 +706,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
         // adjust offset.
-        auto friction = CalculateFriction(std::abs(overScroll) / contentMainSize_);
+        auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
         currentDelta_ = currentDelta_ * friction;
     }
     return true;
@@ -1329,12 +1327,17 @@ void ListPattern::UpdateScrollBarOffset()
 
 float ListPattern::GetTotalHeight() const
 {
+    auto currentOffset = GetTotalOffset();
+    if (endIndex_ >= maxListItemIndex_) {
+        return currentOffset + endMainPos_;
+    }
     if (itemPosition_.empty()) {
         return 0.0f;
     }
-
+    int32_t remainCount = maxListItemIndex_ - endIndex_;
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
-    return itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+    float remainOffset = itemsSize / itemPosition_.size() * remainCount - spaceWidth_;
+    return currentOffset + endMainPos_ + remainOffset;
 }
 
 void ListPattern::SetChainAnimation()
@@ -1727,7 +1730,6 @@ bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
     return false;
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void ListPattern::InitNotifyDragEvent()
 {
     auto host = GetHost();
@@ -1769,7 +1771,6 @@ void ListPattern::HandleOnDragStatusCallback(
             break;
     }
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 
 void ListPattern::RefreshLanesItemRange()
 {

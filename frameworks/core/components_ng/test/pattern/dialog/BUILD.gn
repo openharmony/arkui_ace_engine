@@ -17,8 +17,5 @@ ace_unittest("dialog_test_ng") {
   flutter_skia = true
   render = true
   type = "new"
-  sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
-    "dialog_test_ng.cpp",
-  ]
+  sources = [ "dialog_test_ng.cpp" ]
 }

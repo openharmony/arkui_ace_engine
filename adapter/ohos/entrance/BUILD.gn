@@ -85,7 +85,6 @@ template("ace_ohos_standard_source_set") {
       "//foundation/window/window_manager/interfaces/innerkits",
       "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
       "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-      "//foundation/multimedia/media_library/interfaces/inner_api/media_library_helper/include",
       "//third_party/node/src",
     ]
 
@@ -121,7 +120,6 @@ template("ace_ohos_standard_source_set") {
       "input:libmmi-client",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
-      "media_library:media_library_manager",
       "napi:ace_napi",
       "preferences:native_preferences",
       "relational_store:native_dataability",
@@ -131,6 +129,11 @@ template("ace_ohos_standard_source_set") {
       "window_manager:libwm",
       "window_manager:libwsutils",
     ]
+
+    if (defined(config.media_library_exists) && config.media_library_exists) {
+      include_dirs += [ "//foundation/multimedia/media_library/interfaces/inner_api/media_library_helper/include" ]
+      external_deps += [ "media_library:media_library_manager" ]
+    }
 
     if (enable_graphic_text_gine) {
       external_deps += [ "graphic_2d:rosen_text" ]

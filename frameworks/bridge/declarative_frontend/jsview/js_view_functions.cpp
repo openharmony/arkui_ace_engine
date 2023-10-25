@@ -319,14 +319,17 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
         measureWidth = { -1.0f };
     }
     NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     NG::CalcSize idealSize = { NG::CalcLength(measureWidth.ConvertToPx()),
         NG::CalcLength(measureHeight.ConvertToPx()) };
-    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(idealSize);
     if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         auto parentLayoutProperty = parentNode->GetLayoutProperty();
         parentLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
+        parentNode->GetGeometryNode()->SetFrameSize(frameSize);
+        parentLayoutProperty->UpdateMarginSelfIdealSize(
+            NG::SizeF { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() });
     }
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(idealSize);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
 
 void ViewFunctions::ExecuteReload(bool deep)
@@ -379,6 +382,22 @@ void ViewFunctions::ExecuteSetActive(bool active)
         func->Call(jsObject_.Lock(), 1, &isActive);
     } else {
         LOGE("the set active func is null");
+    }
+}
+
+void ViewFunctions::ExecuteOnDumpInfo(const std::vector<std::string>& params)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsOnDumpInfo_.Lock();
+    if (!func->IsEmpty()) {
+        JSRef<JSArray> arr = JSRef<JSArray>::New();
+        for (size_t i = 0; i < params.size(); ++i) {
+            arr->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(params.at(i))));
+        }
+        JSRef<JSVal> argv = arr;
+        func->Call(jsObject_.Lock(), 1, &argv);
+    } else {
+        LOGE("the on dump info func is null");
     }
 }
 
@@ -453,6 +472,13 @@ void ViewFunctions::InitViewFunctions(
             jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
         } else {
             LOGD("View don't have the ability to prevent inactive update");
+        }
+
+        JSRef<JSVal> jsOnDumpInfo = jsObject->GetProperty("onDumpInfo");
+        if (jsOnDumpInfo->IsFunction()) {
+            jsOnDumpInfo_ = JSRef<JSFunc>::Cast(jsOnDumpInfo);
+        } else {
+            LOGD("View don't have the ability to dump info");
         }
     }
 

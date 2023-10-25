@@ -22,6 +22,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -52,6 +53,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
@@ -118,6 +120,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
@@ -203,13 +206,11 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
-        LOGE("loadDocument: argument provided is not a View!");
         return;
     }
 
     auto container = Container::Current();
     if (!container) {
-        LOGE("loadDocument: Container is null");
         return;
     }
 
@@ -232,7 +233,6 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     }
     Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
     if (!pageNode->GetChildren().empty()) {
-        LOGW("the page has already add node, clean");
         auto oldChild = AceType::DynamicCast<NG::CustomNode>(pageNode->GetChildren().front());
         if (oldChild) {
             oldChild->Reset();
@@ -291,9 +291,6 @@ void JSBindLibs(const std::string moduleName, const std::string exportModuleName
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     std::shared_ptr<JsValue> global = runtime->GetGlobal();
     std::shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime, "requireNapi");
-    if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime)) {
-        LOGW("requireNapi func not found");
-    }
     std::vector<std::shared_ptr<JsValue>> argv = { runtime->NewString(moduleName) };
     std::shared_ptr<JsValue> napiObj = requireNapiFunc->Call(runtime, global, argv, argv.size());
     if (napiObj && !napiObj->IsUndefined(runtime)) {
@@ -310,31 +307,21 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
 {
     // globalObj is panda::Local<panda::ObjectRef>
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
-    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("UINodeRegisterCleanUpFunction");
+    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("uiNodeRegisterCleanUpFunction");
+    const JSRef<JSVal> globalCleanUpFunc = globalObject->GetProperty("globalRegisterCleanUpFunction");
 
     if (globalFuncVal->IsFunction()) {
-        LOGD("UINodeRegisterCleanUpFunction is a valid function");
         const auto globalFunc = JSRef<JSFunc>::Cast(globalFuncVal);
         const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
             jsFunc->Call(globalObject);
         };
         ElementRegister::GetInstance()->RegisterJSUINodeRegisterCallbackFunc(callback);
-    } else {
-        LOGE("Could not find UINodeRegisterCleanUpFunction JS function.ElmtId unregistration Internal error!");
-    }
-
-    // Added below implementation for element unregister during a diff flow of App execution
-    const JSRef<JSVal> globalCleanUpFunc = globalObject->GetProperty("globalRegisterCleanUpFunction");
-
-    if (globalCleanUpFunc->IsFunction()) {
-        LOGD("globalRegisterCleanUpFunction is a valid function");
+    } else if (globalCleanUpFunc->IsFunction()) {
         const auto globalFunc = JSRef<JSFunc>::Cast(globalCleanUpFunc);
         const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
             jsFunc->Call(globalObject);
         };
         ElementRegister::GetInstance()->RegisterJSUINodeRegisterGlobalFunc(callback);
-    } else {
-        LOGE("Could not find globalRegisterCleanUpFunction JS function.ElmtId unregistration Internal error!");
     }
 }
 
@@ -354,6 +341,7 @@ void JsBindViews(BindingTarget globalObj)
     JSList::JSBind(globalObj);
     JSListItem::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
+    JSStateMgmtProfiler::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
@@ -500,6 +488,8 @@ void JsBindViews(BindingTarget globalObj)
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
+    JSDumpLog::JSBind(globalObj);
+    JSDumpRegister::JSBind(globalObj);
     JSKeyboardAvoid::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");

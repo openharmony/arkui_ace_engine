@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
 
-#include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
@@ -29,21 +28,17 @@ shared_ptr<JsValue> SetTimeoutOrInterval(const shared_ptr<JsRuntime>& runtime, c
 {
     auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
         return runtime->NewNull();
     }
     auto delegate = instance->GetDelegate();
     if (!delegate) {
-        LOGE("get frontend delegate failed");
         return runtime->NewNull();
     }
 
     if (argc < 1) {
-        LOGE("argc should be greater than or equal to 1");
         return runtime->NewNull();
     }
     if (!argv[0]->IsFunction(runtime)) {
-        LOGW("argv[0] is not function");
         return runtime->NewNull();
     }
     uint32_t delay = 0;
@@ -67,22 +62,18 @@ void ClearTimeoutOrInterval(const shared_ptr<JsRuntime>& runtime, const shared_p
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc < 1) {
-        LOGE("argc is invalid");
         return;
     }
     if (!argv[0]->IsNumber(runtime)) {
-        LOGE("argv[0] is not number");
         return;
     }
 
     auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
         return;
     }
     auto delegate = instance->GetDelegate();
     if (!delegate) {
-        LOGE("get frontend delegate failed");
         return;
     }
 
@@ -152,11 +143,9 @@ bool JsiTimerModule::GetCallBack(uint32_t callBackId, shared_ptr<JsValue>& func,
     auto iterFunc = callBackFuncMap_.find(callBackId);
     auto iterParams = callBackParamsMap_.find(callBackId);
     if (iterFunc == callBackFuncMap_.end()) {
-        LOGE("find callback function failed, callbackId = %{public}u", callBackId);
         return false;
     }
     if (iterParams == callBackParamsMap_.end()) {
-        LOGE("find callback parameters failed, callbackId = %{public}u", callBackId);
         return false;
     }
     func = iterFunc->second;

@@ -406,7 +406,6 @@ bool Localization::GetHourFormat(bool& isAmPm, bool& hasZero)
 
     std::string result;
     UnicodeString2String(pattern, result);
-    LOGI("hour format is %{public}s", result.c_str());
 
     if (Contain(result, "hh") || Contain(result, "KK")) {
         isAmPm = true;
@@ -432,7 +431,6 @@ bool Localization::GetHourFormat(bool& isAmPm, bool& hasZero)
         return true;
     }
 
-    LOGE("hour format is unknown[%{public}s]", result.c_str());
     return false;
 }
 
@@ -606,7 +604,6 @@ std::string Localization::GetLunarMonth(uint32_t month, bool isLeapMonth)
         }
         return leap + months[month - 1];
     } else {
-        LOGE("month parameter is illegal:%{public}d", month);
         return "";
     }
 }
@@ -615,7 +612,6 @@ std::string Localization::GetLunarDay(uint32_t dayOfMonth)
 {
     WaitingForInit();
     if (dayOfMonth > 30 || dayOfMonth == 0) {
-        LOGE("dayOfMonth parameter is illegal");
         return "";
     }
 
@@ -709,7 +705,6 @@ std::vector<std::u16string> Localization::GetLetters(bool alphabet)
     const char* endMsg = nullptr;
     auto indexLetterJson = JsonUtil::ParseJsonString(jsonStr, &endMsg);
     if (indexLetterJson == nullptr) {
-        LOGE("read indexletter json failed. reason: %{private}s.", endMsg);
         return letters;
     }
 
@@ -732,7 +727,6 @@ std::vector<std::u16string> Localization::GetLetters(bool alphabet)
     std::string letterType = alphabet ? "alphabet" : "index";
     std::unique_ptr<JsonValue> lettersArray;
     if (!lettersSet->Contains(letterType) || !lettersSet->GetValue(letterType)->IsArray()) {
-        LOGE("read letter array failed. Invalid type. %s", letterType.c_str());
         return letters;
     } else {
         lettersArray = lettersSet->GetValue(letterType)->GetChild();
@@ -770,7 +764,7 @@ std::string Localization::GetEntryLetters(const std::string& lettersIndex)
     }
     GetLocalJsonObject(InternalResource::ResourceId::ENTRY_JSON, language, g_indexJsonEntry, localJsonEntry);
     if (localJsonEntry == nullptr) {
-        LOGE("read JsonObject fail. language: %{public}s.", selectLanguage_.c_str());
+        LOGW("read JsonObject fail. language: %{public}s.", selectLanguage_.c_str());
         return "";
     }
 
@@ -781,7 +775,7 @@ std::string Localization::GetEntryLetters(const std::string& lettersIndex)
         if (localJsonEntry && localJsonEntry->Contains(letter)) {
             localJsonEntry = localJsonEntry->GetValue(letter);
         } else {
-            LOGE("read entry json failed.");
+            LOGW("read entry json failed.");
             return "";
         }
     }
@@ -808,14 +802,14 @@ std::string Localization::GetErrorDescription(const std::string& errorIndex)
     }
     GetLocalJsonObject(InternalResource::ResourceId::ERRORINFO_JSON, language, g_indexJsonError, localJsonError);
     if (localJsonError == nullptr) {
-        LOGE("read JsonObject fail. language: %{public}s.", selectLanguage_.c_str());
+        LOGW("read JsonObject fail. language: %{public}s.", selectLanguage_.c_str());
         return "";
     }
 
     if (localJsonError->Contains(errorIndex)) {
         localJsonError = localJsonError->GetValue(errorIndex);
     } else {
-        LOGE("read error json failed. error path: %{private}s.", errorIndex.c_str());
+        LOGW("read error json failed. error path: %{private}s.", errorIndex.c_str());
         return "";
     }
 
@@ -971,7 +965,7 @@ void Localization::ParseLocaleTag(
         locale.addLikelySubtags(status);
     }
     if (status != U_ZERO_ERROR) {
-        LOGE("This localeTag is not valid.");
+        LOGW("This localeTag is not valid.");
         return;
     }
     language = locale.getLanguage();

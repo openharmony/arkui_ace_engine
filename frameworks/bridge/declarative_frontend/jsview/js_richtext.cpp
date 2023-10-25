@@ -49,7 +49,7 @@ namespace OHOS::Ace::Framework {
 void JSRichText::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("richtext create error, info is non-valid");
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "richtext create error, info is non-valid");
         return;
     }
 
@@ -58,7 +58,7 @@ void JSRichText::Create(const JSCallbackInfo& info)
     if (ParseJsString(info[0], data)) {
         RichTextModel::GetInstance()->Create(data);
     } else {
-        LOGE("richtext component failed to parse data");
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "richtext component failed to parse data");
     }
 }
 

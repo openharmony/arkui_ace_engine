@@ -21,6 +21,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
@@ -275,7 +276,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     itemsPosition_.clear();
     gridLayoutInfo_.gridMatrix_.clear();
     gridLayoutInfo_.startIndex_ = 0;
-    gridLayoutInfo_.hasBigItem_  = false;
+    gridLayoutInfo_.hasBigItem_ = false;
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childLayoutWrapper) {
@@ -317,6 +318,10 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             itemsPosition_.try_emplace(index,
                 ComputeItemPosition(layoutWrapper, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutWrapper));
         }
+
+        childLayoutProperty->UpdateRealRowSpan(itemRowSpan);
+        childLayoutProperty->UpdateRealColumnSpan(itemColSpan);
+
         ++itemIndex;
     }
     gridLayoutInfo_.endIndex_ = itemIndex - 1;
@@ -366,6 +371,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(gridItemLayoutProperty);
             gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
+            UpdateRealGridItemPositionInfo(wrapper, mainLine.first, crossLine.first);
         }
     }
 }

@@ -27,7 +27,6 @@ ace_unittest("form_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_rosen_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_rs_surface_mode.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_sub_container.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "form_test_ng.cpp",
   ]
 

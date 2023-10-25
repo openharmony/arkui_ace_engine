@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/manifest/manifest_widget.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace::Framework {
 
 const std::string& ManifestWidget::GetWidgetName() const
@@ -43,17 +41,12 @@ void ManifestWidgetGroup::WidgetParse(const std::unique_ptr<JsonValue>& root)
             const auto& widgetPath = widget->GetString("path");
 
             if (widgetName.empty()) {
-                LOGE("Invalid widget name. Need to be a non-empty string.");
                 continue;
             } else if (widgetPath.empty()) {
-                LOGE("Invalid widget path. Need to be a non-empty string.");
                 continue;
             }
 
-            auto result = widgets_.try_emplace(widgetName, MakeRefPtr<ManifestWidget>(widgetName, widgetPath));
-            if (!result.second) {
-                LOGE("Duplicate Widget Names: %{public}s", widgetName.c_str());
-            }
+            widgets_.try_emplace(widgetName, MakeRefPtr<ManifestWidget>(widgetName, widgetPath));
         }
     }
 }

@@ -20,7 +20,6 @@ ace_unittest("navrouter_test_ng") {
   sources = [
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "navrouter_test_ng.cpp",
   ]
 }

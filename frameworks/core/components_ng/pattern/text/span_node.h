@@ -151,8 +151,8 @@ public:
     // position of last char + 1
     int32_t position = -1;
     std::string content;
-    std::unique_ptr<FontStyle> fontStyle;
-    std::unique_ptr<TextLineStyle> textLineStyle;
+    std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
+    std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
     GestureEventFunc onClick;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     int32_t placeHolderIndex = -1;

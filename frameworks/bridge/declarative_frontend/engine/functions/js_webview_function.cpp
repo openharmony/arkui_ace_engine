@@ -15,12 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace::Framework {
 void JsWebViewFunction::Execute(const std::string& result)
 {
-    LOGD("JsWebViewFunction execute result[%{public}s]", result.c_str());
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Make(ToJSValue(result));
     JsFunction::ExecuteJS(1, params);

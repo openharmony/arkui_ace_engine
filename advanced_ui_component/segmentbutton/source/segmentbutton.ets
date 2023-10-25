@@ -273,12 +273,18 @@ struct SelectItem {
 @Component
 struct MultiSelectItemArray {
   @ObjectLink optionsArray: SegmentButtonItemOptionsArray
-  @ObjectLink options: SegmentButtonOptions
+  @ObjectLink @Watch('optionsChange') options: SegmentButtonOptions
   @Link @Watch('selectedChange') selectedIndexes: number[]
   @Consume buttonItemsSize: SizeOptions[]
   @Consume zoomScaleArray: number[]
   @Consume buttonBorderRadius: BorderRadiuses[]
   @State multiColor: ResourceColor[] = Array.from({ length: MAX_ITEM_COUNT }, () => Color.Transparent)
+
+  optionsChange() {
+    for (let i = 0; i < this.selectedIndexes.length; i++) {
+      this.multiColor[this.selectedIndexes[i]] = this.options.selectedBackgroundColor
+    }
+  }
 
   selectedChange() {
     for (let i = 0; i < MAX_ITEM_COUNT; i++) {
@@ -725,6 +731,12 @@ export struct SegmentButton {
         }
       }
       .size(this.componentSize)
+      .clip(new Rect({
+        width: this.componentSize.width as number,
+        height: this.componentSize.height as number,
+        radius: (this.options.type === 'capsule' && this.options.multiply ?
+        this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
+        this.componentSize.height as number / 2 }))
 
       SegmentButtonItemArrayComponent({
         optionsArray: this.options.buttons,

@@ -37,7 +37,6 @@ bool Validate(panda::Local<panda::JSValueRef> val)
     } else if constexpr (std::is_same_v<T, std::string>) {
         return val->IsString();
     } else {
-        LOGD("Unhandled type");
         return false;
     }
 }
@@ -56,8 +55,6 @@ T fromJsiValue(const EcmaVM* vm, Local<panda::JSValueRef> val)
         return val->ToNumber(vm)->Value();
     } else if constexpr (std::is_same_v<T, std::string>) {
         return val->ToString(vm)->ToString();
-    } else {
-        LOGW("Conversion failure for javascript type.");
     }
 
     return T();

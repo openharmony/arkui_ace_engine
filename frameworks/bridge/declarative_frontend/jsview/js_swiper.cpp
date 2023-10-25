@@ -73,6 +73,7 @@ const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::D
 const static int32_t DEFAULT_INTERVAL = 3000;
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
+const static int32_t DEFAULT_CACHED_COUNT = 1;
 
 JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 {
@@ -755,9 +756,12 @@ void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
         return;
     }
 
-    int32_t cachedCount = 1;
-    if (info[0]->IsNumber()) {
+    int32_t cachedCount = DEFAULT_CACHED_COUNT;
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
         cachedCount = info[0]->ToNumber<int32_t>();
+        if (cachedCount < 0) {
+            cachedCount = DEFAULT_CACHED_COUNT;
+        }
     }
     SwiperModel::GetInstance()->SetCachedCount(cachedCount);
 }

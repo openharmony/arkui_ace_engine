@@ -27,10 +27,7 @@ class JsAnimatorFunction : public JsFunction {
 public:
     explicit JsAnimatorFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
-    ~JsAnimatorFunction() override
-    {
-        LOGD("Destroy: JsAnimatorFunction");
-    };
+    ~JsAnimatorFunction() override {};
     void Execute() override
     {
         ExecuteJS();

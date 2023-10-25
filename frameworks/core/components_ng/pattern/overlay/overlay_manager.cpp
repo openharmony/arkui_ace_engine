@@ -28,6 +28,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
@@ -64,10 +65,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
-
-#ifdef ENABLE_DRAG_FRAMEWORK
-#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
-#endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -156,7 +153,8 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
     });
 }
 
-void ShowContextMenuDisappearAnimation(AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+void ShowContextMenuDisappearAnimation(
+    AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern, bool startDrag = false)
 {
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuChild = menuWrapperPattern->GetMenu();
@@ -171,6 +169,10 @@ void ShowContextMenuDisappearAnimation(AnimationOption& option, const RefPtr<Men
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
+    if (startDrag) {
+        menuRenderContext->UpdateTransformScale(
+            VectorF(menuTheme->GetMenuDragAnimationScale(), menuTheme->GetMenuDragAnimationScale()));
+    }
     auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
     AnimationOption positionOption;
@@ -440,7 +442,7 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
     menuPattern->SetFirstShow();
 }
 
-void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation)
+void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
 {
     ResetLowerNodeFocusable(menu);
 
@@ -493,7 +495,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         } else {
             ShowPreviewDisappearAnimation(menuWrapperPattern);
         }
-        ShowContextMenuDisappearAnimation(option, menuWrapperPattern);
+        ShowContextMenuDisappearAnimation(option, menuWrapperPattern, startDrag);
     } else {
         AnimationUtils::Animate(
             option,
@@ -643,6 +645,11 @@ void OverlayManager::PopToast(int32_t toastId)
     pipeline->SendEventToAccessibility(event);
 }
 
+void OverlayManager::ClearToastInSubwindow()
+{
+    SubwindowManager::GetInstance()->ClearToastInSubwindow();
+}
+
 void OverlayManager::ClearToast()
 {
     auto context = PipelineContext::GetCurrentContext();
@@ -758,9 +765,6 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
     CHECK_NULL_VOID(popupInfo.isCurrentOnShow);
     popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
-    auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSkipHotArea(true);
 
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -948,7 +952,7 @@ void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t 
     PopMenuAnimation(menu);
 }
 
-void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation)
+void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDrag)
 {
     LOGI("OverlayManager::HideMenuInSubWindow from close");
     if (menuMap_.empty()) {
@@ -958,7 +962,7 @@ void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation)
     auto rootNode = rootNodeWeak_.Upgrade();
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
-        PopMenuAnimation(node, showPreviewAnimation);
+        PopMenuAnimation(node, showPreviewAnimation, startDrag);
     }
 }
 
@@ -1066,6 +1070,7 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
     CHECK_NULL_VOID(pipeline);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetMenuHide();
     auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
     if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         ShowPreviewDisappearAnimation(menuWrapperPattern);
@@ -2450,7 +2455,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     scaleOption.SetOnFinishEvent([this, id = Container::CurrentId()] {
         ContainerScope scope(id);
         LOGD("Drag window start with default pixelMap");
-        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();

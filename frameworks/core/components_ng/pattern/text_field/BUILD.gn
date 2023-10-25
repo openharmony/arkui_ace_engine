@@ -16,6 +16,7 @@ import(
 
 build_component_ng("text_field_pattern_ng") {
   sources = [
+    "content_controller.cpp",
     "key_event_handler.cpp",
     "text_field_accessibility_property.cpp",
     "text_field_content_modifier.cpp",
@@ -27,6 +28,8 @@ build_component_ng("text_field_pattern_ng") {
     "text_field_paint_method.cpp",
     "text_field_paint_property.cpp",
     "text_field_pattern.cpp",
+    "text_input_response_area.cpp",
+    "text_select_controller.cpp",
   ]
 
   standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]

@@ -109,7 +109,6 @@ double Dimension::ConvertToVp() const
     if (unit_ == DimensionUnit::LPX) {
         return value_ * pipeline->GetLogicScale() / pipeline->GetDipScale();
     }
-    LOGE("fail to ConvertToVp, %{public}f, %{public}d", value_, unit_);
     return 0.0;
 }
 
@@ -133,7 +132,6 @@ double Dimension::ConvertToPx() const
     if (unit_ == DimensionUnit::LPX) {
         return value_ * pipeline->GetLogicScale();
     }
-    LOGE("fail to ConvertToPx, %{public}f, %{public}d", value_, unit_);
     return 0.0;
 }
 

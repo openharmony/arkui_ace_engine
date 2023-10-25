@@ -47,6 +47,10 @@ public:
     virtual void SetIndicatorIconPath(
         const std::string& iconPath, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetIndicatorSpace(const Dimension& space) = 0;
+    virtual void ResetGradientColors() = 0;
+    virtual void ResetShadowOptions() = 0;
+    virtual void ResetIndicatorIconPath() = 0;
+    virtual void ResetIndicatorSpace() = 0;
 
 private:
     static std::unique_ptr<GaugeModel> instance_;
