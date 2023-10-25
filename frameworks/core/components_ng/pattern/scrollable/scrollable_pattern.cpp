@@ -109,6 +109,9 @@ bool ScrollablePattern::ProcessNavBarReactOnUpdate(float offset)
     CHECK_NULL_RETURN(host, true);
     std::list<RefPtr<FrameNode>> childrens;
     host->GenerateOneDepthVisibleFrame(childrens);
+    if (childrens.empty()) {
+        return false;
+    }
     auto firstGeometryNode = (*childrens.begin())->GetGeometryNode();
     CHECK_NULL_RETURN(firstGeometryNode, true);
     auto dragOffsetY = firstGeometryNode->GetFrameOffset().GetY();
