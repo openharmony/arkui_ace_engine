@@ -93,7 +93,7 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
     // cross count changed by auto-fill and cross size change
     if (!layoutInfo_.waterFlowItems_.empty() && crossLens.size() != layoutInfo_.waterFlowItems_.size()) {
         layoutInfo_.Reset();
-        LOGI("cross count changed");
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "cross count changed");
     }
 
     int32_t index = 0;
@@ -147,7 +147,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 // out of viewport
                 layoutInfo_.currentOffset_ = -item.first;
             }
-            LOGI("scroll to index:%{public}d", layoutInfo_.jumpIndex_);
+            TAG_LOGD(AceLogTag::ACE_WATERFLOW, "scroll to index:%{public}d", layoutInfo_.jumpIndex_);
             layoutInfo_.jumpIndex_ = -1;
         }
     } else {
@@ -192,7 +192,6 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(item.first));
             if (!wrapper) {
-                LOGE("Layout item wrapper of index: %{public}d is null, please check.", item.first);
                 continue;
             }
             wrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
@@ -221,7 +220,6 @@ LayoutConstraintF WaterFlowLayoutAlgorithm::CreateChildConstraint(int32_t crossI
 {
     auto itemConstraint = layoutProperty->CreateChildConstraint();
     if (itemsCrossSize_.find(crossIndex) == itemsCrossSize_.end()) {
-        LOGE("crossIndex:%{public}d", crossIndex);
         return itemConstraint;
     }
     auto itemMainSize = mainSize_;
@@ -321,7 +319,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             if (item->second.second != itemHeight) {
                 item->second.second = itemHeight;
                 layoutInfo_.ClearCacheAfterIndex(currentIndex);
-                LOGI("item size changed");
+                TAG_LOGD(AceLogTag::ACE_WATERFLOW, "item size changed");
             }
         }
         if (layoutInfo_.jumpIndex_ == currentIndex) {
@@ -368,7 +366,6 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         auto oldStart = layoutInfo_.startIndex_;
         layoutInfo_.UpdateStartIndex();
         // lazyforeach
-        LOGD("oldStart:%{public}d, newStart:%{public}d", oldStart, layoutInfo_.startIndex_);
         for (auto i = oldStart; i >= layoutInfo_.startIndex_; i--) {
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(i));
             auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
