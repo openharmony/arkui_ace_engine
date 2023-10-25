@@ -36,6 +36,10 @@ RosenRenderSurface::~RosenRenderSurface()
     if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
         surfaceDelegate_->ReleaseSurface();
     } else {
+        if (nativeWindow_) {
+            DestoryNativeWindow(nativeWindow_);
+            nativeWindow_ = nullptr;
+        }
         CHECK_NULL_VOID(producerSurface_);
         auto* surfaceUtils = SurfaceUtils::GetInstance();
         CHECK_NULL_VOID(surfaceUtils);
