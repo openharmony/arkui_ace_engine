@@ -215,6 +215,7 @@ void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& task
         auto jsEngine = weakEngine.Upgrade();
         CHECK_NULL_VOID(jsEngine);
         jsEngine->LoadJs(url, jsPage, isMainPage);
+        jsEngine->UpdateRootComponent();
     };
 
     const auto& setPluginMessageTransferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](

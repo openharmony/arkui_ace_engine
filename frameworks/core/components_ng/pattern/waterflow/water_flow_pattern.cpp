@@ -182,7 +182,7 @@ void WaterFlowPattern::InitScrollableEvent()
 
 bool WaterFlowPattern::UpdateStartIndex(int32_t index)
 {
-    layoutInfo_.jumpIndex_ = index + layoutInfo_.footerIndex_ + 1;
+    layoutInfo_.jumpIndex_ = index;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

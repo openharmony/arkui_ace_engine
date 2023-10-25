@@ -112,7 +112,6 @@ public:
 
 protected:
     int32_t instanceId_ = -1;
-    bool isKeyboardClosedByUser_ = true;
 };
 
 } // namespace OHOS::Ace

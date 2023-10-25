@@ -188,6 +188,9 @@ public:
     void OnDateTimeChooserClose() override;
     void OnOverScroll(float xOffset, float yOffset) override;
     void OnScreenCaptureRequest(std::shared_ptr<NWeb::NWebScreenCaptureAccessRequest> request) override;
+    void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling) override;
+    void OnOverScrollFlingEnd() override;
+    void OnScrollState(bool scrollState) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

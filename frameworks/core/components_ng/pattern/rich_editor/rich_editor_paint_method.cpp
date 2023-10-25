@@ -53,7 +53,7 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         overlayMod->SetCaretOffsetAndHeight(
             OffsetF(rect.GetX(), rect.GetY()), Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx());
     }
-    std::vector<Rect> selectedRects;
+    std::vector<RectF> selectedRects;
     const auto& selection = richEditorPattern->GetTextSelector();
     if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
         selectedRects = pManager_->GetRects(selection.GetTextStart(), selection.GetTextEnd());

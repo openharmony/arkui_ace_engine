@@ -27,7 +27,6 @@ namespace OHOS::Ace::Framework {
 std::string DeclarativeParseRouteUrl(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg,
     const std::string& key)
 {
-    LOGD("DeclarativeParseRouteUrl");
     std::string argStr = arg->GetJsonString(runtime);
     if (argStr.empty()) {
         return argStr;
@@ -38,7 +37,6 @@ std::string DeclarativeParseRouteUrl(const shared_ptr<JsRuntime>& runtime, const
     if (argsPtr != nullptr && argsPtr->GetValue(key) != nullptr && argsPtr->GetValue(key)->IsString()) {
         pageRoute = argsPtr->GetValue(key)->GetString();
     }
-    LOGD("JsDeclarativeParseRouteUrl pageRoute = %{private}s", pageRoute.c_str());
 
     return pageRoute;
 }
@@ -58,9 +56,7 @@ std::string DeclarativeParseRouteParams(const shared_ptr<JsRuntime>& runtime, co
 shared_ptr<JsValue> PagePush(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGI("PagePush Start");
     if (argc != 1) {
-        LOGE("PagePush args count is invalid");
         return runtime->NewNull();
     }
 
@@ -68,7 +64,6 @@ shared_ptr<JsValue> PagePush(const shared_ptr<JsRuntime>& runtime, const shared_
     std::string params = DeclarativeParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate == nullptr) {
-        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
@@ -79,9 +74,7 @@ shared_ptr<JsValue> PagePush(const shared_ptr<JsRuntime>& runtime, const shared_
 shared_ptr<JsValue> PageReplace(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGI("PageReplace Start");
     if (argc != 1) {
-        LOGE("PageReplace args count is invalid");
         return runtime->NewNull();
     }
 
@@ -89,7 +82,6 @@ shared_ptr<JsValue> PageReplace(const shared_ptr<JsRuntime>& runtime, const shar
     std::string params = DeclarativeParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate == nullptr) {
-        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
@@ -100,9 +92,7 @@ shared_ptr<JsValue> PageReplace(const shared_ptr<JsRuntime>& runtime, const shar
 shared_ptr<JsValue> PageBack(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGI("PageBack Start");
     if (argc != 1 && argc != 0) {
-        LOGE("PageBack args count is invalid");
         return runtime->NewNull();
     }
 
@@ -114,7 +104,6 @@ shared_ptr<JsValue> PageBack(const shared_ptr<JsRuntime>& runtime, const shared_
     }
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate == nullptr) {
-        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
@@ -125,10 +114,8 @@ shared_ptr<JsValue> PageBack(const shared_ptr<JsRuntime>& runtime, const shared_
 shared_ptr<JsValue> PageClear(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGI("PageClear Start");
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate == nullptr) {
-        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
@@ -139,10 +126,8 @@ shared_ptr<JsValue> PageClear(const shared_ptr<JsRuntime>& runtime, const shared
 shared_ptr<JsValue> PageGetLength(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGI("PageGetLength Start");
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate == nullptr) {
-        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
@@ -153,10 +138,8 @@ shared_ptr<JsValue> PageGetLength(const shared_ptr<JsRuntime>& runtime, const sh
 shared_ptr<JsValue> PageGetState(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGI("PageGetState Start");
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate == nullptr) {
-        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
@@ -174,16 +157,13 @@ shared_ptr<JsValue> PageGetState(const shared_ptr<JsRuntime>& runtime, const sha
 shared_ptr<JsValue> PageGetParams(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGI("PageGetParams Start");
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate == nullptr) {
-        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
     std::string paramsStr = delegate->GetParams();
     if (paramsStr.empty()) {
-        LOGI("PageGetParams params is null");
         return runtime->NewNull();
     }
     return runtime->ParseJson(paramsStr);
@@ -202,7 +182,6 @@ void InitRouterModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>&
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime, "requireNapi");
     if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime)) {
-        LOGW("requireNapi func not found");
         return;
     }
     std::vector<shared_ptr<JsValue>> argv = { runtime->NewString("router") };

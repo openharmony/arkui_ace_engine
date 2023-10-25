@@ -312,7 +312,7 @@ public:
         return false;
     }
 
-    virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = {false, false}) {}
+    virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = { false, false }) {}
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)
@@ -358,20 +358,14 @@ public:
 
     static bool LessThanAPIVersion(PlatformVersion version)
     {
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)) {
-            return true;
-        }
-        return false;
+        return PipelineBase::GetCurrentContext() &&
+               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version);
     }
 
     static bool GreatOrEqualAPIVersion(PlatformVersion version)
     {
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)) {
-            return true;
-        }
-        return false;
+        return PipelineBase::GetCurrentContext() &&
+               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
     }
 
 protected:

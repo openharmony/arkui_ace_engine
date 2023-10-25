@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
+#include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -67,13 +68,13 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto textEditingValue = textFieldPattern->GetTextEditingValue();
+    auto textValue = textFieldPattern->GetTextValue();
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
     auto showPlaceHolder = textFieldLayoutProperty->GetValueValue("").empty();
     auto needObscureText = isPasswordType && textFieldPattern->GetTextObscured() && !showPlaceHolder;
-    auto text = TextFieldPattern::CreateDisplayText(
-        textEditingValue.text, textFieldPattern->GetNakedCharPosition(), needObscureText);
+    auto text =
+        TextFieldPattern::CreateDisplayText(textValue, textFieldPattern->GetNakedCharPosition(), needObscureText);
     auto displayText = StringUtils::Str16ToStr8(text);
     textFieldContentModifier_->SetTextValue(displayText);
     textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());
@@ -86,13 +87,12 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (textFieldContentModifier_->GetTextRectX() != currentTextRectOffsetX ||
         (textFieldPattern->IsTextArea() ? textFieldContentModifier_->GetTextRectY()
                                         : textFieldContentModifier_->GetContentOffsetY()) != currentTextRectOffsetY) {
-        // If the parent node is a Search, the Search callback is executed.
-        if (textFieldPattern->IsSearchParentNode()) {
+        auto searchField = DynamicCast<SearchTextFieldPattern>(textFieldPattern);
+        if (searchField) {
             auto parentFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
             auto searchPattern = parentFrameNode->GetPattern<SearchPattern>();
             CHECK_NULL_VOID(searchPattern);
             auto textFieldOffset = searchPattern->GetTextFieldOffset();
-            auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
             currentTextRectOffsetX += textFieldOffset.GetX();
             currentTextRectOffsetY += textFieldOffset.GetY();
         }
@@ -107,14 +107,11 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
-    textFieldContentModifier_->SetShowCounter(layoutProperty->GetShowCounterValue(false) &&
-        layoutProperty->HasMaxLength() && !textFieldPattern->IsNormalInlineState());
-    textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false) &&
+    textFieldContentModifier_->SetShowErrorState(
+        layoutProperty->GetShowErrorTextValue(false) &&
         paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE);
     textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
-    textFieldContentModifier_->SetShowPasswordIcon(textFieldPattern->GetShowResultImageSrc());
-    textFieldContentModifier_->SetHidePasswordIcon(textFieldPattern->GetHideResultImageSrc());
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
@@ -161,7 +158,6 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetCursorColor(cursorColor);
     auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
-    textFieldOverlayModifier_->SetRedrawFlag(textFieldPattern->GetDrawOverlayFlag());
     if (paintProperty->GetCursorWidth().has_value()) {
         float cursorWidth = static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx());
         textFieldOverlayModifier_->SetCursorWidth(cursorWidth);
@@ -172,11 +168,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    textFieldOverlayModifier_->SetShowCounter(layoutProperty->GetShowCounterValue(false) &&
-        layoutProperty->HasMaxLength() && !textFieldPattern->IsNormalInlineState());
-    if (textFieldPattern->GetSelectMode() != SelectionMode::NONE) {
-        textFieldPattern->MarkRedrawOverlay();
-    }
+    textFieldOverlayModifier_->SetChangeSelectedRects(textFieldPattern->NeedPaintSelect());
     UpdateScrollBar();
 }
 

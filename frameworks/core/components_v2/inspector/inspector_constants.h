@@ -313,6 +313,7 @@ ACE_EXPORT extern const char BADGE_ETS_TAG[];
 // search
 ACE_EXPORT extern const char SEARCH_COMPONENT_TAG[];
 ACE_EXPORT extern const char SEARCH_ETS_TAG[];
+extern const char SEARCH_Field_ETS_TAG[];
 
 // formComponent
 ACE_EXPORT extern const char FORM_COMPONENT_TAG[];

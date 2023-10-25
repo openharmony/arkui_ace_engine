@@ -815,13 +815,11 @@ void ProgressModifier::PaintLinearSweeping(
     RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal) const
 {
     if (NearZero(value_->Get()) || NearZero(maxValue_->Get())) {
-        LOGI("value or max value is 0.");
         return;
     }
 
     // If the progress reaches 100%, stop sweeping.
     if (NearEqual(value_->Get(), maxValue_->Get())) {
-        LOGI("The progress reaches 100 percent, stop sweeping.");
         return;
     }
 
@@ -909,7 +907,6 @@ void ProgressModifier::PaintRing(RSCanvas& canvas, const OffsetF& offset, const 
     auto paintShadow = paintShadow_->Get() && GreatNotEqual(radius, RING_SHADOW_VALID_RADIUS_MIN);
     auto shadowBlurOffset = paintShadow ? thickness / 2 + std::max(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y) : 0.0f;
     if (GreatOrEqual(thickness + shadowBlurOffset, radius)) {
-        LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
         thickness = radius / 2;
         shadowBlurOffset = paintShadow ? thickness / 2 + std::max(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y) : 0.0f;
     }
@@ -1076,13 +1073,11 @@ Gradient ProgressModifier::SortGradientColorsByOffset(const Gradient& gradient) 
 void ProgressModifier::PaintRingSweeping(RSCanvas& canvas, const RingProgressData& ringProgressData) const
 {
     if (NearZero(value_->Get()) || NearZero(maxValue_->Get())) {
-        LOGI("value or max value is 0.");
         return;
     }
 
     // If the progress reaches 100%, stop sweeping.
     if (NearEqual(value_->Get(), maxValue_->Get())) {
-        LOGI("The progress reaches 100 percent, stop sweeping.");
         return;
     }
 
@@ -1296,7 +1291,6 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     double lengthOfScale = strokeWidth_->Get();
     double pathDistance = FLOAT_TWO_ZERO * M_PI * radius / scaleCount_->Get();
     if (scaleWidth_->Get() > pathDistance) {
-        LOGI("scaleWidth is lager than pathDistance,  auto changeto paint ring");
         PaintRing(canvas, offset, contentSize);
         return;
     }
@@ -1615,12 +1609,10 @@ void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF&
     double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
     double lengthOfScale = strokeWidth_->Get();
     if (lengthOfScale > radius) {
-        LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
         lengthOfScale = radius / 2;
     }
     double pathDistance = 2.0 * M_PI * radius / scaleCount_->Get();
     if (scaleWidth > pathDistance) {
-        LOGI("scaleWidth is lager than pathDistance,  auto changeto paint ring");
         PaintRing(canvas, offset, frameSize);
         return;
     }
@@ -1628,8 +1620,6 @@ void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF&
     RSPen pen;
     RSPath path;
     pen.SetWidth(widthOfLine);
-    LOGD("scaleWidth %{public}lf strokeWidth  %{public}lf, radius %{public}lf pathDistance %{public}lf ", widthOfLine,
-        lengthOfScale, radius, pathDistance);
     path.AddRoundRect({
         0, 0, widthOfLine, lengthOfScale }, widthOfLine / 2, widthOfLine / 2, RSPathDirection::CW_DIRECTION);
     pen.SetAntiAlias(true);

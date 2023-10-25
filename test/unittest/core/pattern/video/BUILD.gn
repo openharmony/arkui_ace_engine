@@ -18,7 +18,6 @@ ace_unittest("video_test_ng") {
   sources = [
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_media_player_creator.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_path_painter.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "video_test_ng.cpp",
   ]
 }

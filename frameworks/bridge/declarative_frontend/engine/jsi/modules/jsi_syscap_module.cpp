@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 
-#include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
@@ -49,11 +48,9 @@ shared_ptr<JsValue> CanIUse(const shared_ptr<JsRuntime>& runtime, const shared_p
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("argc should be 1");
         return runtime->NewNull();
     }
     if (!argv[0]->IsString(runtime)) {
-        LOGW("argv[0] is not IsString");
         return runtime->NewNull();
     }
 
@@ -69,11 +66,9 @@ bool JsiSyscapModule::GetCallBack(uint32_t callBackId, shared_ptr<JsValue>& func
     auto iterFunc = callBackFuncMap_.find(callBackId);
     auto iterParams = callBackParamsMap_.find(callBackId);
     if (iterFunc == callBackFuncMap_.end()) {
-        LOGE("find callback function failed, callbackId = %{public}u", callBackId);
         return false;
     }
     if (iterParams == callBackParamsMap_.end()) {
-        LOGE("find callback parameters failed, callbackId = %{public}u", callBackId);
         return false;
     }
     func = iterFunc->second;

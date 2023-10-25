@@ -3561,7 +3561,7 @@ HWTEST_F(MenuTestNg, MenuItemSetSelectedChangeEvent001, TestSize.Level1)
     MenuItemProperties itemOption;
     MneuItemModelInstance.Create(itemOption);
     MneuItemModelInstance.SetSelectedChangeEvent(changeEvent);
-    
+
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
 
@@ -4797,9 +4797,6 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
     /**
      * @tc.steps: step2. target is null but the geometry node of target is null
      */
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(target->GetRenderContext());
-    ASSERT_NE(mockRenderContext, nullptr);
-    EXPECT_CALL(*mockRenderContext, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF(0.0f, 0.0f, 0.0f, 0.0f)));
     menuLayoutAlgorithm->InitTargetSizeAndPosition(nullptr, true);
 
     /**

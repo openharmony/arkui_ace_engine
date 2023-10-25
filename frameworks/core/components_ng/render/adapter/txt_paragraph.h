@@ -73,13 +73,18 @@ public:
     void Paint(SkCanvas* skCanvas, float x, float y) override;
 
     // interfaces for calculate the the specified paragraph position
-    int32_t GetHandlePositionForClick(const Offset& offset) override;
-    void GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects) override;
-    void GetRectsForPlaceholders(std::vector<Rect>& selectedRects) override;
-    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) override;
-    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) override;
+    int32_t GetGlyphIndexByCoordinate(const Offset& offset) override;
+    void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
+    void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
+    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result) override;
+    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) override;
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override;
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset) override;
     void SetIndents(const std::vector<float>& indents) override;
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
+    std::u16string GetParagraphText() override;
 
 private:
     void CreateBuilder();
@@ -87,6 +92,7 @@ private:
     {
         return text_.length() + placeHolderIndex_ + 1;
     }
+    float MakeEmptyOffsetX();
 
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -100,6 +106,7 @@ private:
 #endif
     std::u16string text_;
     int32_t placeHolderIndex_ = -1;
+    TextAlign textAlign_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TxtParagraph);
 };

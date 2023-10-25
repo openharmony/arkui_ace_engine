@@ -2628,7 +2628,8 @@ HWTEST_F(GridTestNg, EventHub001, TestSize.Level1)
         CreateVerticalItem(8);
     });
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, DEVICE_HEIGHT);
-    MockGetPaintRectWithTransform(frameNode_, gridRect);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_);
+    mockRenderContext->rect_ = gridRect;
 
     /**
      * @tc.steps: step1. call GetInsertPosition func.
@@ -4308,7 +4309,8 @@ HWTEST_F(GridTestNg, ScrollLayout001, TestSize.Level1)
     });
     const float smallerHeight = DEVICE_HEIGHT - ITEM_HEIGHT;
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, smallerHeight);
-    MockGetPaintRectWithTransform(frameNode_, gridRect);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_);
+    mockRenderContext->rect_ = gridRect;
 
     /**
      * @tc.steps: step1. Change to smaller mainSize

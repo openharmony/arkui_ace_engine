@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
 
-#include "base/log/log_wrapper.h"
-
 namespace OHOS::Ace::NG {
     
 LoadingProgressLayoutAlgorithm::LoadingProgressLayoutAlgorithm() = default;
@@ -31,9 +29,6 @@ std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
     height_ = std::min(height_, contentConstraint.percentReference.Height());
     width_ = std::min(width_, contentConstraint.percentReference.Width());
     auto diameter = std::min(width_, height_);
-    LOGD("LoadingProgressLayoutAlgorithm::MeasureContent: width_: %{public}fl, height_: %{public}fl, diameter: "
-         "%{public}fl",
-        width_, height_, diameter);
     return SizeF(diameter, diameter);
 }
 

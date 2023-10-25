@@ -76,6 +76,11 @@ public:
         onChange_ = std::move(func);
     }
 
+    const std::function<void(const std::string&)>& GetOnChange() const
+    {
+        return onChange_;
+    }
+
     void FireOnChange(const std::string& value)
     {
         if (lastValue_.has_value() && lastValue_.value() == value) {

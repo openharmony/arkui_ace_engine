@@ -38,23 +38,39 @@ RefPtr<GestureReferee> GetCurrentGestureReferee()
 
 } // namespace
 
-std::unordered_map<int, TransformConfig> globalTransFormConfig;
-std::unordered_map<int, AncestorNodeInfo> globalTransFormIds;
+struct TransformInstance {
+    std::unordered_map<int, TransformConfig> transFormConfig;
+    std::unordered_map<int, AncestorNodeInfo> transFormIds;
+};
+
+TransformInstance g_emptyInstance;
+std::unordered_map<int, TransformInstance> globalTransFormInstance;
 
 std::unordered_map<int, TransformConfig>& NGGestureRecognizer::GetGlobalTransCfg()
 {
-    return globalTransFormConfig;
+    auto id = Container::CurrentId();
+    auto iter = globalTransFormInstance.find(id);
+    if (iter == globalTransFormInstance.end()) {
+        return g_emptyInstance.transFormConfig;
+    }
+    return iter->second.transFormConfig;
 }
 
 std::unordered_map<int, AncestorNodeInfo>& NGGestureRecognizer::GetGlobalTransIds()
 {
-    return globalTransFormIds;
+    auto id = Container::CurrentId();
+    auto iter = globalTransFormInstance.find(id);
+    if (iter == globalTransFormInstance.end()) {
+        return g_emptyInstance.transFormIds;
+    }
+    return iter->second.transFormIds;
 }
 
 void NGGestureRecognizer::ResetGlobalTransCfg()
 {
-    globalTransFormConfig.clear();
-    globalTransFormIds.clear();
+    auto id = Container::CurrentId();
+    globalTransFormInstance[id].transFormConfig.clear();
+    globalTransFormInstance[id].transFormIds.clear();
 }
 
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)

@@ -17,7 +17,6 @@ ace_unittest("side_bar_pattern_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "side_bar_layout_test_ng.cpp",
     "side_bar_pattern_test_ng.cpp",
     "side_bar_view_test_ng.cpp",
