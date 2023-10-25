@@ -521,7 +521,7 @@ public:
     bool HasConnection() const
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        return imeAttached_;
+        return imeShown_;
 #else
         return connection_;
 #endif
@@ -1189,7 +1189,6 @@ private:
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE;          // The status of the dragged initiator
-    DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
     std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
@@ -1230,6 +1229,7 @@ private:
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool showSelect_ = false;
+    bool isLongPress_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
     CaretStatus caretStatus_ = CaretStatus::NONE;

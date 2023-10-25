@@ -43,6 +43,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
@@ -503,7 +504,7 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(context);
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-    needToRequestKeyboardInner_ = !(dragRecipientStatus_ == DragStatus::DRAGGING);
+    needToRequestKeyboardInner_ = !isLongPress_;
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -1042,6 +1043,13 @@ void TextFieldPattern::HandleTouchUp()
             }
         }
     }
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (isLongPress_ && !imeShown_) {
+        if (RequestKeyboard(false, true, true)) {
+            NotifyOnEditChanged(true);
+        }
+    }
+#endif
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -1145,7 +1153,6 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         if (pattern->dragStatus_ == DragStatus::NONE) {
             pattern->needToRequestKeyboardInner_ = true;
         }
-        pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {
             return;
         }
@@ -1193,8 +1200,6 @@ void TextFieldPattern::InitDragDropEvent()
         if (pattern->dragStatus_ == DragStatus::ON_DROP) {
             pattern->dragStatus_ = DragStatus::NONE;
         }
-
-        pattern->dragRecipientStatus_ = DragStatus::DRAGGING;
     };
     eventHub->SetOnDragEnter(std::move(onDragEnter));
 
@@ -1221,7 +1226,6 @@ void TextFieldPattern::InitDragDropEvent()
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->StopTwinkling();
-        pattern->dragRecipientStatus_ = DragStatus::NONE;
     };
     eventHub->SetOnDragLeave(std::move(onDragLeave));
 
@@ -1339,15 +1343,12 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
             return;
         }
     }
-    auto lastCaretIndex = selectController_->GetCaretIndex();
     selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
     StartTwinkling();
     SetIsSingleHandle(true);
-    if (lastCaretIndex == selectController_->GetCaretIndex() && hasFocus && caretStatus_ == CaretStatus::SHOW &&
-        info.GetSourceDevice() != SourceType::MOUSE) {
-        ProcessOverlay(true, true);
-    } else {
-        CloseSelectOverlay(true);
+    CloseSelectOverlay(true);
+    if (!contentController_->IsEmpty()) {
+        ProcessOverlay(true, true, false);
     }
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
@@ -1770,18 +1771,17 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
 #ifdef ENABLE_DRAG_FRAMEWORK
+    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         gestureHub->SetIsTextDraggable(true);
-#endif
         return;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
 #endif
+    isLongPress_ = true;
     auto focusHub = GetFocusHub();
-
-    if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
+    if (!focusHub->IsCurrentFocus()) {
+        focusHub->RequestFocusImmediately();
         return;
     }
     selectController_->UpdateSelectByOffset(info.GetLocalLocation());
@@ -2337,7 +2337,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         LOGI("Start to request keyboard");
         if (customKeyboardBuilder_) {
 #if defined(ENABLE_STANDARD_INPUT) && defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-            imeAttached_ = true;
+            imeShown_ = true;
 #endif
             return RequestCustomKeyboard();
         }
@@ -2416,6 +2416,9 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
         StopTwinkling();
         CloseSelectOverlay(true);
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+#if defined(ENABLE_STANDARD_INPUT)
+            imeShown_ = false;
+#endif
             return CloseCustomKeyboard();
         }
 #if defined(ENABLE_STANDARD_INPUT)
