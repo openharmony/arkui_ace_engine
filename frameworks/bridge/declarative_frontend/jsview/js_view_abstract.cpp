@@ -1854,6 +1854,10 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
                 offsetY = y;
             }
         }
+    } else if (info[1]->IsUndefined()) {
+        align = Alignment::CENTER;
+        offsetX = CalcDimension(0);
+        offsetY = CalcDimension(0);
     }
 
     if (info[0]->IsString()) {
