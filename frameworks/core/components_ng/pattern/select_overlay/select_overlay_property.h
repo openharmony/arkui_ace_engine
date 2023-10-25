@@ -57,6 +57,7 @@ struct SelectMenuInfo {
     bool showPaste = true;
     bool showCopyAll = true;
     bool showCut = true;
+    bool showCameraInput = false;
     std::optional<OffsetF> menuOffset;
     std::function<void()> menuBuilder;
 
@@ -66,7 +67,7 @@ struct SelectMenuInfo {
             return true;
         }
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
-                 (showCut == info.showCut));
+                 (showCut == info.showCut) && (showCameraInput == info.showCameraInput));
     }
 };
 
@@ -75,6 +76,7 @@ struct SelectMenuCallback {
     std::function<void()> onPaste;
     std::function<void()> onSelectAll;
     std::function<void()> onCut;
+    std::function<void()> onCameraInput;
 
     std::function<void()> onAppear;
     std::function<void()> onDisappear;

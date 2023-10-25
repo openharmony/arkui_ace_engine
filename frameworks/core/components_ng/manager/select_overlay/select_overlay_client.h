@@ -65,7 +65,8 @@ enum class SelectOverlayMenuId {
     COPY,
     CUT,
     PASTE,
-    SELECT_ALL
+    SELECT_ALL,
+    CAMERA_INPUT
 };
 
 class SelectOverlayClient : public SelectionHost {
