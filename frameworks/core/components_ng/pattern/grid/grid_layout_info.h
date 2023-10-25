@@ -98,6 +98,9 @@ struct GridLayoutInfo {
         scrollAlign_ = align;
     }
 
+    float GetContentOffset(float mainGap) const;
+    float GetContentHeight(float mainGap) const;
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
@@ -142,6 +145,7 @@ struct GridLayoutInfo {
     bool offsetUpdated_ = false;
 
 private:
+    float GetCurrentOffsetOfRegularGrid(float mainGap) const;
     int32_t GetItemIndexByPosition(int32_t position);
     int32_t GetPositionByItemIndex(int32_t itemIndex);
     void MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex);
