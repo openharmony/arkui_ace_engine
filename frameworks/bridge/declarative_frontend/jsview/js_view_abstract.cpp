@@ -2613,7 +2613,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
     ParseMenuParam(info, menuContentOptions, menuParam);
     RefPtr<JsFunction> previewBuilderFunc;
     auto preview = menuContentOptions->GetProperty("preview");
-    if (!preview->IsObject() && !preview->IsNumber()) {
+    if (!preview->IsFunction() && !preview->IsNumber()) {
         return;
     }
 
@@ -2622,12 +2622,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
             menuParam.previewMode = MenuPreviewMode::IMAGE;
         }
     } else {
-        auto previewObj = JSRef<JSObject>::Cast(preview);
-        auto previewBuilder = previewObj->GetProperty("builder");
-        if (!previewBuilder->IsFunction()) {
-            return;
-        }
-        previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(previewBuilder));
+        previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
         CHECK_NULL_VOID(previewBuilderFunc);
         previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
