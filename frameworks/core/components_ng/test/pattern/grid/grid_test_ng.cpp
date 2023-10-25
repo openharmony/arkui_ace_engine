@@ -4772,10 +4772,12 @@ HWTEST_F(GridTestNg, GridItemDisableEventTest001, TestSize.Level1)
      */
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
     auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
+    EXPECT_FALSE(gridItemPattern->enableOpacity_.has_value());
     gridItemEventHub->SetEnabled(false);
     gridItemPattern->InitDisableStyle();
     gridItemEventHub->SetEnabled(true);
     gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(gridItemPattern->enableOpacity_, 1.0);
 }
 
 /**
