@@ -954,7 +954,7 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
             rsImagePtr->SetImage(drawingImage->GetImage());
             if (drawingImage->GetImage()) {
                 rsImagePtr->SetSrcRect(
-                    Rosen::RectF(0, 0, drawingImage->GetImage()->width(), drawingImage->GetImage()->height()));
+                    Rosen::RectF(0, 0, drawingImage->GetImage()->GetWidth(), drawingImage->GetImage()->GetHeight()));
             }
         }
         rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
@@ -2973,12 +2973,12 @@ void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& cli
     auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
     auto shapePath = Rosen::RSPath::CreateRSPath(rsPath);
     if (!clipBoundModifier_) {
-        auto prop = std::make_shared<RSProperty<RSPath>>(shapePath);
+        auto prop = std::make_shared<RSProperty<std::shared_ptr<Rosen::RSPath>>>(shapePath);
         clipBoundModifier_ = std::make_shared<Rosen::RSClipBoundsModifier>(prop);
         rsNode_->AddModifier(clipBoundModifier_);
     } else {
         auto property =
-            std::static_pointer_cast<RSProperty<std::shared_ptr<RSPath>>>(clipBoundModifier_->GetProperty());
+            std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSPath>>>(clipBoundModifier_->GetProperty());
         property->Set(shapePath);
     }
 #endif
@@ -3009,7 +3009,7 @@ void RosenRenderContext::PaintClipMask(const std::unique_ptr<ClipProperty>& clip
     auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
     auto maskPath = Rosen::RSMask::CreatePathMask(rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
     if (!clipMaskModifier_) {
-        auto prop = std::make_shared<RSProperty<RSMask>>(maskPath);
+        auto prop = std::make_shared<RSProperty<std::shared_ptr<RSMask>>>(maskPath);
         clipMaskModifier_ = std::make_shared<Rosen::RSMaskModifier>(prop);
         rsNode_->AddModifier(clipMaskModifier_);
     } else {

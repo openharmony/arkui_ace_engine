@@ -520,7 +520,7 @@ void CanvasPaintMethod::GetImageData(
 #else
     RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
     RSBitmap tempCache;
-    tempCache.Build(width, height, format);
+    tempCache.Build(dirtyWidth * viewScale, dirtyHeight * viewScale, format);
 
     RSBitmap currentBitmap;
     CHECK_NULL_VOID(rsRecordingCanvas_);
@@ -532,7 +532,6 @@ void CanvasPaintMethod::GetImageData(
     }
     LOGE("Drawing is not supported");
 
-    int32_t size = dirtyWidth * dirtyHeight;
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);
     auto srcRect =
@@ -541,7 +540,6 @@ void CanvasPaintMethod::GetImageData(
     RSImage rsImage;
     rsImage.BuildFromBitmap(currentBitmap);
     tempCanvas.DrawImageRect(rsImage, srcRect, dstRect, RSSamplingOptions());
-    const uint8_t* pixels = static_cast<const uint8_t*>(tempCache.GetPixels());
 #endif
 }
 
