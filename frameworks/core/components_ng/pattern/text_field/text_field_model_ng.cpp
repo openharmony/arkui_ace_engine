@@ -83,7 +83,8 @@ void TextFieldModelNG::CreateNode(
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
-    SetDraggable(textFieldTheme->GetDraggable());
+    auto draggable = pipeline->GetDraggable<TextFieldTheme>();
+    SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
 }
 
