@@ -5464,4 +5464,18 @@ void WebDelegate::SetToken()
         nweb_->SetToken(static_cast<void*>(token));
     }
 }
+
+void WebDelegate::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnOverScrollFlingVelocity(xVelocity, yVelocity, isFling);
+}
+
+void WebDelegate::OnScrollState(bool scrollState)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnScrollState(scrollState);
+}
 } // namespace OHOS::Ace
