@@ -598,6 +598,11 @@ export struct Breadcrumb {
               }
               this.onLabelDrop(this.labels.indexOf(item), event);
             })
+            .onDragEnd((event: DragEvent) => {
+              if (this.onLabelDragCancel && event.getResult() != DragResult.DRAG_SUCCESSFUL) {
+                this.onLabelDragCancel(event);
+              }
+            })
         })
       }
     }
@@ -683,10 +688,11 @@ export struct Breadcrumb {
           if (!this.onLabelDrop) {
             return;
           }
-          if (index === this.labels.length - 1 && this.onLabelDragCancel) {
+          this.onLabelDrop(index, event);
+        })
+        .onDragEnd((event: DragEvent) => {
+          if (this.onLabelDragCancel && event.getResult() != DragResult.DRAG_SUCCESSFUL) {
             this.onLabelDragCancel(event);
-          } else {
-            this.onLabelDrop(index, event);
           }
         })
 
@@ -772,7 +778,7 @@ export struct Breadcrumb {
             Image(item.icon)
               .width(24)
               .height(24)
-              .margin({left: 6})
+              .margin({left: 8})
           }
 
           Text(item.text)
@@ -810,11 +816,11 @@ export struct Breadcrumb {
           if (!this.onLabelDrop) {
             return;
           }
-
-          if (index === this.labels.length - 1 && this.onLabelDragCancel) {
+          this.onLabelDrop(index, event);
+        })
+        .onDragEnd((event: DragEvent) => {
+          if (this.onLabelDragCancel && event.getResult() != DragResult.DRAG_SUCCESSFUL) {
             this.onLabelDragCancel(event);
-          } else {
-            this.onLabelDrop(index, event);
           }
         })
       }
