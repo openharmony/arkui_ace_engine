@@ -253,15 +253,13 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
 {
     CHECK_NULL_VOID(skCanvas);
-#ifndef USE_ROSEN_DRAWING
     paragraph_->Paint(skCanvas, x, y);
-#else
-    LOGE("Drawing is not supported");
-#endif
 }
+#endif
 
 // ToDo:adjust index
 int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset)

@@ -397,7 +397,7 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
         RSRect(scaledLeft, scaledTop, dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
     auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
     RSBitmap tempCache;
-    tempCache.Build(width, height, format);
+    tempCache.Build(dirtyWidth, dirtyHeight, format);
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);
     RSImage rsImage;

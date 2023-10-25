@@ -245,7 +245,7 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
             return *skData;
 #else
             LOGD("drawing data from memory cache.");
-            return AceType::DynamicCast<NG::DrawingImageData>(cacheData)->GetRsData();
+            return AceType::DynamicCast<NG::DrawingImageData>(cacheData)->GetRSData();
 #endif
         }
     }
@@ -283,7 +283,7 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawDataFromFileCache(
         const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(data->GetDataWrapper());
         return *skData;
 #else
-        return AceType::DynamicCast<NG::DrawingImageData>(data)->GetRsData();
+        return AceType::DynamicCast<NG::DrawingImageData>(data)->GetRSData();
 #endif
     }
     return nullptr;
