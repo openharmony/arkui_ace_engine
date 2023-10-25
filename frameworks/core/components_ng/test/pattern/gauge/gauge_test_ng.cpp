@@ -85,6 +85,13 @@ constexpr float SIZE_INFINITY = 2.0f;
 constexpr int32_t VERSION = 11;
 constexpr float WIDTH_1 = 300.0f;
 constexpr float HEIGHT_1 = 300.0f;
+constexpr bool SHOW_LIMIT_VALUE = true;
+constexpr bool SHOW_DESCRIPTION = false;
+constexpr bool SHOW_INDICATOR = true;
+const std::string INDICATOR_ICON_PATH = "image1";
+const std::string INDICATOR_BUNDLE_NAME = "bundleName";
+const std::string INDICATOR_MODULE_NAME = "moduleName";
+constexpr Dimension INDICATOR_SPACE = 8.0_vp;
 } // namespace
 
 class GaugeTestNg : public testing::Test {
@@ -1639,5 +1646,120 @@ HWTEST_F(GaugeTestNg, OnImageDataReady, TestSize.Level1)
      */
     gaugePattern->OnImageDataReady();
     EXPECT_EQ(frameNode->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+/**
+ * @tc.name: GaugeModelNGTest001
+ * @tc.desc: Test GaugeModelNG  SetIsShowIndicator SetDescription SetIsShowLimitValue SetIsShowDescription
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugeModelNGTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gauge and set the properties ,and then get frameNode.
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    gauge.SetIsShowIndicator(SHOW_INDICATOR);
+
+    auto customDescriptionNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(customDescriptionNode, nullptr);
+    gauge.SetDescription(customDescriptionNode);
+    gauge.SetIsShowLimitValue(SHOW_LIMIT_VALUE);
+    gauge.SetIsShowDescription(SHOW_DESCRIPTION);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get the properties of all settings.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(gaugePaintProperty, nullptr);
+    EXPECT_EQ(gaugePaintProperty->GetIsShowIndicatorValue(), SHOW_INDICATOR);
+    auto gaugePattern = frameNode->GetPattern<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    EXPECT_EQ(gaugePattern->descriptionNode_, customDescriptionNode);
+    auto gaugeLayoutProperty = frameNode->GetLayoutProperty<GaugeLayoutProperty>();
+    ASSERT_NE(gaugeLayoutProperty, nullptr);
+    EXPECT_EQ(gaugeLayoutProperty->GetIsShowLimitValueValue(), SHOW_LIMIT_VALUE);
+    EXPECT_EQ(gaugeLayoutProperty->GetIsShowDescriptionValue(), SHOW_DESCRIPTION);
+}
+
+/**
+ * @tc.name: GaugeModelNGTest002
+ * @tc.desc: Test GaugeModelNG SetShadowOptions SetGradientColors SetIndicatorIconPath SetIndicatorSpace
+ * @tc.desc: Test GaugeModelNG ResetGradientColors ResetShadowOptions ResetIndicatorIconPath ResetIndicatorSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugeModelNGTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gauge and set the properties ,and then get frameNode.
+     */
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+
+    GaugeShadowOptions shadowOptions;
+    gauge.SetShadowOptions(shadowOptions);
+
+    std::vector<ColorStopArray> colors;
+    ColorStopArray colorStopArray;
+    for (const auto& color : COLORS) {
+        colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
+    }
+    colors.emplace_back(colorStopArray);
+    std::vector<float> values;
+    for (const auto& value : VALUES) {
+        values.emplace_back(value);
+    }
+    GaugeType type;
+    type = GaugeType::TYPE_CIRCULAR_MONOCHROME;
+    gauge.SetGradientColors(colors, values, type);
+
+    string iconPath = INDICATOR_ICON_PATH;
+    string bundleName = INDICATOR_BUNDLE_NAME;
+    string moduleName = INDICATOR_MODULE_NAME;
+    gauge.SetIndicatorIconPath(iconPath, bundleName, moduleName);
+    Dimension space;
+    space = INDICATOR_SPACE;
+    gauge.SetIndicatorSpace(space);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get the properties of all settings.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(gaugePaintProperty, nullptr);
+    EXPECT_EQ(gaugePaintProperty->GetShadowOptionsValue(), shadowOptions);
+    EXPECT_EQ(gaugePaintProperty->GetGradientColorsValue(), colors);
+    EXPECT_EQ(gaugePaintProperty->GetValuesValue(), values);
+    EXPECT_EQ(gaugePaintProperty->GetGaugeTypeValue(), GaugeType::TYPE_CIRCULAR_MONOCHROME);
+    EXPECT_EQ(gaugePaintProperty->GetIndicatorIconSourceInfoValue().src_, INDICATOR_ICON_PATH);
+    EXPECT_EQ(gaugePaintProperty->GetIndicatorIconSourceInfoValue().bundleName_, INDICATOR_BUNDLE_NAME);
+    EXPECT_EQ(gaugePaintProperty->GetIndicatorIconSourceInfoValue().moduleName_, INDICATOR_MODULE_NAME);
+    EXPECT_EQ(gaugePaintProperty->GetIndicatorSpaceValue(), INDICATOR_SPACE);
+
+    /**
+     * @tc.steps: step3. Reset all Settings properties.
+     * @tc.expected: step3. Detects whether the property is reset.
+     */
+
+    gauge.ResetGradientColors();
+    gauge.ResetShadowOptions();
+    gauge.ResetIndicatorIconPath();
+    gauge.ResetIndicatorSpace();
+
+    EXPECT_FALSE(gaugePaintProperty->HasShadowOptions());
+    EXPECT_FALSE(gaugePaintProperty->HasGradientColors());
+    EXPECT_FALSE(gaugePaintProperty->HasValues());
+    EXPECT_FALSE(gaugePaintProperty->HasGaugeType());
+    EXPECT_FALSE(gaugePaintProperty->HasIndicatorIconSourceInfo());
+    EXPECT_FALSE(gaugePaintProperty->HasShadowOptions());
 }
 } // namespace OHOS::Ace::NG
