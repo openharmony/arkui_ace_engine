@@ -169,7 +169,7 @@ void ImageModelNG::SetDraggable(bool draggable)
         gestureHub->RemoveDragEvent();
     }
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDraggable(draggable);
+    frameNode->SetCustomerDraggable(draggable);
 }
 
 void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart)
