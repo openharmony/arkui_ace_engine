@@ -332,7 +332,7 @@ void TextFieldPattern::UpdateCaretRect()
         return;
     }
 
-    selectController_->UpdateCaretOffset();
+    selectController_->MoveCaretToContentRect(selectController_->GetCaretIndex());
 }
 
 void TextFieldPattern::AdjustTextInReasonableArea()
@@ -395,24 +395,6 @@ bool TextFieldPattern::CursorInContentRegion()
                contentRect_.GetX() + contentRect_.Width());
 }
 
-float TextFieldPattern::FitCursorInSafeArea()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto safeAreaBottom = pipeline->GetSafeArea().bottom_;
-    safeAreaBottom = safeAreaBottom.Combine(pipeline->GetSafeAreaManager()->GetKeyboardInset());
-    CHECK_NULL_RETURN(safeAreaBottom.IsValid(), 0.0f);
-    // get global height of caret
-    auto host = GetHost();
-    auto globalBottom = host->GetPaintRectOffset().GetY() + selectController_->GetCaretRect().Bottom();
-    if (globalBottom > safeAreaBottom.start) {
-        auto dy = safeAreaBottom.start - globalBottom;
-        textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
-        selectController_->UpdateCaretOffset();
-        return dy;
-    }
-    return 0.0f;
-}
-
 bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
 {
     // real content region will minus basic padding on left and right
@@ -442,20 +424,7 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
     }
     currentOffset_ = textRect_.GetY() + offset;
     textRect_.SetOffset(OffsetF(textRect_.GetX(), currentOffset_));
-    if (SelectOverlayIsOn()) {
-        selectController_->UpdateSecondHandleOffset();
-        if (!IsSingleHandle()) {
-            selectController_->UpdateFirstHandleOffset();
-            UpdateDoubleHandlePosition();
-        } else {
-            UpdateSecondHandlePosition();
-            auto carectOffset = selectController_->GetCaretRect().GetOffset() + OffsetF(0.0f, offset);
-            selectController_->UpdateCaretOffset(carectOffset);
-        }
-    } else {
-        auto carectOffset = selectController_->GetCaretRect().GetOffset() + OffsetF(0.0f, offset);
-        selectController_->UpdateCaretOffset(carectOffset);
-    }
+    UpdateHandlesOffsetOnScroll(offset);
     UpdateScrollBarOffset();
 }
 
@@ -471,20 +440,7 @@ void TextFieldPattern::OnTextInputScroll(float offset)
     }
     currentOffset_ = textRect_.GetX() + offset;
     textRect_.SetOffset(OffsetF(currentOffset_, textRect_.GetY()));
-    if (SelectOverlayIsOn()) {
-        selectController_->UpdateSecondHandleOffset();
-        if (!IsSingleHandle()) {
-            selectController_->UpdateFirstHandleOffset();
-            UpdateDoubleHandlePosition();
-        } else {
-            UpdateSecondHandlePosition();
-            auto carectOffset = selectController_->GetCaretRect().GetOffset() + OffsetF(offset, 0.0f);
-            selectController_->UpdateCaretOffset(carectOffset);
-        }
-    } else {
-        auto carectOffset = selectController_->GetCaretRect().GetOffset() + OffsetF(offset, 0.0f);
-        selectController_->UpdateCaretOffset(carectOffset);
-    }
+    UpdateHandlesOffsetOnScroll(offset);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -812,14 +768,6 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     }
     ResetObscureTickCountDown();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    // move text to end
-    if (IsTextArea() && GreatOrEqual(textRect_.Height(), contentRect_.Height())) {
-        auto offsetY = textRect_.GetY() + textRect_.Height() - contentRect_.GetY() - contentRect_.Height();
-        textRect_.SetTop(textRect_.GetY() - offsetY);
-    } else if (GreatOrEqual(textRect_.Width(), contentRect_.Width())) {
-        auto offsetX = textRect_.GetX() + textRect_.Width() - contentRect_.GetX() - contentRect_.Width();
-        textRect_.SetLeft(textRect_.GetX() - offsetX);
-    }
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
     if (isKeyEvent || inlineSelectAllFlag_) {
@@ -2390,7 +2338,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(context, false);
     if (needShowSoftKeyboard) {
         LOGI("Start to request keyboard");
-        if (customKeyboardBulder_) {
+        if (customKeyboardBuilder_) {
 #if defined(ENABLE_STANDARD_INPUT) && defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
             imeAttached_ = true;
 #endif
@@ -2470,7 +2418,7 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
     if (forceClose) {
         StopTwinkling();
         CloseSelectOverlay(true);
-        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+        if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
         }
 #if defined(ENABLE_STANDARD_INPUT)
@@ -2496,14 +2444,14 @@ bool TextFieldPattern::RequestCustomKeyboard()
     if (isCustomKeyboardAttached_) {
         return true;
     }
-    CHECK_NULL_RETURN(customKeyboardBulder_, false);
+    CHECK_NULL_RETURN(customKeyboardBuilder_, false);
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
-    overlayManager->BindKeyboard(customKeyboardBulder_, frameNode->GetId());
+    overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     isCustomKeyboardAttached_ = true;
     return true;
 }
@@ -3322,7 +3270,7 @@ void TextFieldPattern::HandleSelectionUp()
         UpdateSelection(selectController_->GetCaretIndex());
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5 - textRect_.GetY();
-    selectController_->MoveSecondHandleToContentRect(static_cast<int32_t>(
+    selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(
         paragraph_->GetGlyphIndexByCoordinate(Offset(selectController_->GetCaretRect().GetX(), newOffsetY))));
     AfterSelection();
 }
@@ -3338,7 +3286,7 @@ void TextFieldPattern::HandleSelectionDown()
         UpdateSelection(selectController_->GetCaretIndex());
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
-    selectController_->MoveSecondHandleToContentRect(static_cast<int32_t>(
+    selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(
         paragraph_->GetGlyphIndexByCoordinate(Offset(selectController_->GetCaretRect().GetX(), newOffsetY))));
     AfterSelection();
 }
@@ -3352,11 +3300,11 @@ void TextFieldPattern::HandleSelectionLeft()
             return;
         }
         UpdateSelection(selectController_->GetCaretIndex());
-        selectController_->MoveSecondHandleToContentRect(
+        selectController_->MoveSecondHandleByKeyBoard(
             selectController_->GetSecondHandleIndex() -
             GetGraphemeClusterLength(contentController_->GetWideText(), selectController_->GetCaretIndex(), true));
     } else {
-        selectController_->MoveSecondHandleToContentRect(
+        selectController_->MoveSecondHandleByKeyBoard(
             selectController_->GetSecondHandleIndex() - GetGraphemeClusterLength(contentController_->GetWideText(),
                                                             selectController_->GetSecondHandleIndex(), true));
     }
@@ -3377,9 +3325,9 @@ void TextFieldPattern::HandleSelectionLeftWord()
     }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
-        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex() - leftWordLength);
+        selectController_->MoveSecondHandleByKeyBoard(selectController_->GetSecondHandleIndex() - leftWordLength);
     } else {
-        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex() - leftWordLength);
+        selectController_->MoveSecondHandleByKeyBoard(selectController_->GetSecondHandleIndex() - leftWordLength);
     }
     AfterSelection();
 }
@@ -3398,9 +3346,9 @@ void TextFieldPattern::HandleSelectionLineBegin()
     }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
-        selectController_->MoveSecondHandleToContentRect(lineBeginPosition);
+        selectController_->MoveSecondHandleByKeyBoard(lineBeginPosition);
     } else {
-        selectController_->MoveSecondHandleToContentRect(lineBeginPosition);
+        selectController_->MoveSecondHandleByKeyBoard(lineBeginPosition);
     }
     AfterSelection();
 }
@@ -3413,9 +3361,9 @@ void TextFieldPattern::HandleSelectionHome()
     }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
-        selectController_->MoveSecondHandleToContentRect(0);
+        selectController_->MoveSecondHandleByKeyBoard(0);
     } else {
-        selectController_->MoveSecondHandleToContentRect(0);
+        selectController_->MoveSecondHandleByKeyBoard(0);
     }
     AfterSelection();
 }
@@ -3430,12 +3378,12 @@ void TextFieldPattern::HandleSelectionRight()
             return;
         }
         UpdateSelection(selectController_->GetCaretIndex());
-        selectController_->MoveSecondHandleToContentRect(
+        selectController_->MoveSecondHandleByKeyBoard(
             selectController_->GetSecondHandleIndex() +
             GetGraphemeClusterLength(contentController_->GetWideText(), selectController_->GetSecondHandleIndex()));
     } else {
         // if currently not in select mode, move destinationOffset and caret position only
-        selectController_->MoveSecondHandleToContentRect(
+        selectController_->MoveSecondHandleByKeyBoard(
             selectController_->GetSecondHandleIndex() +
             GetGraphemeClusterLength(contentController_->GetWideText(), selectController_->GetSecondHandleIndex()));
     }
@@ -3457,9 +3405,9 @@ void TextFieldPattern::HandleSelectionRightWord()
     }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
-        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex() + rightWordLength);
+        selectController_->MoveSecondHandleByKeyBoard(selectController_->GetSecondHandleIndex() + rightWordLength);
     } else {
-        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex() + rightWordLength);
+        selectController_->MoveSecondHandleByKeyBoard(selectController_->GetSecondHandleIndex() + rightWordLength);
         AfterSelection();
     }
 }
@@ -3478,9 +3426,9 @@ void TextFieldPattern::HandleSelectionLineEnd()
     }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
-        selectController_->MoveSecondHandleToContentRect(lineEndPosition);
+        selectController_->MoveSecondHandleByKeyBoard(lineEndPosition);
     } else {
-        selectController_->MoveSecondHandleToContentRect(lineEndPosition);
+        selectController_->MoveSecondHandleByKeyBoard(lineEndPosition);
     }
     AfterSelection();
 }
@@ -3495,9 +3443,9 @@ void TextFieldPattern::HandleSelectionEnd()
     }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
-        selectController_->MoveSecondHandleToContentRect(endPos);
+        selectController_->MoveSecondHandleByKeyBoard(endPos);
     } else {
-        selectController_->MoveSecondHandleToContentRect(endPos);
+        selectController_->MoveSecondHandleByKeyBoard(endPos);
     }
     AfterSelection();
 }
@@ -4650,7 +4598,7 @@ bool TextFieldPattern::CheckSelectionRectVisible()
 
 void TextFieldPattern::DumpAdvanceInfo()
 {
-    if (customKeyboardBulder_) {
+    if (customKeyboardBuilder_) {
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
@@ -4846,6 +4794,27 @@ int32_t TextFieldPattern::GetLineCount() const
         return paragraph_->GetLineCount();
     }
     return 0;
+}
+
+void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
+{
+    if (SelectOverlayIsOn()) {
+        selectController_->UpdateSecondHandleOffset();
+        if (!IsSingleHandle()) {
+            selectController_->UpdateFirstHandleOffset();
+            UpdateDoubleHandlePosition();
+        } else {
+            UpdateSecondHandlePosition();
+            auto carectOffset = selectController_->GetCaretRect().GetOffset() +
+                                (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
+            selectController_->UpdateCaretOffset(carectOffset);
+        }
+        selectController_->UpdateCaretOffset();
+    } else {
+        auto caretOffset = selectController_->GetCaretRect().GetOffset() +
+                            (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
+        selectController_->UpdateCaretOffset(caretOffset);
+    }
 }
 
 void TextFieldPattern::CloseHandleAndSelect()

@@ -889,10 +889,10 @@ public:
 
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
     {
-        if (customKeyboardBulder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+        if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
             CloseCustomKeyboard();
         }
-        customKeyboardBulder_ = keyboardBuilder;
+        customKeyboardBuilder_ = keyboardBuilder;
     }
 
     void DumpAdvanceInfo() override;
@@ -1063,7 +1063,6 @@ private:
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool CursorInContentRegion();
-    float FitCursorInSafeArea();
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
 
@@ -1089,6 +1088,7 @@ private:
     void UpdateErrorTextMargin();
     OffsetF GetTextPaintOffset() const;
     void UpdateSelectController();
+    void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
@@ -1223,7 +1223,7 @@ private:
 #endif
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
-    std::function<void()> customKeyboardBulder_;
+    std::function<void()> customKeyboardBuilder_;
     bool isCustomFont_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;

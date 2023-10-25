@@ -25,8 +25,9 @@ void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t s
 {
     firstHandleInfo_.index = firstHandleIndex;
     secondHandleInfo_.index = secondHandleIndex;
-    caretInfo_.index = secondHandleInfo_.index;
+    caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
     CalculateHandleOffset();
+    UpdateCaretOffset();
     FireSelectEvent();
 }
 
@@ -275,7 +276,7 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index)
     firstHandleInfo_.rect = firstHandle;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
-
+    UpdateCaretOffset();
     UpdateSecondHandleOffset();
     FireSelectEvent();
 }
@@ -293,7 +294,7 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
     secondHandleInfo_.rect = secondHandle;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
-
+    UpdateCaretOffset();
     UpdateFirstHandleOffset();
     FireSelectEvent();
 }
@@ -354,7 +355,6 @@ void TextSelectController::UpdateCaretOffset()
     CHECK_NULL_VOID(textFiled);
     caretRect.SetSize(SizeF(caretInfo_.rect.Width(),
         LessOrEqual(caretMetrics.height, 0.0) ? textFiled->PreferredLineHeight() : caretMetrics.height));
-    MoveHandleToContentRect(caretRect);
     caretInfo_.rect = caretRect;
 }
 
@@ -366,9 +366,16 @@ void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
 void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset)
 {
     auto index = ConvertTouchOffsetToPosition(localOffset);
+    MoveSecondHandleToContentRect(index);
     caretInfo_.index = index;
     UpdateCaretOffset();
+}
+
+void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index)
+{
     MoveSecondHandleToContentRect(index);
+    caretInfo_.index = index;
+    UpdateCaretOffset();
 }
 
 void TextSelectController::FireSelectEvent()
