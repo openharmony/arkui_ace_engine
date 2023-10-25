@@ -19,7 +19,6 @@
 #include <fstream>
 #include <vector>
 
-#include "base/log/log.h"
 #include "base/utils/string_utils.h"
 
 #ifdef WINDOWS_PLATFORM
@@ -129,9 +128,6 @@ JsiModuleSearcher::JsiModuleSearcher(const std::string& bundleName, const std::s
 
 std::string JsiModuleSearcher::operator()(const std::string& curJsModulePath, const std::string& newJsModuleUri) const
 {
-    LOGD("Search JS module (%{public}s, %{public}s) begin",
-        curJsModulePath.c_str(), newJsModuleUri.c_str());
-
     std::string newJsModulePath;
 
     if (curJsModulePath.empty() || newJsModuleUri.empty()) {
@@ -155,11 +151,7 @@ std::string JsiModuleSearcher::operator()(const std::string& curJsModulePath, co
             break;
         }
     }
-
     FixExtName(newJsModulePath);
-
-    LOGD("Search JS module (%{public}s, %{public}s) => %{public}s end",
-        curJsModulePath.c_str(), newJsModuleUri.c_str(), newJsModulePath.c_str());
 
     return newJsModulePath;
 }
@@ -310,7 +302,6 @@ std::string JsiModuleSearcher::FindNpmPackage(const std::string& curJsModulePath
     if (!path.empty()) {
         return path;
     }
-    LOGE("Find npm package failed");
     return std::string();
 }
 

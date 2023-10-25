@@ -57,6 +57,7 @@ public:
     void SetChangeSelectedRects(bool value);
     void SetFirstHandleOffset(const OffsetF& offset);
     void SetSecondHandleOffset(const OffsetF& offset);
+    void SetShowSelect(bool value);
 
 private:
     void PaintSelection(DrawingContext& context) const;
@@ -64,6 +65,7 @@ private:
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
     void PaintScrollBar(DrawingContext& context);
 
+    bool needPaintSelect_ = false;
     WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
@@ -72,6 +74,7 @@ private:
     RefPtr<AnimatablePropertyColor> selectedColor_;
     RefPtr<PropertyOffsetF> cursorOffset_;
     RefPtr<PropertyBool> cursorVisible_;
+    RefPtr<PropertyBool> showSelect_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertyOffsetF> firstHandleOffset_;

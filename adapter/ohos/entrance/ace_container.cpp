@@ -41,6 +41,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/card_frontend/card_frontend.h"
@@ -1571,6 +1572,15 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.direction.empty() || !parsedConfig.densitydpi.empty()) {
         configurationChange.DirectionOrDpiUpdate = true;
+        if (!parsedConfig.direction.empty()) {
+            auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
+            if (parsedConfig.direction == "horizontal") {
+                resDirection = DeviceOrientation::LANDSCAPE;
+            } else if (parsedConfig.direction == "vertical") {
+                resDirection = DeviceOrientation::PORTRAIT;
+            }
+            resConfig.SetOrientation(resDirection);
+        }
     }
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);

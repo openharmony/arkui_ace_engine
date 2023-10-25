@@ -143,4 +143,9 @@ bool ImageLoadingContext::NeedAlt() const
 void ImageLoadingContext::ResetLoading() {}
 void ImageLoadingContext::ResumeLoading() {}
 void ImageLoadingContext::DownloadImage() {}
+
+const std::string ImageLoadingContext::GetCurrentLoadingState()
+{
+    return "UNLOADED";
+}
 } // namespace OHOS::Ace::NG

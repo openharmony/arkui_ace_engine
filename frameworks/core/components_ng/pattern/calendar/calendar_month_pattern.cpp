@@ -214,8 +214,12 @@ void CalendarMonthPattern::OnTouchEvent(const Offset& localLocation, bool isPres
     if (!isCalendarDialog_ || obtainedMonth_.days.empty()) {
         return;
     }
+    auto index = JudgeArea(localLocation);
+    if (index < 0 || index >= obtainedMonth_.days.size()) {
+        return;
+    }
     if (isPressed) {
-        obtainedMonth_.days[JudgeArea(localLocation)].isPressing = true;
+        obtainedMonth_.days[index].isPressing = true;
     } else {
         for (auto& day : obtainedMonth_.days) {
             day.isPressing = false;
@@ -232,11 +236,14 @@ void CalendarMonthPattern::OnHoverEvent(const Offset& localLocation, bool state)
     if (!isCalendarDialog_ || obtainedMonth_.days.empty()) {
         return;
     }
+    int32_t index = JudgeArea(localLocation);
+    if (index < 0 || index >= obtainedMonth_.days.size()) {
+        return;
+    }
     for (auto& day : obtainedMonth_.days) {
         day.isHovering = false;
     }
-    int32_t index = JudgeArea(localLocation);
-    if (state && index >= 0) {
+    if (state) {
         obtainedMonth_.days[index].isHovering = true;
     }
 

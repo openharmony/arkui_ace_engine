@@ -31,6 +31,7 @@ class ACE_EXPORT CustomNode : public UINode, public CustomNodeBase {
 
 public:
     static RefPtr<CustomNode> CreateCustomNode(int32_t nodeId, const std::string& viewKey);
+    static void FlushDelayJsActive();
 
     CustomNode(int32_t nodeId, const std::string& viewKey);
     ~CustomNode() override = default;

@@ -1090,6 +1090,10 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         CHECK_NULL_RETURN(host, itemInfo);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, itemInfo);
+        if (pattern->SelectOverlayIsOn() || pattern->imeAttached_ || pattern->showSelect_) {
+            pattern->CloseHandleAndSelect();
+            pattern->CloseKeyboard(true);
+        }
         pattern->dragStatus_ = DragStatus::DRAGGING;
         pattern->textFieldContentModifier_->ChangeDragStatus();
         auto contentController = pattern->contentController_;
@@ -1114,7 +1118,8 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
 
 std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> TextFieldPattern::OnDragDrop()
 {
-    return [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+    return [weakPtr = WeakClaim(this)](
+                      const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -1137,7 +1142,9 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         for (const auto& record : records) {
             str += record;
         }
-        pattern->needToRequestKeyboardInner_ = true;
+        if (pattern->dragStatus_ == DragStatus::NONE) {
+            pattern->needToRequestKeyboardInner_ = true;
+        }
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {
             return;
@@ -1818,6 +1825,7 @@ void TextFieldPattern::ShowSelectOverlay(const ShowSelectOverlayParams& showOver
     if (isTransparent_) {
         return;
     }
+    showSelect_ = true;
     auto hasDataCallback = [weak = WeakClaim(this), params = showOverlayParams](bool hasData) {
         LOGI("HasData callback from clipboard, data available ? %{public}d", hasData);
         auto pattern = weak.Upgrade();
@@ -4807,5 +4815,11 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
                             (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
         selectController_->UpdateCaretOffset(caretOffset);
     }
+}
+
+void TextFieldPattern::CloseHandleAndSelect()
+{
+    CloseSelectOverlay(true);
+    showSelect_ = false;
 }
 } // namespace OHOS::Ace::NG

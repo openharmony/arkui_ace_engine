@@ -221,6 +221,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(gridItemLayoutProperty);
             gridItemLayoutProperty->UpdateMainIndex(line->first);
             gridItemLayoutProperty->UpdateCrossIndex(iter->first);
+            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
@@ -582,6 +583,9 @@ void GridScrollLayoutAlgorithm::AdjustRowColSpan(
     if (currentItemRowSpan_ > 1 || currentItemColSpan_ > 1) {
         gridLayoutInfo_.hasBigItem_ = true;
     }
+
+    itemLayoutProperty->UpdateRealRowSpan(currentItemRowSpan_);
+    itemLayoutProperty->UpdateRealColumnSpan(currentItemColSpan_);
 }
 
 void GridScrollLayoutAlgorithm::LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem)

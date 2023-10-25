@@ -32,7 +32,6 @@ void QRCodePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto paintProperty = AceType::DynamicCast<QRCodePaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     if (!paintProperty->GetValue().has_value()) {
-        LOGE("QRCode value is empty, can't paint");
         return;
     }
     auto value = paintProperty->GetValueValue();
@@ -50,7 +49,6 @@ void QRCodePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     // For the long string, just show the length as 256.
     if (value.size() > QRCODE_VALUE_MAX_LENGTH) {
-        LOGW("Qrcode value size is more than 256, just show the previous 256.");
         value = value.substr(QRCODE_START_INDEX, QRCODE_VALUE_MAX_LENGTH);
     }
     auto paintOffset = paintWrapper->GetContentOffset();

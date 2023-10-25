@@ -247,7 +247,13 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     if (panEvent_) {
         return;
     }
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnScrollStartRecursive(pattern->GetParentAxis() == Axis::HORIZONTAL
+                                    ? event.GetGlobalLocation().GetX()
+                                    : event.GetGlobalLocation().GetY());
+    };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -2411,5 +2417,91 @@ int WebPattern::GetWebId()
         return delegate_->GetWebId();
     }
     return -1;
+}
+
+ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState state)
+{
+    auto parent = parent_.Upgrade();
+    if (parent) {
+        return parent->HandleScroll(offset, source, state);
+    }
+    return { 0.0f, false };
+}
+
+bool WebPattern::HandleScrollVelocity(float velocity)
+{
+    auto parent = parent_.Upgrade();
+    if (parent) {
+        if (parent->HandleScrollVelocity(velocity)) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "Parent component successfully called HandleScrollVelocity");
+            return true;
+        }
+    }
+    return false;
+}
+
+void WebPattern::OnScrollStartRecursive(float position)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive");
+    auto parent = parent_.Upgrade();
+    if (parent) {
+        parent->OnScrollStartRecursive(position);
+    }
+    isFirstFlingScrollVelocity_ = true;
+}
+
+void WebPattern::OnScrollEndRecursive()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
+    auto parent = parent_.Upgrade();
+    if (parent) {
+        parent->OnScrollEndRecursive();
+    }
+}
+
+void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
+{
+    float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    if (isFling) {
+        if (isFirstFlingScrollVelocity_) {
+            HandleScrollVelocity(velocity);
+            isFirstFlingScrollVelocity_ = false;
+        }
+    } else {
+        HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    }
+}
+
+void WebPattern::OnScrollState(bool scrollState)
+{
+    if (!scrollState) {
+        OnScrollEndRecursive();
+    }
+}
+
+Axis WebPattern::GetParentAxis()
+{
+    auto parent = WebSearchParent();
+    parent_ = parent;
+    CHECK_NULL_RETURN(parent, Axis::HORIZONTAL);
+    return parent->GetAxis();
+}
+
+RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        auto pattern = frameNode->GetPattern<NestableScrollContainer>();
+        if (!pattern) {
+            continue;
+        }
+        return pattern;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

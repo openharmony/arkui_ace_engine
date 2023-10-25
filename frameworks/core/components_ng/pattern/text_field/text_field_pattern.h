@@ -672,9 +672,9 @@ public:
         return { dragParagraph_ };
     }
 
-    RefPtr<FrameNode> MoveDragNode() override
+    const RefPtr<FrameNode>& MoveDragNode() override
     {
-        return std::move(dragNode_);
+        return dragNode_;
     }
 
     const std::vector<std::string>& GetDragContents() const
@@ -972,6 +972,11 @@ public:
         return responseArea_;
     }
 
+    bool GetShowSelect() const
+    {
+        return showSelect_;
+    }
+
 private:
     void GetTextSelectRectsInRangeAndWillChange();
     bool HasFocus() const;
@@ -1084,6 +1089,7 @@ private:
     OffsetF GetTextPaintOffset() const;
     void UpdateSelectController();
     void UpdateHandlesOffsetOnScroll(float offset);
+    void CloseHandleAndSelect() override;
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1226,6 +1232,7 @@ private:
 
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
+    bool showSelect_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
     CaretStatus caretStatus_ = CaretStatus::NONE;
