@@ -139,13 +139,14 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return false;
 }
 
-void ScrollPattern::ScrollSnapTrigger(){
+void ScrollPattern::ScrollSnapTrigger()
+{
     auto scrollBar = GetScrollBar();
     auto scrollBarProxy = GetScrollBarProxy();
-    if(scrollBar && scrollBar->IsPressed()){
+    if (scrollBar && scrollBar->IsPressed()) {
         return;
     }
-    if(scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()){
+    if (scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
         return;
     }
     if (ScrollableIdle() && !AnimateRunning()) {
