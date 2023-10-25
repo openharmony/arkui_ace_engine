@@ -249,8 +249,7 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     buttonParameters.textOverflow = TextOverflow::ELLIPSIS;
     if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
         auto overflow = overflowValue->ToNumber<int32_t>();
-        if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size()) &&
-            TEXT_OVERFLOWS[overflow] != TextOverflow::MARQUEE) {
+        if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
             buttonParameters.textOverflow = TEXT_OVERFLOWS[overflow];
         }
     }
