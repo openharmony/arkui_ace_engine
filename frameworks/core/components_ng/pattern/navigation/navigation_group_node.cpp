@@ -638,16 +638,12 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
-            [weakNavigation, isNavBar]() {
+            [weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 LOGI("navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
-                // clear this flag for navBar layout only
-                if (isNavBar) {
-                    navigation->SetNeedSetInvisible(false);
-                }
                 navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             },
             TaskExecutor::TaskType::UI);
@@ -675,6 +671,10 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
     AnimationUtils::Animate(
         maskOption, [node]() { node->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR); });
     isOnAnimation_ = true;
+    // clear this flag for navBar layout only
+    if (isNavBar) {
+        SetNeedSetInvisible(false);
+    }
 }
 
 void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn)

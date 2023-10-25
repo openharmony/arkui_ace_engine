@@ -35,7 +35,6 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/property/property.h"
-#include "core/common/container.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -444,41 +443,48 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     navigationMode_ = navigationLayoutAlgorithm->GetNavigationMode();
     OnNavBarStateChange(oldMode != navigationMode_);
     OnNavigationModeChange(oldMode != navigationMode_);
-    auto curTopNavPath = navigationStack_->GetTopNavPath();
-    if (curTopNavPath.has_value()) {
-        auto context = PipelineContext::GetCurrentContext();
-        if (context) {
-            context->GetTaskExecutor()->PostTask(
-                [weak = WeakClaim(this), curTopNavPath, hostNode] {
-                    auto pattern = weak.Upgrade();
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this), navigationStackWeak = WeakPtr<NavigationStack>(navigationStack_),
+                navigationWeak = WeakPtr<NavigationGroupNode>(hostNode)] {
+                auto pattern = weak.Upgrade();
+                auto navigationGroupNode = navigationWeak.Upgrade();
+                auto navigationLayoutProperty =
+                    AceType::DynamicCast<NavigationLayoutProperty>(navigationGroupNode->GetLayoutProperty());
+                CHECK_NULL_VOID(navigationLayoutProperty);
+                auto navigationStack = navigationStackWeak.Upgrade();
+                auto curTopNavPath = navigationStack->GetTopNavPath();
+                if (curTopNavPath.has_value()) {
+                    // considering backButton visibility
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
-                    auto navigationLayoutProperty =
-                        AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
-                    if (pattern->navigationStack_->Size() == 1 &&
+                    if (navigationStack->Size() == 1 &&
                         (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
                             navigationLayoutProperty->GetHideNavBar().value_or(false))) {
                         // cases that backButton of navDestination is gone when there's only one child and
                         // 1. In SPLIT mode, it's the first level page
                         // 2. In STACK mode, the navBar is hidden
-                        hostNode->SetBackButtonVisible(curTopNavDestination, false);
+                        navigationGroupNode->SetBackButtonVisible(curTopNavDestination, false);
                     } else {
-                        hostNode->SetBackButtonVisible(curTopNavDestination, true);
+                        navigationGroupNode->SetBackButtonVisible(curTopNavDestination, true);
                     }
-                    pattern->UpdateContextRect(curTopNavDestination, hostNode);
-                    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-                    CHECK_NULL_VOID(navBarNode);
-                    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-                    CHECK_NULL_VOID(navBarLayoutProperty);
-                    if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
-                        (pattern->GetNavigationMode() == NavigationMode::STACK && hostNode->GetNeedSetInvisible())) {
-                        navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-                    } else {
-                        navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                    }
-                },
-                TaskExecutor::TaskType::UI);
-        }
+                    pattern->UpdateContextRect(curTopNavDestination, navigationGroupNode);
+                }
+                // considering navBar visibility
+                auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+                CHECK_NULL_VOID(navBarNode);
+                auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+                CHECK_NULL_VOID(navBarLayoutProperty);
+                if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
+                    (pattern->GetNavigationMode() == NavigationMode::STACK &&
+                        navigationGroupNode->GetNeedSetInvisible())) {
+                    navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+                } else {
+                    navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);

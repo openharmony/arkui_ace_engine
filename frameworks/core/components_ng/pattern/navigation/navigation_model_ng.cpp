@@ -984,7 +984,9 @@ void NavigationModelNG::SetHideNavBar(bool hideNavBar)
     } else {
         pattern->SetNavBarVisibilityChange(true);
     }
-
+    if (pattern->GetNavBarVisibilityChange()) {
+        navigationGroupNode->GetNavBarNode()->MarkDirtyNode();
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar);
 }
 
