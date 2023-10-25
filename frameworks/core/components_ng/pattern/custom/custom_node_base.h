@@ -34,11 +34,12 @@ public:
     CustomNodeBase() = default;
     ~CustomNodeBase() override;
 
-    void FireOnAppear() const
+    void FireOnAppear()
     {
         if (appearFunc_) {
             appearFunc_();
         }
+        executeFireOnAppear_ = true;
     }
 
     virtual void SetRenderFunction(const RenderFunction& renderFunction) {}
@@ -189,6 +190,7 @@ private:
     std::function<void(bool)> setActiveFunc_;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
     bool needRebuild_ = false;
+    bool executeFireOnAppear_ = false;
 };
 } // namespace OHOS::Ace::NG
 
