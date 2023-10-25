@@ -892,7 +892,6 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
             eventHub->HandleInternalOnDrop(event, "");
         }
     }
-
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;

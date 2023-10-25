@@ -94,7 +94,7 @@ frameworks/core/components_ng/pattern/refresh/  @aryawang
 frameworks/core/components_ng/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/pattern/rich_editor/  @jyj-0306
+frameworks/core/components_ng/pattern/rich_editor/  @jyj_0306
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
@@ -115,7 +115,7 @@ frameworks/core/components_ng/pattern/tabs/  @xuzhidan
 frameworks/core/components_ng/pattern/text/  @lijuan124
 frameworks/core/components_ng/pattern/text_clock/  @aryawang
 frameworks/core/components_ng/pattern/text_drag/  @zhaojian2021
-frameworks/core/components_ng/pattern/text_field/  @jyj-0306  @lijuan124
+frameworks/core/components_ng/pattern/text_field/  @jyj_0306  @lijuan124
 frameworks/core/components_ng/pattern/text_picker/  @cheng-feiwang
 frameworks/core/components_ng/pattern/texttimer/  @aryawang
 frameworks/core/components_ng/pattern/time_picker/  @cheng-feiwang
@@ -160,7 +160,7 @@ frameworks/core/components/flex/  @yangfan229
 frameworks/core/components/focus_animation/  @catpoison
 frameworks/core/components/focus_collaboration/  @catpoison
 frameworks/core/components/focusable/  @catpoison
-frameworks/core/components/font/  @jyj-0306
+frameworks/core/components/font/  @jyj_0306
 frameworks/core/components/foreach/  @yan-shuifeng
 frameworks/core/components/form/  @wangchensu1
 frameworks/core/components/gesture_listener/  @zheng-qiyi
@@ -220,7 +220,7 @@ frameworks/core/components/swiper/  @xuzhidan
 frameworks/core/components/tab_bar/  @xuzhidan
 frameworks/core/components/text/  @lijuan124
 frameworks/core/components/text_clock/  @aryawang
-frameworks/core/components/text_field/  @jyj-0306  @lijuan124
+frameworks/core/components/text_field/  @jyj_0306  @lijuan124
 frameworks/core/components/text_overlay/  @yangfan229
 frameworks/core/components/text_span/  @lijuan124
 frameworks/core/components/texttimer/  @aryawang
@@ -371,7 +371,7 @@ frameworks/core/components_ng/test/pattern/refresh/  @suiwuyue
 frameworks/core/components_ng/test/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/test/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/test/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/test/pattern/rich_editor/  @jyj-0306
+frameworks/core/components_ng/test/pattern/rich_editor/  @jyj_0306
 frameworks/core/components_ng/test/pattern/root/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/scroll/  @suiwuyue
 frameworks/core/components_ng/test/pattern/scroll_bar/  @suiwuyue
@@ -392,7 +392,7 @@ frameworks/core/components_ng/test/pattern/tabs/  @xuzhidan
 frameworks/core/components_ng/test/pattern/text/  @lijuan124
 frameworks/core/components_ng/test/pattern/text_clock/  @aryawang
 frameworks/core/components_ng/test/pattern/text_drag/  @zhaojian2021
-frameworks/core/components_ng/test/pattern/text_field/  @jyj-0306  @lijuan124
+frameworks/core/components_ng/test/pattern/text_field/  @jyj_0306  @lijuan124
 frameworks/core/components_ng/test/pattern/text_picker/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/texttimer/  @aryawang
 frameworks/core/components_ng/test/pattern/time_picker/  @cheng-feiwang

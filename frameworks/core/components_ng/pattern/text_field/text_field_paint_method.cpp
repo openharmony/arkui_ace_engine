@@ -164,6 +164,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     }
     textFieldOverlayModifier_->SetUnderlineWidth(textFieldPattern->GetUnderlineWidth());
     textFieldOverlayModifier_->SetUnderlineColor(textFieldPattern->GetUnderlineColor());
+    textFieldOverlayModifier_->SetShowSelect(textFieldPattern->GetShowSelect());
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
