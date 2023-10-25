@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
@@ -236,8 +237,6 @@ void NavigationPattern::CheckTopNavPathChange(
                     parent->RemoveChild(preTopNavDestination);
                 }
             }
-        } else {
-            LOGW("prev page is illegal");
         }
     } else {
         // navBar to new top page case
@@ -269,8 +268,6 @@ void NavigationPattern::CheckTopNavPathChange(
                 focusHub->SetParentFocusable(true);
                 focusHub->RequestFocus();
             });
-        } else {
-            LOGW("new page is illegal");
         }
     } else {
         // back to navBar case
@@ -417,7 +414,7 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
 void NavigationPattern::OnNavigationModeChange(bool modeChange)
 {
     if (!modeChange) {
-        LOGD("navigation mode doesn't change");
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation mode doesn't change");
         return;
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());

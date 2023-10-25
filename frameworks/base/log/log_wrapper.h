@@ -91,6 +91,7 @@ enum class AceLogTag : uint8_t {
     ACE_WEB,
     ACE_IMAGE,
     ACE_RATING,
+    ACE_NAVIGATION,
     ACE_LOADINGPROGRESS,
     ACE_PATTERNLOCK,
     ACE_PROGRESS,
