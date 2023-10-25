@@ -225,6 +225,11 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 
+void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+}
+
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
