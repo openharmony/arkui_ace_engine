@@ -163,14 +163,17 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
     }
     int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN
-        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN) {
         inputType = LAST_DOWN;
         isFirstMove = true;
     } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP
-        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
         inputType = LAST_UP;
         isFirstMove = false;
-    } else if (isFirstMove && pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) {
+    } else if (isFirstMove && (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE)) {
         inputType = FIRST_MOVE;
         isFirstMove = false;
     }
