@@ -308,9 +308,9 @@ void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
     if (scrollPositionCallback_) {
         if (scrollBarProxy_) {
             scrollBarProxy_->NotifyScrollStart();
+            scrollBarProxy_->SetScrollSnapTrigger_(true);
         }
         scrollPositionCallback_(0, SCROLL_FROM_START);
-        scrollBarProxy_->SetScrollSnapTrigger_(true);
     }
 }
 
