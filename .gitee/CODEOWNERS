@@ -28,7 +28,7 @@ frameworks/core/components_ng/render/adapter/  @yan-shuifeng @sunfei2021
 frameworks/core/components_ng/layout/  @yan-shuifeng @yangfan229
 frameworks/core/components_ng/property/  @yan-shuifeng
 frameworks/core/components_ng/syntax/  @yan-shuifeng @lightningHo
-frameworks/core/components_ng/manager/safe_area/  @zhoutianer
+frameworks/core/components_ng/manager/safe_area/  @xiexiyun
 
 [Common source]
 frameworks/core/common/  @yan-shuifeng @sunfei2021
@@ -65,7 +65,7 @@ frameworks/core/components_ng/pattern/grid_col/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_row/  @xiexiyun
 frameworks/core/components_ng/pattern/hyperlink/  @techbuilding
-frameworks/core/components_ng/pattern/image/  @zhoutianer
+frameworks/core/components_ng/pattern/image/  @xiexiyun
 frameworks/core/components_ng/pattern/image_animator/  @hehongyang9
 frameworks/core/components_ng/pattern/indexer/  @aryawang
 frameworks/core/components_ng/pattern/linear_layout/  @xiexiyun
@@ -168,7 +168,7 @@ frameworks/core/components/grid/  @zcdqs
 frameworks/core/components/grid_layout/  @zcdqs
 frameworks/core/components/hyperlink/  @techbuilding
 frameworks/core/components/ifelse/  @yan-shuifeng
-frameworks/core/components/image/  @zhoutianer
+frameworks/core/components/image/  @xiexiyun
 frameworks/core/components/indexer/  @aryawang
 frameworks/core/components/list/  @yeyinglong_admin
 frameworks/core/components/marquee/  @aryawang
@@ -215,7 +215,7 @@ frameworks/core/components/split_container/  @
 frameworks/core/components/stack/  @nickyjd
 frameworks/core/components/stage/  @yan-shuifeng
 frameworks/core/components/stepper/  @tsj_2020
-frameworks/core/components/svg/  @zhoutianer
+frameworks/core/components/svg/  @xiexiyun
 frameworks/core/components/swiper/  @xuzhidan
 frameworks/core/components/tab_bar/  @xuzhidan
 frameworks/core/components/text/  @lijuan124
@@ -261,9 +261,9 @@ frameworks/core/gestures/  @zheng-qiyi
 frameworks/core/components_ng/gestures/  @zheng-qiyi
 
 [Image source]
-frameworks/core/image/  @zhoutianer
-frameworks/core/components_ng/image_provider/  @zhoutianer
-frameworks/core/components_ng/svg/  @zhoutianer
+frameworks/core/image/  @xiexiyun
+frameworks/core/components_ng/image_provider/  @xiexiyun
+frameworks/core/components_ng/svg/  @xiexiyun
 
 [Advanced UI Components]
 advanced_ui_component/ @youzhi92
@@ -342,7 +342,7 @@ frameworks/core/components_ng/test/pattern/grid_col/  @xiexiyun
 frameworks/core/components_ng/test/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/test/pattern/grid_row/  @xiexiyun
 frameworks/core/components_ng/test/pattern/hyperlink/  @jinweiliu
-frameworks/core/components_ng/test/pattern/image/  @zhoutianer
+frameworks/core/components_ng/test/pattern/image/  @xiexiyun
 frameworks/core/components_ng/test/pattern/image_animator/  @suiwuyue
 frameworks/core/components_ng/test/pattern/indexer/  @suiwuyue
 frameworks/core/components_ng/test/pattern/linear_layout/  @xiexiyun
@@ -407,6 +407,6 @@ frameworks/core/components_ng/test/pattern/window_scene/  @liuchao92
 frameworks/core/components_ng/test/pattern/xcomponent/  @sunbees
 frameworks/core/components_ng/test/event/  @zhaojian2021 @catpoison
 frameworks/core/components_ng/test/syntax/  @yan-shuifeng @lightningHo
-frameworks/core/components_ng/test/svg/  @zhoutianer
-frameworks/core/components_ng/test/image_provider/  @zhoutianer
+frameworks/core/components_ng/test/svg/  @xiexiyun
+frameworks/core/components_ng/test/image_provider/  @xiexiyun
 frameworks/core/components_ng/test/animation/  @suiwuyue
