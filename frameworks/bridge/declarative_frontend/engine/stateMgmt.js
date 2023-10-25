@@ -4791,7 +4791,7 @@ class ViewPU extends NativeViewPartialUpdate {
 
             thisViewPu.push(this);
             updateFunc(elmtId, /* isFirstRender */ false);
-            if (thisViewPu.length != 0) {
+            if (thisViewPu.length !== 0) {
                 thisViewPu.pop(this);
             }
                     
@@ -5128,7 +5128,7 @@ class ViewPU extends NativeViewPartialUpdate {
 
         thisViewPu.push(this);
         updateFunc(elmtId, /* is first render */ true);
-        if (thisViewPu.length != 0) {
+        if (thisViewPu.length !== 0) {
             thisViewPu.pop(this);
         }
 
