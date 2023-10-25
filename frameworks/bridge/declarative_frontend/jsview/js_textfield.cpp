@@ -224,13 +224,19 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         font.fontSize = Dimension(-1);
     } else {
         CalcDimension size;
+        auto theme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
         if (fontSize->IsString()) {
-            auto result = StringUtils::StringToDimensionWithThemeValue(fontSize->ToString(), true, Dimension(-1));
+            auto result = StringUtils::StringToDimensionWithThemeValue(
+                fontSize->ToString(), true, Dimension(theme->GetFontSize()));
+            if (result.Unit() == DimensionUnit::PERCENT) {
+                result = theme->GetFontSize();
+            }
             font.fontSize = result;
         } else if (ParseJsDimensionFp(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
             font.fontSize = size;
         } else {
-            font.fontSize = Dimension(-1);
+            font.fontSize = Dimension(theme->GetFontSize());
         }
     }
 
