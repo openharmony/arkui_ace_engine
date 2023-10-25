@@ -102,7 +102,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto mainPercentRefer = GetMainAxisSize(childLayoutConstraint_.percentReference, axis_);
         auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
         spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
-        if (GreatOrEqual(spaceWidth_, contentMainSize_)) {
+        if (Negative(spaceWidth_) || GreatOrEqual(spaceWidth_, contentMainSize_)) {
             spaceWidth_ = 0.0f;
         }
         if (listLayoutProperty->GetDivider().has_value()) {
