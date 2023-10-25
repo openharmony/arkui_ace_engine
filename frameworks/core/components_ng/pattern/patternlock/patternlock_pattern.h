@@ -66,6 +66,14 @@ public:
         if (!patternLockModifier_) {
             patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
         }
+
+        auto host = GetHost();
+        auto geometryNode = host->GetGeometryNode();
+        auto tempOffset = geometryNode->GetFrameOffset() + geometryNode->GetParentAbsoluteOffset();
+        if (tempOffset != absoluteOffset_) {
+            absoluteOffset_ = tempOffset;
+            CalculateCellCenter();
+        }
         auto paintMethod =
             MakeRefPtr<PatternLockPaintMethod>(cellCenter_, isMoveEventValid_, choosePoint_, patternLockModifier_);
         return paintMethod;
@@ -145,14 +153,19 @@ private:
     void StartModifierConnectedAnimate(int32_t x, int32_t y);
     void StartModifierAddPassPointAnimate(int32_t x, int32_t y);
     void StartModifierCanceledAnimate();
+    OffsetF GetLastChoosePointOffset();
+    void CalculateCellCenter();
 
     RefPtr<V2::PatternLockController> patternLockController_;
     RefPtr<TouchEventImpl> touchDownListener_;
     RefPtr<TouchEventImpl> touchUpListener_;
     RefPtr<TouchEventImpl> touchMoveListener_;
     RefPtr<PanEvent> panEvent_;
+    OffsetF absoluteOffset_;
+    OffsetF globalTouchPoint_;
 
     bool isMoveEventValid_ = false;
+    bool isOnKeyEventState_ = false;
     std::vector<PatternLockCell> choosePoint_;
     int32_t passPointCount_ = 0;
     OffsetF cellCenter_;
