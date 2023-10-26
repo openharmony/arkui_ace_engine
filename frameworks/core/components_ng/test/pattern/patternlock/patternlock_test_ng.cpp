@@ -57,6 +57,7 @@ constexpr float CIRCLE_RADIUS_FLOAT = 200.0f;
 constexpr float DEFAULT_SIDE_LENGTH = 20.0f;
 constexpr int32_t PATTERN_LOCK_COL_COUNT = 3;
 constexpr int32_t RADIUS_TO_DIAMETER = 2;
+constexpr float TOUCHPOINT_OFFSET_FLOAT = 200.0f;
 inline int32_t GetPointIndex(int32_t x, int32_t y)
 {
     return (x - 1) * PATTERN_LOCK_COL_COUNT + (y - 1);
@@ -585,7 +586,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest007, TestSize.Level1)
     pattern->HandleGestureUpdate(info);
     EXPECT_EQ(pattern->cellCenter_.GetX(), .0f);
     EXPECT_EQ(pattern->cellCenter_.GetY(), .0f);
-    info.SetLocalLocation(offset);
+    info.SetGlobalLocation(offset);
     info.SetInputEventType(InputEventType::TOUCH_SCREEN);
     pattern->HandleGestureUpdate(info);
     EXPECT_EQ(pattern->cellCenter_.GetX(), .0f);
@@ -1076,6 +1077,94 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest015, TestSize.Level1)
     pattern->isMoveEventValid_ = false;
     pattern->patternLockController_->SetChallengeResult(V2::PatternLockChallengeResult(0));
     ASSERT_FALSE(pattern->patternLockModifier_->challengeResult_.has_value());
+}
+
+/**
+ * @tc.name: PatternLockPatternTest016
+ * @tc.desc: Test PatternLock pattern method CreateNodePaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockPatternTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init PatternLock node.
+     */
+    PatternLockModelNG patternLockModelNG;
+    auto controller = patternLockModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Get PatternLock pattern object.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Set PatternLock pattern variables and call CreateNodePaintMethod.
+     * @tc.expected: step3. Check the PatternLock paintMethod cellCenter_ value.
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameOffset(OffsetF(CONTENT_OFFSET_FLOAT, CONTENT_OFFSET_FLOAT));
+    pattern->globalTouchPoint_ = OffsetF(TOUCHPOINT_OFFSET_FLOAT, TOUCHPOINT_OFFSET_FLOAT);
+    auto paintMethod = AceType::DynamicCast<PatternLockPaintMethod>(pattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    EXPECT_EQ(paintMethod->cellCenter_,
+        OffsetF(TOUCHPOINT_OFFSET_FLOAT - CONTENT_OFFSET_FLOAT, TOUCHPOINT_OFFSET_FLOAT - CONTENT_OFFSET_FLOAT));
+}
+
+/**
+ * @tc.name: PatternLockPatternTest017
+ * @tc.desc: Test PatternLock pattern method CalculateCellCenter and GetLastChoosePointOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockPatternTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init PatternLock node.
+     */
+    PatternLockModelNG patternLockModelNG;
+    auto controller = patternLockModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Get PatternLock pattern object.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Set PatternLock pattern variables and call CalculateCellCenter.
+     * @tc.expected: step3. Check the PatternLock cellCenter_ value.
+     */
+    pattern->absoluteOffset_ = OffsetF(CONTENT_OFFSET_FLOAT, CONTENT_OFFSET_FLOAT);
+    pattern->globalTouchPoint_ = OffsetF(TOUCHPOINT_OFFSET_FLOAT, TOUCHPOINT_OFFSET_FLOAT);
+    pattern->CalculateCellCenter();
+    EXPECT_EQ(pattern->cellCenter_,
+        OffsetF(TOUCHPOINT_OFFSET_FLOAT - CONTENT_OFFSET_FLOAT, TOUCHPOINT_OFFSET_FLOAT - CONTENT_OFFSET_FLOAT));
+
+    /**
+     * @tc.steps: step4. Set PatternLock pattern variables and call CalculateCellCenter.
+     * @tc.expected: step4. Check the PatternLock cellCenter_ value is not changed.
+     */
+    pattern->cellCenter_ = OffsetF();
+    pattern->isOnKeyEventState_ = true;
+    pattern->CalculateCellCenter();
+    EXPECT_EQ(pattern->cellCenter_, OffsetF());
+
+    /**
+     * @tc.steps: step5. Set PatternLock pattern variables and call CalculateCellCenter
+     * @tc.expected: step5. Check the PatternLock cellCenter_ value.
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetContentSize(SizeF(CONTENT_SIZE_FLOAT, CONTENT_SIZE_FLOAT));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_FLOAT, CONTENT_OFFSET_FLOAT));
+    pattern->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern->CalculateCellCenter();
+    auto calculateOffsetResult = CONTENT_OFFSET_FLOAT + CONTENT_SIZE_FLOAT / PATTERN_LOCK_COL_COUNT /
+                                                            RADIUS_TO_DIAMETER * (RADIUS_TO_DIAMETER - 1);
+    EXPECT_EQ(pattern->cellCenter_, OffsetF(calculateOffsetResult, calculateOffsetResult));
 }
 
 /**

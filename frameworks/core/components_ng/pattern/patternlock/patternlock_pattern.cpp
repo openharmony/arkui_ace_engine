@@ -244,6 +244,7 @@ void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
 void PatternLockPattern::HandleReset()
 {
     isMoveEventValid_ = false;
+    isOnKeyEventState_ = false;
     choosePoint_.clear();
     cellCenter_.Reset();
     if (patternLockModifier_) {
@@ -300,20 +301,18 @@ void PatternLockPattern::HandleGestureUpdate(const GestureEvent& info)
     if (info.GetInputEventType() == InputEventType::AXIS) {
         return;
     }
-    auto moveDeltaX = static_cast<float>(info.GetLocalLocation().GetX());
-    auto moveDeltaY = static_cast<float>(info.GetLocalLocation().GetY());
-    OffsetF touchPoint;
-    touchPoint.SetX(moveDeltaX);
-    touchPoint.SetY(moveDeltaY);
-
+    auto globalLocationX = static_cast<float>(info.GetGlobalLocation().GetX());
+    auto globalLocationY = static_cast<float>(info.GetGlobalLocation().GetY());
+    globalTouchPoint_.SetX(globalLocationX);
+    globalTouchPoint_.SetY(globalLocationY);
     if (!isMoveEventValid_) {
         return;
     }
-    cellCenter_ = touchPoint;
+    CalculateCellCenter();
     bool isAdd = false;
     for (int32_t i = 0; i < PATTERN_LOCK_COL_COUNT && !isAdd; i++) {
         for (int32_t j = 0; j < PATTERN_LOCK_COL_COUNT && !isAdd; j++) {
-            isAdd = AddChoosePoint(touchPoint, i + 1, j + 1);
+            isAdd = AddChoosePoint(cellCenter_, i + 1, j + 1);
         }
     }
 
@@ -324,6 +323,9 @@ void PatternLockPattern::HandleGestureUpdate(const GestureEvent& info)
 
 void PatternLockPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    if (panEvent_) {
+        return;
+    }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) {};
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -484,6 +486,7 @@ void PatternLockPattern::OnFocusClick()
     choosePoint_.emplace_back(currentPoint_.first, currentPoint_.second);
     StartModifierConnectedAnimate(currentPoint_.first, currentPoint_.second);
     UpdateDotConnectEvent();
+    isOnKeyEventState_ = true;
 
     isMoveEventValid_ = true;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -544,6 +547,7 @@ bool PatternLockPattern::OnKeyEvent(const KeyEvent& event)
         case KeyCode::KEY_ENTER:
             if (isMoveEventValid_) {
                 AddPointEnd();
+                isOnKeyEventState_ = false;
             }
             return true;
         case KeyCode::KEY_DPAD_UP:
@@ -647,6 +651,36 @@ void PatternLockPattern::StartModifierCanceledAnimate()
     CHECK_NULL_VOID(patternLockModifier_);
     if (isMoveEventValid_) {
         patternLockModifier_->StartCanceledAnimate();
+    }
+}
+
+OffsetF PatternLockPattern::GetLastChoosePointOffset()
+{
+    OffsetF cellCenter;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, cellCenter);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, cellCenter);
+    float sideLength = geometryNode->GetContentSize().Width();
+    auto offset = geometryNode->GetContentOffset();
+    auto lastPoint = choosePoint_.back();
+    cellCenter.SetX(offset.GetX() + sideLength / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER *
+                                        (lastPoint.GetColumn() * RADIUS_TO_DIAMETER - 1));
+    cellCenter.SetY(offset.GetY() + sideLength / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER *
+                                        (lastPoint.GetRow() * RADIUS_TO_DIAMETER - 1));
+    return cellCenter;
+}
+
+void PatternLockPattern::CalculateCellCenter()
+{
+    if (isOnKeyEventState_) {
+        size_t count = choosePoint_.size();
+        if (count < 1) {
+            return;
+        }
+        cellCenter_ = GetLastChoosePointOffset();
+    } else {
+        cellCenter_ = globalTouchPoint_ - absoluteOffset_;
     }
 }
 } // namespace OHOS::Ace::NG
