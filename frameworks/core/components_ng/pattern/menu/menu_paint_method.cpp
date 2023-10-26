@@ -147,6 +147,7 @@ CanvasDrawFunction MenuPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWr
                 brush.SetAntiAlias(true);
                 canvas.AttachBrush(brush);
                 canvas.DrawPath(path);
+                canvas.DetachBrush();
             }
         }
     };

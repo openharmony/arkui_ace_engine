@@ -121,6 +121,7 @@ void SelectOverlayContentModifier::PaintHandle(
     brush.SetColor(handleColor.GetValue());
     canvas.AttachBrush(brush);
     canvas.DrawCircle(RSPoint(0.0, 0.0), handleRadius_->Get());
+    canvas.DetachBrush();
     // Paint inner circle.
     Color innerHandleColor = innerHandleColor_->Get();
     innerHandleColor = innerHandleColor.BlendOpacity(handleOpacity_->Get());

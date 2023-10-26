@@ -375,7 +375,7 @@ void RosenRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offs
     } else {
         canvas->DrawLine(RSPoint(offset.GetX(), dyOffset), RSPoint(offset.GetX() + trackLength, dyOffset));
     }
-    canvas->DetachBrush();
+    canvas->DetachPen();
 #endif
 
     // draw steps

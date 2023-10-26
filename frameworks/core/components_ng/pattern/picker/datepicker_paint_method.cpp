@@ -113,5 +113,7 @@ void DatePickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)
     canvas.AttachBrush(brush);
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
+    canvas.DetachPen();
+    canvas.DetachBrush();
 }
 } // namespace OHOS::Ace::NG
