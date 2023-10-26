@@ -73,6 +73,7 @@
       OHOS::Ace::UdmfClient::*;
       OHOS::Ace::DragEvent::*;
       OHOS::Ace::ResourceManager::*;
+      OHOS::Ace::NG::AppBarView::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

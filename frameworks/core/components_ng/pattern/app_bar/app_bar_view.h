@@ -30,9 +30,17 @@ namespace OHOS::Ace::NG {
  *     |--Page
  */
 
-class ACE_EXPORT AppBarView {
+class ACE_FORCE_EXPORT AppBarView {
 public:
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
+    static void SetVisible(const bool visible);
+    static void SetRowColor(const Color& color);
+    static void SetRowColor(const std::string& color);
+    static void SetRowColor();
+    static void SetTitleContent(const std::string& content);
+    static void SetTitleFontStyle(const Ace::FontStyle fontStyle);
+    static void SetIconColor(const Color& color);
+    static void SetIconColor(const std::string& color);
 
 private:
     static RefPtr<FrameNode> BuildBarTitle();

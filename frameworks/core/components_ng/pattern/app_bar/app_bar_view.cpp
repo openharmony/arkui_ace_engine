@@ -39,6 +39,13 @@ const Dimension MARGIN_TEXT = 24.0_vp;
 const Dimension MARGIN_BUTTON = 12.0_vp;
 const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
 
+static WeakPtr<FrameNode> row_;
+static WeakPtr<FrameNode> label_;
+static ImageSourceInfo backImage_;
+static ImageSourceInfo faImage_;
+static WeakPtr<FrameNode> backIcon_;
+static WeakPtr<FrameNode> faIcon_;
+
 } // namespace
 
 RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
@@ -49,6 +56,13 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
     atom->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     atom->AddChild(titleBar);
     atom->AddChild(content);
+    auto faButton = titleBar->GetLastChild();
+    if (faButton) {
+        LOGI("lqc: success add faButton");
+        titleBar->RemoveChildAtIndex(2);
+        atom->AddChild(faButton);
+        // faButton->GetRenderContext()->UpdatePosition(OffsetT(0.9_pct, 4.0_Vp));
+    }
     content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
     content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stagePattern = content->GetPattern<StagePattern>();
@@ -72,6 +86,7 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
 {
     auto appBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    row_ = appBarRow;
     auto layoutProperty = appBarRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -124,10 +139,9 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
             if (pipeline) {
                 pipeline->CallRouterBackToPopPage();
             }
-        },
-        true));
+        }, true));
     appBarRow->AddChild(titleLabel);
-
+    label_ = titleLabel;
 #ifdef IS_EMULATOR
     return appBarRow;
 #endif
@@ -137,7 +151,7 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
     auto clickCallback = [pipeline, appBarTheme, buttonId](GestureEvent& info) {
 #ifdef PREVIEW
         LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. Perform this operation on the "
-                "emulator or a real device instead.");
+             "emulator or a real device instead.");
 #else
         if (!pipeline || !appBarTheme) {
             return;
@@ -156,6 +170,7 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
         buttonEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback)));
     }
     appBarRow->AddChild(buttonNode);
+    
     return appBarRow;
 }
 
@@ -175,6 +190,7 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
     imageLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(appBarTheme->GetIconSize()), CalcLength(appBarTheme->GetIconSize())));
+        LOGI("lqc: %{public}f",appBarTheme->GetIconSize().Value());
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageIcon->MarkModifyDone();
 
@@ -184,6 +200,9 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    if (!isBackButton) {
+        renderContext->UpdatePosition(OffsetT(0.9_pct, 4.0_vp));
+    }
 
     auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
     CHECK_NULL_RETURN(buttonPattern, nullptr);
@@ -205,6 +224,15 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     margin.left = CalcLength(isBackButton ? MARGIN_BUTTON : -MARGIN_BUTTON);
     margin.right = CalcLength(isBackButton ? MARGIN_BACK_BUTTON_RIGHT : MARGIN_BUTTON);
     buttonLayoutProperty->UpdateMargin(margin);
+
+    if (isBackButton) {
+        backImage_ = imageSourceInfo;
+        backIcon_ = imageIcon;
+    } else {
+        faImage_ = imageSourceInfo;
+        faIcon_ = imageIcon;
+    }
+
     buttonNode->MarkModifyDone();
 
     buttonNode->AddChild(imageIcon);
@@ -234,10 +262,10 @@ void AppBarView::BindContentCover(int32_t targetId)
         auto onRelease = [overlayManager, &modalStyle, targetId](int32_t releaseCode) {
             overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
         };
-        auto onError =
-            [overlayManager, &modalStyle, targetId](int32_t code, const std::string& name, const std::string& message) {
-                overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
-            };
+        auto onError = [overlayManager, &modalStyle, targetId](
+                           int32_t code, const std::string& name, const std::string& message) {
+            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
+        };
 
         // Create parameters of UIExtension.
         auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
@@ -251,25 +279,145 @@ void AppBarView::BindContentCover(int32_t targetId)
         params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
         LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
             AceApplicationInfo::GetInstance().GetProcessName().c_str(),
-            AceApplicationInfo::GetInstance().GetAbilityName().c_str(),
-            Container::Current()->GetModuleName().c_str());
-        
+            AceApplicationInfo::GetInstance().GetAbilityName().c_str(), Container::Current()->GetModuleName().c_str());
+
         // Create UIExtension node.
         auto appGalleryBundleName = OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName();
-        auto uiExtNode = OHOS::Ace::AppBarHelper::CreateUIExtensionNode(appGalleryBundleName, stageAbilityName,
-            params, std::move(onRelease), std::move(onError));
-        LOGI("UIExtension BundleName: %{public}s, AbilityName: %{public}s",
-            appGalleryBundleName.c_str(), stageAbilityName.c_str());
+        auto uiExtNode = OHOS::Ace::AppBarHelper::CreateUIExtensionNode(
+            appGalleryBundleName, stageAbilityName, params, std::move(onRelease), std::move(onError));
+        LOGI("UIExtension BundleName: %{public}s, AbilityName: %{public}s", appGalleryBundleName.c_str(),
+            stageAbilityName.c_str());
 
         // Update ideal size of UIExtension.
         auto layoutProperty = uiExtNode->GetLayoutProperty();
         CHECK_NULL_RETURN(layoutProperty, uiExtNode);
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)),
-            CalcLength(Dimension(1.0, DimensionUnit::PERCENT))));
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(Dimension(1.0, DimensionUnit::PERCENT))));
         uiExtNode->MarkModifyDone();
         return uiExtNode;
     };
     overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, targetId);
 }
 
+void AppBarView::SetVisible(const bool visible)
+{
+    LOGI("lqc: into SetVisible");
+    auto row = row_.Upgrade();
+    CHECK_NULL_VOID(row);
+
+    if (visible) {
+        // auto pipeline = PipelineContext::GetCurrentContext();
+        // CHECK_NULL_VOID(pipeline);
+        // auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+        row->GetLayoutProperty()->ResetCalcMaxSize();
+    } else {
+        row->GetLayoutProperty()->UpdateCalcMaxSize(CalcSize(CalcLength(1.0_pct), CalcLength(0.0)));
+    }
+    // row->MarkModifyDone();
+
+        // row->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        // row->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    LOGI("lqc: success SetVisible");
+}
+
+
+void AppBarView::SetRowColor(const Color& color)
+{
+    auto row = row_.Upgrade();
+    if (!row) {
+        return;
+    }
+    row->GetRenderContext()->UpdateBackgroundColor(color);
+    LOGI("lqc: success SetBackGroundColor");
+}
+
+void AppBarView::SetRowColor(const std::string& color)
+{
+    auto row = row_.Upgrade();
+    if (!row) {
+        return;
+    }
+    row->GetRenderContext()->UpdateBackgroundColor(Color::FromString(color));
+    LOGI("lqc: success SetBackGroundColor");
+}
+
+void AppBarView::SetRowColor()
+{
+    auto row = row_.Upgrade();
+    CHECK_NULL_VOID(row);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+    auto renderContext = row->GetRenderContext();
+    renderContext->UpdateBackgroundColor(appBarTheme->GetBgColor());
+
+    LOGI("lqc: success SetBackGroundColor");
+}
+
+void AppBarView::SetTitleContent(const std::string& content)
+{
+    auto label = label_.Upgrade();
+    CHECK_NULL_VOID(label);
+    label->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(content);
+    label->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    
+    LOGI("lqc: success SetTitleContent");
+}
+
+void AppBarView::SetTitleFontStyle(const Ace::FontStyle fontStyle)
+{
+    auto label = label_.Upgrade();
+    if (!label) {
+        return;
+    }
+    label->GetLayoutProperty<TextLayoutProperty>()->UpdateItalicFontStyle(fontStyle);
+    LOGI("lqc: success SetTitleFontStyle");
+}
+
+void AppBarView::SetIconColor(const Color& color)
+{
+    auto backImage = backImage_;
+    auto backIcon = backIcon_.Upgrade();
+    auto faImage = faImage_;
+    auto faIcon = faIcon_.Upgrade();
+
+    if (!backIcon || !faIcon) {
+        return;
+    }
+
+    backImage.SetResourceId(InternalResource::ResourceId::APP_BAR_BACK_SVG, color);
+    backIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(backImage);
+
+    faImage.SetResourceId(InternalResource::ResourceId::APP_BAR_FA_SVG, color);
+    faIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(faImage);
+
+    backIcon->MarkModifyDone();
+    faIcon->MarkModifyDone();
+
+    LOGI("lqc: success SetIconColor");
+}
+
+void AppBarView::SetIconColor(const std::string& color)
+{
+    auto backImage = backImage_;
+    auto backIcon = backIcon_.Upgrade();
+    auto faImage = faImage_;
+    auto faIcon = faIcon_.Upgrade();
+    if (!backIcon || !faIcon) {
+        return;
+    }
+
+    backImage.SetResourceId(InternalResource::ResourceId::APP_BAR_BACK_SVG, Color::FromString(color));
+    backIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(backImage);
+
+    faImage.SetResourceId(InternalResource::ResourceId::APP_BAR_FA_SVG, Color::FromString(color));
+    faIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(faImage);
+
+    backIcon->MarkModifyDone();
+    faIcon->MarkModifyDone();
+
+    LOGI("lqc: success SetIconColor");
+}
 } // namespace OHOS::Ace::NG
