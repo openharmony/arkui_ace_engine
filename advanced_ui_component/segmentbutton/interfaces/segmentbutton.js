@@ -1587,7 +1587,7 @@ class SegmentButton extends ViewPU {
             "tab" === this.options.type && (this.selectedIndexes = [0]);
             "capsule" !== this.options.type || null !== (t = this.options.multiply) && void 0 !== t && t || (this.selectedIndexes = [])
         }
-        this.selectedIndexes.every((t => void 0 !== t && t >= 0 && t < this.options.buttons.length)) || ("tab" === this.options.type ? this.selectedIndexes = [0] : this.selectedIndexes = [])
+        this.selectedIndexes.some((t => void 0 === t || t < 0 || t >= this.options.buttons.length)) && ("tab" === this.options.type ? this.selectedIndexes = [0] : this.selectedIndexes = [])
     }
 
     onOptionsChange() {

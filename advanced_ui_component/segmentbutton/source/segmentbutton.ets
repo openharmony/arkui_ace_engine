@@ -712,10 +712,10 @@ export struct SegmentButton {
         this.selectedIndexes = []
       }
     }
-    let valid = this.selectedIndexes.every(index => {
-      return (index !== void 0 && index >= 0 && index < this.options.buttons.length)
+    let invalid = this.selectedIndexes.some(index => {
+      return (index === void 0 || index < 0 || index >= this.options.buttons.length)
     })
-    if (!valid) {
+    if (invalid) {
       if (this.options.type === 'tab') {
         this.selectedIndexes = [0]
       } else {
