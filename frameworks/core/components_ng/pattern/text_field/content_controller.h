@@ -76,6 +76,7 @@ private:
     void FormatIndex(int32_t& startIndex, int32_t& endIndex);
     void FilterTextInputStyle(bool& textChanged, std::string& result);
     bool FilterWithEvent(const std::string& filter, std::string& result);
+    std::string PreprocessString(int32_t startIndex, int32_t endIndex, const std::string& value);
     static std::string RemoveErrorTextFromValue(const std::string& value, const std::string& errorText);
     static std::string FilterWithRegex(const std::string& filter, std::string& result);
     static bool FilterWithEmail(std::string& result);
