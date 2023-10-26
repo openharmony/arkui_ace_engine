@@ -150,22 +150,31 @@ void SideBarContainerModelNG::SetControlButtonTop(const Dimension& top)
 void SideBarContainerModelNG::SetControlButtonShowIconInfo(const std::string& showIconStr,
     bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonShowIconInfo,
-        CreateSourceInfo(showIconStr, isPixelMap, pixMap));
+    auto controlButtonShowIconInfo = CreateSourceInfo(showIconStr, isPixelMap, pixMap);
+    if (controlButtonShowIconInfo.IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            SideBarContainerLayoutProperty, ControlButtonShowIconInfo, controlButtonShowIconInfo);
+    }
 }
 
 void SideBarContainerModelNG::SetControlButtonHiddenIconInfo(const std::string& hiddenIconStr,
     bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo,
-        CreateSourceInfo(hiddenIconStr, isPixelMap, pixMap));
+    auto controlButtonHiddenIconInfo = CreateSourceInfo(hiddenIconStr, isPixelMap, pixMap);
+    if (controlButtonHiddenIconInfo.IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, controlButtonHiddenIconInfo);
+    }
 }
 
 void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(const std::string& switchingIconStr,
     bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo,
-        CreateSourceInfo(switchingIconStr, isPixelMap, pixMap));
+    auto controlButtonSwitchingIconInfo = CreateSourceInfo(switchingIconStr, isPixelMap, pixMap);
+    if (controlButtonSwitchingIconInfo.IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, controlButtonSwitchingIconInfo);
+    }
 }
 
 void SideBarContainerModelNG::SetDividerStrokeWidth(const Dimension& strokeWidth)
