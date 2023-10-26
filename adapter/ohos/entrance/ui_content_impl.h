@@ -69,6 +69,7 @@ public:
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
+    void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
 
     // Window color
     uint32_t GetBackgroundColor() override;
