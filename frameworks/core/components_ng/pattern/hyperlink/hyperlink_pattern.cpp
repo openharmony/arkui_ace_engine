@@ -14,9 +14,9 @@
  */
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
-#include "core/components/hyperlink/hyperlink_theme.h"
 
 #include "base/json/json_util.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
 #endif
@@ -27,11 +27,15 @@ void HyperlinkPattern::OnAttachToFrameNode() {}
 void HyperlinkPattern::EnableDrag()
 {
     auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
-                        const std::string& /* extraParams */) -> DragDropInfo {
+                         const std::string& /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
         auto hyperlinkPattern = weak.Upgrade();
         CHECK_NULL_RETURN(hyperlinkPattern, info);
-        std::string address = hyperlinkPattern->GetAddress();
+        auto host = hyperlinkPattern->GetHost();
+        CHECK_NULL_RETURN(host, info);
+        auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
+        CHECK_NULL_RETURN(hyperlinkLayoutProperty, info);
+        std::string address = hyperlinkLayoutProperty->GetAddress().value_or("");
         std::string content = hyperlinkPattern->GetTextForDisplay();
         auto json = JsonUtil::Create(true);
         json->Put("url", address.c_str());
@@ -112,7 +116,8 @@ void HyperlinkPattern::LinkToAddress()
     hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(theme->GetTextLinkedColor()));
     hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    pipeline->HyperlinkStartAbility(address_);
+    auto address = hyperlinkLayoutProperty->GetAddress().value_or("");
+    pipeline->HyperlinkStartAbility(address);
 #endif
 }
 
@@ -286,10 +291,5 @@ void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
     }
-}
-
-void HyperlinkPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
-{
-    json->Put("address", address_.c_str());
 }
 } // namespace OHOS::Ace::NG
