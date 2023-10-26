@@ -74,6 +74,5 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawPath(path);
-    canvas.DetachBrush();
 }
 } // namespace OHOS::Ace::NG

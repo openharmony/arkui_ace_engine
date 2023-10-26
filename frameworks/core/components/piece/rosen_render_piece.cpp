@@ -80,7 +80,6 @@ void RosenRenderPiece::Paint(RenderContext& context, const Offset& offset)
     Rect pieceRect(pieceOffset + offset - GetPosition(), pieceSize);
     canvas->AttachPen(pen);
     canvas->DrawRoundRect(MakeRRect(pieceRect.GetOffset(), pieceRect.GetSize(), pieceComponent_->GetBorder()));
-    canvas->DetachPen();
     canvas->Restore();
 #endif
 }

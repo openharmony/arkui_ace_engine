@@ -133,7 +133,6 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     canvas.AttachBrush(brush);
     auto radius = axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth;
     canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
-    canvas.DetachBrush();
 }
 
 void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty& contentProperty)
@@ -209,7 +208,6 @@ void DotIndicatorModifier::PaintUnselectedIndicator(
         float pointY = axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX();
         canvas.DrawCircle({ pointX, pointY }, itemHalfSizes[ITEM_HALF_HEIGHT]);
     }
-    canvas.DetachBrush();
 }
 
 void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& center, const OffsetF& leftCenter,
@@ -241,7 +239,6 @@ void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const Offset
         canvas.DrawRoundRect(
             { { rectLeft, rectTop, rectRight, rectBottom }, rectSelectedItemHeight, rectSelectedItemHeight });
     }
-    canvas.DetachBrush();
 }
 
 void DotIndicatorModifier::PaintMask(DrawingContext& context)

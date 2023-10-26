@@ -55,8 +55,6 @@ int32_t PixelMapImage::GetHeight() const
     return 0;
 }
 
-#ifdef ENABLE_ROSEN_BACKEND
-#ifndef USE_ROSEN_DRAWING
 void PixelMapImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& /* srcRect */, const RSRect& /* dstRect */, const BorderRadiusArray& radiusXY)
 {
@@ -64,6 +62,7 @@ void PixelMapImage::DrawToRSCanvas(
         return;
     }
 
+#ifdef ENABLE_ROSEN_BACKEND
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     if (rsCanvas == nullptr) {
         LOGE("rsCanvas is nullptr.");
@@ -91,43 +90,6 @@ void PixelMapImage::DrawToRSCanvas(
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
 
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
-}
-#else
-void PixelMapImage::DrawToRSCanvas(
-    RSCanvas& canvas, const RSRect& /* srcRect */, const RSRect& /* dstRect */, const BorderRadiusArray& radiusXY)
-{
-    if (!pixelMap_) {
-        return;
-    }
-
-    auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
-    RSBrush brush;
-    auto config = GetPaintConfig();
-    RSSamplingOptions options;
-    ImagePainterUtils::AddFilter(brush, options, config);
-    auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
-    std::vector<RSPoint> radius;
-    static const int pointCount = 4;
-    for (int i = 0; i < pointCount; i++) {
-        RSPoint point(radiusXY[i].GetX(), radiusXY[i].GetY());
-        radius.emplace_back(point);
-    }
-    recordingCanvas.ClipAdaptiveRoundRect(radius);
-    recordingCanvas.Scale(config.scaleX_, config.scaleY_);
-
-    CHECK_NULL_VOID_NOLOG(pixelMap_->GetPixelMapSharedPtr());
-    RSPoint pointRadius[pointCount] = {};
-    for (int i = 0; i < pointCount; i++) {
-        pointRadius[i] = radius[i];
-    }
-    Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
-        static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
-        1.0, 0, 0, 0 };
-    RSSamplingOptions sampling;
-    recordingCanvas.AttachBrush(brush);
-    recordingCanvas.DrawPixelMap(pixelMap->GetPixelMapSharedPtr(), rsImageInfo, sampling);
-    recordingCanvas.DetachBrush();
-}
 #endif
-#endif
+}
 } // namespace OHOS::Ace::NG

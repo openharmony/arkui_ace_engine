@@ -37,7 +37,6 @@ void BlankPaintMethod::PaintRect(RSCanvas& canvas, PaintWrapper* paintWrapper)
     brush.SetColor(color.GetValue());
     canvas.AttachBrush(brush);
     canvas.DrawRect(RSRect(0.0, 0.0, layoutSize.Width(), layoutSize.Height()));
-    canvas.DetachBrush();
     canvas.Restore();
 }
 } // namespace OHOS::Ace::NG

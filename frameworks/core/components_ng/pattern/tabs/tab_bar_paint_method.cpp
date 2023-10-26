@@ -158,7 +158,6 @@ void TabBarPaintMethod::PaintGradientRect(RSCanvas& canvas, const RSRect& gradie
             startPoint, endPoint, gradientColors, gradientPos, RSTileMode::CLAMP));
     canvas.DetachPen().AttachBrush(brush);
     canvas.DrawRect(gradientRect);
-    canvas.DetachBrush();
 }
 
 RefPtr<Modifier> TabBarPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)

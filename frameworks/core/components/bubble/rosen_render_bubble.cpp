@@ -117,12 +117,12 @@ void RosenRenderBubble::PaintMask(RenderContext& context)
     if (canvas == nullptr) {
         return;
     }
-    RSBrush brush;
-    brush.SetColor(maskColor_.GetValue());
+    RSPen pen;
+    pen.SetColor(maskColor_.GetValue());
 
-    canvas->AttachBrush(brush);
+    canvas->AttachPen(pen);
     canvas->DrawRect(RSRect(0.0, 0.0, GetLayoutSize().Width(), GetLayoutSize().Height()));
-    canvas->DetachBrush();
+    canvas->DetachPen();
 }
 #endif
 

@@ -178,8 +178,6 @@ void SliderTipModifier::PaintBubble(DrawingContext& context)
     canvas.AttachBrush(brush);
     canvas.ClipPath(path, RSClipOp::INTERSECT, true);
     canvas.DrawPath(path);
-    canvas.DetachBrush();
-    canvas.DetachPen();
 }
 
 void SliderTipModifier::onDraw(DrawingContext& context)
