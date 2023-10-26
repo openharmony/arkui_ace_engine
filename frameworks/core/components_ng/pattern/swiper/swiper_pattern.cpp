@@ -864,6 +864,8 @@ void SwiperPattern::ShowPrevious()
 void SwiperPattern::FinishAnimation()
 {
     StopTranslateAnimation();
+    StopSpringAnimation();
+    StopFadeAnimation();
     if (indicatorController_) {
         indicatorController_->Stop();
     }
