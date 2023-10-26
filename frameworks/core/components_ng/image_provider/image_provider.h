@@ -85,6 +85,8 @@ public:
 
     static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
 
+    static void CacheImageObject(const RefPtr<ImageObject>& obj);
+
 private:
     /** Check if task is already running and register task in the task map,
      * making sure the same task runs only once (CreateImageObject with same

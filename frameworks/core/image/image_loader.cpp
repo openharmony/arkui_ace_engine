@@ -484,11 +484,7 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
     data->BuildWithCopy(imageData.data(), imageData.size());
 #endif
     // 3. write it into file cache.
-    BackgroundTaskExecutor::GetInstance().PostTask(
-        [uri, imgData = std::move(imageData)]() {
-            ImageFileCache::GetInstance().WriteCacheFile(uri, imgData.data(), imgData.size());
-        },
-        BgTaskPriority::LOW);
+    WriteCacheToFile(uri, imageData);
     return data;
 }
 
@@ -807,6 +803,15 @@ void SharedMemoryImageLoader::UpdateData(const std::string& uri, const std::vect
     }
 
     cv_.notify_one();
+}
+
+void ImageLoader::WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData)
+{
+    BackgroundTaskExecutor::GetInstance().PostTask(
+        [uri, imgData = std::move(imageData)]() {
+            ImageFileCache::GetInstance().WriteCacheFile(uri, imgData.data(), imgData.size());
+        },
+        BgTaskPriority::LOW);
 }
 
 } // namespace OHOS::Ace
