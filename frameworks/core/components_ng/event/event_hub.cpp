@@ -136,9 +136,6 @@ void EventHub::SetCustomerOnDragFunc(DragFuncType dragFuncType, OnNewDragFunc&& 
 void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info,
     const std::string& extraParams)
 {
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("FireCustomerOnDragFunc type: %u", dragFuncType);
-    }
     switch (dragFuncType) {
         case DragFuncType::DRAG_ENTER: {
             if (customerOnDragEnter_ != nullptr) {
@@ -184,9 +181,6 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
 bool EventHub::IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager IsFireOnDrop, drag ret: %d", info->GetResult());
-    }
     return !HasCustomerOnDrop()
         || info->GetResult() == DragRet::DRAG_DEFAULT
         || info->GetResult() == DragRet::ENABLE_DROP

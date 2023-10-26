@@ -221,9 +221,6 @@ public:
 
     void FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGI("DragDropManager fire onDragEnter");
-        }
         if (onDragEnter_) {
             // callback may be overwritten in its invoke so we copy it first
             auto onDragEnter = onDragEnter_;
@@ -238,9 +235,6 @@ public:
 
     void FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGI("DragDropManager fire onDragLeave");
-        }
         if (onDragLeave_) {
             // callback may be overwritten in its invoke so we copy it first
             auto onDragLeave = onDragLeave_;
@@ -255,9 +249,6 @@ public:
 
     void FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGI("DragDropManager fire onDragMove");
-        }
         if (onDragMove_) {
             // callback may be overwritten in its invoke so we copy it first
             auto onDragMove = onDragMove_;
@@ -302,9 +293,6 @@ public:
 
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGI("DragDropManager fire onDrop");
-        }
         if (onDrop_) {
             // callback may be overwritten in its invoke so we copy it first
             auto onDrop = onDrop_;
