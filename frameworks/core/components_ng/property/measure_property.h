@@ -27,7 +27,9 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/json/json_util.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -262,20 +264,28 @@ struct MeasureProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
         // this may affect XTS, check later.
-        auto jsonSize = JsonUtil::Create(true);
-        if (selfIdealSize.has_value()) {
-            if (selfIdealSize.value().Width().has_value()) {
-                auto widthStr = selfIdealSize.value().Width().value().ToString();
-                json->Put("width", widthStr.c_str());
-                jsonSize->Put("width", widthStr.c_str());
-            }
-            if (selfIdealSize.value().Height().has_value()) {
-                auto heightStr = selfIdealSize.value().Height().value().ToString();
-                json->Put("height", heightStr.c_str());
-                jsonSize->Put("height", heightStr.c_str());
-            }
+        auto context = PipelineBase::GetCurrentContext();
+        if (context && context->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN)) {
+#if !defined(PREVIEW)
+            std::string width = selfIdealSize.has_value() ?
+                (selfIdealSize.value().Width().has_value() ? selfIdealSize.value().Width().value().ToString() : "-")
+                : "-";
+            std::string height = selfIdealSize.has_value() ?
+                (selfIdealSize.value().Height().has_value() ? selfIdealSize.value().Height().value().ToString() : "-")
+                : "-";
+            json->Put("width", width.c_str());
+            json->Put("height", height.c_str());
+
+            auto jsonSize = JsonUtil::Create(true);
+            jsonSize->Put("width", width.c_str());
+            jsonSize->Put("height", height.c_str());
+            json->Put("size", jsonSize);
+#else
+            ToJsonValue_GetJsonSize(json);
+#endif
+        } else {
+            ToJsonValue_GetJsonSize(json);
         }
-        json->Put("size", jsonSize);
 
         auto jsonConstraintSize = JsonUtil::Create(true);
         jsonConstraintSize->Put("minWidth",
@@ -293,6 +303,24 @@ struct MeasureProperty {
                                                  .ToString()
                                                  .c_str());
         json->Put("constraintSize", jsonConstraintSize->ToString().c_str());
+    }
+
+    void ToJsonValue_GetJsonSize(std::unique_ptr<JsonValue>& json) const
+    {
+        auto jsonSize = JsonUtil::Create(true);
+        if (selfIdealSize.has_value()) {
+            if (selfIdealSize.value().Width().has_value()) {
+                auto widthStr = selfIdealSize.value().Width().value().ToString();
+                json->Put("width", widthStr.c_str());
+                jsonSize->Put("width", widthStr.c_str());
+            }
+            if (selfIdealSize.value().Height().has_value()) {
+                auto heightStr = selfIdealSize.value().Height().value().ToString();
+                json->Put("height", heightStr.c_str());
+                jsonSize->Put("height", heightStr.c_str());
+            }
+        }
+        json->Put("size", jsonSize);
     }
 
     static MeasureProperty FromJson(const std::unique_ptr<JsonValue>& json)

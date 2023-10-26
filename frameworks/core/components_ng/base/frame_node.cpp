@@ -27,6 +27,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
@@ -580,7 +581,13 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     FocusToJsonValue(json);
     MouseToJsonValue(json);
     TouchToJsonValue(json);
-    GeometryNodeToJsonValue(json);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+#if defined(PREVIEW)
+        GeometryNodeToJsonValue(json);
+#endif
+    } else {
+        GeometryNodeToJsonValue(json);
+    }
     json->Put("id", propInspectorId_.value_or("").c_str());
 }
 
