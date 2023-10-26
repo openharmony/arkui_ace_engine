@@ -684,6 +684,9 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this))) {
         geometryTransition->DidLayout(dirty);
+        if (geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
+            isLayoutDirtyMarked_ = true;
+        }
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
@@ -2408,6 +2411,9 @@ void FrameNode::SyncGeometryNode()
 
     if (hasTransition) {
         geometryTransition->DidLayout(Claim(this));
+        if (geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
+            isLayoutDirtyMarked_ = true;
+        }
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         isLayoutComplete_ = true;
