@@ -527,7 +527,7 @@ void DragDropManager::RequireSummary()
     std::string udKey;
     InteractionInterface::GetInstance()->GetUdKey(udKey);
     std::map<std::string, int64_t> summary;
-    int32_t ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+    UdmfClient::GetInstance()->GetSummary(udKey, summary);
     previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_ = summary;
 }
@@ -555,8 +555,11 @@ Rect DragDropManager::GetDragWindowRect(const Point& point)
             previewRect_ = Rect(x, y, width, height);
         }
     }
+    return previewRect_ + Offset(point.GetX(), point.GetY());
 }
 
+void DragDropManager::ClearSummary()
+{
     previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_.clear();
     parentHitNodes_.clear();
