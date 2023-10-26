@@ -224,7 +224,7 @@ std::vector<RectF> TextSelectController::GetSelectedRects() const
     return selectedRects;
 }
 
-void TextSelectController::MoveHandleToContentRect(RectF& handleRect)
+void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment)
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
@@ -244,8 +244,8 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect)
         }
     }
 
-    auto contentRightBoundary = contentRect_.GetX() + contentRect_.Width();
     if (textRect.Width() > contentRect_.Width()) {
+        auto contentRightBoundary = contentRect_.GetX() + contentRect_.Width() - boundaryAdjustment;
         if (handleRect.GetX() < contentRect_.GetX()) {
             auto dx = contentRect_.GetX() - handleRect.GetX();
             textRect.SetOffset(OffsetF(textRect.GetX() + dx, textRect.GetY()));
@@ -255,10 +255,6 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect)
             textRect.SetOffset(OffsetF(textRect.GetX() - dx, textRect.GetY()));
             handleRect.SetOffset(OffsetF(handleRect.GetX() - dx, handleRect.GetY()));
         }
-    }
-    if (GreatNotEqual(handleRect.GetX() + handleRect.Width(), contentRightBoundary) &&
-        LessOrEqual(handleRect.Width(), contentRect_.Width())) {
-        handleRect.SetOffset(OffsetF(contentRightBoundary - handleRect.Width(), handleRect.GetY()));
     }
     textFiled->SetTextRect(textRect);
 }
@@ -316,7 +312,16 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
     CHECK_NULL_VOID(textFiled);
     caretRect.SetSize({ caretInfo_.rect.Width(),
         LessOrEqual(CaretMetrics.height, 0.0) ? textFiled->PreferredLineHeight() : CaretMetrics.height });
-    MoveHandleToContentRect(caretRect);
+
+    // Adjusts one character width.
+    float boundaryAdjustment = 0.0f;
+    auto textRect = textFiled->GetTextRect();
+    if (GreatNotEqual(textRect.Width(), contentRect_.Width()) && GreatNotEqual(contentRect_.Width(), 0.0) &&
+        caretInfo_.index < static_cast<int32_t>(contentController_->GetWideText().length())) {
+        boundaryAdjustment = paragraph_->GetCharacterWidth(caretInfo_.index);
+    }
+
+    MoveHandleToContentRect(caretRect, boundaryAdjustment);
     caretInfo_.rect = caretRect;
     caretRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     UpdateRecordCaretIndex(caretInfo_.index);

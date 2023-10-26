@@ -129,10 +129,10 @@ float TextFieldLayoutAlgorithm::ConstraintWithMinWidth(
         if (width != paragraph_->GetLongestLine()) {
             paragraph_->Layout(width);
         } else {
-            return paragraph_->GetLongestLine();
+            return std::max(paragraph_->GetLongestLine(), 0.0f);
         }
     }
-    return paragraph_->GetMaxWidth();
+    return std::max(paragraph_->GetMaxWidth(), 0.0f);
 }
 
 SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(

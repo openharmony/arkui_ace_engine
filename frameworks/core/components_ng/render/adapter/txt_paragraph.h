@@ -67,6 +67,7 @@ public:
     float GetLongestLine() override;
     float GetMaxWidth() override;
     float GetAlphabeticBaseline() override;
+    float GetCharacterWidth(int32_t index) override;
 
     // interfaces for painting
     void Paint(RSCanvas& canvas, float x, float y) override;
