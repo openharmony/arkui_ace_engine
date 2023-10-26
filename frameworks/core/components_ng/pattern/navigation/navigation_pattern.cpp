@@ -446,11 +446,14 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             [weak = WeakClaim(this), navigationStackWeak = WeakPtr<NavigationStack>(navigationStack_),
                 navigationWeak = WeakPtr<NavigationGroupNode>(hostNode)] {
                 auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
                 auto navigationGroupNode = navigationWeak.Upgrade();
+                CHECK_NULL_VOID(navigationGroupNode);
                 auto navigationLayoutProperty =
                     AceType::DynamicCast<NavigationLayoutProperty>(navigationGroupNode->GetLayoutProperty());
                 CHECK_NULL_VOID(navigationLayoutProperty);
                 auto navigationStack = navigationStackWeak.Upgrade();
+                CHECK_NULL_VOID(navigationStack);
                 auto curTopNavPath = navigationStack->GetTopNavPath();
                 if (curTopNavPath.has_value()) {
                     // considering backButton visibility
