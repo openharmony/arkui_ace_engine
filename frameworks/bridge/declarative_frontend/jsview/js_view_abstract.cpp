@@ -582,7 +582,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
             } else if (animationOptionResult->GetDuration() > (DEFAULT_DURATION - formAnimationTimeInterval)) {
                 // If remaining time is less than 1000ms, check for update duration.
                 animationOptionResult->SetDuration(DEFAULT_DURATION - formAnimationTimeInterval);
-                LOGW("[Form animation]  Form Transition SetDuration: %{public}lld ms",
+                TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form Transition SetDuration: %{public}lld ms",
                     static_cast<long long>(DEFAULT_DURATION - formAnimationTimeInterval));
             }
         }

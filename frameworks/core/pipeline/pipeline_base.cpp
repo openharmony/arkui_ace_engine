@@ -542,13 +542,13 @@ void PipelineBase::OpenImplicitAnimation(
                 CHECK_NULL_VOID(context);
                 if (!finishCallback) {
                     if (context->IsFormRender()) {
-                        LOGW("[Form animation]  Form animation is finish.");
+                        TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation is finish.");
                         context->SetIsFormAnimation(false);
                     }
                     return;
                 }
                 if (context->IsFormRender()) {
-                    LOGW("[Form animation]  Form animation is finish.");
+                    TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation is finish.");
                     context->SetFormAnimationFinishCallback(true);
                     finishCallback();
                     context->FlushBuild();
