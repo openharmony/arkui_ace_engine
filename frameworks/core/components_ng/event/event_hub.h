@@ -302,6 +302,9 @@ public:
 
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDrop");
+        }
         if (onDrop_) {
             // callback may be overwritten in its invoke so we copy it first
             auto onDrop = onDrop_;
@@ -321,9 +324,6 @@ public:
 
     virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
     {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGI("DragDropManager fire onDrop");
-        }
         auto json = JsonUtil::Create(true);
         if (!extraInfo.empty()) {
             json->Put("extraInfo", extraInfo.c_str());
