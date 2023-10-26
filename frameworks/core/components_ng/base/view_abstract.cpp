@@ -237,6 +237,9 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
 
 void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
 }
 
