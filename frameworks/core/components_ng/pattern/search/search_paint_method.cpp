@@ -88,7 +88,6 @@ void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper
         pen.SetColor(ToRSColor(searchDividerColor));
         canvas.AttachPen(pen);
         canvas.DrawRect(rect);
-        canvas.DetachPen();
         canvas.Restore();
     }
 }

@@ -72,7 +72,6 @@ void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
         brush.SetColor(barColor);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect({ fgRect, filletRadius, filletRadius });
-        canvas.DetachBrush();
     }
 }
 

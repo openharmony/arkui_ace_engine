@@ -145,7 +145,6 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
-    canvas.DetachBrush();
 }
 
 void CheckBoxModifier::DrawBorder(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const
@@ -157,7 +156,6 @@ void CheckBoxModifier::DrawBorder(RSCanvas& canvas, const OffsetF& origin, RSPen
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, borderRadius_, borderRadius_);
     canvas.AttachPen(pen);
     canvas.DrawRoundRect(rrect);
-    canvas.DetachPen();
 }
 
 void CheckBoxModifier::DrawBackboard(
@@ -170,7 +168,6 @@ void CheckBoxModifier::DrawBackboard(
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, borderRadius_, borderRadius_);
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
-    canvas.DetachBrush();
 }
 
 void CheckBoxModifier::DrawCheck(
@@ -204,10 +201,8 @@ void CheckBoxModifier::DrawCheck(
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     canvas.AttachPen(shadowPen);
     canvas.DrawPath(path);
-    canvas.DetachPen();
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
-    canvas.DetachPen();
 }
 
 } // namespace OHOS::Ace::NG

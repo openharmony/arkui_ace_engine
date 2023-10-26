@@ -106,7 +106,6 @@ void SwiperPaintMethod::PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) 
     } else {
         canvas.DrawCircle({ centerX + fadeTranslate, centerY }, radius);
     }
-    canvas.DetachBrush();
 }
 
 CanvasDrawFunction SwiperPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)

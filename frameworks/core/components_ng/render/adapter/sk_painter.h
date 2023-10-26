@@ -31,13 +31,8 @@ public:
     SkPainter() = default;
     ~SkPainter() = default;
     static void DrawPath(RSCanvas& canvas, const std::string& commands, const ShapePaintProperty& shapePaintProperty);
-#ifndef USE_ROSEN_DRAWING
     static bool SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty);
     static void SetBrush(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty);
-#else
-    static bool SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProperty);
-    static void SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty);
-#endif
 
     static void DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset);
     static SizeF GetPathSize(const std::string& commands);

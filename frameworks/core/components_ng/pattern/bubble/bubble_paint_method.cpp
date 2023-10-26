@@ -76,7 +76,6 @@ void BubblePaintMethod::PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper)
     brush.SetColor(maskColor.GetValue());
     canvas.AttachBrush(brush);
     canvas.DrawRect(RSRect(0.0, 0.0, layoutSize.Width(), layoutSize.Height()));
-    canvas.DetachBrush();
     canvas.Restore();
 }
 
@@ -117,7 +116,6 @@ void BubblePaintMethod::PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper
 #endif
         canvas.AttachPen(paint);
         canvas.DrawPath(path_);
-        canvas.DetachPen();
     } else {
         paint.SetPathEffect(nullptr);
     }
@@ -130,7 +128,6 @@ void BubblePaintMethod::PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper
     canvas.AttachPen(paint);
     auto rect = MakeRRect();
     canvas.DrawRoundRect(rect);
-    canvas.DetachPen();
     canvas.Restore();
 }
 
@@ -163,8 +160,6 @@ void BubblePaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper
     } else {
         PaintDefaultBubble(canvas);
     }
-    canvas.DetachBrush();
-    canvas.DetachPen();
 }
 
 void BubblePaintMethod::UpdateArrowOffset(const std::optional<Dimension>& offset, const Placement& placement)

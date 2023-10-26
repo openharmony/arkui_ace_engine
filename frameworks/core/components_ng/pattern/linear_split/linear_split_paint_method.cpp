@@ -68,7 +68,6 @@ void LinearSplitPaintMethod::PaintContent(RSCanvas& canvas)
             canvas.DrawLine(ToRSPoint(PointF(startPointX, startPointY)), ToRSPoint(PointF(endPointX, endPointY)));
         }
     }
-    canvas.DetachPen();
 }
 
 } // namespace OHOS::Ace::NG

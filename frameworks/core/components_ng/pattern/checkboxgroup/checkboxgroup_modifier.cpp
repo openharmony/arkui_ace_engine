@@ -204,7 +204,6 @@ void CheckBoxGroupModifier::DrawActiveBorder(
     auto rrect = RSRoundRect(rect, borderRadius_, borderRadius_);
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
-    canvas.DetachBrush();
 }
 
 void CheckBoxGroupModifier::DrawUnselectedBorder(

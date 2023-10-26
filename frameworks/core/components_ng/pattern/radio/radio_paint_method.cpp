@@ -189,11 +189,9 @@ void RadioModifier::PaintRadio(
             // draw shadow
             canvas.AttachBrush(shadowBrush);
             canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_->Get() + shadowWidth_);
-            canvas.DetachBrush();
             // draw inner circle
             canvas.AttachBrush(brush);
             canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_->Get());
-            canvas.DetachBrush();
         }
         // draw ring circle
         if (!enabled_->Get()) {
@@ -205,7 +203,6 @@ void RadioModifier::PaintRadio(
         if (!NearZero(ringPointScale_->Get())) {
             canvas.AttachBrush(brush);
             canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * ringPointScale_->Get());
-            canvas.DetachBrush();
         }
         // draw out circular ring
         if (!enabled_->Get()) {
@@ -221,7 +218,6 @@ void RadioModifier::PaintRadio(
         outPen.SetWidth(outWidth);
         canvas.AttachPen(outPen);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - outWidth / CALC_RADIUS);
-        canvas.DetachPen();
     } else if (uiStatus_->Get() == static_cast<int32_t>(UIStatus::UNSELECTED)) {
         auto alphaCalculate = static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA;
         if (!enabled_->Get()) {
@@ -233,11 +229,9 @@ void RadioModifier::PaintRadio(
         }
         canvas.AttachBrush(brush);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_);
-        canvas.DetachBrush();
         // draw border with unselected color
         canvas.AttachPen(pen);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_ / CALC_RADIUS);
-        canvas.DetachPen();
     }
 }
 
@@ -252,7 +246,6 @@ void RadioModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& conten
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius);
-    canvas.DetachBrush();
 }
 
 } // namespace OHOS::Ace::NG
