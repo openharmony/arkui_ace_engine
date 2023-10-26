@@ -50,6 +50,9 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     } else {
         CreateParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition());
     }
+
+    autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
+
     if (textContent_.empty()) {
         // Used for empty text.
         preferredHeight_ = pattern->PreferredLineHeight(true);

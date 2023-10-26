@@ -165,6 +165,11 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(
     paragraph_->Layout(contentConstraint.maxSize.Width());
 
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper);
+
+    if (autoWidth_) {
+        contentWidth = std::min(contentWidth, paragraph_->GetLongestLine());
+    }
+
     auto counterNodeHeight = CounterNodeMeasure(contentWidth, layoutWrapper);
 
     auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
