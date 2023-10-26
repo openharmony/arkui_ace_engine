@@ -1415,6 +1415,9 @@ void TextFieldPattern::OnCursorTwinkling()
     cursorTwinklingTask_.Cancel();
     cursorVisible_ = !cursorVisible_;
     auto shouldMeasure = !IsTextArea() && IsInPasswordMode() && GetTextObscured() && obscureTickCountDown_ == 1;
+    if (IsInPasswordMode() && GetTextObscured() && obscureTickCountDown_ > 0) {
+        --obscureTickCountDown_;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (shouldMeasure) {
@@ -1509,9 +1512,7 @@ void TextFieldPattern::OnModifyDone()
     FilterInitializeText();
     InitSelectOverlay();
     InitDisableColor();
-    if (responseArea_) {
-        responseArea_->InitResponseArea(WeakClaim(this));
-    }
+    ProcessResponseArea();
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
         InitDragDropEvent();
@@ -1962,10 +1963,6 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CloseSelectOverlay();
     ResetSelectOverlayClient();
-    if (responseArea_) {
-        responseArea_->DestoryArea();
-        responseArea_.Reset();
-    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
@@ -3882,17 +3879,6 @@ double TextFieldPattern::GetScrollBarWidth()
     return scrollBarWidth;
 }
 
-void TextFieldPattern::SetUnitNode(const RefPtr<NG::UINode>& unitNode)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(unitNode);
-    if (!host->GetChildren().empty()) {
-        host->Clean();
-    }
-    unitNode->MountToParent(host);
-}
-
 void TextFieldPattern::AddCounterNode()
 {
     auto host = GetHost();
@@ -4822,4 +4808,45 @@ void TextFieldPattern::CloseHandleAndSelect()
     CloseSelectOverlay(true);
     showSelect_ = false;
 }
+
+bool TextFieldPattern::IsShowUnit() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetShowUnderlineValue(false) &&
+           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
+}
+
+bool TextFieldPattern::IsShowPasswordIcon() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetShowPasswordIconValue(true) &&
+           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+}
+
+void TextFieldPattern::ProcessResponseArea()
+{
+    if (IsShowPasswordIcon()) {
+        auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+        if (passwordArea) {
+            passwordArea->Refresh();
+            return;
+        }
+        responseArea_ = AceType::MakeRefPtr<PasswordResponseArea>(WeakClaim(this), GetTextObscured());
+        responseArea_->InitResponseArea();
+        return;
+    }
+
+    if (IsShowUnit()) {
+        responseArea_ = AceType::MakeRefPtr<UnitResponseArea>(WeakClaim(this), unitNode_);
+        responseArea_->InitResponseArea();
+        return;
+    }
+
+    if (responseArea_) {
+        responseArea_->ClearArea();
+    }
+}
+
 } // namespace OHOS::Ace::NG
