@@ -20,7 +20,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr double FRICTION_VELOCITY_THRESHOLD = 100.0;
 constexpr int32_t BAR_DISAPPEAR_DELAY_DURATION = 2000; // 2000ms
 constexpr int32_t BAR_DISAPPEAR_DURATION = 400;        // 400ms
 } // namespace
@@ -336,9 +335,9 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     }
     frictionPosition_ = 0.0;
     if (frictionMotion_) {
-        frictionMotion_->Reset(friction_, 0, velocity, FRICTION_VELOCITY_THRESHOLD);
+        frictionMotion_->Reset(friction_, 0, velocity);
     } else {
-        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity, FRICTION_VELOCITY_THRESHOLD);
+        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity);
         frictionMotion_->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
             auto scrollBar = weakBar.Upgrade();
             CHECK_NULL_VOID(scrollBar);
