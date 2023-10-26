@@ -96,6 +96,7 @@ enum class AceLogTag : uint8_t {
     ACE_PATTERNLOCK,
     ACE_PROGRESS,
     ACE_QRCODE,
+    ACE_ACCESSIBILITY,
     ACE_ROUTER,
     ACE_THEME
 };

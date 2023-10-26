@@ -224,7 +224,6 @@ int32_t ConvertToCardAccessibilityId(int32_t nodeId, int32_t cardId, int32_t roo
 void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, AccessibilityElementInfo& nodeInfo,
     const RefPtr<JsAccessibilityManager>& manager, int windowId)
 {
-    LOGD("nodeId:%{public}d", node->GetNodeId());
     int leftTopX = static_cast<int>(node->GetLeft()) + manager->GetWindowLeft(node->GetWindowId());
     int leftTopY = static_cast<int>(node->GetTop()) + manager->GetWindowTop(node->GetWindowId());
     int rightBottomX = leftTopX + static_cast<int>(node->GetWidth());
@@ -329,12 +328,6 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         nodeInfo.SetContent(node->GetText());
     }
 
-    if (!node->GetAccessibilityHint().empty()) {
-        if (node->GetAccessibilityLabel().empty()) {
-            LOGI("UpdateAccessibilityNodeInfo Label is null");
-        }
-    }
-
     auto supportAceActions = node->GetSupportAction();
     std::vector<ActionType> actions(supportAceActions.size());
 
@@ -364,7 +357,6 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         }
         actionForLog.append(std::to_string(static_cast<int32_t>(action)));
     }
-    LOGD("Support action is %{public}s", actionForLog.c_str());
 #endif
 }
 
@@ -455,7 +447,6 @@ bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<Access
     CHECK_NULL_RETURN(node, false);
     if (node->GetAccessibilityFocusedState()) {
         resultNode = node;
-        LOGI("FindFocus nodeId(%{public}d)", resultNode->GetNodeId());
         return true;
     }
     if (!node->GetChildList().empty()) {
@@ -464,7 +455,6 @@ bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<Access
                 return true;
             }
             if (FindAccessibilityFocus(item, resultNode)) {
-                LOGI("FindFocus nodeId:%{public}d", item->GetNodeId());
                 return true;
             }
         }
@@ -479,7 +469,6 @@ RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node)
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     if (frameNode) {
         if (frameNode->GetRenderContext()->GetAccessibilityFocus().value_or(false)) {
-            LOGI("FindFocus nodeId(%{public}d)", node->GetAccessibilityId());
             return frameNode;
         }
     }
@@ -503,7 +492,6 @@ bool FindInputFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityN
     }
     if (node->GetFocusedState()) {
         resultNode = node;
-        LOGI("FindFocus nodeId:%{public}d", resultNode->GetNodeId());
     }
     if (!node->GetChildList().empty()) {
         for (const auto& item : node->GetChildList()) {
@@ -524,7 +512,6 @@ RefPtr<NG::FrameNode> FindInputFocus(const RefPtr<NG::UINode>& node)
     }
 
     if (frameNode->GetFocusHub()->IsChild()) {
-        LOGI("FoundFocus nodeId(%{public}d)", node->GetAccessibilityId());
         if (frameNode->IsInternal()) {
             return frameNode->GetFocusParent();
         }
@@ -547,7 +534,6 @@ void FindText(
 {
     CHECK_NULL_VOID(node);
     if (node->GetText().find(text) != std::string::npos) {
-        LOGI("FindText find nodeId(%{public}d)", node->GetNodeId());
         nodeList.push_back(node);
     }
     if (!node->GetChildList().empty()) {
@@ -565,7 +551,6 @@ void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list
     if (frameNode && !frameNode->IsInternal()) {
         if (frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText().find(text) !=
             std::string::npos) {
-            LOGI("FindText find nodeId(%{public}d)", frameNode->GetAccessibilityId());
             nodeList.push_back(frameNode);
         }
     }
@@ -882,9 +867,6 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
         auto bottom = rect.Bottom() + commonProperty.windowTop;
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
-        LOGD("UpdateAccessibilityElementInfo nodeId:%{public}d, tag:%{public}s rect:left:%{public}f, top:%{public}f, "
-             "right:%{public}f, bottom:%{public}f",
-            node->GetAccessibilityId(), node->GetTag().c_str(), left, top, right, bottom);
     }
 
     nodeInfo.SetWindowId(commonProperty.windowId);
@@ -1055,7 +1037,6 @@ RefPtr<NG::FrameNode> FindNodeInAbsoluteDirection(
             nearestNode = nodeItem;
         }
     }
-    LOGI("found %{public}d", nearestNode ? nearestNode->GetAccessibilityId() : -1);
     return nearestNode;
 }
 
@@ -1112,7 +1093,6 @@ bool ActAccessibilityFocus(int32_t elementId, RefPtr<NG::FrameNode>& frameNode, 
         return true;
     }
     if (elementId == currentFocusNodeId) {
-        LOGW("This node is focused.");
         return false;
     }
     Framework::ClearAccessibilityFocus(context->GetRootElement(), currentFocusNodeId);
@@ -1348,13 +1328,12 @@ JsAccessibilityManager::~JsAccessibilityManager()
 void JsAccessibilityManager::ToastAccessibilityConfigObserver::OnConfigChanged(
     const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value)
 {
-    LOGD("accessibility content timeout changed:%{public}u", value.contentTimeout);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "accessibility content timeout changed:%{public}u", value.contentTimeout);
     AceApplicationInfo::GetInstance().SetBarrierfreeDuration((int32_t)value.contentTimeout);
 }
 
 bool JsAccessibilityManager::SubscribeToastObserver()
 {
-    LOGD("SubscribeToastObserver");
     if (!toastObserver_) {
         toastObserver_ = std::make_shared<ToastAccessibilityConfigObserver>();
     }
@@ -1362,7 +1341,6 @@ bool JsAccessibilityManager::SubscribeToastObserver()
     auto& config = OHOS::AccessibilityConfig::AccessibilityConfig::GetInstance();
     bool isSuccess = config.InitializeContext();
     if (!isSuccess) {
-        LOGE("AccessibilityConfig InitializeContext failed");
         return false;
     }
     config.SubscribeConfigObserver(CONFIG_CONTENT_TIMEOUT, toastObserver_);
@@ -1371,12 +1349,10 @@ bool JsAccessibilityManager::SubscribeToastObserver()
 
 bool JsAccessibilityManager::UnsubscribeToastObserver()
 {
-    LOGD("UnsubscribeToastObserver");
     CHECK_NULL_RETURN(toastObserver_, false);
     auto& config = OHOS::AccessibilityConfig::AccessibilityConfig::GetInstance();
     bool isSuccess = config.InitializeContext();
     if (!isSuccess) {
-        LOGE("AccessibilityConfig InitializeContext failed");
         return false;
     }
     config.UnsubscribeConfigObserver(CONFIG_CONTENT_TIMEOUT, toastObserver_);
@@ -1394,7 +1370,7 @@ bool JsAccessibilityManager::SubscribeStateObserver(int eventType)
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
     Accessibility::RetError ret = instance->SubscribeStateObserver(stateObserver_, eventType);
-    LOGD("SubscribeStateObserver:%{public}d", ret);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, " the result of SubscribeStateObserver:%{public}d", ret);
     return ret == RET_OK;
 }
 
@@ -1404,13 +1380,12 @@ bool JsAccessibilityManager::UnsubscribeStateObserver(int eventType)
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
     Accessibility::RetError ret = instance->UnsubscribeStateObserver(stateObserver_, eventType);
-    LOGD("UnsubscribeStateObserver:%{public}d", ret);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "the result of UnsubscribeStateObserver:%{public}d", ret);
     return ret == RET_OK;
 }
 
 void JsAccessibilityManager::InitializeCallback()
 {
-    LOGD("InitializeCallback");
     if (IsRegister()) {
         return;
     }
@@ -1450,8 +1425,6 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     if (!isEnabled) {
         return false;
     }
-
-    LOGD("type:%{public}zu nodeId:%{public}d", accessibilityEvent.type, accessibilityEvent.nodeId);
 
     Accessibility::EventType type = Accessibility::EventType::TYPE_VIEW_INVALID;
     if (accessibilityEvent.type != AccessibilityEventType::UNKNOWN) {
@@ -1845,7 +1818,6 @@ void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID)
 
 void JsAccessibilityManager::SetCardViewParams(const std::string& key, bool focus)
 {
-    LOGD("SetCardViewParams key=%{public}s  focus=%{public}d", key.c_str(), focus);
     callbackKey_ = key;
     if (!callbackKey_.empty()) {
         InitializeCallback();
@@ -1926,7 +1898,8 @@ RefPtr<PipelineBase> JsAccessibilityManager::GetPipelineByWindowId(const int32_t
 void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessibilityId(const int32_t elementId,
     const int32_t requestId, AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
-    LOGD("elementId(%{public}d) requestId(%{public}d) mode(%{public}d)", elementId, requestId, mode);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId(%{public}d) requestId(%{public}d) mode(%{public}d)", elementId,
+        requestId, mode);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -1965,7 +1938,6 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int32_t el
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(nodeId);
     if (!node) {
-        LOGW("AccessibilityNodeInfo can't attach component by Id = %{public}d, window:%{public}d", nodeId, windowId_);
         SetSearchElementInfoByAccessibilityIdResult(callback, infos, requestId);
         return;
     }
@@ -1977,7 +1949,6 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int32_t el
     UpdateCacheInfo(infos, mode, node, jsAccessibilityManager, jsAccessibilityManager->windowId_);
 
     SetSearchElementInfoByAccessibilityIdResult(callback, infos, requestId);
-    LOGD("requestId(%{public}d)", requestId);
 }
 
 void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(
@@ -2057,9 +2028,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const
 void JsAccessibilityManager::JsInteractionOperation::SearchElementInfosByText(const int32_t elementId,
     const std::string& text, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
-    LOGI("elementId(%{public}d) text(%{public}s)", elementId, text.c_str());
     if (text.empty()) {
-        LOGW("Text is null");
         return;
     }
     auto jsAccessibilityManager = GetHandler().Upgrade();
@@ -2081,7 +2050,6 @@ void JsAccessibilityManager::SearchElementInfosByText(const int32_t elementId, c
     const int32_t requestId, AccessibilityElementOperatorCallback& callback, const int32_t windowId)
 {
     if (text.empty()) {
-        LOGW("Text is null");
         return;
     }
 
@@ -2110,21 +2078,19 @@ void JsAccessibilityManager::SearchElementInfosByText(const int32_t elementId, c
     FindText(node, text, nodeList);
     if (!nodeList.empty()) {
         for (const auto& node : nodeList) {
-            LOGI(" FindText end nodeId:%{public}d", node->GetNodeId());
             AccessibilityElementInfo nodeInfo;
             UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_);
             infos.emplace_back(nodeInfo);
         }
     }
 
-    LOGI("SetSearchElementInfoByTextResult infos.size(%{public}zu)", infos.size());
     SetSearchElementInfoByTextResult(callback, infos, requestId);
 }
 
 void JsAccessibilityManager::JsInteractionOperation::FindFocusedElementInfo(const int32_t elementId,
     const int32_t focusType, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
-    LOGI("elementId(%{public}d) focusType(%{public}d)", elementId, focusType);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId(%{public}d) focusType(%{public}d)", elementId, focusType);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -2181,9 +2147,7 @@ void JsAccessibilityManager::FindFocusedElementInfo(const int32_t elementId, con
         status = FindInputFocus(node, resultNode);
     }
 
-    LOGI("FindFocus status(%{public}d)", status);
     if ((status) && (resultNode != nullptr)) {
-        LOGI("FindFocus nodeId:%{public}d", resultNode->GetNodeId());
         UpdateAccessibilityNodeInfo(resultNode, nodeInfo, Claim(this), windowId_);
     }
 
@@ -2280,7 +2244,8 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int32_t
     const std::map<std::string, std::string>& actionArguments, const int32_t requestId,
     AccessibilityElementOperatorCallback& callback)
 {
-    LOGI("id:%{public}d, action:%{public}d, request:%{public}d.", elementId, action, requestId);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "id:%{public}d, action:%{public}d, request:%{public}d.", elementId, action,
+        requestId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -2486,7 +2451,6 @@ void JsAccessibilityManager::ExecuteAction(const int32_t elementId, const Action
 {
     auto action = param.action;
     auto actionArguments = param.actionArguments;
-    LOGI("ExecuteAction elementId:%{public}d action:%{public}d", elementId, action);
 
     bool actionResult = false;
     auto context = GetPipelineByWindowId(windowId);
@@ -2500,7 +2464,6 @@ void JsAccessibilityManager::ExecuteAction(const int32_t elementId, const Action
     } else {
         auto node = GetAccessibilityNodeFromPage(elementId);
         if (!node) {
-            LOGW("AccessibilityNodeInfo can't attach component by Id = %{public}d", elementId);
             SetExecuteActionResult(callback, false, requestId);
             return;
         }
@@ -2508,7 +2471,6 @@ void JsAccessibilityManager::ExecuteAction(const int32_t elementId, const Action
         actionResult =
             AccessibilityActionEvent(action, actionArguments, node, AceType::DynamicCast<PipelineContext>(context));
     }
-    LOGD("SetExecuteActionResult actionResult= %{public}d", actionResult);
     SetExecuteActionResult(callback, actionResult, requestId);
     if (actionResult && AceType::InstanceOf<PipelineContext>(context)) {
         SendActionEvent(action, elementId);
@@ -2517,7 +2479,6 @@ void JsAccessibilityManager::ExecuteAction(const int32_t elementId, const Action
 
 void JsAccessibilityManager::JsInteractionOperation::ClearFocus()
 {
-    LOGI("ClearFocus");
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -2546,7 +2507,6 @@ void JsAccessibilityManager::Register(bool state)
 
 int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
 {
-    LOGI("RegisterInteractionOperation windowId:%{public}d", windowId);
     if (IsRegister()) {
         return 0;
     }
@@ -2564,7 +2524,6 @@ int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
         interactionOperation->SetHandler(WeakClaim(this));
         retReg = instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
     }
-    LOGD("RegisterInteractionOperation end windowId:%{public}d, ret:%{public}d", windowId, retReg);
     Register(retReg == RET_OK);
 
     return retReg;
@@ -2580,10 +2539,6 @@ void JsAccessibilityManager::RegisterSubWindowInteractionOperation(int windowId)
     CHECK_NULL_VOID(instance);
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
-    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation);
-    if (!retReg) {
-        LOGE("RegisterInteractionOperation failed, windowId:%{public}d, ret:%{public}d", windowId, retReg);
-    }
 }
 
 void JsAccessibilityManager::DeregisterInteractionOperation()
@@ -2597,7 +2552,6 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     CHECK_NULL_VOID(instance);
     Register(false);
     currentFocusNodeId_ = -1;
-    LOGI("DeregisterInteractionOperation windowId:%{public}d", windowId);
     instance->DeregisterElementOperator(windowId);
     RefPtr<PipelineBase> context;
     for (auto subContext : GetSubPipelineContexts()) {
@@ -2609,7 +2563,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
 
 void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const bool state)
 {
-    LOGI("accessibility state changed:%{public}d", state);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "accessibility state changed:%{public}d", state);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -2629,7 +2583,8 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
 void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearch(
     int32_t elementId, const int32_t direction, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
-    LOGI("elementId:%{public}d,direction:%{public}d,requestId:%{public}d", elementId, direction, requestId);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId:%{public}d,direction:%{public}d,requestId:%{public}d", elementId,
+        direction, requestId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -2649,7 +2604,6 @@ void JsAccessibilityManager::FocusMoveSearch(const int32_t elementId, const int3
     AccessibilityElementInfo nodeInfo;
     auto context = GetPipelineByWindowId(windowId);
     if (!context) {
-        LOGI("FocusMoveSearch context is null");
         nodeInfo.SetValidElement(false);
         SetFocusMoveSearchResult(callback, nodeInfo, requestId);
         return;
@@ -2663,7 +2617,6 @@ void JsAccessibilityManager::FocusMoveSearch(const int32_t elementId, const int3
 
     auto node = GetAccessibilityNodeFromPage(elementId);
     if (!node) {
-        LOGW("AccessibilityNodeInfo can't attach component by Id = %{public}d", (NodeId)elementId);
         nodeInfo.SetValidElement(false);
         SetFocusMoveSearchResult(callback, nodeInfo, requestId);
         return;
@@ -2700,7 +2653,6 @@ void JsAccessibilityManager::FocusMoveSearch(const int32_t elementId, const int3
     }
 
     if (resultNode) {
-        LOGI("FocusMoveSearch end nodeId:%{public}d", resultNode->GetNodeId());
         auto jsAccessibilityManager = Claim(this);
         UpdateAccessibilityNodeInfo(resultNode, nodeInfo, jsAccessibilityManager, windowId_);
     }
@@ -2747,7 +2699,6 @@ RefPtr<AccessibilityNode> JsAccessibilityManager::FindNodeInRelativeDirection(
 RefPtr<AccessibilityNode> JsAccessibilityManager::FindNodeInAbsoluteDirection(
     const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node, const int direction)
 {
-    LOGI("FindNodeInAbsoluteDirection");
     auto tempBest = node->GetRect();
     auto nodeRect = node->GetRect();
 
@@ -2786,7 +2737,6 @@ RefPtr<AccessibilityNode> JsAccessibilityManager::FindNodeInAbsoluteDirection(
 RefPtr<AccessibilityNode> JsAccessibilityManager::GetNextFocusableNode(
     const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node)
 {
-    LOGI("GetNextFocusableNode");
     auto nodeItem = nodeList.begin();
     for (; nodeItem != nodeList.end(); nodeItem++) {
         if ((*nodeItem)->GetNodeId() == node->GetNodeId()) {
@@ -2807,7 +2757,6 @@ RefPtr<AccessibilityNode> JsAccessibilityManager::GetNextFocusableNode(
 RefPtr<AccessibilityNode> JsAccessibilityManager::GetPreviousFocusableNode(
     const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node)
 {
-    LOGI("GetPreviousFocusableNode");
     auto nodeItem = nodeList.rbegin();
     for (; nodeItem != nodeList.rend(); nodeItem++) {
         if ((*nodeItem)->GetNodeId() == node->GetNodeId()) {
@@ -2829,23 +2778,19 @@ bool JsAccessibilityManager::RequestAccessibilityFocus(const RefPtr<Accessibilit
 {
     auto requestNodeId = node->GetNodeId();
     if (currentFocusNodeId_ == requestNodeId) {
-        LOGW("This node is focused.");
         return false;
     }
 
     ClearCurrentFocus();
     currentFocusNodeId_ = requestNodeId;
     node->SetAccessibilityFocusedState(true);
-    LOGI("RequestAccessibilityFocus SetFocusedState true nodeId:%{public}d", node->GetNodeId());
     return node->ActionAccessibilityFocus(true);
 }
 
 bool JsAccessibilityManager::ClearAccessibilityFocus(const RefPtr<AccessibilityNode>& node)
 {
-    LOGI("ClearAccessibilityFocus");
     auto requestNodeId = node->GetNodeId();
     if (currentFocusNodeId_ != requestNodeId) {
-        LOGW("This node is not focused.");
         return false;
     }
 
@@ -2861,7 +2806,6 @@ bool JsAccessibilityManager::ClearCurrentFocus()
     currentFocusNodeId_ = -1;
     currentFocusNode->SetFocusedState(false);
     currentFocusNode->SetAccessibilityFocusedState(false);
-    LOGI("ClearCurrentFocus SetFocusedState false nodeId:%{public}d", currentFocusNode->GetNodeId());
     return currentFocusNode->ActionAccessibilityFocus(false);
 }
 
