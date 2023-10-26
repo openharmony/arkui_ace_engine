@@ -45,7 +45,7 @@ public:
     void SetCursorVisible(bool value);
     void SetContentSize(SizeF& value);
     void SetContentOffset(OffsetF& value);
-    void SetCursorOffset(OffsetF& value);
+    void SetCursorOffset(const OffsetF& value);
     void SetInputStyle(InputStyle& value);
     void SetFrameSize(const SizeF& value);
     void SetCurrentOffset(float value);
@@ -58,6 +58,11 @@ public:
     void SetFirstHandleOffset(const OffsetF& offset);
     void SetSecondHandleOffset(const OffsetF& offset);
     void SetShowSelect(bool value);
+
+    void SetTextRect(const RectF& textRect)
+    {
+        textRect_ = textRect;
+    }
 
 private:
     void PaintSelection(DrawingContext& context) const;
@@ -85,6 +90,7 @@ private:
     InputStyle inputStyle_ = InputStyle::DEFAULT;
     RefPtr<PropertySizeF> frameSize_;
     RefPtr<PropertyBool> changeSelectedRects_;
+    RectF textRect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

@@ -179,7 +179,7 @@ public:
     void MoveFirstHandleToContentRect(int32_t index);
     void MoveSecondHandleToContentRect(int32_t index);
     void MoveCaretToContentRect(int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM);
-    void MoveHandleToContentRect(RectF& handleRect);
+    void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f);
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;
