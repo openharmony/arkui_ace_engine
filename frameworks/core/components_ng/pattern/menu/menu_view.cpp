@@ -74,19 +74,6 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
         previewNode->AddChild(previewCustomNode);
         previewNode->MountToParent(wrapperNode);
         previewNode->MarkModifyDone();
-#ifdef ENABLE_DRAG_FRAMEWORK
-        auto eventHub = previewNode->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, std::make_pair(wrapperNode, menuNode));
-        auto gestureHub = eventHub->GetGestureEventHub();
-        CHECK_NULL_RETURN(gestureHub, std::make_pair(wrapperNode, menuNode));
-        gestureHub->SetPreviewMode(MenuPreviewMode::CUSTOM);
-        gestureHub->InitDragDropEvent();
-        auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
-            DragDropInfo info;
-            return info;
-        };
-        eventHub->SetOnDragStart(std::move(dragStart));
-#endif
     }
 
     return { wrapperNode, menuNode };
@@ -291,26 +278,10 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub, menuNode);
-    gestureHub->SetPreviewMode(MenuPreviewMode::IMAGE);
-    auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
-        DragDropInfo info;
-        return info;
-    };
-    gestureHub->InitDragDropEvent();
-    hub->SetOnDragStart(std::move(dragStart));
-    imageNode->SetDraggable(true);
 
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offsetX), Dimension(offsetY)));
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    ClickEffectInfo clickEffectInfo;
-    clickEffectInfo.level = ClickEffectLevel::LIGHT;
-    clickEffectInfo.scaleNumber = menuTheme->GetPreviewMenuScaleNumber();
-    imageContext->UpdateClickEffectLevel(clickEffectInfo);
     imageNode->MarkModifyDone();
     imageNode->MountToParent(menuNode);
     ShowPixelMapAnimation(imageNode);
