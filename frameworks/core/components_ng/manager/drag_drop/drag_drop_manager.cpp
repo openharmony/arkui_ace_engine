@@ -51,11 +51,6 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     SetIsDragged(true);
     isDragCancel_ = false;
 #if !defined(PREVIEW)
-    if (dragWindow_) {
-        LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
-        return nullptr;
-    }
-
     CreateDragWindow(info, pixelMap->GetWidth(), pixelMap->GetHeight());
     if (!dragWindow_) {
         return nullptr;
@@ -75,7 +70,6 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     isDragCancel_ = false;
 #if !defined(PREVIEW)
     if (dragWindow_) {
-        LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
         return nullptr;
     }
 
@@ -103,7 +97,6 @@ RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
 
 void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height)
 {
-    LOGI("CreateDragWindow");
 #if !defined(PREVIEW)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -113,8 +106,6 @@ void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width,
         static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), width, height);
     if (dragWindow_) {
         dragWindow_->SetOffset(rect.Left(), rect.Top());
-    } else {
-        LOGE("dragWindow create failed!");
     }
 #endif
 }
@@ -195,7 +186,6 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
         auto child = *iter;
         if (child == nullptr) {
-            LOGW("when findding target in child nodes, find child is nullptr");
             continue;
         }
         auto childFindResult = FindTargetInChildNodes(child, hitFrameNodes, findDrop);
@@ -213,9 +203,6 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             }
             if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasCustomerOnDrop()) {
                 return parentFrameNode;
-            }
-            if (SystemProperties::GetDebugEnabled()) {
-                LOGW("Iter is in hitFrameNodes, but findDrop not suit with bind function.");
             }
         }
     }
@@ -244,9 +231,6 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     }
 
     if (frameNodes.empty()) {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGW("FrameNodes which have onDragMove or onDrop set is empty, cannot find targetNode.");
-        }
         return nullptr;
     }
 
@@ -269,9 +253,6 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     }
 
     if (hitFrameNodes.empty()) {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGW("HitFrameNodes vector is empty, cannot find targetNode.");
-        }
         return nullptr;
     }
     auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -283,9 +264,6 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     auto result = FindTargetInChildNodes(rootNode, hitFrameNodes, findDrop);
     if (result) {
         return result;
-    }
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGW("Don't find targetNode by position in rootNode, return nullptr.");
     }
     return nullptr;
 }
@@ -319,31 +297,11 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     CHECK_NULL_VOID(frameNode);
     preTargetFrameNode_ = frameNode;
     draggedFrameNode_ = preTargetFrameNode_;
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager onDragStart. Dragged frameNode is %{public}s, depth is %{public}d.",
-            frameNode->GetTag().c_str(), frameNode->GetDepth());
-    }
 }
 
 void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode)
 {
     CHECK_NULL_VOID(dragFrameNode);
-    if (SystemProperties::GetDebugEnabled()) {
-        if (preTargetFrameNode_) {
-            LOGI("Position is %{public}f and %{public}f.",
-                static_cast<float>(point.GetX()), static_cast<float>(point.GetY()));
-            LOGI("PreTargetFrameNode is %{public}s, depth is %{public}d.",
-                preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth());
-            LOGI("New find targetNode is %{public}s, depth is %{public}d.",
-                dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth());
-        } else {
-            LOGI("Position is %{public}f and %{public}f.",
-                static_cast<float>(point.GetX()), static_cast<float>(point.GetY()));
-            LOGI("PreTargetFrameNode is nullptr.");
-            LOGI("New find targetNode is %{public}s, depth is %{public}d.",
-                dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth());
-        }
-    }
 }
 
 void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)
@@ -352,7 +310,6 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
-            LOGD("The event does not need to be handled");
             SetIsWindowConsumed(false);
             return;
         }
@@ -416,14 +373,10 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
-            LOGD("The event does not need to be handled");
             return;
         }
     }
     if (isDragCancel_) {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGI("DragDropManager is dragCancel, finish drag.");
-        }
         InteractionManager::GetInstance()->SetDragWindowVisible(false);
         InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_CANCEL, false);
         summaryMap_.clear();
@@ -434,21 +387,8 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON, true);
-    if (SystemProperties::GetDebugEnabled()) {
-        if (dragFrameNode) {
-            LOGI("Position is %{public}f and %{public}f. TargetNode is %{public}s.",
-                static_cast<float>(point.GetX()), static_cast<float>(point.GetY()),
-                dragFrameNode->GetTag().c_str());
-        } else {
-            LOGI("Position is %{public}f and %{public}f. TargetNode is nullptr.",
-                static_cast<float>(point.GetX()), static_cast<float>(point.GetY()));
-        }
-    }
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (!dragFrameNode) {
-        if (SystemProperties::GetDebugEnabled()) {
-            LOGW("DragDropManager onDragEnd, not find drop target, stop drag.");
-        }
         InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, isMouseDragged_);
         summaryMap_.clear();
         return;
@@ -465,10 +405,6 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     ClearVelocityInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     SetIsDragged(false);
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager finish drop, start do drop animation. UseCustomAnimation is %{public}d.",
-            event->IsUseCustomAnimation());
-    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dragResult = TranslateDragResult(event->GetResult());
@@ -488,18 +424,8 @@ void DragDropManager::RequireSummary()
 {
     std::string udKey;
     InteractionManager::GetInstance()->GetUdKey(udKey);
-    if (SystemProperties::GetDebugEnabled()) {
-        if (udKey.empty()) {
-            LOGW("Requiry summary get empty udKey.");
-        } else {
-            LOGI("Requiry summary get udKey %{public}s", udKey.c_str());
-        }
-    }
     std::map<std::string, int64_t> summary;
     int32_t ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
-    if (ret != 0) {
-        LOGW("OnDragStart: UDMF GetSummary failed: %{public}d", ret);
-    }
     previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_ = summary;
 }
@@ -524,8 +450,6 @@ Rect DragDropManager::GetDragWindowRect(const Point& point)
         int retOffset = InteractionManager::GetInstance()->GetShadowOffset(x, y, width, height);
         if (retOffset == 0) {
             previewRect_ = Rect(x, y, width, height);
-        } else if (SystemProperties::GetDebugEnabled()) {
-            LOGW("InteractionManager GetShadowOffset is failed:%{public}d", retOffset);
         }
     }
     return previewRect_ + Offset(point.GetX(), point.GetY());
@@ -549,7 +473,6 @@ void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::str
             textFieldPattern->InsertValue(extraInfo);
         }
     }
-    LOGI("OnTextDragEnd");
     SetIsDragged(false);
     currentId_ = -1;
 }
@@ -868,10 +791,6 @@ void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo)
     }
 
     extraInfo = extraInfo_;
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager get extra info from clipBoard, extraInfo is %{public}s",
-            extraInfo_.c_str());
-    }
 }
 
 void DragDropManager::RestoreClipboardData()
@@ -915,7 +834,6 @@ void DragDropManager::DestroyDragWindow()
     if (dragWindowRootNode_) {
         dragWindowRootNode_ = nullptr;
     }
-    LOGI("DestroyDragWindow");
     SetIsDragged(false);
     SetIsDragWindowShow(false);
     previewRect_ = Rect(-1, -1, -1, -1);
@@ -945,7 +863,6 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     std::string udKey;
     InteractionManager::GetInstance()->GetUdKey(udKey);
     if (udKey.empty()) {
-        LOGW("InteractionManager GetUdkey is null");
         event->SetIsGetDataSuccess(false);
     } else {
         event->SetUdKey(udKey);
@@ -953,7 +870,6 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
     int ret = UdmfClient::GetInstance()->GetData(udData, udKey);
     if (ret != 0) {
-        LOGW("UDMF GetData failed: %{public}d", ret);
         event->SetIsGetDataSuccess(false);
     } else {
         event->SetIsGetDataSuccess(true);
@@ -972,7 +888,6 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     } else {
         previewRect_ = Rect(x, y, width, height);
         event->SetPreviewRect(previewRect_);
-        LOGW("InteractionManager GetShadowOffset is failed:%{public}d", retOffset);
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 }
