@@ -429,20 +429,26 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
      * @tc.expected: RequestDefaultFocus returns true while IsFocusableWholePath return true
                     RequestDefaultFocus returns false while IsFocusableWholePath return false.
      */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    focusHub->focusable_ = true;
     focusHub->SetIsDefaultHasFocused(false);
-    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     auto frameNodeId_2 = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_2, nullptr);
-    frameNode_2->parent_ = nullptr;
+    frameNode_1->children_.push_back(frameNode_2);
+    frameNode_2->parent_ = frameNode_1;
     auto newFocusHub = frameNode_2->eventHub_->GetOrCreateFocusHub();
-    focusHub->focusCallbackEvents_->SetDefaultFocusNode(newFocusHub);
+    newFocusHub->SetIsDefaultFocus(true);
     newFocusHub->SetFocusType(FocusType::NODE);
     frameNode_2->eventHub_->enabled_ = true;
     newFocusHub->focusable_ = true;
     newFocusHub->parentFocusable_ = true;
-    EXPECT_TRUE(context_->RequestDefaultFocus(newFocusHub));
-    newFocusHub->SetFocusType(FocusType::DISABLE);
-    EXPECT_FALSE(context_->RequestDefaultFocus(newFocusHub));
+    EXPECT_TRUE(context_->RequestDefaultFocus(focusHub));
+    focusHub->SetIsDefaultHasFocused(false);
+    focusHub->currentFocus_ = false;
+    focusHub->focusable_ = false;
+    newFocusHub->currentFocus_ = false;
+    newFocusHub->focusable_ = false;
+    EXPECT_FALSE(context_->RequestDefaultFocus(focusHub));
 
     /**
      * @tc.steps7: Create a new frameNode and call AddDirtyDefaultFocus
