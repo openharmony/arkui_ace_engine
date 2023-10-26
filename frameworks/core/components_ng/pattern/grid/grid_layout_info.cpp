@@ -47,6 +47,7 @@ void GridLayoutInfo::ClearDragState()
 {
     positionItemIndexMap_.clear();
     currentMovingItemPosition_ = -1;
+    currentRect_.Reset();
 }
 
 void GridLayoutInfo::MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex)
