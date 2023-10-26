@@ -136,13 +136,12 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             singleHandle.Width(), singleHandle.Height());
     }
 
-    float menuSpacing = 0.0f;
     if (info_->isSingleHandle) {
-        menuSpacing = static_cast<float>(menuSpacingBetweenText);
+        auto menuSpacing = static_cast<float>(menuSpacingBetweenText);
         menuPosition = OffsetF((singleHandle.Left() + singleHandle.Right() - menuWidth) / 2.0f,
             static_cast<float>(singleHandle.Top() - menuSpacing - menuHeight));
     } else {
-        menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
+        auto menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
         menuPosition = OffsetF((firstHandleRect.Left() + secondHandleRect.Left() - menuWidth) / 2.0f,
             static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
 
@@ -177,7 +176,6 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         } else {
             menuPosition.SetY(
                 static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
-            menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
         }
     }
     if (LessNotEqual(menuPosition.GetY(), viewPort.GetY() - menuSpacingBetweenText - menuHeight) ||
@@ -192,7 +190,6 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         menuPosition.SetY(viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText);
     }
     LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
-    ConstraintMenuWithAnchorNode(menuPosition, { menuSpacing, menuHeight, frameNode, viewPort });
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     if (isExtension) {
         return defaultMenuEndOffset_ - OffsetF(width, 0);
@@ -223,30 +220,6 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper
 bool SelectOverlayLayoutAlgorithm::IsTextAreaSelectAll()
 {
     return info_->menuInfo.menuOffset.has_value() && (!info_->firstHandle.isShow || !info_->secondHandle.isShow);
-}
-
-void SelectOverlayLayoutAlgorithm::ConstraintMenuWithAnchorNode(OffsetF& menuOffset, const ConstraintMenuParams& params)
-{
-    CHECK_NULL_VOID(params.anchorNode);
-    auto context = params.anchorNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto parentGlobalOffset = params.anchorNode->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    auto geometryNode = params.anchorNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto contentRect = geometryNode->GetContentRect();
-    auto anchorGlobalOffset = geometryNode->GetContentOffset() + parentGlobalOffset;
-    contentRect.SetOffset(anchorGlobalOffset);
-    auto interRect = params.viewPort.IntersectRectT(contentRect);
-    auto menuBottomDistance = interRect.GetY() - (menuOffset.GetY() + params.minSpacing + params.menuHeight);
-    if (menuBottomDistance > 0) {
-        menuOffset.AddY(menuBottomDistance);
-        return;
-    }
-    auto menuTopDistance =
-        anchorGlobalOffset.GetY() + geometryNode->GetContentSize().Height() - (menuOffset.GetY() - params.minSpacing);
-    if (menuTopDistance < 0) {
-        menuOffset.AddY(menuTopDistance);
-    }
 }
 
 } // namespace OHOS::Ace::NG

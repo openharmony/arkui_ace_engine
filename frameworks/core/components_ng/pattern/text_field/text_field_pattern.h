@@ -934,7 +934,6 @@ public:
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     void OnHandleClosed(bool closedByGlobalEvent) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
-    bool CheckSelectionRectVisible() override;
     bool OnPreShowSelectOverlay(
         SelectOverlayInfo& overlayInfo, const ClientOverlayInfo& clientInfo, bool isSelectOverlayOn) override;
     void OnObscuredChanged(bool isObscured);
@@ -1004,7 +1003,10 @@ private:
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
     void HandleMouseEvent(MouseInfo& info);
+    void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void HandleRightMouseEvent(MouseInfo& info);
+    void HandleRightMousePressEvent(MouseInfo& info);
+    void HandleRightMouseReleaseEvent(MouseInfo& info);
     void HandleLeftMouseEvent(MouseInfo& info);
     void HandleLeftMousePressEvent(MouseInfo& info);
     void HandleLeftMouseMoveEvent(MouseInfo& info);
