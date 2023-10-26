@@ -309,6 +309,7 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
         LOGD("passenger holder is null, maybe not need to place passenger back");
     } else {
         // restore the position and zIndex of passenger frameNode
+        passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
         if (effect->GetPassengerInitPos().has_value()) {
             passenger->GetRenderContext()->UpdatePosition(effect->GetPassengerInitPos().value());
         } else {
@@ -326,7 +327,6 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
             passenger->MarkDirtyNode();
         }
         // restore initialFrameOffset for static type sharedTransition, because it may not layout again
-        passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
         ReplaceFrameNode(passengerHolder, passenger);
         passenger->GetEventHub<EventHub>()->RestoreEnabled();
         auto isPassengerCurrentFocused = effect->GetPassengerCurrentFocused();
