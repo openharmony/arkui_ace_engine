@@ -85,7 +85,30 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     }
 }
 
-void MountTitle(const RefPtr<TitleBarNode>& hostNode)
+void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto subtitleNode = AceType::DynamicCast<FrameNode>(hostNode->GetSubtitle());
+    CHECK_NULL_VOID(subtitleNode);
+    auto titleLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(titleLayoutProperty);
+
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
+        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    }
+
+    subtitleNode->MarkModifyDone();
+}
+
+} // namespace
+
+void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 {
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
@@ -106,7 +129,8 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(theme);
     auto currentFontSize = titleLayoutProperty->GetFontSizeValue(Dimension(0));
     auto currentMaxLine = titleLayoutProperty->GetMaxLinesValue(0);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+    auto titleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    if (titleMode == NavigationTitleMode::MINI) {
         if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
             titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
@@ -116,44 +140,34 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
         }
         titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
         titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
-    } else {
+        UpdateSubTitleOpacity(1.0);
+    } else if (titleMode == NavigationTitleMode::FULL) {
         titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
         titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+        UpdateSubTitleOpacity(1.0);
+    } else {
+        if (fontSize_.has_value()) {
+            titleLayoutProperty->UpdateFontSize(Dimension(fontSize_.value(), DimensionUnit::PX));
+            titleLayoutProperty->UpdateAdaptMaxFontSize(Dimension(fontSize_.value(), DimensionUnit::PX));
+        } else {
+            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+        }
+        if (opacity_.has_value()) {
+            UpdateSubTitleOpacity(opacity_.value());
+        } else {
+            UpdateSubTitleOpacity(1.0);
+        }
     }
 
-    if (hostNode->GetSubtitle()) {
-        titleLayoutProperty->UpdateMaxLines(1);
-    } else {
-        titleLayoutProperty->UpdateMaxLines(TITLEBAR_MAX_LINES);
-    }
+    auto maxLines = hostNode->GetSubtitle() ? 1 : TITLEBAR_MAX_LINES;
+    titleLayoutProperty->UpdateMaxLines(maxLines);
     if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||
         currentMaxLine != titleLayoutProperty->GetMaxLinesValue(0)) {
         titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
     titleNode->MarkModifyDone();
 }
-
-void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
-{
-    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    auto subtitleNode = AceType::DynamicCast<FrameNode>(hostNode->GetSubtitle());
-    CHECK_NULL_VOID(subtitleNode);
-    auto titleLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(titleLayoutProperty);
-
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
-        titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
-        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
-    }
-
-    subtitleNode->MarkModifyDone();
-}
-
-} // namespace
 
 void TitleBarPattern::OnModifyDone()
 {
@@ -376,12 +390,12 @@ void TitleBarPattern::SetTitleStyleByOffset(float offset)
 
     // title font size
     auto mappedOffset = GetMappedOffset(offset);
-    auto tempFontSize = GetFontSize(mappedOffset);
-    UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::PX));
+    fontSize_ = GetFontSize(mappedOffset);
+    UpdateTitleFontSize(Dimension(fontSize_.value(), DimensionUnit::PX));
 
     // subTitle Opacity
-    auto tempOpacity = GetSubtitleOpacity();
-    UpdateSubTitleOpacity(tempOpacity);
+    opacity_ = GetSubtitleOpacity();
+    UpdateSubTitleOpacity(opacity_.value());
 }
 
 void TitleBarPattern::ProcessTitleDragEnd()
