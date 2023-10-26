@@ -26,6 +26,7 @@
 #define private public
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "core/animation/animator.h"
 #include "core/components/common/properties/color.h"
@@ -104,7 +105,9 @@ public:
 
 void ScrollTestNg::SetUpTestSuite()
 {
+    MockContainer::SetUp();
     MockPipelineBase::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto scrollBarTheme = AceType::MakeRefPtr<ScrollBarTheme>();
@@ -115,6 +118,7 @@ void ScrollTestNg::SetUpTestSuite()
 void ScrollTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+    MockContainer::TearDown();
 }
 
 void ScrollTestNg::SetUp() {}
