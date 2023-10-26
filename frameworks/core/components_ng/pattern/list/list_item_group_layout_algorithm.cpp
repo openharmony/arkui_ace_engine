@@ -508,15 +508,15 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
         auto offset = paddingOffset;
         int32_t laneIndex = pos.first % lanes_;
         float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
-        float laneCrossOffset = CalculateLaneCrossOffset(crossSize / lanes_, childCrossSize);
+        float laneCrossOffset = CalculateLaneCrossOffset((crossSize + GetLaneGutter()) / lanes_, childCrossSize);
         if (axis_ == Axis::VERTICAL) {
             offset =
                 offset + OffsetF(0, pos.second.first) + OffsetF(laneCrossOffset, 0) +
-                OffsetF(((crossSize + laneGutter_) / lanes_ - laneGutter_) * laneIndex + laneGutter_ * laneIndex, 0);
+                OffsetF(((crossSize + laneGutter_) / lanes_) * laneIndex, 0);
         } else {
             offset =
                 offset + OffsetF(pos.second.first, 0) + OffsetF(0, laneCrossOffset) +
-                OffsetF(0, ((crossSize + laneGutter_) / lanes_ - laneGutter_) * laneIndex + laneGutter_ * laneIndex);
+                OffsetF(0, ((crossSize + laneGutter_) / lanes_) * laneIndex);
         }
         SetListItemIndex(layoutWrapper, wrapper, pos.first);
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
@@ -587,7 +587,7 @@ void ListItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrap
 
 float ListItemGroupLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
 {
-    float delta = crossSize - childCrossSize;
+    float delta = crossSize - GetLaneGutter() - childCrossSize;
     if (LessOrEqual(delta, 0.0f)) {
         return 0.0f;
     }
