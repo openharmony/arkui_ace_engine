@@ -104,12 +104,10 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
 #ifndef USE_ROSEN_DRAWING
     if (!skCanvas_) {
-        LOGW("skCanvas_ is null");
         return;
     }
 #else
     if (!rsCanvas_) {
-        LOGW("rsCanvas_ is null");
         return;
     }
 #endif
@@ -135,7 +133,6 @@ void CanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
 {
     imageObj_ = imageObj;
     if (!imageObj_->IsSvg()) {
-        LOGE("image is not svg");
         return;
     }
     skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
@@ -335,8 +332,6 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
         skCanvas_->restore();
     }
-#else
-    LOGE("Drawing is not supported");
 #endif
 }
 
@@ -377,8 +372,6 @@ void CanvasPaintMethod::DrawPixelMapWithoutGlobalState(
         default:
             break;
     }
-#else
-    LOGE("Drawing is not supported");
 #endif
 }
 
@@ -438,10 +431,8 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
     bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
     if (!res || !currentBitmap.IsValid()) {
-        LOGE("Bitmap is empty");
         return nullptr;
     }
-    LOGE("Drawing is not supported");
 
     int32_t size = dirtyWidth * dirtyHeight;
     RSCanvas tempCanvas;
@@ -527,10 +518,8 @@ void CanvasPaintMethod::GetImageData(
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
     bool res = rosenRenderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
     if (!res || !currentBitmap.IsValid()) {
-        LOGE("Bitmap is empty");
         return;
     }
-    LOGE("Drawing is not supported");
 
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);
@@ -569,8 +558,6 @@ void CanvasPaintMethod::TransferFromImageBitmap(
         Ace::CanvasImage canvasImage;
         canvasImage.flag = 0;
         DrawPixelMapWithoutGlobalState(pixelMap, canvasImage);
-    } else {
-        LOGE("pixelMap create fail");
     }
 #else
     std::unique_ptr<Ace::ImageData> imageData =
@@ -780,7 +767,6 @@ void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize,
             }
             rsCanvas_->Scale(scale.value(), 1.0);
         }
-        LOGE("Drawing is not supported");
         rsCanvas_->Restore();
         return;
     }
@@ -800,10 +786,7 @@ void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize,
 #else
         rsCanvas_->Save();
         rsCanvas_->Scale(scale.value(), 1.0);
-        LOGE("Drawing is not supported");
         rsCanvas_->Restore();
-    } else {
-        LOGE("Drawing is not supported");
     }
 #endif
 }
@@ -995,8 +978,6 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         txtStyle.has_foreground = true;
 #endif
     }
-#else
-    LOGE("Drawing is not supported");
 #endif
 }
 
@@ -1076,10 +1057,8 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
     bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
     if (!res || !currentBitmap.IsValid()) {
-        LOGE("Bitmap is empty");
         return UNSUPPORTED;
     }
-    LOGE("Drawing is not supported");
     bool success = false;
     auto& skBitmap = currentBitmap.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
     success =
@@ -1106,7 +1085,6 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     CHECK_NULL_RETURN(result, UNSUPPORTED);
     size_t len = SkBase64::Encode(result->data(), result->size(), nullptr);
     if (len > MAX_LENGTH) {
-        LOGE("ToDataURL failed, image too large.");
         return UNSUPPORTED;
     }
     SkString info(len);
@@ -1124,7 +1102,6 @@ bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkB
     if (res) {
         return true;
     }
-    LOGD("GetBitmap failed.");
     if (!drawCmdList) {
         return false;
     }

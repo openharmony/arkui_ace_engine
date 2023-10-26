@@ -55,7 +55,6 @@ void JSCanvasGradient::addColorStop(const JSCallbackInfo& info)
         double offset = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], offset);
         if (offset < 0 || offset > 1) {
-            LOGE("offset not valid!");
             isColorStopValid_ = false;
             // if the offset is invalid, fill the shape with transparent
             gradient_->ClearColors();
@@ -71,7 +70,6 @@ void JSCanvasGradient::addColorStop(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsString(info[1], jsColor);
         Color colorFromString = Color::WHITE;
         if (!Color::ParseColorString(jsColor, colorFromString)) {
-            LOGE("color is invalid!");
             gradient_ ->ClearColors();
             color.SetColor(Color::TRANSPARENT);
             color.SetDimension(0.0);
