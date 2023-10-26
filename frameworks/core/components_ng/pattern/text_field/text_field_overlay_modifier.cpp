@@ -181,10 +181,13 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto caretRect = textFieldPattern->GetCaretRect();
     // Adjust the cursor to the viewable area.
-    auto textRectRightBoundary = textRect_.GetX() + textRect_.Width();
+    auto textRectRightBoundary = textFieldPattern->IsTextArea()
+                                     ? contentOffset_->Get().GetX() + contentSize_->Get().Width()
+                                     : textRect_.GetX() + textRect_.Width();
     if (GreatOrEqual(caretRect.GetX() + caretRect.Width(), textRectRightBoundary) &&
-        GreatOrEqual(std::ceil(textRect_.Width()), contentSize_->Get().Width()) &&
-        GreatNotEqual(contentSize_->Get().Width(), 0.0)) {
+        (textFieldPattern->IsTextArea() || GreatOrEqual(std::ceil(textRect_.Width()), contentSize_->Get().Width()) ||
+            textFieldPattern->GetTextAlign() == TextAlign::END) &&
+        GreatNotEqual(contentSize_->Get().Width(), 0.0) && !textFieldPattern->GetTextValue().empty()) {
         caretRect.SetLeft(textRectRightBoundary - caretRect.Width());
     }
 
