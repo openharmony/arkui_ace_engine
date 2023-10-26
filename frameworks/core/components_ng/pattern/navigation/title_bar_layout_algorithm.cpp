@@ -137,7 +137,7 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
         occupiedWidth += isCustomMenu ? 0.0f : (defaultPaddingStart_).ConvertToPx();
     }
-    return titleBarSize.Width() < occupiedWidth ? 0 : titleBarSize.Width() - occupiedWidth;
+    return titleBarSize.Width() - occupiedWidth;
 }
 
 void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
