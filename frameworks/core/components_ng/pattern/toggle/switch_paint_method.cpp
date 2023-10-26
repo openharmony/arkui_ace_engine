@@ -135,6 +135,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(roundRect);
+    canvas.DetachBrush();
 
     brush.SetColor(ToRSColor(animatePointColor_->Get()));
     brush.SetAntiAlias(true);
@@ -144,6 +145,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     point.SetX(xOffset + actualGap + pointRadius_ + pointOffset_->Get());
     point.SetY(yOffset + radius);
     canvas.DrawCircle(point, pointRadius_);
+    canvas.DetachBrush();
 }
 
 void SwitchModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& offset) const
@@ -158,6 +160,7 @@ void SwitchModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& off
         hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
+    canvas.DetachBrush();
 }
 
 float SwitchModifier::GetSwitchWidth(const SizeF& contentSize) const
