@@ -254,6 +254,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     }
 
     if (hitFrameNodes.empty()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Cannot find targetNodes.");
         return nullptr;
     }
     auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -460,6 +461,9 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         }
     }
     if (isDragCancel_) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager is dragCancel, finish drag. WindowId is %{public}d.", container->GetWindowId());
+        }
         InteractionInterface::GetInstance()->SetDragWindowVisible(false);
         DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId() };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
@@ -476,8 +480,22 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON, true);
+    if (SystemProperties::GetDebugEnabled()) {
+        if (dragFrameNode) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Position is %{public}f and %{public}f. TargetNode is %{public}s.",
+                static_cast<float>(point.GetX()), static_cast<float>(point.GetY()),
+                dragFrameNode->GetTag().c_str());
+        } else {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Position is %{public}f and %{public}f. TargetNode is nullptr.",
+                static_cast<float>(point.GetX()), static_cast<float>(point.GetY()));
+        }
+    }
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (!dragFrameNode) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d.",
+                container->GetWindowId());
+        }
         DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, container->GetWindowId() };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
         RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
@@ -500,6 +518,10 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     ClearVelocityInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     SetIsDragged(false);
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager finish drop, start do drop animation. UseCustomAnimation is %{public}d."
+            " WindowId is %{public}d.", event->IsUseCustomAnimation(), container->GetWindowId());
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dragResult = event->GetResult();
@@ -527,7 +549,10 @@ void DragDropManager::RequireSummary()
     std::string udKey;
     InteractionInterface::GetInstance()->GetUdKey(udKey);
     std::map<std::string, int64_t> summary;
-    UdmfClient::GetInstance()->GetSummary(udKey, summary);
+    int32_t ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+    if (ret != 0) {
+        LOGW("OnDragStart: UDMF GetSummary failed: %{public}d", ret);
+    }
     previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_ = summary;
 }
