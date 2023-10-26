@@ -19,8 +19,6 @@
 #include <string>
 #include <utility>
 
-#include "foundation/graphic/graphic_utils_lite/interfaces/kits/gfx_utils/graphic_types.h"
-
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
