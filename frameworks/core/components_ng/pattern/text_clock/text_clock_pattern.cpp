@@ -145,8 +145,6 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
             auto textClock = wp.Upgrade();
             if (textClock) {
                 textClock->UpdateTimeText();
-            } else {
-                LOGE("textClock is empty.");
             }
         });
     }
@@ -163,7 +161,6 @@ void TextClockPattern::UpdateTimeText()
 
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
-        LOGE("Get current format date time failed.");
         return;
     }
     textLayoutProperty->UpdateContent(currentTime); // update time text.
