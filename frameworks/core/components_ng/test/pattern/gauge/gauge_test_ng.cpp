@@ -1578,11 +1578,11 @@ HWTEST_F(GaugeTestNg, GetMaxValueColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: GaugePattern::OnImageLoadSuccess
+ * @tc.name: GaugePattern::OnImageLoadSuccess001
  * @tc.desc: Test the OnImageLoadSuccess
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeTestNg, OnImageLoadSuccess, TestSize.Level1)
+HWTEST_F(GaugeTestNg, OnImageLoadSuccess001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create GaugePattern.
@@ -1592,7 +1592,49 @@ HWTEST_F(GaugeTestNg, OnImageLoadSuccess, TestSize.Level1)
     pipeline->minPlatformVersion_ = 11;
     GaugeModelNG gauge;
     gauge.Create(VALUE, MIN, MAX);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto gaugePattern = frameNode->GetPattern<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set indicatorIconLoadingCtx_
+     * @tc.expected: Related function is called.
+     */
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(gaugePaintProperty, nullptr);
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(InternalResource::ResourceId::APP_BAR_BACK_SVG);
+    gaugePaintProperty->UpdateIndicatorIconSourceInfo(imageSourceInfo);
+    gaugePattern->InitIndicatorImage();
+    gaugePattern->indicatorIconLoadingCtx_->dstRect_.x_ = 50;
+    gaugePattern->indicatorIconLoadingCtx_->dstRect_.y_ = 100;
+
+    /**
+     * @tc.steps: step3. dstRect_ is RectF(50, 100).
+     * @tc.expected: Related function is called.
+     */
+    gaugePattern->OnImageLoadSuccess();
+    auto config = gaugePattern->indicatorIconCanvasImage_->GetPaintConfig();
+    EXPECT_EQ(config.dstRect_, RectF(50, 100, 0, 0));
+}
+
+/**
+ * @tc.name: GaugePattern::OnImageLoadSuccess002
+ * @tc.desc: Test the OnImageLoadSuccess
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, OnImageLoadSuccess002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create GaugePattern.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->minPlatformVersion_ = 11;
+    GaugeModelNG gauge;
+    gauge.Create(VALUE, MIN, MAX);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto gaugePattern = frameNode->GetPattern<GaugePattern>();
     ASSERT_NE(gaugePattern, nullptr);
@@ -1606,12 +1648,13 @@ HWTEST_F(GaugeTestNg, OnImageLoadSuccess, TestSize.Level1)
     gaugePattern->indicatorIconLoadingCtx_->dstRect_.y_ = 100;
 
     /**
-     * @tc.steps: step3. dstRect_ is RectF(50, 100).
+     * @tc.steps: step3. HasIndicatorIconSourceInfo is false.
      * @tc.expected: Related function is called.
      */
     gaugePattern->OnImageLoadSuccess();
-    auto config = gaugePattern->indicatorIconCanvasImage_->GetPaintConfig();
-    EXPECT_EQ(config.dstRect_, RectF(50, 100, 0, 0));
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(gaugePaintProperty, nullptr);
+    EXPECT_FALSE(gaugePaintProperty->HasIndicatorIconSourceInfo());
 }
 
 /**
