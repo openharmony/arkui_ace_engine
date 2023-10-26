@@ -52,6 +52,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateDefaultValueByVersion();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
+        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
         return;
     }
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -539,6 +540,7 @@ void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
+        LOGE("SideBarContainerLayoutAlgorithm::Layout, children is less than 3.");
         return;
     }
 
