@@ -2748,7 +2748,7 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
         if (auto frameNode = item.second.node) {
             auto context = frameNode->GetRenderContext();
             CHECK_NULL_VOID(context);
-            context->UpdateRenderGroup(itemRenderGroup);
+            context->UpdateSuggestedRenderGroup(itemRenderGroup);
         }
     }
     auto host = GetHost();
@@ -2760,7 +2760,7 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
         }
         auto context = frameNode->GetRenderContext();
         CHECK_NULL_VOID(context);
-        context->UpdateRenderGroup(itemRenderGroup);
+        context->UpdateSuggestedRenderGroup(itemRenderGroup);
     }
 }
 
