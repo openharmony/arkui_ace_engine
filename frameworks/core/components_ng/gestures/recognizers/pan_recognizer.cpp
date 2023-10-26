@@ -206,7 +206,13 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
-    UpdateTouchPointInVelocityTracker(event, true);
+    
+    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+        UpdateTouchPointInVelocityTracker(event, true);
+    } else if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
+        velocityTracker_.Reset();
+        UpdateTouchPointInVelocityTracker(event, true);
+    }
 
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
