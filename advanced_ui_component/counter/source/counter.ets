@@ -269,17 +269,17 @@ export struct CounterComponent {
     }
     if (this.numberStyleOptions.value !== undefined ) {
       this.value = this.numberStyleOptions.value;
+      this.onChange?.(this.value);
       this.inputValue = this.value.toString();
     }
-    if (this.numberStyleOptions.min !== undefined &&
-        this.numberStyleOptions.min < this.max &&
-        this.numberStyleOptions.min >= this.min) {
+    if (this.numberStyleOptions.min !== undefined) {
       this.min = this.numberStyleOptions.min;
     }
-    if (this.numberStyleOptions.max !== undefined &&
-        this.numberStyleOptions.max > this.min &&
-        this.numberStyleOptions.max <= this.max) {
+    if (this.numberStyleOptions.max !== undefined) {
       this.max = this.numberStyleOptions.max;
+    }
+    if (this.min > this.max) {
+      this.min = this.max;
     }
     if (this.numberStyleOptions.textWidth !== undefined) {
       this.textWidth = this.numberStyleOptions.textWidth;
@@ -289,22 +289,23 @@ export struct CounterComponent {
       this.hasTextWidth = true;
     }
     if (this.value <= this.min) {
-      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-      this.subBtnStateEffect = false;
-      this.subBtnEnabled = false;
       this.value = this.min;
+      this.onChange?.(this.value);
       this.inputValue = this.value.toString();
     }
     if (this.value >= this.max) {
-      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-      this.addBtnStateEffect = false;
-      this.addBtnEnabled = false;
       this.value = this.max;
+      this.onChange?.(this.value);
       this.inputValue = this.value.toString();
     }
     if (this.numberStyleOptions.step !== undefined) {
-      this.step = this.numberStyleOptions.step;
+      if (this.numberStyleOptions.step < 1) {
+        this.step = 1
+      } else {
+        this.step = this.numberStyleOptions.step;
+      }
     }
+    this.updateButtonStatus()
     this.updateNumberStyleOptionsEvent();
   }
 
@@ -337,8 +338,9 @@ export struct CounterComponent {
 
   private updateInlineStyleOptions() {
     if (this.inlineStyleOptions.value !== undefined) {
-        this.value = this.inlineStyleOptions.value;
-        this.inputValue = this.value.toString();
+      this.value = this.inlineStyleOptions.value;
+      this.onChange?.(this.value);
+      this.inputValue = this.value.toString();
     }
     if (this.inlineStyleOptions.min !== undefined) {
       this.min = this.inlineStyleOptions.min;
@@ -358,22 +360,23 @@ export struct CounterComponent {
       this.hasTextWidth = true;
     }
     if (this.value <= this.min) {
-      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-      this.subBtnStateEffect = false;
-      this.subBtnEnabled = false;
       this.value = this.min;
+      this.onChange?.(this.value);
       this.inputValue = this.value.toString();
     }
     if (this.value >= this.max) {
-      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-      this.addBtnStateEffect = false;
-      this.addBtnEnabled = false;
       this.value = this.max;
+      this.onChange?.(this.value);
       this.inputValue = this.value.toString();
     }
     if (this.inlineStyleOptions.step !== undefined) {
-      this.step = this.inlineStyleOptions.step;
+      if (this.inlineStyleOptions.step < 1) {
+        this.step = 1
+      } else {
+        this.step = this.inlineStyleOptions.step;
+      }
     }
+    this.updateButtonStatus()
     this.updateInlineStyleOptionsEvent();
   }
 
@@ -394,7 +397,11 @@ export struct CounterComponent {
 
   private updateDateStyleOptions() {
     if (this.dateStyleOptions.step !== undefined) {
-      this.step = this.dateStyleOptions.step;
+      if (this.dateStyleOptions.step < 1) {
+        this.step = 1
+      } else {
+        this.step = this.dateStyleOptions.step;
+      }
     }
     if (this.dateStyleOptions.onHoverIncrease !== undefined) {
       this.onHoverIncrease = this.dateStyleOptions.onHoverIncrease;
@@ -406,16 +413,22 @@ export struct CounterComponent {
         this.dateStyleOptions.year >= this.minYear &&
         this.dateStyleOptions.year <= this.maxYear) {
       this.year = this.dateStyleOptions.year;
+      let date = new DateData(this.year, this.month, this.day);
+      this.onDateChange?.(date);
     }
     if (this.dateStyleOptions.month !== undefined &&
         this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
         this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
       this.month = this.dateStyleOptions.month;
+      let date = new DateData(this.year, this.month, this.day);
+      this.onDateChange?.(date);
     }
     if (this.dateStyleOptions.day !== undefined &&
         this.dateStyleOptions.day <= this.getDayNumber() &&
         this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
       this.day = this.dateStyleOptions.day;
+      let date = new DateData(this.year, this.month, this.day);
+      this.onDateChange?.(date);
     }
     if (this.dateStyleOptions.onDateChange !== undefined) {
       this.onDateChange = this.dateStyleOptions.onDateChange;
@@ -768,7 +781,7 @@ export struct CounterComponent {
 
   private updateButtonStatus() {
     if (this.value <= this.min) {
-      if (!this.addBtnStateEffect) {
+      if (!this.addBtnStateEffect && this.max != this.min) {
         this.addBtnStateEffect = true;
         this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
         this.addBtnEnabled = true;
@@ -778,7 +791,7 @@ export struct CounterComponent {
       this.subBtnEnabled = false;
     }
     if (this.value >= this.max) {
-      if (!this.subBtnStateEffect) {
+      if (!this.subBtnStateEffect && this.max != this.min) {
         this.subBtnStateEffect = true;
         this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
         this.subBtnEnabled = true;
@@ -790,6 +803,9 @@ export struct CounterComponent {
   }
 
   private getValue() {
+    if (this.inputValue == undefined) {
+      this.inputValue = ''
+    }
     return this.hasInputText1? this.inputValue : this.value.toString();
   }
 
@@ -916,7 +932,7 @@ export struct CounterComponent {
               })
               .onClick((event: ClickEvent) => {
                 this.subValue();
-                this.onChange && this.onChange(this.value);
+                this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                     event.source === SourceType.TouchScreen) {
                   this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -927,7 +943,7 @@ export struct CounterComponent {
                   .onAction((event: GestureEvent) => {
                     if (event.repeat) {
                       this.subValue();
-                      this.onChange && this.onChange(this.value);
+                      this.onChange?.(this.value);
                     }
                     this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
@@ -1019,7 +1035,7 @@ export struct CounterComponent {
               })
               .onClick((event: ClickEvent) => {
                 this.addValue();
-                this.onChange && this.onChange(this.value);
+                this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                     event.source === SourceType.TouchScreen) {
                   this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -1030,7 +1046,7 @@ export struct CounterComponent {
                   .onAction((event: GestureEvent) => {
                     if (event.repeat) {
                       this.addValue();
-                      this.onChange && this.onChange(this.value);
+                      this.onChange?.(this.value);
                     }
                     this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
@@ -1109,7 +1125,7 @@ export struct CounterComponent {
             })
             .onClick((event: ClickEvent) => {
               this.subValue();
-              this.onChange && this.onChange(this.value);
+              this.onChange?.(this.value);
               if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                 this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -1120,7 +1136,7 @@ export struct CounterComponent {
                 .onAction((event: GestureEvent) => {
                   if (event.repeat) {
                     this.subValue();
-                    this.onChange && this.onChange(this.value);
+                    this.onChange?.(this.value);
                   }
                   if (event.source === SourceType.Mouse ||
                       event.source === SourceType.TouchScreen) {
@@ -1211,7 +1227,7 @@ export struct CounterComponent {
             })
             .onClick((event: ClickEvent) => {
               this.addValue();
-              this.onChange && this.onChange(this.value);
+              this.onChange?.(this.value);
               if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -1222,7 +1238,7 @@ export struct CounterComponent {
                 .onAction((event: GestureEvent) => {
                   if (event.repeat) {
                     this.addValue();
-                    this.onChange && this.onChange(this.value);
+                    this.onChange?.(this.value);
                   }
                   if (event.source === SourceType.Mouse ||
                       event.source === SourceType.TouchScreen) {
@@ -1356,6 +1372,7 @@ export struct CounterComponent {
                 if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
                     Number(this.inputValue) >= this.min) {
                   this.value = Number(this.inputValue);
+                  this.onChange?.(this.value);
                   this.hasInputText1 = false;
                 } else {
                   if (Number(this.inputValue) > this.max ||
@@ -1368,6 +1385,7 @@ export struct CounterComponent {
                       if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
                           Number(this.inputValue) >= this.min) {
                         this.value = Number(this.inputValue);
+                        this.onChange?.(this.value);
                       }
                       this.inputValue = this.value.toString();
                       this.hasInputText1 = false;
@@ -1386,6 +1404,7 @@ export struct CounterComponent {
                 this.value -= 1;
                 if (Number(this.inputValue) >= this.min && Number(this.inputValue) <= this.max) {
                   this.value = Number(this.inputValue);
+                  this.onChange?.(this.value);
                   this.updateInlineEnableSate();
                 } else {
                   this.value += 1;
@@ -1491,6 +1510,7 @@ export struct CounterComponent {
                 if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
                     Number(this.inputValue) >= this.min) {
                   this.value = Number(this.inputValue);
+                  this.onChange?.(this.value);
                   this.hasInputText1 = false;
                 } else {
                   if (Number(this.inputValue) > this.max ||
@@ -1503,6 +1523,7 @@ export struct CounterComponent {
                       if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
                           Number(this.inputValue) >= this.min) {
                         this.value = Number(this.inputValue);
+                        this.onChange?.(this.value);
                       }
                       this.inputValue = this.value.toString()
                       this.hasInputText1 = false;
@@ -1521,6 +1542,7 @@ export struct CounterComponent {
                 this.value -= 1;
                 if (Number(this.inputValue) >= this.min && Number(this.inputValue) <= this.max) {
                   this.value = Number(this.inputValue);
+                  this.onChange?.(this.value);
                   this.updateInlineEnableSate();
                 } else {
                   this.value += 1;
@@ -1579,7 +1601,7 @@ export struct CounterComponent {
             .enabled(this.addBtnEnabled)
             .onClick((event: ClickEvent) => {
               this.addValue();
-              this.onChange && this.onChange(this.value);
+              this.onChange?.(this.value);
               if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -1590,7 +1612,7 @@ export struct CounterComponent {
                 .onAction((event: GestureEvent) => {
                   if (event.repeat) {
                     this.addValue();
-                    this.onChange && this.onChange(this.value);
+                    this.onChange?.(this.value);
                   }
                   this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 })
@@ -1643,7 +1665,7 @@ export struct CounterComponent {
             .enabled(this.subBtnEnabled)
             .onClick((event: ClickEvent) => {
               this.subValue();
-              this.onChange && this.onChange(this.value);
+              this.onChange?.(this.value);
               if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                 this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -1654,7 +1676,7 @@ export struct CounterComponent {
                 .onAction((event: GestureEvent) => {
                   if (event.repeat) {
                     this.subValue();
-                    this.onChange && this.onChange(this.value);
+                    this.onChange?.(this.value);
                   }
                   this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 })
@@ -1767,6 +1789,8 @@ export struct CounterComponent {
 
               if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
                 this.year = this.inputYear;
+                let date = new DateData(this.year, this.month, this.day);
+                this.onDateChange?.(date);
                 this.updateDateEnableSate();
                 this.updateDay();
               }
@@ -1780,6 +1804,8 @@ export struct CounterComponent {
               this.year -= 1;
               if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
                 this.year = this.inputYear;
+                let date = new DateData(this.year, this.month, this.day);
+                this.onDateChange?.(date);
               } else {
                 this.year += 1;
                 this.inputYear = this.year;
@@ -1890,6 +1916,8 @@ export struct CounterComponent {
                 this.month -= 1;
                 if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                   this.month = this.inputMoon;
+                  let date = new DateData(this.year, this.month, this.day);
+                  this.onDateChange?.(date);
                 } else {
                   this.month += 1;
                   this.inputMoon = this.month;
@@ -1902,6 +1930,8 @@ export struct CounterComponent {
                 this.month -= 1;
                 if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                   this.month = this.inputMoon;
+                  let date = new DateData(this.year, this.month, this.day);
+                  this.onDateChange?.(date);
                 } else {
                   this.month += 1;
                   this.inputMoon = this.month;
@@ -1918,6 +1948,8 @@ export struct CounterComponent {
               this.month -= 1;
               if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                 this.month = this.inputMoon;
+                let date = new DateData(this.year, this.month, this.day);
+                this.onDateChange?.(date);
                 this.updateDay();
               } else {
                 this.month += 1;
@@ -2023,6 +2055,8 @@ export struct CounterComponent {
                 this.day -= 1;
                 if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
                   this.day = this.inputDay;
+                  let date = new DateData(this.year, this.month, this.day);
+                  this.onDateChange?.(date);
                 } else {
                   this.day += 1;
                   this.inputDay = this.day;
@@ -2034,6 +2068,8 @@ export struct CounterComponent {
                 this.day -= 1;
                 if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
                   this.day = this.inputDay;
+                  let date = new DateData(this.year, this.month, this.day);
+                  this.onDateChange?.(date);
                 } else {
                   this.day += 1;
                   this.inputDay = this.day;
@@ -2049,6 +2085,8 @@ export struct CounterComponent {
               this.day -= 1;
               if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
                 this.day = this.inputDay;
+                let date = new DateData(this.year, this.month, this.day);
+                this.onDateChange?.(date);
               } else {
                 this.day += 1;
               }
@@ -2104,7 +2142,7 @@ export struct CounterComponent {
             .onClick((event: ClickEvent) => {
               this.addDate();
               let date = new DateData(this.year, this.month, this.day);
-              this.onDateChange && this.onDateChange(date);
+              this.onDateChange?.(date);
               if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -2116,7 +2154,7 @@ export struct CounterComponent {
                   if (event.repeat) {
                     this.addDate();
                     let date = new DateData(this.year, this.month, this.day);
-                    this.onDateChange && this.onDateChange(date);
+                    this.onDateChange?.(date);
                   }
                   this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 })
@@ -2169,7 +2207,7 @@ export struct CounterComponent {
             .onClick((event: ClickEvent) => {
               this.subDate();
               let date = new DateData(this.year, this.month, this.day);
-              this.onDateChange && this.onDateChange(date);
+              this.onDateChange?.(date);
               if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                 this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -2181,7 +2219,7 @@ export struct CounterComponent {
                   if (event.repeat) {
                     this.subDate();
                     let date = new DateData(this.year, this.month, this.day);
-                    this.onDateChange && this.onDateChange(date);
+                    this.onDateChange?.(date);
                   }
                   this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 })

@@ -56,6 +56,35 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WordBreak, WordBreak);
 };
 
+struct HandleInfoNG {
+    void UpdateOffset(const OffsetF& offset)
+    {
+        rect.SetOffset(offset);
+    }
+
+    void AddOffset(float x, float y)
+    {
+        auto offset = rect.GetOffset();
+        offset.AddX(x);
+        offset.AddY(y);
+        UpdateOffset(offset);
+    }
+
+    bool operator==(const HandleInfoNG& handleInfo) const
+    {
+
+        return rect == handleInfo.rect && index == handleInfo.index;
+    }
+
+    bool operator!=(const HandleInfoNG& handleInfo) const
+    {
+        return !operator==(handleInfo);
+    }
+
+    int32_t index = 0;
+    RectF rect;
+};
+
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme);
 

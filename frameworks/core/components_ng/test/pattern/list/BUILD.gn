@@ -21,7 +21,6 @@ ace_unittest("list_test_ng") {
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/test_ng.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "list_test_ng.cpp",
   ]
 }

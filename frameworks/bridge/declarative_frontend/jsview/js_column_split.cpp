@@ -81,6 +81,7 @@ void JSColumnSplit::JSBind(BindingTarget globalObj)
     JSClass<JSColumnSplit>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSColumnSplit>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSColumnSplit>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSColumnSplit>::StaticMethod("clip", &JSColumnSplit::JsClip);
     JSClass<JSColumnSplit>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

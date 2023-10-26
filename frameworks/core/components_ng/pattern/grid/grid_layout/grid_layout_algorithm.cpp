@@ -371,28 +371,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(gridItemLayoutProperty);
             gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
-
-            bool isItemAtExpectedPosition =
-                gridItemLayoutProperty->CheckWhetherCurrentItemAtExpectedPosition(gridLayoutInfo_.axis_);
-            auto gridItemNode = wrapper->GetHostNode();
-            CHECK_NULL_VOID(gridItemNode);
-            auto gridItemPattern = gridItemNode->GetPattern<GridItemPattern>();
-            CHECK_NULL_VOID(gridItemPattern);
-            if (isItemAtExpectedPosition) {
-                gridItemPattern->ResetGridItemInfo();
-            }
-            if (!isItemAtExpectedPosition) {
-                GridItemIndexInfo itemInfo;
-                itemInfo.mainIndex = mainLine.first;
-                itemInfo.crossIndex = crossLine.first;
-                itemInfo.mainSpan = gridItemLayoutProperty->GetRealRowSpan().value_or(-1);
-                itemInfo.crossSpan = gridItemLayoutProperty->GetRealColumnSpan().value_or(-1);
-                itemInfo.mainStart = mainLine.first - itemInfo.mainSpan + 1;
-                itemInfo.mainEnd = mainLine.first;
-                itemInfo.crossStart = crossLine.first;
-                itemInfo.crossEnd = crossLine.first + itemInfo.crossSpan - 1;
-                gridItemPattern->SetIrregularItemInfo(itemInfo);
-            }
+            UpdateRealGridItemPositionInfo(wrapper, mainLine.first, crossLine.first);
         }
     }
 }

@@ -98,7 +98,9 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         strokeWidth = 1.0_px;
     }
-    ParseJsDimensionVp(info[0], strokeWidth);
+    if (!ParseJsDimensionVpNG(info[0], strokeWidth, false)) {
+        strokeWidth = 1.0_px;
+    }
     DividerModel::GetInstance()->StrokeWidth(strokeWidth);
 }
 

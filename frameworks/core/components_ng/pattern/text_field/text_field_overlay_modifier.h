@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_FIELD_TEXT_FIELD_OVERLAY_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_FIELD_TEXT_FIELD_OVERLAY_MODIFIER_H
 
+#include <cstdint>
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
@@ -51,9 +52,12 @@ public:
     void PaintUnderline(RSCanvas& canvas) const;
     void SetUnderlineColor(const Color& value);
     void SetUnderlineWidth(float underlineWidth);
-    void SetShowCounter(bool value);
     void SetRedrawFlag(int32_t value);
     void SetScrollBar(const RefPtr<ScrollBar>& scrollBar);
+    void SetChangeSelectedRects(bool value);
+    void SetFirstHandleOffset(const OffsetF& offset);
+    void SetSecondHandleOffset(const OffsetF& offset);
+    void SetShowSelect(bool value);
 
 private:
     void PaintSelection(DrawingContext& context) const;
@@ -61,6 +65,7 @@ private:
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
     void PaintScrollBar(DrawingContext& context);
 
+    bool needPaintSelect_ = false;
     WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
@@ -69,15 +74,17 @@ private:
     RefPtr<AnimatablePropertyColor> selectedColor_;
     RefPtr<PropertyOffsetF> cursorOffset_;
     RefPtr<PropertyBool> cursorVisible_;
+    RefPtr<PropertyBool> showSelect_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyOffsetF> contentOffset_;
+    RefPtr<PropertyOffsetF> firstHandleOffset_;
+    RefPtr<PropertyOffsetF> secondHandleOffset_;
     RefPtr<PropertyFloat> currentOffset_;
-    RefPtr<PropertyInt> flag_;
     RefPtr<PropertyFloat> underlineWidth_;
     RefPtr<PropertyColor> underlineColor_;
     InputStyle inputStyle_ = InputStyle::DEFAULT;
     RefPtr<PropertySizeF> frameSize_;
-    RefPtr<PropertyBool> showCounter_;
+    RefPtr<PropertyBool> changeSelectedRects_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

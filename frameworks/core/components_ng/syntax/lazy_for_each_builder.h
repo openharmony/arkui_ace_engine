@@ -33,6 +33,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -263,6 +264,10 @@ public:
         cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
         ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
         itemInfo.second->Build();
+        auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false));
+        if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+            frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
+        }
         ViewStackProcessor::GetInstance()->ResetPredict();
         itemInfo.second->SetJSViewActive(false);
         cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);

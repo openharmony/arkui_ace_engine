@@ -285,6 +285,7 @@ private:
     void FireOnScrollStart();
     void FireOnScrollStop();
     void SetAccessibilityAction();
+    void ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
 

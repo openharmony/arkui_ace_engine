@@ -58,7 +58,6 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
-#include "core/components_ng/test/mock/pattern/picker/mock_picker_theme_manager.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -403,7 +402,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
     auto sheetDragBarPaintProperty = sheetDragBarNode->GetPaintProperty<SheetDragBarPaintProperty>();
     EXPECT_FALSE(sheetDragBarPaintProperty == nullptr);
     SheetStyle sheetStyle1;
-    topSheetNode->GetGeometryNode()->SetFrameSize({10, 10});
+    topSheetNode->GetGeometryNode()->SetFrameSize({ 10, 10 });
 
     // sheetStyle1.sheetMode is null.
     sheetStyle1.sheetMode = std::nullopt;
@@ -491,7 +490,7 @@ HWTEST_F(OverlayManagerTestNg, RemoveAllModalInOverlay001, TestSize.Level1)
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
-    
+
     /**
      * @tc.steps: step4. run RemoveAllModalInOverlay func.
      */
@@ -659,7 +658,7 @@ HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
     EXPECT_NE(sheetNode->GetPattern<SheetPresentationPattern>()->targetId_, targetId);
     overlayManager->DestroySheet(sheetNode, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
-    
+
     sheetNode->tag_ = V2::SHEET_PAGE_TAG;
     sheetNode->GetPattern<SheetPresentationPattern>()->targetId_ = targetId;
     overlayManager->DestroySheet(sheetNode, targetId);
@@ -1013,8 +1012,8 @@ HWTEST_F(OverlayManagerTestNg, MenuTest002, TestSize.Level1)
     auto menuNode =
         FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
     auto subMenuId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto subMenuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
-        subMenuId, AceType::MakeRefPtr<MenuPattern>(1, "Test", MenuType::MENU));
+    auto subMenuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, subMenuId, AceType::MakeRefPtr<MenuPattern>(1, "Test", MenuType::MENU));
     subMenuNode->MountToParent(menuNode);
     /**
      * @tc.steps: step2. call showMenu when menuNode is nullptr and menuMap is empty.
@@ -1480,6 +1479,7 @@ HWTEST_F(OverlayManagerTestNg, DialogTest002, TestSize.Level1)
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
     EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
 }
+
 /**
  * @tc.name: DialogTest003
  * @tc.desc: Test OverlayManager::ShowDateDialog->ShowTimeDialog->RemoveOverlay.
@@ -1490,7 +1490,7 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. create root node and prepare dialogProperties.
      */
-    auto themeManager = AceType::MakeRefPtr<MockPickerThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     DialogProperties dialogProperties;

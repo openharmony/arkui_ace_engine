@@ -52,8 +52,6 @@ namespace OHOS::Ace::Framework {
 
 void JSNavigator::Create(const JSCallbackInfo& info)
 {
-    LOGD("Create component: JSNavigator");
-
     NavigatorModel::GetInstance()->Create();
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -129,7 +127,6 @@ void JSNavigator::SetParams(const JSCallbackInfo& args)
 void JSNavigator::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -145,7 +142,6 @@ void JSNavigator::JsWidth(const JSRef<JSVal>& jsValue)
 void JSNavigator::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -161,12 +157,10 @@ void JSNavigator::JsHeight(const JSRef<JSVal>& jsValue)
 void JSNavigator::JsSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 

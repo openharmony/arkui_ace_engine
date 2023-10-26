@@ -338,4 +338,27 @@ void ImageLoadingContext::ResumeLoading()
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
 }
 
+const std::string ImageLoadingContext::GetCurrentLoadingState()
+{
+    ImageLoadingState state = ImageLoadingState::UNLOADED;
+    if (stateManager_) {
+        state = stateManager_->GetCurrentState();
+    }
+    switch (state) {
+        case ImageLoadingState::DATA_LOADING:
+            return "DATA_LOADING";
+        case ImageLoadingState::DATA_READY:
+            return "DATA_READY";
+        case ImageLoadingState::MAKE_CANVAS_IMAGE:
+            return "MAKE_CANVAS_IMAGE";
+        case ImageLoadingState::LOAD_SUCCESS:
+            return "LOAD_SUCCESS";
+        case ImageLoadingState::LOAD_FAIL:
+            return "LOAD_FAIL";
+
+        default:
+            return "UNLOADED";
+    }
+}
+
 } // namespace OHOS::Ace::NG

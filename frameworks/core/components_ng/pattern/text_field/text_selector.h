@@ -49,6 +49,24 @@ enum class CaretUpdateType {
  * Stands for selection indexes
  * We use base/destination to indicate the start/end position because of uncertain direction.
  */
+struct HandleInfo {
+    int32_t index = 0;
+    RectF rect;
+
+    void AddRectY(float deltaY)
+    {
+        auto newOffset = rect.GetOffset();
+        newOffset.AddY(deltaY);
+        rect.SetOffset(newOffset);
+    }
+
+    void AddRectX(float deltaX)
+    {
+        auto newOffset = rect.GetOffset();
+        newOffset.AddX(deltaX);
+        rect.SetOffset(newOffset);
+    }
+};
 struct TextSelector {
     TextSelector() = default;
     TextSelector(int32_t base, int32_t destination) : baseOffset(base), destinationOffset(destination) {}
@@ -60,7 +78,7 @@ struct TextSelector {
         }
     }
 
-    void FireAccessibilityCallback()
+    void FireAccessibilityCallback() const
     {
         if (onAccessibilityCallback_) {
             onAccessibilityCallback_();

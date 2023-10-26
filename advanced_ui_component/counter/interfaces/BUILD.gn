@@ -14,6 +14,8 @@
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 es2abc_gen_abc("gen_counter_abc") {
   src_js = rebase_path("counter.js")
@@ -29,10 +31,20 @@ gen_js_obj("counter_abc") {
   dep = ":gen_counter_abc"
 }
 
+gen_obj("counter_abc_preview") {
+  input = get_label_info(":gen_counter_abc", "target_out_dir") + "/counter.abc"
+  output = target_out_dir + "/counter_abc.c"
+  snapshot_dep = [ ":gen_counter_abc" ]
+}
+
 ohos_shared_library("counter") {
   sources = [ "counter.cpp" ]
 
-  deps = [ ":counter_abc" ]
+  if (use_mingw_win || use_mac || use_linux) {
+    deps = [ ":gen_obj_src_counter_abc_preview" ]
+  } else {
+    deps = [ ":counter_abc" ]
+  }
 
   external_deps = [
     "hilog:libhilog",

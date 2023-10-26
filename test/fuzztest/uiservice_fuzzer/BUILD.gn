@@ -17,7 +17,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 #####################hydra-fuzz###################
 import("//foundation/arkui/ace_engine/ace_config.gni")
-module_output_path = "arkui/ui_service"
+module_output_path = "ace_engine/ace_engine/ui_service"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("UiServiceFuzzTest") {

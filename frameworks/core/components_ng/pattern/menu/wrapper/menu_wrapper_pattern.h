@@ -136,6 +136,30 @@ public:
         isFirstShow_ = true;
     }
 
+    void RegisterMenuAppearCallback(const std::function<void()>& onAppear)
+    {
+        onAppearCallback_ = onAppear;
+    }
+
+    void RegisterMenuDisappearCallback(const std::function<void()>& onDisappear)
+    {
+        onDisappearCallback_ = onDisappear;
+    }
+
+    void CallMenuAppearCallback()
+    {
+        if (onAppearCallback_) {
+            onAppearCallback_();
+        }
+    }
+
+    void CallMenuDisappearCallback()
+    {
+        if (onDisappearCallback_) {
+            onDisappearCallback_();
+        }
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -154,6 +178,8 @@ private:
 
     void HideMenu(const RefPtr<FrameNode>& menu);
 
+    std::function<void()> onAppearCallback_ = nullptr;
+    std::function<void()> onDisappearCallback_ = nullptr;
     RefPtr<TouchEventImpl> onTouch_;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;

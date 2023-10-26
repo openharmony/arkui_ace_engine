@@ -49,6 +49,9 @@
 #include "core/common/thread_checker.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 #include "core/image/image_cache.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline/pipeline_context.h"

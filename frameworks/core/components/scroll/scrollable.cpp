@@ -127,6 +127,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
                 scrollEvent.eventType = "scrollstart";
                 context->SendEventToAccessibility(scrollEvent);
             }
+            scroll->isDragging_ = true;
             scroll->HandleDragStart(info);
         }
     };
@@ -154,6 +155,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
                 auto gestureEvent = info;
                 scroll->actionEnd_(gestureEvent);
             }
+            scroll->isDragging_ = false;
         }
     };
 
@@ -165,6 +167,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         if (scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
         }
+        scroll->isDragging_ = false;
     };
 
     if (Container::IsCurrentUseNewPipeline()) {
@@ -266,6 +269,10 @@ void Scrollable::HandleTouchDown()
 
 void Scrollable::HandleTouchUp()
 {
+    // Two fingers are alternately drag, one finger is released without triggering spring animation.
+    if (isDragging_) {
+        return;
+    }
     isTouching_ = false;
     if (outBoundaryCallback_ && !outBoundaryCallback_()) {
         if (scrollSnapController_->IsStopped() && scrollSnapCallback_) {

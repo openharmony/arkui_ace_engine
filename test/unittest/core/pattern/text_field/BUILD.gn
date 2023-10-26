@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("TextFieldTest") {
   type = "new"
-  sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
-    "text_field_test.cpp",
-  ]
+  sources = [ "text_field_test.cpp" ]
 }

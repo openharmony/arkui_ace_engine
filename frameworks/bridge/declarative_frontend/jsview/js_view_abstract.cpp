@@ -2613,7 +2613,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
     ParseMenuParam(info, menuContentOptions, menuParam);
     RefPtr<JsFunction> previewBuilderFunc;
     auto preview = menuContentOptions->GetProperty("preview");
-    if (!preview->IsObject() && !preview->IsNumber()) {
+    if (!preview->IsFunction() && !preview->IsNumber()) {
         return;
     }
 
@@ -2622,12 +2622,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
             menuParam.previewMode = MenuPreviewMode::IMAGE;
         }
     } else {
-        auto previewObj = JSRef<JSObject>::Cast(preview);
-        auto previewBuilder = previewObj->GetProperty("builder");
-        if (!previewBuilder->IsFunction()) {
-            return;
-        }
-        previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(previewBuilder));
+        previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
         CHECK_NULL_VOID(previewBuilderFunc);
         previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -4449,13 +4444,7 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
             return dragDropInfo;
         }
 
-        auto node = ParseDragNode(ret);
-        if (node) {
-            LOGI("use custom builder param.");
-            dragDropInfo.node = node;
-            return dragDropInfo;
-        }
-
+        dragDropInfo.node = ParseDragNode(ret);
         auto builderObj = JSRef<JSObject>::Cast(ret);
 #if defined(PIXEL_MAP_SUPPORTED)
         auto pixmap = builderObj->GetProperty("pixelMap");
@@ -4463,8 +4452,6 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 #endif
         auto extraInfo = builderObj->GetProperty("extraInfo");
         ParseJsString(extraInfo, dragDropInfo.extraInfo);
-        node = ParseDragNode(builderObj->GetProperty("builder"));
-        dragDropInfo.node = node;
         return dragDropInfo;
     };
     ViewAbstractModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
@@ -6262,12 +6249,21 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     }
     shadow.SetBlurRadius(radius);
     CalcDimension offsetX;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
+    if (ParseJsonResource(argsPtrItem->GetValue("offsetX"), offsetX)) {
         shadow.SetOffsetX(offsetX.Value());
+    } else {
+        if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
+            shadow.SetOffsetX(offsetX.Value());
+        }
     }
+
     CalcDimension offsetY;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
+    if (ParseJsonResource(argsPtrItem->GetValue("offsetY"), offsetY)) {
         shadow.SetOffsetY(offsetY.Value());
+    } else {
+        if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
+            shadow.SetOffsetY(offsetY.Value());
+        }
     }
     Color color;
     if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
@@ -6279,6 +6275,30 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     bool isFilled = argsPtrItem->GetBool("fill", false);
     shadow.SetIsFilled(isFilled);
     return true;
+}
+
+bool JSViewAbstract::ParseJsonResource(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result)
+{
+    if (!jsonValue->IsObject()) {
+        return false;
+    }
+    auto resourceWrapper = CreateResourceWrapper();
+    CHECK_NULL_RETURN(resourceWrapper, false);
+    if (jsonValue->GetValue("type")->GetInt() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(jsonValue->GetValue("id")->GetInt());
+        return StringUtils::StringToCalcDimensionNG(value, result, false);
+    }
+    if (jsonValue->GetValue("type")->GetInt() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetInt(jsonValue->GetValue("id")->GetInt()));
+        StringUtils::StringToDimensionWithUnitNG(value, result);
+        return true;
+    }
+
+    if (jsonValue->GetValue("type")->GetInt() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = resourceWrapper->GetDimension(jsonValue->GetValue("id")->GetInt());
+        return true;
+    }
+    return false;
 }
 
 void JSViewAbstract::GetAngle(

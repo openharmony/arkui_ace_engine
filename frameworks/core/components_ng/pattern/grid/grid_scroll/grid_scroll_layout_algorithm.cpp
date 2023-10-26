@@ -221,6 +221,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(gridItemLayoutProperty);
             gridItemLayoutProperty->UpdateMainIndex(line->first);
             gridItemLayoutProperty->UpdateCrossIndex(iter->first);
+            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
@@ -582,6 +583,9 @@ void GridScrollLayoutAlgorithm::AdjustRowColSpan(
     if (currentItemRowSpan_ > 1 || currentItemColSpan_ > 1) {
         gridLayoutInfo_.hasBigItem_ = true;
     }
+
+    itemLayoutProperty->UpdateRealRowSpan(currentItemRowSpan_);
+    itemLayoutProperty->UpdateRealColumnSpan(currentItemColSpan_);
 }
 
 void GridScrollLayoutAlgorithm::LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem)
@@ -1122,6 +1126,9 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
     }
     auto currentIndex = gridLayoutInfo_.endIndex_ + 1;
     currentMainLineIndex_++; // if it fails to fill a new line backward, do [currentMainLineIndex_--]
+    if (gridLayoutInfo_.gridMatrix_.find(currentMainLineIndex_) != gridLayoutInfo_.gridMatrix_.end()) {
+        cellAveLength_ = gridLayoutInfo_.lineHeightMap_.find(currentMainLineIndex_ - 1)->second;
+    }
     lastCross_ = 0;
     bool hasNormalItem = false;
     bool doneFillLine = false;
@@ -1158,7 +1165,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         doneFillLine = true;
     }
 
-    if (doneFillLine) {
+    if (doneFillLine || gridLayoutInfo_.gridMatrix_.find(currentMainLineIndex_) != gridLayoutInfo_.gridMatrix_.end()) {
         gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = cellAveLength_;
         gridLayoutInfo_.endMainLineIndex_ = currentMainLineIndex_;
     } else {

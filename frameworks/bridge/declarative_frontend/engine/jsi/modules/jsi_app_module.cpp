@@ -15,7 +15,6 @@
 
 #include "bridge/declarative_frontend/engine/jsi/modules/jsi_app_module.h"
 
-#include "base/log/log.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/engine/common/js_constants.h"
 #include "core/common/container.h"
@@ -28,12 +27,10 @@ shared_ptr<JsValue> AppGetInfo(const shared_ptr<JsRuntime>& runtime, const share
 {
     auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
         return runtime->NewNull();
     }
     auto delegate = instance->GetDelegate();
     if (!delegate) {
-        LOGE("get frontend delegate failed");
         return runtime->NewNull();
     }
 
@@ -54,17 +51,14 @@ shared_ptr<JsValue> AppTerminate(const shared_ptr<JsRuntime>& runtime, const sha
 {
     auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
         return runtime->NewNull();
     }
     auto delegate = instance->GetDelegate();
     if (!delegate) {
-        LOGE("get frontend delegate failed");
         return runtime->NewNull();
     }
     auto pipelineContext = delegate->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("get frontend pipelineContext failed");
         return runtime->NewNull();
     }
     auto uiTaskExecutor = delegate->GetUiTask();
@@ -83,26 +77,21 @@ shared_ptr<JsValue> AppSetImageCacheCount(const shared_ptr<JsRuntime>& runtime, 
 {
     auto container = Container::Current();
     if (!container) {
-        LOGE("current container is null");
         return runtime->NewNull();
     }
     auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("get pipelineContext failed");
         return runtime->NewNull();
     }
     if (argc != 1 || !argv[0]->IsNumber(runtime)) {
-        LOGE("The arguments must be one int number.");
         return runtime->NewNull();
     }
     int32_t size = argv[0]->ToInt32(runtime);
     if (size < 0) {
-        LOGE("size: %{public}d less than zero is invalid for cache image", size);
         return runtime->NewNull();
     }
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     if (!taskExecutor) {
-        LOGE("taskExecutor is null.");
         return runtime->NewNull();
     }
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
@@ -112,8 +101,6 @@ shared_ptr<JsValue> AppSetImageCacheCount(const shared_ptr<JsRuntime>& runtime, 
             auto imageCache = pipelineContext->GetImageCache();
             if (imageCache) {
                 imageCache->SetCapacity(size);
-            } else {
-                LOGW("image cache is null");
             }
         }
     }, TaskExecutor::TaskType::UI);
@@ -127,26 +114,21 @@ shared_ptr<JsValue> AppSetImageRawDataCacheSize(
 {
     auto container = Container::Current();
     if (!container) {
-        LOGE("current container is null");
         return runtime->NewNull();
     }
     auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("get pipelineContext failed");
         return runtime->NewNull();
     }
     if (argc != 1 || !argv[0]->IsNumber(runtime)) {
-        LOGE("The arguments must be one int number.");
         return runtime->NewNull();
     }
     int32_t size = argv[0]->ToInt32(runtime);
     if (size < 0) {
-        LOGE("size: %{public}d less than zero is invalid for cache image raw data", size);
         return runtime->NewNull();
     }
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     if (!taskExecutor) {
-        LOGE("taskExecutor is null.");
         return runtime->NewNull();
     }
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
@@ -156,8 +138,6 @@ shared_ptr<JsValue> AppSetImageRawDataCacheSize(
             auto imageCache = pipelineContext->GetImageCache();
             if (imageCache) {
                 imageCache->SetDataCacheLimit(size);
-            } else {
-                LOGW("image cache is null");
             }
         }
     }, TaskExecutor::TaskType::UI);
@@ -168,12 +148,10 @@ shared_ptr<JsValue> AppSetImageFileCacheSize(const shared_ptr<JsRuntime>& runtim
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1 || !argv[0]->IsNumber(runtime)) {
-        LOGE("The arguments must be one int number.");
         return runtime->NewNull();
     }
     int32_t size = argv[0]->ToInt32(runtime);
     if (size < 0) {
-        LOGE("size: %{public}d less than zero is invalid for cache image files", size);
         return runtime->NewNull();
     }
     ImageFileCache::GetInstance().SetCacheFileLimit(size);

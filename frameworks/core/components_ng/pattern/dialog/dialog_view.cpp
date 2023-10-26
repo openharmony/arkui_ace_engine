@@ -85,6 +85,10 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));
 
+    if (customNode) {
+        customNode->Build();
+    }
+
     // update layout and render props
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
     CHECK_NULL_RETURN(dialogLayoutProp, dialog);

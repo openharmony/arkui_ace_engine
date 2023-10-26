@@ -17,7 +17,6 @@ ace_unittest("slider_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_path_painter.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "slider_test_ng.cpp",
   ]
 }

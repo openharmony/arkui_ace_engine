@@ -17,7 +17,6 @@ ace_unittest("search_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "search_test_ng.cpp",
   ]
 }

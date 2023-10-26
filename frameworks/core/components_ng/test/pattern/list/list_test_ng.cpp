@@ -2939,7 +2939,6 @@ HWTEST_F(ListTestNg, Event005, TestSize.Level1)
         listModelNG.SetOnScrollStart(scrollStart);
         listModelNG.SetOnScrollStop(scrollStop);
     });
-    MockGetPaintRectWithTransform(frameNode_);
 
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(isScrollStartCalled);
@@ -2993,7 +2992,6 @@ HWTEST_F(ListTestNg, EventHub001, TestSize.Level1)
     CreateListWithItem([onItemDragStart](ListModelNG listModelNG) {
         listModelNG.SetOnItemDragStart(onItemDragStart);
     });
-    MockGetPaintRectWithTransform(frameNode_);
     auto jsonStr = eventHub_->GetDragExtraParams("", Point(0, 250), DragEventType::MOVE);
     EXPECT_EQ(jsonStr, "{\"insertIndex\":2}");
 
@@ -5033,7 +5031,6 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
         auto startFunc = GetDefaultSwiperBuilder(START_NODE_SIZE);
         CreateListItemWithSwiper(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     });
-    MockGetPaintRectWithTransform(frameNode_);
 
     // Set swiperItem_ to list pattern
     DragSwiperItem(0, 1.f);
@@ -5096,7 +5093,6 @@ HWTEST_F(ListTestNg, Pattern006, TestSize.Level1)
         listModelNG.SetLanes(2);
         CreateListItem(VIEWPORT_NUMBER);
     });
-    MockGetPaintRectWithTransform(frameNode_);
 
     /**
      * @tc.steps: step1. When lanes > 1, call GetItemIndexByPosition
@@ -5120,7 +5116,6 @@ HWTEST_F(ListTestNg, Pattern007, TestSize.Level1)
      * @tc.expected: Would return the last itemIndex
      */
     CreateList([](ListModelNG listModelNG) { CreateListItem(VIEWPORT_NUMBER); });
-    MockGetPaintRectWithTransform(frameNode_);
     const Point point = Point(0, 1000.f);
     int32_t itemIndex = pattern_->GetItemIndexByPosition(point.GetX(), point.GetY());
     EXPECT_EQ(itemIndex, VIEWPORT_NUMBER);
@@ -5138,7 +5133,6 @@ HWTEST_F(ListTestNg, Pattern008, TestSize.Level1)
      * @tc.expected: Would return 0
      */
     CreateList();
-    MockGetPaintRectWithTransform(frameNode_);
     const Point point = Point(0, 1000.f);
     int32_t itemIndex = pattern_->GetItemIndexByPosition(point.GetX(), point.GetY());
     EXPECT_EQ(itemIndex, 0);

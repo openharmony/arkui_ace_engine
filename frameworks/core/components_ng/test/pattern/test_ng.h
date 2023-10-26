@@ -47,7 +47,6 @@ public:
     void RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode,
         float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
-    void MockGetPaintRectWithTransform(const RefPtr<FrameNode>& frameNode, RectF paintRect = RectF());
 
     AssertionResult IsEqualOverScrollOffset(const OverScrollOffset& actual, const OverScrollOffset& expected)
     {
@@ -126,12 +125,11 @@ public:
     {
         return GetChildFrameNode(frameNode, index)->GetEventHub<T>();
     }
-    
+
     const RectF& GetChildRect(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
         return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameRect();
     }
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_PATTERN_H

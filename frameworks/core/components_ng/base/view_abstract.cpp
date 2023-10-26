@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/property/calc_length.h"
@@ -59,6 +60,15 @@ void BindMenu(const RefPtr<FrameNode>& menuNode, int32_t targetId, const NG::Off
 
     // pass in menuNode to register it in OverlayManager
     overlayManager->ShowMenu(targetId, offset, menuNode);
+}
+
+void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RegisterMenuAppearCallback(menuParam.onAppear);
+    pattern->RegisterMenuDisappearCallback(menuParam.onDisappear);
 }
 } // namespace
 
@@ -223,6 +233,14 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
+}
+
+void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
 }
 
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
@@ -1144,6 +1162,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
     }
     auto menuNode =
         MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
+    RegisterMenuCallback(menuNode, menuParam);
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
@@ -1159,6 +1178,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
 #endif
     auto menuNode =
         MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
+    RegisterMenuCallback(menuNode, menuParam);
     if (type == MenuType::CONTEXT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;

@@ -319,14 +319,17 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
         measureWidth = { -1.0f };
     }
     NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     NG::CalcSize idealSize = { NG::CalcLength(measureWidth.ConvertToPx()),
         NG::CalcLength(measureHeight.ConvertToPx()) };
-    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(idealSize);
     if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         auto parentLayoutProperty = parentNode->GetLayoutProperty();
         parentLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
+        parentNode->GetGeometryNode()->SetFrameSize(frameSize);
+        parentLayoutProperty->UpdateMarginSelfIdealSize(
+            NG::SizeF { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() });
     }
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(idealSize);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
 
 void ViewFunctions::ExecuteReload(bool deep)

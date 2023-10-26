@@ -48,6 +48,10 @@ void PathPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const 
 
 SizeF PathPainter::GetPathSize(const std::string& commands)
 {
+#ifndef USE_ROSEN_DRAWING
     return SkPainter::GetPathSize(commands);
+#else
+    return DrawingPainter::GetPathSize(commands);
+#endif
 }
 } // namespace OHOS::Ace::NG
