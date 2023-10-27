@@ -503,6 +503,17 @@ public:
         return {};
     }
 
+    template<typename T>
+    bool GetDraggable()
+    {
+        if (IsJsCard()) {
+            return false;
+        }
+        auto theme = GetTheme<T>();
+        CHECK_NULL_RETURN(theme, false);
+        return theme->GetDraggable();
+    }
+
     const RefPtr<ManagerInterface>& GetTextFieldManager()
     {
         return textFieldManager_;
@@ -550,6 +561,11 @@ public:
     bool IsJsCard() const
     {
         return isJsCard_;
+    }
+
+    bool IsJsPlugin() const
+    {
+        return isJsPlugin_;
     }
 
     void SetIsFormRender(bool isEtsCard)
@@ -946,6 +962,11 @@ public:
         return halfLeading_;
     }
 
+    bool GetOnFoucs() const
+    {
+        return onFocus_;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1054,6 +1075,7 @@ protected:
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
+    std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
 

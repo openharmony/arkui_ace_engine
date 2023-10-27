@@ -37,14 +37,8 @@ namespace {
 constexpr int32_t SCROLL_NONE = 0;
 constexpr int32_t SCROLL_TOUCH_DOWN = 1;
 constexpr int32_t SCROLL_TOUCH_UP = 2;
-constexpr float SCROLL_RATIO = 0.52f;
 constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
 constexpr float UNIT_CONVERT = 1000.0f;   // 1s convert to 1000ms
-
-float CalculateFriction(float gamma)
-{
-    return static_cast<float>(SCROLL_RATIO * std::pow(1.0 - gamma, SQUARE));
-}
 
 float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 {
@@ -127,13 +121,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         FireOnScrollStop();
         scrollStop_ = false;
     }
-    if (ScrollableIdle() && !AnimateRunning()) {
-        auto predictSnapOffset = CalePredictSnapOffset(0.0);
-        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
-            StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
-            FireOnScrollStart();
-        }
-    }
+    ScrollSnapTrigger();
     CheckScrollable();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -143,6 +131,25 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto globalViewPort = RectF(offsetRelativeToWindow, geometryNode->GetFrameRect().GetSize());
     host->SetViewPort(globalViewPort);
     return false;
+}
+
+void ScrollPattern::ScrollSnapTrigger()
+{
+    auto scrollBar = GetScrollBar();
+    auto scrollBarProxy = GetScrollBarProxy();
+    if (scrollBar && scrollBar->IsPressed()) {
+        return;
+    }
+    if (scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
+        return;
+    }
+    if (ScrollableIdle() && !AnimateRunning()) {
+        auto predictSnapOffset = CalePredictSnapOffset(0.0);
+        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
+            StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
+            FireOnScrollStart();
+        }
+    }
 }
 
 void ScrollPattern::CheckScrollable()
@@ -314,7 +321,7 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     if (overScrollPast == 0.0f) {
         return;
     }
-    float friction = CalculateFriction((overScrollPast - std::abs(delta)) / viewPortLength_);
+    float friction = ScrollablePattern::CalculateFriction((overScrollPast - std::abs(delta)) / viewPortLength_);
     float direction = delta > 0.0f ? 1.0f : -1.0f;
     delta = direction * CalculateOffsetByFriction(overScrollPast, std::abs(delta), friction);
 }
@@ -638,12 +645,11 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     auto scrollGeometry = scrollFrame->GetGeometryNode();
     CHECK_NULL_RETURN(scrollGeometry, false);
     auto scrollFrameSize = scrollGeometry->GetFrameSize();
-    LOGD("Child: %{public}s/%{public}d on focus. Size is (%{public}f,%{public}f). Offset to Scroll is "
-         "(%{public}f,%{public}f). Scroll size is (%{public}f,%{public}f)",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Child: %{public}s/%{public}d on focus. Size is (%{public}f,%{public}f). "
+        "Offset to Scroll is (%{public}f,%{public}f). Scroll size is (%{public}f,%{public}f)",
         focusFrameNode->GetTag().c_str(), focusFrameNode->GetId(), focusNodeSize.Width(), focusNodeSize.Height(),
         focusNodeOffsetToScrolll.GetX(), focusNodeOffsetToScrolll.GetY(), scrollFrameSize.Width(),
         scrollFrameSize.Height());
-
     float focusNodeDiffToScroll =
         GetAxis() == Axis::VERTICAL ? focusNodeOffsetToScrolll.GetY() : focusNodeOffsetToScrolll.GetX();
     if (NearZero(focusNodeDiffToScroll)) {
@@ -658,7 +664,6 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
         moveOffset = scrollFrameLength - focusNodeDiffToScroll - focusNodeLength;
     }
     if (!NearZero(moveOffset)) {
-        LOGD("Scroll offset: %{public}f on axis: %{public}d", moveOffset, GetAxis());
         return OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
     }
     return false;
@@ -707,7 +712,7 @@ std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta)
     }
     if (predictSnapOffset.has_value()) {
         predictSnapOffset = predictSnapOffset.value() - currentOffset_;
-        LOGD("CalePredictSnapOffset predictSnapOffset:%{public}f", predictSnapOffset.value());
+        TAG_LOGD(AceLogTag::ACE_SCROLL, "Prediction of snap offset is %{public}f", predictSnapOffset.value());
     }
     return predictSnapOffset;
 }

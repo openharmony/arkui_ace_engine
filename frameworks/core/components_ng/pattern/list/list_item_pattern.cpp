@@ -254,18 +254,33 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         auto actionStartTask = [weak](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            auto listPattern = pattern->GetListFrameNode()->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(listPattern);
+            if (!listPattern->CanReplaceSwiperItem()) {
+                return;
+            }
             pattern->HandleDragStart(info);
         };
 
         auto actionUpdateTask = [weak](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            auto listPattern = pattern->GetListFrameNode()->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(listPattern);
+            if (!listPattern->IsCurrentSwiperItem(weak)) {
+                return;
+            }
             pattern->HandleDragUpdate(info);
         };
 
         auto actionEndTask = [weak](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            auto listPattern = pattern->GetListFrameNode()->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(listPattern);
+            if (!listPattern->IsCurrentSwiperItem(weak)) {
+                return;
+            }
             pattern->HandleDragEnd(info);
         };
         GestureEventNoParameter actionCancelTask;
@@ -518,6 +533,11 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     if (info.GetInputEventType() == InputEventType::AXIS) {
         return;
     }
+
+    auto listPattern = GetListFrameNode()->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    listPattern->SetSwiperItemEnd(AceType::WeakClaim(this));
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();

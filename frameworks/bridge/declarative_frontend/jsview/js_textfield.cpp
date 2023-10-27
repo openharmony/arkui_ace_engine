@@ -73,7 +73,7 @@ namespace OHOS::Ace::Framework {
 
 namespace {
 
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const uint32_t MAX_LINES = 3;
@@ -224,13 +224,19 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         font.fontSize = Dimension(-1);
     } else {
         CalcDimension size;
+        auto theme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
         if (fontSize->IsString()) {
-            auto result = StringUtils::StringToDimensionWithThemeValue(fontSize->ToString(), true, Dimension(-1));
+            auto result = StringUtils::StringToDimensionWithThemeValue(
+                fontSize->ToString(), true, Dimension(theme->GetFontSize()));
+            if (result.Unit() == DimensionUnit::PERCENT) {
+                result = theme->GetFontSize();
+            }
             font.fontSize = result;
         } else if (ParseJsDimensionFp(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
             font.fontSize = size;
         } else {
-            font.fontSize = Dimension(-1);
+            font.fontSize = Dimension(theme->GetFontSize());
         }
     }
 

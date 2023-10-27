@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 
 void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    gridLayoutInfo_.gridMatrix_.clear();
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
     auto layoutDirection = gridLayoutProperty->GetGridDirection().value_or(FlexDirection::ROW);
@@ -92,6 +93,8 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Update frame size.
     auto rowCount = axis == Axis::HORIZONTAL ? crossCount_ : mainCount_;
     auto columnCount = axis == Axis::HORIZONTAL ? mainCount_ : crossCount_;
+    rowCount_ = rowCount;
+    columnCount_ = columnCount;
     idealSize.UpdateIllegalSizeWithCheck(
         OptionalSizeF(columnCount * gridCellSize_.Width() + (columnCount - 1) * columnsGap,
             rowCount * gridCellSize_.Height() + (rowCount - 1) * rowsGap));
@@ -151,9 +154,13 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
         }
     }
+    gridLayoutInfo_.crossCount_ = columnCount_;
+    gridLayoutInfo_.endIndex_ = displayCount_ - 1;
+    gridLayoutInfo_.startMainLineIndex_ = 0;
+    gridLayoutInfo_.endMainLineIndex_ = rowCount_ - 1;
 }
 
-OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper) const
+OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper)
 {
     auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
     auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -188,6 +195,7 @@ OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutW
             LOGI("%{public}d is not support", layoutDirection);
             break;
     }
+    gridLayoutInfo_.gridMatrix_[rowIndex][columnIndex] = index;
 
     auto positionX = columnIndex * (gridCellSize_.Width() + columnsGap);
     auto positionY = rowIndex * (gridCellSize_.Height() + rowsGap);

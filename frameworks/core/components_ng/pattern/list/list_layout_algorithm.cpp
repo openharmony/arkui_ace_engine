@@ -102,7 +102,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto mainPercentRefer = GetMainAxisSize(childLayoutConstraint_.percentReference, axis_);
         auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
         spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
-        if (GreatOrEqual(spaceWidth_, contentMainSize_)) {
+        if (Negative(spaceWidth_) || GreatOrEqual(spaceWidth_, contentMainSize_)) {
             spaceWidth_ = 0.0f;
         }
         if (listLayoutProperty->GetDivider().has_value()) {
@@ -112,7 +112,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 dividerSpace.reset();
             }
             if (dividerSpace.has_value()) {
-                spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
+                spaceWidth_ = std::max(spaceWidth_, static_cast<float>(Round(dividerSpace.value())));
             }
         }
         spaceWidth_ += chainInterval_;
@@ -662,7 +662,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (GreatOrEqual(pos->second.endPos + chainOffset, startMainPos_)) {
+        if (GreatNotEqual(pos->second.endPos + chainOffset, startMainPos_)) {
             if (pos->second.isGroup) {
                 CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.startPos + chainOffset, true);
             }
@@ -734,7 +734,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (LessOrEqual(pos->second.startPos + chainOffset, endMainPos_)) {
+        if (LessNotEqual(pos->second.startPos + chainOffset, endMainPos_)) {
             if (pos->second.isGroup) {
                 CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.endPos + chainOffset, false);
             }
@@ -929,7 +929,7 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
 
         float laneGutter = GetLaneGutter();
         crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize * GetLanes());
-        crossOffset += ((crossSize + laneGutter) / GetLanes() - laneGutter) * laneIndex + laneGutter * laneIndex;
+        crossOffset += ((crossSize + laneGutter) / GetLanes()) * laneIndex;
     } else {
         crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
     }
@@ -982,7 +982,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
 {
-    float delta = crossSize - childCrossSize;
+    float delta = crossSize - GetLaneGutter() - childCrossSize;
     if (LessOrEqual(delta, 0)) {
         return 0.0f;
     }
@@ -1167,7 +1167,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     for (int32_t i = 0; i < cacheCount && currIndex + i < totalItemCount_; i++) {
         int32_t index = currIndex + i;
         auto wrapper = layoutWrapper->GetChildByIndex(index);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (!wrapper) {
             predictBuildList.emplace_back(index);
             continue;
         }
@@ -1187,7 +1187,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     for (int32_t i = 0; i < cacheCount && currIndex - i >= 0; i++) {
         int32_t index = currIndex - i;
         auto wrapper = layoutWrapper->GetChildByIndex(index);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (!wrapper) {
             predictBuildList.emplace_back(index);
             continue;
         }
@@ -1244,8 +1244,10 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
                 break;
             }
             auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false);
-            PredictBuildItem(wrapper, param.layoutConstraint);
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            if (wrapper) {
+                PredictBuildItem(wrapper, param.layoutConstraint);
+                frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            }
             param.items.erase(it++);
         }
         pattern->SetPredictLayoutParam(std::nullopt);

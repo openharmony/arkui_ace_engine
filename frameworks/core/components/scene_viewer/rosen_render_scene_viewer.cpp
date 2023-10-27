@@ -70,7 +70,13 @@ void RosenRenderSceneViewer::PaintTextureLayer(RenderContext& context, const Off
     textureLayer_->UpdateRenderFinishFuture(renderFinished_);
     textureLayer_->SetOffset(offset.GetX(), offset.GetY());
     ACE_FUNCTION_TRACE();
+#ifndef USE_ROSEN_DRAWING
     auto skCanvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+#else
+    auto drawingCanvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    auto rsCanvas = drawingCanvas->GetImpl<RSSkCanvas>();
+    auto skCanvas = rsCanvas->ExportSkCanvas();
+#endif
     if (skCanvas == nullptr) {
         LOGE("SceneView RosenRenderSceneView::PaintTexture skCanvas is null");
         return;

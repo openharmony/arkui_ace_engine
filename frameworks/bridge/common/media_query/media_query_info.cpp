@@ -54,7 +54,7 @@ std::string MediaQueryInfo::GetOrientation()
         case DeviceOrientation::LANDSCAPE:
             return "landscape";
         default:
-            LOGE("unsupported orientation type");
+            break;
     }
     return "";
 }

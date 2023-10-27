@@ -23,6 +23,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "base/geometry/matrix4.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/point.h"
 #include "base/image/pixel_map.h"
@@ -63,6 +64,7 @@ struct TransformConfig {
     double translateY = 0.0;
     double degree = 0.0;
     int id = -1;
+    Matrix4 localMat;
     bool operator==(TransformConfig tc)
     {
         return scaleX = tc.scaleX && scaleY == tc.scaleY && centerX == tc.centerX && centerY == tc.centerY &&
@@ -422,6 +424,14 @@ private:
     bool copy_ = true;
 #endif
     Velocity velocity_;
+};
+
+class NotifyDragEvent : public DragEvent {
+    DECLARE_ACE_TYPE(NotifyDragEvent, DragEvent)
+
+public:
+    NotifyDragEvent() = default;
+    ~NotifyDragEvent() = default;
 };
 
 struct FingerInfo {

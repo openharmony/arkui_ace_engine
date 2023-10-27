@@ -338,6 +338,14 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
     }
 }
 
+void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
+{
+    CHECK_NULL_VOID(rsNode_ && paintRect.IsValid());
+    RSNode::ExecuteWithoutAnimation([&]() {
+        rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    });
+}
+
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool needRoundToPixelGrid)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -349,7 +357,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     if (needRoundToPixelGrid) {
         RoundToPixelGrid(geometryNode->GetParentAbsoluteOffset().GetX(),
             geometryNode->GetParentAbsoluteOffset().GetY());
-        paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetFrameSize());
+        paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
     }
     SyncGeometryProperties(paintRect);
 }
@@ -946,7 +954,7 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
             rsImagePtr->SetImage(drawingImage->GetImage());
             if (drawingImage->GetImage()) {
                 rsImagePtr->SetSrcRect(
-                    Rosen::RectF(0, 0, drawingImage->GetImage()->width(), drawingImage->GetImage()->height()));
+                    Rosen::RectF(0, 0, drawingImage->GetImage()->GetWidth(), drawingImage->GetImage()->GetHeight()));
             }
         }
         rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
@@ -1422,7 +1430,7 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
     return rect;
 }
 
-void RosenRenderContext::GetPointWithRevert(PointF& point)
+Matrix4 RosenRenderContext::GetRevertMatrix()
 {
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
@@ -1441,7 +1449,20 @@ void RosenRenderContext::GetPointWithRevert(PointF& point)
                     Matrix4::CreateScale(scale[0], scale[1], 1) *
                     Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
 
-    auto invertMat = Matrix4::Invert(translateMat * rotationMat * scaleMat);
+    return Matrix4::Invert(translateMat * rotationMat * scaleMat);
+}
+
+Matrix4 RosenRenderContext::GetLocalTransformMatrix()
+{
+    auto invertMat = GetRevertMatrix();
+    RectF rect = GetPaintRectWithoutTransform();
+    auto transformMat = Matrix4::CreateTranslate(-rect.GetOffset().GetX(), -rect.GetOffset().GetY(), 0) * invertMat;
+    return transformMat;
+}
+
+void RosenRenderContext::GetPointWithRevert(PointF& point)
+{
+    auto invertMat = GetRevertMatrix();
     Point tmp(point.GetX(), point.GetY());
     auto invertPoint = invertMat * tmp;
     point.SetX(invertPoint.GetX());
@@ -1985,8 +2006,6 @@ RectF RosenRenderContext::AdjustPaintRect()
         }
         auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
-        auto offsetForArea = OffsetF(rect.GetX() - anchorX.value_or(0), rect.GetY() - anchorY.value_or(0));
-        geometryNode->SetPixelGridRoundOffsetForArea(offsetForArea);
         rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
         rect.SetTop(rect.GetY() + offsetY.value_or(0) - anchorY.value_or(0));
         geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
@@ -2065,15 +2084,6 @@ void RosenRenderContext::RoundToPixelGrid(float absoluteLeft, float absoluteTop)
     geometryNode->SetPixelGridRoundOffset(OffsetF(RoundValueToPixelGrid(nodeLeft, false, textRounding),
         RoundValueToPixelGrid(nodeTop, false, textRounding)));
 
-    if (HasOffset()) {
-        float nodeLeftWithoutOffset = geometryNode->GetPixelGridRoundOffsetForArea().GetX();
-        float nodeTopWithoutOffset = geometryNode->GetPixelGridRoundOffsetForArea().GetY();
-        geometryNode->SetPixelGridRoundOffsetForArea(OffsetF(RoundValueToPixelGrid(nodeLeftWithoutOffset, false,
-            textRounding), RoundValueToPixelGrid(nodeTopWithoutOffset, false, textRounding)));
-    } else {
-        geometryNode->SetPixelGridRoundOffsetForArea(geometryNode->GetPixelGridRoundOffset());
-    }
-
     // We multiply dimension by scale factor and if the result is close to the
     // whole number, we don't have any fraction To verify if the result is close
     // to whole number we want to check both floor and ceil numbers
@@ -2082,7 +2092,7 @@ void RosenRenderContext::RoundToPixelGrid(float absoluteLeft, float absoluteTop)
     bool hasFractionalHeight =
         !NearEqual(fmod(nodeHeight, 1.0), 0) && !NearEqual(fmod(nodeHeight, 1.0), 1.0);
 
-    geometryNode->SetFrameSize(SizeF(
+    geometryNode->SetPixelGridRoundSize(SizeF(
         RoundValueToPixelGrid(absoluteNodeRight, (textRounding && hasFractionalWidth),
             (textRounding && !hasFractionalWidth)) - RoundValueToPixelGrid(absoluteNodeLeft, false, textRounding),
         RoundValueToPixelGrid(absoluteNodeBottom, (textRounding && hasFractionalHeight),
@@ -2278,6 +2288,7 @@ void RosenRenderContext::PaintFocusState(
         pen.SetWidth(borderWidthPx);
         rsCanvas.AttachPen(pen);
         rsCanvas.DrawRoundRect(rrect);
+        rsCanvas.DetachPen();
     };
     std::shared_ptr<Rosen::RectF> overlayRect = std::make_shared<Rosen::RectF>(
         paintRect.GetRect().Left() - borderWidthPx / 2, paintRect.GetRect().Top() - borderWidthPx / 2,
@@ -2963,12 +2974,12 @@ void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& cli
     auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
     auto shapePath = Rosen::RSPath::CreateRSPath(rsPath);
     if (!clipBoundModifier_) {
-        auto prop = std::make_shared<RSProperty<RSPath>>(shapePath);
+        auto prop = std::make_shared<RSProperty<std::shared_ptr<Rosen::RSPath>>>(shapePath);
         clipBoundModifier_ = std::make_shared<Rosen::RSClipBoundsModifier>(prop);
         rsNode_->AddModifier(clipBoundModifier_);
     } else {
         auto property =
-            std::static_pointer_cast<RSProperty<std::shared_ptr<RSPath>>>(clipBoundModifier_->GetProperty());
+            std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSPath>>>(clipBoundModifier_->GetProperty());
         property->Set(shapePath);
     }
 #endif
@@ -2999,7 +3010,7 @@ void RosenRenderContext::PaintClipMask(const std::unique_ptr<ClipProperty>& clip
     auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
     auto maskPath = Rosen::RSMask::CreatePathMask(rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
     if (!clipMaskModifier_) {
-        auto prop = std::make_shared<RSProperty<RSMask>>(maskPath);
+        auto prop = std::make_shared<RSProperty<std::shared_ptr<RSMask>>>(maskPath);
         clipMaskModifier_ = std::make_shared<Rosen::RSMaskModifier>(prop);
         rsNode_->AddModifier(clipMaskModifier_);
     } else {
@@ -3457,6 +3468,7 @@ void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fi
         pen.SetColor(ToRSColor(strokeColor));
         rsCanvas.AttachPen(pen);
         rsCanvas.DrawRect(ToRSRect(rect));
+        rsCanvas.DetachPen();
     };
 
     mouseSelectModifier_ = std::make_shared<MouseSelectModifier>();
@@ -3871,6 +3883,12 @@ void RosenRenderContext::OnRenderGroupUpdate(bool isRenderGroup)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkNodeGroup(isRenderGroup);
+}
+
+void RosenRenderContext::OnSuggestedRenderGroupUpdate(bool isRenderGroup)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkNodeGroup(isRenderGroup, false);
 }
 
 void RosenRenderContext::OnRenderFitUpdate(RenderFit renderFit)

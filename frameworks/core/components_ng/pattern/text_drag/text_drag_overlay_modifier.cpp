@@ -47,6 +47,7 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     } else {
         canvas.DrawPath(*pattern->GenerateBackgroundPath(backgroundOffset_->Get()));
     }
+    canvas.DetachBrush();
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     auto&& paragraph = pattern->GetParagraph();
     if (std::holds_alternative<RefPtr<Paragraph>>(paragraph)) {

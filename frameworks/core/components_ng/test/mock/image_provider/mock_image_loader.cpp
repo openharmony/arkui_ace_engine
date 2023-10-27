@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "mock_image_loader.h"
+
 #include <chrono>
 
 #include "core/image/image_loader.h"
@@ -57,4 +58,11 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 {
     return nullptr;
 }
+
+bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
+{
+    return false;
+}
+
+void ImageLoader::WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData) {}
 } // namespace OHOS::Ace

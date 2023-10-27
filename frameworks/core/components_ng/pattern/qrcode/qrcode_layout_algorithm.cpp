@@ -55,7 +55,6 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
         }
         auto width = DEFAULT_SIZE.ConvertToPx() - leftPadding - rightPadding;
         if (Negative(width)) {
-            LOGD("QRCode padding is greater than QRCode size, reset QRCode size to 0.");
             width = 0.0f;
         }
         if (contentConstraint.selfIdealSize.Width().has_value()) {
@@ -63,7 +62,6 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
         }
         auto height = DEFAULT_SIZE.ConvertToPx() - topPadding - bottomPadding;
         if (Negative(height)) {
-            LOGD("QRCode padding is greater than QRCode size, reset QRCode size to 0.");
             height = 0.0f;
         }
         if (contentConstraint.selfIdealSize.Height().has_value()) {

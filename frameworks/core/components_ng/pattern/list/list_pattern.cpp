@@ -86,6 +86,9 @@ void ListPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    if (!listDragStatusListener_.has_value()) {
+        InitNotifyDragEvent();
+    }
     SetAccessibilityAction();
 }
 
@@ -185,6 +188,12 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
+        if (lanesLayoutAlgorithm->GetLanes() != lanes_) {
+            auto item = swiperItem_.Upgrade();
+            if (item) {
+                item->SwiperReset();
+            }
+        }
         lanes_ = lanesLayoutAlgorithm->GetLanes();
         laneGutter_ = lanesLayoutAlgorithm->GetLaneGutter();
     }
@@ -703,7 +712,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
         // adjust offset.
-        auto friction = CalculateFriction(std::abs(overScroll) / contentMainSize_);
+        auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
         currentDelta_ = currentDelta_ * friction;
     }
     return true;
@@ -1324,12 +1333,17 @@ void ListPattern::UpdateScrollBarOffset()
 
 float ListPattern::GetTotalHeight() const
 {
+    auto currentOffset = GetTotalOffset();
+    if (endIndex_ >= maxListItemIndex_) {
+        return currentOffset + endMainPos_;
+    }
     if (itemPosition_.empty()) {
         return 0.0f;
     }
-
+    int32_t remainCount = maxListItemIndex_ - endIndex_;
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
-    return itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+    float remainOffset = itemsSize / itemPosition_.size() * remainCount - spaceWidth_;
+    return currentOffset + endMainPos_ + remainOffset;
 }
 
 void ListPattern::SetChainAnimation()
@@ -1347,6 +1361,9 @@ void ListPattern::SetChainAnimation()
     }
     if (!chainAnimation_) {
         auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+        if (Negative(space)) {
+            space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
+        }
         springProperty_ =
             AceType::MakeRefPtr<SpringProperty>(CHAIN_SPRING_MASS, CHAIN_SPRING_STIFFNESS, CHAIN_SPRING_DAMPING);
         if (chainAnimationOptions_.has_value()) {
@@ -1391,6 +1408,9 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
         auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
         CHECK_NULL_VOID(listLayoutProperty);
         auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+        if (Negative(space)) {
+            space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
+        }
         float maxSpace = options.maxSpace.ConvertToPx();
         float minSpace = options.minSpace.ConvertToPx();
         if (GreatNotEqual(minSpace, maxSpace)) {
@@ -1594,12 +1614,16 @@ bool ListPattern::IsItemSelected(const MouseInfo& info)
 
 void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
 {
-    if (swiperItem_ != swiperItem) {
-        auto item = swiperItem_.Upgrade();
-        if (item) {
-            item->SwiperReset();
+    // swiper item only can be replaced when no other items be dragged
+    if (canReplaceSwiperItem_) {
+        if (swiperItem != swiperItem_) {
+            auto item = swiperItem_.Upgrade();
+            if (item) {
+                item->SwiperReset();
+            }
+            swiperItem_ = std::move(swiperItem);
         }
-        swiperItem_ = std::move(swiperItem);
+        canReplaceSwiperItem_ = false;
     }
 }
 
@@ -1720,6 +1744,48 @@ bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
         }
     }
     return false;
+}
+
+void ListPattern::InitNotifyDragEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!listDragStatusListener_.has_value()) {
+        listDragStatusListener_ = AceType::MakeRefPtr<ListDragStatusListener>();
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->RegisterDragStatusListener(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
+}
+
+void ListPattern::HandleOnDragStatusCallback(
+    const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    if (!listDragStatusListener_.has_value()) {
+        return;
+    }
+    auto listDragStatusListener = listDragStatusListener_.value();
+    switch (dragEventType) {
+        case DragEventType::START:
+            listDragStatusListener->OnDragStarted(notifyDragEvent);
+            break;
+        case DragEventType::ENTER:
+            listDragStatusListener->OnDragEntered(notifyDragEvent);
+            break;
+        case DragEventType::MOVE:
+            listDragStatusListener->OnDragMoved(notifyDragEvent);
+            break;
+        case DragEventType::LEAVE:
+            listDragStatusListener->OnDragLeaved(notifyDragEvent);
+            break;
+        case DragEventType::DROP:
+            listDragStatusListener->OnDragEnded(notifyDragEvent);
+            break;
+        default:
+            break;
+    }
 }
 
 void ListPattern::RefreshLanesItemRange()

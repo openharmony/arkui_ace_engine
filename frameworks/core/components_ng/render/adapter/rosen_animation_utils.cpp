@@ -58,6 +58,11 @@ bool AnimationUtils::CloseImplicitAnimation()
     return !animations.empty();
 }
 
+bool AnimationUtils::IsImplicitAnimationOpen()
+{
+    return Rosen::RSNode::IsImplicitAnimationOpen();
+}
+
 void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
     const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {

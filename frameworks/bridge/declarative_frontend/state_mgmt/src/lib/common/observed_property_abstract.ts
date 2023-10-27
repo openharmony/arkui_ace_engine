@@ -121,6 +121,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   }
 
   protected notifyHasChanged(newValue: T) {
+    stateMgmtProfiler.begin("ObservedPropertyAbstract.notifyHasChanged");
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
@@ -142,9 +143,11 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
         stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
       }
     });
+    stateMgmtProfiler.end();
   }
 
   protected notifyPropertyRead() {
+    stateMgmtProfiler.begin("ObservedPropertyAbstract.notifyPropertyRead");
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: propertyRead.`)
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
@@ -154,6 +157,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
         }
       }
     });
+    stateMgmtProfiler.end();
   }
 
   /*

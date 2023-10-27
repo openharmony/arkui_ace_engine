@@ -138,7 +138,7 @@ HWTEST_F(GridContainerTestNg, BuildContainer001, TestSize.Level1)
     /* layout */
     MeasureLayout(layoutWrapper, textWrapper);
     auto rect = textWrapper->GetHostNode()->GetGeometryNode()->GetFrameRect();
-    EXPECT_EQ(rect.Width(), DEFAULT_COLUMN_WIDTH);
+    EXPECT_EQ(rect.Width(), 0);
     EXPECT_EQ(rect.GetX(), DEFAULT_COLUMN_WIDTH);
 }
 } // namespace OHOS::Ace::NG

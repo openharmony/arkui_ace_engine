@@ -24,6 +24,10 @@ namespace OHOS::Ace::NG {
 
 CustomNodeBase::~CustomNodeBase()
 {
+    // appearFunc_ & destroyFunc_ should be executed in pairs
+    if (!executeFireOnAppear_ && appearFunc_) {
+        appearFunc_();
+    }
     if (destroyFunc_) {
         destroyFunc_();
     }
@@ -74,5 +78,10 @@ void CustomNodeBase::FireRecycleSelf()
     if (recycleCustomNodeFunc_) {
         recycleCustomNodeFunc_(AceType::Claim<CustomNodeBase>(this));
     }
+}
+
+void CustomNodeBase::SetOnDumpInfoFunc(std::function<void(const std::vector<std::string>&)>&& func)
+{
+    onDumpInfoFunc_ = func;
 }
 } // namespace OHOS::Ace::NG

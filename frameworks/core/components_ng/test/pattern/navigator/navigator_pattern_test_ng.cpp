@@ -16,10 +16,10 @@
 #include "gtest/gtest.h"
 
 #define private public
-
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigator/navigator_model.h"
+#include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
 
 using namespace testing;
@@ -48,12 +48,13 @@ protected:
 
 RefPtr<FrameNode> NavigatorPatternTestNg::CreateNavigator(const TestProperty& testProperty)
 {
-    NavigatorModel::GetInstance()->Create();
+    NavigatorModelNG navigator;
+    navigator.Create();
     if (testProperty.typeValue.has_value()) {
-        NavigatorModel::GetInstance()->SetType(testProperty.typeValue.value());
-        NavigatorModel::GetInstance()->SetUri(testProperty.url.value());
-        NavigatorModel::GetInstance()->SetActive(testProperty.active.value());
-        NavigatorModel::GetInstance()->SetParams(testProperty.params.value());
+        navigator.SetType(testProperty.typeValue.value());
+        navigator.SetUri(testProperty.url.value());
+        navigator.SetActive(testProperty.active.value());
+        navigator.SetParams(testProperty.params.value());
     }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop

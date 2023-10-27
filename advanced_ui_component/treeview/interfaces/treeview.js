@@ -3485,7 +3485,6 @@ export class TreeViewInner extends ViewPU {
                             t.listNodeDataSource.handleEvent(Event.MOUSE_BUTTON_RIGHT, findCurrentNodeIndex.call(t, this.item.getNodeCurrentNodeId()));
                             this.listTreeViewMenu = this.item.getMenu();
                             t.listNodeDataSource.setClickIndex(i);
-                            t.listNodeDataSource.setPopUpInfo(PopUpType.HINTS, InputError.NONE,!1, i);
                             clearTimeout(this.item.getNodeItem().mainTitleNode.popUpTimeout)
                         }
                         e.stopPropagation()

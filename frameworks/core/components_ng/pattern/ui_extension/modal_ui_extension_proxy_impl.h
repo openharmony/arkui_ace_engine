@@ -32,7 +32,7 @@ public:
     void SendData(const AAFwk::WantParams& params) override;
 
 private:
-    sptr<Rosen::Session> session_;
+    wptr<Rosen::Session> session_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_MODAL_UI_EXTENSION_PROXY_H

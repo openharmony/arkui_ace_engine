@@ -20,8 +20,15 @@
 #include "pointer_event.h"
 
 #include "base/utils/utils.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Platform {
+namespace {
+constexpr int32_t ANGLE_0 = 0;
+constexpr int32_t ANGLE_90 = 90;
+constexpr int32_t ANGLE_180 = 180;
+constexpr int32_t ANGLE_270 = 270;
+} // namespace
 
 SourceTool GetSourceTool(int32_t orgToolType)
 {
@@ -371,21 +378,48 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     }
 }
 
-void CalculatePointerEvent(
-    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale)
+void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
+    const NG::VectorF& scale, int32_t udegree)
 {
     CHECK_NULL_VOID(point);
     int32_t pointerId = point->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     bool ret = point->GetPointerItem(pointerId, item);
     if (ret) {
-        float xRelative = item.GetWindowX() - offsetF.GetX();
-        float yRelative = item.GetWindowY() - offsetF.GetY();
-        float xBeforeScale = NearZero(scale.x) ? xRelative : xRelative / scale.x;
-        float yBeforeScale = NearZero(scale.y) ? yRelative : yRelative / scale.y;
+        float xRelative = item.GetWindowX();
+        float yRelative = item.GetWindowY();
+        auto windowX = xRelative;
+        auto windowY = yRelative;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
+        auto windowWidth = displayWindowRect.Width();
+        auto windowHeight = displayWindowRect.Height();
+        switch (udegree) {
+            case ANGLE_0:
+                windowX = xRelative - offsetF.GetX();
+                windowY = yRelative - offsetF.GetY();
+                break;
+            case ANGLE_90:
+                windowX = yRelative - offsetF.GetX();
+                windowY = windowWidth - offsetF.GetY() - xRelative;
+                break;
+            case ANGLE_180:
+                windowX = windowWidth - offsetF.GetX() - xRelative;
+                windowY = windowHeight - offsetF.GetY() - yRelative;
+                break;
+            case ANGLE_270:
+                windowX = windowHeight - offsetF.GetX() - yRelative;
+                windowY = xRelative - offsetF.GetY();
+                break;
+            default:
+                break;
+        }
+        windowX = NearZero(scale.x) ? windowX : windowX / scale.x;
+        windowY = NearZero(scale.y) ? windowY : windowY / scale.y;
 
-        item.SetWindowX(static_cast<int32_t>(xBeforeScale));
-        item.SetWindowY(static_cast<int32_t>(yBeforeScale));
+        item.SetWindowX(static_cast<int32_t>(windowX));
+        item.SetWindowY(static_cast<int32_t>(windowY));
         point->UpdatePointerItem(pointerId, item);
     }
 }
@@ -409,19 +443,19 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
         int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
         int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
 
-        if (udegree == 0) {
+        if (udegree == ANGLE_0) {
             windowX = xRelative - offsetF.GetX();
             windowY = yRelative - offsetF.GetY();
         }
-        if (udegree == 90) {
+        if (udegree == ANGLE_90) {
             windowX = yRelative - offsetF.GetX();
             windowY = deviceWidth - offsetF.GetY() - xRelative;
         }
-        if (udegree == 180) {
+        if (udegree == ANGLE_180) {
             windowX = deviceWidth - offsetF.GetX() - xRelative;
             windowY = deviceHeight - offsetF.GetY() - yRelative;
         }
-        if (udegree == 270) {
+        if (udegree == ANGLE_270) {
             windowX = deviceHeight - offsetF.GetX() - yRelative;
             windowY = xRelative - offsetF.GetY();
         }

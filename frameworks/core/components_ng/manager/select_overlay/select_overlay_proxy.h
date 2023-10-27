@@ -42,7 +42,11 @@ public:
 
     void UpdateSelectMenuInfo(const SelectMenuInfo& info) const;
 
+    void UpdateSelectMenuInfo(std::function<void(SelectMenuInfo& menuInfo)> updateAction) const;
+
     void UpdateShowArea(const RectF& area) const;
+
+    void SetSelectRegionVisible(bool isSelectRegionVisible);
 
     void SetHandleReverse(bool reverse);
 
@@ -60,6 +64,7 @@ public:
     void DisableMenu(bool isDisabled);
     bool IsMenuShow();
     bool IsHandleShow();
+    bool IsSingleHandle();
 
 private:
     int32_t selectOverlayId_ = 0;

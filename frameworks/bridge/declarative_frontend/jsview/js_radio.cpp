@@ -52,7 +52,6 @@ namespace OHOS::Ace::Framework {
 void JSRadio::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("radio create error, info is not-valid");
         return;
     }
 
@@ -115,7 +114,6 @@ void ParseCheckedObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEv
 void JSRadio::Checked(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
@@ -133,7 +131,6 @@ void JSRadio::Checked(const JSCallbackInfo& info)
 void JSRadio::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -160,7 +157,6 @@ void JSRadio::JsWidth(const JSRef<JSVal>& jsValue)
 void JSRadio::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -192,13 +188,7 @@ void JSRadio::JsHeight(const JSRef<JSVal>& jsValue)
 
 void JSRadio::JsSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -210,7 +200,6 @@ void JSRadio::JsSize(const JSCallbackInfo& info)
 void JSRadio::JsPadding(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     NG::PaddingPropertyF oldPadding = GetOldPadding(info);
@@ -224,7 +213,6 @@ NG::PaddingPropertyF JSRadio::GetOldPadding(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
             return padding;
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
@@ -358,7 +346,6 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
 void JSRadio::JsResponseRegion(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 

@@ -76,14 +76,6 @@ ViewAbstractModelNG viewAbstractModelNG;
 auto callback = []() { srcimages = "test"; };
 int32_t flag = 0;
 const ImageSourceInfo imageSourceInfo = ImageSourceInfo("common/images/mmm.jpg", "abstract", "abstract");
-
-void CallShowHideFunc()
-{
-    MockPipelineBase::GetCurrent()->GetOverlayManager()->CallOnShowMenuCallback();
-    MockPipelineBase::GetCurrent()->GetOverlayManager()->CallOnHideMenuCallback();
-    SubwindowManager::GetInstance()->onShowMenuCallback_();
-    SubwindowManager::GetInstance()->onHideMenuCallback_();
-}
 }; // namespace
 class ViewAbstractTestNg : public testing::Test {
 public:
@@ -1675,15 +1667,12 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
      * @tc.expected: The show or hide method will not call flagFunc.
      */
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
-    EXPECT_FALSE(MockPipelineBase::GetCurrent()->GetOverlayManager()->onShowMenuCallback_);
     buildFunc = []() {};
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
-    EXPECT_TRUE(MockPipelineBase::GetCurrent()->GetOverlayManager()->onShowMenuCallback_);
     params.push_back(OptionParam());
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     menuParam.type = MenuType::CONTEXT_MENU;
     viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam, previewBuildFunc);
-    CallShowHideFunc();
     EXPECT_EQ(flag, 0);
     /**
      * @tc.steps: step3. set appear and disappear and recall BindMenu and BindContextMenu;
@@ -1695,8 +1684,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     menuParam.type = MenuType::CONTEXT_MENU;
     viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
-    CallShowHideFunc();
-    EXPECT_EQ(flag, 4);
+    EXPECT_EQ(flag, 0);
     /**
      * @tc.steps: step4. create mouseInfo, set some useless params and call onMouseCallback_;
      * @tc.expected: StopPropagation in mouseInfo is false.

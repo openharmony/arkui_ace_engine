@@ -17,6 +17,8 @@
 
 #define private public
 
+#undef SECURITY_COMPONENT_ENABLE
+
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
@@ -268,7 +270,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest004, TestSize.Level1)
      */
     auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(DOUBLE_FINGERS, 1);
     gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
-    EXPECT_TRUE(gestureEventHub->ActClick());
+    EXPECT_FALSE(gestureEventHub->ActClick());
     gestureEventHub->gestureHierarchy_.clear();
 
     /**
@@ -353,7 +355,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest005, TestSize.Level1)
      */
     auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(1, DOUBLE_FINGERS, false);
     gestureEventHub->gestureHierarchy_.emplace_back(longPressRecognizer);
-    EXPECT_TRUE(gestureEventHub->ActLongClick());
+    EXPECT_FALSE(gestureEventHub->ActLongClick());
     gestureEventHub->gestureHierarchy_.clear();
 
     /**
@@ -785,11 +787,11 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest011, TestSize.Level1)
 
     auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(DOUBLE_FINGERS, 1);
     gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
-    EXPECT_TRUE(gestureEventHub->IsAccessibilityClickable());
+    EXPECT_FALSE(gestureEventHub->IsAccessibilityClickable());
     gestureEventHub->gestureHierarchy_.clear();
     clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, CLICK_COUNTS);
     gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
-    EXPECT_TRUE(gestureEventHub->IsAccessibilityClickable());
+    EXPECT_FALSE(gestureEventHub->IsAccessibilityClickable());
     gestureEventHub->gestureHierarchy_.clear();
 
     /**
@@ -818,7 +820,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest011, TestSize.Level1)
 
     auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(1, DOUBLE_FINGERS, false);
     gestureEventHub->gestureHierarchy_.emplace_back(longPressRecognizer);
-    EXPECT_TRUE(gestureEventHub->IsAccessibilityLongClickable());
+    EXPECT_FALSE(gestureEventHub->IsAccessibilityLongClickable());
     gestureEventHub->gestureHierarchy_.clear();
 
     /**

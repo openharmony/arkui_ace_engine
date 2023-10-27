@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
+#include "core/common/ime/text_input_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -40,12 +41,12 @@ void TextFieldModelNG::CreateNode(
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    auto textEditingValue = pattern->GetTextEditingValue();
+    auto textValue = pattern->GetTextValue();
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("TextFieldModelNG::GetOrCreateNode with text %{public}s, current text %{public}s",
-            value.value_or("NA").c_str(), textEditingValue.text.c_str());
+            value.value_or("NA").c_str(), textValue.c_str());
     }
-    if (value.has_value() && value.value() != textEditingValue.text) {
+    if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
@@ -81,7 +82,8 @@ void TextFieldModelNG::CreateNode(
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
-    SetDraggable(textFieldTheme->GetDraggable());
+    auto draggable = pipeline->GetDraggable<TextFieldTheme>();
+    SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
 }
 
@@ -111,7 +113,7 @@ void TextFieldModelNG::ProcessDefaultPadding(PaddingProperty& paddings)
     paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
     paddings.bottom = NG::CalcLength(themePadding.Top().ConvertToPx());
     paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
-    paddings.right = NG::CalcLength(themePadding.Left().ConvertToPx());
+    paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
 }
 
 RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
@@ -138,9 +140,6 @@ void TextFieldModelNG::SetWidthAuto(bool isAuto)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
-        return;
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, isAuto);
 }
 
@@ -152,14 +151,6 @@ void TextFieldModelNG::RequestKeyboardOnFocus(bool needToRequest)
     pattern->SetNeedToRequestKeyboardOnFocus(needToRequest);
 }
 
-void TextFieldModelNG::SetTextRectWillChange()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    pattern->SetTextRectWillChange();
-}
-
 void TextFieldModelNG::SetType(TextInputType value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -168,7 +159,6 @@ void TextFieldModelNG::SetType(TextInputType value)
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
         layoutProperty->UpdateTypeChanged(true);
     }
-    SetTextRectWillChange();
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value);
 }
 
@@ -219,10 +209,8 @@ void TextFieldModelNG::SetCaretPosition(const int32_t& value)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    auto caretPosition = layoutProperty->GetPlaceholderValue() == "" ? value : 0;
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CaretPosition, caretPosition);
-    pattern->SetCaretPosition(caretPosition);
-    pattern->UpdateCaretPositionByTextEdit();
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CaretPosition, value);
+    pattern->SetCaretPosition(value);
 }
 
 void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
@@ -232,13 +220,21 @@ void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
 
 void TextFieldModelNG::SetTextAlign(TextAlign value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    TextAlign newValue = value;
+    if (!pattern->IsTextArea() && newValue == TextAlign::JUSTIFY) {
+        newValue = TextAlign::START;
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    if (layoutProperty->GetTextAlignValue(TextAlign::START) != value) {
+    if (layoutProperty->GetTextAlignValue(TextAlign::START) != newValue) {
         layoutProperty->UpdateTextAlignChanged(true);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, newValue);
 }
+
 void TextFieldModelNG::SetMaxLength(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value);
@@ -258,7 +254,6 @@ void TextFieldModelNG::SetMaxLines(uint32_t value)
 }
 void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
-    SetTextRectWillChange();
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
@@ -306,9 +301,6 @@ void TextFieldModelNG::SetShowPasswordIcon(bool value)
     CHECK_NULL_VOID(layoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    if (layoutProperty->GetShowPasswordIcon().has_value() && layoutProperty->GetShowPasswordIconValue() != value) {
-        pattern->ShowPasswordIconChange();
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value);
 }
 
@@ -403,21 +395,13 @@ void TextFieldModelNG::SetPasswordIcon(const PasswordIcon& passwordIcon)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    if (passwordIcon.showResult == "") {
-        pattern->SetShowUserDefinedIcon(false);
-    } else {
+    if (passwordIcon.showResult != "") {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
             ImageSourceInfo(passwordIcon.showResult, passwordIcon.showBundleName, passwordIcon.showModuleName));
-        pattern->SetShowUserDefinedIcon(true);
-        pattern->SetShowUserDefinedIconSrc(passwordIcon.showResult);
     }
-    if (passwordIcon.hideResult == "") {
-        pattern->SetHideUserDefinedIcon(false);
-    } else {
+    if (passwordIcon.hideResult != "") {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo,
             ImageSourceInfo(passwordIcon.hideResult, passwordIcon.hideBundleName, passwordIcon.hideModuleName));
-        pattern->SetHideUserDefinedIcon(true);
-        pattern->SetHideUserDefinedIconSrc(passwordIcon.hideResult);
     }
 }
 
@@ -447,6 +431,16 @@ void TextFieldModelNG::SetShowError(const std::string& errorText, bool visible)
 void TextFieldModelNG::SetShowCounter(bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (value) {
+        pattern->AddCounterNode();
+    } else {
+        pattern->ClearCounterNode();
+    }
 }
 
 void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)

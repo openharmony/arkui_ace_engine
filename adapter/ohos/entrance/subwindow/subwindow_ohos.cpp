@@ -92,7 +92,7 @@ void SubwindowOhos::InitContainer()
             "Find parent window success, name: %{public}s, windowId: %{public}u, type: %{public}u",
             parentWindow->GetWindowName().c_str(), parentWindow->GetWindowId(), static_cast<uint32_t>(windowType));
         if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_FLOAT);
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
@@ -494,7 +494,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 
-void SubwindowOhos::HideMenuNG(bool showPreviewAnimation)
+void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 {
     if (!isShowed_) {
         return;
@@ -508,7 +508,7 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation)
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     ContainerScope scope(childContainerId_);
-    overlay->HideMenuInSubWindow(showPreviewAnimation);
+    overlay->HideMenuInSubWindow(showPreviewAnimation, startDrag);
 }
 
 void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
@@ -765,6 +765,9 @@ bool SubwindowOhos::CreateEventRunner()
 
 void SubwindowOhos::ClearToast()
 {
+    if (!IsToastWindow()) {
+        return;
+    }
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -782,7 +785,7 @@ void SubwindowOhos::ShowToastForAbility(
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos ShowToastForAbility Show the toast");
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
-
+    SetIsToastWindow(showMode == NG::ToastShowMode::TOP_MOST);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     if (!aceContainer) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Get container failed, it is null");
@@ -809,7 +812,7 @@ void SubwindowOhos::ShowToastForAbility(
 void SubwindowOhos::ShowToastForService(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos ShowToastForService begin");
+    TAG_LOGI(AceLogTag::ACE_PROMPT_ACTION_TOAST, "SubwindowOhos ShowToastForService begin");
     bool ret = CreateEventRunner();
     if (!ret) {
         return;
@@ -848,7 +851,7 @@ void SubwindowOhos::ShowToastForService(
         Platform::DialogContainer::ShowToast(childContainerId, message, duration, bottom);
     };
     if (!handler_->PostTask(showDialogCallback)) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Post sync task error");
+        TAG_LOGE(AceLogTag::ACE_PROMPT_ACTION_TOAST, "Post sync task error");
         return;
     }
 }

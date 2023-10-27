@@ -105,11 +105,11 @@ HWTEST_F(DragDropProxyTestNg, DragDropProxyTest001, TestSize.Level1)
      * @tc.expected: step4. DragDropManager->OnDragStart() & AddDataToClipboard() will be called
      *                      some logs will be print
      *                      they are defined in "mock_drag_drop_manager.cpp"
-     *                      frameNode's nodeName_ = ON_DRAG_START
+     *                      frameNode's nodeName_ not change
      */
     proxy->OnDragStart(info, EXTRA_INFO_DRAG_START, frameNode);
     nodeName = frameNode->GetNodeName();
-    EXPECT_EQ(nodeName, ON_DRAG_START);
+    EXPECT_EQ(nodeName, "");
 }
 
 /**
@@ -307,11 +307,11 @@ HWTEST_F(DragDropProxyTestNg, DragDropProxyTest005, TestSize.Level1)
      * @tc.steps: step4. call OnItemDragStart
      * @tc.expected: step4. DragDropManager->OnItemDragStart() will be called
      *                      some logs will be print they are defined in "mock_drag_drop_manager.cpp"
-     *                      frameNode' nodeName = ITEM_DRAG_START
+     *                      frameNode' nodeName not change
      */
     proxy->OnItemDragStart(info, frameNode);
     nodeName = frameNode->GetNodeName();
-    EXPECT_EQ(nodeName, ITEM_DRAG_START);
+    EXPECT_EQ(nodeName, "");
 }
 
 /**

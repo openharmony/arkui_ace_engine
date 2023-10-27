@@ -926,7 +926,6 @@ Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
 void FrontendDelegateImpl::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& /* showMode */)
 {
-    LOGD("FrontendDelegateImpl ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();

@@ -90,11 +90,7 @@ double TransferValue(double value, const std::string& unit)
             auto pipeline = container->GetPipelineContext();
             if (pipeline && !NearZero(pipeline->GetDipScale())) {
                 transfer = 1.0 / pipeline->GetDipScale();
-            } else {
-                LOGW("No pipeline, use default scale.");
             }
-        } else {
-            LOGW("No container, use default scale.");
         }
     } else if (unit == "dpcm") {
         transfer = 36.0; // 1px = 36 dpcm
@@ -266,7 +262,6 @@ bool ParseSingleCondition(const std::string& condition, const MediaFeature& medi
             return rule.ParseCondition(matchResults, mediaFeature, failReason);
         }
     }
-    LOGE("illegal condition");
     failReason = MediaError::SYNTAX;
     return false;
 }
@@ -307,7 +302,6 @@ bool DoMatchCondition(const std::string& condition, const MediaFeature& mediaFea
     } else if (CONDITION_WITHOUT_SCREEN.Match(noSpace)) {
         noScreen = noSpace;
     } else {
-        LOGE("illegal condition");
         return false;
     }
     MediaError failReason = MediaError::NONE;

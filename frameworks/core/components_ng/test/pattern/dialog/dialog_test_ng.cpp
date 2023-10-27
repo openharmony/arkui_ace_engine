@@ -663,7 +663,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg006, TestSize.Level1)
     param.autoCancel = true;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     auto child = FrameNode::GetOrCreateFrameNode(
         V2::CUSTOM_DIALOG_COMPONENT_TAG, 0, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
     auto Dialog = DialogView::CreateDialogNode(param, child);

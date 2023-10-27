@@ -264,7 +264,8 @@ float ListLanesLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float 
     if (lanes_ <= 0) {
         return 0.0f;
     }
-    return ListLayoutAlgorithm::CalculateLaneCrossOffset(crossSize / lanes_, childCrossSize / lanes_);
+    return ListLayoutAlgorithm::CalculateLaneCrossOffset((crossSize + GetLaneGutter()) / lanes_,
+        childCrossSize / lanes_);
 }
 
 int32_t ListLanesLayoutAlgorithm::GetLazyForEachIndex(const RefPtr<FrameNode>& host)
@@ -343,7 +344,7 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineForward(LayoutWrap
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (int32_t i = 0; i < lanes && index + i <= GetMaxListItemIndex(); i++) {
         auto wrapper = layoutWrapper->GetChildByIndex(index + i);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (!wrapper) {
             predictBuildList.emplace_back(index + i);
             continue;
         }
@@ -391,7 +392,7 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineBackward(LayoutWra
     for (int32_t i = 0; i < lanes && index >= 0; i++) {
         auto idx = index - i;
         auto wrapper = layoutWrapper->GetChildByIndex(idx);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (!wrapper) {
             predictBuildList.emplace_back(idx);
             continue;
         }

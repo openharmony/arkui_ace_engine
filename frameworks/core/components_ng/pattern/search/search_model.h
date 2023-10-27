@@ -70,7 +70,8 @@ public:
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent);
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void ()> &&buildFunc);
-
+    virtual void SetMaxLength(uint32_t value);
+    virtual void ResetMaxLength();
 private:
     static std::unique_ptr<SearchModel> instance_;
     static std::mutex mutex_;

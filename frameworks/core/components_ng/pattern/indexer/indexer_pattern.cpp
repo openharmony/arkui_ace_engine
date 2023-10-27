@@ -81,6 +81,7 @@ void IndexerPattern::OnModifyDone()
     if (propSelect != lastSelectProp_) {
         selected_ = propSelect;
         lastSelectProp_ = propSelect;
+        selectChanged_ = true;
         ResetStatus();
     }
     auto itemSize =
@@ -88,7 +89,8 @@ void IndexerPattern::OnModifyDone()
     auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
     lastItemSize_ = itemSize;
     auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
-    ApplyIndexChanged(needMarkDirty, false, false, indexerSizeChanged);
+    ApplyIndexChanged(needMarkDirty,
+        initialized_ && selectChanged_, false, indexerSizeChanged);
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
         InitPanEvent(gesture);
@@ -168,7 +170,7 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 void IndexerPattern::OnHover(bool isHover)
 {
     if (itemCount_ <= 0) {
-        LOGE("AlphabetIndexer arrayValue size is less than 0");
+        TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "AlphabetIndexer arrayValue size is less than 0");
         return;
     }
     if (isHover_ == isHover) {
@@ -235,7 +237,7 @@ void IndexerPattern::InitChildInputEvent()
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 {
     if (itemCount_ <= 0) {
-        LOGE("AlphabetIndexer arrayValue size is less than 0");
+        TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "AlphabetIndexer arrayValue size is less than 0");
         return;
     }
     MoveIndexByOffset(info.GetTouches().front().GetLocalLocation());
@@ -244,7 +246,6 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
 {
     if (itemCount_ <= 0) {
-        LOGE("AlphabetIndexer arrayValue size is less than 0");
         return;
     }
     childPressIndex_ = -1;
@@ -266,7 +267,6 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
         return;
     }
     if (itemCount_ <= 0) {
-        LOGE("AlphabetIndexer arrayValue size is less than 0");
         return;
     }
     auto nextSelectIndex = GetSelectChildIndex(offset);
@@ -425,6 +425,8 @@ void IndexerPattern::OnSelect(bool changed)
 void IndexerPattern::ApplyIndexChanged(
     bool isTextNodeInTree, bool selectChanged, bool fromTouchUp, bool indexerSizeChanged)
 {
+    initialized_ = true;
+    selectChanged_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();

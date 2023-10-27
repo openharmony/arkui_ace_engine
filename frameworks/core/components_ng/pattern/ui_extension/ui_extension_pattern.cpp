@@ -128,7 +128,12 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
     // Prohibit rebuilding the session unless the Want is updated.
     if (session_ && (!session_->GetSessionInfo().want->IsEquals(want))) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->RemoveChild(contentNode_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         DestorySession();
+        state_ = AbilityState::DESTRUCTION;
         session_ = nullptr;
     }
     CHECK_NULL_VOID(!session_);
@@ -146,10 +151,6 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     RegisterLifecycleListener();
     LOGI("Native Modal UIExtension request UIExtensionAbility start");
     RequestExtensionSessionActivation();
-    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    sptr<Rosen::ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback =
-        new (std::nothrow) Rosen::ExtensionSession::ExtensionSessionEventCallback();
-    extensionSession->RegisterExtensionSessionEventCallback(extSessionEventCallback);
 }
 
 void UIExtensionPattern::OnConnect()
@@ -267,6 +268,9 @@ void UIExtensionPattern::OnWindowHide()
 
 void UIExtensionPattern::RequestExtensionSessionActivation()
 {
+    if (state_ == AbilityState::FOREGROUND) {
+        return;
+    }
     LOGI("UIExtension request UIExtensionAbility foreground, AbilityState=%{public}d", static_cast<int>(state_));
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -491,7 +495,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
-    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
+    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();

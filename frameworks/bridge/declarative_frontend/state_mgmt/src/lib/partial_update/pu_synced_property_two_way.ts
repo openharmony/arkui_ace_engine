@@ -90,10 +90,12 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
    * @param eventSource 
    */
   syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
+    stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.syncPeerHasChanged");
     if (!this.changeNotificationIsOngoing_) {
       stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}' .`)
       this.notifyPropertyHasChangedPU();
     }
+    stateMgmtProfiler.end();
   }
 
   /**
@@ -121,15 +123,20 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   // get 'read through` from the ObservedProperty
   public get(): C {
+    stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.get");
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get`)
     this.notifyPropertyHasBeenReadPU()
-    return this.getUnmonitored();
+    const result = this.getUnmonitored();
+    stateMgmtProfiler.end();
+    return result;
   }
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
+    stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.set");
     if (this.getUnmonitored() === newValue) {
       stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value  - nothing to do.`);
+      stateMgmtProfiler.end();
       return;
     }
 
@@ -140,6 +147,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     this.setObject(newValue);
     this.notifyPropertyHasChangedPU();
     this.changeNotificationIsOngoing_ = false;
+    stateMgmtProfiler.end();
   }
 }
 
