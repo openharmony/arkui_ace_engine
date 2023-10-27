@@ -2818,7 +2818,7 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
 
     if (!Container::IsCurrentUseNewPipeline()) {
         std::lock_guard<std::mutex> lock(mutex_);
-        auto jsonRouterStack = JsonUtil::CreateArray(false);
+        auto jsonRouterStack = JsonUtil::CreateArray(true);
         for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
             jsonRouterStack->Put("", pageRouteStack_[index].url.c_str());
         }

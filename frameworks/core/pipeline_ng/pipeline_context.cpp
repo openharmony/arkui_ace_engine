@@ -2010,7 +2010,7 @@ void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
 
 std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
 {
-    auto jsonNodeInfo = JsonUtil::Create(false);
+    auto jsonNodeInfo = JsonUtil::Create(true);
     auto iter = storeNode_.begin();
     while (iter != storeNode_.end()) {
         auto node = (iter->second).Upgrade();

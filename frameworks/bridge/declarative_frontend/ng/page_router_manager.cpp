@@ -547,10 +547,10 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
 
 std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo()
 {
-    auto jsonRouterStack = JsonUtil::CreateArray(false);
+    auto jsonRouterStack = JsonUtil::CreateArray(true);
     auto restoreIter = restorePageStack_.begin();
     while (restoreIter != restorePageStack_.end()) {
-        auto jsonItem = JsonUtil::Create(false);
+        auto jsonItem = JsonUtil::Create(true);
         jsonItem->Put("url", restoreIter->c_str());
         jsonRouterStack->Put(jsonItem);
         ++restoreIter;
@@ -564,7 +564,7 @@ std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo()
         auto pageInfo = pagePattern->GetPageInfo();
         CHECK_NULL_RETURN(pageInfo, jsonRouterStack);
         auto url = pageInfo->GetPageUrl();
-        auto jsonItem = JsonUtil::Create(false);
+        auto jsonItem = JsonUtil::Create(true);
         jsonItem->Put("url", url.c_str());
         jsonRouterStack->Put(jsonItem);
         ++iter;

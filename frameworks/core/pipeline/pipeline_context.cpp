@@ -3581,7 +3581,7 @@ void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<RenderElement>&
 
 std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
 {
-    auto jsonNodeInfo = JsonUtil::Create(false);
+    auto jsonNodeInfo = JsonUtil::Create(true);
     auto iter = storeNode_.begin();
     while (iter != storeNode_.end()) {
         auto RenderElement = (iter->second).Upgrade();

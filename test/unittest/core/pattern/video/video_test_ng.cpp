@@ -1448,7 +1448,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest020, TestSize.Level1)
      * @tc.steps: step2. Call dragEnd in different wrong situation.
      * @tc.expected: step2. Log error message.
      */
-    auto json = JsonUtil::Create(false);
+    auto json = JsonUtil::Create(true);
     json->Put(EXTRA_INFO_KEY.c_str(), "");
     dragEnd(nullptr, json->ToString());
     json->Delete(EXTRA_INFO_KEY.c_str());

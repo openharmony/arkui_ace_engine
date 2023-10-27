@@ -958,6 +958,10 @@ void FrontendDelegateDeclarativeNG::GetSnapshot(
 std::string FrontendDelegateDeclarativeNG::GetContentInfo()
 {
     auto jsonContentInfo = JsonUtil::Create(true);
+
+    CHECK_NULL_RETURN(pageRouterManager_, "");
+    jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo());
+
     auto pipelineContext = pipelineContextHolder_.Get();
     CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
     jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
