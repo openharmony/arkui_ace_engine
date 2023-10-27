@@ -662,7 +662,9 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (GreatNotEqual(pos->second.endPos + chainOffset, startMainPos_)) {
+        // Don't recycle When the head item is Visibility.None.
+        if (GreatNotEqual(pos->second.endPos + chainOffset, startMainPos_) ||
+            GreatOrEqual(pos->second.startPos + chainOffset, startMainPos_)) {
             if (pos->second.isGroup) {
                 CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.startPos + chainOffset, true);
             }
@@ -734,7 +736,9 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (LessNotEqual(pos->second.startPos + chainOffset, endMainPos_)) {
+        // Don't recycle When the tail item is Visibility.None.
+        if (LessNotEqual(pos->second.startPos + chainOffset, endMainPos_) ||
+            LessOrEqual(pos->second.endPos + chainOffset, endMainPos_)) {
             if (pos->second.isGroup) {
                 CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.endPos + chainOffset, false);
             }
