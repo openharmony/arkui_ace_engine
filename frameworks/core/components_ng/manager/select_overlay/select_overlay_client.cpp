@@ -125,10 +125,11 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
 
 void SelectOverlayClient::UpdateShowingSelectOverlay(ClientOverlayInfo& clientInfo)
 {
-    LOGI("update select overlay, isUseMouse %{public}d", clientInfo.isShowMouseMenu);
+    LOGI("update select overlay");
     auto isCurrentSingleHandle = IsShowingSingleHandle();
     auto hasRequestSingleHandle = !clientInfo.firstHandleInfo && clientInfo.secondHandleInfo;
     if (clientInfo.isShowMouseMenu || (isCurrentSingleHandle ^ hasRequestSingleHandle)) {
+        LOGI("force close and create new select overlay");
         RequestCloseSelectOverlay(true);
         clientInfo.isUpdateMenu = true;
         CreateSelectOverlay(clientInfo);

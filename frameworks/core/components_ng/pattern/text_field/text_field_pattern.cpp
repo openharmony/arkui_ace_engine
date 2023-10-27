@@ -1861,7 +1861,6 @@ void TextFieldPattern::StartRequestSelectOverlay(const ShowSelectOverlayParams& 
     }
     overlayInfo.isShowPaste = isShowPaste;
     overlayInfo.isMenuShow = params.isShowMenu;
-    overlayInfo.isShowMouseMenu = IsUsingMouse();
     RequestOpenSelectOverlay(overlayInfo);
     auto start = GetTextSelectController()->GetStartIndex();
     auto end = GetTextSelectController()->GetEndIndex();
@@ -2217,13 +2216,37 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto focusHub = tmpHost->GetOrCreateFocusHub();
-    if (info.GetAction() == MouseAction::RELEASE && focusHub->IsCurrentFocus()) {
+    if (info.GetAction() == OHOS::Ace::MouseAction::PRESS) {
+        HandleRightMousePressEvent(info);
+        return;
+    }
+    if (info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
+        HandleRightMouseReleaseEvent(info);
+    }
+}
+
+void TextFieldPattern::HandleRightMousePressEvent(MouseInfo& info)
+{
+    if (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+        return;
+    }
+    auto focusHub = GetFocusHub();
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
+    FocusAndUpdateCaretByMouse(info);
+}
+
+void TextFieldPattern::HandleRightMouseReleaseEvent(MouseInfo& info)
+{
+    auto focusHub = GetFocusHub();
+    if (focusHub->IsCurrentFocus()) {
         LOGI("Handle mouse right button release");
         rightClickOffset_ = OffsetF(
             static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
+        if (SelectOverlayIsOn()) {
+            CloseSelectOverlay(true);
+        }
         ProcessOverlay();
     }
 }
@@ -2261,6 +2284,12 @@ void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
     mouseStatus_ = MouseStatus::PRESSED;
     blockPress_ = false;
     leftMouseCanMove_ = true;
+    FocusAndUpdateCaretByMouse(info);
+}
+
+void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
+{
+    auto focusHub = GetFocusHub();
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE &&
@@ -4560,29 +4589,6 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
     OffsetF offset(paintRect.GetX() - parentGlobalOffset_.GetX(), paintRect.GetY() - parentGlobalOffset_.GetY());
     return !(!contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) ||
              !contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON }));
-}
-
-bool TextFieldPattern::CheckSelectionRectVisible()
-{
-    if (!IsSelected()) {
-        return false;
-    }
-    std::vector<RectF> selectedRects;
-    paragraph_->GetRectsForRange(selectController_->GetStartIndex(), selectController_->GetEndIndex(), selectedRects);
-    if (selectedRects.empty()) {
-        return false;
-    }
-    for (const auto& rect : selectedRects) {
-        auto left = rect.Left();
-        auto top = rect.Top();
-        SizeF boxSize = { rect.Width(), rect.Height() };
-        auto boxOffset = OffsetF(left + (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()),
-            top + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) + BOX_EPSILON);
-        if (contentRect_.IsIntersectWith(RectF(boxOffset, boxSize))) {
-            return true;
-        }
-    }
-    return false;
 }
 
 void TextFieldPattern::DumpAdvanceInfo()
