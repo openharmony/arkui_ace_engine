@@ -542,7 +542,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #ifdef ENABLE_DRAG_FRAMEWORK
     SetIsDragged(false);
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, 
+        TAG_LOGI(AceLogTag::ACE_DRAG,
             "DragDropManager finish drop, start do drop animation. UseCustomAnimation is %{public}d."
             " WindowId is %{public}d.", event->IsUseCustomAnimation(), container->GetWindowId());
     }
