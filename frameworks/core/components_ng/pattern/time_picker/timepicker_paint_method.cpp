@@ -79,6 +79,9 @@ void TimePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     topEndPoint.SetY(frameRect.Height());
     Color endColor = backgroundColor_;
     Color middleColor = endColor.ChangeAlpha(0);
+    if (NearZero(frameRect.Bottom())) {
+        return;
+    }
     std::vector<float> topPos { 0.0f, gradientHeight / frameRect.Bottom(),
         (frameRect.Bottom() - gradientHeight) / frameRect.Bottom(), 1.0f };
     std::vector<RSColorQuad> topColors { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(),
@@ -105,5 +108,7 @@ void TimePickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)
     canvas.AttachBrush(brush);
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
+    canvas.DetachPen();
+    canvas.DetachBrush();
 }
 } // namespace OHOS::Ace::NG

@@ -55,10 +55,8 @@ bool ModuleManager::InitModule(
     auto iter = MODULE_LIST.find(moduleName);
     if (iter != MODULE_LIST.end()) {
         iter->second(runtime, thisObj);
-        LOGD("ModuleManager InitModule is %{private}s", moduleName.c_str());
         return true;
     } else {
-        LOGE("register module is not found");
         return false;
     }
 }

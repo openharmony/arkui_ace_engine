@@ -20,8 +20,8 @@
 #include <string>
 #include <utility>
 
-#include "base/thread/cancelable_callback.h"
 #include "base/memory/referenced.h"
+#include "base/thread/cancelable_callback.h"
 #include "base/utils/utils.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -30,14 +30,15 @@
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
+#include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
 #include "core/components_ng/pattern/web/web_paint_property.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace {
@@ -71,8 +72,8 @@ enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 #endif
 } // namespace
 
-class WebPattern : public Pattern, public SelectionHost {
-    DECLARE_ACE_TYPE(WebPattern, Pattern, SelectionHost);
+class WebPattern : public NestableScrollContainer, public SelectionHost {
+    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, SelectionHost);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -254,6 +255,23 @@ public:
         return 1;
     }
 
+    /**
+     *  NestableScrollContainer implementations
+     */
+    Axis GetAxis() const override
+    {
+        return Axis::FREE;
+    }
+    ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
+    bool HandleScrollVelocity(float velocity) override;
+    void OnScrollStartRecursive(float position) override;
+    void OnScrollEndRecursive() override;
+    Axis GetParentAxis();
+    RefPtr<NestableScrollContainer> WebSearchParent();
+    /**
+     *  End of NestableScrollContainer implementations
+     */
+
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -345,6 +363,8 @@ public:
     DragRet GetDragAcceptableStatus();
 #endif
     Offset GetDragOffset() const;
+    void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
+    void OnScrollState(bool scrollState);
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -550,6 +570,8 @@ private:
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;
+    bool isFirstFlingScrollVelocity_ = true;
+    WeakPtr<NestableScrollContainer> parent_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;

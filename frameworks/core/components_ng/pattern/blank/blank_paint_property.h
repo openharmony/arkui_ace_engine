@@ -36,6 +36,7 @@ public:
     void Reset() override
     {
         PaintProperty::Reset();
+        ResetColor();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_RENDER);

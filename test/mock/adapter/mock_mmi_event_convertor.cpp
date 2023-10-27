@@ -16,8 +16,8 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
 namespace OHOS::Ace::Platform {
-void CalculatePointerEvent(
-    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale)
+void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
+    const NG::VectorF& scale, int32_t udegree)
 {}
 void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, const int32_t udegree)

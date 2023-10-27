@@ -16,7 +16,7 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-module_output_path = "arkui/sharedimagemanager_fuzzer"
+module_output_path = "ace_engine/ace_engine/sharedimagemanager_fuzzer"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("SharedImageManagerFuzzTest") {
@@ -76,13 +76,14 @@ ohos_fuzztest("SharedImageManagerFuzzTest") {
 
     # mock
     #"$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
 
     #fuzz
-    "$ace_root/test/fuzztest/sharedimagemanager_fuzzer/sharedimagemanager_fuzzer.cpp",
     "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
     "$ace_root/adapter/ohos/osal/system_properties.cpp",
     "$ace_root/frameworks/base/resource/shared_image_manager.cpp",
     "$ace_root/frameworks/core/common/flutter/flutter_asset_manager.cpp",
+    "$ace_root/test/fuzztest/sharedimagemanager_fuzzer/sharedimagemanager_fuzzer.cpp",
 
     #"$ace_root/frameworks/base/log/ace_trace.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",

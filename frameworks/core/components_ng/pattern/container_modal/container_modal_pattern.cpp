@@ -165,7 +165,7 @@ void ContainerModalPattern::InitContainerEvent()
         if (info.GetChangedTouches().begin()->GetTouchType() != TouchType::DOWN) {
             return;
         }
-        if (floatingLayoutProperty->GetVisibilityValue() != VisibleType::VISIBLE) {
+        if (floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE) != VisibleType::VISIBLE) {
             return;
         }
         // step4. Touch other area to hide floating title.
@@ -210,7 +210,7 @@ void ContainerModalPattern::InitContainerEvent()
             return;
         }
         if ((info.GetLocalLocation().GetY() >= titlePopupDistance || action == MouseAction::WINDOW_LEAVE) &&
-            floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
+            floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
             AnimationUtils::Animate(
                 option,
                 [context, titlePopupDistance]() {
@@ -392,7 +392,7 @@ bool ContainerModalPattern::CanShowFloatingTitle()
         return false;
     }
 
-    if (floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
+    if (floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
         LOGI("Floating tittle is visible now, no need to show again.");
         return false;
     }

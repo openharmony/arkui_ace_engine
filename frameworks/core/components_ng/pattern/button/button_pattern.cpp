@@ -115,7 +115,7 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(buttonRenderContext);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
+    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }

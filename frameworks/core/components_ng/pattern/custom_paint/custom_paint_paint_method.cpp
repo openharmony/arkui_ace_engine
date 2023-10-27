@@ -551,8 +551,6 @@ void CustomPaintPaintMethod::InitImagePaint(SkPaint& paint, SkSamplingOptions& o
             options = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
         } else if (smoothingQuality_ == "high") {
             options = SkSamplingOptions(SkCubicResampler::Mitchell());
-        } else {
-            LOGE("Unsupported Quality type:%{public}s", smoothingQuality_.c_str());
         }
     } else {
         options = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
@@ -611,8 +609,6 @@ void CustomPaintPaintMethod::InitImagePaint(RSPen* pen, RSBrush* brush, RSSampli
         } else if (smoothingQuality_ == "high") {
             options = RSSamplingOptions(RSCubicResampler::Mitchell());
             filter.SetFilterQuality(RSFilter::FilterQuality::HIGH);
-        } else {
-            LOGE("Unsupported Quality type:%{public}s", smoothingQuality_.c_str());
         }
     } else {
         options = RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NONE);
@@ -637,9 +633,6 @@ void CustomPaintPaintMethod::InitImageCallbacks()
         if (paintMethod->loadingSource_ == info) {
             paintMethod->ImageObjReady(imageObj);
             return;
-        } else {
-            LOGE("image sourceInfo_ check error, : %{public}s vs %{public}s",
-                paintMethod->loadingSource_.ToString().c_str(), info.ToString().c_str());
         }
     };
 
@@ -746,7 +739,6 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
 void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData)
 {
     if (imageData.data.empty()) {
-        LOGE("PutImageData failed, image data is empty.");
         return;
     }
     uint32_t* data = new (std::nothrow) uint32_t[imageData.data.size()];
@@ -1440,8 +1432,6 @@ void CustomPaintPaintMethod::ArcTo(PaintWrapper* paintWrapper, const ArcToParam&
     double radius = param.radius;
     skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
         SkDoubleToScalar(radius));
-#else
-    LOGE("Drawing is not supported");
 #endif
 }
 
@@ -1711,8 +1701,6 @@ void CustomPaintPaintMethod::Path2DArcTo(const OffsetF& offset, const PathArgs& 
     double y2 = args.para4 + offset.GetY();
     double r = args.para5;
     skPath2d_.arcTo(x1, y1, x2, y2, r);
-#else
-    LOGE("Drawing is not supported");
 #endif
 }
 
@@ -2070,10 +2058,9 @@ void CustomPaintPaintMethod::SetPaintImage(RSPen* pen, RSBrush* brush)
 #endif
             break;
         case FilterType::DROP_SHADOW:
-            LOGW("Dropshadow is not supported yet.");
             break;
         default:
-            LOGE("invalid type of filter");
+            break;
     }
 }
 

@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -45,12 +46,21 @@ std::optional<SizeF> PathLayoutAlgorithm::MeasureContent(
 
     auto pathCommands = paintProperty->GetCommandsValue("");
     CHECK_NULL_RETURN(!pathCommands.empty(), SizeF());
+#ifndef USE_ROSEN_DRAWING
     SkPath skPath;
     bool ret = SkParsePath::FromSVGString(pathCommands.c_str(), &skPath);
     CHECK_NULL_RETURN(ret, SizeF());
     auto skRect = skPath.getBounds();
     auto right = skRect.right();
     auto bottom = skRect.bottom();
+#else
+    RSPath path;
+    bool ret = path.BuildFromSVGString(pathCommands.c_str());
+    CHECK_NULL_RETURN(ret, SizeF());
+    auto rect = path.GetBounds();
+    auto right = rect.GetRight();
+    auto bottom = rect.GetBottom();
+#endif
     if (NearZero(right) && NearZero(bottom)) {
         return SizeF();
     }

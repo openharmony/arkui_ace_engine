@@ -52,7 +52,7 @@ BackgroundTaskExecutor::BackgroundTaskExecutor() : maxThreadNum_(MAX_BACKGROUND_
 {
     FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
     if (ft != nullptr && ft->IsEnabled()) {
-        LOGI("Use frame trace as bg threads pool.");
+        return;
     } else {
         LOGI("Create ace bg threads pool.");
         if (maxThreadNum_ > 1) {

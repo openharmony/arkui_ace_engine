@@ -532,7 +532,6 @@ void SliderContentModifier::DrawBlockShape(DrawingContext& context)
             break;
         }
         default:
-            LOGW("Invalid shape type [%{public}d]", static_cast<int>(shape_->GetBasicShapeType()));
             break;
     }
 }

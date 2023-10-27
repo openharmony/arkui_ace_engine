@@ -219,7 +219,7 @@ void PluginPattern::CreatePluginSubContainer()
     auto uiTaskExecutor = SingleTaskExecutor::Make(host_->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
 
     int32_t instanceID = context->GetInstanceId();
-    uiTaskExecutor.PostTask([this, weak, instanceID] {
+    uiTaskExecutor.PostTask([weak, instanceID] {
         ContainerScope scope(instanceID);
         auto pluginPattern = weak.Upgrade();
         CHECK_NULL_VOID(pluginPattern);
@@ -233,16 +233,16 @@ void PluginPattern::CreatePluginSubContainer()
             return;
         }
         if (!info.bundleName.empty() && !info.moduleName.empty()) {
-            pluginSubContainer_->SetPluginBundleName(info.bundleName);
-            pluginSubContainer_->SetPluginModuleName(info.moduleName);
+            pluginPattern->pluginSubContainer_->SetPluginBundleName(info.bundleName);
+            pluginPattern->pluginSubContainer_->SetPluginModuleName(info.moduleName);
         }
         if (packagePathStr.rfind(".hap") != std::string::npos) {
             std::string sub = packagePathStr.substr(1, packagePathStr.size() - 5) + "/";
-            ReplaceAll(info.source, sub, "");
-            pluginSubContainer_->RunDecompressedPlugin(
+            pluginPattern->ReplaceAll(info.source, sub, "");
+            pluginPattern->pluginSubContainer_->RunDecompressedPlugin(
                 packagePathStr, info.abilityName, info.source, info.moduleResPath, pluginPattern->GetData());
         } else {
-            pluginSubContainer_->RunPlugin(
+            pluginPattern->pluginSubContainer_->RunPlugin(
                 packagePathStr, info.abilityName, info.source, info.moduleResPath, pluginPattern->GetData());
         }
     });

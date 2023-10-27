@@ -35,7 +35,9 @@ public:
     RefPtr<ThemeStyle> GetTheme(int32_t themeId) override;
 
     Color GetColor(uint32_t resId) override;
+    Color GetColorByName(const std::string& resName) override;
     Dimension GetDimension(uint32_t resId) override;
+    Dimension GetDimensionByName(const std::string& resName) override;
     std::string GetString(uint32_t resId) override;
     std::string GetPluralString(uint32_t resId, int quantity) override;
     std::vector<std::string> GetStringArray(uint32_t resId) const override;
@@ -44,6 +46,7 @@ public:
     std::vector<uint32_t> GetIntArray(uint32_t resId) const override;
     bool GetBoolean(uint32_t resId) const override;
     std::string GetMediaPath(uint32_t resId) override;
+    std::string GetMediaPathByName(const std::string& resName) override;
     std::string GetRawfile(const std::string& fileName) override;
     bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]> &dest) override;
     bool GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]> &dest) override;
@@ -51,6 +54,8 @@ public:
     void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) override;
 
 private:
+    static std::string GetActualResourceName(const std::string& resName);
+
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
     std::string packagePathStr_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImpl);

@@ -81,6 +81,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnUpdateShowDivider();
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    void BeforeCreateLayoutWrapper() override;
 
     ChangeEventPtr onChangeEvent_;
     ChangeEventPtr onTabBarClickEvent_;

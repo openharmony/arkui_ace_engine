@@ -19,6 +19,7 @@ ohos_unittest("ace_engine_special_test") {
   sources = [
     # old
     "$ace_root/frameworks/base/geometry/dimension.cpp",
+    "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",

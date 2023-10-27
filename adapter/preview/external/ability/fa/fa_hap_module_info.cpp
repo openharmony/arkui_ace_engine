@@ -19,7 +19,7 @@ namespace OHOS::Ace {
 void FaHapModuleInfo::Parse(const std::unique_ptr<JsonValue>& root)
 {
     if (!root) {
-        LOGE("The information of fa model application is null.");
+        LOGW("The information of fa model application is empty.");
         return;
     }
     mainAbility_ = root->GetString("mainAbility");

@@ -63,6 +63,7 @@ LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 bool SystemProperties::windowAnimationEnabled_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
+bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;
@@ -70,6 +71,7 @@ int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
+bool SystemProperties::resourceDecoupling_ = true;
 #ifndef ENABLE_ROSEN_BACKEND
 bool SystemProperties::rosenBackendEnabled_ = false;
 #else
@@ -212,5 +214,10 @@ bool SystemProperties::IsFormAnimationLimited()
 bool SystemProperties::GetImageFrameworkEnabled()
 {
     return false;
+}
+
+bool SystemProperties::GetResourceDecoupling()
+{
+    return true;
 }
 } // namespace OHOS::Ace

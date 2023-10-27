@@ -160,6 +160,9 @@ void JSPageTransition::Opacity(const JSCallbackInfo& info)
     if (!JSViewAbstract::ParseJsDouble(info[0], opacity)) {
         return;
     }
+    if (LessNotEqual(opacity, 0.0)) {
+        opacity = 1.0;
+    }
     PageTransitionModel::GetInstance()->SetOpacityEffect(static_cast<float>(opacity));
 }
 

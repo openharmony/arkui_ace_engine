@@ -56,6 +56,8 @@
 #include "core/components_v2/list/list_properties.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -144,7 +146,9 @@ protected:
 
 void ListTestNg::SetUpTestSuite()
 {
+    MockContainer::SetUp();
     MockPipelineBase::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
@@ -168,6 +172,7 @@ void ListTestNg::SetUpTestSuite()
 void ListTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+    MockContainer::TearDown();
 }
 
 void ListTestNg::SetUp() {}
@@ -1150,7 +1155,7 @@ HWTEST_F(ListTestNg, AttrLanes006, TestSize.Level1)
             itemWidth,
             ITEM_HEIGHT
         );
-        EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, index), expectRect));
+        EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, index), expectRect));
     }
 }
 
@@ -1177,7 +1182,7 @@ HWTEST_F(ListTestNg, AttrLanes007, TestSize.Level1)
             ITEM_WIDTH,
             itemHeight
         );
-        EXPECT_TRUE(IsEqualRect(GetChildRect(frameNode_, index), expectRect));
+        EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, index), expectRect));
     }
 }
 
@@ -1562,8 +1567,8 @@ HWTEST_F(ListTestNg, SwiperItem001, TestSize.Level1)
     RectF itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     RectF expectStartNodeRect = RectF();
     RectF expectItemNodeRect = itemNodeInitialRect;
-    EXPECT_TRUE(IsEqualRect(startNodeRect, expectStartNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     ListItemSwipeIndex swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 
@@ -1576,8 +1581,8 @@ HWTEST_F(ListTestNg, SwiperItem001, TestSize.Level1)
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     expectStartNodeRect = RectF();
     expectItemNodeRect = itemNodeInitialRect;
-    EXPECT_TRUE(IsEqualRect(startNodeRect, expectStartNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 
@@ -1591,8 +1596,8 @@ HWTEST_F(ListTestNg, SwiperItem001, TestSize.Level1)
     // Because when curOffset_ is equal to zero, startNode will not layout
     expectStartNodeRect = RectF(slightSwipeDelta - START_NODE_SIZE, 0, START_NODE_SIZE, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeInitialRect;
-    EXPECT_TRUE(IsEqualRect(startNodeRect, expectStartNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 
@@ -1605,8 +1610,8 @@ HWTEST_F(ListTestNg, SwiperItem001, TestSize.Level1)
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     expectStartNodeRect = RectF(0, 0, START_NODE_SIZE, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeSwipeStartRect;
-    EXPECT_TRUE(IsEqualRect(startNodeRect, expectStartNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::SWIPER_START);
 
@@ -1619,8 +1624,8 @@ HWTEST_F(ListTestNg, SwiperItem001, TestSize.Level1)
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     expectStartNodeRect = RectF(0, 0, START_NODE_SIZE, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeSwipeStartRect;
-    EXPECT_TRUE(IsEqualRect(startNodeRect, expectStartNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::SWIPER_START);
 
@@ -1633,8 +1638,8 @@ HWTEST_F(ListTestNg, SwiperItem001, TestSize.Level1)
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     expectStartNodeRect = RectF(-obviousSwipeDelta, 0, START_NODE_SIZE, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeInitialRect;
-    EXPECT_TRUE(IsEqualRect(startNodeRect, expectStartNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 
@@ -1647,8 +1652,8 @@ HWTEST_F(ListTestNg, SwiperItem001, TestSize.Level1)
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     expectStartNodeRect = RectF(0, 0, START_NODE_SIZE, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeSwipeStartRect;
-    EXPECT_TRUE(IsEqualRect(startNodeRect, expectStartNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::SWIPER_START);
 }
@@ -1680,8 +1685,8 @@ HWTEST_F(ListTestNg, SwiperItem002, TestSize.Level1)
     RectF itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     RectF expectEndNodeRect = RectF();
     RectF expectItemNodeRect = itemNodeInitialRect;
-    EXPECT_TRUE(IsEqualRect(endNodeRect, expectEndNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     ListItemSwipeIndex swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 
@@ -1694,8 +1699,8 @@ HWTEST_F(ListTestNg, SwiperItem002, TestSize.Level1)
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     expectEndNodeRect = RectF();
     expectItemNodeRect = itemNodeInitialRect;
-    EXPECT_TRUE(IsEqualRect(endNodeRect, expectEndNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 
@@ -1709,8 +1714,8 @@ HWTEST_F(ListTestNg, SwiperItem002, TestSize.Level1)
     // Because when curOffset_ is equal to zero, endNode will not layout
     expectEndNodeRect = RectF(DEVICE_WIDTH - slightSwipeDelta, 0, END_NODE_SIZE, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeInitialRect;
-    EXPECT_TRUE(IsEqualRect(endNodeRect, expectEndNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 
@@ -1723,8 +1728,8 @@ HWTEST_F(ListTestNg, SwiperItem002, TestSize.Level1)
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     expectEndNodeRect = RectF(DEVICE_WIDTH - END_NODE_SIZE, 0, END_NODE_SIZE, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeSwipeEndRect;
-    EXPECT_TRUE(IsEqualRect(endNodeRect, expectEndNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::SWIPER_END);
 
@@ -1737,8 +1742,8 @@ HWTEST_F(ListTestNg, SwiperItem002, TestSize.Level1)
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     expectEndNodeRect = RectF(DEVICE_WIDTH - END_NODE_SIZE, 0, END_NODE_SIZE, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeSwipeEndRect;
-    EXPECT_TRUE(IsEqualRect(endNodeRect, expectEndNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::SWIPER_END);
 
@@ -1751,8 +1756,8 @@ HWTEST_F(ListTestNg, SwiperItem002, TestSize.Level1)
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     expectEndNodeRect = RectF(DEVICE_WIDTH - END_NODE_SIZE + obviousSwipeDelta, 0, END_NODE_SIZE, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeInitialRect;
-    EXPECT_TRUE(IsEqualRect(endNodeRect, expectEndNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 
@@ -1765,8 +1770,8 @@ HWTEST_F(ListTestNg, SwiperItem002, TestSize.Level1)
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
     expectEndNodeRect = RectF(DEVICE_WIDTH - END_NODE_SIZE, 0, END_NODE_SIZE, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeSwipeEndRect;
-    EXPECT_TRUE(IsEqualRect(endNodeRect, expectEndNodeRect));
-    EXPECT_TRUE(IsEqualRect(itemNodeRect, expectItemNodeRect));
+    EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
     swiperIndex = listItemPattern->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::SWIPER_END);
 }
@@ -2433,9 +2438,9 @@ HWTEST_F(ListTestNg, ListItemGroup001, TestSize.Level1)
     RectF groupRect = GetChildRect(frameNode_, 0);
     RectF headRect = GetChildRect(groupNode, 0);
     RectF footRect = GetChildRect(groupNode, 1);
-    EXPECT_TRUE(IsEqualRect(groupRect, RectF(0, 0, DEVICE_WIDTH, groupHeight)));
-    EXPECT_TRUE(IsEqualRect(headRect, RectF(0, 0, DEVICE_WIDTH, HEADER_MAIN_LENGTH)));
-    EXPECT_TRUE(IsEqualRect(footRect, RectF(0, groupHeight - HEADER_MAIN_LENGTH, DEVICE_WIDTH, HEADER_MAIN_LENGTH)));
+    EXPECT_TRUE(IsEqual(groupRect, RectF(0, 0, DEVICE_WIDTH, groupHeight)));
+    EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, DEVICE_WIDTH, HEADER_MAIN_LENGTH)));
+    EXPECT_TRUE(IsEqual(footRect, RectF(0, groupHeight - HEADER_MAIN_LENGTH, DEVICE_WIDTH, HEADER_MAIN_LENGTH)));
     EXPECT_TRUE(VerifyPosition(groupNode, GROUP_ITEM_NUMBER, DEFAULT_LANES, SPACE, HEADER_MAIN_LENGTH));
 }
 
@@ -2454,9 +2459,9 @@ HWTEST_F(ListTestNg, ListItemGroup002, TestSize.Level1)
     RectF groupRect = GetChildRect(frameNode_, 0);
     RectF headRect = GetChildRect(groupNode, 0);
     RectF footRect = GetChildRect(groupNode, 1);
-    EXPECT_TRUE(IsEqualRect(groupRect, RectF(12.f, 0, -60.f, groupHeight)));
-    EXPECT_TRUE(IsEqualRect(headRect, RectF(0, 0, 456.f, HEADER_MAIN_LENGTH)));
-    EXPECT_TRUE(IsEqualRect(footRect, RectF(0, groupHeight - HEADER_MAIN_LENGTH, 456.f, HEADER_MAIN_LENGTH)));
+    EXPECT_TRUE(IsEqual(groupRect, RectF(12.f, 0, -60.f, groupHeight)));
+    EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, 456.f, HEADER_MAIN_LENGTH)));
+    EXPECT_TRUE(IsEqual(footRect, RectF(0, groupHeight - HEADER_MAIN_LENGTH, 456.f, HEADER_MAIN_LENGTH)));
     EXPECT_TRUE(VerifyPosition(groupNode, GROUP_ITEM_NUMBER, DEFAULT_LANES, SPACE, HEADER_MAIN_LENGTH));
 }
 
@@ -2939,7 +2944,6 @@ HWTEST_F(ListTestNg, Event005, TestSize.Level1)
         listModelNG.SetOnScrollStart(scrollStart);
         listModelNG.SetOnScrollStop(scrollStop);
     });
-    MockGetPaintRectWithTransform(frameNode_);
 
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(isScrollStartCalled);
@@ -2993,7 +2997,6 @@ HWTEST_F(ListTestNg, EventHub001, TestSize.Level1)
     CreateListWithItem([onItemDragStart](ListModelNG listModelNG) {
         listModelNG.SetOnItemDragStart(onItemDragStart);
     });
-    MockGetPaintRectWithTransform(frameNode_);
     auto jsonStr = eventHub_->GetDragExtraParams("", Point(0, 250), DragEventType::MOVE);
     EXPECT_EQ(jsonStr, "{\"insertIndex\":2}");
 
@@ -5033,7 +5036,6 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
         auto startFunc = GetDefaultSwiperBuilder(START_NODE_SIZE);
         CreateListItemWithSwiper(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     });
-    MockGetPaintRectWithTransform(frameNode_);
 
     // Set swiperItem_ to list pattern
     DragSwiperItem(0, 1.f);
@@ -5096,7 +5098,6 @@ HWTEST_F(ListTestNg, Pattern006, TestSize.Level1)
         listModelNG.SetLanes(2);
         CreateListItem(VIEWPORT_NUMBER);
     });
-    MockGetPaintRectWithTransform(frameNode_);
 
     /**
      * @tc.steps: step1. When lanes > 1, call GetItemIndexByPosition
@@ -5120,7 +5121,6 @@ HWTEST_F(ListTestNg, Pattern007, TestSize.Level1)
      * @tc.expected: Would return the last itemIndex
      */
     CreateList([](ListModelNG listModelNG) { CreateListItem(VIEWPORT_NUMBER); });
-    MockGetPaintRectWithTransform(frameNode_);
     const Point point = Point(0, 1000.f);
     int32_t itemIndex = pattern_->GetItemIndexByPosition(point.GetX(), point.GetY());
     EXPECT_EQ(itemIndex, VIEWPORT_NUMBER);
@@ -5138,7 +5138,6 @@ HWTEST_F(ListTestNg, Pattern008, TestSize.Level1)
      * @tc.expected: Would return 0
      */
     CreateList();
-    MockGetPaintRectWithTransform(frameNode_);
     const Point point = Point(0, 1000.f);
     int32_t itemIndex = pattern_->GetItemIndexByPosition(point.GetX(), point.GetY());
     EXPECT_EQ(itemIndex, 0);

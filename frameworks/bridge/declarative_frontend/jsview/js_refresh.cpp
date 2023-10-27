@@ -65,7 +65,6 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
     auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         if (param != "true" && param != "false") {
-            LOGE("param is not equal true or false, invalid.");
             return;
         }
         bool newValue = StringToBool(param);
@@ -93,12 +92,10 @@ void JSRefresh::JSBind(BindingTarget globalObj)
 void JSRefresh::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("refresh create error, info is non-valid");
         return;
     }
     RefPtr<RefreshTheme> theme = GetTheme<RefreshTheme>();
     if (!theme) {
-        LOGE("Refresh Theme is null");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -139,7 +136,6 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("Invalid params");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -164,7 +160,6 @@ void JSRefresh::Pop()
 void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGI("refresh onStateChange error, param is non-valid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
@@ -180,7 +175,6 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGI("refresh onRefreshing error, param is non-valid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));

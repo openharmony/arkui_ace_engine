@@ -854,7 +854,6 @@ OffsetF CalendarPickerPattern::CalculateDialogOffset()
     float x = 0.0f;
     float y = 0.0f;
     auto hostRect = host->GetTransformRectRelativeToWindow();
-    hostRect.SetOffset(host->GetPaintRectOffsetToPage());
     auto hostTop = hostRect.Top();
     auto hostBottom = hostRect.Bottom();
 

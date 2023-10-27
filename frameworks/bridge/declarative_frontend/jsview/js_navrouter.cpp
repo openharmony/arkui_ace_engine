@@ -55,11 +55,9 @@ void JSNavRouter::Create(const JSCallbackInfo& info)
         }
         JSRef<JSVal> name = jsObj->GetProperty("name");
         if (name->IsEmpty()) {
-            LOGW("name is empty");
             return;
         }
         if (!name->IsString()) {
-            LOGW("name is not string");
             return;
         }
         JSRef<JSVal> param = jsObj->GetProperty("param");
@@ -78,7 +76,6 @@ void JSNavRouter::Create(const JSCallbackInfo& info)
 void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
     if (info[0]->IsFunction()) {
@@ -104,8 +101,6 @@ void JSNavRouter::SetNavRouteMode(const JSCallbackInfo& info)
     auto value = info[0]->ToNumber<int32_t>();
     if (value >= 0 && value <= NAV_ROUTE_MODE_RANGE) {
         NavRouterModel::GetInstance()->SetNavRouteMode(value);
-    } else {
-        LOGW("invalid value for navRouteMode");
     }
 }
 

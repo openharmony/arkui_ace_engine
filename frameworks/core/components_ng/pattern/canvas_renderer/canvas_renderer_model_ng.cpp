@@ -1356,7 +1356,6 @@ RefPtr<Ace::PixelMap> CanvasRendererModelNG::GetPixelMap(const BaseInfo& baseInf
     auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
     auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
-        LOGE("Integer Overflow!!!the product of finalHeight and finalWidth is too big.");
         return nullptr;
     }
 
@@ -1390,7 +1389,6 @@ void CanvasRendererModelNG::GetImageDataModel(const BaseInfo& baseInfo, const Im
     auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
     auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
-        LOGE("Integer Overflow!!!the product of finalHeight and finalWidth is too big.");
         return;
     }
     OHOS::Media::InitializationOptions options;
@@ -1410,9 +1408,7 @@ void CanvasRendererModelNG::GetImageDataModel(const BaseInfo& baseInfo, const Im
         imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
         GetImageData(baseInfo, imageData);
         auto pixelsSize = pixelMap->GetRowBytes() * pixelMap->GetHeight();
-        if (memcpy_s(buffer, pixelsSize, pixelMap->GetWritablePixels(), pixelsSize) != 0) {
-            LOGE("memcpy error");
-        }
+        memcpy_s(buffer, pixelsSize, pixelMap->GetWritablePixels(), pixelsSize);
     }
 #else
     auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));

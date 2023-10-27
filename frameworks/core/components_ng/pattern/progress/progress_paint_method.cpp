@@ -20,7 +20,6 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
-#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_option_component.h"
 #include "core/components/progress/progress_theme.h"
@@ -74,7 +73,6 @@ void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
         case ProgressType::RING:
         case ProgressType::SCALE:
             if (strokeWidth_ >= length * HALF) {
-                LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
                 strokeWidth_ = length * HALF * HALF;
             }
             break;

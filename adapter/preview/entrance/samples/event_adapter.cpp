@@ -77,7 +77,7 @@ void EventAdapter::Initialize(std::shared_ptr<GlfwRenderContext>& glfwRenderCont
     // keyboard callback
     auto&& keyboardCbk = [this](int key, int scancode, int action, int mods) {
         if (RunSpecialOperations(key, action, mods)) {
-            LOGI("Some special shortcut keys are intercepted for performing specific operations.");
+            LOGD("Some special shortcut keys are intercepted for performing specific operations.");
             return;
         }
         if (keyEventCallback_ && RecognizeKeyEvent(key, action, mods)) {

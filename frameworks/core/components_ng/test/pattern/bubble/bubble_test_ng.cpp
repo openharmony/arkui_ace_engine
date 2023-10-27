@@ -1450,8 +1450,8 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH, BUBBLE_HEIGHT));
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0);
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 0);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 6);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 16);
 }
 
 /**
@@ -1558,9 +1558,6 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest005, TestSize.Level1)
 
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
-    OffsetT<Dimension> offset;
-    offset = bubbleLayoutAlgorithm->GetChildOffsetAfterLayout(layoutWrapper);
-    EXPECT_EQ(offset, OffsetT<Dimension> {});
 
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
@@ -1718,18 +1715,6 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
     EXPECT_FALSE(children.empty());
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-
-    OffsetT<Dimension> offset;
-    EXPECT_TRUE(!bubblePattern->IsSkipHotArea());
-    offset = bubbleLayoutAlgorithm->GetChildOffsetAfterLayout(layoutWrapper);
-    EXPECT_TRUE(!bubblePattern->IsSkipHotArea());
-
-    auto targetNode1 = FrameNode::GetFrameNode(bubbleLayoutAlgorithm->targetTag_, bubbleLayoutAlgorithm->targetNodeId_);
-    targetNode1->onMainTree_ = true;
-    offset = bubbleLayoutAlgorithm->GetChildOffsetAfterLayout(layoutWrapper);
-    bubbleLayoutProperty->UpdateShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
-    offset = bubbleLayoutAlgorithm->GetChildOffsetAfterLayout(layoutWrapper);
-    EXPECT_FALSE(offset == bubblePattern->GetInvisibleOffset());
     EXPECT_FALSE(bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), bubbleLayoutProperty, true)
         == DISPLAY_WINDOW_OFFSET);
 }

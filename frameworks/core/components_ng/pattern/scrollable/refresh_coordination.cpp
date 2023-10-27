@@ -15,7 +15,6 @@
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 
 #include "core/common/container.h"
-#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -27,9 +26,6 @@ RefPtr<FrameNode> RefreshCoordination::FindRefreshNode() const
     while (parent) {
         if (InstanceOf<FrameNode>(parent)) {
             auto parentFrameNode = DynamicCast<FrameNode>(parent);
-            if (InstanceOf<NavigationPattern>(parentFrameNode->GetPattern())) {
-                return nullptr;
-            }
             if (InstanceOf<RefreshPattern>(parentFrameNode->GetPattern())) {
                 return DynamicCast<FrameNode>(parent);
             }

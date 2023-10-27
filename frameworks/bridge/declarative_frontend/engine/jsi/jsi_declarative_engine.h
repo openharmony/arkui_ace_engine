@@ -25,7 +25,6 @@
 #include "ecmascript/napi/include/jsnapi.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 
-#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/noncopyable.h"
@@ -166,7 +165,6 @@ public:
             dispatcher->CallCurlFunction(requestData, callbackId);
             return true;
         } else {
-            LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
             return false;
         }
     }
@@ -174,11 +172,10 @@ public:
     bool InitAceModule(const uint8_t* start, size_t length)
     {
         if (!runtime_) {
-            LOGE("jsi runtime is nullptr");
+            return false;
         }
         bool result = runtime_->EvaluateJsCode(start, length);
         if (!result) {
-            LOGE("jsi runtime InitAceModule Evaluate JsCode failed");
             return false;
         }
         return true;
@@ -404,6 +401,12 @@ public:
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
+    bool UpdateRootComponent() override;
+    static void SetEntryObject(const panda::Global<panda::ObjectRef>& obj)
+    {
+        obj_ = obj;
+    }
+
 private:
     bool CallAppFunc(const std::string& appFuncName);
 
@@ -441,6 +444,7 @@ private:
     std::string pluginModuleName_;
     static std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
     bool isFirstCallShow_ = true;
+    static panda::Global<panda::ObjectRef> obj_;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

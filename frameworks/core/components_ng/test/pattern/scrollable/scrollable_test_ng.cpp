@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "gmock/gmock-actions.h"
 #include "gtest/gtest.h"
 #include "gtest/hwext/gtest-ext.h"
 
@@ -20,6 +21,9 @@
 
 #define protected public
 #define private public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/test/mock/pattern/scrollable/mock_nestable_scroll_container.h"
@@ -30,8 +34,11 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 class ScrollableTestNg : public testing::Test {
+public:
     void SetUp() override;
     void TearDown() override;
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 
 private:
     void InitNestedScrolls();
@@ -60,17 +67,28 @@ public:
     MOCK_METHOD(bool, HandleScrollVelocity, (float), (override));
 };
 
+void ScrollableTestNg::SetUpTestSuite()
+{
+    MockPipelineBase::TearDown();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+}
+
+void ScrollableTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
+    MockContainer::TearDown();
+}
+
 void ScrollableTestNg::SetUp()
 {
     InitNestedScrolls();
-    MockPipelineBase::SetUp();
 }
 
 void ScrollableTestNg::TearDown()
 {
     scroll_.Reset();
     mockScroll_.Reset();
-    MockPipelineBase::TearDown();
 }
 
 void ScrollableTestNg::InitNestedScrolls()
@@ -745,6 +763,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity001, TestSize.Level1)
     scrollPn->parent_ = mockPn;
 
     EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(0);
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(true));
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_ONLY, .backward = NestedScrollMode::SELF_ONLY };
@@ -771,6 +790,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity002, TestSize.Level1)
     scrollPn->parent_ = mockPn;
 
     EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(true));
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
     bool res = scrollPn->HandleScrollVelocity(5);
     EXPECT_TRUE(res);
@@ -795,6 +815,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity003, TestSize.Level1)
     scrollPn->parent_ = mockPn;
 
     EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(2).WillRepeatedly(Return(false));
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(true));
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
     bool res = scrollPn->HandleScrollVelocity(5);
@@ -815,6 +836,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity004, TestSize.Level1)
     scrollPn->parent_ = mockPn;
 
     EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(0);
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(true));
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     bool res = scrollPn->HandleScrollVelocity(5);

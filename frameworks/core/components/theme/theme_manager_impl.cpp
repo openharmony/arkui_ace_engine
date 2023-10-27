@@ -56,6 +56,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/card_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/tool_bar/tool_bar_theme.h"
@@ -146,6 +147,11 @@ ThemeManagerImpl::ThemeManagerImpl()
     themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
 }
 
+ThemeManagerImpl::ThemeManagerImpl(RefPtr<ResourceAdapter>& resourceAdapter)
+{
+    themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
+}
+
 RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
 {
     auto findIter = themes_.find(type);
@@ -154,7 +160,6 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
     }
     auto builderIter = THEME_BUILDERS.find(type);
     if (builderIter == THEME_BUILDERS.end()) {
-        LOGE("No theme builder defined! type=%{public}zu", type);
         return nullptr;
     }
     auto theme = builderIter->second(themeConstants_);

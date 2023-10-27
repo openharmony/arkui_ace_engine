@@ -30,23 +30,29 @@ float ParagraphManager::GetHeight() const
 int32_t ParagraphManager::GetIndex(Offset offset) const
 {
     CHECK_NULL_RETURN(!paragraphs_.empty(), 0);
-    for (auto&& info : paragraphs_) {
-        if (offset.GetY() > info.paragraph->GetHeight()) {
+    int idx = 0;
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
+        auto&& info = *it;
+        if (GreatNotEqual(offset.GetY(), info.paragraph->GetHeight())) {
+            if (idx == static_cast<int>(paragraphs_.size()) - 1) {
+                // in the last line
+                return info.end;
+            }
             // get offset relative to each paragraph
             offset.SetY(offset.GetY() - info.paragraph->GetHeight());
-            continue;
+        } else {
+            return info.paragraph->GetGlyphIndexByCoordinate(offset) + info.start;
         }
-        return info.paragraph->GetHandlePositionForClick(offset) + info.start;
     }
-    return paragraphs_.back().paragraph->GetHandlePositionForClick(offset) + paragraphs_.back().start;
+    return paragraphs_.back().paragraph->GetGlyphIndexByCoordinate(offset) + paragraphs_.back().start;
 }
 
-std::vector<Rect> ParagraphManager::GetRects(int32_t start, int32_t end) const
+std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const
 {
-    std::vector<Rect> res;
+    std::vector<RectF> res;
     float y = 0.0f;
     for (auto&& info : paragraphs_) {
-        std::vector<Rect> rects;
+        std::vector<RectF> rects;
         if (info.start > end) {
             break;
         }
@@ -64,12 +70,12 @@ std::vector<Rect> ParagraphManager::GetRects(int32_t start, int32_t end) const
     return res;
 }
 
-std::vector<Rect> ParagraphManager::GetPlaceholderRects() const
+std::vector<RectF> ParagraphManager::GetPlaceholderRects() const
 {
-    std::vector<Rect> res;
+    std::vector<RectF> res;
     float y = 0.0f;
     for (auto&& info : paragraphs_) {
-        std::vector<Rect> rects;
+        std::vector<RectF> rects;
         info.paragraph->GetRectsForPlaceholders(rects);
         for (auto& rect : rects) {
             rect.SetTop(rect.Top() + y);
@@ -103,7 +109,7 @@ OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHe
 
     int32_t relativeIndex = index - it->start;
     auto&& paragraph = it->paragraph;
-    CaretMetrics metrics;
+    CaretMetricsF metrics;
     auto computeSuccess = paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics) ||
                           paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics);
     CHECK_NULL_RETURN(computeSuccess, OffsetF(0.0f, y));

@@ -31,6 +31,7 @@ template("napi_dragcontroller_static") {
       "$ace_root/frameworks",
       "$root_out_dir/arkui/framework",
       "$ark_ets_path",
+      "$ark_runtime_path",
     ]
 
     sources = [ "js_drag_controller.cpp" ]

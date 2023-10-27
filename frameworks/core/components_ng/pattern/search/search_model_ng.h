@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_MODEL_NG_H
 
+#include "base/memory/referenced.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/search/search_model.h"
 #include "core/components_ng/pattern/search/search_node.h"
 
@@ -66,6 +68,7 @@ private:
     void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode);
     RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
 };
 
 } // namespace OHOS::Ace::NG

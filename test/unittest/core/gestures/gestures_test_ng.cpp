@@ -21,6 +21,8 @@
 #define private public
 #define protected public
 
+#undef SECURITY_COMPONENT_ENABLE
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -1418,7 +1420,7 @@ HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
      */
     exclusiveRecognizer.recognizers_.clear();
     exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
@@ -1428,7 +1430,7 @@ HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
     exclusiveRecognizer.recognizers_.clear();
     exclusiveRecognizer.recognizers_.push_back(nullptr);
     exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
@@ -1439,7 +1441,7 @@ HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
     exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
@@ -1450,7 +1452,7 @@ HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
     clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
     exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
     exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -4385,7 +4387,7 @@ HWTEST_F(GesturesTestNg, PinchRecognizerTest001, TestSize.Level1)
      * @tc.expected: step3. result equals.
      */
     pinchRecognizer.OnRejected();
-    EXPECT_EQ(pinchRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(pinchRecognizer.refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -11809,7 +11811,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest012, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->transId_ = 1;
+    clickRecognizerPtr->SetNodeId(1);
     AncestorNodeInfo info1;
     AncestorNodeInfo info2;
     AncestorNodeInfo info3;
@@ -11822,9 +11824,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest012, TestSize.L
     transFormIds.insert(pair3);
     EXPECT_EQ(transFormIds.size(), 3);
     PointF f1 = PointF(1.0, 0.0);
-    PointF f2 = PointF(1.0, 0.0);
-    clickRecognizerPtr->Transform(f1, f2);
-    EXPECT_EQ(clickRecognizerPtr->transId_, 1);
+    NGGestureRecognizer::Transform(f1, 1);
     EXPECT_EQ(NGGestureRecognizer::GetGlobalTransIds().size(), 0);
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 }
@@ -11843,7 +11843,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest013, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->transId_ = 1;
+    clickRecognizerPtr->SetNodeId(1);
     AncestorNodeInfo info1;
     AncestorNodeInfo info2;
     AncestorNodeInfo info3;
@@ -11855,9 +11855,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest013, TestSize.L
     transFormIds.insert(transFormIds.begin(), std::make_pair(2, info3));
     EXPECT_EQ(transFormIds.size(), 3);
     PointF f1 = PointF(1.0, 0.0);
-    PointF f2 = PointF(1.0, 0.0);
-    clickRecognizerPtr->Transform(f1, f2);
-    EXPECT_EQ(clickRecognizerPtr->transId_, 1);
+    NGGestureRecognizer::Transform(f1, 1);
     EXPECT_EQ(NGGestureRecognizer::GetGlobalTransIds().size(), 0);
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 }
@@ -11923,7 +11921,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest014, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->transId_ = 1;
+    clickRecognizerPtr->SetNodeId(1);
     AncestorNodeInfo info1;
     AncestorNodeInfo info2;
     AncestorNodeInfo info3;
@@ -11935,9 +11933,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest014, TestSize.L
     transFormIds[2] = info3;
     EXPECT_EQ(transFormIds.size(), 3);
     PointF f1 = PointF(1.0, 0.0);
-    PointF f2 = PointF(1.0, 0.0);
-    clickRecognizerPtr->Transform(f1, f2);
-    EXPECT_EQ(clickRecognizerPtr->transId_, 1);
+    NGGestureRecognizer::Transform(f1, 1);
     EXPECT_EQ(NGGestureRecognizer::GetGlobalTransIds().size(), 0);
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 }
@@ -12040,7 +12036,7 @@ HWTEST_F(GesturesTestNg, PinchRecognizerTest011, TestSize.Level1)
     pinchRecognizer->initialDev_ = 2.0;
     pinchRecognizer->OnFlushTouchEventsEnd();
     pinchRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(pinchRecognizer->scale_, 1);
+    EXPECT_NE(pinchRecognizer->scale_, 1);
 
     /**
      * @tc.steps: step3. test HandleTouchMoveEvent(AxisEvent).

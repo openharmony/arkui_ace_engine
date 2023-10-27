@@ -85,56 +85,9 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     }
 }
 
-void MountTitle(const RefPtr<TitleBarNode>& hostNode)
-{
-    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    auto titleNode = AceType::DynamicCast<FrameNode>(hostNode->GetTitle());
-    CHECK_NULL_VOID(titleNode);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetParent());
-    CHECK_NULL_VOID(navBarNode);
-    // if title node is custom node markModifyDone and return
-    if (navBarNode->GetPrevTitleIsCustomValue(false)) {
-        titleNode->MarkModifyDone();
-        return;
-    }
-
-    auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(titleLayoutProperty);
-
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    auto currentFontSize = titleLayoutProperty->GetFontSizeValue(Dimension(0));
-    auto currentMaxLine = titleLayoutProperty->GetMaxLinesValue(0);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
-            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
-            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
-        } else {
-            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
-            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
-        }
-        titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
-        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
-    } else {
-        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
-        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
-    }
-
-    if (hostNode->GetSubtitle()) {
-        titleLayoutProperty->UpdateMaxLines(1);
-    } else {
-        titleLayoutProperty->UpdateMaxLines(TITLEBAR_MAX_LINES);
-    }
-    if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||
-        currentMaxLine != titleLayoutProperty->GetMaxLinesValue(0)) {
-        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    }
-    titleNode->MarkModifyDone();
-}
-
 void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
 {
+    CHECK_NULL_VOID(hostNode);
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     auto subtitleNode = AceType::DynamicCast<FrameNode>(hostNode->GetSubtitle());
@@ -155,6 +108,67 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
 
 } // namespace
 
+void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
+{
+    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto titleNode = AceType::DynamicCast<FrameNode>(hostNode->GetTitle());
+    CHECK_NULL_VOID(titleNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetParent());
+    CHECK_NULL_VOID(navBarNode);
+    // if title node is custom node markModifyDone and return
+    if (navBarNode->GetPrevTitleIsCustomValue(false)) {
+        titleNode->MarkModifyDone();
+        return;
+    }
+
+    auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(titleLayoutProperty);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto currentFontSize = titleLayoutProperty->GetFontSizeValue(Dimension(0));
+    auto currentMaxLine = titleLayoutProperty->GetMaxLinesValue(0);
+    auto titleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    if (titleMode == NavigationTitleMode::MINI) {
+        if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
+            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
+        } else {
+            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
+        }
+        titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+        UpdateSubTitleOpacity(1.0);
+    } else if (titleMode == NavigationTitleMode::FULL) {
+        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
+        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+        UpdateSubTitleOpacity(1.0);
+    } else {
+        if (fontSize_.has_value()) {
+            titleLayoutProperty->UpdateFontSize(Dimension(fontSize_.value(), DimensionUnit::PX));
+            titleLayoutProperty->UpdateAdaptMaxFontSize(Dimension(fontSize_.value(), DimensionUnit::PX));
+        } else {
+            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+        }
+        if (opacity_.has_value()) {
+            UpdateSubTitleOpacity(opacity_.value());
+        } else {
+            UpdateSubTitleOpacity(1.0);
+        }
+    }
+
+    auto maxLines = hostNode->GetSubtitle() ? 1 : TITLEBAR_MAX_LINES;
+    titleLayoutProperty->UpdateMaxLines(maxLines);
+    if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||
+        currentMaxLine != titleLayoutProperty->GetMaxLinesValue(0)) {
+        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    }
+    titleNode->MarkModifyDone();
+}
+
 void TitleBarPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -170,7 +184,7 @@ void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(!panEvent_);
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGI("Pan event start");
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Pan event start");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -189,7 +203,7 @@ void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -199,7 +213,7 @@ void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        LOGI("Pan event cancel");
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Pan event cancel");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd(0.0);
@@ -376,12 +390,12 @@ void TitleBarPattern::SetTitleStyleByOffset(float offset)
 
     // title font size
     auto mappedOffset = GetMappedOffset(offset);
-    auto tempFontSize = GetFontSize(mappedOffset);
-    UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::PX));
+    fontSize_ = GetFontSize(mappedOffset);
+    UpdateTitleFontSize(Dimension(fontSize_.value(), DimensionUnit::PX));
 
     // subTitle Opacity
-    auto tempOpacity = GetSubtitleOpacity();
-    UpdateSubTitleOpacity(tempOpacity);
+    opacity_ = GetSubtitleOpacity();
+    UpdateSubTitleOpacity(opacity_.value());
 }
 
 void TitleBarPattern::ProcessTitleDragEnd()
@@ -697,6 +711,7 @@ void TitleBarPattern::UpdateTitleFontSize(const Dimension& tempTitleFontSize)
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateFontSize(tempTitleFontSize);
+    textLayoutProperty->UpdateAdaptMaxFontSize(tempTitleFontSize);
     titleNode->MarkModifyDone();
 }
 

@@ -37,7 +37,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
     if (children.empty()) {
-        LOGW("Badge has no child node.");
         return;
     }
     auto childrenSize = children.size();
@@ -136,7 +135,6 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
     if (children.empty()) {
-        LOGW("Badge has no child node.");
         return;
     }
     auto childrenSize = children.size();

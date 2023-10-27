@@ -125,7 +125,6 @@ void JSIndexer::Create(const JSCallbackInfo& args)
 void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     IndexerModel::GetInstance()->SetSelectedColor(PaseColor(args));
@@ -134,7 +133,6 @@ void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
 void JSIndexer::SetColor(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     IndexerModel::GetInstance()->SetColor(PaseColor(args));
@@ -143,7 +141,6 @@ void JSIndexer::SetColor(const JSCallbackInfo& args)
 void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     IndexerModel::GetInstance()->SetPopupColor(PaseColor(args));
@@ -152,7 +149,6 @@ void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
 void JSIndexer::SetSelectedBackgroundColor(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     IndexerModel::GetInstance()->SetSelectedBackgroundColor(PaseColor(args));
@@ -161,7 +157,6 @@ void JSIndexer::SetSelectedBackgroundColor(const JSCallbackInfo& args)
 void JSIndexer::SetPopupBackground(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     IndexerModel::GetInstance()->SetPopupBackground(PaseColor(args));
@@ -175,7 +170,6 @@ void JSIndexer::SetUsingPopup(bool state)
 void JSIndexer::SetSelectedFont(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::optional<Dimension> fontSize;
@@ -191,7 +185,6 @@ void JSIndexer::SetSelectedFont(const JSCallbackInfo& args)
 void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::optional<Dimension> fontSize;
@@ -207,7 +200,6 @@ void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
 void JSIndexer::SetFont(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::optional<Dimension> fontSize;
@@ -243,12 +235,10 @@ void JSIndexer::JsOnRequestPopupData(const JSCallbackInfo& args)
             auto params = ConvertToJSValues(selected);
             JSRef<JSArray> result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
-                LOGE("Error calling onRequestPopupData result is empty.");
                 return popupData;
             }
 
             if (!result->IsArray()) {
-                LOGE("Error calling onRequestPopupData result is not array.");
                 return popupData;
             }
 
@@ -256,8 +246,6 @@ void JSIndexer::JsOnRequestPopupData(const JSCallbackInfo& args)
                 if (result->GetValueAt(i)->IsString()) {
                     auto item = result->GetValueAt(i);
                     popupData.emplace_back(item->ToString());
-                } else {
-                    LOGE("Error calling onRequestPopupData index %{public}zu is not string.", i);
                 }
             }
             return popupData;
@@ -314,7 +302,6 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, std::optional<Dimensi
 void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension itemSize;
@@ -329,7 +316,6 @@ void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     int32_t value = Container::IsCurrentUseNewPipeline() ? static_cast<int32_t>(NG::AlignStyle::RIGHT)
@@ -386,7 +372,6 @@ void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
 void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     IndexerModel::GetInstance()->SetPopupSelectedColor(PaseColor(args));
@@ -400,7 +385,6 @@ void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
 void JSIndexer::SetPopupUnselectedColor(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     IndexerModel::GetInstance()->SetPopupUnselectedColor(PaseColor(args));
@@ -437,7 +421,6 @@ void JSIndexer::SetPopupItemFont(const JSCallbackInfo& args)
 void JSIndexer::SetPopupItemBackgroundColor(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     IndexerModel::GetInstance()->SetPopupItemBackground(PaseColor(args));

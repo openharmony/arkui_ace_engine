@@ -106,7 +106,7 @@ public:
     }
 
     void BeforeCreatePaintWrapper() override;
-    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
 
 private:
     class ObscuredImage : public CanvasImage {

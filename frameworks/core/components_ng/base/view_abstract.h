@@ -312,6 +312,8 @@ public:
         const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
     static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
 
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+
 private:
     static void AddDragFrameNodeToManager();
 };

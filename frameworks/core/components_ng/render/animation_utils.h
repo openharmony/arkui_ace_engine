@@ -39,6 +39,7 @@ public:
     static void OpenImplicitAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
     static bool CloseImplicitAnimation();
+    static bool IsImplicitAnimationOpen();
     static void Animate(const AnimationOption& option, const PropertyCallback& callback,
         const FinishCallback& finishCallback = nullptr, const RepeatCallback& repeatCallback = nullptr);
     static void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback);

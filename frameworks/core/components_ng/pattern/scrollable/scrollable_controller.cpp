@@ -23,7 +23,6 @@ bool ScrollableController::AnimateTo(
     CHECK_NULL_RETURN(pattern, false);
     if (pattern->GetAxis() != Axis::NONE) {
         if (position.Unit() == DimensionUnit::PERCENT) {
-            LOGW("not support percent dimension now");
             return false;
         }
         if (Positive(duration) || smooth) {
