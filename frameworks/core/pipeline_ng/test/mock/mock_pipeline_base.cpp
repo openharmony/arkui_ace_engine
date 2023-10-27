@@ -436,4 +436,9 @@ void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
 {
     textFieldManager_ = manager;
 }
+
+RefPtr<NG::FrameNode> NG::PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<NG::UINode>& node)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

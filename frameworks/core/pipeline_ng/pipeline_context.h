@@ -185,9 +185,7 @@ public:
 
     bool OnBackPressed();
 
-    RefPtr<FrameNode> GetNavDestinationBackButtonNode();
-
-    RefPtr<FrameNode> FindNavDestinationNodeToHandleBack(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> FindNavigationNodeToHandleBack(const RefPtr<UINode>& node);
 
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
@@ -387,7 +385,6 @@ public:
         storeNode_.erase(restoreId);
     }
     void SetNeedRenderNode(const RefPtr<FrameNode>& node);
-
 
     void SetIgnoreViewSafeArea(bool value) override;
     void SetIsLayoutFullScreen(bool value) override;

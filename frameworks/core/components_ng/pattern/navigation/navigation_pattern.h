@@ -238,6 +238,7 @@ public:
 
     void UpdateContextRect(const RefPtr<NavDestinationGroupNode>& curDestination,
         const RefPtr<NavigationGroupNode>& navigation);
+    void OnNavBarStateChange(bool modeChange);
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
@@ -256,7 +257,6 @@ private:
     void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
-    void OnNavBarStateChange(bool modeChange);
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
