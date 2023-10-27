@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/badge/badge_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT BadgeModelNG: public OHOS::Ace::BadgeModel {
+class ACE_EXPORT BadgeModelNG : public OHOS::Ace::BadgeModel {
 public:
     void Create(BadgeParameters& badgeParameters) override;
 
