@@ -864,6 +864,35 @@ void TextFieldPattern::HandleOnPaste()
     clipboard_->GetData(pasteCallback);
 }
 
+void TextFieldPattern::HandleOnCameraInput()
+{
+    LOGI("TextFieldPattern::HandleOnCameraInput");
+#if defined(ENABLE_STANDARD_INPUT)
+    if (textChangeListener_ == nullptr) {
+        textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+    }
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (!inputMethod) {
+        LOGE("HandleOnCameraInput input method is null.");
+        return;
+    }
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (imeAttached_) {
+        inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
+    } else {
+        auto optionalTextConfig = GetMiscTextConfig();
+        CHECK_NULL_VOID(optionalTextConfig.has_value());
+        MiscServices::TextConfig textConfig = optionalTextConfig.value();
+        LOGI("HandleOnCameraInput set calling window id is : %{public}u", textConfig.windowId);
+        inputMethod->Attach(textChangeListener_, false, textConfig);
+        inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
+        imeAttached_ = true;
+    }
+#endif
+#endif
+}
+
+
 void TextFieldPattern::StripNextLine(std::wstring& data)
 {
     CHECK_NULL_VOID(!(data.empty() || IsTextArea()));
@@ -1901,6 +1930,14 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
     overlayInfo.menuInfo.menuIsShow = (hasTextContent || hasData) && !isHideSelectionMenu && clientInfo.isMenuShow;
     overlayInfo.isHandleLineShow = overlayInfo.isHandleLineShow && !IsSingleHandle();
     overlayInfo.menuInfo.menuDisable = isHideSelectionMenu;
+#if defined(ENABLE_STANDARD_INPUT)
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    isSupportCameraInput_ = inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
+#else
+    isSupportCameraInput_ = false;
+#endif
+    LOGI("Is support camera input %{public}d", isSupportCameraInput_);
+    overlayInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput_;
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->RemoveTouchEvent(GetTouchListener());
     return true;

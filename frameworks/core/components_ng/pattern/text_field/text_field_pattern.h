@@ -780,6 +780,7 @@ public:
     void HandleOnCopy();
     void HandleOnPaste();
     void HandleOnCut();
+    void HandleOnCameraInput();
     void StripNextLine(std::wstring& data);
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
@@ -951,6 +952,9 @@ public:
                 return;
             case SelectOverlayMenuId::PASTE:
                 HandleOnPaste();
+                return;
+            case SelectOverlayMenuId::CAMERA_INPUT:
+                HandleOnCameraInput();
                 return;
         }
     }
@@ -1237,6 +1241,7 @@ private:
     CaretStatus caretStatus_ = CaretStatus::NONE;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
+    bool isSupportCameraInput_ = false;
 };
 } // namespace OHOS::Ace::NG
 
