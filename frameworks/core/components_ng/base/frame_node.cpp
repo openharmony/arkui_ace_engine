@@ -19,6 +19,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
@@ -221,6 +222,9 @@ public:
 
     std::string Dump()
     {
+        if (totalCount_ == 0) {
+            return "totalCount is 0";
+        }
         std::string info = "FrameChildNode:[";
         for (const auto& child : children_) {
             info += std::to_string(child.node->GetId());
@@ -391,20 +395,31 @@ void FrameNode::InitializePatternAndContext()
 void FrameNode::DumpCommonInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
+    if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
+    }
+
     DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
                                                    : "NA"));
-    DumpLog::GetInstance().AddDesc(std::string("top: ")
-                                       .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
-                                       .append(" left: ")
-                                       .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
-    DumpLog::GetInstance().AddDesc(std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
-    DumpLog::GetInstance().AddDesc(std::string("Visible: ")
-                                       .append(std::to_string(static_cast<int32_t>(
-                                           layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
+    if (NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX())) {
+        DumpLog::GetInstance().AddDesc(std::string("top: ")
+                                           .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
+                                           .append(" left: ")
+                                           .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+    }
+    if (static_cast<int32_t>(IsActive()) != 1) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
+    }
+
+    if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
+        DumpLog::GetInstance().AddDesc(std::string("Visible: ")
+                                           .append(std::to_string(static_cast<int32_t>(
+                                               layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
+    }
     if (layoutProperty_->GetPaddingProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
@@ -421,7 +436,9 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(std::string("User defined constraint: ")
                                            .append(layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()));
     }
-    DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
+    if (!propInspectorId_->empty()) {
+        DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
+    }
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
                                                    ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
@@ -429,7 +446,9 @@ void FrameNode::DumpCommonInfo()
     DumpOverlayInfo();
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
+    if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
+        DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
+    }
 }
 
 void FrameNode::DumpOverlayInfo()
