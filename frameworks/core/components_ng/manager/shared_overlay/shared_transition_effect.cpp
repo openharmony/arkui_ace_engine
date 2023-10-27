@@ -145,7 +145,7 @@ bool SharedTransitionExchange::CreateTranslateAnimation(const RefPtr<FrameNode>&
         translateAnimation->SetEvaluator(motionPathEvaluator->CreateDimensionOffsetEvaluator());
         if (option_->motionPathOption.GetRotate()) {
             // Just need to add a rotation animation, the specific rotation Angle is calculated through the path
-            auto rotateAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, option_->curve);
+            auto rotateAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 0.0f, option_->curve);
             rotateAnimation->SetEvaluator(motionPathEvaluator->CreateRotateEvaluator());
             auto rotateListener = [weakSrc = WeakPtr<RenderContext>(srcRenderContext)](float value) {
                 auto srcNode = weakSrc.Upgrade();
@@ -155,7 +155,7 @@ bool SharedTransitionExchange::CreateTranslateAnimation(const RefPtr<FrameNode>&
             };
             rotateAnimation->AddListener(rotateListener);
             controller_->AddInterpolator(rotateAnimation);
-            srcRotate = srcRenderContext->GetTransformRotate();
+            srcRotate = srcRenderContext->GetTransformRotateValue({ 0, 0, 1, 0, 0 });
         }
     }
     auto translateListener = [weakSrc = WeakPtr<RenderContext>(srcRenderContext)](const DimensionOffset& value) {
