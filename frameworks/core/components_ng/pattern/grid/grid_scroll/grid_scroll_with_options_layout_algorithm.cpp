@@ -173,7 +173,6 @@ static void JumpToLastIrregularItem(
 static void ResetInvalidCrossSpan(uint32_t crossCount, int32_t& crossSpan)
 {
     if (crossSpan > static_cast<int32_t>(crossCount) || crossSpan <= 0) {
-        LOGI("crossSpan %{public}d invalid, use 1", crossSpan);
         crossSpan = 1;
     }
 }
