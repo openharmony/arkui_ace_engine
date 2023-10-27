@@ -575,7 +575,15 @@ void GridPattern::OnScrollStartCallback()
 
 std::pair<bool, bool> GridPattern::IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex)
 {
-    auto crossIndexSet = GetFocusableChildCrossIndexesAt(curMainIndex);
+    std::unordered_set<int32_t> crossIndexSet;
+    size_t maxSize = 0;
+    for (int32_t index = curMainIndex - curFocusIndexInfo_.mainSpan + 1; index <= curMainIndex; index++) {
+        auto tempIndexSet = GetFocusableChildCrossIndexesAt(index);
+        if (tempIndexSet.size() > maxSize) {
+            maxSize = tempIndexSet.size();
+            crossIndexSet = tempIndexSet;
+        }
+    }
     auto findLesser = std::find_if(crossIndexSet.begin(), crossIndexSet.end(),
         [curCrossIndex](int32_t crossIndex) { return curCrossIndex > crossIndex; });
     auto findGreater = std::find_if(crossIndexSet.begin(), crossIndexSet.end(),
@@ -911,6 +919,10 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
                                                    : childItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
         auto chidCrossEnd = hasIrregularItemInfo ? irregularInfo.value().crossEnd
                                                  : childItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
+        auto childCrossSpan = hasIrregularItemInfo ? irregularInfo.value().crossSpan
+                                                   : childItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
+        auto childMainSpan = hasIrregularItemInfo ? irregularInfo.value().mainSpan
+                                                   : childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
 
         GridItemIndexInfo childInfo;
         childInfo.mainIndex = childMainIndex;
@@ -920,8 +932,12 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
         childInfo.crossStart = chidCrossStart;
         childInfo.crossEnd = chidCrossEnd;
 
-        if ((isLeftStep_ &&
-                ((childCrossIndex == tarCrossIndex && chidCrossEnd == -1) || chidCrossEnd == tarCrossIndex)) ||
+        if (childMainIndex < 0 || childCrossIndex < 0) {
+            continue;
+        }
+
+        if ((isLeftStep_ && ((childCrossIndex == tarCrossIndex && childCrossSpan == 1) ||
+                                (chidCrossEnd >= 0 && chidCrossEnd == tarCrossIndex))) ||
             (isRightStep_ && childCrossIndex == tarCrossIndex)) {
             double nearestDistance = GetNearestDistanceFromChildToCurFocusItemInMainAxis(tarCrossIndex, childInfo);
             int32_t intersectAreaSize = CalcIntersectAreaInTargetDirectionShadow(childInfo, true);
@@ -935,8 +951,8 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
                 targetFocusHubWeak = AceType::WeakClaim(AceType::RawPtr(childFocus));
             }
         } else if ((isUpStep_ && childMainIndex == tarMainIndex) ||
-                   (isDownStep_ &&
-                       ((childMainIndex == tarMainIndex && chidlMainStart == -1) || chidlMainStart == tarMainIndex))) {
+                   (isDownStep_ && ((childMainIndex == tarMainIndex && childMainSpan == 1) ||
+                                       (chidlMainStart >= 0 && chidlMainStart == tarMainIndex)))) {
             double nearestDistance = GetNearestDistanceFromChildToCurFocusItemInCrossAxis(tarMainIndex, childInfo);
             int32_t intersectAreaSize = CalcIntersectAreaInTargetDirectionShadow(childInfo, false);
             if (LessNotEqual(nearestDistance, minDistance) ||
@@ -950,7 +966,7 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
             }
         } else if ((isLeftEndStep_ || isRightEndStep_) &&
                    ((tarMainIndex == childMainIndex && tarCrossIndex == childCrossIndex) ||
-                       (chidlMainStart != -1 && chidlMainStart <= tarMainIndex && tarMainIndex <= childMainIndex &&
+                       (chidlMainStart >= 0 && chidlMainStart <= tarMainIndex && tarMainIndex <= childMainIndex &&
                            tarCrossIndex == childCrossIndex))) {
             targetFocusHubWeak = AceType::WeakClaim(AceType::RawPtr(childFocus));
         }
@@ -1134,11 +1150,16 @@ std::unordered_set<int32_t> GridPattern::GetFocusableChildCrossIndexesAt(int32_t
         if (!childItemProperty) {
             continue;
         }
+        auto irregularInfo = childItemPattern->GetIrregularItemInfo();
+        bool hasIrregularItemInfo = irregularInfo.has_value();
         auto curMainIndex = childItemProperty->GetMainIndex().value_or(-1);
         auto curCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
-        auto curMainStart = childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+        auto curMainStart = hasIrregularItemInfo ? irregularInfo.value().mainStart
+                                                 : childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+        auto curMainEnd =
+            hasIrregularItemInfo ? irregularInfo.value().mainEnd : childItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
         if ((curMainIndex == tarMainIndex) ||
-            (curMainStart != -1 && curMainStart <= tarMainIndex && tarMainIndex <= curMainIndex)) {
+            (curMainStart >= 0 && curMainStart <= tarMainIndex && tarMainIndex <= curMainEnd)) {
             result.emplace(curCrossIndex);
         }
     }
