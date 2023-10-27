@@ -537,8 +537,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
         result.SetY(1.0f - size.Height());
     }
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("Get pixelMap offset is %{public}f and %{public}f.",
-            result.GetX(), result.GetY());
+        LOGI("Get pixelMap offset is %{public}f and %{public}f.", result.GetX(), result.GetY());
     }
     return result;
 }
@@ -684,8 +683,10 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
     g_getPixelMapSucc = false;
     if (dragDropInfo.customNode) {
-        auto callback = [pipeline, info, gestureEventHubPtr = AceType::Claim(this), frameNode, dragDropInfo, event](
-                            std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
+        auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
+                            frameNode, dragDropInfo,
+                            event](std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
+            ContainerScope scope(id);
             if (pixelMap == nullptr) {
                 LOGW("%{public}s: failed to get pixelmap, return nullptr", __func__);
                 g_getPixelMapSucc = false;
@@ -790,8 +791,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     DragData dragData { shadowInfo, {}, udKey, dragDropInfo.extraInfo, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), true };
-    ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
-        dragData, GetDragCallback(pipeline, eventHub));
+    ret =
+        Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
         return;
