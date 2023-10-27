@@ -1361,6 +1361,9 @@ void ListPattern::SetChainAnimation()
     }
     if (!chainAnimation_) {
         auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+        if (Negative(space)) {
+            space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
+        }
         springProperty_ =
             AceType::MakeRefPtr<SpringProperty>(CHAIN_SPRING_MASS, CHAIN_SPRING_STIFFNESS, CHAIN_SPRING_DAMPING);
         if (chainAnimationOptions_.has_value()) {
@@ -1405,6 +1408,9 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
         auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
         CHECK_NULL_VOID(listLayoutProperty);
         auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+        if (Negative(space)) {
+            space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
+        }
         float maxSpace = options.maxSpace.ConvertToPx();
         float minSpace = options.minSpace.ConvertToPx();
         if (GreatNotEqual(minSpace, maxSpace)) {
