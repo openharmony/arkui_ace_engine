@@ -2007,12 +2007,6 @@ bool RosenRenderCustomPaint::UpdateParagraph(
         txtShadow.offset.SetY(shadow_.GetOffset().GetY());
 #endif
 
-        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
-        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
-
-        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
-        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
-
         txtShadow.blur_sigma = shadow_.GetBlurRadius();
         txtStyle.text_shadows.emplace_back(txtShadow);
 #else
