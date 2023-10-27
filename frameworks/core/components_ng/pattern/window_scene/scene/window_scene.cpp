@@ -271,7 +271,6 @@ void WindowScene::OnForeground()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->RemoveChild(self->snapshotNode_);
-        self->snapshotNode_.Reset();
         host->AddChild(self->contentNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -296,7 +295,7 @@ void WindowScene::OnDisconnect()
         CHECK_NULL_VOID(host);
         host->RemoveChild(self->contentNode_);
         self->contentNode_.Reset();
-        if (!self->snapshotNode_) {
+        if (host->GetChildIndex(self->snapshotNode_) < 0) {
             self->CreateSnapshotNode(snapshot);
             host->AddChild(self->snapshotNode_, 0);
         }
