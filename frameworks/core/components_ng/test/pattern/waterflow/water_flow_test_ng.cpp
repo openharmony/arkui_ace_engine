@@ -150,6 +150,7 @@ void WaterFlowTestNg::CreateWaterFlowItem(int32_t number)
     for (int32_t i = 0; i < number; i++) {
         WaterFlowItemModelNG waterFlowItemModel;
         waterFlowItemModel.Create();
+        SetWidth(Dimension(ITEM_HEIGHT));
         SetHeight(Dimension(ITEM_HEIGHT));
         ViewStackProcessor::GetInstance()->Pop();
     }
@@ -1209,5 +1210,40 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
     FlowItemIndex position = pattern_->layoutInfo_.GetCrossIndexForNextItem();
     EXPECT_EQ(position.crossIndex, crossIndex + 1);
     EXPECT_EQ(position.lastItemIndex, 1);
+}
+
+/**
+ * @tc.name: WaterFlowGetItemRectTest001
+ * @tc.desc: Test WaterFlow GetItemRect function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemRectTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init WaterFlow and then slide by Scroller.
+     */
+    CreateWithItem([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateWaterFlowItem(15);
+    });
+
+    /**
+     * @tc.steps: step2. Get invalid WaterFlowItem Rect.
+     * @tc.expected: Return 0 when input invalid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(-1), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(12), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(13), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(15), Rect()));
+
+    /**
+     * @tc.steps: step3. Get valid WaterFlowItem Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, ITEM_HEIGHT, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5),
+        Rect(DEVICE_WIDTH / 4, ITEM_HEIGHT, ITEM_HEIGHT, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(10),
+        Rect(DEVICE_WIDTH / 2, ITEM_HEIGHT * 2, ITEM_HEIGHT, ITEM_HEIGHT)));
 }
 } // namespace OHOS::Ace::NG

@@ -76,4 +76,11 @@ bool ScrollPositionController::IsAtEnd() const
     CHECK_NULL_RETURN(scrollPattern, false);
     return scrollPattern->IsAtBottom();
 }
+
+Rect ScrollPositionController::GetItemRect(int32_t index) const
+{
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN(scrollPattern, Rect());
+    return scrollPattern->GetItemRect(index);
+}
 } // namespace OHOS::Ace::NG
