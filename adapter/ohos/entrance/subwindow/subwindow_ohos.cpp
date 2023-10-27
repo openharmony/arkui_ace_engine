@@ -509,6 +509,11 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     CHECK_NULL_VOID(overlay);
     ContainerScope scope(childContainerId_);
     overlay->HideMenuInSubWindow(showPreviewAnimation, startDrag);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    HideEventColumn();
+    HidePixelMap(false, 0, 0, false);
+    HideFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
