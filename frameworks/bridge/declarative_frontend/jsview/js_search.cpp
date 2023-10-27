@@ -100,6 +100,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
     JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
+    JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -744,6 +745,27 @@ void JSSearchController::StopEditing()
     auto controller = controller_.Upgrade();
     if (controller) {
         controller->StopEditing();
+    }
+}
+void JSSearch::SetMaxLength(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The arg(SetMaxLength) is wrong, it is supposed to have atleast 1 argument");
+        return;
+    }
+    int32_t maxLength = 0;
+    if (info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->ResetMaxLength();
+        return;
+    } else if (!info[0]->IsNumber()) {
+        SearchModel::GetInstance()->ResetMaxLength();
+        return;
+    }
+    maxLength = info[0]->ToNumber<int32_t>();
+    if (GreatOrEqual(maxLength, 0)) {
+        SearchModel::GetInstance()->SetMaxLength(maxLength);
+    } else {
+        SearchModel::GetInstance()->ResetMaxLength();
     }
 }
 } // namespace OHOS::Ace::Framework
