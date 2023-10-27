@@ -812,7 +812,7 @@ void SubwindowOhos::ShowToastForAbility(
 void SubwindowOhos::ShowToastForService(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos ShowToastForService begin");
+    TAG_LOGI(AceLogTag::ACE_PROMPT_ACTION_TOAST, "SubwindowOhos ShowToastForService begin");
     bool ret = CreateEventRunner();
     if (!ret) {
         return;
@@ -851,7 +851,7 @@ void SubwindowOhos::ShowToastForService(
         Platform::DialogContainer::ShowToast(childContainerId, message, duration, bottom);
     };
     if (!handler_->PostTask(showDialogCallback)) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Post sync task error");
+        TAG_LOGE(AceLogTag::ACE_PROMPT_ACTION_TOAST, "Post sync task error");
         return;
     }
 }

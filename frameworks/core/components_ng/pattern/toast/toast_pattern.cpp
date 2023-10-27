@@ -93,7 +93,8 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetY()) };
         offset += displayWindowOffset;
     }
-    LOGD("Toast bottom value: [%{public}f], offsetX [%{public}s] offsetY [%{public}s]", toastBottom,
+    TAG_LOGD(AceLogTag::ACE_PROMPT_ACTION_TOAST,
+        "Toast bottom value: [%{public}f],offsetX[% { public } s] offsetY[% { public } s] ", toastBottom,
         offset.GetX().ToString().c_str(), offset.GetY().ToString().c_str());
     toastContext->UpdateOffset(offset);
     return true;

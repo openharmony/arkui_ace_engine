@@ -122,17 +122,14 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         messageString = message.get();
     } else if (valueType == napi_object) {
         if (!ParseResourceParam(env, messageNApi, recv)) {
-            LOGE("can not parse resource info from input params.");
             NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(recv, messageString)) {
-            LOGE("can not get message from resource manager.");
             NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
     } else {
-        LOGE("The parameter type is incorrect.");
         NapiThrow(env, "The type of message is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
@@ -145,12 +142,10 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     } else if (valueType == napi_object) {
         recv = {};
         if (!ParseResourceParam(env, durationNApi, recv)) {
-            LOGE("can not parse resource info from input params.");
             NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(recv, durationStr)) {
-            LOGE("can not get message from resource manager.");
             NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
@@ -170,12 +165,10 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     } else if (valueType == napi_object) {
         recv = {};
         if (!ParseResourceParam(env, bottomNApi, recv)) {
-            LOGE("can not parse resource info from input params.");
             NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(recv, bottomString)) {
-            LOGE("can not get message from resource manager.");
             NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
@@ -195,7 +188,6 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (!delegate) {
-            LOGE("can not get delegate.");
             NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
@@ -206,7 +198,6 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
-        LOGE("can not get delegate.");
         NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
@@ -266,7 +257,6 @@ bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, in
     int32_t buttonsLenInt = buttonsLen;
     if (buttonsLenInt > maxButtonNum && maxButtonNum != -1) {
         buttonsLenInt = maxButtonNum;
-        LOGW("Supports 1 - %{public}u buttons", maxButtonNum);
     }
     for (index = 0; index < buttonsLenInt; index++) {
         napi_get_element(env, context->buttonsNApi, index, &buttonArray);
@@ -321,11 +311,9 @@ bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValu
         ResourceInfo recv;
         std::string parameterStr;
         if (!ParseResourceParam(env, napiValue, recv)) {
-            LOGE("can not parse resource info from inout params.");
             return false;
         }
         if (!ParseString(recv, parameterStr)) {
-            LOGE("can not get message from resource manager.");
             return false;
         }
         result = StringUtils::StringToDimensionWithUnit(parameterStr, defaultUnit);
@@ -401,13 +389,11 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         return nullptr;
     }
     if (thisVar == nullptr) {
-        LOGE("%{public}s, This argument is nullptr.", __func__);
         return nullptr;
     }
     napi_valuetype valueTypeOfThis = napi_undefined;
     napi_typeof(env, thisVar, &valueTypeOfThis);
     if (valueTypeOfThis == napi_undefined) {
-        LOGE("%{public}s, Wrong this value.", __func__);
         return nullptr;
     }
 
@@ -474,31 +460,26 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         asyncContext->successType = successType;
         auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
         if (!container) {
-            LOGW("container is null. %{public}d", asyncContext->instanceId);
             return;
         }
 
         auto taskExecutor = container->GetTaskExecutor();
         if (!taskExecutor) {
-            LOGW("taskExecutor is null.");
             return;
         }
         taskExecutor->PostTask(
             [asyncContext]() {
                 if (asyncContext == nullptr) {
-                    LOGE("%{public}s, asyncContext is nullptr.", __func__);
                     return;
                 }
 
                 if (!asyncContext->valid) {
-                    LOGE("%{public}s, module exported object is invalid.", __func__);
                     return;
                 }
 
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(asyncContext->env, &scope);
                 if (scope == nullptr) {
-                    LOGE("%{public}s, open handle scope failed.", __func__);
                     return;
                 }
 
@@ -559,7 +540,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         if (delegate) {
             delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
         } else {
-            LOGE("delegate is null");
             // throw internal error
             napi_value code = nullptr;
             std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
@@ -589,7 +569,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     if (delegate) {
         delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
     } else {
-        LOGE("delegate is null");
         // throw internal error
         napi_value code = nullptr;
         std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
@@ -628,13 +607,11 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         return nullptr;
     }
     if (thisVar == nullptr) {
-        LOGE("%{public}s, This argument is nullptr.", __func__);
         return nullptr;
     }
     napi_valuetype valueTypeOfThis = napi_undefined;
     napi_typeof(env, thisVar, &valueTypeOfThis);
     if (valueTypeOfThis == napi_undefined) {
-        LOGE("%{public}s, Wrong this value.", __func__);
         return nullptr;
     }
 
@@ -690,31 +667,26 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         asyncContext->successType = successType;
         auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
         if (!container) {
-            LOGW("container is null. %{public}d", asyncContext->instanceId);
             return;
         }
 
         auto taskExecutor = container->GetTaskExecutor();
         if (!taskExecutor) {
-            LOGW("taskExecutor is null.");
             return;
         }
         taskExecutor->PostTask(
             [asyncContext]() {
                 if (asyncContext == nullptr) {
-                    LOGE("%{public}s, asyncContext is nullptr.", __func__);
                     return;
                 }
 
                 if (!asyncContext->valid) {
-                    LOGE("%{public}s, module exported object is invalid.", __func__);
                     return;
                 }
 
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(asyncContext->env, &scope);
                 if (scope == nullptr) {
-                    LOGE("%{public}s, open handle scope failed.", __func__);
                     return;
                 }
 
@@ -765,7 +737,6 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         if (delegate) {
             delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
         } else {
-            LOGE("delegate is null");
             napi_value code = nullptr;
             std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
             napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
@@ -794,7 +765,6 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     if (delegate) {
         delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
     } else {
-        LOGE("delegate is null");
         napi_value code = nullptr;
         std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
