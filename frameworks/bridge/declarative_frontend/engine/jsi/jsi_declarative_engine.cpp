@@ -1540,6 +1540,16 @@ bool JsiDeclarativeEngine::ExecuteJsForFastPreview(const std::string& jsCode, co
     return result;
 }
 
+void JsiDeclarativeEngine::SetHspBufferTrackerCallback(
+    std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback)
+{
+    CHECK_NULL_VOID(engineInstance_);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    CHECK_NULL_VOID(runtime);
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    LOGI("SetHspBufferTrackerCallback is executed successfully.");
+    panda::JSNApi::SetHostResolveBufferTracker(vm, std::move(callback));
+}
 #endif
 
 void JsiDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)

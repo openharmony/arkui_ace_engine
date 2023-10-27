@@ -287,6 +287,7 @@ public:
 private:
     void InitializeFrontend();
     void InitializeCallback();
+    void SetHspBufferTrackerCallback();
 
 #ifndef ENABLE_ROSEN_BACKEND
     void AttachView(
