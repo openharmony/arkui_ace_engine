@@ -984,7 +984,6 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
         CHECK_NULL_RETURN(pipeline, false);
         auto theme = pipeline->GetTheme<TextOverlayTheme>();
         CHECK_NULL_RETURN(theme, false);
-        LOGW("Select GetCameraInput= %{public}s", theme->GetCameraInput().c_str());
         auto button = BuildButton(theme->GetCameraInput(), info->menuCallback.onCameraInput, GetId(), buttonWidth,
             false);
         if (maxWidth - allocatedSize >= buttonWidth) {
