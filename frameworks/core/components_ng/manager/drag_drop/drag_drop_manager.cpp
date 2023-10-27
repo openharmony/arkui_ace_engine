@@ -828,6 +828,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
 
 void DragDropManager::onItemDragCancel()
 {
+    dragDropState_ = DragDropMgrState::IDLE;
     preGridTargetFrameNode_ = nullptr;
     draggedGridFrameNode_ = nullptr;
 }
