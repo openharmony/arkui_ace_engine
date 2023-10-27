@@ -487,6 +487,113 @@ HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition003, TestSize.Lev
 }
 
 /**
+ * @tc.name: OnTextChangedListenerCaretPosition004
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize insert text and expected values when 'IsSelected() = false'
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    pattern->InsertValue("abc");
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare(DEFAULT_TEXT + "abc"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.length() + 3);
+
+    /**
+     * @tc.steps: Move the cursor and then insert text forward.
+     */
+    auto textFiledController = pattern->GetTextFieldController();
+    textFiledController->CaretPosition(0);
+    pattern->InsertValue("abcde");
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->
+        GetTextValue().compare("abcde" + DEFAULT_TEXT + "abc"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 5);
+}
+
+/**
+ * @tc.name: OnTextChangedListenerCaretPosition005
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize insert text and expected values
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    int32_t start = 5;
+    int32_t end = 10;
+    pattern->HandleSetSelection(start, end);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new handle positions are correct
+     */
+    EXPECT_EQ(pattern->caretStatus_, CaretStatus::HIDE);
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 5);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 10);
+}
+
+/**
+ * @tc.name: OnTextChangedListenerCaretPosition006
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize insert text and expected values
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    std::vector<std::int32_t> action = {
+        ACTION_SELECT_ALL,
+        ACTION_CUT,
+        ACTION_COPY,
+        ACTION_PASTE,
+    };
+    pattern->HandleExtendAction(action[0]);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new handle positions are correct
+     */
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 26);
+
+    /**
+     * @tc.steps: Move the handles and then cut text snippet.
+     */
+    int32_t start = 5;
+    int32_t end = 10;
+    pattern->HandleSetSelection(start, end);
+    pattern->HandleExtendAction(action[1]);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new handle positions are correct
+     * Cut data hasn't simulated
+     */
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 5);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 5);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 5);
+}
+
+/**
  * @tc.name: ContentController001
  * @tc.desc: Test ContentController in different input type
  * @tc.type: FUNC
