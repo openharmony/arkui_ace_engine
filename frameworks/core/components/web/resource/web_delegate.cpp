@@ -5485,4 +5485,19 @@ void WebDelegate::OnRootLayerChanged(int width, int height)
     CHECK_NULL_VOID(webPattern);
     webPattern->OnRootLayerChanged(width, height);
 }
+
+void WebDelegate::SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard)
+{
+    if (nweb_) {
+        nweb_->SetVirtualKeyBoardArg(width, height, keyboard);
+    }
+}
+
+bool WebDelegate::ShouldVirtualKeyboardOverlay()
+{
+    if (nweb_) {
+        return nweb_->ShouldVirtualKeyboardOverlay();
+    }
+    return false;
+}
 } // namespace OHOS::Ace

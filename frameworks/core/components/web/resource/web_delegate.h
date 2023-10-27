@@ -633,6 +633,8 @@ public:
     }
 #endif
     void SetToken();
+    void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
+    bool ShouldVirtualKeyboardOverlay();
 private:
     void InitWebEvent();
     void RegisterWebEvent();
