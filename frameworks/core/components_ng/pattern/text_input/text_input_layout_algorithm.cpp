@@ -124,6 +124,9 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (LessOrEqual(contentWidth + childWidth, contentConstraint.maxSize.Width())) {
             frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + childWidth);
         } else {
+            if (showPlaceHolder_) {
+                PlaceHolderMeasureContent(contentConstraint, layoutWrapper, childWidth);
+            }
             content->SetSize(SizeF(contentConstraint.maxSize.Width() - childWidth, contentHeight));
             frameSize.SetWidth(contentConstraint.maxSize.Width() + pattern->GetHorizontalPaddingAndBorderSum());
         }

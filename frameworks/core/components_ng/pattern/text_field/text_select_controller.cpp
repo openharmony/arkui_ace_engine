@@ -302,6 +302,10 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
     caretInfo_.index = index;
     firstHandleInfo_.index = index;
     secondHandleInfo_.index = index;
+    if (contentController_->IsEmpty()) {
+        caretInfo_.rect = CalculateEmptyValueCaretRect();
+        return;
+    }
     CalcCaretMetricsByPosition(GetCaretIndex(), CaretMetrics, textAffinity);
     OffsetF CaretOffset = CaretMetrics.offset;
     RectF caretRect;
