@@ -381,8 +381,9 @@ void DragDropManager::NotifyDragRegisterFrameNode(std::unordered_map<int32_t, We
         auto pattern = frameNode->GetPattern<Pattern>();
         CHECK_NULL_VOID(pattern);
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager NotifyDragRegisterFrameNode. Dragged frameNode is %{public}s, depth is %{public}d, "
-                 "DragEventType is %{public}d.",
+            TAG_LOGI(AceLogTag::ACE_DRAG,
+                "DragDropManager NotifyDragRegisterFrameNode. Dragged frameNode is %{public}s, depth is %{public}d, "
+                "DragEventType is %{public}d.",
                 frameNode->GetTag().c_str(), frameNode->GetDepth(), static_cast<int32_t>(dragEventType));
         }
         pattern->HandleOnDragStatusCallback(dragEventType, notifyEvent);
@@ -514,7 +515,8 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (!dragFrameNode) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGW(AceLogTag::ACE_DRAG, "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d.",
+            TAG_LOGW(AceLogTag::ACE_DRAG,
+                "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d.",
                 container->GetWindowId());
         }
         DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, container->GetWindowId() };
@@ -540,7 +542,8 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #ifdef ENABLE_DRAG_FRAMEWORK
     SetIsDragged(false);
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager finish drop, start do drop animation. UseCustomAnimation is %{public}d."
+        TAG_LOGI(AceLogTag::ACE_DRAG, 
+            "DragDropManager finish drop, start do drop animation. UseCustomAnimation is %{public}d."
             " WindowId is %{public}d.", event->IsUseCustomAnimation(), container->GetWindowId());
     }
     auto pipeline = PipelineContext::GetCurrentContext();
