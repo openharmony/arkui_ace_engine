@@ -95,8 +95,6 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
             HandleTouchMoveEvent(event);
             break;
         case AxisAction::END:
-            // When scroll one step. Axis events are 'BEGIN' and 'END'. So it's need to do 'UPDATE' before 'END'.
-            HandleTouchMoveEvent(event);
             HandleTouchUpEvent(event);
             break;
         default:
