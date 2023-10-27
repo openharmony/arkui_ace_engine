@@ -33,6 +33,12 @@ enum class TextAlign {
     END,
 };
 
+enum class EllipsisMode {
+    HEAD,
+    MIDDLE,
+    TAIL,
+};
+
 class TestingTypography {
 public:
     TestingTypography() = default;
@@ -81,9 +87,8 @@ public:
         TestingTypographyProperties::RectHeightStyle /* height */,
         TestingTypographyProperties::RectWidthStyle /* width */)
 #else
-    virtual std::vector<TestingTypographyProperties::TextRect> GetTextRectsByBoundary(
-        size_t /* start */, size_t /* end */,
-        TestingTypographyProperties::TextRectHeightStyle /* height */,
+    virtual std::vector<TestingTypographyProperties::TextRect> GetTextRectsByBoundary(size_t /* start */,
+        size_t /* end */, TestingTypographyProperties::TextRectHeightStyle /* height */,
         TestingTypographyProperties::TextRectWidthStyle /* width */)
 #endif
     {

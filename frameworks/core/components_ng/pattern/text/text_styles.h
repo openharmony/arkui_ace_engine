@@ -54,6 +54,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextIndent, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LeadingMargin, LeadingMargin);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WordBreak, WordBreak);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EllipsisMode, EllipsisMode);
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,

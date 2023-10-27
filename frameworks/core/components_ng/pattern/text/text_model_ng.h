@@ -44,6 +44,7 @@ public:
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetWordBreak(WordBreak value) override;
+    void SetEllipsisMode(EllipsisMode modal) override;
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;

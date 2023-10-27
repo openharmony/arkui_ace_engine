@@ -156,6 +156,12 @@ RSWordBreakType ToRSWordBreakType(const WordBreak& wordBreak)
     return static_cast<RSWordBreakType>(wordBreak);
 }
 
+RSEllipsisMode ToRSEllipsisMode(EllipsisMode value)
+{
+    // should keep enum same with rosen.
+    return static_cast<RSEllipsisMode>(value);
+}
+
 RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration)
 {
     RSTextDecoration rsTextDecoration = RSTextDecoration::NONE;
