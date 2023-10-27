@@ -61,6 +61,7 @@ static const std::set<std::string> stringAttrs = {
     "description_continue_to_receive",
     "draggable",
     "divider_shadow_enable",
+    "camera_input"
 };
 
 double ParseDoubleUnit(const std::string& value, std::string& unit)
