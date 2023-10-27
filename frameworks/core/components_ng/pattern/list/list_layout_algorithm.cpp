@@ -929,7 +929,7 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
 
         float laneGutter = GetLaneGutter();
         crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize * GetLanes());
-        crossOffset += ((crossSize + laneGutter) / GetLanes() - laneGutter) * laneIndex + laneGutter * laneIndex;
+        crossOffset += ((crossSize + laneGutter) / GetLanes()) * laneIndex;
     } else {
         crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
     }
@@ -982,7 +982,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
 {
-    float delta = crossSize - childCrossSize;
+    float delta = crossSize - GetLaneGutter() - childCrossSize;
     if (LessOrEqual(delta, 0)) {
         return 0.0f;
     }

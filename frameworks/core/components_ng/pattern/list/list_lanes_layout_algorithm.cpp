@@ -264,7 +264,8 @@ float ListLanesLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float 
     if (lanes_ <= 0) {
         return 0.0f;
     }
-    return ListLayoutAlgorithm::CalculateLaneCrossOffset(crossSize / lanes_, childCrossSize / lanes_);
+    return ListLayoutAlgorithm::CalculateLaneCrossOffset((crossSize + GetLaneGutter()) / lanes_,
+        childCrossSize / lanes_);
 }
 
 int32_t ListLanesLayoutAlgorithm::GetLazyForEachIndex(const RefPtr<FrameNode>& host)
