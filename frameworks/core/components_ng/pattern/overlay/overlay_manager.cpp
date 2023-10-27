@@ -1586,6 +1586,10 @@ void OverlayManager::ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOve
             continue;
         }
         if (node->GetTag() == V2::STAGE_ETS_TAG) {
+            auto parent = node->GetParent();
+            if (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
+                return;
+            }
             auto pageNode = GetLastPage();
             CHECK_NULL_VOID(pageNode);
             auto pageFocusHub = pageNode->GetFocusHub();
