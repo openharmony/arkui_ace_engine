@@ -138,6 +138,27 @@ HWTEST_F(SelectOverlayTestNg, SelectFrameNodeCreator001, TestSize.Level1)
     EXPECT_NE(selectOverlayNode2->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode2->selectMenuInner_, nullptr);
 }
+/**
+ * @tc.name: SelectFrameNodeCreator002
+ * @tc.desc: Test CreateSelectOverlayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectFrameNodeCreator002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode with camera input.
+     * @tc.expected: the selectOverlayNode including selectMenu with camera input is created successfully.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = true;
+    selectInfo.menuInfo.showCameraInput = true;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
+    EXPECT_NE(selectOverlayNode->selectMenuInner_, nullptr);
+}
 
 /**
  * @tc.name: SelectFrameNodeAnimationTest001
