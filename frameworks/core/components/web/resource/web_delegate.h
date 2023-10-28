@@ -597,6 +597,7 @@ public:
     void OnOverScroll(float xOffset, float yOffset);
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
+    void OnRootLayerChanged(int width, int height);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();

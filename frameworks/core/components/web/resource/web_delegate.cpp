@@ -5478,4 +5478,11 @@ void WebDelegate::OnScrollState(bool scrollState)
     CHECK_NULL_VOID(webPattern);
     webPattern->OnScrollState(scrollState);
 }
+
+void WebDelegate::OnRootLayerChanged(int width, int height)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnRootLayerChanged(width, height);
+}
 } // namespace OHOS::Ace
