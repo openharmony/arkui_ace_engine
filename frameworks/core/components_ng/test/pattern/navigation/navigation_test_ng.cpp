@@ -2569,7 +2569,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0016, TestSize.Level1)
 
 /**
  * @tc.name: NavigationModelNG0017
- * @tc.desc: Test NavigationModelNG::GetNavDestinationNodeToHandleBack
+ * @tc.desc: Test NavigationModelNG::CheckCanHandleBack
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationTestNg, NavigationModelNG0017, TestSize.Level1)
@@ -2592,15 +2592,15 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0017, TestSize.Level1)
     auto child = FrameNode::CreateFrameNode("navigationContent", 345, AceType::MakeRefPtr<ButtonPattern>());
     navigationContentNode->children_.push_back(child);
 
-    navigation->GetNavDestinationNodeToHandleBack();
+    navigation->CheckCanHandleBack();
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::AUTO);
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    navigation->GetNavDestinationNodeToHandleBack();
+    navigation->CheckCanHandleBack();
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
     auto child2 = FrameNode::CreateFrameNode("navigationContent", 346, AceType::MakeRefPtr<ButtonPattern>());
     navigationContentNode->children_.push_back(child2);
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    navigation->GetNavDestinationNodeToHandleBack();
+    navigation->CheckCanHandleBack();
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
 }
 

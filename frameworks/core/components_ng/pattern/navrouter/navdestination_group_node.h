@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-using NavDestinationBackButtonEvent = std::function<void(GestureEvent&)>;
+using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
 class ACE_EXPORT NavDestinationGroupNode : public GroupNode {
     DECLARE_ACE_TYPE(NavDestinationGroupNode, GroupNode)

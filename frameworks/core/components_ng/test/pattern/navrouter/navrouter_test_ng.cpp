@@ -996,7 +996,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0021, TestSize.Level1)
     stack->navPathList_.push_back(p2);
 
     parent->isOnAnimation_ = true;
-    parent->GetNavDestinationNodeToHandleBack();
+    parent->CheckCanHandleBack();
     bool isPop = true;
     EXPECT_TRUE(parent->isOnAnimation_);
     pattern->DoNavigationTransitionAnimation(preNavDestination, navDestination, isPop);
