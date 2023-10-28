@@ -388,6 +388,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         gridLayoutInfo_.offsetUpdated_ = true;
     }
     gridLayoutInfo_.currentOffset_ += offset;
+    HandleScrollBarOutBoundary(overScroll);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
