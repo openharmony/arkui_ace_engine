@@ -59,7 +59,7 @@ public:
 
     void InitContainerEvent();
 
-    void ShowTitle(bool isShow, bool hasDeco = true);
+    void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false);
 
     void SetAppTitle(const std::string& title);
 

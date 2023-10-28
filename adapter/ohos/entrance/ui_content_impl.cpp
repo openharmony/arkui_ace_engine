@@ -1583,6 +1583,26 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
         TaskExecutor::TaskType::UI);
 }
 
+void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
+{
+    LOGI("UIContentImpl: UpdateMaximizeMode, maximize mode is %{public}d", mode);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, mode]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto windowManager = pipelineContext->GetWindowManager();
+            CHECK_NULL_VOID(windowManager);
+            windowManager->SetCurrentWindowMaximizeMode(static_cast<OHOS::Ace::MaximizeMode>(mode));
+            pipelineContext->ShowContainerTitle(true, true, true);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
     LOGI("HideWindowTitleButton hideSplit: %{public}d, hideMaximize: %{public}d, hideMinimize: %{public}d", hideSplit,
