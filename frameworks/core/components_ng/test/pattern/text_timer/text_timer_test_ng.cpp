@@ -320,4 +320,248 @@ HWTEST_F(TextTimerTestNg, TextTimerAccessibilityPropertyIsScrollable001, TestSiz
     textLayoutProperty->UpdateContent(TEXTTIMER_CONTENT);
     EXPECT_EQ(textTimerAccessibilityProperty->GetText(), TEXTTIMER_CONTENT);
 }
+
+/**
+ * @tc.name: TextTimerTest004
+ * @tc.desc: Test InitTimerDisplay of TextTimerPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2. UpdateTextLayoutProperty function is called.
+     */
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto textTimerProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    EXPECT_NE(textTimerProperty, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+
+    pattern->UpdateTextLayoutProperty(textTimerProperty, textLayoutProperty);
+
+    /**
+     * @tc.steps: step3. get the properties of all settings.
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    EXPECT_FALSE(textLayoutProperty->HasFontSize());
+    EXPECT_FALSE(textLayoutProperty->HasTextColor());
+    EXPECT_FALSE(textLayoutProperty->HasItalicFontStyle());
+    EXPECT_FALSE(textLayoutProperty->HasFontWeight());
+    EXPECT_FALSE(textLayoutProperty->HasFontFamily());
+}
+
+/**
+ * @tc.name: TextTimerTest005
+ * @tc.desc: Test InitTimerDisplay of TextTimerPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2. UpdateTextLayoutProperty function is called.
+     */
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto textTimerProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    EXPECT_NE(textTimerProperty, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+
+    pattern->UpdateTextLayoutProperty(textTimerProperty, textLayoutProperty);
+
+    /**
+     * @tc.steps: step3. get the properties of all settings.
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    EXPECT_EQ(textLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+}
+
+/**
+ * @tc.name: TextTimerTest006
+ * @tc.desc: Test GetFormatDuration of TextTimerPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
+    testProperty.inputCount = std::make_optional(INPUT_COUNT);
+    testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN);
+    testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto textTimerProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(textTimerProperty, nullptr);
+    const int32_t hourOfMinute = 60;
+    const int32_t minuteOfSeconds = 60;
+    const int32_t secondsOfMillisecond = 1000;
+    uint64_t duration = hourOfMinute * minuteOfSeconds * secondsOfMillisecond;
+
+    /**
+     * @tc.steps: step3.GetFormatDuration function is called.
+     * @tc.expected: step3.  Check whether the return value is correct.
+     */
+    std::string format = TEXT_TIMER_FORMAT;
+    textTimerProperty->UpdateFormat(format);
+    EXPECT_EQ(pattern->GetFormatDuration(duration), duration);
+    EXPECT_EQ(pattern->GetMillisecondsDuration(1), 1);
+
+    format = "HH:mm:ss";
+    textTimerProperty->UpdateFormat(format);
+    EXPECT_EQ(pattern->GetFormatDuration(duration), hourOfMinute * minuteOfSeconds);
+    EXPECT_EQ(pattern->GetMillisecondsDuration(1), secondsOfMillisecond);
+
+    format = "HH:mm";
+    textTimerProperty->UpdateFormat(format);
+    EXPECT_EQ(pattern->GetFormatDuration(duration), hourOfMinute);
+    EXPECT_EQ(pattern->GetMillisecondsDuration(1), secondsOfMillisecond * minuteOfSeconds);
+
+    format = "hh";
+    textTimerProperty->UpdateFormat(format);
+    EXPECT_EQ(pattern->GetFormatDuration(duration), 1);
+    EXPECT_EQ(pattern->GetMillisecondsDuration(1), duration);
+}
+
+/**
+ * @tc.name: TextTimerTest007
+ * @tc.desc: Test GetTextNode of TextTimerPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
+    testProperty.inputCount = std::make_optional(INPUT_COUNT);
+    testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN);
+    testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+
+    /**
+     * @tc.steps: step3.GetTextNode function is called.
+     * @tc.expected: step3. Check whether the return value is correct.
+     */
+    textNode->tag_ = V2::TEXTTIMER_ETS_TAG;
+    EXPECT_EQ(pattern->GetTextNode(), nullptr);
+
+    textNode->tag_ = V2::TEXT_ETS_TAG;
+    EXPECT_NE(pattern->GetTextNode(), nullptr);
+}
+
+/**
+ * @tc.name: TextTimerTest008
+ * @tc.desc: Test OnVisibleAreaChange of TextTimerPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    pattern->InitTimerDisplay();
+    pattern->scheduler_->callback_(1);
+    EXPECT_NE(pattern->scheduler_, nullptr);
+
+    /**
+     * @tc.steps: step3.OnVisibleAreaChange function is called.
+     * @tc.expected: step3. Check whether the value is correct.
+     */
+    int32_t length = host->GetChildren().size();
+    pattern->OnVisibleAreaChange(true);
+    EXPECT_EQ(host->GetChildren().size(), length);
+
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    ASSERT_NE(childNode, nullptr);
+    childNode->pattern_ = AceType::MakeRefPtr<TextTimerPattern>();
+
+    pattern->OnVisibleAreaChange(true);
+    EXPECT_EQ(host->GetChildren().size(), length);
+    EXPECT_EQ(pattern->textNode_, nullptr);
+
+    pattern->OnVisibleAreaChange(false);
+    EXPECT_EQ(host->GetChildren().size(), length);
+}
 } // namespace OHOS::Ace::NG
