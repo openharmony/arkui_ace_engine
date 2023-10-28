@@ -139,12 +139,11 @@ void JSSearch::Create(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 key = text;
             }
+        } else if (textValue->IsUndefined()) {
+            key = "";
         } else {
             if (ParseJsString(textValue, text)) {
                 key = text;
-            }
-            if (textValue->IsUndefined()) {
-                key = "";
             }
         }
         std::string icon;
