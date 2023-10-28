@@ -59,7 +59,7 @@ class UIInspector {
      */
     constructor(instanceId) {
         this.instanceId_ = instanceId;
-        this.ohos_UIInspector  = globalThis.requireNapi('arkui.inspector');
+        this.ohos_UIInspector = globalThis.requireNapi('arkui.inspector');
     }
     createComponentObserver(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -85,7 +85,7 @@ class UIContext {
         this.font_ = new Font(this.instanceId_);
         return this.font_;
     }
-    
+
     getRouter() {
         this.router_ = new Router(this.instanceId_);
         return this.router_;
@@ -98,7 +98,7 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return animatorResult;
     }
-    
+
     getPromptAction() {
         this.promptAction_ = new PromptAction(this.instanceId_);
         return this.promptAction_;
@@ -109,13 +109,13 @@ class UIContext {
         return this.mediaQuery_;
     }
 
-    getUIInspector(){
+    getUIInspector() {
         this.UIInspector_ = new UIInspector(this.instanceId_);
         return this.UIInspector_;
     }
 
     getComponentUtils() {
-        if(this.componentUtils_ == null) {
+        if (this.componentUtils_ == null) {
             this.componentUtils_ = new ComponentUtils(this.instanceId_);
         }
         return this.componentUtils_;
@@ -149,7 +149,7 @@ class UIContext {
         TimePickerDialog.show(options);
         __JSScopeUtil__.restoreInstanceId();
     }
-    
+
     showTextPickerDialog(options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         TextPickerDialog.show(options);
@@ -175,6 +175,17 @@ class UIContext {
         let keyBoardAvoidMode = __KeyboardAvoid__.getKeyboardAvoid();
         __JSScopeUtil__.restoreInstanceId();
         return keyBoardAvoidMode;
+    }
+
+    getAtomicServiceBar() {
+        const bundleMgr = globalThis.requireNapi('bundle.bundleManager');
+        let data = bundleMgr.getBundleInfoForSelfSync(bundleMgr.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+        if (data.appInfo.bundleType == 1) {
+            this.atomServiceBar = new AtomicServiceBar(this.instanceId_);
+            return this.atomServiceBar;
+        } else {
+            return undefined;
+        }
     }
 }
 class ComponentUtils {
@@ -222,8 +233,7 @@ class Router {
         else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
             let promise = this.ohos_router.pushUrl(options, modeOrCallback);
             __JSScopeUtil__.restoreInstanceId();
-            if(promise)
-            {
+            if (promise) {
                 return promise;
             }
         }
@@ -243,8 +253,7 @@ class Router {
         else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
             let promise = this.ohos_router.replaceUrl(options, modeOrCallback);
             __JSScopeUtil__.restoreInstanceId();
-            if(promise)
-            {
+            if (promise) {
                 return promise;
             }
         }
@@ -309,8 +318,7 @@ class Router {
         else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
             let promise = this.ohos_router.pushNamedRoute(options, modeOrCallback);
             __JSScopeUtil__.restoreInstanceId();
-            if(promise)
-            {
+            if (promise) {
                 return promise;
             }
         }
@@ -330,8 +338,7 @@ class Router {
         else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
             let promise = this.ohos_router.replaceNamedRoute(options, modeOrCallback);
             __JSScopeUtil__.restoreInstanceId();
-            if(promise)
-            {
+            if (promise) {
                 return promise;
             }
         }
@@ -380,6 +387,49 @@ class PromptAction {
             __JSScopeUtil__.restoreInstanceId();
             return actionMenuSuccessResponse;
         }
+    }
+}
+
+class AtomicServiceBar {
+    /**
+     * Construct new instance of AtomicServiceBar.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 11
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_atomicServiceBar = globalThis.requireNapi('atomicservicebar');
+    }
+
+    setVisible(visible) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.setVisible(visible);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setBackgroundColor(color) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.setBackgroundColor(color);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setTitleContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.setTitleContent(content);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setTitleFontStyle(font) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.setTitleFontStyle(font);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setIconColor(color) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.setIconColor(color);
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 

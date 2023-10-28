@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -22,212 +24,110 @@
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "napi/native_api.h"
-#include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
 
-#include "core/components_ng/pattern/app_bar/app_bar_view.h"
-#include "frameworks/base/log/log.h"
-#include "bridge/common/media_query/media_queryer.h"
-#include "core/common/container.h"
-#include "bridge/common/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
 namespace OHOS::Ace::Napi {
-
-WeakPtr<TaskExecutor> taskExecutor_;
-
-RefPtr<TaskExecutor> ObtainTaskExecutor()
+static RefPtr<NG::AppBarView> ObtainAppBar()
 {
-    auto taskExecutor = taskExecutor_.Upgrade();
-    if (taskExecutor) {
-        return taskExecutor;
-    }
-    auto instanceId = Container::CurrentId();
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        return nullptr;
-    }
-    taskExecutor_ = container->GetTaskExecutor();
-    return taskExecutor_.Upgrade();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    return container->GetAppBar();
 }
 
-bool ObtainValue(napi_env env, napi_callback_info info, napi_value* argv, napi_valuetype& valueType)
+static void SetBarInUIThread(TaskExecutor::Task&& task)
 {
-    size_t argc = 1;
-    napi_value thisArg = nullptr;
-    napi_get_cb_info(env, info, &argc, argv, &thisArg, nullptr);
-    if (argc != 1) {
-        return true;
-    }
-    napi_typeof(env, argv[0], &valueType);
-    return false;
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI);
 }
 
 static napi_value JSSetVisible(napi_env env, napi_callback_info info)
 {
-    napi_value argv[1] = {0};
+    napi_value argv[1] = { 0 };
     napi_valuetype valueType = napi_undefined;
-    if (ObtainValue(env, info, argv, valueType)) {
+    if (!GetSingleParam(env, info, argv, valueType) || (valueType != napi_boolean)) {
+        LOGW("invalid boolean value for visible");
         return nullptr;
     }
-    auto taskExecutor = ObtainTaskExecutor();
-    if (!taskExecutor) {
-        return nullptr;
-    }
-
-    if (valueType == napi_boolean) {
-        bool visible = true;
-        napi_get_value_bool(env, argv[0], &visible);
-        taskExecutor->PostTask([visible](){
-            NG::AppBarView::SetVisible(visible);
-        }, TaskExecutor::TaskType::UI);
-    } else {
-        LOGI("lqc: cannot get value");
-    }
+    bool visible = true;
+    napi_get_value_bool(env, argv[0], &visible);
+    auto appBar = ObtainAppBar();
+    CHECK_NULL_RETURN(appBar, nullptr);
+    SetBarInUIThread([visible, appBar]() { appBar->SetVisible(visible); });
     return nullptr;
 }
-static napi_value JSSetBackGroundColor(napi_env env, napi_callback_info info)
-{
-    napi_value argv[1] = {0};
-    napi_valuetype valueType = napi_undefined;
-    if (ObtainValue(env, info, argv, valueType)) {
-        return nullptr;
-    }
-    auto taskExecutor = ObtainTaskExecutor();
-    if (!taskExecutor) {
-        return nullptr;
-    }
 
-    if (valueType == napi_number) {
-        uint32_t num;
-        napi_get_value_uint32(env, argv[0], &num);
-        Color rowColor(num);
-        LOGI("lqc: number=%{public}d", num);
-        
-        taskExecutor->PostTask([rowColor](){
-            NG::AppBarView::SetRowColor(rowColor);
-        }, TaskExecutor::TaskType::UI);
-    } else if (valueType == napi_string) {
-        size_t len = 0;
-        napi_status status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &len);
-        if (status != napi_ok || len <= 0) {
-            return nullptr;
-        }
-        std::vector<char> buf(len + 1);
-        size_t ret = 0;
-        napi_get_value_string_utf8(env, argv[0], buf.data(), len + 1, &ret);
-        std::string str(buf.data());
-        LOGI("lqc: string=%{public}s", str.c_str());
-        taskExecutor->PostTask([str](){
-            NG::AppBarView::SetRowColor(str);
-        }, TaskExecutor::TaskType::UI);
-    } else {
-        LOGI("lqc: recognized undefined");
-        taskExecutor->PostTask([](){
-            NG::AppBarView::SetRowColor();
-        }, TaskExecutor::TaskType::UI);
+static napi_value JSSetBackgroundColor(napi_env env, napi_callback_info info)
+{
+    napi_value argv[1] = { 0 };
+    napi_valuetype valueType = napi_undefined;
+    if (!GetSingleParam(env, info, argv, valueType)) {
+        return nullptr;
     }
+    std::optional<Color> color = GetOptionalColor(env, argv[0], valueType);
+    if (!color && valueType != napi_undefined) {
+        return nullptr;
+    }
+    auto appBar = ObtainAppBar();
+    CHECK_NULL_RETURN(appBar, nullptr);
+    SetBarInUIThread([color, appBar]() { appBar->SetRowColor(color); });
     return nullptr;
 }
 
 static napi_value JSSetTitleContent(napi_env env, napi_callback_info info)
 {
-    napi_value argv[1] = {0};
-    napi_valuetype valueType = napi_undefined;
-    if (ObtainValue(env, info, argv, valueType)) {
+    napi_value argv[1] = { 0 };
+    napi_valuetype valueType;
+    std::string str;
+    if (!GetSingleParam(env, info, argv, valueType) || (valueType != napi_string)) {
+        LOGW("invalid string value for content");
         return nullptr;
     }
-    auto taskExecutor = ObtainTaskExecutor();
-    if (!taskExecutor) {
+    bool result = GetNapiString(env, argv[0], str, valueType);
+    if (!result) {
         return nullptr;
     }
-
-    if (valueType == napi_string) {
-        size_t len = 0;
-        napi_status status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &len);
-        if (status != napi_ok || len <= 0) {
-            return nullptr;
-        }
-        std::vector<char> buf(len + 1);
-        size_t ret = 0;
-        napi_get_value_string_utf8(env, argv[0], buf.data(), len + 1, &ret);
-        std::string str(buf.data());
-        LOGI("lqc: string=%{public}s", str.c_str());
-        taskExecutor->PostTask([str](){
-            NG::AppBarView::SetTitleContent(str);
-        }, TaskExecutor::TaskType::UI);
-    } else {
-        LOGI("lqc: cannot get value");
-    }
+    auto appBar = ObtainAppBar();
+    CHECK_NULL_RETURN(appBar, nullptr);
+    SetBarInUIThread([str, appBar]() { appBar->SetContent(str); });
     return nullptr;
 }
 
 static napi_value JSSetTitleFontStyle(napi_env env, napi_callback_info info)
 {
-    napi_value argv[1] = {0};
+    napi_value argv[1] = { 0 };
     napi_valuetype valueType = napi_undefined;
-    if (ObtainValue(env, info, argv, valueType)) {
+    if (!GetSingleParam(env, info, argv, valueType) || (valueType != napi_number)) {
+        LOGW("invalid number value for fontStyle");
         return nullptr;
     }
-    auto taskExecutor = ObtainTaskExecutor();
-    if (!taskExecutor) {
-        return nullptr;
-    }
-
-    if (valueType == napi_number) {
-        uint32_t num;
-        napi_get_value_uint32(env, argv[0], &num);
-        LOGI("lqc: number=%{public}d", num);
-
-        taskExecutor->PostTask([num](){
-            NG::AppBarView::SetTitleFontStyle(num == 0 ? FontStyle::NORMAL : FontStyle::ITALIC);
-        }, TaskExecutor::TaskType::UI);
-    } else {
-        LOGI("lqc: cannot get value");
-    }
+    uint32_t num;
+    napi_get_value_uint32(env, argv[0], &num);
+    auto appBar = ObtainAppBar();
+    CHECK_NULL_RETURN(appBar, nullptr);
+    SetBarInUIThread(
+        [num, appBar]() { appBar->SetFontStyle(num == 0 ? Ace::FontStyle::NORMAL : Ace::FontStyle::ITALIC); });
     return nullptr;
 }
 
-static napi_value JSSetAtomicServiceIconColor(napi_env env, napi_callback_info info)
+static napi_value JSSetIconColor(napi_env env, napi_callback_info info)
 {
-    napi_value argv[1] = {0};
+    napi_value argv[1] = { 0 };
     napi_valuetype valueType = napi_undefined;
-    if (ObtainValue(env, info, argv, valueType)) {
+    if (!GetSingleParam(env, info, argv, valueType)) {
         return nullptr;
     }
-    auto taskExecutor = ObtainTaskExecutor();
-    if (!taskExecutor) {
+    std::optional<Color> color = GetOptionalColor(env, argv[0], valueType);
+    if (!color && valueType != napi_undefined) {
         return nullptr;
     }
-
-    if (valueType == napi_number) {
-        uint32_t num;
-        napi_get_value_uint32(env, argv[0], &num);
-        Color rowColor(num);
-        LOGI("lqc: number=%{public}d", num);
-        
-        taskExecutor->PostTask([rowColor](){
-            NG::AppBarView::SetIconColor(rowColor);
-        }, TaskExecutor::TaskType::UI);
-    } else if (valueType == napi_string) {
-        size_t len = 0;
-        napi_status status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &len);
-        if (status != napi_ok || len <= 0) {
-            return nullptr;
-        }
-        std::vector<char> buf(len + 1);
-        size_t ret = 0;
-        napi_get_value_string_utf8(env, argv[0], buf.data(), len + 1, &ret);
-        std::string str(buf.data());
-        LOGI("lqc: string=%{public}s", str.c_str());
-        taskExecutor->PostTask([str](){
-            NG::AppBarView::SetIconColor(str);
-        }, TaskExecutor::TaskType::UI);
-    } else {
-        LOGI("lqc: cannot get value");
-    }
+    auto appBar = ObtainAppBar();
+    CHECK_NULL_RETURN(appBar, nullptr);
+    SetBarInUIThread([color, appBar]() { appBar->SetIconColor(color); });
     return nullptr;
 }
 
@@ -235,10 +135,10 @@ static napi_value Export(napi_env env, napi_value exports)
 {
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("setVisible", JSSetVisible),
-        DECLARE_NAPI_FUNCTION("setBackgroundColor", JSSetBackGroundColor),
+        DECLARE_NAPI_FUNCTION("setBackgroundColor", JSSetBackgroundColor),
         DECLARE_NAPI_FUNCTION("setTitleContent", JSSetTitleContent),
         DECLARE_NAPI_FUNCTION("setTitleFontStyle", JSSetTitleFontStyle),
-        DECLARE_NAPI_FUNCTION("setAtomicServiceIconColor", JSSetAtomicServiceIconColor),
+        DECLARE_NAPI_FUNCTION("setIconColor", JSSetIconColor),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties));
     return exports;

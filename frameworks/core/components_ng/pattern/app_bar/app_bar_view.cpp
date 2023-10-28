@@ -35,16 +35,10 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-const Dimension MARGIN_TEXT = 24.0_vp;
+const Dimension MARGIN_TEXT_LEFT = 24.0_vp;
+const Dimension MARGIN_TEXT_RIGHT = 72.0_vp;
 const Dimension MARGIN_BUTTON = 12.0_vp;
 const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
-
-static WeakPtr<FrameNode> row_;
-static WeakPtr<FrameNode> label_;
-static ImageSourceInfo backImage_;
-static ImageSourceInfo faImage_;
-static WeakPtr<FrameNode> backIcon_;
-static WeakPtr<FrameNode> faIcon_;
 
 } // namespace
 
@@ -56,13 +50,10 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
     atom->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     atom->AddChild(titleBar);
     atom->AddChild(content);
-    auto faButton = titleBar->GetLastChild();
-    if (faButton) {
-        LOGI("lqc: success add faButton");
-        titleBar->RemoveChildAtIndex(2);
-        atom->AddChild(faButton);
-        // faButton->GetRenderContext()->UpdatePosition(OffsetT(0.9_pct, 4.0_Vp));
-    }
+#ifndef IS_EMULATOR
+    auto faButton = BuildFaButton();
+    atom->AddChild(faButton);
+#endif
     content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
     content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stagePattern = content->GetPattern<StagePattern>();
@@ -86,7 +77,6 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
 {
     auto appBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    row_ = appBarRow;
     auto layoutProperty = appBarRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -129,8 +119,8 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
     textLayoutProperty->UpdateLayoutWeight(1.0f);
 
     MarginProperty margin;
-    margin.left = CalcLength(MARGIN_TEXT);
-    margin.right = CalcLength(MARGIN_TEXT);
+    margin.left = CalcLength(MARGIN_TEXT_LEFT);
+    margin.right = CalcLength(MARGIN_TEXT_RIGHT);
     textLayoutProperty->UpdateMargin(margin);
 
     appBarRow->AddChild(BuildIconButton(
@@ -139,14 +129,18 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
             if (pipeline) {
                 pipeline->CallRouterBackToPopPage();
             }
-        }, true));
+        },
+        true));
     appBarRow->AddChild(titleLabel);
-    label_ = titleLabel;
-#ifdef IS_EMULATOR
     return appBarRow;
-#endif
+}
 
+RefPtr<FrameNode> AppBarView::BuildFaButton()
+{
     auto buttonNode = BuildIconButton(InternalResource::ResourceId::APP_BAR_FA_SVG, nullptr, false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
     auto buttonId = buttonNode->GetId();
     auto clickCallback = [pipeline, appBarTheme, buttonId](GestureEvent& info) {
 #ifdef PREVIEW
@@ -169,9 +163,7 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
     if (buttonEventHub) {
         buttonEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback)));
     }
-    appBarRow->AddChild(buttonNode);
-    
-    return appBarRow;
+    return buttonNode;
 }
 
 RefPtr<FrameNode> AppBarView::BuildIconButton(
@@ -190,7 +182,6 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
     imageLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(appBarTheme->GetIconSize()), CalcLength(appBarTheme->GetIconSize())));
-        LOGI("lqc: %{public}f",appBarTheme->GetIconSize().Value());
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageIcon->MarkModifyDone();
 
@@ -201,7 +192,8 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     if (!isBackButton) {
-        renderContext->UpdatePosition(OffsetT(0.9_pct, 4.0_vp));
+        Dimension PositionY = (appBarTheme->GetAppBarHeight() / 2.0f) - appBarTheme->GetIconSize();
+        renderContext->UpdatePosition(OffsetT(0.9_pct, PositionY));
     }
 
     auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
@@ -224,17 +216,7 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     margin.left = CalcLength(isBackButton ? MARGIN_BUTTON : -MARGIN_BUTTON);
     margin.right = CalcLength(isBackButton ? MARGIN_BACK_BUTTON_RIGHT : MARGIN_BUTTON);
     buttonLayoutProperty->UpdateMargin(margin);
-
-    if (isBackButton) {
-        backImage_ = imageSourceInfo;
-        backIcon_ = imageIcon;
-    } else {
-        faImage_ = imageSourceInfo;
-        faIcon_ = imageIcon;
-    }
-
     buttonNode->MarkModifyDone();
-
     buttonNode->AddChild(imageIcon);
     return buttonNode;
 }
@@ -299,125 +281,88 @@ void AppBarView::BindContentCover(int32_t targetId)
     overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, targetId);
 }
 
-void AppBarView::SetVisible(const bool visible)
+void AppBarView::SetVisible(bool visible)
 {
-    LOGI("lqc: into SetVisible");
-    auto row = row_.Upgrade();
-    CHECK_NULL_VOID(row);
+    CHECK_NULL_VOID(atom_);
+    auto uiRow = atom_->GetFirstChild();
+    CHECK_NULL_VOID(uiRow);
+    auto row = AceType::DynamicCast<FrameNode>(uiRow);
+    row->GetLayoutProperty()->UpdateVisibility(visible ? VisibleType::VISIBLE : VisibleType::GONE);
+    row->MarkModifyDone();
+    row->MarkDirtyNode();
+}
 
-    if (visible) {
-        // auto pipeline = PipelineContext::GetCurrentContext();
-        // CHECK_NULL_VOID(pipeline);
-        // auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-        row->GetLayoutProperty()->ResetCalcMaxSize();
+void AppBarView::SetRowColor(const std::optional<Color>& color)
+{
+    CHECK_NULL_VOID(atom_);
+    auto uiRow = atom_->GetFirstChild();
+    CHECK_NULL_VOID(uiRow);
+    auto row = AceType::DynamicCast<FrameNode>(uiRow);
+    if (color) {
+        row->GetRenderContext()->UpdateBackgroundColor(color.value());
     } else {
-        row->GetLayoutProperty()->UpdateCalcMaxSize(CalcSize(CalcLength(1.0_pct), CalcLength(0.0)));
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+        row->GetRenderContext()->UpdateBackgroundColor(appBarTheme->GetBgColor());
     }
-    // row->MarkModifyDone();
-
-        // row->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-        // row->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-    row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    LOGI("lqc: success SetVisible");
+    row->MarkModifyDone();
+    row->MarkDirtyNode();
 }
 
-
-void AppBarView::SetRowColor(const Color& color)
+void AppBarView::SetContent(const std::string& content)
 {
-    auto row = row_.Upgrade();
-    if (!row) {
-        return;
-    }
-    row->GetRenderContext()->UpdateBackgroundColor(color);
-    LOGI("lqc: success SetBackGroundColor");
-}
-
-void AppBarView::SetRowColor(const std::string& color)
-{
-    auto row = row_.Upgrade();
-    if (!row) {
-        return;
-    }
-    row->GetRenderContext()->UpdateBackgroundColor(Color::FromString(color));
-    LOGI("lqc: success SetBackGroundColor");
-}
-
-void AppBarView::SetRowColor()
-{
-    auto row = row_.Upgrade();
-    CHECK_NULL_VOID(row);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    auto renderContext = row->GetRenderContext();
-    renderContext->UpdateBackgroundColor(appBarTheme->GetBgColor());
-
-    LOGI("lqc: success SetBackGroundColor");
-}
-
-void AppBarView::SetTitleContent(const std::string& content)
-{
-    auto label = label_.Upgrade();
-    CHECK_NULL_VOID(label);
+    CHECK_NULL_VOID(atom_);
+    auto uiRow = atom_->GetFirstChild();
+    CHECK_NULL_VOID(uiRow);
+    auto uiLabel = uiRow->GetLastChild();
+    CHECK_NULL_VOID(uiLabel);
+    auto label = AceType::DynamicCast<FrameNode>(uiLabel);
     label->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(content);
-    label->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    
-    LOGI("lqc: success SetTitleContent");
+    label->MarkModifyDone();
+    label->MarkDirtyNode();
 }
 
-void AppBarView::SetTitleFontStyle(const Ace::FontStyle fontStyle)
+void AppBarView::SetFontStyle(Ace::FontStyle fontStyle)
 {
-    auto label = label_.Upgrade();
-    if (!label) {
-        return;
-    }
+    CHECK_NULL_VOID(atom_);
+    auto uiRow = atom_->GetFirstChild();
+    CHECK_NULL_VOID(uiRow);
+    auto uiLabel = uiRow->GetLastChild();
+    CHECK_NULL_VOID(uiLabel);
+    auto label = AceType::DynamicCast<FrameNode>(uiLabel);
     label->GetLayoutProperty<TextLayoutProperty>()->UpdateItalicFontStyle(fontStyle);
-    LOGI("lqc: success SetTitleFontStyle");
+    label->MarkModifyDone();
+    label->MarkDirtyNode();
 }
 
-void AppBarView::SetIconColor(const Color& color)
+void AppBarView::SetIconColor(const std::optional<Color>& color)
 {
-    auto backImage = backImage_;
-    auto backIcon = backIcon_.Upgrade();
-    auto faImage = faImage_;
-    auto faIcon = faIcon_.Upgrade();
-
-    if (!backIcon || !faIcon) {
-        return;
-    }
-
-    backImage.SetResourceId(InternalResource::ResourceId::APP_BAR_BACK_SVG, color);
-    backIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(backImage);
-
-    faImage.SetResourceId(InternalResource::ResourceId::APP_BAR_FA_SVG, color);
-    faIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(faImage);
-
-    backIcon->MarkModifyDone();
-    faIcon->MarkModifyDone();
-
-    LOGI("lqc: success SetIconColor");
+    CHECK_NULL_VOID(atom_);
+    auto uiRow = atom_->GetFirstChild();
+    CHECK_NULL_VOID(uiRow);
+    auto uiBackButton = uiRow->GetFirstChild();
+    CHECK_NULL_VOID(uiBackButton);
+    auto uiBackIcon = uiBackButton->GetFirstChild();
+    CHECK_NULL_VOID(uiBackIcon);
+    auto backIcon = AceType::DynamicCast<FrameNode>(uiBackIcon);
+    auto uiFaButton = atom_->GetLastChild();
+    CHECK_NULL_VOID(uiFaButton);
+    auto uiFaIcon = uiFaButton->GetFirstChild();
+    CHECK_NULL_VOID(uiFaIcon);
+    auto faIcon = AceType::DynamicCast<FrameNode>(uiFaIcon);
+    SetEachIconColor(backIcon, color, InternalResource::ResourceId::APP_BAR_BACK_SVG);
+    SetEachIconColor(faIcon, color, InternalResource::ResourceId::APP_BAR_FA_SVG);
 }
 
-void AppBarView::SetIconColor(const std::string& color)
+void AppBarView::SetEachIconColor(
+    RefPtr<FrameNode> icon, const std::optional<Color>& color, InternalResource::ResourceId image)
 {
-    auto backImage = backImage_;
-    auto backIcon = backIcon_.Upgrade();
-    auto faImage = faImage_;
-    auto faIcon = faIcon_.Upgrade();
-    if (!backIcon || !faIcon) {
-        return;
-    }
-
-    backImage.SetResourceId(InternalResource::ResourceId::APP_BAR_BACK_SVG, Color::FromString(color));
-    backIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(backImage);
-
-    faImage.SetResourceId(InternalResource::ResourceId::APP_BAR_FA_SVG, Color::FromString(color));
-    faIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(faImage);
-
-    backIcon->MarkModifyDone();
-    faIcon->MarkModifyDone();
-
-    LOGI("lqc: success SetIconColor");
+    CHECK_NULL_VOID(icon);
+    ImageSourceInfo info;
+    info.SetResourceId(image, color);
+    icon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(info);
+    icon->MarkModifyDone();
+    icon->MarkDirtyNode();
 }
 } // namespace OHOS::Ace::NG

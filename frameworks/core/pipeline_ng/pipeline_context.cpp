@@ -497,6 +497,11 @@ void PipelineContext::SetupRootElement()
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     auto atomicService = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
+    auto container = Container::Current();
+    if (container && atomicService) {
+        auto appBar = Referenced::MakeRefPtr<AppBarView>(atomicService);
+        container->SetAppBar(appBar);
+    }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
         MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
         rootNode_->AddChild(
@@ -721,8 +726,7 @@ void PipelineContext::StartWindowMaximizeAnimation(
     AnimationOption option;
     int32_t duration = 400;
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-    if (maximizeMode == MaximizeMode::MODE_FULL_FILL
-        || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         duration = 0;
     }
     option.SetDuration(duration);
@@ -1221,7 +1225,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
         for (const auto& func : dumpListeners_) {
             func(jsParams);
-        } 
+        }
     }
 
     return true;
@@ -1682,8 +1686,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
         }
     };
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-    if (maximizeMode == MaximizeMode::MODE_FULL_FILL
-        || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         constexpr int32_t delayedTime = 50;
         taskExecutor_->PostDelayedTask(callback, TaskExecutor::TaskType::UI, delayedTime);
     } else {
