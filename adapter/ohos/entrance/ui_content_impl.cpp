@@ -158,6 +158,8 @@ public:
     {
         auto rect = info->rect_;
         auto type = info->type_;
+        double positionY = info->textFieldPositionY_;
+        double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
         LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
         if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
@@ -167,10 +169,10 @@ public:
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
-                [container, keyboardRect, rsTransaction] {
+                [container, keyboardRect, rsTransaction, positionY, height] {
                     auto context = container->GetPipelineContext();
                     CHECK_NULL_VOID(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
+                    context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
                 },
                 TaskExecutor::TaskType::UI);
         }
