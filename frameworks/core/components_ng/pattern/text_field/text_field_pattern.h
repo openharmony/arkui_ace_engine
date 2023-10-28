@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <stack>
 #include <stdint.h>
 #include <string>
 #include <utility>
@@ -236,8 +237,11 @@ public:
     int32_t ConvertTouchOffsetToCaretPositionNG(const Offset& localOffset);
 
     void InsertValue(const std::string& insertValue) override;
+    void InsertValueOperation(const std::string& insertValue);
     void DeleteBackward(int32_t length) override;
+    void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
+    void DeleteForwardOperation(int32_t length);
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
@@ -298,6 +302,7 @@ public:
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
+    void BeforeCreateLayoutWrapper() override;
     void OnAreaChangedInner() override;
     void OnVisibleChange(bool isVisible) override;
     void ClearEditingValue();
@@ -1232,6 +1237,9 @@ private:
     TimeStamp lastClickTimeStamp_;
     float paragraphWidth_ = 0.0f;
 
+    std::stack<int32_t> deleteBackwardOperations_;
+    std::stack<int32_t> deleteForwardOperations_;
+    std::stack<std::string> insertValueOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool showSelect_ = false;

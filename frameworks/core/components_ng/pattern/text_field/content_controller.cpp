@@ -30,6 +30,25 @@ const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 } // namespace
 
+std::string ContentController::PreprocessString(int32_t startIndex, int32_t endIndex, const std::string& value)
+{
+    auto tmp = value;
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, value);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textField, value);
+    auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto selectValue = GetSelectedValue(startIndex, endIndex);
+    if (property->GetTextInputType().has_value() &&
+        property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS &&
+        content_.find('@') != std::string::npos && value.find('@') != std::string::npos &&
+        GetSelectedValue(startIndex, endIndex).find('@') == std::string::npos) {
+        tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [](char c) { return c == '@'; }), tmp.end());
+        return tmp;
+    }
+    return tmp;
+}
+
 void ContentController::InsertValue(int32_t index, const std::string& value)
 {
     ReplaceSelectedValue(index, index, value);
@@ -38,8 +57,9 @@ void ContentController::InsertValue(int32_t index, const std::string& value)
 void ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::string& value)
 {
     FormatIndex(startIndex, endIndex);
+    auto tmp = PreprocessString(startIndex, endIndex, value);
     auto wideText = GetWideText();
-    content_ = StringUtils::ToString(wideText.substr(0, startIndex)) + value +
+    content_ = StringUtils::ToString(wideText.substr(0, startIndex)) + tmp +
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
     FilterValue();
 }
