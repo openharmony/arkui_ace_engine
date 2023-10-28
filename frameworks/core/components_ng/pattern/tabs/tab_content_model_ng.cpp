@@ -193,7 +193,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         builderNode->MountToParent(columnNode);
         auto oldColumnNode = tabsNode->GetBuilderByContentId(tabContentId, columnNode);
-        if (!oldColumnNode)  {
+        if (!oldColumnNode) {
             columnNode->MountToParent(tabBarNode, myIndex);
         } else {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
@@ -292,7 +292,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             imageSourceInfo.SetFillColor(tabTheme->GetBottomTabIconOff());
         }
     }
-    
+
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
     columnNode->MarkModifyDone();
     textNode->MarkModifyDone();
