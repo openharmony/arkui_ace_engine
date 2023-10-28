@@ -40,7 +40,6 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     CHECK_NULL_VOID(frameNode);
 
     if (!clickRecognizer_) {
-        LOGD("Create clickRecognizer");
         clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
     }
     clickRecognizer_->SetOnAction(GetClickEvent());
