@@ -61,6 +61,27 @@ public:
         uint32_t count = 0;
     };
 
+    struct RecursionGuard {
+        FramePorxy* proxy_;
+        bool inUse_;
+        explicit RecursionGuard(FramePorxy* proxy) : proxy_(proxy), inUse_(proxy->inUse_)
+        {
+            proxy_->inUse_ = true;
+        }
+        ~RecursionGuard()
+        {
+            proxy_->inUse_ = inUse_;
+            if (!proxy_->inUse_ && proxy_->delayReset_) {
+                proxy_->ResetChildren(proxy_->needResetChild_);
+            }
+        }
+    };
+
+    RecursionGuard GetGuard()
+    {
+        return RecursionGuard{this};
+    }
+
     explicit FramePorxy(FrameNode* frameNode) : hostNode_(frameNode) {}
 
     void Build()
@@ -110,15 +131,18 @@ public:
         }
     }
 
-    std::list<RefPtr<LayoutWrapper>>& GetAllFrameChildren()
+    const std::list<RefPtr<LayoutWrapper>>& GetAllFrameChildren()
     {
         if (!allFrameNodeChildren_.empty()) {
             return allFrameNodeChildren_;
         }
         Build();
-        uint32_t count = 0;
-        for (const auto& child : children_) {
-            AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_, count);
+        {
+            uint32_t count = 0;
+            auto guard = GetGuard();
+            for (const auto& child : children_) {
+                AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_, count);
+            }
         }
         return allFrameNodeChildren_;
     }
@@ -162,6 +186,12 @@ public:
 
     void ResetChildren(bool needResetChild = false)
     {
+        if (inUse_) {
+            delayReset_ = true;
+            needResetChild_ = needResetChild;
+            return;
+        }
+        delayReset_ = false;
         allFrameNodeChildren_.clear();
         partFrameNodeChildren_.clear();
         totalCount_ = 0;
@@ -201,6 +231,7 @@ public:
         SetAllChildrenInActive();
         ResetChildren();
         Build();
+        auto guard = GetGuard();
         for (const auto& child : children_) {
             child.node->DoRemoveChildInRenderTree(0, true);
         }
@@ -213,6 +244,7 @@ public:
 
     void SetAllChildrenInActive()
     {
+        auto guard = GetGuard();
         for (const auto& child : partFrameNodeChildren_) {
             child.second->SetActive(false);
         }
@@ -221,6 +253,7 @@ public:
     std::string Dump()
     {
         std::string info = "FrameChildNode:[";
+        auto guard = GetGuard();
         for (const auto& child : children_) {
             info += std::to_string(child.node->GetId());
             info += "-";
@@ -241,6 +274,7 @@ public:
 
     void SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
     {
+        auto guard = GetGuard();
         for (const auto& child : children_) {
             child.node->OnSetCacheCount(cacheCount, itemConstraint);
         }
@@ -253,6 +287,9 @@ private:
     std::map<uint32_t, RefPtr<LayoutWrapper>> partFrameNodeChildren_;
     uint32_t totalCount_ = 0;
     FrameNode* hostNode_ { nullptr };
+    bool inUse_ = false;
+    bool delayReset_ = false;
+    bool needResetChild_ = false;
 }; // namespace OHOS::Ace::NG
 
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
@@ -2515,11 +2552,14 @@ RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index)
 const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
 {
     const auto& children = frameProxy_->GetAllFrameChildren();
-    for (const auto& child : children) {
-        if (addToRenderTree) {
-            child->SetActive(true);
+    {
+        auto guard = frameProxy_->GetGuard();
+        for (const auto& child : children) {
+            if (addToRenderTree) {
+                child->SetActive(true);
+            }
+            child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         }
-        child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
     }
 
     return children;
@@ -2548,14 +2588,17 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 
 float FrameNode::GetBaselineDistance() const
 {
-    auto children = frameProxy_->GetAllFrameChildren();
+    const auto& children = frameProxy_->GetAllFrameChildren();
     if (children.empty()) {
         return geometryNode_->GetBaselineDistance();
     }
     float distance = 0.0;
-    for (const auto& child : children) {
-        float childBaseline = child->GetBaselineDistance();
-        distance = NearZero(distance) ? childBaseline : std::min(distance, childBaseline);
+    {
+        auto guard = frameProxy_->GetGuard();
+        for (const auto& child : children) {
+            float childBaseline = child->GetBaselineDistance();
+            distance = NearZero(distance) ? childBaseline : std::min(distance, childBaseline);
+        }
     }
     return distance;
 }
