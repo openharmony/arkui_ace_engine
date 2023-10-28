@@ -1348,7 +1348,15 @@ void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ClipShape, basicShape);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetClipEdge().has_value()) {
+            target->UpdateClipEdge(false);
+        }
+        target->UpdateClipShape(basicShape);
+    }
 }
 
 void ViewAbstract::SetClipEdge(bool isClip)
@@ -1356,7 +1364,15 @@ void ViewAbstract::SetClipEdge(bool isClip)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ClipEdge, isClip);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetClipShape().has_value()) {
+            target->UpdateClipShape(nullptr);
+        }
+        target->UpdateClipEdge(isClip);
+    }
 }
 
 void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
