@@ -123,6 +123,7 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
         overlayInfo.menuOptionItems = GetMenuOptionItems();
     }
     if (OnPreShowSelectOverlay(overlayInfo, clientInfo, SelectOverlayIsOn())) {
+        overlayInfo.menuInfo.singleHandleMenuIsShow = overlayInfo.menuInfo.menuIsShow;
         return overlayInfo;
     }
     return std::nullopt;
@@ -151,6 +152,7 @@ void SelectOverlayClient::UpdateShowingSelectOverlay(ClientOverlayInfo& clientIn
                 menuInfo.showCopyAll = newMenuInfo.showCopyAll;
             });
         }
+        selectOverlayInfo->secondHandle.needLayout = true;
         proxy->UpdateSecondSelectHandleInfo(selectOverlayInfo->secondHandle);
     } else {
         if (clientInfo.isUpdateMenu) {
@@ -260,5 +262,23 @@ void SelectOverlayClient::StopListeningScrollableParent(const RefPtr<FrameNode>&
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     context->GetSelectOverlayManager()->RemoveScrollCallback(host->GetId());
+}
+
+void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd)
+{
+    if (!SelectOverlayIsOn()) {
+        return;
+    }
+    auto proxy = GetSelectOverlayProxy();
+    CHECK_NULL_VOID(proxy);
+    if (!isEnd) {
+        proxy->ShowOrHiddenMenu(true);
+        return;
+    }
+    if (proxy->IsSingleHandle() && !proxy->IsSingleHandleMenuShow()) {
+        UpdateSelectMenuInfo([](SelectMenuInfo& menuInfo) { menuInfo.menuIsShow = false; });
+    } else {
+        proxy->ShowOrHiddenMenu(false);
+    }
 }
 } // namespace OHOS::Ace::NG

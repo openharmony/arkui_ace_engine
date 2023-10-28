@@ -118,16 +118,7 @@ public:
         return std::move(menuOptionItems_);
     }
 
-    virtual void OnParentScrollStartOrEnd(bool isEnd)
-    {
-        auto proxy = GetSelectOverlayProxy();
-        CHECK_NULL_VOID(proxy);
-        if (isEnd) {
-            proxy->ShowOrHiddenMenu(false);
-        } else {
-            proxy->ShowOrHiddenMenu(true);
-        }
-    }
+    virtual void OnParentScrollStartOrEnd(bool isEnd);
 
     virtual void OnParentScrollCallback(Axis axis, int32_t offset) {};
 

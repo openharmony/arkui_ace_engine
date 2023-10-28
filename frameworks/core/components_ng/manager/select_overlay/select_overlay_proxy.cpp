@@ -140,6 +140,13 @@ bool SelectOverlayProxy::IsMenuShow()
     return pattern->IsMenuShow();
 }
 
+bool SelectOverlayProxy::IsSingleHandleMenuShow()
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsSingleHandleMenuShow();
+}
+
 bool SelectOverlayProxy::IsHandleShow()
 {
     auto pattern = GetSelectOverlayPattern(selectOverlayId_);
