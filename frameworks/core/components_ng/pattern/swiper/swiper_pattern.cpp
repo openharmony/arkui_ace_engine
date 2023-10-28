@@ -1191,7 +1191,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
         if (LessOrEqual(visibleSize, 0.0)) {
             return;
         }
-        auto friction = currentOffset_ > 0
+        auto friction = currentIndexOffset_ > 0
                             ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
                             : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
 
@@ -1343,7 +1343,9 @@ void SwiperPattern::HandleTouchUp()
         springController_->Resume();
     }
 
-    StartAutoPlay();
+    if (!isDragging_) {
+        StartAutoPlay();
+    }
 }
 
 void SwiperPattern::HandleDragStart(const GestureEvent& info)
@@ -1904,6 +1906,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     currentIndexOffset_ = firstIndexStartPos;
     UpdateItemRenderGroup(false);
     OnScrollEndRecursive();
+    StartAutoPlay();
 }
 
 void SwiperPattern::OnFadeAnimationStart()
@@ -1943,7 +1946,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     static const auto springProperty = AceType::MakeRefPtr<SpringProperty>(1, 228, 30);
     ExtentPair extentPair = ExtentPair(currentOffset_ + mainSize - itemPosition_.rbegin()->second.endPos,
         currentOffset_ - itemPosition_.begin()->second.startPos);
-    float friction = currentOffset_ > 0
+    float friction = currentIndexOffset_ > 0
                          ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
                          : CalculateFriction((mainSize - itemPosition_.rbegin()->second.endPos) / mainSize);
     auto springMotion = AceType::MakeRefPtr<SpringMotion>(currentOffset_,
