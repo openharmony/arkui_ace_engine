@@ -335,6 +335,12 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 if (!swiper) {
                     return;
                 }
+
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    swiper->windowSizeChangeReason_ = type;
+                    swiper->StopAutoPlay();
+                }
+
                 swiper->StopPropertyTranslateAnimation();
                 swiper->StopTranslateAnimation();
                 swiper->StopSpringAnimation();
@@ -649,6 +655,12 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
     crossMatchChild_ = swiperLayoutAlgorithm->IsCrossMatchChild();
     oldIndex_ = currentIndex_;
+
+    if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
+        StartAutoPlay();
+        windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    }
+
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
 }
