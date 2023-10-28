@@ -433,7 +433,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator001, TestSize.Level1)
     EXPECT_EQ(callBackFlag, 1);
     pattern->firstHandleDrag_ = false;
     pattern->secondHandleDrag_ = true;
-    
+
     callBackFlag = 0;
     pattern->HandlePanEnd(info);
     EXPECT_EQ(callBackFlag, 1);
@@ -2191,7 +2191,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateToolBar002, TestSize.Level1)
     ASSERT_NE(selectOverlayNode, nullptr);
     selectOverlayNode->isExtensionMenu_ = true;
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
-    
+
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
@@ -2248,7 +2248,7 @@ HWTEST_F(SelectOverlayTestNg, ExecuteOverlayStatus001, TestSize.Level1)
     /**
      * @tc.steps: step2. Create invalid type and call ExecuteOverlayStatus function.
      */
-    
+
     FrameNodeType type = (FrameNodeType) 4;
     selectOverlayNode->ExecuteOverlayStatus(type, FrameNodeTrigger::HIDDEN);
     ASSERT_NE(selectOverlayNode, nullptr);
@@ -2273,7 +2273,7 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeOpacity002, TestSize.Level1)
     /**
      * @tc.steps: step2. Create invalid type and call SetFrameNodeOpacity function.
      */
-    
+
     FrameNodeType type = (FrameNodeType) 4;
     selectOverlayNode->SetFrameNodeOpacity(type, 0.0);
     ASSERT_NE(selectOverlayNode, nullptr);
@@ -2298,7 +2298,7 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeVisibility002, TestSize.Level1)
     /**
      * @tc.steps: step2. Create invalid type and call SetFrameNodeVisibility function.
      */
-    
+
     FrameNodeType type = (FrameNodeType) 4;
     selectOverlayNode->SetFrameNodeVisibility(type, VisibleType::INVISIBLE);
     ASSERT_NE(selectOverlayNode, nullptr);
@@ -2323,7 +2323,7 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeStatus002, TestSize.Level1)
     /**
      * @tc.steps: step2. Create invalid type and call SetFrameNodeStatus function.
      */
-    
+
     FrameNodeType type = (FrameNodeType) 4;
     selectOverlayNode->SetFrameNodeStatus(type, FrameNodeStatus::VISIBLE);
     ASSERT_NE(selectOverlayNode, nullptr);
@@ -2626,7 +2626,7 @@ HWTEST_F(SelectOverlayTestNg, ComputeSelectMenuPosition001, TestSize.Level1)
     // add item to selectOverlayNode
     selectOverlayNode->AddChild(item);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    
+
     firstGeometryNode->Reset();
     firstGeometryNode->SetFrameSize({ 2, 1 });
 
@@ -2700,7 +2700,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateFirstAndSecondHandleInfo001, TestSize.Level1
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-    
+
     /**
      * @tc.steps: step3. Test cases.
      */
@@ -2714,7 +2714,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateFirstAndSecondHandleInfo001, TestSize.Level1
     pattern->UpdateFirstAndSecondHandleInfo(comInfoFirst, comInfoSecond);
     EXPECT_EQ(pattern->info_->firstHandle, comInfoFirst);
     EXPECT_EQ(pattern->info_->secondHandle, comInfoSecond);
-    
+
     pattern->info_->firstHandle.isShow = true;
     pattern->info_->secondHandle.isShow = true;
     pattern->UpdateFirstAndSecondHandleInfo(comInfoSecond, comInfoFirst);

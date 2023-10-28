@@ -4130,6 +4130,7 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
