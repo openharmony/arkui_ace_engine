@@ -227,11 +227,13 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
         JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
-        if (!overflowValue->IsNumber()) {
+        if (!overflowValue->IsNumber() && !overflowValue->IsUndefined()) {
             break;
         }
         auto overflow = overflowValue->ToNumber<int32_t>();
-        if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        if(overflowValue->IsUndefined()) {
+            overflow = 0;
+        } else if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
             break;
         }
         TextModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
