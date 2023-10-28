@@ -250,7 +250,7 @@ float ListPattern::CalculateTargetPos(float startPos, float endPos, ScrollAutoTy
     float targetPos = 0.0f;
     switch (scrollAutoType) {
         case ScrollAutoType::NOT_CHANGE:
-            LOGI("item is fully visible, no need to scroll.");
+            TAG_LOGI(AceLogTag::ACE_LIST, "item is fully visible, no need to scroll.");
             break;
         case ScrollAutoType::START:
             targetPos = startPos;
@@ -928,12 +928,10 @@ bool ListPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     if (event.code == KeyCode::KEY_PAGE_DOWN) {
-        LOGD("Keycode is PgDn. Scroll to next page");
         ScrollPage(false);
         return true;
     }
     if (event.code == KeyCode::KEY_PAGE_UP) {
-        LOGD("Keycode is PgDn. Scroll to next page");
         ScrollPage(true);
         return true;
     }
@@ -963,7 +961,6 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto curIndexInGroup = curItemPattern->GetIndexInListItemGroup();
     auto curListItemGroupPara = GetListItemGroupParameter(curFrame);
     if (curIndex < 0 || curIndex > maxListItemIndex_) {
-        LOGE("can't find focused child.");
         return nullptr;
     }
 
@@ -1083,7 +1080,6 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
 
 WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex)
 {
-    LOGD("Get target item location is (%{public}d,%{public}d)", tarMainIndex, tarGroupIndex);
     auto listFrame = GetHost();
     CHECK_NULL_RETURN(listFrame, nullptr);
     auto listFocus = listFrame->GetFocusHub();
@@ -1111,7 +1107,6 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
             return AceType::WeakClaim(AceType::RawPtr(childFocus));
         }
     }
-    LOGD("The target item at location(%{public}d,%{public}d) can not found.", tarMainIndex, tarGroupIndex);
     return nullptr;
 }
 
@@ -1218,7 +1213,6 @@ void ListPattern::OnAnimateStop()
 
 void ListPattern::ScrollTo(float position)
 {
-    LOGI("ScrollTo:%{public}f", position);
     StopAnimate();
     jumpIndex_.reset();
     targetIndex_.reset();
@@ -1230,7 +1224,6 @@ void ListPattern::ScrollTo(float position)
 
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
-    LOGI("ScrollToIndex:%{public}d, align:%{public}d.", index, align);
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
     auto host = GetHost();
@@ -1258,7 +1251,6 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 
 void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align)
 {
-    LOGI("ScrollToIndex:%{public}d, %{public}d, align:%{public}d.", index, indexInGroup, align);
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
@@ -1273,7 +1265,6 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign
 
 void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
-    LOGI("ScrollToEdge:%{public}zu", scrollEdgeType);
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         ScrollToIndex(0, smooth_, ScrollAlign::START);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
@@ -1283,7 +1274,6 @@ void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 
 bool ListPattern::ScrollPage(bool reverse)
 {
-    LOGI("ScrollPage:%{public}d", reverse);
     StopAnimate();
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
     UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
@@ -1762,9 +1752,9 @@ ListItemGroupPara ListPattern::GetListItemGroupParameter(const RefPtr<FrameNode>
         listItemGroupPara.displayStartIndex = itemGroupPattern->GetDisplayStartIndexInGroup();
         listItemGroupPara.lanes = itemGroupPattern->GetLanesInGroup();
         listItemGroupPara.itemEndIndex = itemGroupPattern->GetEndIndexInGroup();
-        LOGD("TListPattern::GetListItemGroupParameter(%{public}d,%{public}d,%{public}d,%{public}d).",
-            listItemGroupPara.displayEndIndex, listItemGroupPara.displayStartIndex, listItemGroupPara.lanes,
-            listItemGroupPara.itemEndIndex);
+        TAG_LOGD(AceLogTag::ACE_LIST, "Get ListItem group parameter(%{public}d,"
+            "%{public}d,%{public}d,%{public}d).", listItemGroupPara.displayEndIndex,
+            listItemGroupPara.displayStartIndex, listItemGroupPara.lanes, listItemGroupPara.itemEndIndex);
     }
     return listItemGroupPara;
 }

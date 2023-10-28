@@ -100,6 +100,7 @@ enum class AceLogTag : uint8_t {
     ACE_GESTURE,
     ACE_IMAGE,
     ACE_RATING,
+    ACE_LIST,
     ACE_NAVIGATION,
     ACE_LOADINGPROGRESS,
     ACE_PATTERNLOCK,
