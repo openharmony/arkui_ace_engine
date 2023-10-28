@@ -996,9 +996,13 @@ void DragDropManager::RestoreClipboardData()
             auto json = JsonUtil::ParseJsonString(data);
             if (json->Contains("preData")) {
                 auto preData = json->GetString("preData");
+#ifdef ENABLE_DRAG_FRAMEWORK
                 if (!preData.empty()) {
                     dragDropManager->clipboard_->SetData(preData);
                 }
+#else
+                dragDropManager->clipboard_->SetData(json->GetString("preData"));
+#endif // ENABLE_DRAG_FRAMEWORK
             }
         };
         deleteDataCallback_ = callback;
