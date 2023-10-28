@@ -74,9 +74,7 @@ public:
 
     virtual void CaretPosition(int32_t caretPosition) {}
     virtual int32_t GetCaretIndex() { return {}; }
-
     virtual NG::OffsetF GetCaretPosition() { return {}; }
-
     virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
     virtual Rect GetTextContentRect() { return {}; }
     virtual int32_t GetTextContentLinesNum() { return {}; }
