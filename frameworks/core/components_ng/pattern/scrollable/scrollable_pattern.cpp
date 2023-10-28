@@ -154,7 +154,7 @@ bool ScrollablePattern::NeedSplitScroll(OverScrollOffset& overOffsets, int32_t s
 {
     return GreatNotEqual(overOffsets.start, 0.0) && refreshCoordination_ && refreshCoordination_->InCoordination() &&
            !isRefreshInReactive_ &&
-           (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION_SPRING ||
+           (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_ANIMATION_SPRING ||
                source == SCROLL_FROM_ANIMATION) &&
            (axis_ == Axis::VERTICAL);
 }
@@ -172,21 +172,21 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         OnScrollCallback(offset, source);
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE);
+            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS);
         }
     }
     if (IsAtTop() &&
         (Positive(offset) || (Negative(offset) && refreshCoordination_ && refreshCoordination_->IsRefreshInScroll())) &&
-        (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION) && !isRefreshInReactive_ &&
-        (axis_ == Axis::VERTICAL)) {
+        (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_ANIMATION) &&
+        !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE);
+            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS);
         }
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         (refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
-        isRefreshInReactive_) {
+        source != SCROLL_FROM_AXIS && isRefreshInReactive_) {
         isRefreshInReactive_ = false;
         refreshCoordination_->OnScrollEnd(0.0f);
     }
