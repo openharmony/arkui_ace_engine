@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 
 #ifdef USE_ARK_ENGINE
@@ -250,6 +251,10 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have 1 object argument.");
+        return;
+    }
+    if (ViewStackModel::GetInstance()->CheckTopNodeFirstBuilding()) {
+        // the node sets attribute value for the first time. No animation is generated.
         return;
     }
     AnimationOption option = AnimationOption();

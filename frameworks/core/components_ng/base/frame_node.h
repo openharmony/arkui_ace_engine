@@ -565,6 +565,16 @@ public:
         return nullptr;
     }
 
+    bool IsFirstBuilding() const
+    {
+        return isFirstBuilding_;
+    }
+
+    void MarkBuildDone()
+    {
+        isFirstBuilding_ = false;
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -661,6 +671,7 @@ private:
     bool isResponseRegion_ = false;
     bool bypass_ = false;
     bool isLayoutComplete_ = false;
+    bool isFirstBuilding_ = true;
 
     double lastVisibleRatio_ = 0.0;
 
