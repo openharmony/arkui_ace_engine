@@ -144,6 +144,7 @@ public:
     }
 
     bool IsMenuShow();
+    bool IsSingleHandleMenuShow();
     bool IsHandleShow();
     bool IsSingleHandle();
 

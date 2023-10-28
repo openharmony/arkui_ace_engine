@@ -63,6 +63,7 @@ public:
     void ShowOrHiddenMenu(bool isHidden);
     void DisableMenu(bool isDisabled);
     bool IsMenuShow();
+    bool IsSingleHandleMenuShow();
     bool IsHandleShow();
     bool IsSingleHandle();
 

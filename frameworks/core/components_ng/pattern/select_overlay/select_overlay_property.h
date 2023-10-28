@@ -53,6 +53,7 @@ struct SelectHandleInfo {
 struct SelectMenuInfo {
     bool menuDisable = false;
     bool menuIsShow = false;
+    bool singleHandleMenuIsShow = false;
     bool showCopy = true;
     bool showPaste = true;
     bool showCopyAll = true;

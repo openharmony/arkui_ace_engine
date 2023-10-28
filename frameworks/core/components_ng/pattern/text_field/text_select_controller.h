@@ -165,6 +165,10 @@ public:
         return caretInfo_;
     }
 
+    bool HasReverse() {
+        return firstHandleInfo_.index > secondHandleInfo_.index;
+    }
+
     void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
     void UpdateCaretIndex(int32_t index);

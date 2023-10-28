@@ -280,6 +280,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (hostLayoutProperty) {
         hostLayoutProperty->ResetTextAlignChanged();
     }
+    if (processOverlayDelayTask_) {
+        processOverlayDelayTask_();
+        processOverlayDelayTask_ = nullptr;
+    }
     if (needToRefreshSelectOverlay_) {
         StopTwinkling();
         ProcessOverlay();
@@ -428,7 +432,7 @@ void TextFieldPattern::OnScrollEndCallback()
     if (scrollBar) {
         scrollBar->ScheduleDisappearDelayTask();
     }
-    UpdateSelectMenuVisibility(true);
+    OnParentScrollStartOrEnd(true);
 }
 
 void TextFieldPattern::OnTextAreaScroll(float offset)
@@ -1399,8 +1403,12 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     StartTwinkling();
     SetIsSingleHandle(true);
     CloseSelectOverlay(true);
-    if (!contentController_->IsEmpty()) {
-        ProcessOverlay(true, true, false);
+    if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE) {
+        if (GetNakedCharPosition() >= 0) {
+            DelayProcessOverlay(true, true, false);
+        } else {
+            ProcessOverlay(true, true, false);
+        }
     }
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
@@ -1797,7 +1805,9 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    bool shouldProcessOverlayAfterLayout = false;
     if (ResetObscureTickCountDown()) {
+        shouldProcessOverlayAfterLayout = true;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (info.GetSourceDevice() == SourceType::MOUSE) {
@@ -1825,7 +1835,11 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         StopTwinkling();
     }
     SetIsSingleHandle(!IsSelected());
-    ProcessOverlay(true, true);
+    if (shouldProcessOverlayAfterLayout) {
+        DelayProcessOverlay(true, true);
+    } else {
+        ProcessOverlay(true, true);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1855,6 +1869,15 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         showOverlayParams.secondHandle = selectController_->GetSecondHandleRect();
         ShowSelectOverlay(showOverlayParams);
     }
+}
+
+void TextFieldPattern::DelayProcessOverlay(bool isUpdateMenu, bool animation, bool isShowMenu)
+{
+    processOverlayDelayTask_ = [weak = WeakClaim(this), isUpdateMenu, animation, isShowMenu]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ProcessOverlay(isUpdateMenu, animation, isShowMenu);
+    };
 }
 
 void TextFieldPattern::ShowSelectOverlay(const ShowSelectOverlayParams& showOverlayParams)
@@ -1950,26 +1973,16 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
     return true;
 }
 
-// 建议将函数名换成和overlay相关，此函数会和select中的handle产生歧义
-void TextFieldPattern::UpdateFirstHandlePosition(bool needLayout)
-{
-    auto proxy = GetSelectOverlayProxy();
-    CHECK_NULL_VOID(proxy);
-    SelectHandleInfo handleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
-    handleInfo.needLayout = needLayout;
-    proxy->UpdateFirstSelectHandleInfo(handleInfo);
-}
-
-void TextFieldPattern::UpdateSecondHandlePosition(bool needLayout)
+void TextFieldPattern::UpdateSelectOverlaySecondHandle(bool needLayout)
 {
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     SelectHandleInfo handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
+    handleInfo.needLayout = needLayout;
     proxy->UpdateSecondSelectHandleInfo(handleInfo);
 }
 
-// 基于最新的代码整改
-void TextFieldPattern::UpdateDoubleHandlePosition(bool firstNeedLayout, bool secondNeedLayout)
+void TextFieldPattern::UpdateSelectOverlayDoubleHandle(bool firstNeedLayout, bool secondNeedLayout)
 {
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
@@ -2052,20 +2065,19 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     if (isSingleHandle_) {
         selectController_->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
     } else {
+        auto proxy = GetSelectOverlayProxy();
+        CHECK_NULL_VOID(proxy);
         auto position = UpdateCaretPositionOnHandleMove(localOffset);
         if (isFirstHandle) {
             selectController_->MoveFirstHandleToContentRect(position);
-            auto proxy = GetSelectOverlayProxy();
-            CHECK_NULL_VOID(proxy);
             SelectHandleInfo handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
             proxy->UpdateSecondSelectHandleInfo(handleInfo);
         } else {
             selectController_->MoveSecondHandleToContentRect(position);
-            auto proxy = GetSelectOverlayProxy();
-            CHECK_NULL_VOID(proxy);
             SelectHandleInfo handleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
             proxy->UpdateFirstSelectHandleInfo(handleInfo);
         }
+        proxy->SetHandleReverse(selectController_->HasReverse());
     }
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -2129,10 +2141,10 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
             StartTwinkling();
             selectController_->UpdateCaretOffset();
         } else {
-            auto handleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
-            proxy->UpdateFirstSelectHandleInfo(handleInfo);
-            handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
-            proxy->UpdateSecondSelectHandleInfo(handleInfo);
+            auto firstHandleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
+            auto secondHandleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
+            proxy->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+            proxy->SetHandleReverse(selectController_->HasReverse());
         }
     } else {
         auto handleInfo = GetSelectHandleInfo(selectController_->GetCaretRect().GetOffset());
@@ -2353,6 +2365,7 @@ void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
     }
     mouseStatus_ = MouseStatus::MOVE;
     selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
+    showSelect_ = true;
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -3920,7 +3933,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
         if (scrollBar) {
             scrollBar->PlayScrollBarAppearAnimation();
         }
-        UpdateSelectMenuVisibility(false);
+        OnParentScrollStartOrEnd(false);
         return true;
     }
     if (IsReachedBoundary(offset)) {
@@ -4644,8 +4657,12 @@ void TextFieldPattern::StopEditing()
 bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
 {
     OffsetF offset(paintRect.GetX() - parentGlobalOffset_.GetX(), paintRect.GetY() - parentGlobalOffset_.GetY());
-    return !(!contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) ||
-             !contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON }));
+    if (!IsTextArea()) {
+        return LessOrEqual(offset.GetX(), contentRect_.GetX() + contentRect_.Width()) &&
+               GreatOrEqual(offset.GetX() + paintRect.Width(), contentRect_.GetX());
+    }
+    return contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) &&
+             contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON });
 }
 
 void TextFieldPattern::DumpAdvanceInfo()
@@ -4854,9 +4871,9 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
         selectController_->UpdateSecondHandleOffset();
         if (!IsSingleHandle()) {
             selectController_->UpdateFirstHandleOffset();
-            UpdateDoubleHandlePosition();
+            UpdateSelectOverlayDoubleHandle();
         } else {
-            UpdateSecondHandlePosition();
+            UpdateSelectOverlaySecondHandle();
             auto carectOffset = selectController_->GetCaretRect().GetOffset() +
                                 (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
             selectController_->UpdateCaretOffset(carectOffset);

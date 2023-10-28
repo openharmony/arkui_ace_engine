@@ -1028,10 +1028,10 @@ private:
     void UpdateCaretInfoToController() const;
 
     void ProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
+    void DelayProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
     SelectHandleInfo GetSelectHandleInfo(OffsetF info);
-    void UpdateFirstHandlePosition(bool needLayout = false);
-    void UpdateSecondHandlePosition(bool needLayout = false);
-    void UpdateDoubleHandlePosition(bool firstNeedLayout = false, bool secondNeedLayout = false);
+    void UpdateSelectOverlaySecondHandle(bool needLayout = false);
+    void UpdateSelectOverlayDoubleHandle(bool firstNeedLayout = false, bool secondNeedLayout = false);
 
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
@@ -1250,6 +1250,7 @@ private:
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     bool isSupportCameraInput_ = false;
+    std::function<void()> processOverlayDelayTask_;
 };
 } // namespace OHOS::Ace::NG
 
