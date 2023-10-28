@@ -1796,7 +1796,6 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
         CHECK_NULL_VOID(ctx);
         auto imageSourceInfo = ctx->GetBorderImageSource().value_or(ImageSourceInfo(""));
         if (imageSourceInfo != sourceInfo) {
-                imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
         ctx->bdImage_ = ctx->bdImageLoadingCtx_->MoveCanvasImage();

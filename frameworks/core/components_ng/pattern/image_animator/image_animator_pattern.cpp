@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
-constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+constexpr int32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less than this, use more cacheImages.
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
@@ -485,7 +485,7 @@ void ImageAnimatorPattern::SetIteration(int32_t iteration)
 
 void ImageAnimatorPattern::SetDuration(int32_t duration)
 {
-    auto finalDuration = durationTotal_ > 0 ? durationTotal_ : duration;
+    int32_t finalDuration = durationTotal_ > 0 ? durationTotal_ : duration;
     if (IsFormRender()) {
         finalDuration = finalDuration < DEFAULT_DURATION ? finalDuration : DEFAULT_DURATION;
     }

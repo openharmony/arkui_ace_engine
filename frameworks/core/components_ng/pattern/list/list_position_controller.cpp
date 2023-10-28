@@ -73,4 +73,18 @@ bool ListPositionController::IsAtEnd() const
     CHECK_NULL_RETURN(listPattern, false);
     return listPattern->IsAtBottom();
 }
+
+Rect ListPositionController::GetItemRect(int32_t index) const
+{
+    auto listPattern = AceType::DynamicCast<ListPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN(listPattern, Rect());
+    return listPattern->GetItemRect(index);
+}
+
+Rect ListPositionController::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
+{
+    auto listPattern = AceType::DynamicCast<ListPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN(listPattern, Rect());
+    return listPattern->GetItemRectInGroup(index, indexInGroup);
+}
 } // namespace OHOS::Ace::NG

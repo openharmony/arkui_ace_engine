@@ -259,7 +259,8 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pipelineContextBase);
     if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
         GetFormAnimationTimeInterval(pipelineContextBase) > DEFAULT_DURATION) {
-        LOGW("[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+        TAG_LOGW(
+            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
         return;
     }
     if (info[0]->IsNull() || !info[0]->IsObject()) {
@@ -289,7 +290,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
         option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
-        LOGW("[Form animation]  Form animation SetDuration: %{public}lld ms",
+        TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
             static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase)));
     }
 
@@ -330,7 +331,8 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pipelineContext);
     if (pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRender() &&
         GetFormAnimationTimeInterval(pipelineContext) > DEFAULT_DURATION) {
-        LOGW("[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+        TAG_LOGW(
+            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
         return;
     }
 
@@ -358,7 +360,7 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     if (pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRender() &&
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext))) {
         option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
-        LOGW("[Form animation]  Form animation SetDuration: %{public}lld ms",
+        TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
             static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext)));
     }
     if (SystemProperties::GetRosenBackendEnabled()) {

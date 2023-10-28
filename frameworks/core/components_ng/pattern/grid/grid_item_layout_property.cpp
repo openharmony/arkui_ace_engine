@@ -106,10 +106,26 @@ int32_t GridItemLayoutProperty::GetCrossEnd(Axis axis) const
     return propRowEnd_.value_or(-1);
 }
 
+int32_t GridItemLayoutProperty::GetRealMainSpan(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propRealRowSpan_.value_or(-1);
+    }
+    return propRealColumnSpan_.value_or(-1);
+}
+
+int32_t GridItemLayoutProperty::GetRealCrossSpan(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propRealColumnSpan_.value_or(-1);
+    }
+    return propRealRowSpan_.value_or(-1);
+}
+
 bool GridItemLayoutProperty::CheckWhetherCurrentItemAtExpectedPosition(Axis axis) const
 {
-    auto realMainSpan = propRealRowSpan_.value_or(-1);
-    auto realCrossSpan = propRealColumnSpan_.value_or(-1);
+    auto realMainSpan = GetRealMainSpan(axis);
+    auto realCrossSpan = GetRealCrossSpan(axis);
     auto realMainIndex = propMainIndex_.value_or(-1);
     auto realCrossIndex = propCrossIndex_.value_or(-1);
 

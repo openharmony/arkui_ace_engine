@@ -721,12 +721,25 @@ class SegmentButtonItem extends ViewPU {
             If.create();
             this.options.showIcon ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation(((t, e) => {
-                    var o;
+                    var o, s, i;
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Image.create(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon);
                     Image.size(null !== (o = this.options.imageSize) && void 0 !== o ? o : { width: 24, height: 24 });
                     Image.focusable(0 == this.index);
                     Image.draggable(!1);
+                    Image.fillColor(this.property.isSelected ? null !== (s = this.options.selectedFontColor) && void 0 !== s ? s : {
+                                                                                                                                       id: -1,
+                                                                                                                                       type: 10001,
+                                                                                                                                       params: ["sys.color.ohos_id_color_foreground_contrary"],
+                                                                                                                                       bundleName: "",
+                                                                                                                                       moduleName: ""
+                                                                                                                                   } : null !== (i = this.options.fontColor) && void 0 !== i ? i : {
+                                                                                                                                                                                                       id: -1,
+                                                                                                                                                                                                       type: 10001,
+                                                                                                                                                                                                       params: ["sys.color.ohos_id_color_text_secondary"],
+                                                                                                                                                                                                       bundleName: "",
+                                                                                                                                                                                                       moduleName: ""
+                                                                                                                                                                                                   });
                     e || Image.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }))

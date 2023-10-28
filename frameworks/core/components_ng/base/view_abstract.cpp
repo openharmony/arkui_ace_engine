@@ -823,7 +823,7 @@ void ViewAbstract::SetDraggable(bool draggable)
     } else {
         gestureHub->RemoveDragEvent();
     }
-    frameNode->SetDraggable(draggable);
+    frameNode->SetCustomerDraggable(draggable);
 }
 
 void ViewAbstract::SetOnDragStart(

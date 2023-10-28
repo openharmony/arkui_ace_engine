@@ -11,6 +11,9 @@ adapter/ohos/capability/udmf/  @echoorchid @LongLie
 adapter/ohos/capability/window_connection/  @lushi1202
 adapter/ohos/capability/window_connection_ng/  @lushi1202
 adapter/ohos/entrance/pa_engine/  @jayleehw
+adapter/ohos/osal/ace_trace.cpp  @lushi1202
+adapter/ohos/osal/anr_thread.cpp  @lushi1202
+adapter/ohos/osal/log_wrapper.cpp  @lushi1202
 
 [Preview adapter]
 adapter/preview/ @laigerendaqiu

@@ -136,6 +136,7 @@ void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)
     auto onRemoteReady = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
         (const RefPtr<NG::UIExtensionProxy>& session) {
         ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         JSRef<JSObject> contextObj = JSClass<JSUIExtensionProxy>::NewInstance();
         RefPtr<JSUIExtensionProxy> proxy = Referenced::Claim(contextObj->Unwrap<JSUIExtensionProxy>());
         proxy->SetInstanceId(instanceId);

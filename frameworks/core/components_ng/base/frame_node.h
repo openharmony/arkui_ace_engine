@@ -378,9 +378,15 @@ public:
         userSet_ = true;
     }
 
+    void SetCustomerDraggable(bool draggable) {
+        draggable_ = draggable;
+        userSet_ = true;
+        customerSet_ = true;
+    }
+
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
     {
-        builderFunc_ = buildFunc;
+        builderFunc_ = std::move(buildFunc);
         backgroundNode_ = nullptr;
     }
 
@@ -397,6 +403,11 @@ public:
     bool IsUserSet() const
     {
         return userSet_;
+    }
+
+    bool IsCustomerSet() const
+    {
+        return customerSet_;
     }
 
     void SetAllowDrop(const std::set<std::string>& allowDrop)
@@ -661,6 +672,7 @@ private:
 
     bool draggable_ = false;
     bool userSet_ = false;
+    bool customerSet_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
 
