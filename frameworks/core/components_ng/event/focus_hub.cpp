@@ -199,15 +199,28 @@ RefPtr<FocusHub> FocusHub::GetChildMainView()
 {
     std::list<RefPtr<FocusHub>> children;
     FlushChildrenFocusHub(children);
+    RefPtr<FocusHub> curFocusMainView = nullptr;
+    RefPtr<FocusHub> focusableMainView = nullptr;
     for (const auto& child : children) {
         if (!child) {
             continue;
         }
         auto frameName = child->GetFrameName();
-        if (child->IsFocusableNode() && (frameName == V2::PAGE_ETS_TAG || frameName == V2::MENU_WRAPPER_ETS_TAG ||
-                                            frameName == V2::DIALOG_ETS_TAG || frameName == V2::MODAL_PAGE_TAG)) {
-            return child;
+        if (frameName == V2::PAGE_ETS_TAG || frameName == V2::MENU_WRAPPER_ETS_TAG || frameName == V2::DIALOG_ETS_TAG ||
+            frameName == V2::MODAL_PAGE_TAG || frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG) {
+            if (!curFocusMainView && child->IsCurrentFocus()) {
+                curFocusMainView = child;
+            }
+            if (!focusableMainView && child->IsFocusableNode()) {
+                focusableMainView = child;
+            }
         }
+    }
+    if (curFocusMainView) {
+        return curFocusMainView;
+    }
+    if (focusableMainView) {
+        return focusableMainView;
     }
     for (const auto& child : children) {
         if (!child) {
@@ -237,6 +250,8 @@ RefPtr<FocusHub> FocusHub::GetMainViewRootScope()
     auto frameName = GetFrameName();
     int32_t rootScopeDeepth = 0;
     if (frameName == V2::MENU_WRAPPER_ETS_TAG) {
+        rootScopeDeepth = DEEPTH_OF_MENU_WRAPPER;
+    } else if (frameName == V2::MENU_ETS_TAG) {
         rootScopeDeepth = DEEPTH_OF_MENU;
     } else if (frameName == V2::DIALOG_ETS_TAG) {
         rootScopeDeepth = DEEPTH_OF_DIALOG;
@@ -1213,7 +1228,7 @@ bool FocusHub::PaintAllFocusState()
     std::list<RefPtr<FocusHub>> focusNodes;
     FlushChildrenFocusHub(focusNodes);
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
-    if (lastFocusNode) {
+    if (lastFocusNode && lastFocusNode->IsCurrentFocus() && lastFocusNode->IsFocusableNode()) {
         return lastFocusNode->PaintAllFocusState();
     }
     if (onPaintFocusStateCallback_) {
@@ -1283,16 +1298,25 @@ void FocusHub::ClearAllFocusState()
 
 bool FocusHub::IsNeedPaintFocusState()
 {
-    if (focusType_ == FocusType::DISABLE || (focusStyleType_ == FocusStyleType::NONE && !HasFocusStateStyle())) {
-        return false;
-    }
-    if (focusType_ == FocusType::NODE) {
-        return true;
+    if (currentFocus_ && IsFocusableNode() &&
+        (focusDepend_ == FocusDependence::SELF || focusType_ == FocusType::NODE)) {
+        return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle();
     }
     std::list<RefPtr<FocusHub>> focusNodes;
     FlushChildrenFocusHub(focusNodes);
-    return std::none_of(focusNodes.begin(), focusNodes.end(),
-        [](const RefPtr<FocusHub>& node) { return node->IsNeedPaintFocusState(); });
+    auto lastFocusNode = GetLastWeakFocusNode().Upgrade();
+    while (lastFocusNode) {
+        if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
+            break;
+        }
+        if (lastFocusNode->GetFocusStyleType() != FocusStyleType::NONE || lastFocusNode->HasFocusStateStyle()) {
+            return false;
+        }
+        focusNodes.clear();
+        lastFocusNode->FlushChildrenFocusHub(focusNodes);
+        lastFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
+    }
+    return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle();
 }
 
 bool FocusHub::AcceptFocusOfSpecifyChild(FocusStep step)
