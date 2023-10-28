@@ -484,7 +484,8 @@ std::shared_ptr<Media::PixelMap> CreatePixelMapFromString(const std::string& fil
     return pixelMap;
 }
 
-OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale) const
+OffsetF GestureEventHub::GetPixelMapOffset(
+    const GestureEvent& info, const SizeF& size, const float scale, const bool needScale) const
 {
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     auto frameNode = GetFrameNode();
@@ -493,9 +494,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
     if (frameTag == V2::WEB_ETS_TAG) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
-    } else if ((info.GetInputEventType() != InputEventType::MOUSE_BUTTON &&
-                   !NearEqual(scale, DEFALUT_DRAG_PPIXELMAP_SCALE)) ||
-               (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !NearEqual(scale, 1.0f))) {
+    } else if (needScale) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
     } else if (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
@@ -509,8 +508,8 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
             result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
         }
     } else {
-        auto coordinateX = frameNodeOffset_.GetX() > SystemProperties::GetDeviceWidth()
-                               ? frameNodeOffset_.GetX() - SystemProperties::GetDeviceWidth()
+        auto coordinateX = frameNodeOffset_.GetX() > SystemProperties::GetDevicePhysicalWidth()
+                               ? frameNodeOffset_.GetX() - SystemProperties::GetDevicePhysicalWidth()
                                : frameNodeOffset_.GetX();
         auto coordinateY = frameNodeOffset_.GetY();
         result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
@@ -538,8 +537,8 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
 float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t width) const
 {
     float scale = 1.0f;
-    int32_t deviceWidth = SystemProperties::GetDeviceWidth();
-    int32_t deviceHeight = SystemProperties::GetDeviceHeight();
+    int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
+    int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
     int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
     int32_t minDeviceLength = std::min(deviceHeight, deviceWidth);
     if (maxDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE > minDeviceLength) {
@@ -597,7 +596,7 @@ std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEve
         }
         int32_t width = pixelMap->GetWidth();
         int32_t height = pixelMap->GetHeight();
-        auto pixelMapOffset = gestureHub->GetPixelMapOffset(info, SizeF(width, height), scale);
+        auto pixelMapOffset = gestureHub->GetPixelMapOffset(info, SizeF(width, height), scale, !NearEqual(scale, 1.0f));
         ShadowInfoCore shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
         int ret = InteractionInterface::GetInstance()->UpdateShadowPic(shadowInfo);
         if (ret != 0) {
@@ -773,7 +772,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
-    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
+    auto pixelMapOffset =
+        GetPixelMapOffset(info, SizeF(width, height), scale, !NearEqual(scale, DEFALUT_DRAG_PPIXELMAP_SCALE));
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
