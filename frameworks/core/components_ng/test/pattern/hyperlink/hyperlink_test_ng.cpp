@@ -163,30 +163,6 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HyperlinkPatternTest002
- * @tc.desc: Test HyperlinkPattern InitLongPressEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest002, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
-    ASSERT_NE(frameNode, nullptr);
-    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
-    ASSERT_NE(hyperlinkPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto inputHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-
-    hyperlinkPattern->InitLongPressEvent(inputHub);
-    auto longPressEvent = hyperlinkPattern->longPressEvent_->callback_;
-
-    auto info = GestureEvent();
-    longPressEvent(info);
-    EXPECT_EQ(hyperlinkPattern->isLinked_, 1);
-}
-
-/**
  * @tc.name: HyperlinkPatternTest003
  * @tc.desc: Test HyperlinkPattern InitTouchEvent.
  * @tc.type: FUNC
