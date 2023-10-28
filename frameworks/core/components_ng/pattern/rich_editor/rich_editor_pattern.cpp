@@ -2895,6 +2895,22 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             pattern->isMousePressed_ = usingMouse;
             pattern->HandleOnSelectAll();
         };
+        selectInfo.onClose = [weak](bool closedByGlobalEvent) {
+            if (closedByGlobalEvent) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                auto textSelector = pattern->GetTextSelector();
+                auto end = textSelector.GetEnd();
+                pattern->StartTwinkling();
+                pattern->ResetSelection();
+                pattern->CloseSelectOverlay();
+                textSelector.Update(end);
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        };
+
         selectInfo.callerFrameNode = host;
 
         pattern->CopySelectionMenuParams(selectInfo);
