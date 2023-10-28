@@ -17,6 +17,7 @@
 #define private public
 #include "test/mock/core/common/mock_container.h"
 
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -28,6 +29,10 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/property/property.h"
+#include "core/pipeline/base/element_register.h"
+#include "frameworks/core/pipeline/base/element.h"
 #undef private
 #undef protected
 using namespace testing;
@@ -55,6 +60,7 @@ const int32_t TEN = 10;
 const int32_t FOUF = 4;
 const int32_t INDEX = 1;
 const Color BLUE = Color(0xff0000ff);
+const Color DEFAULT_COLOR = Color(0xFF007DFF);
 const SafeAreaExpandOpts safeAreaExpandOpts = SafeAreaExpandOpts();
 const std::vector<ObscuredReasons> reasonsVector = { ObscuredReasons::PLACEHOLDER };
 
@@ -67,6 +73,8 @@ constexpr char TAG_CHILD[] = "child";
 const auto MOCK_PATTERN_ROOT = AceType::MakeRefPtr<Pattern>();
 const auto FRAME_NODE_ROOT = FrameNode::CreateFrameNode(TAG_ROOT, 1, MOCK_PATTERN_ROOT, true);
 const auto FRAME_NODE_CHILD = FrameNode::CreateFrameNode(TAG_CHILD, 2, MOCK_PATTERN_ROOT, false);
+const uint32_t REGISTER_ID = 1 << 20;
+const auto FRAME_NODE_REGISTER = FrameNode::CreateFrameNode(TAG_ROOT, REGISTER_ID, MOCK_PATTERN_ROOT, false);
 
 std::string srcimages = "common/images/mmm.jpg";
 const std::string VALUE_EMPTY = "";
@@ -2092,6 +2100,98 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableBlurTest, TestSize.Level1)
     OnBlurFunc onBlurCallback2 = []() {};
     ViewAbstract::SetOnBlur(std::move(onBlurCallback2));
     EXPECT_TRUE(callback);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+
+/**
+ * @tc.name: ViewAbstractArk001
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractArk001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get framenode by GetFrameNodeById;
+     * @tc.expected: node is not null.
+     */
+    auto rootNode = reinterpret_cast<FrameNode*>(GetArkUIInternalNodeAPI()->GetFrameNodeById(REGISTER_ID));
+    EXPECT_NE(rootNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get node id;
+     * @tc.expected: node id is equal to REGISTER_ID.
+     */
+    EXPECT_EQ(rootNode->GetId(), REGISTER_ID);
+}
+
+/**
+ * @tc.name: ViewAbstractArk002
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractArk002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. set BLUE by SetBackgroundColor and get renderContext.
+     * @tc.expected: renderContext is not null.
+     */
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundColor(AceType::RawPtr(rootFrameNode), BLUE.GetValue());
+    auto renderContext = rootFrameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step4. get backgroundColor value of the node.
+     * @tc.expected: value is equal to BLUE.
+     */
+    EXPECT_EQ(renderContext->GetBackgroundColor(), BLUE);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractArk003
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractArk003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. set BLUE by ResetBackgroundColor and get renderContext.
+     * @tc.expected: renderContext is not null.
+     */
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundColor(AceType::RawPtr(rootFrameNode));
+    auto renderContext = rootFrameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step4. get backgroundColor value of the node.
+     * @tc.expected: value is equal to BLUE.
+     */
+    EXPECT_EQ(renderContext->GetBackgroundColor(), DEFAULT_COLOR);
     ViewStackProcessor::GetInstance()->instance = nullptr;
 }
 } // namespace OHOS::Ace::NG
