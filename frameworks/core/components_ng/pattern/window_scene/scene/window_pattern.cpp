@@ -130,7 +130,8 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
-    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence()->IsSnapshotExisted()) {
+    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence()
+        && session_->GetScenePersistence()->IsSnapshotExisted()) {
         CreateSnapshotNode();
         host->AddChild(snapshotNode_);
         return;
