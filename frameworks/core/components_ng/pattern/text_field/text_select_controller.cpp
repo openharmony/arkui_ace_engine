@@ -329,10 +329,6 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
     MoveHandleToContentRect(caretRect, boundaryAdjustment);
     caretInfo_.rect = caretRect;
     caretRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
-    if (contentController_->IsEmpty()) {
-        caretInfo_.rect = CalculateEmptyValueCaretRect();
-        return;
-    }
     UpdateRecordCaretIndex(caretInfo_.index);
 }
 
