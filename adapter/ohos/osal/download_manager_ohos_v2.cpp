@@ -24,7 +24,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace {
 
-constexpr int32_t MAXIMUM_WAITING_PERIOD = 10;
+constexpr int32_t MAXIMUM_WAITING_PERIOD = 5;
 using NetStackRequest = NetStack::HttpClient::HttpClientRequest;
 using NetStackResponse = NetStack::HttpClient::HttpClientResponse;
 using NetStackError = NetStack::HttpClient::HttpClientError;
