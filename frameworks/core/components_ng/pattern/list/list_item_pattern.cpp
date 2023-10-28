@@ -589,9 +589,9 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START &&
             (curOffset_ < width * (1 - threshold) || (reachLeftSpeed && curOffset_ < width))) {
-            swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+            ResetToItemChild();
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END) {
-            swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+            ResetToItemChild();
         }
         end = width * static_cast<int32_t>(swiperIndex_);
     } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
@@ -613,9 +613,9 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END &&
             (-curOffset_ < width * (1 - threshold) || (reachRightSpeed && -curOffset_ < width))) {
-            swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+            ResetToItemChild();
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START) {
-            swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+            ResetToItemChild();
         }
         end = width * static_cast<int32_t>(swiperIndex_);
     }
@@ -627,7 +627,7 @@ void ListItemPattern::SwiperReset()
     if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD) {
         return;
     }
-    swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+    ResetToItemChild();
     float velocity = 0.0f;
     if (springMotion_) {
         velocity = springMotion_->GetCurrentVelocity();
