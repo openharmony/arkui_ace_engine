@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_PAINT_METHOD_H
 
+#include "core/components_ng/pattern/gauge/gauge_modifier.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/drawing.h"
@@ -46,9 +47,18 @@ public:
     GaugePaintMethod() = default;
     ~GaugePaintMethod() override = default;
 
-    explicit GaugePaintMethod(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern) : pattern_(pattern) {}
+    GaugePaintMethod(
+        const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, const RefPtr<GaugeModifier>& gaugeModifier)
+        : pattern_(pattern), gaugeModifier_(gaugeModifier)
+    {}
 
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(gaugeModifier_, nullptr);
+        return gaugeModifier_;
+    }
 
 private:
     void Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
@@ -85,8 +95,10 @@ private:
     void CreateDefaultColor(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     void CreateDefaultTrianglePath(float pathStartVertexX, float pathStartVertexY, float radius, RSPath& path) const;
     WeakPtr<Pattern> pattern_;
+    RefPtr<GaugeModifier> gaugeModifier_;
 };
 
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_PAINT_METHOD_H
+
