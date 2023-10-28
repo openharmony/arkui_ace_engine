@@ -66,7 +66,7 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         offset =
             OffsetF(menuContext->GetOffset()->GetX().ConvertToPx(), menuContext->GetOffset()->GetY().ConvertToPx());
     }
-    if (!info_->menuInfo.menuIsShow) {
+    if (!info_->menuInfo.menuIsShow || info_->menuInfo.menuDisable) {
         hasExtensionMenu_ = false;
         return;
     }
