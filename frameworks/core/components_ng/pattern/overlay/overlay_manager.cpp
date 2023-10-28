@@ -1683,10 +1683,11 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
     if (!modalStack_.empty()) {
         auto topModalNode = modalStack_.top().Upgrade();
         CHECK_NULL_VOID(topModalNode);
-        if (topModalNode->GetTag() != V2::MODAL_PAGE_TAG) {
+        if (topModalNode->GetTag() != V2::SHEET_PAGE_TAG && topModalNode->GetTag() != V2::MODAL_PAGE_TAG) {
             return;
         }
-        if (topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() != targetId) {
+        if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG ||
+            topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() != targetId) {
             DeleteModal(targetId);
             return;
         }
@@ -1957,10 +1958,11 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     if (!modalStack_.empty()) {
         auto topSheetNode = modalStack_.top().Upgrade();
         CHECK_NULL_VOID(topSheetNode);
-        if (topSheetNode->GetTag() != V2::SHEET_PAGE_TAG) {
+        if (topSheetNode->GetTag() != V2::SHEET_PAGE_TAG && topSheetNode->GetTag() != V2::MODAL_PAGE_TAG) {
             return;
         }
-        if (topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
+        if (topSheetNode->GetTag() == V2::MODAL_PAGE_TAG ||
+            topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
             DeleteModal(targetId);
             return;
         }
@@ -2167,8 +2169,10 @@ void OverlayManager::DeleteModal(int32_t targetId)
             CHECK_NULL_VOID(rootNode);
             if (isModal) {
                 modalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
+                modalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
             } else {
                 modalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+                modalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
             }
             rootNode->RemoveChild(modalNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
