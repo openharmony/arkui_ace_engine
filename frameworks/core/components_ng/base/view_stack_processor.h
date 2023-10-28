@@ -371,6 +371,13 @@ public:
         Push(frameNode);
     }
 
+    bool CheckTopNodeFirstBuilding() const
+    {
+        auto node = GetMainFrameNode();
+        CHECK_NULL_RETURN(node, false);
+        return node->IsFirstBuilding();
+    }
+
 private:
     ViewStackProcessor();
 
