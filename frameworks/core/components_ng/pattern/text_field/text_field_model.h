@@ -36,7 +36,6 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
-constexpr int32_t ERROR = -1;
 
 struct Font {
     std::optional<FontWeight> fontWeight;
@@ -74,15 +73,9 @@ public:
     virtual void Insert(const std::string& args) {}
 
     virtual void CaretPosition(int32_t caretPosition) {}
-    virtual int32_t GetCaretIndex()
-    {
-        return ERROR;
-    }
+    virtual int32_t GetCaretIndex() { return {}; }
 
-    virtual NG::OffsetF GetCaretPosition()
-    {
-        return NG::OffsetF(ERROR, ERROR);
-    }
+    virtual NG::OffsetF GetCaretPosition() { return {}; }
 
     virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
     virtual Rect GetTextContentRect() { return {}; }
