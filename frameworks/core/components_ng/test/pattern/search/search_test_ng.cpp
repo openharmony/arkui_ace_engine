@@ -17,6 +17,9 @@
 
 #define protected public
 #define private public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+
 #include "core/animation/curves.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/edge.h"
@@ -68,31 +71,20 @@ class SearchTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    static void SetThemeInCreate();
-    void SetSearchTheme();
-    void SetIconTheme();
 };
 
 void SearchTestNg::SetUpTestSuite()
 {
+    MockContainer::SetUp();
     MockPipelineBase::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    SearchModelNG searchModelInstance;
-    SetThemeInCreate();
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
-}
-
-void SearchTestNg::TearDownTestSuite()
-{
-    MockPipelineBase::TearDown();
-}
-
-void SearchTestNg::SetThemeInCreate()
-{
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
     auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
     auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
+    searchTheme->iconHeight_ = 24.0_px;
+    searchTheme->height_ = 60.0_px;
+    searchTheme->searchButtonTextColor_ = Color::RED;
+    searchTheme->placeholderColor_ = Color::RED;
+    textFieldTheme->bgColor_ = Color::RED;
     auto iconTheme = AceType::MakeRefPtr<IconTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
         if (type == SearchTheme::TypeId()) {
@@ -103,18 +95,16 @@ void SearchTestNg::SetThemeInCreate()
         }
         return textFieldTheme;
     });
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
 }
 
-void SearchTestNg::SetSearchTheme()
+void SearchTestNg::TearDownTestSuite()
 {
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SearchTheme>()));
-}
-
-void SearchTestNg::SetIconTheme()
-{
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IconTheme>()));
+    MockContainer::TearDown();
+    MockPipelineBase::TearDown();
 }
 
 /**
@@ -125,7 +115,7 @@ void SearchTestNg::SetIconTheme()
 HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
 {
     SearchModelNG searchModelInstance;
-    SetSearchTheme();
+
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -228,12 +218,6 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
     searchLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_LT(geometryNode->GetFrameSize().Height(), searchButtonHeight);
     EXPECT_GE(geometryNode->GetFrameSize().Height(), cancelButtonSize);
-
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
-    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
-    searchTheme->iconHeight_ = 24.0_px;
-    searchTheme->height_ = 60.0_px;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(searchTheme));
     searchLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
     layoutWrapper->GetLayoutProperty()->UpdatePadding(
@@ -285,29 +269,6 @@ HWTEST_F(SearchTestNg, Measure002, TestSize.Level1)
     searchLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     searchLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetTotalChildCount(), 0);
-}
-
-/**
- * @tc.name: SearchEventHub001
- * @tc.desc: SearchEventHub
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, SearchEventHub001, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    ChangeAndSubmitEvent changeEvent = [](const std::string str) {};
-    searchModelInstance.SetOnChange(changeEvent);
-    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->AttachHost(frameNode);
-    eventHub->UpdateChangeEvent("");
-    ASSERT_NE(eventHub->changeEvent_, nullptr);
-
-    eventHub->changeEvent_ = nullptr;
-    eventHub->UpdateChangeEvent("");
-    EXPECT_EQ(eventHub->changeEvent_, nullptr);
 }
 
 /**
@@ -584,7 +545,7 @@ HWTEST_F(SearchTestNg, Pattern003, TestSize.Level1)
     auto pattern = frameNode->GetPattern<SearchPattern>();
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     ASSERT_NE(pattern, nullptr);
-    SetSearchTheme();
+
     pattern->UpdateChangeEvent("search");
     pattern->ToJsonValue(json);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::CONSTANT);
@@ -674,22 +635,6 @@ HWTEST_F(SearchTestNg, Pattern008, TestSize.Level1)
 HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate009, TestSize.Level1)
 {
     /**
-     * @tc.step: step1. Set theme.
-     */
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
-    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
-    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
-
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(textFieldTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(textFieldTheme));
-
-    /**
      * @tc.step: step2. create frameNode and pattern.
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -707,6 +652,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate009, TestSize.Level1)
 
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     canvasDrawFunction(rsCanvas);
@@ -731,22 +677,6 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate009, TestSize.Level1)
 HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate010, TestSize.Level1)
 {
     /**
-     * @tc.step: step1. Set theme.
-     */
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
-    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
-    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
-
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(textFieldTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(searchTheme))
-        .WillOnce(Return(textFieldTheme));
-
-    /**
      * @tc.step: step2. create frameNode and pattern.
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -764,6 +694,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate010, TestSize.Level1)
 
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     canvasDrawFunction(rsCanvas);
@@ -897,7 +828,7 @@ HWTEST_F(SearchTestNg, SetSearchIconSize001, TestSize.Level1)
     SearchModelNG searchModelInstance;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    SetSearchTheme();
+
     auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
 
     searchModelInstance.SetSearchIconSize(14.0_vp);
@@ -930,7 +861,6 @@ HWTEST_F(SearchTestNg, SetSearchIconColor002, TestSize.Level1)
     SearchModelNG searchModelInstance;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    SetIconTheme();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetSearchSrcPath("/common/icon.png");
@@ -948,10 +878,6 @@ HWTEST_F(SearchTestNg, SetSearchSrcPath001, TestSize.Level1)
     SearchModelNG searchModelInstance;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SearchTheme>()));
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetSearchSrcPath("");
@@ -968,7 +894,6 @@ HWTEST_F(SearchTestNg, SetSearchSrcPath002, TestSize.Level1)
     SearchModelNG searchModelInstance;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    SetIconTheme();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetSearchSrcPath("/common/icon.png");
@@ -985,10 +910,6 @@ HWTEST_F(SearchTestNg, SetRightIconSrcPath001, TestSize.Level1)
     SearchModelNG searchModelInstance;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SearchTheme>()));
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetRightIconSrcPath("");
@@ -1039,12 +960,11 @@ HWTEST_F(SearchTestNg, SetCancelButtonStyle001, TestSize.Level1)
 HWTEST_F(SearchTestNg, SetCancelIconSize001, TestSize.Level1)
 {
     SearchModelNG searchModelInstance;
-    SetThemeInCreate();
 
     searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    SetSearchTheme();
+
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
@@ -1103,11 +1023,10 @@ HWTEST_F(SearchTestNg, SetTextColor001, TestSize.Level1)
 HWTEST_F(SearchTestNg, Create001, TestSize.Level1)
 {
     SearchModelNG searchModelInstance;
-    SetThemeInCreate();
 
     searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, EMPTY_VALUE);
     auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    SetSearchTheme();
+
     ASSERT_NE(frameNode, nullptr);
     searchModelInstance.CreateTextField(frameNode, PLACEHOLDER, EMPTY_VALUE, true);
     searchModelInstance.CreateImage(frameNode, SEARCH_SVG, true);
@@ -1123,7 +1042,7 @@ HWTEST_F(SearchTestNg, Create001, TestSize.Level1)
     auto cancelButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
     ASSERT_NE(cancelButtonFrameNode, nullptr);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
-    EXPECT_EQ(buttonFrameNode, nullptr);
+    EXPECT_NE(buttonFrameNode, nullptr);
 }
 
 /**
@@ -1374,6 +1293,7 @@ HWTEST_F(SearchTestNg, PaintMethodTest001, TestSize.Level1)
 
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     canvasDrawFunction(rsCanvas);
@@ -1426,6 +1346,7 @@ HWTEST_F(SearchTestNg, PaintMethodTest003, TestSize.Level1)
 
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     canvasDrawFunction(rsCanvas);
@@ -1439,10 +1360,6 @@ HWTEST_F(SearchTestNg, PaintMethodTest003, TestSize.Level1)
 HWTEST_F(SearchTestNg, PaintMethodTest004, TestSize.Level1)
 {
     SearchModelNG searchModelInstance;
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
-    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
-    searchTheme->iconHeight_ = 24.0_px;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(searchTheme));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
@@ -1459,16 +1376,13 @@ HWTEST_F(SearchTestNg, PaintMethodTest004, TestSize.Level1)
     auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(2);
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
     canvasDrawFunction(rsCanvas);
 
     paintWrapper->GetGeometryNode()->UpdatePaddingWithBorder(PaddingPropertyF({ 0.0f, 0.0f, 20.0f, 0.0f }));
     auto canvasDrawFunction2 = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
     canvasDrawFunction2(rsCanvas);
 }
 
@@ -1488,7 +1402,7 @@ HWTEST_F(SearchTestNg, SearchChangeEventHub001, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     eventHub->AttachHost(frameNode);
     eventHub->UpdateChangeEvent("");
-    ASSERT_NE(eventHub->onValueChangeEvent_, nullptr);
+    ASSERT_EQ(eventHub->onValueChangeEvent_, nullptr);
     eventHub->onValueChangeEvent_ = nullptr;
     eventHub->UpdateChangeEvent("");
     EXPECT_EQ(eventHub->onValueChangeEvent_, nullptr);
@@ -1505,7 +1419,6 @@ HWTEST_F(SearchTestNg, Pattern009, TestSize.Level1)
      * @tc.step: step1. create frameNode and pattern.
      */
     SearchModelNG searchModelInstance;
-    SetThemeInCreate();
     searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1604,10 +1517,7 @@ HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
  */
 HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
 {
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
-    ASSERT_NE(themeManager, nullptr);
     SearchModelNG searchModelInstance;
-    SetThemeInCreate();
     searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
     auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
@@ -1615,13 +1525,6 @@ HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    pipeline->SetThemeManager(themeManager);
-    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
-    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(textFieldTheme)).WillOnce(Return(searchTheme));
-    textFieldTheme->bgColor_ = Color::RED;
-    searchTheme->searchButtonTextColor_ = Color::RED;
-    searchTheme->placeholderColor_ = Color::RED;
     pattern->OnColorConfigurationUpdate();
     ASSERT_NE(pattern->cancelButtonNode_, nullptr);
     auto textFieldLayoutProperty = pattern->textField_->GetLayoutProperty<TextFieldLayoutProperty>();

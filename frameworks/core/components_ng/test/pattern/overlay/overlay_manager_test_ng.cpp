@@ -1492,6 +1492,7 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     DialogProperties dialogProperties;
     dialogProperties.isShowInSubWindow = true;

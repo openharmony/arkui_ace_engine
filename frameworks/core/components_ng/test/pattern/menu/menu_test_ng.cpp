@@ -71,7 +71,7 @@ const std::string MENU_TAG = "menu";
 const std::string MENU_ITEM_TEXT = "menuItem";
 const std::string MENU_ITEM_GROUP_TEXT = "menuItemGroup";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
-const DirtySwapConfig configDirtySwap = {false, false, false, false, true, false};
+const DirtySwapConfig configDirtySwap = { false, false, false, false, true, false };
 constexpr Color ITEM_DISABLED_COLOR = Color(0x0c182431);
 
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
@@ -1359,7 +1359,7 @@ HWTEST_F(MenuTestNg, MenuPatternTestNg020, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuPatternTestNg021, TestSize.Level1)
 {
-    MenuPattern *menuPattern = new MenuPattern(TARGET_ID, "", TYPE);
+    MenuPattern* menuPattern = new MenuPattern(TARGET_ID, "", TYPE);
     const std::string tag = "tag";
     int32_t nodeId = 1;
     RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();
@@ -2782,10 +2782,10 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestEvent001, TestSize.Level1)
 }
 
 /**
-    * @tc.name: CustomMenuItemPattern001
-    * @tc.desc: Test CustomMenuItem creation
-    * @tc.type: FUNC
-    */
+ * @tc.name: CustomMenuItemPattern001
+ * @tc.desc: Test CustomMenuItem creation
+ * @tc.type: FUNC
+ */
 HWTEST_F(MenuTestNg, CustomMenuItemPattern001, TestSize.Level1)
 {
     MenuItemModelNG model;
@@ -4595,15 +4595,13 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
     algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(),
-        MENU_ITEM_SIZE_WIDTH);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), MENU_ITEM_SIZE_WIDTH);
 
     // @tc.cases: case2. sub menu show on the left side of item
     algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(),
-        MENU_ITEM_SIZE_WIDTH);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), MENU_ITEM_SIZE_WIDTH);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 
@@ -5567,6 +5565,8 @@ HWTEST_F(MenuTestNg, MenuItemGroupPaintMethod001, TestSize.Level1)
     RefPtr<MenuItemGroupPaintMethod> paintMethod = AceType::MakeRefPtr<MenuItemGroupPaintMethod>();
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
     /**
      * @tc.steps: step2. update paint property and excute GetOverlayDrawFunction.
@@ -6282,6 +6282,7 @@ HWTEST_F(MenuTestNg, MenuPaintMethodTestNg001, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     /**
      * @tc.steps: step2. update paint property and excute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
