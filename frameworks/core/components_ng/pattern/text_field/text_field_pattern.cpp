@@ -3168,7 +3168,7 @@ void TextFieldPattern::RequestKeyboardOnFocus()
 void TextFieldPattern::OnVisibleChange(bool isVisible)
 {
     LOGI("visible change to %{public}d", isVisible);
-    if (!isVisible) {
+    if (!isVisible && HasFocus()) {
         LOGI("TextField is not visible");
         selectionMode_ = SelectionMode::NONE;
         CloseKeyboard(true);
@@ -3528,7 +3528,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 
 void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd)
 {
-    if (!HasFocus()) {
+    if (!HasFocus() || selectionStart == selectionEnd) {
         return;
     }
     cursorVisible_ = false;
