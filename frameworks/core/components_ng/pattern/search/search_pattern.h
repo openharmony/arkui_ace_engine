@@ -138,6 +138,8 @@ private:
     void OnClickButtonAndImage();
     void OnClickCancelButton();
     void HandleCaretPosition(int32_t caretPosition);
+    int32_t HandleGetCaretIndex();
+    NG::OffsetF HandleGetCaretPosition();
     Rect HandleTextContentRect();
     int32_t HandleTextContentLines();
     void StopEditing();
