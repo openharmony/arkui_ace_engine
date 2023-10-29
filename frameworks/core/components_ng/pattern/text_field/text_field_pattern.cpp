@@ -4802,13 +4802,13 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
         if (!IsSingleHandle()) {
             selectController_->UpdateFirstHandleOffset();
             UpdateDoubleHandlePosition();
+            selectController_->UpdateCaretOffset();
         } else {
             UpdateSecondHandlePosition();
             auto carectOffset = selectController_->GetCaretRect().GetOffset() +
                                 (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
             selectController_->UpdateCaretOffset(carectOffset);
         }
-        selectController_->UpdateCaretOffset();
     } else {
         auto caretOffset = selectController_->GetCaretRect().GetOffset() +
                             (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
