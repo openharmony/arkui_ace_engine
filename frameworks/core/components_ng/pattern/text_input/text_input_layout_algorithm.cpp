@@ -69,11 +69,11 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     // Paragraph layout.
     if (isInlineStyle) {
         return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
-    } else if (showPlaceHolder_) {
-        return PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper, 0);
-    } else {
-        return TextInputMeasureContent(textFieldContentConstraint, layoutWrapper, 0);
     }
+    if (showPlaceHolder_) {
+        return PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper, 0);
+    }
+    return TextInputMeasureContent(textFieldContentConstraint, layoutWrapper, 0);
 }
 
 void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
