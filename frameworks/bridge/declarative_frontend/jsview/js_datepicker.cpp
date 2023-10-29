@@ -839,10 +839,12 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
-        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
-            pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+                alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+                alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+                pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
+            }
         }
     }
 
@@ -919,11 +921,16 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     DialogProperties properties;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         properties.alignment = DialogAlignment::BOTTOM;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+        }
     } else {
         properties.alignment = DialogAlignment::CENTER;
     }
     properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    }
 
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;
@@ -1324,10 +1331,12 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
-        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
-            pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+                alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+                alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+                pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
+            }
         }
     }
 
@@ -1388,11 +1397,16 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     DialogProperties properties;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         properties.alignment = DialogAlignment::BOTTOM;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+        }
     } else {
         properties.alignment = DialogAlignment::CENTER;
     }
     properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    }
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (selectedTime->IsObject()) {

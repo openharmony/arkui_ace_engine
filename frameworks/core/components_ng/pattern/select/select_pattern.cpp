@@ -375,10 +375,10 @@ void SelectPattern::BuildChild()
     if (!hasTextNode) {
         text_->MountToParent(row);
     }
+    spinner_->MarkModifyDone();
     if (!hasSpinnerNode) {
         spinner_->MountToParent(row);
     }
-    spinner_->MarkModifyDone();
     if (!hasRowNode) {
         row->MountToParent(select);
     }

@@ -1174,10 +1174,12 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             textPickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
-        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
-            textPickerDialog.offset = TEXT_PICKER_OFFSET_DEFAULT_TOP;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+                alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+                alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+                textPickerDialog.offset = TEXT_PICKER_OFFSET_DEFAULT_TOP;
+            }
         }
     }
 
@@ -1238,11 +1240,16 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
     ButtonInfo buttonInfo;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         properties.alignment = DialogAlignment::BOTTOM;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+        }
     } else {
         properties.alignment = DialogAlignment::CENTER;
     }
     properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    }
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

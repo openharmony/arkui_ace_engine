@@ -257,16 +257,29 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     };
     dialogCancelEvent["cancelId"] = func;
     DialogProperties properties;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        properties.alignment = DialogAlignment::BOTTOM;
-    } else {
-        properties.alignment = DialogAlignment::CENTER;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+            properties.alignment = DialogAlignment::BOTTOM;
+        } else {
+            properties.alignment = DialogAlignment::CENTER;
+        }
     }
     if (pickerDialog.alignment.has_value()) {
         properties.alignment = pickerDialog.alignment.value();
     }
     properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    } else {
+        if (properties.alignment == DialogAlignment::DEFAULT) {
+            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+                properties.alignment = DialogAlignment::BOTTOM;
+                properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+            } else {
+                properties.alignment = DialogAlignment::CENTER;
+            }
+        }
+    }
     if (pickerDialog.offset.has_value()) {
         properties.offset = pickerDialog.offset.value();
     }

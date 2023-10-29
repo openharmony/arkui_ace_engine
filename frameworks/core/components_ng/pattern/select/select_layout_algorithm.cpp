@@ -19,6 +19,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -38,11 +39,18 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(rowProps);
     auto space = static_cast<float>(rowProps->GetSpaceValue(Dimension()).ConvertToPx());
     childConstraint.maxSize.MinusWidth(spinnerSize.Width() + space);
-    auto textSize = MeasureAndGetSize(rowWrapper->GetOrCreateChildByIndex(0), childConstraint);
+    auto textWrapper = rowWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(textWrapper);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto textLayoutConstraint = textLayoutProperty->CreateContentConstraint();
+    auto textSize = MeasureAndGetSize(textWrapper, childConstraint);
     if (childConstraint.parentIdealSize.Width().has_value()) {
         // Make the spinner icon layout at the right end
-        space = childConstraint.parentIdealSize.Width().value() - spinnerSize.Width() - textSize.Width();
-        rowProps->UpdateSpace(Dimension(space));
+        textSize.SetWidth(childConstraint.parentIdealSize.Width().value() - spinnerSize.Width() - space);
+        textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
+        textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
+        textWrapper->Measure(textLayoutConstraint);
     }
 
     auto rowGeometry = rowWrapper->GetGeometryNode();
