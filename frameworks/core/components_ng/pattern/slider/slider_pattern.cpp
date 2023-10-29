@@ -239,6 +239,10 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchInfo = touchList.front();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
+        if (fingerId_ != -1) {
+            return;
+        }
+        fingerId_ = touchInfo.GetFingerId();
         axisFlag_ = false;
         // when Touch Down area is at Pan Area, value is unchanged.
         if (!AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
@@ -251,7 +255,11 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         mousePressedFlag_ = true;
         FireChangeEvent(SliderChangeMode::Begin);
         OpenTranslateAnimation();
-    } else if (touchType == TouchType::UP) {
+    } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        if (fingerId_ != touchInfo.GetFingerId()) {
+            return;
+        }
+        fingerId_ = -1;
         if (bubbleFlag_) {
             bubbleFlag_ = false;
         }
@@ -313,8 +321,18 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
             InitializeBubble();
         }
     } else {
-        UpdateValueByLocalLocation(info.GetLocalLocation());
-        UpdateBubble();
+        auto fingerList = info.GetFingerList();
+        if (fingerList.size() > 0) {
+            for (auto fingerInfo : fingerList) {
+                if (fingerInfo.fingerId_ == fingerId_) {
+                    UpdateValueByLocalLocation(fingerInfo.localLocation_);
+                    UpdateBubble();
+                }
+            }
+        } else {
+            UpdateValueByLocalLocation(info.GetLocalLocation());
+            UpdateBubble();
+        }
     }
     panMoveFlag_ = true;
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1047,7 +1065,7 @@ void SliderPattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isVisibleArea_  = visible;
+        pattern->isVisibleArea_ = visible;
         visible ? pattern->StartAnimation() : pattern->StopAnimation();
     };
     auto host = GetHost();

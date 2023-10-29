@@ -215,14 +215,13 @@ void SwiperPattern::OnModifyDone()
             }
         }
     }
-    if (IsDisableSwipe()) {
-        if (panEvent_) {
-            gestureHub->RemovePanEvent(panEvent_);
-            panEvent_.Reset();
-        }
-        return;
+    if (!IsDisableSwipe()) {
+        InitPanEvent(gestureHub);
+    } else if (panEvent_) {
+        gestureHub->RemovePanEvent(panEvent_);
+        panEvent_.Reset();
     }
-    InitPanEvent(gestureHub);
+
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
@@ -2748,7 +2747,7 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
         if (auto frameNode = item.second.node) {
             auto context = frameNode->GetRenderContext();
             CHECK_NULL_VOID(context);
-            context->UpdateRenderGroup(itemRenderGroup);
+            context->UpdateSuggestedRenderGroup(itemRenderGroup);
         }
     }
     auto host = GetHost();
@@ -2760,7 +2759,7 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
         }
         auto context = frameNode->GetRenderContext();
         CHECK_NULL_VOID(context);
-        context->UpdateRenderGroup(itemRenderGroup);
+        context->UpdateSuggestedRenderGroup(itemRenderGroup);
     }
 }
 

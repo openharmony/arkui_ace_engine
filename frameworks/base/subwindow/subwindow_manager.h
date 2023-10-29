@@ -98,8 +98,6 @@ public:
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
     void CloseDialog(int32_t instanceId);
-    void RegisterOnShowMenu(const std::function<void()>& callback);
-    void RegisterOnHideMenu(const std::function<void()>& callback);
     void RequestFocusSubwindow(int32_t instanceId);
 
 private:
@@ -128,8 +126,6 @@ private:
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
-    std::function<void()> onShowMenuCallback_;
-    std::function<void()> onHideMenuCallback_;
 };
 
 } // namespace OHOS::Ace

@@ -342,7 +342,6 @@ void RefreshPattern::HandleDragUpdate(float delta)
         return;
     }
     if (NearZero(delta) || isRefreshing_) {
-        LOGI("Delta is near zero or isRefreshing!");
         return;
     }
     scrollOffset_.SetY(GetScrollOffset(delta));
@@ -860,6 +859,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         FireChangeEvent("false");
     }
     FireStateChange(static_cast<int>(refreshStatus_));
+    TAG_LOGD(AceLogTag::ACE_REFRESH, "refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 
 void RefreshPattern::SwitchToFinish()

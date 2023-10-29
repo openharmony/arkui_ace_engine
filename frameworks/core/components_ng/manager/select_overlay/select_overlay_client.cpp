@@ -45,6 +45,11 @@ void SelectOverlayClient::InitSelectOverlay()
         CHECK_NULL_VOID(client);
         client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::PASTE);
     };
+    selectOverlayInfo_.menuCallback.onCameraInput = [weak = WeakClaim(this)]() {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::CAMERA_INPUT);
+    };
     selectOverlayInfo_.onHandleMoveStart = [weak = WeakClaim(this)](bool isFirst) {
         auto client = weak.Upgrade();
         CHECK_NULL_VOID(client);
@@ -118,6 +123,7 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
         overlayInfo.menuOptionItems = GetMenuOptionItems();
     }
     if (OnPreShowSelectOverlay(overlayInfo, clientInfo, SelectOverlayIsOn())) {
+        overlayInfo.menuInfo.singleHandleMenuIsShow = overlayInfo.menuInfo.menuIsShow;
         return overlayInfo;
     }
     return std::nullopt;
@@ -125,10 +131,11 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
 
 void SelectOverlayClient::UpdateShowingSelectOverlay(ClientOverlayInfo& clientInfo)
 {
-    LOGI("update select overlay, isUseMouse %{public}d", clientInfo.isShowMouseMenu);
+    LOGI("update select overlay");
     auto isCurrentSingleHandle = IsShowingSingleHandle();
     auto hasRequestSingleHandle = !clientInfo.firstHandleInfo && clientInfo.secondHandleInfo;
     if (clientInfo.isShowMouseMenu || (isCurrentSingleHandle ^ hasRequestSingleHandle)) {
+        LOGI("force close and create new select overlay");
         RequestCloseSelectOverlay(true);
         clientInfo.isUpdateMenu = true;
         CreateSelectOverlay(clientInfo);
@@ -145,6 +152,7 @@ void SelectOverlayClient::UpdateShowingSelectOverlay(ClientOverlayInfo& clientIn
                 menuInfo.showCopyAll = newMenuInfo.showCopyAll;
             });
         }
+        selectOverlayInfo->secondHandle.needLayout = true;
         proxy->UpdateSecondSelectHandleInfo(selectOverlayInfo->secondHandle);
     } else {
         if (clientInfo.isUpdateMenu) {
@@ -254,5 +262,23 @@ void SelectOverlayClient::StopListeningScrollableParent(const RefPtr<FrameNode>&
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     context->GetSelectOverlayManager()->RemoveScrollCallback(host->GetId());
+}
+
+void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd)
+{
+    if (!SelectOverlayIsOn()) {
+        return;
+    }
+    auto proxy = GetSelectOverlayProxy();
+    CHECK_NULL_VOID(proxy);
+    if (!isEnd) {
+        proxy->ShowOrHiddenMenu(true);
+        return;
+    }
+    if (proxy->IsSingleHandle() && !proxy->IsSingleHandleMenuShow()) {
+        UpdateSelectMenuInfo([](SelectMenuInfo& menuInfo) { menuInfo.menuIsShow = false; });
+    } else {
+        proxy->ShowOrHiddenMenu(false);
+    }
 }
 } // namespace OHOS::Ace::NG

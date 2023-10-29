@@ -11,6 +11,9 @@ adapter/ohos/capability/udmf/  @echoorchid @LongLie
 adapter/ohos/capability/window_connection/  @lushi1202
 adapter/ohos/capability/window_connection_ng/  @lushi1202
 adapter/ohos/entrance/pa_engine/  @jayleehw
+adapter/ohos/osal/ace_trace.cpp  @lushi1202
+adapter/ohos/osal/anr_thread.cpp  @lushi1202
+adapter/ohos/osal/log_wrapper.cpp  @lushi1202
 
 [Preview adapter]
 adapter/preview/ @laigerendaqiu
@@ -94,7 +97,7 @@ frameworks/core/components_ng/pattern/refresh/  @aryawang
 frameworks/core/components_ng/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/pattern/rich_editor/  @jyj_0306
+frameworks/core/components_ng/pattern/rich_editor/  @wu-yinxiao
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
@@ -371,7 +374,7 @@ frameworks/core/components_ng/test/pattern/refresh/  @suiwuyue
 frameworks/core/components_ng/test/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/test/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/test/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/test/pattern/rich_editor/  @jyj_0306
+frameworks/core/components_ng/test/pattern/rich_editor/  @wu-yinxiao
 frameworks/core/components_ng/test/pattern/root/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/scroll/  @suiwuyue
 frameworks/core/components_ng/test/pattern/scroll_bar/  @suiwuyue

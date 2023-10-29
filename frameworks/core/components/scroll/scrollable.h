@@ -370,10 +370,11 @@ public:
     {
         handleScrollCallback_ = std::move(func);
     }
-    void SetHandleVelocityCallback(std::function<bool(float)>&& func)
+    void SetOverScrollCallback(std::function<bool(float)>&& func)
     {
-        handleVelocityCallback_ = std::move(func);
+        overScrollCallback_ = std::move(func);
     }
+    void StartScrollAnimation(float mainPosition, float velocity);
     void SetOnScrollStartRec(std::function<void(float)>&& func)
     {
         onScrollStartRec_ = std::move(func);
@@ -532,7 +533,7 @@ private:
     // ScrollablePattern::HandleScroll
     NestableScrollCallback handleScrollCallback_;
     // ScrollablePattern::HandleScrollVelocity
-    std::function<bool(float)> handleVelocityCallback_;
+    std::function<bool(float)> overScrollCallback_;
     // ScrollablePattern::onScrollStartRecursive
     std::function<void(float)> onScrollStartRec_;
     // ScrollablePattern::onScrollEndRecursive

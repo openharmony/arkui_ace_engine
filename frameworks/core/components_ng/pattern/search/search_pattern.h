@@ -138,6 +138,8 @@ private:
     void OnClickButtonAndImage();
     void OnClickCancelButton();
     void HandleCaretPosition(int32_t caretPosition);
+    int32_t HandleGetCaretIndex();
+    NG::OffsetF HandleGetCaretPosition();
     Rect HandleTextContentRect();
     int32_t HandleTextContentLines();
     void StopEditing();
@@ -170,6 +172,7 @@ private:
     void HandleBlurEvent();
     void InitClickEvent();
     void HandleClickEvent(GestureEvent& info);
+    uint32_t GetMaxLength() const;
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;

@@ -375,7 +375,9 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     auto frameNode = Inspector::GetFrameNodeByKey(key);
     CHECK_NULL_VOID(frameNode);
     rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
-    rectangle.localOffset = frameNode->GetGeometryNode()->GetFrameOffset();
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
     rectangle.windowOffset = frameNode->GetTransformRelativeOffset();
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

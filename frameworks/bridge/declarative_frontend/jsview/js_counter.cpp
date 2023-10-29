@@ -75,7 +75,6 @@ void JSCounter::JSBind(BindingTarget globalObj)
 void JSCounter::JsEnableDec(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("Must contain at least 1 argument");
         return;
     }
     if (!args[0]->IsBoolean()) {
@@ -88,7 +87,6 @@ void JSCounter::JsEnableDec(const JSCallbackInfo& args)
 void JSCounter::JsEnableInc(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("Must contain at least 1 argument");
         return;
     }
     if (!args[0]->IsBoolean()) {
@@ -101,11 +99,9 @@ void JSCounter::JsEnableInc(const JSCallbackInfo& args)
 void JSCounter::JsOnInc(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("Must contain at least 1 argument");
         return;
     }
     if (!args[0]->IsFunction()) {
-        LOGW("Argument is not a function object");
         return;
     }
     CounterModel::GetInstance()->SetOnInc(
@@ -116,11 +112,9 @@ void JSCounter::JsOnInc(const JSCallbackInfo& args)
 void JSCounter::JsOnDec(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGW("Must contain at least 1 argument");
         return;
     }
     if (!args[0]->IsFunction()) {
-        LOGW("Argument is not a function object");
         return;
     }
     CounterModel::GetInstance()->SetOnDec(
@@ -131,13 +125,11 @@ void JSCounter::JsOnDec(const JSCallbackInfo& args)
 void JSCounter::JSHeight(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
     Dimension value;
     if (!ConvertFromJSValue(args[0], value)) {
-        LOGE("args can not set height");
         return;
     }
 
@@ -151,13 +143,11 @@ void JSCounter::JSHeight(const JSCallbackInfo& args)
 void JSCounter::JSWidth(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
     Dimension value;
     if (!ConvertFromJSValue(args[0], value)) {
-        LOGE("args can not set width");
         return;
     }
 
@@ -193,13 +183,11 @@ void JSCounter::SetSize(const JSCallbackInfo& args)
 void JSCounter::JSControlWidth(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
     Dimension value;
     if (!ConvertFromJSValue(args[0], value)) {
-        LOGE("args can not set control width");
         return;
     }
     CounterModel::GetInstance()->SetControlWidth(value);
@@ -214,13 +202,11 @@ void JSCounter::JSStateChange(bool state)
 void JSCounter::JsBackgroundColor(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
     Color color;
     if (!ParseJsColor(args[0], color)) {
-        LOGE("args can not set backgroundColor");
         return;
     }
     CounterModel::GetInstance()->SetBackgroundColor(color);

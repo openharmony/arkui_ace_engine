@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "mock_image_loader.h"
+
 #include <chrono>
 
 #include "core/image/image_loader.h"
@@ -62,4 +63,6 @@ bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, cons
 {
     return false;
 }
+
+void ImageLoader::WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData) {}
 } // namespace OHOS::Ace

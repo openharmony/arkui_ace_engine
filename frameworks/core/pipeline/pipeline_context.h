@@ -333,7 +333,7 @@ public:
 
     void RefreshStageFocus();
 
-    void ShowContainerTitle(bool isShow, bool hasDeco = true) override;
+    void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
 
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 

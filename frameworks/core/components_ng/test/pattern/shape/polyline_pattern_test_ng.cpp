@@ -71,7 +71,6 @@ public:
         auto shapeAbstactModel = ShapeAbstractModelNG();
         SetSize(shapeAbstactModel);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-        ViewStackProcessor::GetInstance()->Pop();
         CheckPoints(frameNode, hasValue);
         Draw(frameNode);
     }

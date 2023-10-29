@@ -26,4 +26,9 @@ DimensionOffset DimensionOffsetEvaluator::Evaluate(
 {
     return DimensionOffset();
 }
+
+float RotateEvaluator::Evaluate(const float& start, const float& end, float fraction)
+{
+    return 0.0f;
+}
 } // namespace OHOS::Ace

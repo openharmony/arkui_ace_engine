@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
@@ -244,7 +245,9 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
             CHECK_NULL_VOID(navBarNode);
             navBarNode->SetIsTitleMenuNodeShowing(false);
         };
-        overlayManager->RegisterOnHideMenu(hidMenuCallback);
+        auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->RegisterMenuDisappearCallback(hidMenuCallback);
     };
     eventHub->SetItemAction(clickCallback);
 

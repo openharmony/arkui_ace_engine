@@ -78,17 +78,13 @@ SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper)
 } // TextInputResponseArea end
 
 // PasswordResponseArea begin
-void PasswordResponseArea::InitResponseArea(const WeakPtr<Pattern>& hostPattern)
+void PasswordResponseArea::InitResponseArea()
 {
-    hostPattern_ = hostPattern;
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto host = textFieldPattern->GetHost();
+    ClearArea();
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    if (!host->GetChildren().empty()) {
-        host->GetChildren();
-        host->Clean();
-    }
     if (!IsShowPasswordIcon()) {
         LOGD("show password icon is false");
         return;
@@ -157,7 +153,30 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         CHECK_NULL_VOID(button);
         button->OnPasswordIconClicked();
     };
+    auto longPressCallback = [](GestureEvent& info) {
+        LOGI("PasswordResponseArea long press");
+    };
+    gesture->SetLongPressEvent(MakeRefPtr<LongPressEvent>(std::move(longPressCallback)));
     gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+}
+
+void PasswordResponseArea::Refresh()
+{
+    auto imageNode = passwordNode_.Upgrade();
+    if (!imageNode) {
+        LOGD("password node has not been added to the parent");
+        InitResponseArea();
+        return;
+    }
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
+    LoadImageSourceInfo();
+    auto src = isObscured_ ? hideIcon_->GetSrc() : showIcon_->GetSrc();
+    if (currentSrc != src) {
+        LOGD("image src is changed, reload it.");
+        UpdateImageSource();
+    }
 }
 
 void PasswordResponseArea::OnPasswordIconClicked()
@@ -258,44 +277,27 @@ void PasswordResponseArea::UpdateImageSource()
     imagePattern->LoadImageDataIfNeed();
 }
 
-void PasswordResponseArea::DestoryArea()
-{
-    TextInputResponseArea::DestoryArea();
-    isObscured_ = true;
-    hostPattern_.Reset();
-    passwordNode_.Reset();
-    showIcon_ = std::nullopt;
-    hideIcon_ = std::nullopt;
-}
-
 bool PasswordResponseArea::IsShowPasswordIcon()
 {
-    auto textFieldPattern = hostPattern_.Upgrade();
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_RETURN(textFieldPattern, false);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetShowPasswordIconValue(true) &&
-           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    return textFieldPattern->IsShowPasswordIcon();
 } // PasswordResponseArea end
 
 // UnitResponseArea begin
-void UnitResponseArea::InitResponseArea(const WeakPtr<Pattern>& hostPattern)
+void UnitResponseArea::InitResponseArea()
 {
-    hostPattern_ = hostPattern;
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto host = textFieldPattern->GetHost();
+    ClearArea();
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    if (!host->GetChildren().empty()) {
-        host->GetChildren();
-        host->Clean();
-    }
     if (!IsShowUnit()) {
         return;
     }
-    auto unitNode = unitNode_.Upgrade();
-    CHECK_NULL_VOID(unitNode);
-    unitNode->MountToParent(host);
+    CHECK_NULL_VOID(unitNode_);
+    unitNode_->MountToParent(host);
+    unitNode_.Reset();
 }
 
 SizeF UnitResponseArea::Measure(LayoutWrapper* layoutWrapper)
@@ -323,18 +325,10 @@ OffsetF UnitResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, Si
 
 bool UnitResponseArea::IsShowUnit()
 {
-    auto textFieldPattern = hostPattern_.Upgrade();
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textFieldPattern, false);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetShowUnderlineValue(false) &&
-           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
-}
-
-void UnitResponseArea::DestoryArea()
-{
-    TextInputResponseArea::DestoryArea();
-    hostPattern_.Reset();
-    unitNode_.Reset();
+    return textFieldPattern->IsShowUnit();
 } // UnitResponseArea end
 } // namespace OHOS::Ace::NG

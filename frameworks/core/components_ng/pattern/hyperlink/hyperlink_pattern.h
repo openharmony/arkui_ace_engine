@@ -67,7 +67,6 @@ private:
 
     bool isLinked_ = false;
     RefPtr<TouchEventImpl> onTouchEvent_;
-    RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<InputEvent> onMouseEvent_;
     RefPtr<ClickEvent> clickListener_;

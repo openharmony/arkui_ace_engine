@@ -100,6 +100,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
     JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
+    JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -139,6 +140,8 @@ void JSSearch::Create(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 key = text;
             }
+        } else if (textValue->IsUndefined()) {
+            key = "";
         } else {
             if (ParseJsString(textValue, text)) {
                 key = text;
@@ -676,6 +679,7 @@ void JSSearchController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSearchController>::Declare("SearchController");
     JSClass<JSSearchController>::Method("caretPosition", &JSSearchController::CaretPosition);
+    JSClass<JSSearchController>::CustomMethod("getCaretOffset", &JSSearchController::GetCaretOffset);
     JSClass<JSSearchController>::CustomMethod("getTextContentRect", &JSSearchController::GetTextContentRect);
     JSClass<JSSearchController>::CustomMethod("getTextContentLineCount", &JSSearchController::GetTextContentLinesNum);
     JSClass<JSSearchController>::Method("stopEditing", &JSSearchController::StopEditing);
@@ -701,6 +705,20 @@ void JSSearchController::CaretPosition(int32_t caretPosition)
     auto controller = controller_.Upgrade();
     if (controller) {
         controller->CaretPosition(caretPosition);
+    }
+}
+
+void JSSearchController::GetCaretOffset(const JSCallbackInfo& info)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        JSRef<JSObject> caretObj = JSRef<JSObject>::New();
+        NG::OffsetF caretOffset = controller->GetCaretPosition();
+        caretObj->SetProperty<int32_t>("index", controller->GetCaretIndex());
+        caretObj->SetProperty<float>("x", caretOffset.GetX());
+        caretObj->SetProperty<float>("y", caretOffset.GetY());
+        JSRef<JSVal> ret = JSRef<JSObject>::Cast(caretObj);
+        info.SetReturnValue(ret);
     }
 }
 
@@ -744,6 +762,27 @@ void JSSearchController::StopEditing()
     auto controller = controller_.Upgrade();
     if (controller) {
         controller->StopEditing();
+    }
+}
+void JSSearch::SetMaxLength(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The arg(SetMaxLength) is wrong, it is supposed to have atleast 1 argument");
+        return;
+    }
+    int32_t maxLength = 0;
+    if (info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->ResetMaxLength();
+        return;
+    } else if (!info[0]->IsNumber()) {
+        SearchModel::GetInstance()->ResetMaxLength();
+        return;
+    }
+    maxLength = info[0]->ToNumber<int32_t>();
+    if (GreatOrEqual(maxLength, 0)) {
+        SearchModel::GetInstance()->SetMaxLength(maxLength);
+    } else {
+        SearchModel::GetInstance()->ResetMaxLength();
     }
 }
 } // namespace OHOS::Ace::Framework

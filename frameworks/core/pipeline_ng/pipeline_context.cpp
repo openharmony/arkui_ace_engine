@@ -1650,7 +1650,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     FlushWindowFocusChangedCallback(isFocus);
 }
 
-void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         return;
@@ -1660,10 +1660,10 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    auto callback = [weakPattern = WeakClaim(RawPtr(containerPattern)), isShow, hasDeco]() {
+    auto callback = [weakPattern = WeakClaim(RawPtr(containerPattern)), isShow, hasDeco, needUpdate]() {
         auto pattern = weakPattern.Upgrade();
         if (pattern != nullptr) {
-            pattern->ShowTitle(isShow, hasDeco);
+            pattern->ShowTitle(isShow, hasDeco, needUpdate);
         }
     };
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();

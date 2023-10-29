@@ -950,4 +950,21 @@ void SelectPattern::OnColorConfigurationUpdate()
     SetOptionBgColor(selectTheme->GetBackgroundColor());
     host->SetNeedCallChildrenUpdate(false);
 }
+
+void SelectPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateText(pattern->selected_);
+        },
+        TaskExecutor::TaskType::UI);
+}
 } // namespace OHOS::Ace::NG

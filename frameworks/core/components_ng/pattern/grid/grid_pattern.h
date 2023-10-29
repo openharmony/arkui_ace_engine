@@ -201,6 +201,7 @@ public:
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    Rect GetItemRect(int32_t index) const;
 
 private:
     float GetMainGap();

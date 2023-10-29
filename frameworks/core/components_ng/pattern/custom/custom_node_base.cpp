@@ -24,6 +24,10 @@ namespace OHOS::Ace::NG {
 
 CustomNodeBase::~CustomNodeBase()
 {
+    // appearFunc_ & destroyFunc_ should be executed in pairs
+    if (!executeFireOnAppear_ && appearFunc_) {
+        appearFunc_();
+    }
     if (destroyFunc_) {
         destroyFunc_();
     }

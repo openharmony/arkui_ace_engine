@@ -67,10 +67,13 @@ public:
     float GetLongestLine() override;
     float GetMaxWidth() override;
     float GetAlphabeticBaseline() override;
+    float GetCharacterWidth(int32_t index) override;
 
     // interfaces for painting
     void Paint(RSCanvas& canvas, float x, float y) override;
+#ifndef USE_ROSEN_DRAWING
     void Paint(SkCanvas* skCanvas, float x, float y) override;
+#endif
 
     // interfaces for calculate the the specified paragraph position
     int32_t GetGlyphIndexByCoordinate(const Offset& offset) override;

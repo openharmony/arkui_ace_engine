@@ -24,6 +24,7 @@
 
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/base/mock_task_executor.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -217,6 +218,7 @@ void TextTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
     MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void TextTestNg::TearDownTestSuite()
@@ -595,7 +597,7 @@ HWTEST_F(TextTestNg, OnDetachFromFrameNode003, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
     pattern->selectOverlayProxy_ = proxy;
     proxy->selectOverlayId_ = 1;
     pattern->OnDetachFromFrameNode(nullptr);
@@ -636,7 +638,7 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
      * @tc.steps: step4. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
     pattern->selectOverlayProxy_ = proxy;
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 
@@ -830,7 +832,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     selectOverlayInfo.singleLineHeight = NODE_ID;
     auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
     auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
     pattern->selectOverlayProxy_ = proxy;
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(ret);
@@ -979,7 +981,7 @@ HWTEST_F(TextTestNg, OnHandleMove001, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
     pattern->selectOverlayProxy_ = proxy;
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
@@ -1091,6 +1093,7 @@ HWTEST_F(TextTestNg, TextLayoutTest001, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutTest002, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
     EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
     EXPECT_CALL(*paragraph, Layout).Times(2);
@@ -1309,6 +1312,7 @@ HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutTest006, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
     EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
     EXPECT_CALL(*paragraph, AddText).Times(2);
@@ -1417,6 +1421,8 @@ HWTEST_F(TextTestNg, TextLayoutTest007, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, TextLayoutTest008, TestSize.Level1)
 {
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -3837,7 +3843,7 @@ HWTEST_F(TextTestNg, HandleOnSelectAll002, TestSize.Level1)
      * @tc.steps: step3. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
     pattern->selectOverlayProxy_ = proxy;
     pattern->textForDisplay_ = "TestHandleOnSelectAll";
 
@@ -4124,6 +4130,7 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());

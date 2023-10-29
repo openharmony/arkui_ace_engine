@@ -81,7 +81,7 @@ globalThis.Button.attributeModifier = (modifier) => {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
     var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
 
-    if (thisViewPu.length != 0) {
+    if (thisViewPu.length !== 0) {
         var viewPu = thisViewPu[thisViewPu.length - 1];
         var component = viewPu.getOrCreateArkComponent(elmtId, (nativePtr)=>new ArkButtonComponent(nativePtr), nativeNode);
         modifier.applyNormalAttribute(component);

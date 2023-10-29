@@ -231,6 +231,29 @@ size_t TxtParagraph::GetLineCount()
 #endif
 }
 
+float TxtParagraph::GetCharacterWidth(int32_t index)
+{
+    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    auto next = index + 1;
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto boxes = paragraph_->GetRectsForRange(
+        index, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+#else
+    auto boxes = paragraph_->GetTextRectsByBoundary(
+        index, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+#endif
+    if (boxes.empty()) {
+        LOGD("boxes is empty.");
+        return 0.0f;
+    }
+    const auto& textBox = *boxes.begin();
+#ifndef USE_GRAPHIC_TEXT_GINE
+    return textBox.rect.fRight - textBox.rect.fLeft;
+#else
+    return textBox.rect.GetRight() - textBox.rect.GetLeft();
+#endif
+}
+
 void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
 {
     CHECK_NULL_VOID(paragraph_);
@@ -253,15 +276,13 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
 {
     CHECK_NULL_VOID(skCanvas);
-#ifndef USE_ROSEN_DRAWING
     paragraph_->Paint(skCanvas, x, y);
-#else
-    LOGE("Drawing is not supported");
-#endif
 }
+#endif
 
 // ToDo:adjust index
 int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset)

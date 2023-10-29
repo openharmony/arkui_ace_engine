@@ -70,6 +70,8 @@ public:
 #endif
     static void CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& data);
     static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string& key, const std::string& suffix);
+
+    static void WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData);
 };
 
 // File image provider: read image from file.

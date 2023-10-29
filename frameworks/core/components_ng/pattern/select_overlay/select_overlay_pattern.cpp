@@ -260,6 +260,7 @@ void SelectOverlayPattern::HandleOnClick(GestureEvent& /*info*/)
             info_->menuInfo.menuIsShow = true;
             host->UpdateToolBar(false);
         }
+        info_->menuInfo.singleHandleMenuIsShow = info_->menuInfo.menuIsShow;
     }
 }
 
@@ -370,7 +371,7 @@ void SelectOverlayPattern::CheckHandleReverse()
 {
     bool handleReverseChanged = false;
     double epsilon = std::max(info_->firstHandle.paintRect.Height(), info_->secondHandle.paintRect.Height());
-    epsilon = std::max(static_cast<double>(info_->singleLineHeight), epsilon);
+    epsilon = std::max(static_cast<double>(info_->singleLineHeight), epsilon) - 0.001f;
     if (NearEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top(), epsilon)) {
         if (info_->firstHandle.paintRect.Left() > info_->secondHandle.paintRect.Left()) {
             if (!info_->handleReverse) {
@@ -546,6 +547,12 @@ bool SelectOverlayPattern::IsMenuShow()
 {
     CHECK_NULL_RETURN(info_, false);
     return info_->menuInfo.menuIsShow;
+}
+
+bool SelectOverlayPattern::IsSingleHandleMenuShow()
+{
+    CHECK_NULL_RETURN(info_, false);
+    return info_->menuInfo.singleHandleMenuIsShow;
 }
 
 bool SelectOverlayPattern::IsHandleShow()

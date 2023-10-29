@@ -55,6 +55,8 @@ constexpr float FULL_OPACITY = 1.0f;
 constexpr float NEAR_FULL_OPACITY = 0.99f;
 constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
+
+const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 } // namespace
 
 void TabBarPattern::OnAttachToFrameNode()
@@ -64,6 +66,19 @@ void TabBarPattern::OnAttachToFrameNode()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
+
+    swiperController_->SetTabBarFinishCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        // always swipe with physical curve, ignore animationDuration
+        pattern->SetSwiperCurve(TabBarPhysicalCurve);
+
+        CHECK_NULL_VOID(pattern && pattern->scrollableEvent_);
+        auto scrollable = pattern->scrollableEvent_->GetScrollable();
+        if (scrollable) {
+            scrollable->StopScrollable();
+        }
+    });
 }
 
 void TabBarPattern::InitClick(const RefPtr<GestureEventHub>& gestureHub)
@@ -147,18 +162,6 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     if (scrollableEvent_) {
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
-
-    auto callback = [weak = WeakClaim(this)]() {
-        auto tabBarPattern = weak.Upgrade();
-        CHECK_NULL_VOID(tabBarPattern);
-        auto scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
-        if (scrollable) {
-            scrollable->StopScrollable();
-        }
-        tabBarPattern->SetSwiperCurve(TabBarPhysicalCurve);
-    };
-
-    swiperController_->SetTabBarFinishCallback(std::move(callback));
 
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
     auto scrollable = MakeRefPtr<Scrollable>(task, axis);
@@ -629,8 +632,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
-    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-    SetSwiperCurve(curve);
+    SetSwiperCurve(DurationCubicCurve);
     TabBarClickEvent(index);
     if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE &&
         tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
@@ -1074,7 +1076,7 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
                            : static_cast<int32_t>(tabTheme->GetSubTabBarHoverDuration()));
     option.SetDelay(0);
 
-    option.SetCurve(animationType == AnimationType::PRESS   ? AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f)
+    option.SetCurve(animationType == AnimationType::PRESS   ? DurationCubicCurve
                     : animationType == AnimationType::HOVER ? Curves::FRICTION
                                                             : Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
@@ -1308,7 +1310,7 @@ bool TabBarPattern::IsContainsBuilder()
 
 void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset)
 {
-    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    auto curve = DurationCubicCurve;
     isAnimating_ = true;
 
     // If animation is still running, stop it before play new animation.
@@ -1374,7 +1376,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
                             ? host->GetGeometryNode()->GetPaddingSize().Width() - childrenMainSize_
                             : space - frontChildrenMainSize;
     auto startOffset = currentOffset_;
-    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    auto curve = DurationCubicCurve;
 
     // If animation is still running, stop it before play new animation.
     StopTabBarTranslateAnimation();

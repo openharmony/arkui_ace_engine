@@ -202,13 +202,18 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     auto frameNode = layoutWrapper->GetHostNode();
     const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    auto iterItems = children.begin();
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
         }
         auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
         if (imageSpanItem) {
+            int32_t targetId = imageSpanItem->imageNodeId;
+            auto iterItems = children.begin();
+            // find the Corresponding ImageNode for every ImageSpanItem
+            while (iterItems != children.end() && (*iterItems) && (*iterItems)->GetHostNode()->GetId() != targetId) {
+                iterItems++;
+            }
             if (iterItems == children.end() || !(*iterItems)) {
                 continue;
             }

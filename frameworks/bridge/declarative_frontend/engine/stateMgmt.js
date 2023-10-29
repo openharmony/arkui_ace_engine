@@ -4791,7 +4791,7 @@ class ViewPU extends NativeViewPartialUpdate {
 
             thisViewPu.push(this);
             updateFunc(elmtId, /* isFirstRender */ false);
-            if (thisViewPu.length != 0) {
+            if (thisViewPu.length !== 0) {
                 thisViewPu.pop(this);
             }
                     
@@ -5116,19 +5116,21 @@ class ViewPU extends NativeViewPartialUpdate {
         const _popFunc = (classObject && "pop" in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             
+            this.syncInstanceId();
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
             }
             ViewStackProcessor.StopGetAccessRecording();
+            this.restoreInstanceId();
             
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
 
         thisViewPu.push(this);
         updateFunc(elmtId, /* is first render */ true);
-        if (thisViewPu.length != 0) {
+        if (thisViewPu.length !== 0) {
             thisViewPu.pop(this);
         }
 

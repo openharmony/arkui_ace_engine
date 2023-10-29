@@ -160,7 +160,6 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
     }
     auto builderIter = THEME_BUILDERS.find(type);
     if (builderIter == THEME_BUILDERS.end()) {
-        LOGE("No theme builder defined! type=%{public}zu", type);
         return nullptr;
     }
     auto theme = builderIter->second(themeConstants_);

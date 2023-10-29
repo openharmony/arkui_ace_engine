@@ -263,7 +263,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CreateIdealSize(gridLayoutProperty->GetLayoutConstraint().value(), axis, MeasureType::MATCH_PARENT, true);
     if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
         idealSize = gridLayoutProperty->GetLayoutConstraint().value().percentReference;
-        LOGI("size of main axis value is infinity, use percent reference");
+        TAG_LOGI(AceLogTag::ACE_GRID, "size of main axis value is infinity, use percent reference");
     }
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -326,7 +326,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     gridLayoutInfo_.endIndex_ = itemIndex - 1;
     gridLayoutInfo_.startMainLineIndex_ = 0;
-    gridLayoutInfo_.endMainLineIndex_ = rowIndex;
+    gridLayoutInfo_.endMainLineIndex_ = gridLayoutInfo_.hasBigItem_ ? gridLayoutInfo_.gridMatrix_.size() - 1 : rowIndex;
 }
 
 void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -362,7 +362,6 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             itemIndex = crossLine.second;
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex);
             if (!wrapper) {
-                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIndex);
                 break;
             }
             auto layoutProperty = wrapper->GetLayoutProperty();

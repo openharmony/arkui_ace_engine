@@ -69,12 +69,9 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
     auto searchHeight =
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
-    auto padding = layoutProperty->CreatePaddingAndBorder();
     auto defaultImageHeight =
         imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
-    auto imageHeightAdaptPadding =
-        static_cast<float>(searchHeight - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f));
-    auto imageHeight = std::min(defaultImageHeight, imageHeightAdaptPadding);
+    auto imageHeight = std::min(defaultImageHeight, static_cast<float>(searchHeight));
     CalcSize imageCalcSize;
     imageCalcSize.SetHeight(CalcLength(imageHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
@@ -111,9 +108,8 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto searchHeight =
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
-    auto padding = layoutProperty->CreatePaddingAndBorder();
     cancelButtonHeight =
-        std::min(cancelButtonHeight, searchHeight - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f));
+        std::min(cancelButtonHeight, searchHeight - 0.0f);
     CalcSize cancelButtonCalcSize((CalcLength(cancelButtonHeight)), CalcLength(cancelButtonHeight));
     cancelButtonLayoutProperty->UpdateUserDefinedIdealSize(cancelButtonCalcSize);
 
@@ -171,7 +167,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto searchHeight =
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
     auto textFieldHeight =
-        std::min(themeHeight, searchHeight - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f));
+        std::min(themeHeight, searchHeight - 0.0f);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
     childLayoutConstraint.selfIdealSize.SetHeight(textFieldHeight);
@@ -198,12 +194,9 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
     auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
     auto searchHeight =
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
-    auto padding = layoutProperty->CreatePaddingAndBorder();
     auto defaultImageHeight =
         imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
-    auto imageHeightAdaptPadding =
-        static_cast<float>(searchHeight - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f));
-    auto imageHeight = std::min(defaultImageHeight, imageHeightAdaptPadding);
+    auto imageHeight = std::min(defaultImageHeight, static_cast<float>(searchHeight));
     CalcSize imageCalcSize;
     imageCalcSize.SetHeight(CalcLength(imageHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
@@ -241,9 +234,7 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto searchHeight =
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    searchButtonHeight =
-        std::min(searchButtonHeight, searchHeight - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f));
+    searchButtonHeight = std::min(searchButtonHeight, searchHeight - 0.0f);
     CalcSize searchButtonCalcSize;
     searchButtonCalcSize.SetHeight(CalcLength(searchButtonHeight));
     buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize);

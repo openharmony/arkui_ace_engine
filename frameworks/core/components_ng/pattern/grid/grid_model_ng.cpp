@@ -63,7 +63,7 @@ void GridModelNG::SetLayoutOptions(GridLayoutOptions options)
 void GridModelNG::SetColumnsTemplate(const std::string& value)
 {
     if (value.empty()) {
-        LOGE("Columns Template [%{public}s] is not valid.", value.c_str());
+        TAG_LOGW(AceLogTag::ACE_GRID, "Columns Template [%{public}s] is not valid.", value.c_str());
         ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, "1fr");
         return;
     }
@@ -73,7 +73,7 @@ void GridModelNG::SetColumnsTemplate(const std::string& value)
 void GridModelNG::SetRowsTemplate(const std::string& value)
 {
     if (value.empty()) {
-        LOGE("Rows Template [%{public}s] is not valid.", value.c_str());
+        TAG_LOGW(AceLogTag::ACE_GRID, "Rows Template [%{public}s] is not valid.", value.c_str());
         ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, "1fr");
         return;
     }

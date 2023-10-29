@@ -434,7 +434,6 @@ sptr<OHOS::Rosen::Window> DialogContainer::GetUIWindowInner() const
 void DialogContainer::ShowToast(
     int32_t instanceId, const std::string& message, int32_t duration, const std::string& bottom)
 {
-    LOGI("DialogContainer ShowToast begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
     auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
@@ -442,7 +441,8 @@ void DialogContainer::ShowToast(
     auto delegate = frontend->GetDelegate();
     CHECK_NULL_VOID(delegate);
     delegate->SetToastStopListenerCallback([instanceId = instanceId]() {
-        LOGI("DialogContainer::ShowToast HideWindow instanceId = %{public}d", instanceId);
+        TAG_LOGD(
+            AceLogTag::ACE_PROMPT_ACTION_TOAST, "Begin show Toast,hide window instanceId is %{public}d", instanceId);
         if (ContainerScope::CurrentId() >= 0) {
             DialogContainer::HideWindow(instanceId);
         }

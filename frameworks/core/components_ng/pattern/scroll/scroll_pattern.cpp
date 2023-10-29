@@ -121,13 +121,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         FireOnScrollStop();
         scrollStop_ = false;
     }
-    if (ScrollableIdle() && !AnimateRunning()) {
-        auto predictSnapOffset = CalePredictSnapOffset(0.0);
-        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
-            StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
-            FireOnScrollStart();
-        }
-    }
+    ScrollSnapTrigger();
     CheckScrollable();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -137,6 +131,25 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto globalViewPort = RectF(offsetRelativeToWindow, geometryNode->GetFrameRect().GetSize());
     host->SetViewPort(globalViewPort);
     return false;
+}
+
+void ScrollPattern::ScrollSnapTrigger()
+{
+    auto scrollBar = GetScrollBar();
+    auto scrollBarProxy = GetScrollBarProxy();
+    if (scrollBar && scrollBar->IsPressed()) {
+        return;
+    }
+    if (scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
+        return;
+    }
+    if (ScrollableIdle() && !AnimateRunning()) {
+        auto predictSnapOffset = CalePredictSnapOffset(0.0);
+        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
+            StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
+            FireOnScrollStart();
+        }
+    }
 }
 
 void ScrollPattern::CheckScrollable()
@@ -822,5 +835,20 @@ void ScrollPattern::OnRestoreInfo(const std::string& restoreInfo)
 {
     Dimension dimension = StringUtils::StringToDimension(restoreInfo, true);
     currentOffset_ = dimension.ConvertToPx();
+}
+
+Rect ScrollPattern::GetItemRect(int32_t index) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Rect());
+    if (index != 0 || host->TotalChildCount() != 1) {
+        return Rect();
+    }
+    auto item = host->GetChildByIndex(index);
+    CHECK_NULL_RETURN(item, Rect());
+    auto itemGeometry = item->GetGeometryNode();
+    CHECK_NULL_RETURN(itemGeometry, Rect());
+    return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
+        itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 } // namespace OHOS::Ace::NG

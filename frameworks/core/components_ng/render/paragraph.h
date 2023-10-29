@@ -18,9 +18,6 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
-#ifdef USE_ROSEN_DRAWING
-#include "include/core/SkCanvas.h"
-#endif
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
@@ -106,6 +103,7 @@ public:
     virtual float GetLongestLine() = 0;
     virtual float GetMaxWidth() = 0;
     virtual float GetAlphabeticBaseline() = 0;
+    virtual float GetCharacterWidth(int32_t index) = 0;
     virtual int32_t GetGlyphIndexByCoordinate(const Offset& offset) = 0;
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) = 0;
@@ -121,7 +119,9 @@ public:
 
     // interfaces for painting
     virtual void Paint(RSCanvas& canvas, float x, float y) = 0;
+#ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
+#endif
 };
 
 } // namespace OHOS::Ace::NG

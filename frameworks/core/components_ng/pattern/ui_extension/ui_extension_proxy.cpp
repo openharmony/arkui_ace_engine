@@ -24,8 +24,9 @@ UIExtensionProxy::UIExtensionProxy(const sptr<Rosen::Session>& session): session
 
 void UIExtensionProxy::SendData(const RefPtr<WantParamsWrap>& wantParams)
 {
-    if (session_) {
-        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto session = session_.promote();
+    if (session) {
+        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session.GetRefPtr()));
         auto params = DynamicCast<WantParamsWrapOhos>(wantParams)->GetWantParams();
         extensionSession->TransferComponentData(params);
     }

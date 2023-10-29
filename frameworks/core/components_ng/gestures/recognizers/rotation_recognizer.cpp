@@ -72,6 +72,7 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
     LOGD("rotation recognizer receives touch up event");
     if (currentFingers_ < fingers_) {
         LOGW("RotationGesture current finger number is less than requiried finger number.");
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {

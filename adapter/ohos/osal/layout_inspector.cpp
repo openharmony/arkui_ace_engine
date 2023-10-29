@@ -150,7 +150,6 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
 
 void LayoutInspector::SetCallback(int32_t instanceId)
 {
-    LOGI("SetCallback start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
@@ -166,7 +165,6 @@ void LayoutInspector::SetCallback(int32_t instanceId)
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
-    LOGI("CreateLayoutInfo start");
     auto  container = Container::GetFoucsed();
     CHECK_NULL_VOID(container);
     containerId = container->GetInstanceId();
@@ -231,8 +229,6 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     auto deviceDpi = defaultDisplay->GetDpi();
     auto deviceWidth = defaultDisplay->GetWidth();
     auto deviceHeight = defaultDisplay->GetHeight();
-    LOGI("GetSnapshotJson: deviceWidth: %{public}d, deviceHeight: %{public}d, dpi: %{public}d", deviceWidth,
-        deviceHeight, deviceDpi);
     message->Put("type", "snapShot");
     message->Put("format", PNG_TAG);
     message->Put("width", (*pixelMap).GetWidth());
@@ -247,7 +243,9 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     SkString info(encodeLength);
     SkBase64::Encode(data->data(), data->size(), info.writable_str());
     message->Put("pixelMapBase64", info.c_str());
-    LOGI("GetSnapshotJson pixelMapBase64:%{public}s", info.c_str());
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "GetSnapshotJson: deviceWidth: %{public}d, deviceHeight: %{public}d, dpi: %{public}d", deviceWidth,
+        deviceHeight, deviceDpi);
 }
 
 } // namespace OHOS::Ace

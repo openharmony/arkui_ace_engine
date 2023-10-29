@@ -828,6 +828,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
 
 void DragDropManager::onItemDragCancel()
 {
+    dragDropState_ = DragDropMgrState::IDLE;
     preGridTargetFrameNode_ = nullptr;
     draggedGridFrameNode_ = nullptr;
 }
@@ -994,7 +995,14 @@ void DragDropManager::RestoreClipboardData()
             CHECK_NULL_VOID(dragDropManager);
             auto json = JsonUtil::ParseJsonString(data);
             if (json->Contains("preData")) {
+                auto preData = json->GetString("preData");
+#ifdef ENABLE_DRAG_FRAMEWORK
+                if (!preData.empty()) {
+                    dragDropManager->clipboard_->SetData(preData);
+                }
+#else
                 dragDropManager->clipboard_->SetData(json->GetString("preData"));
+#endif // ENABLE_DRAG_FRAMEWORK
             }
         };
         deleteDataCallback_ = callback;

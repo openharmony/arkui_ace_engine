@@ -52,12 +52,12 @@ public:
         if (isItemAtExpectedPosition) {
             gridItemPattern->ResetGridItemInfo();
         }
-        if (!isItemAtExpectedPosition) {
+        if (!isItemAtExpectedPosition && gridLayoutInfo_.hasBigItem_) {
             GridItemIndexInfo itemInfo;
             itemInfo.mainIndex = mainIndex;
             itemInfo.crossIndex = crossIndex;
-            itemInfo.mainSpan = gridItemLayoutProperty->GetRealRowSpan().value_or(-1);
-            itemInfo.crossSpan = gridItemLayoutProperty->GetRealColumnSpan().value_or(-1);
+            itemInfo.mainSpan = gridItemLayoutProperty->GetRealMainSpan(gridLayoutInfo_.axis_);
+            itemInfo.crossSpan = gridItemLayoutProperty->GetRealCrossSpan(gridLayoutInfo_.axis_);
             itemInfo.mainStart = mainIndex - itemInfo.mainSpan + 1;
             itemInfo.mainEnd = mainIndex;
             itemInfo.crossStart = crossIndex;

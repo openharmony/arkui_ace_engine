@@ -582,7 +582,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
             } else if (animationOptionResult->GetDuration() > (DEFAULT_DURATION - formAnimationTimeInterval)) {
                 // If remaining time is less than 1000ms, check for update duration.
                 animationOptionResult->SetDuration(DEFAULT_DURATION - formAnimationTimeInterval);
-                LOGW("[Form animation]  Form Transition SetDuration: %{public}lld ms",
+                TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form Transition SetDuration: %{public}lld ms",
                     static_cast<long long>(DEFAULT_DURATION - formAnimationTimeInterval));
             }
         }
@@ -1854,6 +1854,10 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
                 offsetY = y;
             }
         }
+    } else if (info[1]->IsUndefined()) {
+        align = Alignment::CENTER;
+        offsetX = CalcDimension(0);
+        offsetY = CalcDimension(0);
     }
 
     if (info[0]->IsString()) {
@@ -4444,13 +4448,7 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
             return dragDropInfo;
         }
 
-        auto node = ParseDragNode(ret);
-        if (node) {
-            LOGI("use custom builder param.");
-            dragDropInfo.node = node;
-            return dragDropInfo;
-        }
-
+        dragDropInfo.node = ParseDragNode(ret);
         auto builderObj = JSRef<JSObject>::Cast(ret);
 #if defined(PIXEL_MAP_SUPPORTED)
         auto pixmap = builderObj->GetProperty("pixelMap");
@@ -4458,8 +4456,6 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 #endif
         auto extraInfo = builderObj->GetProperty("extraInfo");
         ParseJsString(extraInfo, dragDropInfo.extraInfo);
-        node = ParseDragNode(builderObj->GetProperty("builder"));
-        dragDropInfo.node = node;
         return dragDropInfo;
     };
     ViewAbstractModel::GetInstance()->SetOnDragStart(std::move(onDragStart));

@@ -143,4 +143,16 @@ void DrawingPainter::DrawPath(RSCanvas& canvas, const std::string& commands, con
     path.Offset(offset.GetX(), offset.GetY());
     canvas.DrawPath(path);
 }
+
+SizeF DrawingPainter::GetPathSize(const std::string& commands)
+{
+    RSRecordingPath path;
+    if (!path.BuildFromSVGString(commands)) {
+        LOGE("Invalid path value.");
+        return SizeF();
+    }
+
+    auto rect = path.GetBounds();
+    return SizeF(rect.GetRight(), rect.GetBottom());
+}
 } // namespace OHOS::Ace::NG

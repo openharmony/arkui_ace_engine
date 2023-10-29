@@ -107,8 +107,9 @@ public:
         secondHandleInfo_.rect.SetHeight(height);
     }
 
-    RectF GetCaretRect() const
+    RectF GetCaretRect()
     {
+        UpdateCaretOffset();
         return caretInfo_.rect;
     }
 
@@ -165,6 +166,10 @@ public:
         return caretInfo_;
     }
 
+    bool HasReverse() {
+        return firstHandleInfo_.index > secondHandleInfo_.index;
+    }
+
     void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
     void UpdateCaretIndex(int32_t index);
@@ -179,7 +184,7 @@ public:
     void MoveFirstHandleToContentRect(int32_t index);
     void MoveSecondHandleToContentRect(int32_t index);
     void MoveCaretToContentRect(int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM);
-    void MoveHandleToContentRect(RectF& handleRect);
+    void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f);
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;

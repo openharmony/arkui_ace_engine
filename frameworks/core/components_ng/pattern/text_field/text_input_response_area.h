@@ -29,18 +29,27 @@ class TextInputResponseArea : public virtual AceType {
     DECLARE_ACE_TYPE(TextInputResponseArea, AceType);
 
 public:
-    TextInputResponseArea() = default;
+    TextInputResponseArea(const WeakPtr<Pattern>& hostPattern) : hostPattern_(hostPattern) {}
     ~TextInputResponseArea() = default;
 
-    virtual void InitResponseArea(const WeakPtr<Pattern>& hostPattern) = 0;
+    virtual void InitResponseArea() = 0;
 
     virtual SizeF Measure(LayoutWrapper* layoutWrapper) = 0;
 
     virtual void Layout(LayoutWrapper* layoutWrapper) = 0;
 
-    virtual void DestoryArea()
+    virtual void Refresh() {}
+
+    virtual void ClearArea()
     {
-        areaRect_.Reset();
+        auto hostPattern = hostPattern_.Upgrade();
+        CHECK_NULL_VOID(hostPattern);
+        auto host = hostPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        if (!host->GetChildren().empty()) {
+            host->GetChildren();
+            host->Clean();
+        }
     }
 
     virtual OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize) = 0;
@@ -60,10 +69,11 @@ class PasswordResponseArea : public TextInputResponseArea {
     DECLARE_ACE_TYPE(PasswordResponseArea, TextInputResponseArea);
 
 public:
-    PasswordResponseArea() = default;
+    PasswordResponseArea(const WeakPtr<Pattern>& hostPattern, bool isObscured)
+        : TextInputResponseArea(hostPattern), isObscured_(isObscured) {}
     ~PasswordResponseArea() = default;
 
-    void InitResponseArea(const WeakPtr<Pattern>& hostPattern) override;
+    void InitResponseArea() override;
 
     SizeF Measure(LayoutWrapper* layoutWrapper) override;
 
@@ -73,11 +83,17 @@ public:
 
     void AddEvent(const RefPtr<FrameNode>& node);
 
-    void DestoryArea() override;
-
     void SetObscured(bool isObscured)
     {
         isObscured_ = isObscured;
+    }
+
+    void Refresh() override;
+
+    void ClearArea() override
+    {
+        TextInputResponseArea::ClearArea();
+        passwordNode_.Reset();
     }
 
 private:
@@ -103,15 +119,11 @@ class UnitResponseArea : public TextInputResponseArea {
     DECLARE_ACE_TYPE(UnitResponseArea, TextInputResponseArea);
 
 public:
-    UnitResponseArea(const RefPtr<NG::UINode>& unitNode) : unitNode_(WeakClaim(AceType::RawPtr(unitNode))) {}
+    UnitResponseArea(const WeakPtr<Pattern>& hostPattern, const RefPtr<NG::UINode>& unitNode)
+        : TextInputResponseArea(hostPattern), unitNode_(std::move(unitNode)) {}
     ~UnitResponseArea() = default;
 
-    void SetUnitNode(const RefPtr<NG::UINode>& unitNode)
-    {
-        unitNode_ = WeakClaim(AceType::RawPtr(unitNode));
-    }
-
-    void InitResponseArea(const WeakPtr<Pattern>& hostPattern) override;
+    void InitResponseArea() override;
 
     SizeF Measure(LayoutWrapper* layoutWrapper) override;
 
@@ -119,11 +131,9 @@ public:
 
     OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize) override;
 
-    void DestoryArea() override;
-
 private:
     bool IsShowUnit();
-    WeakPtr<NG::UINode> unitNode_;
+    RefPtr<NG::UINode> unitNode_;
 };
 } // namespace OHOS::Ace::NG
 

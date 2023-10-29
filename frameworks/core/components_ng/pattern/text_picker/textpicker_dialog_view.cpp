@@ -629,6 +629,7 @@ bool TextPickerDialogView::OnKeyEvent(const KeyEvent& event)
         auto pipeline = PipelineContext::GetCurrentContext();
         auto overlayManager = pipeline->GetOverlayManager();
         auto dialogNode = dialogNode_.Upgrade();
+        CHECK_NULL_RETURN(dialogNode, false);
         overlayManager->CloseDialog(dialogNode);
         return true;
     }
