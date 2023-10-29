@@ -369,8 +369,8 @@ void SearchPattern::OnClickCancelButton()
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateValue("");
-    auto eventHub = host->GetEventHub<SearchEventHub>();
-    eventHub->UpdateChangeEvent("");
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    eventHub->FireOnChange("");
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
