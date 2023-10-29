@@ -1975,8 +1975,8 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetValue(spanNode->GetSpanItem()->content);
     auto contentLength = StringUtils::ToWstring(spanNode->GetSpanItem()->content).length();
     if (isCreate) {
-        auto spanEnd = GetCaretPosition() + 1;
-        auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
+        auto spanStart = 0;
+        auto spanEnd = static_cast<int32_t>(contentLength);
         retInfo.SetSpanRangeStart(spanStart);
         retInfo.SetSpanRangeEnd(spanEnd);
         retInfo.SetOffsetInSpan(0);
