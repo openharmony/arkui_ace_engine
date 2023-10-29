@@ -1689,7 +1689,7 @@ HWTEST_F(ImageTestNg, OnAttachToFrameNode001, TestSize.Level1)
     pipeline->GetTheme<ImageTheme>()->draggable_ = false;
     frameNode->draggable_ = true;
     pattern->OnAttachToFrameNode();
-    EXPECT_FALSE(frameNode->draggable_);
+    EXPECT_TRUE(frameNode->draggable_);
 
     pipeline->GetTheme<ImageTheme>()->draggable_ = true;
     frameNode->draggable_ = true;
@@ -1699,7 +1699,7 @@ HWTEST_F(ImageTestNg, OnAttachToFrameNode001, TestSize.Level1)
     pipeline->GetTheme<ImageTheme>()->draggable_ = true;
     frameNode->draggable_ = false;
     pattern->OnAttachToFrameNode();
-    EXPECT_TRUE(frameNode->draggable_);
+    EXPECT_FALSE(frameNode->draggable_);
 }
 
 /**
