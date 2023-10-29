@@ -222,7 +222,7 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
     }
 
     if (!deleteForwardOperations_.empty()) {
-        DeleteForwardOperation(deleteBackwardOperations_.top());
+        DeleteForwardOperation(deleteForwardOperations_.top());
         deleteForwardOperations_.pop();
     }
 
