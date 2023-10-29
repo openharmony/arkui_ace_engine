@@ -923,12 +923,6 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (uiExtensionManager_->OnBackPressed()) {
-        return true;
-    }
-#endif
-
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
         return true;
@@ -943,6 +937,12 @@ bool PipelineContext::OnBackPressed()
     if (textfieldManager && textfieldManager->OnBackPressed()) {
         return true;
     }
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_->OnBackPressed()) {
+        return true;
+    }
+#endif
 
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
