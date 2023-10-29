@@ -214,24 +214,6 @@ TextFieldPattern::~TextFieldPattern()
     }
 }
 
-void TextFieldPattern::BeforeCreateLayoutWrapper()
-{
-    if (!deleteBackwardOperations_.empty()) {
-        DeleteBackwardOperation(deleteBackwardOperations_.top());
-        deleteBackwardOperations_.pop();
-    }
-
-    if (!deleteForwardOperations_.empty()) {
-        DeleteForwardOperation(deleteBackwardOperations_.top());
-        deleteForwardOperations_.pop();
-    }
-
-    if (!insertValueOperations_.empty()) {
-        InsertValueOperation(insertValueOperations_.top());
-        insertValueOperations_.pop();
-    }
-}
-
 bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
@@ -2617,7 +2599,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         LOGW("Max length reached");
         return;
     }
-    insertValueOperations_.emplace(insertValue);
+    InsertValueOperation(insertValue);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3268,7 +3250,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         LOGW("Caret position at the beginning , cannot DeleteBackward");
         return;
     }
-    deleteBackwardOperations_.emplace(length);
+    DeleteBackwardOperation(length);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3320,7 +3302,15 @@ void TextFieldPattern::DeleteForward(int32_t length)
         LOGW("Caret position at the end , cannot DeleteForward");
         return;
     }
-    deleteForwardOperations_.emplace(length);
+    DeleteForwardOperation(length);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (IsTextArea() && layoutProperty->HasMaxLength()) {
+        HandleCounterBorder();
+    }
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 std::u16string TextFieldPattern::GetLeftTextOfCursor(int32_t number)

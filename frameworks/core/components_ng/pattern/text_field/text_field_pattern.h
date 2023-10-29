@@ -302,7 +302,6 @@ public:
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
-    void BeforeCreateLayoutWrapper() override;
     void OnAreaChangedInner() override;
     void OnVisibleChange(bool isVisible) override;
     void ClearEditingValue();
