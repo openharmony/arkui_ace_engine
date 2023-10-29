@@ -110,6 +110,9 @@ enum class AceLogTag : uint8_t {
     ACE_ROUTER,
     ACE_THEME,
     ACE_GRID,
+    ACE_IF,
+    ACE_FOREACH,
+    ACE_LAZYFOREACH,
 };
 
 enum class LogDomain : uint32_t {

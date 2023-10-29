@@ -62,7 +62,7 @@ void JSForEach::Create(const JSCallbackInfo& info)
 
     if (info.Length() < 4 || !info[2]->IsObject() || !info[3]->IsFunction() ||
         (!info[0]->IsNumber() && !info[0]->IsString()) || info[1]->IsUndefined() || !info[1]->IsObject()) {
-        LOGW("Invalid arguments for ForEach");
+        TAG_LOGW(AceLogTag::ACE_FOREACH, "Invalid arguments for ForEach");
         return;
     }
 
@@ -96,14 +96,14 @@ void JSForEach::Pop()
 void JSForEach::GetIdArray(const JSCallbackInfo& info)
 {
     if ((info.Length() != 2) || !info[1]->IsArray() || info[0]->IsString()) {
-        LOGW("Invalid arguments for ForEach.GetIdArray");
+        TAG_LOGW(AceLogTag::ACE_FOREACH, "Invalid arguments for ForEach.GetIdArray");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
 
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
     if (jsArr->Length() > 0) {
-        LOGW("JS Array must be empty!");
+        TAG_LOGW(AceLogTag::ACE_FOREACH, "JS Array must be empty!");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
@@ -132,7 +132,7 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
     if (info.Length() != 4 ||
         !info[0]->IsNumber() || !info[1]->IsArray() ||
         !info[2]->IsArray()  || !info[3]->IsArray()) {
-        LOGW("Invalid arguments for ForEach.SetIdArray");
+        TAG_LOGW(AceLogTag::ACE_FOREACH, "Invalid arguments for ForEach.SetIdArray");
         return;
     }
 
@@ -143,7 +143,7 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
     std::list<std::string> newIdArr;
 
     if (diffIds->Length() > 0 || duplicateIds->Length() > 0) {
-        LOGW("Invalid arguments for ForEach.SetIdArray output arrays must be empty!");
+        TAG_LOGW(AceLogTag::ACE_FOREACH, "Invalid arguments for ForEach.SetIdArray output arrays must be empty!");
         return;
     }
 
@@ -195,7 +195,7 @@ void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
 void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
 {
     if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
-        LOGW("Invalid arguments for ForEach.CreateNewChildFinish");
+        TAG_LOGW(AceLogTag::ACE_FOREACH, "Invalid arguments for ForEach.CreateNewChildFinish");
         return;
     }
 
