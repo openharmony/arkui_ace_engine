@@ -28,7 +28,7 @@ public:
     void SetDraggable(bool draggable) override;
 
 private:
-    void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& content);
+    void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& content, const std::string& address);
 };
 } // namespace OHOS::Ace::NG
 

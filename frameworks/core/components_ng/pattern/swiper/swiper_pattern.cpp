@@ -124,7 +124,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     return swiperLayoutAlgorithm;
 }
 
-void SwiperPattern::OnIndexChange() const
+void SwiperPattern::OnIndexChange()
 {
     auto totalCount = TotalCount();
     if (NonPositive(totalCount)) {
@@ -132,6 +132,11 @@ void SwiperPattern::OnIndexChange() const
     }
 
     auto oldIndex = GetLoopIndex(oldIndex_);
+    if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != totalCount) {
+        oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
+        oldChildrenSize_ = totalCount;
+    }
+
     auto targetIndex = GetLoopIndex(CurrentIndex());
     if (oldIndex != targetIndex) {
         auto swiperEventHub = GetEventHub<SwiperEventHub>();
@@ -285,11 +290,15 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(layoutProperty);
     oldIndex_ = currentIndex_;
     auto userSetCurrentIndex = CurrentIndex();
+    auto oldIndex = GetLoopIndex(oldIndex_);
+    if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
+        oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
+    }
     if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount()) {
         currentIndex_ = 0;
         layoutProperty->UpdateIndexWithoutMeasure(GetLoopIndex(currentIndex_));
     } else {
-        if (GetLoopIndex(currentIndex_) != userSetCurrentIndex) {
+        if (oldIndex != userSetCurrentIndex) {
             currentIndex_ = userSetCurrentIndex;
         }
     }
@@ -335,6 +344,12 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 if (!swiper) {
                     return;
                 }
+
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    swiper->windowSizeChangeReason_ = type;
+                    swiper->StopAutoPlay();
+                }
+
                 swiper->StopPropertyTranslateAnimation();
                 swiper->StopTranslateAnimation();
                 swiper->StopSpringAnimation();
@@ -649,6 +664,13 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
     crossMatchChild_ = swiperLayoutAlgorithm->IsCrossMatchChild();
     oldIndex_ = currentIndex_;
+    oldChildrenSize_ = TotalCount();
+
+    if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
+        StartAutoPlay();
+        windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    }
+
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
 }
@@ -863,6 +885,8 @@ void SwiperPattern::ShowPrevious()
 void SwiperPattern::FinishAnimation()
 {
     StopTranslateAnimation();
+    StopSpringAnimation();
+    StopFadeAnimation();
     if (indicatorController_) {
         indicatorController_->Stop();
     }
@@ -3361,5 +3385,18 @@ void SwiperPattern::DumpAdvanceInfo()
             break;
         }
     }
+}
+
+int32_t SwiperPattern::GetLoopIndex(int32_t index, int32_t childrenSize) const
+{
+    if (childrenSize <= 0) {
+        return index;
+    }
+    auto loopIndex = index;
+    while (loopIndex < 0) {
+        loopIndex = loopIndex + childrenSize;
+    }
+    loopIndex %= childrenSize;
+    return loopIndex;
 }
 } // namespace OHOS::Ace::NG

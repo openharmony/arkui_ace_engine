@@ -543,7 +543,6 @@ HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition005, TestSize.Lev
     /**
      * @tc.expected: Check if the new handle positions are correct
      */
-    EXPECT_EQ(pattern->caretStatus_, CaretStatus::HIDE);
     EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 5);
     EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 10);
 }
@@ -580,17 +579,45 @@ HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition006, TestSize.Lev
      */
     int32_t start = 5;
     int32_t end = 10;
+    std::string expectStr = "fghij";
+    auto callback1 = [expectStr](const std::string& str) -> void {
+        EXPECT_EQ(expectStr, str);
+    };
+    frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model)-> void {
+        model.SetOnCut(callback1);
+    });
+    pattern = GetPattern(frameNode);
     pattern->HandleSetSelection(start, end);
     pattern->HandleExtendAction(action[1]);
     RunMeasureAndLayout(frameNode);
 
     /**
      * @tc.expected: Check if the new handle positions are correct
-     * Cut data hasn't simulated
+     * Verify the cut data
      */
     EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 5);
     EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 5);
     EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 5);
+    EXPECT_EQ(pattern->contentController_->
+        GetTextValue().compare("abcdeklmnopqrstuvwxyz"), 0);
+
+    /**
+     * @tc.steps: Move the handles and then cut text snippet.
+     * Verify the copy and paste data.
+     */
+    auto callback2 = [expectStr](const std::string& str) -> void {
+        EXPECT_EQ(expectStr, str);
+    };
+    frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model)-> void {
+        model.SetOnCopy(callback1);
+        model.SetOnPaste(callback2);
+    });
+    pattern = GetPattern(frameNode);
+    pattern->HandleSetSelection(start, end);
+    pattern->HandleExtendAction(action[2]);
+    pattern->HandleExtendAction(action[3]);
+    RunMeasureAndLayout(frameNode);
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare(DEFAULT_TEXT), 0);
 }
 
 /**

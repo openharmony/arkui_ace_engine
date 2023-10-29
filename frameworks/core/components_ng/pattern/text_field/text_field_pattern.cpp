@@ -3176,7 +3176,7 @@ void TextFieldPattern::RequestKeyboardOnFocus()
 void TextFieldPattern::OnVisibleChange(bool isVisible)
 {
     LOGI("visible change to %{public}d", isVisible);
-    if (!isVisible) {
+    if (!isVisible && HasFocus()) {
         LOGI("TextField is not visible");
         CloseKeyboard(true);
         if (SelectOverlayIsOn()) {
@@ -3554,7 +3554,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 
 void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd)
 {
-    if (!HasFocus()) {
+    if (!HasFocus() || selectionStart == selectionEnd) {
         return;
     }
     cursorVisible_ = false;
@@ -4862,6 +4862,7 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
         selectController_->UpdateSecondHandleOffset();
         if (!IsSingleHandle()) {
             selectController_->UpdateFirstHandleOffset();
+            selectController_->UpdateCaretOffset();
             UpdateSelectOverlayDoubleHandle();
         } else {
             UpdateSelectOverlaySecondHandle();
@@ -4869,7 +4870,6 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
                                 (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
             selectController_->UpdateCaretOffset(carectOffset);
         }
-        selectController_->UpdateCaretOffset();
     } else {
         auto caretOffset = selectController_->GetCaretRect().GetOffset() +
                             (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
