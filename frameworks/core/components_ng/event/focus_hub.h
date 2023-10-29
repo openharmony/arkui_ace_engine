@@ -33,7 +33,8 @@ constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
 constexpr int32_t MASK_FOCUS_STEP_TAB = 0x5;
-constexpr int32_t DEEPTH_OF_MENU = 3;
+constexpr int32_t DEEPTH_OF_MENU_WRAPPER = 3;
+constexpr int32_t DEEPTH_OF_MENU = 2;
 constexpr int32_t DEEPTH_OF_DIALOG = 2;
 constexpr int32_t DEEPTH_OF_PAGE = 1;
 
@@ -421,6 +422,10 @@ public:
     void SetFocusStyleType(FocusStyleType type)
     {
         focusStyleType_ = type;
+    }
+    FocusStyleType GetFocusStyleType() const
+    {
+        return focusStyleType_;
     }
     void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
     {
