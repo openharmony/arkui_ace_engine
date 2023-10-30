@@ -36,6 +36,7 @@ constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t DOUBLE = 2;
+constexpr int32_t ERROR = -1;
 
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
@@ -281,11 +282,45 @@ void SearchPattern::InitSearchController()
         return search->HandleTextContentLines();
     });
 
+    searchController_->SetGetCaretIndex([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN(search, ERROR);
+        return search->HandleGetCaretIndex();
+    });
+
+    searchController_->SetGetCaretPosition([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN(search, NG::OffsetF(ERROR, ERROR));
+        return search->HandleGetCaretPosition();
+    });
+
     searchController_->SetStopEditing([weak = WeakClaim(this)]() {
         auto search = weak.Upgrade();
         CHECK_NULL_VOID(search);
         search->StopEditing();
     });
+}
+
+int32_t SearchPattern::HandleGetCaretIndex()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ERROR);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, ERROR);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, ERROR);
+    return textFieldPattern->GetCaretIndex();
+}
+
+NG::OffsetF SearchPattern::HandleGetCaretPosition()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, NG::OffsetF(ERROR, ERROR));
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, NG::OffsetF(ERROR, ERROR));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, NG::OffsetF(ERROR, ERROR));
+    return textFieldPattern->GetCaretOffset();
 }
 
 void SearchPattern::HandleCaretPosition(int32_t caretPosition)
@@ -809,6 +844,8 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     json->Put("textFont", textFontJson->ToString().c_str());
     json->Put("copyOption",
         ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str());
+    auto maxLength = GetMaxLength();
+    json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
     textFieldLayoutProperty->HasCopyOptions();
 }
 
@@ -985,4 +1022,17 @@ void SearchPattern::OnColorConfigurationUpdate()
         textField_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
+
+uint32_t SearchPattern::GetMaxLength() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Infinity<uint32_t>());
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, Infinity<uint32_t>());
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, Infinity<uint32_t>());
+    return textFieldLayoutProperty->HasMaxLength() ? textFieldLayoutProperty->GetMaxLengthValue(Infinity<uint32_t>())
+                                          : Infinity<uint32_t>();
+}
+
 } // namespace OHOS::Ace::NG

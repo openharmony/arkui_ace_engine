@@ -91,7 +91,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     axis_ = layoutAlgorithm->GetAxis();
     laneGutter_ = layoutAlgorithm->GetLaneGutter();
     itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
-    itemDiasplayStartIndex_ = layoutAlgorithm->GetStartIndex();
+    itemDisplayStartIndex_ = layoutAlgorithm->GetStartIndex();
     itemTotalCount_ = layoutAlgorithm->GetTotalItemCount();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);

@@ -1147,9 +1147,9 @@ RSBrush DrawingDecorationPainter::CreateMaskDrawingBrush(const RefPtr<BasicShape
 RSImage DrawingDecorationPainter::CreateBorderImageGradient(const NG::Gradient& gradient, const SizeF& paintSize)
 {
     auto recordingShader = DrawingDecorationPainter::CreateGradientShader(gradient, paintSize);
-    std::shared_ptr<RSShaderEffect> shader = nullptr;
+    std::shared_ptr<Rosen::Drawing::ShaderEffect> shader = nullptr;
     if (recordingShader != nullptr) {
-        shader = std::static_pointer_cast<RSRecordingShaderEffect>(recordingShader)->GetCmdList()->Playback();
+        shader = recordingShader->GetCmdList()->Playback();
     }
     RSBrush brush;
     brush.SetAntiAlias(true);

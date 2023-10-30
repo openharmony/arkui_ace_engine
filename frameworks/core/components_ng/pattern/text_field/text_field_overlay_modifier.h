@@ -45,7 +45,7 @@ public:
     void SetCursorVisible(bool value);
     void SetContentSize(SizeF& value);
     void SetContentOffset(OffsetF& value);
-    void SetCursorOffset(OffsetF& value);
+    void SetCursorOffset(const OffsetF& value);
     void SetInputStyle(InputStyle& value);
     void SetFrameSize(const SizeF& value);
     void SetCurrentOffset(float value);
@@ -57,6 +57,12 @@ public:
     void SetChangeSelectedRects(bool value);
     void SetFirstHandleOffset(const OffsetF& offset);
     void SetSecondHandleOffset(const OffsetF& offset);
+    void SetShowSelect(bool value);
+
+    void SetTextRect(const RectF& textRect)
+    {
+        textRect_ = textRect;
+    }
 
 private:
     void PaintSelection(DrawingContext& context) const;
@@ -64,6 +70,7 @@ private:
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
     void PaintScrollBar(DrawingContext& context);
 
+    bool needPaintSelect_ = false;
     WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
@@ -72,6 +79,7 @@ private:
     RefPtr<AnimatablePropertyColor> selectedColor_;
     RefPtr<PropertyOffsetF> cursorOffset_;
     RefPtr<PropertyBool> cursorVisible_;
+    RefPtr<PropertyBool> showSelect_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertyOffsetF> firstHandleOffset_;
@@ -82,6 +90,7 @@ private:
     InputStyle inputStyle_ = InputStyle::DEFAULT;
     RefPtr<PropertySizeF> frameSize_;
     RefPtr<PropertyBool> changeSelectedRects_;
+    RectF textRect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

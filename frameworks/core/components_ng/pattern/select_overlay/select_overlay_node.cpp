@@ -67,6 +67,7 @@ constexpr int32_t OPTION_INDEX_COPY_ALL = 3;
 constexpr int32_t OPTION_INDEX_SHARE = 4;
 constexpr int32_t OPTION_INDEX_TRANSLATE = 5;
 constexpr int32_t OPTION_INDEX_SEARCH = 6;
+constexpr int32_t OPTION_INDEX_CAMERA_INPUT = 7;
 constexpr int32_t ANIMATION_DURATION1 = 350;
 constexpr int32_t ANIMATION_DURATION2 = 150;
 
@@ -975,6 +976,26 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
         isShowInDefaultMenu_[OPTION_INDEX_SHARE] = true;
         isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
         isShowInDefaultMenu_[OPTION_INDEX_SEARCH] = true;
+    }
+
+    if (info->menuInfo.showCameraInput) {
+        float buttonWidth = 0.0f;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto theme = pipeline->GetTheme<TextOverlayTheme>();
+        CHECK_NULL_RETURN(theme, false);
+        auto button = BuildButton(theme->GetCameraInput(), info->menuCallback.onCameraInput, GetId(), buttonWidth,
+            false);
+        if (maxWidth - allocatedSize >= buttonWidth) {
+            button->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_CAMERA_INPUT] = true;
+        } else {
+            button.Reset();
+            return true;
+        }
+    } else {
+        isShowInDefaultMenu_[OPTION_INDEX_CAMERA_INPUT] = true;
     }
     return false;
 }

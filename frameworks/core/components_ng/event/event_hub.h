@@ -161,7 +161,7 @@ public:
         onDisappear_ = std::move(onDisappear);
     }
 
-    void FireOnDisappear()
+    virtual void FireOnDisappear()
     {
         if (onDisappear_) {
             // callback may be overwritten in its invoke so we copy it first

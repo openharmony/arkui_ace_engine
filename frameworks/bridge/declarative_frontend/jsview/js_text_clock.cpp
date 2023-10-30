@@ -79,7 +79,6 @@ void JSTextClock::Create(const JSCallbackInfo& info)
     auto controller = TextClockModel::GetInstance()->Create();
     if (info.Length() < 1 || !info[0]->IsObject()) {
         SetFontDefault();
-        LOGD("TextClock Info is non-valid");
         return;
     }
     JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
@@ -88,7 +87,6 @@ void JSTextClock::Create(const JSCallbackInfo& info)
         TextClockModel::GetInstance()->SetHoursWest(hourWestVal->ToNumber<int32_t>());
     } else {
         TextClockModel::GetInstance()->SetHoursWest(INT_MAX);
-        LOGE("hourWest args is invalid");
     }
     auto controllerObj = optionsObject->GetProperty("controller");
     if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
@@ -96,13 +94,10 @@ void JSTextClock::Create(const JSCallbackInfo& info)
         if (jsController != nullptr) {
             if (controller) {
                 jsController->AddController(controller);
-            } else {
-                LOGE("TextClockController is nullptr");
             }
         }
         return;
     }
-    LOGE("controllerObj is nullptr or undefined or invalid");
 }
 
 void JSTextClock::JSBind(BindingTarget globalObj)
@@ -139,7 +134,6 @@ void JSTextClock::SetFontDefault()
 void JSTextClock::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
@@ -156,7 +150,6 @@ void JSTextClock::SetTextColor(const JSCallbackInfo& info)
 void JSTextClock::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("JSTextInput::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -183,7 +176,6 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
 void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
@@ -210,7 +202,6 @@ void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
 void JSTextClock::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        LOGE("TextTimer fontStyle(%{public}d) illegal value", value);
         return;
     }
     TextClockModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
@@ -219,12 +210,10 @@ void JSTextClock::SetFontStyle(int32_t value)
 void JSTextClock::SetFontFamily(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
         return;
     }
     TextClockModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -233,11 +222,9 @@ void JSTextClock::SetFontFamily(const JSCallbackInfo& info)
 void JSTextClock::SetFormat(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
     if (!info[0]->IsString()) {
-        LOGE("The arg is not string,it is supposed to be a string.");
         TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT);
         return;
     }

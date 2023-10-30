@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <stack>
 #include <stdint.h>
 #include <string>
 #include <utility>
@@ -236,8 +237,11 @@ public:
     int32_t ConvertTouchOffsetToCaretPositionNG(const Offset& localOffset);
 
     void InsertValue(const std::string& insertValue) override;
+    void InsertValueOperation(const std::string& insertValue);
     void DeleteBackward(int32_t length) override;
+    void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
+    void DeleteForwardOperation(int32_t length);
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
@@ -514,6 +518,10 @@ public:
         imeShown_ = keyboardShown;
 #endif
     }
+    void NotifyKeyboardClosedByUser() override
+    {
+        FocusHub::LostFocusToViewRoot();
+    }
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
@@ -521,7 +529,7 @@ public:
     bool HasConnection() const
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        return imeAttached_;
+        return imeShown_;
 #else
         return connection_;
 #endif
@@ -672,9 +680,9 @@ public:
         return { dragParagraph_ };
     }
 
-    RefPtr<FrameNode> MoveDragNode() override
+    const RefPtr<FrameNode>& MoveDragNode() override
     {
-        return std::move(dragNode_);
+        return dragNode_;
     }
 
     const std::vector<std::string>& GetDragContents() const
@@ -780,6 +788,7 @@ public:
     void HandleOnCopy();
     void HandleOnPaste();
     void HandleOnCut();
+    void HandleOnCameraInput();
     void StripNextLine(std::wstring& data);
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
@@ -796,7 +805,10 @@ public:
     {
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
-    void SetUnitNode(const RefPtr<NG::UINode>& unitNode);
+    void SetUnitNode(const RefPtr<NG::UINode>& unitNode)
+    {
+        unitNode_ = unitNode;
+    }
     void AddCounterNode();
     void ClearCounterNode();
     void SetShowError();
@@ -889,10 +901,10 @@ public:
 
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
     {
-        if (customKeyboardBulder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+        if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
             CloseCustomKeyboard();
         }
-        customKeyboardBulder_ = keyboardBuilder;
+        customKeyboardBuilder_ = keyboardBuilder;
     }
 
     void DumpAdvanceInfo() override;
@@ -931,7 +943,6 @@ public:
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     void OnHandleClosed(bool closedByGlobalEvent) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
-    bool CheckSelectionRectVisible() override;
     bool OnPreShowSelectOverlay(
         SelectOverlayInfo& overlayInfo, const ClientOverlayInfo& clientInfo, bool isSelectOverlayOn) override;
     void OnObscuredChanged(bool isObscured);
@@ -950,6 +961,9 @@ public:
             case SelectOverlayMenuId::PASTE:
                 HandleOnPaste();
                 return;
+            case SelectOverlayMenuId::CAMERA_INPUT:
+                HandleOnCameraInput();
+                return;
         }
     }
 
@@ -958,18 +972,16 @@ public:
         return GetHost();
     }
 
-    void SetResponseArea(const RefPtr<TextInputResponseArea>& responseArea)
-    {
-        if (responseArea_) {
-            responseArea_->DestoryArea();
-            responseArea_.Reset();
-        }
-        responseArea_ = responseArea;
-    }
-
     const RefPtr<TextInputResponseArea>& GetResponseArea()
     {
         return responseArea_;
+    }
+    bool IsShowUnit() const;
+    bool IsShowPasswordIcon() const;
+
+    bool GetShowSelect() const
+    {
+        return showSelect_;
     }
 
 private:
@@ -1003,7 +1015,10 @@ private:
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
     void HandleMouseEvent(MouseInfo& info);
+    void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void HandleRightMouseEvent(MouseInfo& info);
+    void HandleRightMousePressEvent(MouseInfo& info);
+    void HandleRightMouseReleaseEvent(MouseInfo& info);
     void HandleLeftMouseEvent(MouseInfo& info);
     void HandleLeftMousePressEvent(MouseInfo& info);
     void HandleLeftMouseMoveEvent(MouseInfo& info);
@@ -1016,10 +1031,10 @@ private:
     void UpdateCaretInfoToController() const;
 
     void ProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
+    void DelayProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
     SelectHandleInfo GetSelectHandleInfo(OffsetF info);
-    void UpdateFirstHandlePosition(bool needLayout = false);
-    void UpdateSecondHandlePosition(bool needLayout = false);
-    void UpdateDoubleHandlePosition(bool firstNeedLayout = false, bool secondNeedLayout = false);
+    void UpdateSelectOverlaySecondHandle(bool needLayout = false);
+    void UpdateSelectOverlayDoubleHandle(bool firstNeedLayout = false, bool secondNeedLayout = false);
 
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
@@ -1058,7 +1073,6 @@ private:
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool CursorInContentRegion();
-    float FitCursorInSafeArea();
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
 
@@ -1084,6 +1098,8 @@ private:
     void UpdateErrorTextMargin();
     OffsetF GetTextPaintOffset() const;
     void UpdateSelectController();
+    void UpdateHandlesOffsetOnScroll(float offset);
+    void CloseHandleAndSelect() override;
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1094,6 +1110,7 @@ private:
     }
     void NotifyOnEditChanged(bool isChanged);
     void StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste = false);
+    void ProcessResponseArea();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1186,7 +1203,6 @@ private:
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE;          // The status of the dragged initiator
-    DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
     std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
@@ -1217,19 +1233,27 @@ private:
 #endif
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
-    std::function<void()> customKeyboardBulder_;
+    std::function<void()> customKeyboardBuilder_;
     bool isCustomFont_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
     TimeStamp lastClickTimeStamp_;
     float paragraphWidth_ = 0.0f;
 
+    std::stack<int32_t> deleteBackwardOperations_;
+    std::stack<int32_t> deleteForwardOperations_;
+    std::stack<std::string> insertValueOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
+    bool showSelect_ = false;
+    bool isLongPress_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
     CaretStatus caretStatus_ = CaretStatus::NONE;
+    RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
+    bool isSupportCameraInput_ = false;
+    std::function<void()> processOverlayDelayTask_;
 };
 } // namespace OHOS::Ace::NG
 

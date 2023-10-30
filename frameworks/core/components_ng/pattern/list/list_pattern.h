@@ -172,6 +172,8 @@ public:
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
+    Rect GetItemRect(int32_t index) const;
+    Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
     void OnAnimateStop() override;
     void UpdateScrollBarOffset() override;
     // chain animation
@@ -193,6 +195,20 @@ public:
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
+    void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem)
+    {
+        if (swiperItem == swiperItem_) {
+            canReplaceSwiperItem_ = true;
+        }
+    }
+    bool IsCurrentSwiperItem(WeakPtr<ListItemPattern> swiperItem)
+    {
+        return swiperItem == swiperItem_;
+    }
+    bool CanReplaceSwiperItem()
+    {
+        return canReplaceSwiperItem_;
+    }
 
     void SetPredictSnapOffset(float predictSnapOffset)
     {
@@ -315,6 +331,8 @@ private:
 
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;
+    bool canReplaceSwiperItem_ = true;
+
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
     RefPtr<Scrollable> scrollableTouchEvent_;

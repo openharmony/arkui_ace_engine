@@ -182,7 +182,7 @@ public:
 
     virtual void WindowFocus(bool isFocus) = 0;
 
-    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
+    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) = 0;
 
     virtual void OnSurfaceChanged(int32_t width, int32_t height,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
@@ -501,6 +501,17 @@ public:
             return themeManager_->GetTheme<T>();
         }
         return {};
+    }
+
+    template<typename T>
+    bool GetDraggable()
+    {
+        if (IsJsCard()) {
+            return false;
+        }
+        auto theme = GetTheme<T>();
+        CHECK_NULL_RETURN(theme, false);
+        return theme->GetDraggable();
     }
 
     const RefPtr<ManagerInterface>& GetTextFieldManager()

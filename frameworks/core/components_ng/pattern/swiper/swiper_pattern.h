@@ -537,7 +537,7 @@ private:
     std::pair<int32_t, SwiperItemInfo> GetFirstItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetLastItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
-    void OnIndexChange() const;
+    void OnIndexChange();
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
@@ -578,6 +578,7 @@ private:
     void UpdateItemRenderGroup(bool itemRenderGroup);
     void MarkDirtyNodeSelf();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
+    int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
 
     /**
      *  NestableScrollContainer implementations
@@ -679,6 +680,7 @@ private:
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> preTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
+    std::optional<int32_t> oldChildrenSize_;
     float currentDelta_ = 0.0f;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     std::optional<float> velocity_;
@@ -698,6 +700,8 @@ private:
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
+
+    WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
 };
 } // namespace OHOS::Ace::NG
 

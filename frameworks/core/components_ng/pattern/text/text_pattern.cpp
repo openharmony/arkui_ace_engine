@@ -62,9 +62,6 @@ void TextPattern::OnAttachToFrameNode()
     }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
-    auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    host->SetDraggable(theme->GetDraggable());
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateTextAlign(TextAlign::START);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
@@ -1195,6 +1192,7 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         auto imageNode = DynamicCast<FrameNode>(child);
         if (imageNode) {
             spans_.emplace_back(MakeRefPtr<ImageSpanItem>());
+            spans_.back()->imageNodeId = imageNode->GetId();
         }
     }
 }

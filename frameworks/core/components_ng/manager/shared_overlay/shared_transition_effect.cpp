@@ -137,28 +137,40 @@ bool SharedTransitionExchange::CreateTranslateAnimation(const RefPtr<FrameNode>&
     }
     Offset diff { destOffset.GetX() - srcOffset.GetX(), destOffset.GetY() - srcOffset.GetY() };
     auto translateAnimation = AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(Offset(0, 0), diff, option_->curve);
+    auto srcRenderContext = src->GetRenderContext();
+    std::optional<Vector5F> srcRotate;
     if (option_->motionPathOption.IsValid()) {
         auto motionPathEvaluator =
             AceType::MakeRefPtr<MotionPathEvaluator>(option_->motionPathOption, Offset(0, 0), diff);
         translateAnimation->SetEvaluator(motionPathEvaluator->CreateDimensionOffsetEvaluator());
-        // ignore motion rotate
-    }
-    auto translateListener =
-        [weakSrc = WeakPtr<RenderContext>(src->GetRenderContext())](const DimensionOffset& value) {
-        auto srcNode = weakSrc.Upgrade();
-        if (srcNode) {
-            auto host = srcNode->GetHost();
-            srcNode->SetSharedTranslate(
-                static_cast<float>(value.GetX().Value()), static_cast<float>(value.GetY().Value()));
+        if (option_->motionPathOption.GetRotate()) {
+            // Just need to add a rotation animation, the specific rotation Angle is calculated through the path
+            auto rotateAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 0.0f, option_->curve);
+            rotateAnimation->SetEvaluator(motionPathEvaluator->CreateRotateEvaluator());
+            auto rotateListener = [weakSrc = WeakPtr<RenderContext>(srcRenderContext)](float value) {
+                auto srcNode = weakSrc.Upgrade();
+                CHECK_NULL_VOID(srcNode);
+                // Rotate around the Z axis
+                srcNode->UpdateTransformRotate({ 0, 0, 1, value, 0 });
+            };
+            rotateAnimation->AddListener(rotateListener);
+            controller_->AddInterpolator(rotateAnimation);
+            srcRotate = srcRenderContext->GetTransformRotateValue({ 0, 0, 1, 0, 0 });
         }
+    }
+    auto translateListener = [weakSrc = WeakPtr<RenderContext>(srcRenderContext)](const DimensionOffset& value) {
+        auto srcNode = weakSrc.Upgrade();
+        CHECK_NULL_VOID(srcNode);
+        srcNode->SetSharedTranslate(static_cast<float>(value.GetX().Value()), static_cast<float>(value.GetY().Value()));
     };
     translateAnimation->AddListener(translateListener);
     controller_->AddInterpolator(translateAnimation);
-    finishCallbacks_.emplace_back([weakSrc = WeakPtr<RenderContext>(src->GetRenderContext())]() {
+    finishCallbacks_.emplace_back([weakSrc = WeakPtr<RenderContext>(srcRenderContext), srcRotate]() {
         auto srcNode = weakSrc.Upgrade();
-        if (srcNode) {
-            LOGD("reset shared translate");
-            srcNode->ResetSharedTranslate();
+        CHECK_NULL_VOID(srcNode);
+        srcNode->ResetSharedTranslate();
+        if (srcRotate) {
+            srcNode->UpdateTransformRotate(srcRotate.value());
         }
     });
     return true;

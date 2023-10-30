@@ -238,17 +238,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest004, TestSize.Level1)
     std::string extraInfo;
     dragDropManager->GetExtraInfoFromClipboard(extraInfo);
     EXPECT_EQ(extraInfo, EXTRA_INFO);
-
-    /**
-     * @tc.steps: step5. call RestoreClipboardData with no deleteCallback
-     * @tc.expected: step5. restore the ClipboardData extraInfo is ""
-     *                      ClipBoard.SetData() & ClipBoard.GetData() will be called with printing logs
-     *                      they're defined in "components_ng/test/mock/clipboard/mock_clipboard.cpp"
-     */
-    dragDropManager->RestoreClipboardData();
-    dragDropManager->GetExtraInfoFromClipboard(extraInfo);
-    dragDropManager->AddDataToClipboard("");
-    EXPECT_EQ(extraInfo, "");
 }
 
 /**

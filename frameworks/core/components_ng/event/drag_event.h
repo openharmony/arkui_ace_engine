@@ -131,7 +131,7 @@ public:
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
-    void GetTextPixelMap(bool startDrag);
+    void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
     OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode);
 #endif // ENABLE_DRAG_FRAMEWORK
     PanDirection GetDirection() const

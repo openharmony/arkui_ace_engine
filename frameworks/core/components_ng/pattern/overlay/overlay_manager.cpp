@@ -413,7 +413,8 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
                     } else {
                         overlayManager->FocusOverlayNode(menu);
                     }
-                    overlayManager->CallOnShowMenuCallback();
+                    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+                    menuWrapperPattern->CallMenuAppearCallback();
                 },
                 TaskExecutor::TaskType::UI);
         });
@@ -469,8 +470,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     root = overlayManager->FindWindowScene(menu);
                 }
                 CHECK_NULL_VOID(root);
-                overlayManager->CallOnHideMenuCallback();
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+                menuWrapperPattern->CallMenuDisappearCallback();
                 // clear contextMenu then return
                 if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
@@ -571,7 +572,7 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
 
 void OverlayManager::PopToast(int32_t toastId)
 {
-    LOGI("OverlayManager::PopToast");
+    TAG_LOGD(AceLogTag::ACE_PROMPT_ACTION_TOAST, "Overlay starts to pop Toast");
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetCurve(curve);
@@ -591,12 +592,10 @@ void OverlayManager::PopToast(int32_t toastId)
                 CHECK_NULL_VOID(overlayManager);
                 auto toastIter = overlayManager->toastMap_.find(toastId);
                 if (toastIter == overlayManager->toastMap_.end()) {
-                    LOGI("No toast under pop");
                     return;
                 }
                 auto toastUnderPop = toastIter->second.Upgrade();
                 CHECK_NULL_VOID(toastUnderPop);
-                LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 auto rootNode = context->GetRootElement();
@@ -617,7 +616,6 @@ void OverlayManager::PopToast(int32_t toastId)
     });
     auto toastIter = toastMap_.find(toastId);
     if (toastIter == toastMap_.end()) {
-        LOGI("No toast under pop");
         return;
     }
     auto toastUnderPop = toastIter->second.Upgrade();
@@ -978,6 +976,7 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
 
 void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
+    // menu is menuWrapper
     LOGI("OverlayManager::HideMenuNode menu targetId is %{public}d", targetId);
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
@@ -1048,15 +1047,22 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
         }
     }
     CHECK_NULL_VOID(menu);
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetMenuHide();
+    if (menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE) {
+        CleanMenuInSubWindow();
+        return;
+    }
     AnimationOption option;
-    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
-    option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent([weak = WeakClaim(this), id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostTask(
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
             [weak, id]() {
                 ContainerScope scope(id);
                 auto overlayManager = weak.Upgrade();
@@ -1064,26 +1070,8 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
             },
             TaskExecutor::TaskType::UI);
     });
-    auto context = menu->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->SetMenuHide();
-    auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
-    if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
-        ShowPreviewDisappearAnimation(menuWrapperPattern);
-        ShowContextMenuDisappearAnimation(option, menuWrapperPattern);
-    } else {
-        AnimationUtils::Animate(
-            option,
-            [context, menuAnimationOffset]() {
-                context->UpdateOpacity(0.0);
-                context->UpdateOffset(menuAnimationOffset);
-            },
-            option.GetOnFinishEvent());
-    }
+    ShowPreviewDisappearAnimation(menuWrapperPattern);
+    ShowContextMenuDisappearAnimation(option, menuWrapperPattern);
 }
 
 void OverlayManager::CleanPreviewInSubWindow()
@@ -1595,6 +1583,10 @@ void OverlayManager::ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOve
             continue;
         }
         if (node->GetTag() == V2::STAGE_ETS_TAG) {
+            auto parent = node->GetParent();
+            if (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
+                return;
+            }
             auto pageNode = GetLastPage();
             CHECK_NULL_VOID(pageNode);
             auto pageFocusHub = pageNode->GetFocusHub();

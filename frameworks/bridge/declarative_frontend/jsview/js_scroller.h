@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSScroller final : public Referenced {
+class JSScroller : public Referenced {
 public:
     JSScroller() = default;
     ~JSScroller() override = default;
@@ -39,6 +39,7 @@ public:
     void ScrollToIndex(const JSCallbackInfo& args);
     void ScrollBy(const JSCallbackInfo& args);
     void IsAtEnd(const JSCallbackInfo& args);
+    void GetItemRect(const JSCallbackInfo& args);
 
     const WeakPtr<ScrollControllerBase>& GetController() const
     {
@@ -60,6 +61,7 @@ public:
         return scrollBarProxyWeak_.Upgrade();
     }
 
+    JSRef<JSObject> CreateRectangle(const Rect& info);
 private:
     void ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue);
 

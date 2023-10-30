@@ -399,14 +399,17 @@ void JSGauge::SetIndicator(const JSCallbackInfo& info)
         std::string moduleName;
         GetJsMediaBundleInfo(jsIcon, bundleName, moduleName);
         GaugeModel::GetInstance()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
+    } else {
+        GaugeModel::GetInstance()->ResetIndicatorIconPath();
     }
 
     CalcDimension space;
-    if (ParseJsDimensionVpNG(jsSpace, space, false)) {
-        if (space.IsNegative()) {
-            space = NG::INDICATOR_DISTANCE_TO_TOP;
-        }
-        GaugeModel::GetInstance()->SetIndicatorSpace(space);
+    if (!ParseJsDimensionVpNG(jsSpace, space, false)) {
+        space = NG::INDICATOR_DISTANCE_TO_TOP;
     }
+    if (space.IsNegative()) {
+        space = NG::INDICATOR_DISTANCE_TO_TOP;
+    }
+    GaugeModel::GetInstance()->SetIndicatorSpace(space);
 }
 } // namespace OHOS::Ace::Framework

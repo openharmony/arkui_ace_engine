@@ -265,7 +265,8 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 
     // Make Menu node if hasMenu (actionMenu)
     if (props.isMenu) {
-        auto menu = BuildMenu(props.buttons);
+        bool hasTitle = !props.title.empty() || !props.subtitle.empty();
+        auto menu = BuildMenu(props.buttons, hasTitle);
         CHECK_NULL_VOID(menu);
         menu->MountToParent(contentColumn);
     } else {
@@ -799,7 +800,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& 
     return list;
 }
 
-RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& buttons)
+RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& buttons, bool hasTitle)
 {
     auto menu = FrameNode::CreateFrameNode(
         V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(true));
@@ -814,16 +815,28 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         }
         CHECK_NULL_RETURN(button, nullptr);
         auto props = DynamicCast<FrameNode>(button)->GetLayoutProperty();
-        props->UpdateFlexGrow(1);
-        props->UpdateFlexShrink(1);
+        auto buttonRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_RETURN(buttonRow, nullptr);
+        auto buttonRowProps = buttonRow->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(buttonRowProps, nullptr);
+        buttonRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+        buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
 
-        button->MountToParent(menu);
+        button->MountToParent(buttonRow);
         button->MarkModifyDone();
+        menu->AddChild(buttonRow);
     }
     auto menuProps = menu->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(menuProps, nullptr);
-    menuProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
-    menuProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
+    PaddingProperty menuPadding;
+    if (!hasTitle) {
+        menuPadding.top = CalcLength(dialogTheme_->GetContentAdjustPadding().Top());
+    }
+    menuPadding.left = CalcLength(dialogTheme_->GetDefaultPadding().Left());
+    menuPadding.right = CalcLength(dialogTheme_->GetDefaultPadding().Right());
+    menuPadding.bottom = CalcLength(dialogTheme_->GetButtonPaddingBottom());
+    menuProps->UpdatePadding(menuPadding);
     return menu;
 }
 

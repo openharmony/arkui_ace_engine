@@ -538,6 +538,10 @@ export class Breadcrumb extends ViewPU {
             this.showMenu && (this.showMenu = !1);
             this.onLabelDrop && this.onLabelDrop(this.labels.indexOf(i), e)
           }));
+          MenuItem.onDragEnd((e => {
+            this.onLabelDragCancel && e.getResult() != DragResult.DRAG_SUCCESSFUL && this.onLabelDragCancel(
+              e)
+          }));
           s || MenuItem.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -603,8 +607,11 @@ export class Breadcrumb extends ViewPU {
                 this.onLabelDragLeave && this.onLabelDragLeave(t, e)
               }));
               Button.onDrop(((e, i) => {
-                this.onLabelDrop && (t === this.labels.length - 1 && this.onLabelDragCancel ?
-                  this.onLabelDragCancel(e) : this.onLabelDrop(t, e))
+                this.onLabelDrop && this.onLabelDrop(t, e)
+              }));
+              Button.onDragEnd((e => {
+                this.onLabelDragCancel && e.getResult() != DragResult.DRAG_SUCCESSFUL &&
+                  this.onLabelDragCancel(e)
               }));
               i || Button.pop();
               ViewStackProcessor.StopGetAccessRecording()
@@ -880,8 +887,11 @@ export class Breadcrumb extends ViewPU {
                 this.onLabelDragLeave && this.onLabelDragLeave(t, e)
               }));
               Row.onDrop(((e, i) => {
-                this.onLabelDrop && (t === this.labels.length - 1 && this.onLabelDragCancel ?
-                  this.onLabelDragCancel(e) : this.onLabelDrop(t, e))
+                this.onLabelDrop && this.onLabelDrop(t, e)
+              }));
+              Row.onDragEnd((e => {
+                this.onLabelDragCancel && e.getResult() != DragResult.DRAG_SUCCESSFUL &&
+                  this.onLabelDragCancel(e)
               }));
               i || Row.pop();
               ViewStackProcessor.StopGetAccessRecording()
@@ -896,7 +906,7 @@ export class Breadcrumb extends ViewPU {
                   Image.width(24);
                   Image.height(24);
                   Image.margin({
-                    left: 6
+                    left: 8
                   });
                   t || Image.pop();
                   ViewStackProcessor.StopGetAccessRecording()

@@ -213,6 +213,12 @@ private:
     void InitDisableEvent();
     void SetAccessibilityAction();
     void DoDeleteAnimation(bool isRightDelete);
+    void ResetToItemChild()
+    {
+        swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+        startNodeSize_ = 0.0f;
+        endNodeSize_ = 0.0f;
+    }
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;

@@ -864,6 +864,8 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
     EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
@@ -926,8 +928,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level1)
     ASSERT_FALSE(bubblePaintMethod.showArrow_);
 
     bubblePaintMethod.SetShowArrow(true);
-    for (size_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); i++)
-    {
+    for (size_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); i++) {
         bubblePaintProperty->UpdatePlacement(BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i]);
         bubblePaintMethod.PaintBubble(canvas, paintWrapper);
     }
@@ -947,6 +948,8 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod002, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     /**
      * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the progressPaintProperty.
      * @tc.expected: Check the GeometryNode and PaintWrapper were created successfully.
@@ -996,6 +999,8 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod003, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawRect(_)).Times(1);
     EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
@@ -1034,7 +1039,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level1)
      */
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
-    ButtonProperties buttonProperties {true, "Button"};
+    ButtonProperties buttonProperties { true, "Button" };
     buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
     popupParam->SetPrimaryButtonProperties(buttonProperties);
     popupParam->SetSecondaryButtonProperties(buttonProperties);
@@ -1093,7 +1098,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
      */
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
-    ButtonProperties buttonProperties {true, "Button"};
+    ButtonProperties buttonProperties { true, "Button" };
     buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
     popupParam->SetPrimaryButtonProperties(buttonProperties);
     popupParam->SetSecondaryButtonProperties(buttonProperties);
@@ -1168,7 +1173,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
  */
 HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
 {
-	/**
+    /**
      * @tc.steps: step1. set popup value to popupParam.
      */
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
@@ -1606,8 +1611,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest006, TestSize.Level1)
         Placement::LEFT_BOTTOM, Placement::LEFT_TOP, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
     for (uint32_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); ++i) {
         bubbleLayoutAlgorithm.placement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
-        bubbleLayoutAlgorithm.GetPositionWithPlacement(
-            topPosition, arrowPosition, childSize, placements[i]);
+        bubbleLayoutAlgorithm.GetPositionWithPlacement(topPosition, arrowPosition, childSize, placements[i]);
         EXPECT_EQ(BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i], placements[i]);
     }
 }
@@ -1625,7 +1629,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
     BubbleLayoutProperty property;
     EXPECT_FALSE(property.GetPositionOffset().has_value());
     property.UpdatePositionOffset(OffsetF(25.0f, 30.0f));
-    
+
     /**
      * @tc.steps: step2. use GetPositionOffset() get popup position offset .
      * @tc.expected: check whether popup offset is correct.
@@ -1715,7 +1719,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
     EXPECT_FALSE(children.empty());
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-    EXPECT_FALSE(bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), bubbleLayoutProperty, true)
-        == DISPLAY_WINDOW_OFFSET);
+    EXPECT_FALSE(bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), bubbleLayoutProperty, true) ==
+                 DISPLAY_WINDOW_OFFSET);
 }
 } // namespace OHOS::Ace::NG

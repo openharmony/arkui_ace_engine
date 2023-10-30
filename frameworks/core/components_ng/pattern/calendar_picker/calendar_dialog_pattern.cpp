@@ -880,7 +880,6 @@ void CalendarDialogPattern::AddHotZoneRect()
     auto entryNode = entryNode_.Upgrade();
     CHECK_NULL_VOID(entryNode);
     auto rect = entryNode->GetPaintRectWithTransform();
-    rect.SetOffset(entryNode->GetPaintRectOffsetToPage());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(
         Dimension(rect.Width()), Dimension(rect.Height())));

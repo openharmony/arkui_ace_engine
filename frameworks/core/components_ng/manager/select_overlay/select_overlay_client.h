@@ -65,7 +65,8 @@ enum class SelectOverlayMenuId {
     COPY,
     CUT,
     PASTE,
-    SELECT_ALL
+    SELECT_ALL,
+    CAMERA_INPUT
 };
 
 class SelectOverlayClient : public SelectionHost {
@@ -117,16 +118,7 @@ public:
         return std::move(menuOptionItems_);
     }
 
-    virtual void OnParentScrollStartOrEnd(bool isEnd)
-    {
-        auto proxy = GetSelectOverlayProxy();
-        CHECK_NULL_VOID(proxy);
-        if (isEnd) {
-            proxy->ShowOrHiddenMenu(false);
-        } else {
-            proxy->ShowOrHiddenMenu(true);
-        }
-    }
+    virtual void OnParentScrollStartOrEnd(bool isEnd);
 
     virtual void OnParentScrollCallback(Axis axis, int32_t offset) {};
 

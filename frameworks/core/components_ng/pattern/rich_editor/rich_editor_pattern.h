@@ -134,6 +134,10 @@ public:
     void DeleteBackward(int32_t length = 0) override;
     void DeleteForward(int32_t length) override;
     void SetInputMethodStatus(bool keyboardShown) override;
+    void NotifyKeyboardClosedByUser() override
+    {
+        FocusHub::LostFocusToViewRoot();
+    }
     bool CursorMoveLeft() override;
     bool CursorMoveRight() override;
     bool CursorMoveUp() override;

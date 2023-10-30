@@ -32,6 +32,7 @@ public:
     static void SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty);
 
     static void DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset);
+    static SizeF GetPathSize(const std::string& commands);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_DRAWING_PAINTER_H

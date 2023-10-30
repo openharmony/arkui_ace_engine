@@ -54,7 +54,6 @@ void JSCanvas::Create(const JSCallbackInfo& info)
         JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
         if (jsContext) {
             jsContext->SetCanvasPattern(canvasPattern);
-            LOGI("SetCanvasPattern successfully");
             jsContext->SetAntiAlias();
         }
     }
@@ -79,9 +78,8 @@ void JSCanvas::JSBind(BindingTarget globalObj)
 
 void JSCanvas::OnReady(const JSCallbackInfo& info)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "Canvas onReady begins");
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
-            "and the first argument must be a function.");
         return;
     }
 
@@ -92,11 +90,9 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
                          uint32_t accountableCanvasElement) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Canvas.onReady");
-            LOGD("Canvas elmtId %{public}d executing JS onReady function - start", accountableCanvasElement);
             ViewStackModel::GetInstance()->StartGetAccessRecordingFor(accountableCanvasElement);
             func->Execute();
             ViewStackModel::GetInstance()->StopGetAccessRecording();
-            LOGD("Canvas elmtId %{public}d executing JS onReady function - end", accountableCanvasElement);
         };
     } else {
         readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](

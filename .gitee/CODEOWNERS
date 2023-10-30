@@ -11,6 +11,9 @@ adapter/ohos/capability/udmf/  @echoorchid @LongLie
 adapter/ohos/capability/window_connection/  @lushi1202
 adapter/ohos/capability/window_connection_ng/  @lushi1202
 adapter/ohos/entrance/pa_engine/  @jayleehw
+adapter/ohos/osal/ace_trace.cpp  @lushi1202
+adapter/ohos/osal/anr_thread.cpp  @lushi1202
+adapter/ohos/osal/log_wrapper.cpp  @lushi1202
 
 [Preview adapter]
 adapter/preview/ @laigerendaqiu
@@ -28,7 +31,7 @@ frameworks/core/components_ng/render/adapter/  @yan-shuifeng @sunfei2021
 frameworks/core/components_ng/layout/  @yan-shuifeng @yangfan229
 frameworks/core/components_ng/property/  @yan-shuifeng
 frameworks/core/components_ng/syntax/  @yan-shuifeng @lightningHo
-frameworks/core/components_ng/manager/safe_area/  @zhoutianer
+frameworks/core/components_ng/manager/safe_area/  @xiexiyun
 
 [Common source]
 frameworks/core/common/  @yan-shuifeng @sunfei2021
@@ -65,7 +68,7 @@ frameworks/core/components_ng/pattern/grid_col/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_row/  @xiexiyun
 frameworks/core/components_ng/pattern/hyperlink/  @techbuilding
-frameworks/core/components_ng/pattern/image/  @zhoutianer
+frameworks/core/components_ng/pattern/image/  @xiexiyun
 frameworks/core/components_ng/pattern/image_animator/  @hehongyang9
 frameworks/core/components_ng/pattern/indexer/  @aryawang
 frameworks/core/components_ng/pattern/linear_layout/  @xiexiyun
@@ -94,7 +97,7 @@ frameworks/core/components_ng/pattern/refresh/  @aryawang
 frameworks/core/components_ng/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/pattern/rich_editor/  @jyj-0306
+frameworks/core/components_ng/pattern/rich_editor/  @wu-yinxiao
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
@@ -115,7 +118,7 @@ frameworks/core/components_ng/pattern/tabs/  @xuzhidan
 frameworks/core/components_ng/pattern/text/  @lijuan124
 frameworks/core/components_ng/pattern/text_clock/  @aryawang
 frameworks/core/components_ng/pattern/text_drag/  @zhaojian2021
-frameworks/core/components_ng/pattern/text_field/  @jyj-0306  @lijuan124
+frameworks/core/components_ng/pattern/text_field/  @jyj_0306  @lijuan124
 frameworks/core/components_ng/pattern/text_picker/  @cheng-feiwang
 frameworks/core/components_ng/pattern/texttimer/  @aryawang
 frameworks/core/components_ng/pattern/time_picker/  @cheng-feiwang
@@ -160,7 +163,7 @@ frameworks/core/components/flex/  @yangfan229
 frameworks/core/components/focus_animation/  @catpoison
 frameworks/core/components/focus_collaboration/  @catpoison
 frameworks/core/components/focusable/  @catpoison
-frameworks/core/components/font/  @jyj-0306
+frameworks/core/components/font/  @jyj_0306
 frameworks/core/components/foreach/  @yan-shuifeng
 frameworks/core/components/form/  @wangchensu1
 frameworks/core/components/gesture_listener/  @zheng-qiyi
@@ -168,7 +171,7 @@ frameworks/core/components/grid/  @zcdqs
 frameworks/core/components/grid_layout/  @zcdqs
 frameworks/core/components/hyperlink/  @techbuilding
 frameworks/core/components/ifelse/  @yan-shuifeng
-frameworks/core/components/image/  @zhoutianer
+frameworks/core/components/image/  @xiexiyun
 frameworks/core/components/indexer/  @aryawang
 frameworks/core/components/list/  @yeyinglong_admin
 frameworks/core/components/marquee/  @aryawang
@@ -215,12 +218,12 @@ frameworks/core/components/split_container/  @
 frameworks/core/components/stack/  @nickyjd
 frameworks/core/components/stage/  @yan-shuifeng
 frameworks/core/components/stepper/  @tsj_2020
-frameworks/core/components/svg/  @zhoutianer
+frameworks/core/components/svg/  @xiexiyun
 frameworks/core/components/swiper/  @xuzhidan
 frameworks/core/components/tab_bar/  @xuzhidan
 frameworks/core/components/text/  @lijuan124
 frameworks/core/components/text_clock/  @aryawang
-frameworks/core/components/text_field/  @jyj-0306  @lijuan124
+frameworks/core/components/text_field/  @jyj_0306  @lijuan124
 frameworks/core/components/text_overlay/  @yangfan229
 frameworks/core/components/text_span/  @lijuan124
 frameworks/core/components/texttimer/  @aryawang
@@ -261,9 +264,9 @@ frameworks/core/gestures/  @zheng-qiyi
 frameworks/core/components_ng/gestures/  @zheng-qiyi
 
 [Image source]
-frameworks/core/image/  @zhoutianer
-frameworks/core/components_ng/image_provider/  @zhoutianer
-frameworks/core/components_ng/svg/  @zhoutianer
+frameworks/core/image/  @xiexiyun
+frameworks/core/components_ng/image_provider/  @xiexiyun
+frameworks/core/components_ng/svg/  @xiexiyun
 
 [Advanced UI Components]
 advanced_ui_component/ @youzhi92
@@ -342,7 +345,7 @@ frameworks/core/components_ng/test/pattern/grid_col/  @xiexiyun
 frameworks/core/components_ng/test/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/test/pattern/grid_row/  @xiexiyun
 frameworks/core/components_ng/test/pattern/hyperlink/  @jinweiliu
-frameworks/core/components_ng/test/pattern/image/  @zhoutianer
+frameworks/core/components_ng/test/pattern/image/  @xiexiyun
 frameworks/core/components_ng/test/pattern/image_animator/  @suiwuyue
 frameworks/core/components_ng/test/pattern/indexer/  @suiwuyue
 frameworks/core/components_ng/test/pattern/linear_layout/  @xiexiyun
@@ -371,7 +374,7 @@ frameworks/core/components_ng/test/pattern/refresh/  @suiwuyue
 frameworks/core/components_ng/test/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/test/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/test/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/test/pattern/rich_editor/  @jyj-0306
+frameworks/core/components_ng/test/pattern/rich_editor/  @wu-yinxiao
 frameworks/core/components_ng/test/pattern/root/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/scroll/  @suiwuyue
 frameworks/core/components_ng/test/pattern/scroll_bar/  @suiwuyue
@@ -392,7 +395,7 @@ frameworks/core/components_ng/test/pattern/tabs/  @xuzhidan
 frameworks/core/components_ng/test/pattern/text/  @lijuan124
 frameworks/core/components_ng/test/pattern/text_clock/  @aryawang
 frameworks/core/components_ng/test/pattern/text_drag/  @zhaojian2021
-frameworks/core/components_ng/test/pattern/text_field/  @jyj-0306  @lijuan124
+frameworks/core/components_ng/test/pattern/text_field/  @jyj_0306  @lijuan124
 frameworks/core/components_ng/test/pattern/text_picker/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/texttimer/  @aryawang
 frameworks/core/components_ng/test/pattern/time_picker/  @cheng-feiwang
@@ -407,6 +410,6 @@ frameworks/core/components_ng/test/pattern/window_scene/  @liuchao92
 frameworks/core/components_ng/test/pattern/xcomponent/  @sunbees
 frameworks/core/components_ng/test/event/  @zhaojian2021 @catpoison
 frameworks/core/components_ng/test/syntax/  @yan-shuifeng @lightningHo
-frameworks/core/components_ng/test/svg/  @zhoutianer
-frameworks/core/components_ng/test/image_provider/  @zhoutianer
+frameworks/core/components_ng/test/svg/  @xiexiyun
+frameworks/core/components_ng/test/image_provider/  @xiexiyun
 frameworks/core/components_ng/test/animation/  @suiwuyue

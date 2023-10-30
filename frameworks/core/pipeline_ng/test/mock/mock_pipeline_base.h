@@ -55,7 +55,7 @@ public:
     MOCK_METHOD0(OnShow, void());
     MOCK_METHOD0(OnHide, void());
     MOCK_METHOD1(WindowFocus, void(bool isFocus));
-    MOCK_METHOD2(ShowContainerTitle, void(bool isShow, bool hasDeco));
+    MOCK_METHOD3(ShowContainerTitle, void(bool isShow, bool hasDeco, bool needUpdate));
     MOCK_METHOD4(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type,
                                        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD1(OnLayoutCompleted, void(const std::string& componentId));

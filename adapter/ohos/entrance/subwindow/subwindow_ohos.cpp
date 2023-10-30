@@ -92,7 +92,7 @@ void SubwindowOhos::InitContainer()
             "Find parent window success, name: %{public}s, windowId: %{public}u, type: %{public}u",
             parentWindow->GetWindowName().c_str(), parentWindow->GetWindowId(), static_cast<uint32_t>(windowType));
         if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_FLOAT);
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
@@ -509,6 +509,11 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     CHECK_NULL_VOID(overlay);
     ContainerScope scope(childContainerId_);
     overlay->HideMenuInSubWindow(showPreviewAnimation, startDrag);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    HideEventColumn();
+    HidePixelMap(false, 0, 0, false);
+    HideFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
@@ -812,7 +817,7 @@ void SubwindowOhos::ShowToastForAbility(
 void SubwindowOhos::ShowToastForService(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos ShowToastForService begin");
+    TAG_LOGI(AceLogTag::ACE_PROMPT_ACTION_TOAST, "SubwindowOhos ShowToastForService begin");
     bool ret = CreateEventRunner();
     if (!ret) {
         return;
@@ -851,7 +856,7 @@ void SubwindowOhos::ShowToastForService(
         Platform::DialogContainer::ShowToast(childContainerId, message, duration, bottom);
     };
     if (!handler_->PostTask(showDialogCallback)) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Post sync task error");
+        TAG_LOGE(AceLogTag::ACE_PROMPT_ACTION_TOAST, "Post sync task error");
         return;
     }
 }

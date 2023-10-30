@@ -108,6 +108,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     LOGD("pinch recognizer receives touch up event");
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         LOGW("PinchGesture current finger number is less than requiried finger number.");
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 

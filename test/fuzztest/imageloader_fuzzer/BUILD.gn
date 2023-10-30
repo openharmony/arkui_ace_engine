@@ -16,7 +16,7 @@ import("//build/test.gni")
 
 #####################hydra-fuzz###################
 import("//foundation/arkui/ace_engine/ace_config.gni")
-module_output_path = "arkui/imageloader"
+module_output_path = "ace_engine/ace_engine/imageloader"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ImageLoaderFuzzTest") {

@@ -1887,7 +1887,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest003, TestSize.Level1)
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
     sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
-    EXPECT_CALL(*themeManager, GetTheme(SliderTheme::TypeId())).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
     sliderLayoutAlgorithm->trackThickness_ = 40.0f;
 
     auto imageId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -2410,6 +2410,9 @@ HWTEST_F(SliderTestNg, SliderPatternTest013, TestSize.Level1)
      */
     auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     sliderPattern->AttachToFrameNode(frameNode);
     ASSERT_NE(frameNode, nullptr);

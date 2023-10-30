@@ -206,11 +206,13 @@ private:
     void UpdateTitleFontSize(const Dimension& tempTitleFontSize);
     void UpdateSubTitleOpacity(const double &value);
     void UpdateTitleModeChange();
-
+    void MountTitle(const RefPtr<TitleBarNode>& hostNode);
     RefPtr<PanEvent> panEvent_;
     RefPtr<SpringMotion> springMotion_;
     RefPtr<Animator> springController_;
     RefPtr<Animator> animator_;
+    std::optional<float> fontSize_;
+    std::optional<float> opacity_;
 
     float overDragOffset_ = 0.0f;
     float maxTitleBarHeight_ = 0.0f;

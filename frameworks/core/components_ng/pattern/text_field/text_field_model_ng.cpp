@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text_field/text_input_response_area.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -83,7 +82,8 @@ void TextFieldModelNG::CreateNode(
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
-    SetDraggable(textFieldTheme->GetDraggable());
+    auto draggable = pipeline->GetDraggable<TextFieldTheme>();
+    SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
 }
 
@@ -140,9 +140,6 @@ void TextFieldModelNG::SetWidthAuto(bool isAuto)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
-        return;
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, isAuto);
 }
 
@@ -163,19 +160,6 @@ void TextFieldModelNG::SetType(TextInputType value)
         layoutProperty->UpdateTypeChanged(true);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto responseArea = textFieldPattern->GetResponseArea();
-    auto passwordResponseArea = AceType::DynamicCast<PasswordResponseArea>(responseArea);
-    if (value == TextInputType::VISIBLE_PASSWORD) {
-        CHECK_NULL_VOID(!passwordResponseArea);
-        auto responseArea = AceType::MakeRefPtr<PasswordResponseArea>();
-        responseArea->SetObscured(textFieldPattern->GetTextObscured());
-        textFieldPattern->SetResponseArea(responseArea);
-    } else {
-        CHECK_NULL_VOID(passwordResponseArea);
-        textFieldPattern->SetResponseArea(nullptr);
-    }
 }
 
 void TextFieldModelNG::SetPlaceholderColor(const Color& value)
@@ -236,13 +220,21 @@ void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
 
 void TextFieldModelNG::SetTextAlign(TextAlign value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    TextAlign newValue = value;
+    if (!pattern->IsTextArea() && newValue == TextAlign::JUSTIFY) {
+        newValue = TextAlign::START;
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    if (layoutProperty->GetTextAlignValue(TextAlign::START) != value) {
+    if (layoutProperty->GetTextAlignValue(TextAlign::START) != newValue) {
         layoutProperty->UpdateTextAlignChanged(true);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, newValue);
 }
+
 void TextFieldModelNG::SetMaxLength(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value);
@@ -426,15 +418,7 @@ void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)
         unitNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
     if (unitNode) {
-        auto responseArea = pattern->GetResponseArea();
-        auto unitResponseArea = AceType::DynamicCast<UnitResponseArea>(responseArea);
-        if (unitResponseArea) {
-            unitResponseArea->SetUnitNode(unitNode);
-        } else {
-            unitResponseArea = AceType::MakeRefPtr<UnitResponseArea>(unitNode);
-            pattern->SetResponseArea(unitResponseArea);
-        }
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        pattern->SetUnitNode(unitNode);
     }
 }
 

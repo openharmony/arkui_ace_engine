@@ -130,45 +130,50 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
     CHECK_NULL_VOID(textFieldOverlayModifier_);
+
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+
     OffsetF contentOffset = paintWrapper->GetContentOffset();
     textFieldOverlayModifier_->SetContentOffset(contentOffset);
     SizeF contentSize = paintWrapper->GetContentSize();
     textFieldOverlayModifier_->SetContentSize(contentSize);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     textFieldOverlayModifier_->SetFrameSize(frameSize);
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto cursorVisible = textFieldPattern->GetCursorVisible();
-    textFieldOverlayModifier_->SetCursorVisible(cursorVisible);
-    auto cursorOffset = textFieldPattern->GetCaretOffset();
-    textFieldOverlayModifier_->SetCursorOffset(cursorOffset);
     auto currentOffset = textFieldPattern->GetCurrentOffset();
     textFieldOverlayModifier_->SetCurrentOffset(currentOffset);
 
-    auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    InputStyle inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
-    textFieldOverlayModifier_->SetInputStyle(inputStyle);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    auto cursorVisible = textFieldPattern->GetCursorVisible();
+    textFieldOverlayModifier_->SetCursorVisible(cursorVisible);
+    auto cursorRect = textFieldPattern->GetCaretRect();
+    textFieldOverlayModifier_->SetCursorOffset(cursorRect.GetOffset());
+    textFieldOverlayModifier_->SetCursorWidth(cursorRect.Width());
     auto cursorColor = paintProperty->GetCursorColorValue(theme->GetCursorColor());
     textFieldOverlayModifier_->SetCursorColor(cursorColor);
+
+    InputStyle inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
+    textFieldOverlayModifier_->SetInputStyle(inputStyle);
+
     auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
-    if (paintProperty->GetCursorWidth().has_value()) {
-        float cursorWidth = static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx());
-        textFieldOverlayModifier_->SetCursorWidth(cursorWidth);
-    }
+    textFieldOverlayModifier_->SetChangeSelectedRects(textFieldPattern->NeedPaintSelect());
+
     textFieldOverlayModifier_->SetUnderlineWidth(textFieldPattern->GetUnderlineWidth());
     textFieldOverlayModifier_->SetUnderlineColor(textFieldPattern->GetUnderlineColor());
-    auto frameNode = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+
+    textFieldOverlayModifier_->SetShowSelect(textFieldPattern->GetShowSelect());
     textFieldOverlayModifier_->SetChangeSelectedRects(textFieldPattern->NeedPaintSelect());
+
+    textFieldOverlayModifier_->SetTextRect(textFieldPattern->GetTextRect());
     UpdateScrollBar();
 }
 

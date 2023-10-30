@@ -490,16 +490,6 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
     pipeline->AddWindowStateChangedCallback(host->GetId());
-    // set draggable for framenode
-    auto theme = pipeline->GetTheme<ImageTheme>();
-    CHECK_NULL_VOID(theme);
-    auto draggable = theme->GetDraggable();
-    if (draggable && !host->IsDraggable()) {
-        auto gestureHub = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->InitDragDropEvent();
-    }
-    host->SetDraggable(draggable);
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)

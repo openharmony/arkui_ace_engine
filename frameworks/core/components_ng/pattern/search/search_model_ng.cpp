@@ -851,4 +851,28 @@ RefPtr<FrameNode> SearchModelNG::GetSearchTextFieldFrameNode() const
     CHECK_NULL_RETURN(textFieldChild, nullptr);
     return textFieldChild;
 }
+
+void SearchModelNG::SetMaxLength(uint32_t value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateMaxLength(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::ResetMaxLength()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->ResetMaxLength();
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG

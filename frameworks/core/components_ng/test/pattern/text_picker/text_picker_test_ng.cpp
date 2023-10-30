@@ -3474,9 +3474,9 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AnyNumber());
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(AnyNumber());
     canvasDrawFunction(rsCanvas);
 }
 
@@ -3515,6 +3515,8 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest002, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
     canvasDrawFunction(rsCanvas);
 }
@@ -4366,7 +4368,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewOnKeyEvent, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_ESCAPE;
     result = TextPickerDialogView::OnKeyEvent(event);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.cases: case. cover KeyCode is not KEY_ESCAPE.
