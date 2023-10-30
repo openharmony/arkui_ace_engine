@@ -192,6 +192,20 @@ void JSSelect::Value(const JSCallbackInfo& info)
 
 void JSSelect::Font(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
+        auto textTheme = pipeline->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(textTheme);
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
+        SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
+        SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+        SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+        return;
+    }
+
     if (!info[0]->IsObject()) {
         return;
     }
@@ -272,26 +286,33 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
 
 void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        auto textTheme = pipeline->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(textTheme);
+        SelectModel::GetInstance()->SetSelectedOptionFontSize(selectTheme->GetFontSize());
+        SelectModel::GetInstance()->SetSelectedOptionFontWeight(textTheme->GetTextStyle().GetFontWeight());
+        SelectModel::GetInstance()->SetSelectedOptionFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+        SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+        return;
+    }
     if (!info[0]->IsObject()) {
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
-
-    if (info.Length() < 1) {
-        return;
-    }
-
     auto size = param->GetProperty("size");
     if (!size->IsNull()) {
         CalcDimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
             SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
         } else if (size->IsUndefined()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID(theme);
-            SelectModel::GetInstance()->SetSelectedOptionFontSize(theme->GetFontSize());
+            SelectModel::GetInstance()->SetSelectedOptionFontSize(selectTheme->GetFontSize());
         }
     }
     std::string weight;
@@ -304,13 +325,11 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
         }
         SelectModel::GetInstance()->SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight));
     }
-
     auto family = param->GetProperty("family");
     if (!family->IsNull() && family->IsString()) {
         auto familyVal = family->ToString();
         SelectModel::GetInstance()->SetSelectedOptionFontFamily(ConvertStrToFontFamilies(familyVal));
     }
-
     auto style = param->GetProperty("style");
     if (!style->IsNull() && style->IsNumber()) {
         auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
@@ -345,7 +364,15 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
     }
     Color bgColor;
     if (!ParseJsColor(info[0], bgColor)) {
-        return;
+        if (info[0]->IsUndefined() || info[0]->IsNull()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID(theme);
+            bgColor = theme->GetBackgroundColor();
+        } else {
+            return;
+        }
     }
 
     SelectModel::GetInstance()->SetOptionBgColor(bgColor);
@@ -353,6 +380,20 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
 
 void JSSelect::OptionFont(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
+        auto textTheme = pipeline->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(textTheme);
+        SelectModel::GetInstance()->SetOptionFontSize(selectTheme->GetMenuFontSize());
+        SelectModel::GetInstance()->SetOptionFontWeight(textTheme->GetTextStyle().GetFontWeight());
+        SelectModel::GetInstance()->SetOptionFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+        SelectModel::GetInstance()->SetOptionItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+        return;
+    }
+
     if (!info[0]->IsObject()) {
         return;
     }
@@ -369,7 +410,7 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
             CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SelectTheme>();
             CHECK_NULL_VOID(theme);
-            SelectModel::GetInstance()->SetOptionFontSize(theme->GetFontSize());
+            SelectModel::GetInstance()->SetOptionFontSize(theme->GetMenuFontSize());
         }
     }
     std::string weight;
@@ -403,7 +444,15 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        if (info[0]->IsUndefined() || info[0]->IsNull()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID(theme);
+            textColor = theme->GetMenuFontColor();
+        } else {
+            return;
+        }
     }
 
     SelectModel::GetInstance()->SetOptionFontColor(textColor);
@@ -656,14 +705,21 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
         return;
     }
 
+    MenuAlign menuAlignObj;
+
     if (!info[0]->IsNumber()) {
-        return;
+        if (!(info[0]->IsUndefined() || info[0]->IsNull())) {
+            return;
+        }
+    } else {
+        menuAlignObj.alignType = static_cast<MenuAlignType>(info[0]->ToNumber<int32_t>());
     }
 
-    MenuAlign menuAlignObj;
-    menuAlignObj.alignType = static_cast<MenuAlignType>(info[0]->ToNumber<int32_t>());
-
     if (info.Length() > 1) {
+        if (info[1]->IsUndefined() || info[1]->IsNull()) {
+            SelectModel::GetInstance()->SetMenuAlign(menuAlignObj);
+            return;
+        }
         if (!info[1]->IsObject()) {
             return;
         }
