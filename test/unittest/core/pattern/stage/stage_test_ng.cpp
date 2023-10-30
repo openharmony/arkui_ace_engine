@@ -613,9 +613,10 @@ HWTEST_F(StageTestNg, PagePatternTest005, TestSize.Level1)
     auto child = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, "child");
     parent->AddChild(node);
     node->AddChild(child);
-    PagePattern pattern(AceType::MakeRefPtr<PageInfo>());
-    pattern.AttachToFrameNode(node);
-    pattern.ReloadPage();
+    // PagePattern pattern(AceType::MakeRefPtr<PageInfo>());
+    auto pattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    pattern->AttachToFrameNode(node);
+    pattern->ReloadPage();
 
     /**
      * @tc.steps: step2. Create PageTransitionEffect with option.
@@ -628,41 +629,43 @@ HWTEST_F(StageTestNg, PagePatternTest005, TestSize.Level1)
      * @tc.steps: step3. Calling the AddPageTransition function.
      * @tc.expected: Calling the GetTopTransition function returned not nullptr.
      */
-    pattern.AddPageTransition(effect);
-    EXPECT_NE(pattern.GetTopTransition(), nullptr);
+    pattern->AddPageTransition(effect);
+    EXPECT_NE(pattern->GetTopTransition(), nullptr);
 
     /**
-     * @tc.steps: step4. Calling the TriggerPageTransition function.
+     * @tc.steps: step4. Calling the TriggerPageTransition function and StopPageTransition function.
      * @tc.expected: Attribute pageTransitionFinish_ not nullptr.
      */
-    pattern.TriggerPageTransition(PageTransitionType::NONE, FLAG_FUNC);
-    EXPECT_NE(pattern.pageTransitionFinish_, nullptr);
+    pattern->TriggerPageTransition(PageTransitionType::NONE, FLAG_FUNC);
+    pattern->StopPageTransition();
+    EXPECT_EQ(flag, 1);
 
     /**
      * @tc.steps: step5. SetUserCallback and recall TriggerPageTransition and StopPageTransition.
      */
     effect->SetUserCallback([](RouteType routeType, const float& value) {});
-    pattern.SetPageTransitionFunc(std::move(FLAG_FUNC));
-    pattern.TriggerPageTransition(PageTransitionType::ENTER_POP, FLAG_FUNC);
-    pattern.StopPageTransition();
+    pattern->SetPageTransitionFunc(std::move(FLAG_FUNC));
+    pattern->TriggerPageTransition(PageTransitionType::ENTER_POP, FLAG_FUNC);
+    pattern->StopPageTransition();
+    EXPECT_EQ(flag, 3);
     /**
      * @tc.steps: step6.change some params ,recall TriggerPageTransition and StopPageTransition.
      * @tc.expected: The FLAG_FUNC call times meets expectation.
      */
-    ASSERT_NE(pattern.controller_, nullptr);
-    pattern.controller_->Stop();
-    auto innerEffect = pattern.FindPageTransitionEffect(PageTransitionType::ENTER_POP);
+    ASSERT_NE(pattern->controller_, nullptr);
+    pattern->controller_->Stop();
+    auto innerEffect = pattern->FindPageTransitionEffect(PageTransitionType::ENTER_POP);
     ASSERT_NE(effect, nullptr);
     innerEffect->animationOption_.delay = -1;
-    pattern.TriggerPageTransition(PageTransitionType::ENTER_POP, FLAG_FUNC);
-    pattern.StopPageTransition();
-    EXPECT_EQ(flag, 3);
+    pattern->TriggerPageTransition(PageTransitionType::ENTER_POP, FLAG_FUNC);
+    pattern->StopPageTransition();
+    EXPECT_EQ(flag, 5);
     /**
      * @tc.steps: step7.Calling the ClearPageTransitionEffect function.
      * @tc.expected: The GetTopTransition function returns a nullptr.
      */
-    pattern.ClearPageTransitionEffect();
-    EXPECT_EQ(pattern.GetTopTransition(), nullptr);
+    pattern->ClearPageTransitionEffect();
+    EXPECT_EQ(pattern->GetTopTransition(), nullptr);
 }
 
 /**
