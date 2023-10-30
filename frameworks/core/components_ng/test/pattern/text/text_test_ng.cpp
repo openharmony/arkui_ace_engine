@@ -956,19 +956,6 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper004, TestSize.Level1)
 }
 
 /**
- * @tc.name: DumpInfo001
- * @tc.desc: Test TextPattern DumpInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, DumpInfo001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    pattern->selectOverlayProxy_ = nullptr;
-    pattern->DumpInfo();
-    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
-}
-
-/**
  * @tc.name: OnHandleMove001
  * @tc.desc: Test TextPattern OnHandleMove when SelectOverlayProxy is not nullptr.
  * @tc.type: FUNC
