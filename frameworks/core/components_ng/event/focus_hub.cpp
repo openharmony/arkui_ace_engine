@@ -822,18 +822,10 @@ bool FocusHub::OnClick(const KeyEvent& event)
 void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
 {
     if (focusType_ != FocusType::SCOPE) {
-        TAG_LOGW(AceLogTag::ACE_FOCUS, "SwitchFocus: parent focus node is not a scope!");
         return;
     }
     std::list<RefPtr<FocusHub>> focusNodes;
     FlushChildrenFocusHub(focusNodes);
-
-    auto it = std::find(focusNodes.begin(), focusNodes.end(), focusNode);
-    if (it == focusNodes.end()) {
-        TAG_LOGW(AceLogTag::ACE_FOCUS,
-            "SwitchFocus: Can't find node: %{public}s/%{public}d in parent: %{public}s/%{public}d 's children",
-            focusNode->GetFrameName().c_str(), focusNode->GetFrameId(), GetFrameName().c_str(), GetFrameId());
-    }
 
     auto focusNodeNeedBlur = lastWeakFocusNode_.Upgrade();
     lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusNode));
@@ -859,8 +851,6 @@ bool FocusHub::GoToNextFocusLinear(FocusStep step, const RectF& rect)
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = FlushChildrenFocusHub(focusNodes);
     if (focusNodes.empty()) {
-        TAG_LOGW(AceLogTag::ACE_FOCUS, "FocusNode: %{public}s/%{public}d has no next child focus node to go.",
-            GetFrameName().c_str(), GetFrameId());
         return false;
     }
     if (itNewFocusNode == focusNodes.end()) {
@@ -975,8 +965,6 @@ void FocusHub::OnFocus()
         OnFocusNode();
     } else if (focusType_ == FocusType::SCOPE) {
         OnFocusScope();
-    } else {
-        TAG_LOGW(AceLogTag::ACE_FOCUS, "Current node focus type: %{public}d is invalid.", focusType_);
     }
 }
 
@@ -986,8 +974,6 @@ void FocusHub::OnBlur()
         OnBlurNode();
     } else if (focusType_ == FocusType::SCOPE) {
         OnBlurScope();
-    } else {
-        TAG_LOGW(AceLogTag::ACE_FOCUS, "Current node focus type: %{public}d is invalid.", focusType_);
     }
 }
 
@@ -1158,7 +1144,6 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
 
     if (focusStyleType_ == FocusStyleType::CUSTOM_BORDER) {
         if (!HasPaintRect()) {
-            TAG_LOGW(AceLogTag::ACE_FOCUS, "PaintFocusState: frame rect has no value while focus style is CUSTOMIZE");
             return false;
         }
         renderContext->PaintFocusState(GetPaintRect(), paintColor, paintWidth);
@@ -1391,7 +1376,6 @@ bool FocusHub::AcceptFocusByRectOfLastFocusScope(const RectF& rect)
 bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
 {
     if (!rect.IsValid()) {
-        TAG_LOGW(AceLogTag::ACE_FOCUS, "the rect is not valid");
         return false;
     }
 
@@ -1513,7 +1497,6 @@ bool FocusHub::GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t ta
     auto iter = tabIndexNodes.begin();
     std::advance(iter, tabNodeIdx);
     if (iter == tabIndexNodes.end()) {
-        TAG_LOGW(AceLogTag::ACE_FOCUS, "Tab index node is not found");
         return false;
     }
     auto nodeNeedToFocus = (*iter).second.Upgrade();
@@ -1525,7 +1508,7 @@ bool FocusHub::GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t ta
         auto defaultFocusNode = nodeNeedToFocus->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT);
         if (defaultFocusNode) {
             if (!defaultFocusNode->IsFocusableWholePath()) {
-                TAG_LOGW(AceLogTag::ACE_FOCUS, "node(%{public}d) is not focusable", tabNodeIdx);
+                TAG_LOGI(AceLogTag::ACE_FOCUS, "node(%{public}d) is not focusable", tabNodeIdx);
                 return false;
             }
             nodeNeedToFocus->SetIsDefaultGroupHasFocused(true);
@@ -1533,7 +1516,7 @@ bool FocusHub::GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t ta
         }
     }
     if (!nodeNeedToFocus->IsFocusableWholePath()) {
-        TAG_LOGW(AceLogTag::ACE_FOCUS, "node(%{public}d) is not focusable", tabNodeIdx);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "node(%{public}d) is not focusable", tabNodeIdx);
         return false;
     }
     return nodeNeedToFocus->RequestFocusImmediately();
