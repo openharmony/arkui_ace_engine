@@ -162,9 +162,9 @@ public:
 
     void ClearUserDefinedIdealSize(bool clearWidth, bool clearHeight);
 
-    void UpdateCalcMinSize(const CalcSize& value);
+    virtual void UpdateCalcMinSize(const CalcSize& value);
 
-    void UpdateCalcMaxSize(const CalcSize& value);
+    virtual void UpdateCalcMaxSize(const CalcSize& value);
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
