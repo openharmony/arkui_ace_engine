@@ -4904,6 +4904,19 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
 }
 
+void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
+    if (!CheckJSCallbackInfo("JsBlendMode", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetBlendMode(BlendMode::NORMAL);
+        return;
+    }
+    int16_t value = 0;
+    ParseJsInteger<int16_t>(info[0], value);
+    auto blendMode = static_cast<BlendMode>(value);
+    ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+}
+
 void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -5845,6 +5858,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("gridOffset", &JSViewAbstract::JsGridOffset);
     JSClass<JSViewAbstract>::StaticMethod("useSizeType", &JSViewAbstract::JsUseSizeType);
     JSClass<JSViewAbstract>::StaticMethod("shadow", &JSViewAbstract::JsShadow);
+    JSClass<JSViewAbstract>::StaticMethod("blendMode", &JSViewAbstract::JsBlendMode);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);

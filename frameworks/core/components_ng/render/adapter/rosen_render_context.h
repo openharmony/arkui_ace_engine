@@ -155,6 +155,7 @@ public:
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
 
     void OnBackShadowUpdate(const Shadow& shadow) override;
+    void OnBackBlendModeUpdate(BlendMode blendMode) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
