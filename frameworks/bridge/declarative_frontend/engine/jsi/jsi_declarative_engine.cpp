@@ -888,6 +888,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
             return false;
         }
         nativeEngine_ = nativeArkEngine;
+        arkRuntime->SetNativeEngine(nativeArkEngine);
     }
     engineInstance_->SetInstanceId(instanceId_);
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());

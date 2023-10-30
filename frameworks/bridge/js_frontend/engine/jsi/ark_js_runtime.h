@@ -23,6 +23,7 @@
 #include <memory>
 
 #include "ecmascript/napi/include/jsnapi.h"
+#include "native_engine/native_engine.h"
 
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 
@@ -150,6 +151,11 @@ public:
         language_ = language;
     }
 
+    void SetNativeEngine(NativeEngine* nativeEngine)
+    {
+        nativeEngine_ = nativeEngine;
+    }
+
 #if defined(PREVIEW)
     void SetPreviewFlag(bool flag)
     {
@@ -210,6 +216,7 @@ private:
     bool isDebugMode_ = false;
     DebuggerPostTask debuggerPostTask_;
     ErrorEventHandler errorCallback_;
+    NativeEngine* nativeEngine_;
 #if defined(PREVIEW)
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};
