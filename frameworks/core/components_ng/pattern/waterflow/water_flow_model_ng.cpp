@@ -68,7 +68,7 @@ void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr
 void WaterFlowModelNG::SetColumnsTemplate(const std::string& value)
 {
     if (value.empty()) {
-        LOGE("Columns Template [%{public}s] is not valid.", value.c_str());
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Columns Template [%{public}s] is not valid.", value.c_str());
         ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, "1fr");
         return;
     }
@@ -78,7 +78,7 @@ void WaterFlowModelNG::SetColumnsTemplate(const std::string& value)
 void WaterFlowModelNG::SetRowsTemplate(const std::string& value)
 {
     if (value.empty()) {
-        LOGE("Rows Template [%{public}s] is not valid.", value.c_str());
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Rows Template [%{public}s] is not valid.", value.c_str());
         ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, "1fr");
         return;
     }
@@ -88,7 +88,7 @@ void WaterFlowModelNG::SetRowsTemplate(const std::string& value)
 void WaterFlowModelNG::SetItemMinWidth(const Dimension& minWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -101,7 +101,7 @@ void WaterFlowModelNG::SetItemMinWidth(const Dimension& minWidth)
 void WaterFlowModelNG::SetItemMinHeight(const Dimension& minHeight)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -114,7 +114,7 @@ void WaterFlowModelNG::SetItemMinHeight(const Dimension& minHeight)
 void WaterFlowModelNG::SetItemMaxWidth(const Dimension& maxWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -127,7 +127,7 @@ void WaterFlowModelNG::SetItemMaxWidth(const Dimension& maxWidth)
 void WaterFlowModelNG::SetItemMaxHeight(const Dimension& maxHeight)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

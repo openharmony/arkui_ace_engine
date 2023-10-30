@@ -1047,22 +1047,15 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
         }
     }
     CHECK_NULL_VOID(menu);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->SetMenuHide();
-    if (menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE) {
-        CleanMenuInSubWindow();
-        return;
-    }
     AnimationOption option;
+    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
+    option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent([weak = WeakClaim(this), id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
+        context->GetTaskExecutor()->PostTask(
             [weak, id]() {
                 ContainerScope scope(id);
                 auto overlayManager = weak.Upgrade();
@@ -1070,8 +1063,26 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
             },
             TaskExecutor::TaskType::UI);
     });
-    ShowPreviewDisappearAnimation(menuWrapperPattern);
-    ShowContextMenuDisappearAnimation(option, menuWrapperPattern);
+    auto context = menu->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetMenuHide();
+    auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
+    if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+        ShowPreviewDisappearAnimation(menuWrapperPattern);
+        ShowContextMenuDisappearAnimation(option, menuWrapperPattern);
+    } else {
+        AnimationUtils::Animate(
+            option,
+            [context, menuAnimationOffset]() {
+                context->UpdateOpacity(0.0);
+                context->UpdateOffset(menuAnimationOffset);
+            },
+            option.GetOnFinishEvent());
+    }
 }
 
 void OverlayManager::CleanPreviewInSubWindow()

@@ -71,6 +71,7 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_RATING, "AceRating" },
     { AceLogTag::ACE_LIST, "AceList" },
     { AceLogTag::ACE_NAVIGATION, "AceNavigation" },
+    { AceLogTag::ACE_WATERFLOW, "AceWaterFlow" },
     { AceLogTag::ACE_LOADINGPROGRESS, "AceLoadingProgress" },
     { AceLogTag::ACE_PATTERNLOCK, "AcePatternLock" },
     { AceLogTag::ACE_PROGRESS, "AceProgress" },
