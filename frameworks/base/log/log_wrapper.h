@@ -114,6 +114,9 @@ enum class AceLogTag : uint8_t {
     ACE_BORDER_IMAGE,
     ACE_LINEAR_SPLIT,
     ACE_GRID,
+    ACE_IF,
+    ACE_FOREACH,
+    ACE_LAZYFOREACH,
 };
 
 enum class LogDomain : uint32_t {

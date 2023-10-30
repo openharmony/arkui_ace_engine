@@ -83,6 +83,9 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_BORDER_IMAGE, "AceBorderImage" },
     { AceLogTag::ACE_LINEAR_SPLIT, "AceLinearSplit" },
     { AceLogTag::ACE_GRID, "AceGrid" },
+    { AceLogTag::ACE_IF, "AceIf" },
+    { AceLogTag::ACE_FOREACH, "AceForEach" },
+    { AceLogTag::ACE_LAZYFOREACH, "AceLazyForEach" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";
