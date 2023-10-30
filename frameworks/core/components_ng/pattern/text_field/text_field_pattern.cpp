@@ -2600,6 +2600,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         return;
     }
     InsertValueOperation(insertValue);
+    FireOnTextChangeEvent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3261,6 +3262,7 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     auto start = std::max(selectController_->GetCaretIndex() - length, 0);
     contentController_->erase(start, length);
     selectController_->UpdateCaretIndex(start);
+    FireOnTextChangeEvent();
     CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
@@ -3277,6 +3279,7 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
 {
     contentController_->erase(selectController_->GetCaretIndex(), length);
+    FireOnTextChangeEvent();
     CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
