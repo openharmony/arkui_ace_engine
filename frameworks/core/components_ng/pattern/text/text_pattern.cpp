@@ -519,21 +519,32 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     bool isClickOnSpan = false;
     if (textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY())) &&
         !spans_.empty() && paragraph_) {
-        Offset textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
+        PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
             info.GetLocalLocation().GetY() - textContentRect.GetY() };
-        auto position = paragraph_->GetGlyphIndexByCoordinate(textOffset);
+        int32_t start = 0;
         for (const auto& item : spans_) {
-            if (item && position <= item->position) {
-                if (!item->onClick) {
+            if (!item) {
+                continue;
+            }
+            std::vector<RectF> selectedRects;
+            paragraph_->GetRectsForRange(start, item->position, selectedRects);
+            start =  item->position;
+            for (auto&& rect : selectedRects) {
+                if (rect.IsInRegion(textOffset)) {
+                    if (!item->onClick) {
+                        break;
+                    }
+                    GestureEvent spanClickinfo = info;
+                    EventTarget target = info.GetTarget();
+                    target.area.SetWidth(Dimension(0.0f));
+                    target.area.SetHeight(Dimension(0.0f));
+                    spanClickinfo.SetTarget(target);
+                    item->onClick(spanClickinfo);
+                    isClickOnSpan = true;
                     break;
                 }
-                GestureEvent spanClickinfo = info;
-                EventTarget target = info.GetTarget();
-                target.area.SetWidth(Dimension(0.0f));
-                target.area.SetHeight(Dimension(0.0f));
-                spanClickinfo.SetTarget(target);
-                item->onClick(spanClickinfo);
-                isClickOnSpan = true;
+            }
+            if (isClickOnSpan) {
                 break;
             }
         }
