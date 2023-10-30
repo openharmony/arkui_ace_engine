@@ -102,7 +102,7 @@ public:
     }
 
     void AttachScheduler(const WeakPtr<PipelineBase>& context);
-    void AttachSchedulerOnContainer();
+    bool AttachSchedulerOnContainer();
     bool HasScheduler() const;
 
     // Every interpolate animation needs to add itself into animator and use the controller to drive.

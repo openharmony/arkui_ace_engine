@@ -100,11 +100,12 @@ void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
     scheduler_ = SchedulerBuilder::Build(callback, context);
 }
 
-void Animator::AttachSchedulerOnContainer()
+bool Animator::AttachSchedulerOnContainer()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     AttachScheduler(pipeline);
+    return true;
 }
 
 bool Animator::HasScheduler() const
