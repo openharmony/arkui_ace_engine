@@ -86,6 +86,8 @@ public:
     void OnWindowHide() override;
     void OnWindowShow() override;
     void OnVisibleChange(bool isVisible) override;
+    void OnRecycle() override;
+    void OnReuse() override;
 
     void EnableDrag();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;

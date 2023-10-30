@@ -452,6 +452,26 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     pipeline->FlushMessages();
 }
 
+// when recycle image component, release the pixelmap resource
+void ImagePattern::OnRecycle()
+{
+    loadingCtx_ = nullptr;
+    image_ = nullptr;
+    altLoadingCtx_ = nullptr;
+    altImage_ = nullptr;
+
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->ClearDrawCommands();
+}
+
+void ImagePattern::OnReuse()
+{
+    LoadImageDataIfNeed();
+}
+
 void ImagePattern::OnWindowHide()
 {
     isShow_ = false;
