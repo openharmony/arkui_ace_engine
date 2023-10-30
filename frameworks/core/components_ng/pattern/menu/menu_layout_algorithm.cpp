@@ -1465,7 +1465,8 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    auto maxSpaceHeight = std::max(topSpace_, bottomSpace_);
+    float factor = 0.8;
+    float maxSpaceHeight = wrapperSize_.Height() * factor;
     constraint.maxSize.SetHeight(maxSpaceHeight);
 }
 
