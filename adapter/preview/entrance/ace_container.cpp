@@ -597,7 +597,7 @@ void AceContainer::NativeOnConfigurationUpdated(int32_t instanceId)
         return;
     }
 
-    std::unique_ptr<JsonValue> localeValue = JsonUtil::Create(false);
+    std::unique_ptr<JsonValue> localeValue = JsonUtil::Create(true);
     localeValue->Put(LANGUAGE_TAG, AceApplicationInfo::GetInstance().GetLanguage().c_str());
     localeValue->Put(COUNTRY_TAG, AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
     localeValue->Put(
