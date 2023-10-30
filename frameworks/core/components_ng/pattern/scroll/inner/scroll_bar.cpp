@@ -301,7 +301,7 @@ float ScrollBar::CalcPatternOffset(float scrollBarOffset) const
     if (!isDriving_ || NearZero(barRegionSize_ - activeRect_.Height())) {
         return scrollBarOffset;
     }
-    double mainSize = (positionMode_ == PositionMode::BOTTOM ? viewPortSize_.Width() : viewPortSize_.Height());
+    auto mainSize = (positionMode_ == PositionMode::BOTTOM ? viewPortSize_.Width() : viewPortSize_.Height());
     return -scrollBarOffset * (estimatedHeight_ - mainSize) / (barRegionSize_ - activeRect_.Height());
 }
 
