@@ -93,6 +93,8 @@ protected:
     void ConstructTextStyles(
         const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder);
     void ErrorTextMeasureContent(const std::string& content, const RefPtr<TextFieldTheme>& theme);
+    LayoutConstraintF CalculateContentMaxSizeWithCalculateConstraint(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
     void UpdateUnitLayout(LayoutWrapper* layoutWrapper);
