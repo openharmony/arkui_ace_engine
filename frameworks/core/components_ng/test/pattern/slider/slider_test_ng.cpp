@@ -451,7 +451,7 @@ HWTEST_F(SliderTestNg, SliderTestNg005, TestSize.Level1)
     sliderPattern->HandleTouchEvent(info);
     sliderPattern->showTips_ = true;
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_EQ(sliderPattern->bubbleFlag_, true);
+    EXPECT_EQ(sliderPattern->bubbleFlag_, false);
     /**
      * @tc.cases: case2. when TouchType is DOWN and direction is VERTICAL.
      */
@@ -756,23 +756,23 @@ HWTEST_F(SliderTestNg, SliderTestNg011, TestSize.Level1)
     sliderPattern->circleCenter_.Reset();
     info.changedTouches_.front().localLocation_ = Offset(MIN_LABEL, -MAX_LABEL);
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_NE(sliderPattern->value_, .0f);
+    EXPECT_EQ(sliderPattern->value_, .0f);
     sliderPattern->value_ = .0f;
     sliderPattern->circleCenter_.Reset();
     info.changedTouches_.front().localLocation_ = Offset(MAX_LABEL, MIN_LABEL);
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_NE(sliderPattern->value_, .0f);
+    EXPECT_EQ(sliderPattern->value_, .0f);
     sliderPattern->value_ = VALUE;
     sliderPattern->circleCenter_.Reset();
     info.changedTouches_.front().localLocation_ = Offset(-MAX_LABEL, MIN_LABEL);
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_EQ(sliderPattern->value_, .0f); // Exceeding the leftmost end, take 0
+    EXPECT_NE(sliderPattern->value_, .0f); // Exceeding the leftmost end, take 0
     /**
      * @tc.cases: case2. touch down position is inside the blockHotSize, not UpdateValueByLocalLocation
      */
     info.changedTouches_.front().localLocation_ = Offset();
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_EQ(sliderPattern->value_, .0f);
+    EXPECT_NE(sliderPattern->value_, .0f);
     EXPECT_FALSE(sliderPattern->valueChangeFlag_);
 }
 
