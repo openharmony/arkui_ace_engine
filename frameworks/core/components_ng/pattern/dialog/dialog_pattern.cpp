@@ -631,7 +631,7 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
 
     AddButtonAndDivider(buttons, container, isVertical);
     container->MarkModifyDone();
-
+    buttonContainer_ = container;
     return container;
 }
 
@@ -874,11 +874,11 @@ void DialogPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     if (!GetDialogProperties().customStyle) {
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto dialogTheme = context->GetTheme<DialogTheme>();
-        CHECK_NULL_VOID(dialogTheme);
         auto col = DynamicCast<FrameNode>(host->GetChildAtIndex(START_CHILD_INDEX));
         CHECK_NULL_VOID(col);
         auto colContext = col->GetContext();
@@ -887,9 +887,8 @@ void DialogPattern::OnColorConfigurationUpdate()
         CHECK_NULL_VOID(colRenderContext);
         colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
     }
-    auto menuNode = menuNode_.Upgrade();
-    CHECK_NULL_VOID(menuNode);
-    for (const auto& buttonNode : menuNode->GetChildren()) {
+    CHECK_NULL_VOID(buttonContainer_);
+    for (const auto& buttonNode : buttonContainer_->GetChildren()) {
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
         }
@@ -898,6 +897,13 @@ void DialogPattern::OnColorConfigurationUpdate()
         auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSkipColorConfigurationUpdate();
+        auto buttonTextNode = DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
+        CHECK_NULL_VOID(buttonTextNode);
+        auto buttonTextLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(buttonTextLayoutProperty);
+        buttonTextLayoutProperty->UpdateTextColor(dialogTheme->GetButtonDefaultFontColor());
+        buttonTextNode->MarkModifyDone();
+        buttonTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     OnModifyDone();
     host->MarkDirtyNode();
