@@ -138,6 +138,10 @@ private:
     void ProcessUIExtensionSessionBackgroundResult(OHOS::Rosen::WSError errcode);
     void ProcessUIExtensionSessionDestructionResult(OHOS::Rosen::WSError errcode);
 
+    void onConfigurationUpdate();
+    void OnLanguageConfigurationUpdate() override;
+    void OnColorConfigurationUpdate() override;
+
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
 
