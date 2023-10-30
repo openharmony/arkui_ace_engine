@@ -126,7 +126,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsDragging() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
+    if (dragDropManager->IsDragging() ||
+        dragDropManager->IsMsdpDragging() ||
+        (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
         LOGD("not handle because of dragging now.");
         return;
     }

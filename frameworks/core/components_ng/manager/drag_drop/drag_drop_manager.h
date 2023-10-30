@@ -102,6 +102,7 @@ public:
     std::string GetExtraInfo();
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
+    bool IsMsdpDragging();
 #endif // ENABLE_DRAG_FRAMEWORK
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
     void UpdateNotifyDragEvent(

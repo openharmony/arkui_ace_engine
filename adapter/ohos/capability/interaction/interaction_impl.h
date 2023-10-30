@@ -37,6 +37,8 @@ public:
     int32_t GetUdKey(std::string& udKey) override;
 
     int32_t GetShadowOffset(ShadowOffsetData shadowOffsetData) override;
+
+    int32_t GetDragState(MsdpDragState& dragState) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_INTERACTION_IMPL_H

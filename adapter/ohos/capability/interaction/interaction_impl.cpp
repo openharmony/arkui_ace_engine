@@ -132,5 +132,33 @@ DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult)
             return DragRet::DRAG_SUCCESS;
     }
 }
+
+int32_t InteractionImpl::GetDragState(MsdpDragState& dragState)
+{
+    Msdp::DeviceStatus::DragState state;
+    int32_t ret = InteractionManager::GetInstance()->GetDragState(state);
+    switch (state) {
+        case Msdp::DeviceStatus::DragState::ERROR:
+            dragState = MsdpDragState::DragState::ERROR;
+            break;
+        case Msdp::DeviceStatus::DragState::START:
+            dragState = MsdpDragState::DragState::START;
+            break;
+        case Msdp::DeviceStatus::DragState::STOP:
+            dragState = MsdpDragState::DragState::STOP;
+            break;
+        case Msdp::DeviceStatus::DragState::CANCEL:
+            dragState = MsdpDragState::DragState::CANCEL;
+            break;
+        case Msdp::DeviceStatus::DragState::MOTION_DRAGGING:
+            dragState = MsdpDragState::DragState::MOTION_DRAGGING;
+            break;
+        default:
+            dragState = MsdpDragState::DragState::ERROR;
+            LOGW("unknow msdp drag state: %d", state);
+            break;
+    }
+    return ret;
+}
 } // namespace OHOS::Ace
 #endif // ENABLE_DRAG_FRAMEWORK

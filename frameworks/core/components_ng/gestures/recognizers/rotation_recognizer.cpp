@@ -131,11 +131,16 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
 
 double RotationRecognizer::ComputeAngle()
 {
-    double fx = touchPoints_[0].x;
-    double fy = touchPoints_[0].y;
-    double sx = touchPoints_[1].x;
-    double sy = touchPoints_[1].y;
-    double angle = atan2(fy - sy, fx - sx) * 180.0 / M_PI;
+    double angle = 0.0;
+    if (touchPoints_.size() >= 2) {
+        auto it = touchPoints_.begin();
+        double fx = it->second.x;
+        double fy = it->second.y;
+        ++it;
+        double sx = it->second.x;
+        double sy = it->second.y;
+        angle = atan2(fy - sy, fx - sx) * 180.0 / M_PI;
+    }
     return angle;
 }
 
