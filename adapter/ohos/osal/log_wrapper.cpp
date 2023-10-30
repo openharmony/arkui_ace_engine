@@ -78,6 +78,9 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_ACCESSIBILITY, "AceAccessibility" },
     { AceLogTag::ACE_ROUTER, "AceRouter" },
     { AceLogTag::ACE_THEME, "AceTheme" },
+    { AceLogTag::ACE_BORDER, "AceBorder" },
+    { AceLogTag::ACE_BORDER_IMAGE, "AceBorderImage" },
+    { AceLogTag::ACE_LINEAR_SPLIT, "AceLinearSplit" },
     { AceLogTag::ACE_GRID, "AceGrid" },
 };
 

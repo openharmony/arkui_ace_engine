@@ -1782,11 +1782,9 @@ DataReadyNotifyTask RosenRenderContext::CreateBorderImageDataReadyCallback()
         CHECK_NULL_VOID(rosenRenderContext);
         auto imageSourceInfo = rosenRenderContext->GetBorderImageSource().value_or(ImageSourceInfo(""));
         if (imageSourceInfo != sourceInfo) {
-            LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
-                imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        LOGI("borderImage data ready %{public}s", sourceInfo.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_BORDER_IMAGE, "borderImage data ready %{public}s", sourceInfo.ToString().c_str());
         rosenRenderContext->bdImageLoadingCtx_->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
     };
 }
@@ -1798,13 +1796,11 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
         CHECK_NULL_VOID(ctx);
         auto imageSourceInfo = ctx->GetBorderImageSource().value_or(ImageSourceInfo(""));
         if (imageSourceInfo != sourceInfo) {
-            LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
-                imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
         ctx->bdImage_ = ctx->bdImageLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bdImage_);
-        LOGI("borderImage load success %{public}s", sourceInfo.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_BORDER_IMAGE, "borderImage load success %{public}s", sourceInfo.ToString().c_str());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             ctx->PaintBorderImage();
             ctx->RequestNextFrame();
@@ -1891,7 +1887,6 @@ void RosenRenderContext::OnBorderImageGradientUpdate(const Gradient& gradient)
 {
     CHECK_NULL_VOID(rsNode_);
     if (!gradient.IsValid()) {
-        LOGE("Gradient not valid");
         return;
     }
     if (GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
@@ -1907,7 +1902,6 @@ void RosenRenderContext::PaintBorderImageGradient()
     CHECK_NULL_VOID(GetBorderImageGradient());
     auto gradient = GetBorderImageGradient().value();
     if (!gradient.IsValid()) {
-        LOGE("Gradient not valid");
         return;
     }
     auto paintSize = GetPaintRectWithoutTransform().GetSize();
