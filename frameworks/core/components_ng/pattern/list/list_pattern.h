@@ -114,6 +114,7 @@ public:
     bool IsAtBottom() const override;
     bool OutBoundaryCallback() override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
+    void HandleScrollBarOutBoundary();
 
     FocusPattern GetFocusPattern() const override
     {
