@@ -62,6 +62,10 @@ namespace Media {
 class PixelMap;
 } // namespace Media
 
+class RefBase;
+class Parcelable;
+class IRemoteObject;
+
 } // namespace OHOS
 
 class NativeEngine;
@@ -189,6 +193,18 @@ public:
      * If the sessionId is 0, refuse to close
      */
     virtual void CloseModalUIExtension(int32_t sessionId) = 0;
+
+    /**
+     * @description: Set parent ability token.
+     * @param token ability token.
+     */
+    virtual void SetParentToken(sptr<IRemoteObject> token);
+
+    /**
+     * @description: Get parent ability token.
+     * @return return parent ability token.
+     */
+    virtual sptr<IRemoteObject> GetParentToken();
 };
 
 } // namespace OHOS::Ace

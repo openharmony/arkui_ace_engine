@@ -20,6 +20,7 @@
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "ui_content.h"
+#include "iremote_object.h"
 
 namespace OHOS {
 namespace Ace {
@@ -78,6 +79,8 @@ public:
     MOCK_METHOD3(CreateModalUIExtension, int32_t(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config));
     MOCK_METHOD1(CloseModalUIExtension, void(int32_t sessionId));
+    MOCK_METHOD1(SetParentToken, void(sptr<IRemoteObject> token));
+    MOCK_METHOD0(GetParentToken, sptr<IRemoteObject>());
 };
 } // namespace Ace
 } // namespace OHOS

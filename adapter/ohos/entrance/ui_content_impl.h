@@ -26,6 +26,7 @@
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "iremote_object.h"
 
 namespace OHOS::Ace {
 
@@ -162,6 +163,9 @@ public:
         const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config) override;
     void CloseModalUIExtension(int32_t sessionId) override;
 
+    void SetParentToken(sptr<IRemoteObject> token) override;
+    sptr<IRemoteObject> GetParentToken() override;
+
 private:
     void InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -197,6 +201,8 @@ private:
     std::string formData_;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
     std::unique_ptr<DistributedUIManager> uiManager_;
+
+    sptr<IRemoteObject> parentToken_ = nullptr;
 };
 
 } // namespace OHOS::Ace

@@ -1141,6 +1141,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetWindowId(window_->GetWindowId());
     auto token = context->GetToken();
     container->SetToken(token);
+    container->SetParentToken(parentToken_);
     container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
@@ -1903,5 +1904,15 @@ void UIContentImpl::CloseModalUIExtension(int32_t sessionId)
             overlay->CloseModalUIExtension(sessionId);
         },
         TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetParentToken(sptr<IRemoteObject> token)
+{
+    parentToken_ = token;
+}
+
+sptr<IRemoteObject> UIContentImpl::GetParentToken()
+{
+    return parentToken_;
 }
 } // namespace OHOS::Ace

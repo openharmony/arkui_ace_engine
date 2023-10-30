@@ -26,6 +26,8 @@
 #include "adapter/preview/external/ability/context.h"
 #include "adapter/preview/external/ability/fa/fa_context.h"
 #include "adapter/preview/external/ability/stage/stage_context.h"
+#include "iremote_object.h"
+
 
 namespace OHOS::Ace {
 
@@ -112,6 +114,12 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config) override;
     void CloseModalUIExtension(int32_t sessionId) override;
+
+    void SetParentToken(sptr<IRemoteObject> token) override {}
+    sptr<IRemoteObject> GetParentToken() override
+    {
+        return nullptr;
+    }
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
