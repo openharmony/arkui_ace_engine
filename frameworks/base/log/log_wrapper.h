@@ -110,6 +110,8 @@ enum class AceLogTag : uint8_t {
     ACE_ROUTER,
     ACE_THEME,
     ACE_GRID,
+    ACE_PLUGINCOMPONENT,
+    ACE_UIEXTENSIONCOMPONENT,
 };
 
 enum class LogDomain : uint32_t {
