@@ -120,6 +120,7 @@ private:
     {
         CHECK_NULL_VOID(builder_);
         builder_->UnregisterDataChangeListener(Claim(this));
+        isRegisterListener_ = false;
     }
 
     void OnOffscreenProcess(bool recursive) override
