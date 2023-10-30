@@ -33,7 +33,7 @@ public:
 
         std::string ToString() const;
     };
-    std::optional<double> minParagraphFontSize;
+    std::optional<double> minParagraphFontSize = std::nullopt;
 
     int32_t GetIndex(Offset offset) const;
     float GetHeight() const;

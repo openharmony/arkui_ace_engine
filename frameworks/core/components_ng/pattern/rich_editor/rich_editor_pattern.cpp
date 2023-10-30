@@ -938,6 +938,8 @@ void RichEditorPattern::UpdateSpanStyle(
             break;
         }
     }
+    textSelector_.Update(-1);
+    CloseSelectOverlay();
 }
 
 std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, int32_t end)
