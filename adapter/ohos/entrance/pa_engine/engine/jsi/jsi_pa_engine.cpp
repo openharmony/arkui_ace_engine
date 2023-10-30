@@ -169,10 +169,10 @@ void JsiPaEngine::RegisterUncaughtExceptionHandler()
     JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
     uncaughtExceptionInfo.uncaughtTask = [](std::string summary, const JsEnv::ErrorObject errorObj) {
         std::string packageName = AceApplicationInfo::GetInstance().GetPackageName();
-        std::map<std::string, std::string> errorInfo = {
-            { "name", errorObj.name },
-            { "message", errorObj.message },
-            { "stack", errorObj.stack },
+        JsErrorObject errorInfo = {
+            .name = errorObj.name,
+            .message = errorObj.message,
+            .stack = errorObj.stack,
         };
         EventReport::JsErrReport(packageName, "", summary);
         ExceptionHandler::HandleJsException(summary, errorInfo);

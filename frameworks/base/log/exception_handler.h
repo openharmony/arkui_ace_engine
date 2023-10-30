@@ -16,16 +16,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_EXCEPTION_HANDLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_EXCEPTION_HANDLER_H
 
-#include <map>
 #include <string>
 
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
+    struct JsErrorObject {
+    std::string name;
+    std::string message;
+    std::string stack;
+};
 class ACE_FORCE_EXPORT ExceptionHandler {
 public:
     static void HandleJsException(
-        const std::string& exceptionMsg, std::map<std::string, std::string>& errorInfo);
+        const std::string& exceptionMsg, const JsErrorObject& errorInfo);
 };
 } // namespace OHOS::Ace
 

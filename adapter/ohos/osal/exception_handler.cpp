@@ -22,6 +22,9 @@
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
+const std::string NAME = "name";
+const std::string MESSAGE = "message";
+const std::string STACK = "stack";
 static void KillApplicationByUid()
 {
     auto appMgrClient = std::make_unique<AppExecFwk::AppMgrClient>();
@@ -39,16 +42,16 @@ static void KillApplicationByUid()
 }
 
 void ExceptionHandler::HandleJsException(
-    const std::string& exceptionMsg, std::map<std::string, std::string>& errorInfo)
+    const std::string& exceptionMsg, const JsErrorObject& errorInfo)
 {
     AppExecFwk::ErrorObject errorObject = {
-        .name = errorInfo.find("name") != errorInfo.end() ? errorInfo["name"] : "",
-        .message = errorInfo.find("message") != errorInfo.end() ? errorInfo["message"] : "",
-        .stack = errorInfo.find("stack") != errorInfo.end() ? errorInfo["stack"] : ""
+        .name = errorInfo.name,
+        .message = errorInfo.message,
+        .stack = errorInfo.stack
     };
     auto hasErrorObserver = AppExecFwk::ApplicationDataManager::GetInstance().NotifyUnhandledException(exceptionMsg);
-    auto secErrorObserver = AppExecFwk::ApplicationDataManager::GetInstance().NotifyExceptionObject(errorObject);
-    if (!hasErrorObserver && secErrorObserver) {
+    auto isNotifySuccess = AppExecFwk::ApplicationDataManager::GetInstance().NotifyExceptionObject(errorObject);
+    if (!hasErrorObserver && !isNotifySuccess) {
         KillApplicationByUid();
     }
 }

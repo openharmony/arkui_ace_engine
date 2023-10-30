@@ -29,6 +29,9 @@
 
 namespace OHOS::Ace::Framework {
 constexpr char JS_CRASH_CODE[] = "100001";
+const std::string NAME = "name";
+const std::string MESSAGE = "message";
+const std::string STACK = "stack";
 
 int32_t GetLineOffset(const AceType* data)
 {
@@ -122,27 +125,29 @@ std::string JsiBaseUtils::GenerateErrorMsg(
         .append("\"}");
     return errMsg;
 }
-std::map<std::string, std::string> JsiBaseUtils::GenerateErrorObject(
+
+JsErrorObject JsiBaseUtils::GenerateJsErrorObject(
     const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
 {
-    std::map<std::string, std::string> errorInfo;
-    if (!error) {
+    if(error == nullptr){
         return {};
     }
-
-    shared_ptr<JsValue> name = error->GetProperty(runtime,"name");
-    errorInfo["name"] = name->ToString(runtime);
-    shared_ptr<JsValue> message = error->GetProperty(runtime, "message");
-    errorInfo["message"] = message->ToString(runtime);
-    shared_ptr<JsValue> stack = error->GetProperty(runtime, "stack");
-    errorInfo["stack"] = stack->ToString(runtime);
-
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-#else
-#endif
-    return errorInfo;
-
+    JsErrorObject errInfo;
+    shared_ptr<JsValue> name = error->GetProperty(runtime, NAME);
+    if (name != nullptr) {
+        errInfo.name = name->ToString(runtime);
+    }
+    shared_ptr<JsValue> message = error->GetProperty(runtime, MESSAGE);
+    if (message != nullptr) {
+        errInfo.message = message->ToString(runtime);
+    }
+    shared_ptr<JsValue> stack = error->GetProperty(runtime, STACK);
+    if (stack != nullptr) {
+        errInfo.stack = stack->ToString(runtime);
+    }
+    return errInfo;
 }
+
 std::string JsiBaseUtils::GenerateSummaryBody(
     const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
 {
@@ -582,7 +587,7 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
         arkJSRuntime->GetErrorEventHandler()(JS_CRASH_CODE, msg);
         return;
     }
-    auto errorInfo = GenerateErrorObject(error,runtime);
+    auto errorInfo = GenerateJsErrorObject(error,runtime);
 
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
