@@ -216,6 +216,8 @@ void NavigationPattern::CheckTopNavPathChange(
                 NotifyPageHide(preTopNavPath->first);
                 eventHub->FireOnHiddenEvent();
                 navDestinationPattern->SetIsOnShow(false);
+                // The navigations in NavDestination should be fired the hidden event
+                NavigationPattern::FireNavigationStateChange(preTopNavDestination, false);
             }
             auto focusHub = preTopNavDestination->GetOrCreateFocusHub();
             focusHub->SetParentFocusable(false);
@@ -262,6 +264,8 @@ void NavigationPattern::CheckTopNavPathChange(
                 NotifyPageShow(newTopNavPath->first);
                 eventHub->FireOnShownEvent();
                 navDestinationPattern->SetIsOnShow(true);
+                // The navigations in NavDestination should be fired the shown event
+                NavigationPattern::FireNavigationStateChange(newTopNavDestination, true);
             }
             auto focusHub = newTopNavDestination->GetOrCreateFocusHub();
             context->AddAfterLayoutTask([focusHub]() {
@@ -295,6 +299,73 @@ void NavigationPattern::CheckTopNavPathChange(
         });
     }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<UINode> NavigationPattern::FireNavDestinationStateChange(bool show)
+{
+    // Only need to check top NavDestination every time.
+    auto topNavPath = navigationStack_->GetTopNavPath();
+    if (!topNavPath.has_value()) {
+        return nullptr;
+    }
+
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(topNavPath->second));
+    CHECK_NULL_RETURN(navDestinationGroupNode, nullptr);
+
+    auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestinationGroupNode->GetPattern());
+    CHECK_NULL_RETURN(navDestinationPattern, nullptr);
+
+    // Same state, no need to fire event
+    if (navDestinationPattern->GetIsOnShow() == show) {
+        return navDestinationGroupNode;
+    }
+
+    auto eventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+
+    auto id = GetHost()->GetId();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_RETURN(pipeline, nullptr);
+
+    if (show) {
+        NotifyPageShow(topNavPath->first);
+        eventHub->FireOnShownEvent();
+        navDestinationPattern->SetIsOnShow(true);
+        // The change from hiding to showing of top page means the navigation return to screen,
+        // so add window state callback again.
+        pipeline->AddWindowStateChangedCallback(id);
+    } else {
+        NotifyPageHide(topNavPath->first);
+        eventHub->FireOnHiddenEvent();
+        navDestinationPattern->SetIsOnShow(false);
+        // The change from showing to hiding of top page means the navigation leaves from screen,
+        // so remove window state callback.
+        pipeline->RemoveWindowStateChangedCallback(id);
+    }
+
+    return navDestinationGroupNode;
+}
+
+void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bool show)
+{
+    const auto& children = node->GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+
+        auto navigation = AceType::DynamicCast<NavigationGroupNode>(child);
+        if (navigation) {
+            auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
+            CHECK_NULL_VOID(navigationPattern);
+            auto changedNode = navigationPattern->FireNavDestinationStateChange(show);
+            if (changedNode) {
+                // Ignore node from navigation to navdestination in node tree, start from navdestination node directly.
+                NavigationPattern::FireNavigationStateChange(changedNode, show);
+                continue;
+            }
+        }
+        NavigationPattern::FireNavigationStateChange(child, show);
+    }
 }
 
 void NavigationPattern::NotifyPageHide(const std::string& pageName)
