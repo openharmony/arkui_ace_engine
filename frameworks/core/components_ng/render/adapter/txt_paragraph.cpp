@@ -460,8 +460,8 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
 
 void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
 {
-#ifndef USE_GRAPHIC_TEXT_GINE
     CHECK_NULL_VOID(paragraph_);
+#ifndef USE_GRAPHIC_TEXT_GINE
     const auto& boxes = paragraph_->GetRectsForRange(
         start, end, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
@@ -555,6 +555,7 @@ void TxtParagraph::SetIndents(const std::vector<float>& indents)
 
 bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
 {
+    CHECK_NULL_RETURN(paragraph_, false);
 #ifndef USE_GRAPHIC_TEXT_GINE
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
 #else
