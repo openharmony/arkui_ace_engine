@@ -176,7 +176,7 @@ void ScrollBar::SetRectTrickRegion(
         }
         double normalWidth = NormalizeToPx(normalWidth_);
         if (LessOrEqual(activeSize, normalWidth)) {
-            if (!isOutOfBoundary_) {
+            if (GreatNotEqual(normalWidth, mainSize)) {
                 auto pipelineContext = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
@@ -250,7 +250,7 @@ void ScrollBar::SetRectTrickRegion(
         }
         // If the scrollBar length changes, start the adaptation animation
         if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation &&
-            !Negative(inactiveMainOffset)) {
+            !Negative(inactiveMainOffset) && !normalWidthUpdate_) {
             PlayScrollBarAdaptAnimation();
         } else {
             needAdaptAnimation_ = false;
@@ -298,10 +298,11 @@ double ScrollBar::GetNormalWidthToPx() const
 
 float ScrollBar::CalcPatternOffset(float scrollBarOffset) const
 {
-    if (!isDriving_ || NearZero(offsetScale_)) {
+    if (!isDriving_ || NearZero(barRegionSize_ - activeRect_.Height())) {
         return scrollBarOffset;
     }
-    return -scrollBarOffset / offsetScale_;
+    double mainSize = (positionMode_ == PositionMode::BOTTOM ? viewPortSize_.Width() : viewPortSize_.Height());
+    return -scrollBarOffset * (estimatedHeight_ - mainSize) / (barRegionSize_ - activeRect_.Height());
 }
 
 double ScrollBar::NormalizeToPx(const Dimension& dimension) const
