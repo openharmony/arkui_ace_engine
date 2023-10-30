@@ -129,7 +129,7 @@ std::string JsiBaseUtils::GenerateErrorMsg(
 JsErrorObject JsiBaseUtils::GenerateJsErrorObject(
     const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
 {
-    if(error == nullptr){
+    if (error == nullptr) {
         return {};
     }
     JsErrorObject errInfo;
@@ -587,7 +587,7 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
         arkJSRuntime->GetErrorEventHandler()(JS_CRASH_CODE, msg);
         return;
     }
-    auto errorInfo = GenerateJsErrorObject(error,runtime);
+    auto errorInfo = GenerateJsErrorObject(error, runtime);
 
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
