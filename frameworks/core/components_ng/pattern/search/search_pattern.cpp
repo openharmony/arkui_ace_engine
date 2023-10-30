@@ -18,6 +18,7 @@
 #include <cstdint>
 
 #include "base/geometry/rect.h"
+#include "base/utils/system_properties.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -724,8 +725,13 @@ void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
 void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
     int32_t duration, const RefPtr<Curve>& curve)
 {
+    auto colorMode = SystemProperties::GetColorMode();
     Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
     Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
+    if (colorMode == ColorMode::DARK) {
+        touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+        touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+    }
     Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
     Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
     renderContext->OnBackgroundColorUpdate(highlightStart);
