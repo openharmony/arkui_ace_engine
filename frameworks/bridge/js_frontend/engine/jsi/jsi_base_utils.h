@@ -82,6 +82,8 @@ private:
         const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime);
     static std::string GenerateSummaryBody(
         const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime);
+    static std::map<std::string, std::string> GenerateErrorObject(
+        const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime);
     static ErrorPos GetErrorPos(const std::string& rawStack);
     static std::string GetSourceCodeInfo(
         std::shared_ptr<JsRuntime> runtime, const shared_ptr<JsValue>& errorFunc, ErrorPos pos);

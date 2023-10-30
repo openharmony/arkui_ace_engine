@@ -38,10 +38,17 @@ static void KillApplicationByUid()
     }
 }
 
-void ExceptionHandler::HandleJsException(const std::string& exceptionMsg)
+void ExceptionHandler::HandleJsException(
+    const std::string& exceptionMsg, std::map<std::string, std::string>& errorInfo)
 {
+    AppExecFwk::ErrorObject errorObject = {
+        .name = errorInfo.find("name") != errorInfo.end() ? errorInfo["name"] : "",
+        .message = errorInfo.find("message") != errorInfo.end() ? errorInfo["message"] : "",
+        .stack = errorInfo.find("stack") != errorInfo.end() ? errorInfo["stack"] : ""
+    };
     auto hasErrorObserver = AppExecFwk::ApplicationDataManager::GetInstance().NotifyUnhandledException(exceptionMsg);
-    if (!hasErrorObserver) {
+    auto secErrorObserver = AppExecFwk::ApplicationDataManager::GetInstance().NotifyExceptionObject(errorObject);
+    if (!hasErrorObserver && secErrorObserver) {
         KillApplicationByUid();
     }
 }

@@ -122,7 +122,27 @@ std::string JsiBaseUtils::GenerateErrorMsg(
         .append("\"}");
     return errMsg;
 }
+std::map<std::string, std::string> JsiBaseUtils::GenerateErrorObject(
+    const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
+{
+    std::map<std::string, std::string> errorInfo;
+    if (!error) {
+        return {};
+    }
 
+    shared_ptr<JsValue> name = error->GetProperty(runtime,"name");
+    errorInfo["name"] = name->ToString(runtime);
+    shared_ptr<JsValue> message = error->GetProperty(runtime, "message");
+    errorInfo["message"] = message->ToString(runtime);
+    shared_ptr<JsValue> stack = error->GetProperty(runtime, "stack");
+    errorInfo["stack"] = stack->ToString(runtime);
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#else
+#endif
+    return errorInfo;
+
+}
 std::string JsiBaseUtils::GenerateSummaryBody(
     const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
 {
@@ -562,12 +582,13 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
         arkJSRuntime->GetErrorEventHandler()(JS_CRASH_CODE, msg);
         return;
     }
+    auto errorInfo = GenerateErrorObject(error,runtime);
 
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
     EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), "", summaryBody);
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-    ExceptionHandler::HandleJsException(summaryBody);
+    ExceptionHandler::HandleJsException(summaryBody, errorInfo);
 #endif
 }
 
