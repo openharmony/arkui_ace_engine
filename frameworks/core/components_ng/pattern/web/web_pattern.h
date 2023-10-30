@@ -365,6 +365,23 @@ public:
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
+    void SetWrapContent(bool isWrapContentEnabled)
+    {
+        isWrapContentEnabled_ = isWrapContentEnabled;
+    }
+    bool GetWrapContent() const
+    {
+        return isWrapContentEnabled_;
+    }
+    void OnRootLayerChanged(int width, int height);
+    int GetRootLayerWidth() const
+    {
+        return rootLayerWidth_;
+    }
+    int GetRootLayerHeight() const
+    {
+        return rootLayerHeight_;
+    }
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -571,6 +588,9 @@ private:
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;
     bool isFirstFlingScrollVelocity_ = true;
+    bool isWrapContentEnabled_ = false;
+    int32_t rootLayerWidth_ = 0;
+    int32_t rootLayerHeight_ = 0;
     WeakPtr<NestableScrollContainer> parent_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;

@@ -2507,4 +2507,13 @@ RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
     }
     return nullptr;
 }
+
+void WebPattern::OnRootLayerChanged(int width, int height)
+{
+    rootLayerWidth_ = width;
+    rootLayerHeight_ = height;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
 } // namespace OHOS::Ace::NG
