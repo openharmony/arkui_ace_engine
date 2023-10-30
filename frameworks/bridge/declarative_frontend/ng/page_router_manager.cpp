@@ -910,10 +910,12 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
 
     if (!OnPageReady(pageNode, needHideLast, needTransition)) {
         pageRouterStack_.pop_back();
+        LOGE("LoadPage OnPageReady Failed");
         return;
     }
     AccessibilityEventType type = AccessibilityEventType::CHANGE;
     pageNode->OnAccessibilityEvent(type);
+    LOGI("LoadPage Success");
 }
 
 void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
@@ -937,9 +939,11 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
     }
 
     if (!OnPageReady(pageNode, needHideLast, false, isCardRouter_, cardId)) {
+        LOGE("LoadCard OnPageReady Failed");
         pageRouterStack_.pop_back();
         return;
     }
+    LOGI("LoadCard Success");
 }
 
 void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const RouterPageInfo& target,
@@ -1006,6 +1010,7 @@ void PageRouterManager::PopPage(const std::string& params, bool needShowNext, bo
 {
     CHECK_RUN_ON(JS);
     if (pageRouterStack_.empty()) {
+        LOGW("Page router stack size is zero, can not pop");
         return;
     }
     if (needShowNext && (pageRouterStack_.size() == 1)) {
