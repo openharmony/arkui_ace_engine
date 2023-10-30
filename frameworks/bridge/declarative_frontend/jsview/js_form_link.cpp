@@ -48,7 +48,6 @@ namespace OHOS::Ace::Framework {
 void JSFormLink::Create(const JSCallbackInfo& info)
 {
     if (info.Length() == 0 || !info[0]->IsObject()) {
-        LOGE("form_link create failed due to construct param is empty or type is not object");
         return;
     }
     auto action = info[0]->ToString();

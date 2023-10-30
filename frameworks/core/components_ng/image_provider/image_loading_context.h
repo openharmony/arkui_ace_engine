@@ -69,6 +69,7 @@ public:
     void DataReadyCallback(const RefPtr<ImageObject>& imageObj);
     void SuccessCallback(const RefPtr<CanvasImage>& canvasImage);
     void FailCallback(const std::string& errorMsg);
+    const std::string GetCurrentLoadingState();
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
@@ -89,6 +90,8 @@ private:
     void OnMakeCanvasImage();
     void OnLoadSuccess();
     void OnLoadFail();
+    void DownloadImage();
+    bool NotifyReadyIfCacheHit();
 
     // round up int to the nearest 2-fold proportion of image width
     // REQUIRE: value > 0, image width > 0
@@ -99,7 +102,7 @@ private:
     {
         return dstSize_.IsPositive() && dstSize != dstSize_;
     }
-    
+
     const ImageSourceInfo src_;
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;

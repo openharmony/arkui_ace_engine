@@ -95,7 +95,6 @@ std::unique_ptr<DrawDelegate> AceViewPreview::GetDrawDelegate()
         layer->AddToScene(*flutterSceneBuilder, 0.0, 0.0);
         auto scene_ = flutterSceneBuilder->Build();
         if (!flutter::UIDartState::Current()) {
-            LOGE("uiDartState is nullptr");
             return;
         }
         auto window = flutter::UIDartState::Current()->window();

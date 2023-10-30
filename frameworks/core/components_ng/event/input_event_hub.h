@@ -59,13 +59,7 @@ public:
         mouseEventActuator_->RemoveInputEvent(onMouseEvent);
     }
 
-    void SetHoverEffect(HoverEffectType type)
-    {
-        if (!hoverEffectActuator_) {
-            hoverEffectActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
-        }
-        hoverEffectType_ = type;
-    }
+    void SetHoverEffect(HoverEffectType type);
 
     HoverEffectType GetHoverEffect()
     {

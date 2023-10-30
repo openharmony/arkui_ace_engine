@@ -70,6 +70,7 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives touch up event");
     if (currentFingers_ < fingers_) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {

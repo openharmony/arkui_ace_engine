@@ -98,7 +98,7 @@ void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
 void PipelineContext::WindowFocus(bool isFocus) {}
 
-void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco) {}
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate) {}
 
 void PipelineContext::SetContainerWindow(bool isShow) {}
 
@@ -260,7 +260,12 @@ const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
-void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
+void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
+{
+    if (task) {
+        task();
+    }
+}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
 
@@ -448,4 +453,6 @@ RefPtr<NG::FrameNode> NG::PipelineContext::FindNavigationNodeToHandleBack(const 
 {
     return nullptr;
 }
+
+void HandleSubwindow(bool isShow) {}
 } // namespace OHOS::Ace

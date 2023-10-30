@@ -145,6 +145,7 @@ private:
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
     Axis GetDirection() const;
 
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
@@ -201,6 +202,7 @@ private:
     bool isVisibleArea_ = true;
     bool isVisible_ = true;
     bool isShow_ = true;
+    int32_t fingerId_ = -1;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;

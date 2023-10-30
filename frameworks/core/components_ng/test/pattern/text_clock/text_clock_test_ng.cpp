@@ -39,8 +39,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HOURS_WEST = -8;
 constexpr int32_t DATE_INDEX = 0;
-constexpr int32_t HOURS_WEST2 = INT_MAX;
-constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 inline const std::string CLOCK_FORMAT = "aa h:m:s";
 inline const std::string UTC_1 = "1000000000000";
 inline const std::string UTC_2 = "2000000000000";
@@ -48,12 +46,6 @@ inline const std::string FORMAT_DATA = "08:00:00";
 inline const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const std::string EMPTY_TEXT = "";
 const std::string TEXTCLOCK_CONTENT = "08:00:00";
-
-int32_t GetSystemTimeZone()
-{
-    int32_t hoursWest = timezone / TOTAL_SECONDS_OF_HOUR;
-    return hoursWest;
-}
 } // namespace
 
 struct TestProperty {
@@ -227,6 +219,7 @@ HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level1)
     eventHub->FireChangeEvent(UTC_2);
     EXPECT_EQ(utc, UTC_2);
 }
+
 /**
  * @tc.name: TextClockTest004
  * @tc.desc: Test GetHourWest function of textclock.
@@ -241,25 +234,25 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
     testProperty.format = std::make_optional(CLOCK_FORMAT);
 
     /**
-     * @tc.steps: step2. construct different params.
+     * @tc.steps: step2. create frameNode to get layout properties.
+     * @tc.expected: related function is called.
      */
-    auto systemTimeZone = GetSystemTimeZone();
-    std::vector<std::vector<int32_t>> params = { { HOURS_WEST2, systemTimeZone }, { HOURS_WEST, HOURS_WEST } };
-    for (int turn = 0; turn < params.size(); turn++) {
-        testProperty.hoursWest = std::make_optional(params[turn][0]);
-        /**
-         * @tc.steps: step3. create textclock and get frameNode.
-         */
-        auto frameNode = CreateTextClockParagraph(testProperty);
-        ASSERT_NE(frameNode, nullptr);
-        /**
-         * @tc.steps: step4. get pattern.
-         * @tc.expected: related function is called and return right value.
-         */
-        auto pattern = frameNode->GetPattern<TextClockPattern>();
-        ASSERT_NE(pattern, nullptr);
-        EXPECT_EQ(pattern->GetHoursWest(), params[turn][1]);
-    }
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextClockLayoutProperty> textClockLayoutProperty =
+        AceType::DynamicCast<TextClockLayoutProperty>(layoutProperty);
+    ASSERT_NE(textClockLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. get pattern.
+     * @tc.expected: related function is called and return right value.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetHoursWest(), INT_MAX);
+    textClockLayoutProperty->UpdateHoursWest(HOURS_WEST);
+    EXPECT_EQ(pattern->GetHoursWest(), HOURS_WEST);
 }
 
 /**

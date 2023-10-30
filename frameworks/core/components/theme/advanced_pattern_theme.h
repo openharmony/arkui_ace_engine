@@ -57,7 +57,6 @@ public:
             }
             auto advancedPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_ADVANCED_PATTERN, nullptr);
             if (!advancedPattern) {
-                LOGE("find pattern of advance theme fail");
                 return;
             }
 
@@ -95,7 +94,6 @@ public:
             }
             auto advancedPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_ADVANCED_PATTERN, nullptr);
             if (!advancedPattern) {
-                LOGE("find pattern of advance theme fail");
                 return;
             }
 

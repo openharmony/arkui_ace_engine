@@ -46,10 +46,7 @@ public:
         jsViewMapperFunc_ = jsViewMapperFunc;
     }
 
-    ~JsForEachFunction() override
-    {
-        LOGD("Destroy: JsForEachFunction");
-    }
+    ~JsForEachFunction() override {}
 
     // This executes the IdentifierFunction on all items  in a array
     // returns the vector of keys/ids in the same order.

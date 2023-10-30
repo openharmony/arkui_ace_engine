@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("badge_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
-    "badge_test_ng.cpp",
-  ]
+  sources = [ "badge_test_ng.cpp" ]
 }

@@ -25,12 +25,15 @@ class ACE_EXPORT ImageSource : public AceType {
     DECLARE_ACE_TYPE(ImageSource, AceType)
 
 public:
+    using Size = std::pair<int32_t, int32_t>;
+
     static RefPtr<ImageSource> Create(int32_t fd);
     static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size);
+    static bool IsAstc(const uint8_t* data);
+    static Size GetASTCInfo(const uint8_t* data);
 
     virtual std::string GetProperty(const std::string& key) = 0;
 
-    using Size = std::pair<int32_t, int32_t>;
     virtual RefPtr<PixelMap> CreatePixelMap(const Size& size) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size) = 0;
     virtual Size GetImageSize() = 0;

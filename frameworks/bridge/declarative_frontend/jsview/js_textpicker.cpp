@@ -209,10 +209,10 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         ParseTextArrayParam param;
         NG::TextCascadePickerOptionsAttr optionsAttr;
-        bool isSingleRange = false;
         bool optionsMultiContentCheckErr = false;
         bool optionsCascadeContentCheckErr = false;
-        isSingleRange = ProcessSingleRangeValue(paramObject, param);
+        auto isSingleRange = ProcessSingleRangeValue(paramObject, param);
+        TextPickerModel::GetInstance()->SetSingleRange(isSingleRange);
         if (!isSingleRange) {
             if (!JSTextPickerParser::ParseMultiTextArray(paramObject, param)) {
                 param.options.clear();
@@ -259,7 +259,10 @@ bool JSTextPicker::ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec, Pa
     bool ret = true;
     auto getRange = paramObjec->GetProperty("range");
     if (getRange->IsNull() || getRange->IsUndefined()) {
-        return ret;
+        if (TextPickerModel::GetInstance()->GetSingleRange()) {
+            return ret;
+        }
+        return false;
     }
     if (!JSTextPickerParser::ParseTextArray(paramObjec, param)) {
         if (!JSTextPickerParser::ParseIconTextArray(paramObjec, param.result, param.kind, param.selected)) {

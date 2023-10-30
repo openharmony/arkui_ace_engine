@@ -23,8 +23,8 @@
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
@@ -56,6 +56,7 @@ constexpr static int32_t CONTENT_INDEX = 3;
 Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 Dimension SIDEBAR_WIDTH_NEGATIVE = -1.0_vp;
+constexpr static Dimension DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER = 1;
 constexpr static int32_t DEFAULT_CONTROL_BUTTON_ZINDEX = 3;
 } // namespace
@@ -319,7 +320,8 @@ void SideBarContainerPattern::OnModifyDone()
     }
 
     CHECK_NULL_VOID(layoutProperty);
-    if (userSetSidebarWidth_ != layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE)) {
+    if ((userSetSidebarWidth_ != layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE)) ||
+        (layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE) == DEFAULT_SIDE_BAR_WIDTH)) {
         preSidebarWidth_.Reset();
         userSetSidebarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
     }

@@ -31,6 +31,7 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
 private:
+    bool IsValidRootLayer(int value);
     ACE_DISALLOW_COPY_AND_MOVE(WebLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

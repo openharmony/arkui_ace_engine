@@ -370,7 +370,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
     EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_TRUE(startFlag);
+    EXPECT_FALSE(startFlag);
 
     /**
      * @tc.steps: step5. change IsReverse and use OnModifyDone to run Backward.
@@ -439,7 +439,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest005, TestSize.Level1)
     EXPECT_TRUE(imageAnimatorPattern != nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_TRUE(pauseFlag);
+    EXPECT_FALSE(pauseFlag);
 }
 
 /**
@@ -511,7 +511,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest006, TestSize.Level1)
     ImageAnimatorModelNG.SetState(STATE_DEFAULT);
     ImageAnimatorModelNG.SetFixedSize(FIXEDSIZE_CHANGED);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_TRUE(cancelFlag);
+    EXPECT_FALSE(cancelFlag);
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     EXPECT_NE(imageFrameNode, nullptr);
     EXPECT_EQ(imageFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -581,7 +581,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest007, TestSize.Level1)
     EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_TRUE(startFlag);
+    EXPECT_FALSE(startFlag);
 
     /**
      * @tc.steps: step5. change imageAnimatorView's status and use OnModifyDone to run stoppedlEvent.

@@ -36,6 +36,10 @@ RosenRenderSurface::~RosenRenderSurface()
     if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
         surfaceDelegate_->ReleaseSurface();
     } else {
+        if (nativeWindow_) {
+            DestoryNativeWindow(nativeWindow_);
+            nativeWindow_ = nullptr;
+        }
         CHECK_NULL_VOID(producerSurface_);
         auto* surfaceUtils = SurfaceUtils::GetInstance();
         CHECK_NULL_VOID(surfaceUtils);
@@ -164,6 +168,13 @@ void RosenRenderSurface::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t 
 void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback)
 {
     extSurfaceCallbackInterface_ = extSurfaceCallback;
+}
+
+void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height)
+{
+    if (consumerSurface_) {
+        consumerSurface_->SetDefaultWidthAndHeight(width, height);
+    }
 }
 
 void RosenRenderSurface::ConsumeBuffer()

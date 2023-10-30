@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_PARAGRAPH_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_PARAGRAPH_MANAGER_H
 #include <list>
+#include <optional>
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -32,6 +33,7 @@ public:
 
         std::string ToString() const;
     };
+    std::optional<double> minParagraphFontSize = std::nullopt;
 
     int32_t GetIndex(Offset offset) const;
     float GetHeight() const;
@@ -42,8 +44,8 @@ public:
     }
     void Reset();
 
-    std::vector<Rect> GetRects(int32_t start, int32_t end) const;
-    std::vector<Rect> GetPlaceholderRects() const;
+    std::vector<RectF> GetRects(int32_t start, int32_t end) const;
+    std::vector<RectF> GetPlaceholderRects() const;
     OffsetF ComputeCursorOffset(int32_t index, float& selectLineHeight) const;
 
     void AddParagraph(ParagraphInfo&& info)

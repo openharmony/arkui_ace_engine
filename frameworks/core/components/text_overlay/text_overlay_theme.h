@@ -111,6 +111,7 @@ public:
                 theme->selectOverlayMaxWidth_ = pattern->GetAttr<Dimension>("select_overlay_max_width", 280.0_vp);
                 theme->alphaDisabled_ =
                     pattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, defaultTertiaryColorAlpha);
+                theme->cameraInput_ = pattern->GetAttr<std::string>("camera_input", "Camera input");
             } else {
                 LOGW("find pattern of textoverlay fail");
             }
@@ -249,6 +250,11 @@ public:
         return alphaDisabled_;
     }
 
+    const std::string& GetCameraInput() const
+    {
+        return cameraInput_;
+    }
+
 protected:
     TextOverlayTheme() = default;
 
@@ -273,6 +279,7 @@ private:
     Dimension selectOverlayMaxWidth_;
     TextStyle menuButtonTextStyle_;
     double alphaDisabled_ = 0.0;
+    std::string cameraInput_;
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;

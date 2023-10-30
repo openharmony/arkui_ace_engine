@@ -162,7 +162,7 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
 {
     return {};
 }
-void TextFieldPattern::DumpInfo() {}
+void TextFieldPattern::DumpAdvanceInfo() {}
 void TextFieldPattern::OnColorConfigurationUpdate() {}
 
 void TextFieldPattern::InsertValue(const std::string& insertValue) {};

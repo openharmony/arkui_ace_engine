@@ -54,12 +54,12 @@ int32_t FormUtilsImpl::RouterEvent(
         }
     }
     want.SetParam("params", params->ToString());
-    if (uri->IsValid()) {
+    auto abilityName = eventAction->GetValue("abilityName");
+    if (uri->IsValid() && !abilityName->IsValid()) {
         auto uriStr = uri->GetString();
         want.SetUri(uriStr);
     } else {
         auto bundleName = eventAction->GetValue("bundleName");
-        auto abilityName = eventAction->GetValue("abilityName");
         auto bundle = bundleName->GetString();
         auto ability = abilityName->GetString();
         if (ability.empty()) {

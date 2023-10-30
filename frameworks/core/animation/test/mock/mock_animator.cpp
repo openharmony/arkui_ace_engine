@@ -173,7 +173,10 @@ void Animator::Play()
 
 void Animator::Reverse() {}
 
-void Animator::Forward() {}
+void Animator::Forward()
+{
+    Play();
+}
 
 void Animator::Backward() {}
 
@@ -190,9 +193,13 @@ void Animator::Stop()
     status_ = Status::STOPPED;
     isBothBackwards = false;
     elapsedTime_ = 0;
+    StatusListenable::NotifyStopListener();
 }
 
-void Animator::Finish() {}
+void Animator::Finish()
+{
+    Stop();
+}
 
 void Animator::Cancel() {}
 

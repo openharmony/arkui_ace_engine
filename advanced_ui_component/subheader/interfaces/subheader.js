@@ -46,7 +46,7 @@ class IconGroup extends ViewPU {
     this.__bgColor = new ObservedPropertyObjectPU({
       id: -1,
       type: 10001,
-      params: ["sys.color.ohos_id_color_background"],
+      params: ["sys.color.ohos_id_color_sub_background_transparent"],
       bundleName: "",
       moduleName: ""
     }, this, "bgColor");
@@ -125,7 +125,7 @@ class IconGroup extends ViewPU {
         e.type === TouchType.Up && (this.bgColor = {
           id: -1,
           type: 10001,
-          params: ["sys.color.ohos_id_color_background"],
+          params: ["sys.color.ohos_id_color_sub_background_transparent"],
           bundleName: "",
           moduleName: ""
         })
@@ -140,7 +140,7 @@ class IconGroup extends ViewPU {
         } : {
           id: -1,
           type: 10001,
-          params: ["sys.color.ohos_id_color_background"],
+          params: ["sys.color.ohos_id_color_sub_background_transparent"],
           bundleName: "",
           moduleName: ""
         }
@@ -219,14 +219,14 @@ export class SubHeader extends ViewPU {
     this.__textArrowBgColor = new ObservedPropertyObjectPU({
       id: -1,
       type: 10001,
-      params: ["sys.color.ohos_id_color_background"],
+      params: ["sys.color.ohos_id_color_sub_background_transparent"],
       bundleName: "",
       moduleName: ""
     }, this, "textArrowBgColor");
     this.__buttonBgColor = new ObservedPropertyObjectPU({
       id: -1,
       type: 10001,
-      params: ["sys.color.ohos_id_color_background"],
+      params: ["sys.color.ohos_id_color_sub_background_transparent"],
       bundleName: "",
       moduleName: ""
     }, this, "buttonBgColor");
@@ -743,7 +743,7 @@ export class SubHeader extends ViewPU {
         t.type === TouchType.Up && (this.textArrowBgColor = {
           id: -1,
           type: 10001,
-          params: ["sys.color.ohos_id_color_background"],
+          params: ["sys.color.ohos_id_color_sub_background_transparent"],
           bundleName: "",
           moduleName: ""
         })
@@ -758,7 +758,7 @@ export class SubHeader extends ViewPU {
         } : {
           id: -1,
           type: 10001,
-          params: ["sys.color.ohos_id_color_background"],
+          params: ["sys.color.ohos_id_color_sub_background_transparent"],
           bundleName: "",
           moduleName: ""
         }
@@ -918,7 +918,7 @@ export class SubHeader extends ViewPU {
         t.type === TouchType.Up && (this.buttonBgColor = {
           id: -1,
           type: 10001,
-          params: ["sys.color.ohos_id_color_background"],
+          params: ["sys.color.ohos_id_color_sub_background_transparent"],
           bundleName: "",
           moduleName: ""
         })
@@ -933,7 +933,7 @@ export class SubHeader extends ViewPU {
         } : {
           id: -1,
           type: 10001,
-          params: ["sys.color.ohos_id_color_background"],
+          params: ["sys.color.ohos_id_color_sub_background_transparent"],
           bundleName: "",
           moduleName: ""
         }

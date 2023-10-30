@@ -31,23 +31,11 @@ void GaugeLayoutAlgorithm::OnReset() {}
 void GaugeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto constraint = layoutProperty->GetLayoutConstraint();
-
-    const auto idealSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
-        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT();
-
-    if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
-        LOGW("Size is infinity.");
-        geometryNode->SetFrameSize(SizeF());
-        return;
-    }
-    geometryNode->SetFrameSize(idealSize);
-
-    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    BoxLayoutAlgorithm::Measure(layoutWrapper);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto idealSize = geometryNode->GetContentSize();
         MeasureLimitValueText(layoutWrapper, idealSize, true);
         MeasureLimitValueText(layoutWrapper, idealSize, false);
         MeasureDescription(layoutWrapper, idealSize);
@@ -183,6 +171,7 @@ void GaugeLayoutAlgorithm::MeasureTitleChild(LayoutWrapper* layoutWrapper, const
 void GaugeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        BoxLayoutAlgorithm::Layout(layoutWrapper);
         return;
     }
     auto hostNode = layoutWrapper->GetHostNode();

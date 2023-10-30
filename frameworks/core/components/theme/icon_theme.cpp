@@ -124,20 +124,16 @@ void IconTheme::Builder::ParsePattern(const RefPtr<ThemeStyle>& themeStyle, cons
         return;
     }
     theme->pattern_ = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_ICON, nullptr);
-    if (!theme->pattern_) {
-        LOGW("find pattern of icon fail");
-    }
 }
 
 std::string IconTheme::GetIconPath(const InternalResource::ResourceId& resourceId) const
 {
     if (!pattern_) {
-        LOGW("pattern of icon is null");
         return "";
     }
     auto iter = RESOURCE_ICON_MAP.find(resourceId);
     if (iter == RESOURCE_ICON_MAP.end()) {
-        LOGW("Find resourceId:%{public}d fail in resourceMap", resourceId);
+        TAG_LOGW(AceLogTag::ACE_THEME, "Find iconPath fail in resourceMap, resourceId:%{public}d", resourceId);
         return "";
     }
     return pattern_->GetAttr<std::string>(iter->second, "");

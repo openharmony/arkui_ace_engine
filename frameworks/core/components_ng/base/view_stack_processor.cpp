@@ -72,8 +72,6 @@ void ViewStackProcessor::ImplicitPopBeforeContinue()
     if ((elementsStack_.size() > 1) && ShouldPopImmediately()) {
         Pop();
         LOGD("Implicit Pop done, top component is %{public}s", GetMainElementNode()->GetTag().c_str());
-    } else {
-        LOGD("NO Implicit Pop before continue. top component is %{public}s", GetMainElementNode()->GetTag().c_str());
     }
 }
 
@@ -119,7 +117,6 @@ void ViewStackProcessor::Pop()
     if (currentFrameNode) {
         currentFrameNode->OnMountToParentDone();
     }
-    LOGD("ViewStackProcessor Pop size %{public}d", static_cast<int32_t>(elementsStack_.size()));
 }
 
 void ViewStackProcessor::PopContainer()
@@ -144,13 +141,13 @@ void ViewStackProcessor::PopContainer()
 RefPtr<UINode> ViewStackProcessor::Finish()
 {
     if (elementsStack_.empty()) {
-        LOGE("ViewStackProcessor Finish failed, input empty render or invalid root component");
         return nullptr;
     }
     auto element = elementsStack_.top();
     elementsStack_.pop();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     if (frameNode) {
+        frameNode->MarkBuildDone();
         frameNode->MarkModifyDone();
         auto renderContext = frameNode->GetRenderContext();
         if (renderContext) {
@@ -184,7 +181,6 @@ void ViewStackProcessor::SetVisualState(VisualState state)
         default:
             visualState_ = UI_STATE_NORMAL;
     }
-    LOGD("set visual state: %{public}d", static_cast<int32_t>(visualState_.value()));
     auto eventHub = GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->AddSupportedState(visualState_.value());
@@ -198,8 +194,6 @@ bool ViewStackProcessor::IsCurrentVisualStateProcess()
     auto eventHub = GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto result = eventHub->IsCurrentStateOn(visualState_.value());
-    LOGD("get current visual state: %{public}d, node state: %{public}d, result is: %{public}d",
-        static_cast<int32_t>(visualState_.value()), static_cast<int32_t>(eventHub->GetCurrentUIState()), result);
     return result;
 }
 

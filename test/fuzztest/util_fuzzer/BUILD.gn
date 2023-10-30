@@ -15,7 +15,7 @@
 import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-module_output_path = "arkui/util"
+module_output_path = "ace_engine/ace_engine/util"
 
 ##############################fuzztest##########################################
 import("//foundation/arkui/ace_engine/ace_config.gni")

@@ -94,6 +94,7 @@ void DragBarPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) con
         (barRightPoint.GetX() + Dimension(4 * scaleRatio, DimensionUnit::VP)).ConvertToPx() + totalOffset.GetX(),
         (barRightPoint.GetY() + Dimension(verticalOffset, DimensionUnit::VP)).ConvertToPx() + totalOffset.GetY());
     canvas.DrawPath(path);
+    canvas.DetachPen();
 }
 
 } // namespace OHOS::Ace::NG

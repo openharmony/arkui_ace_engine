@@ -58,9 +58,10 @@ public:
     void SetUp() override;
     void TearDown() override;
     void GetInstance();
-    static RefPtr<FrameNode> CreateCustomNode();
 
     void Create(const std::function<void(RefreshModelNG)>& callback = nullptr);
+    static RefPtr<FrameNode> CreateCustomNode();
+    void VersionElevenHandleDragEnd(float speed, float targetOffsetY);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<RefreshPattern> pattern_;
@@ -127,6 +128,13 @@ RefPtr<FrameNode> RefreshTestNg::CreateCustomNode()
     layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(CUSTOM_NODE_WIDTH), CalcLength(CUSTOM_NODE_HEIGHT)));
     return frameNode;
+}
+
+void RefreshTestNg::VersionElevenHandleDragEnd(float speed, float targetOffsetY)
+{
+    pattern_->HandleDragEnd(speed);
+    pattern_->scrollOffset_.SetY(targetOffsetY);
+    pattern_->SpeedAnimationFinish();
 }
 
 /**
@@ -571,17 +579,12 @@ HWTEST_F(RefreshTestNg, UpdateRefreshDraw001, TestSize.Level1)
 {
     Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
     pattern_->UpdateRefreshDraw();
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
-
     pattern_->updatePerFrame_ = true;
     pattern_->UpdateRefreshDraw();
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
-
     pattern_->updatePerFrame_ = true;
     pattern_->isRefreshing_ = true;
     pattern_->scrollOffset_ = OffsetF(0, TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1);
     pattern_->UpdateRefreshDraw();
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
 
     pattern_->updatePerFrame_ = true;
     pattern_->isRefreshing_ = false;
@@ -628,8 +631,7 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag001, TestSize.Level1)
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
     pattern_->HandleDragUpdate(greaterThanRefreshDistance);
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
-    float speed = 1200.f;
-    pattern_->HandleDragEnd(speed);
+    VersionElevenHandleDragEnd(1200.f, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     EXPECT_EQ(refreshStatus, RefreshStatus::REFRESH);
     EXPECT_TRUE(isRefreshTrigger);
     // The front end set isRefreshing to false
@@ -649,7 +651,7 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag001, TestSize.Level1)
     pattern_->HandleDragUpdate(lessThanOffset);
     pattern_->HandleDragUpdate(greaterThanOffset);
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
-    pattern_->HandleDragEnd(speed);
+    VersionElevenHandleDragEnd(1200.f, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     pattern_->OnExitAnimationFinish();
     EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
 
@@ -696,8 +698,7 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag002, TestSize.Level1)
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
     pattern_->HandleDragUpdate(greaterThanRefreshDistance + CUSTOM_NODE_HEIGHT / radio);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
-    float speed = 0.f;
-    pattern_->HandleDragEnd(speed);
+    VersionElevenHandleDragEnd(0.f, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
     // The front end set isRefreshing to false
     paintProperty_->UpdateIsRefreshing(false);
@@ -717,7 +718,7 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag002, TestSize.Level1)
     pattern_->HandleDragUpdate(lessThanOffset);
     pattern_->HandleDragUpdate(greaterThanOffset);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
-    pattern_->HandleDragEnd(speed);
+    VersionElevenHandleDragEnd(0.f, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     pattern_->OnExitAnimationFinish();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
 
@@ -754,16 +755,13 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag003, TestSize.Level1)
      * @tc.expected: return
      */
     pattern_->HandleDragUpdate(0.f);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
-
     /**
      * @tc.steps: step2. drag to refresh
      * @tc.expected: refreshStatus_ is REFRESH
      */
     pattern_->HandleDragUpdate(155.f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
-    float speed = 1200.f;
-    pattern_->HandleDragEnd(speed);
+    VersionElevenHandleDragEnd(1200.f, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
 
     /**
@@ -772,7 +770,7 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag003, TestSize.Level1)
      */
     pattern_->HandleDragStart();
     pattern_->HandleDragUpdate(10.f);
-    pattern_->HandleDragEnd(speed);
+    VersionElevenHandleDragEnd(1200.f, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
 }
 

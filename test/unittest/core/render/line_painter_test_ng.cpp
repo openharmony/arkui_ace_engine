@@ -31,7 +31,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-const double ZERO_TEST = 0.0;
+const double START_VALUE = 10.0;
+const double END_VALUE = 30.0;
 const Dimension TEST {0.0, DimensionUnit::PX};
 const NG::OffsetF OFFSET_TEST {1, 1};
 const std::pair<Dimension, Dimension> START_POINT = {10.0_vp, 10.0_vp};
@@ -64,8 +65,8 @@ HWTEST_F(LinePainterTestNg, LinePainterTestNg001, TestSize.Level1)
     NG::LinePainter::DrawLine(canvas, linePaintProperty, OFFSET_TEST);
     bool result = NG::ShapePainter::SetPen(pen, linePaintProperty);
     EXPECT_TRUE(result);
-    EXPECT_EQ(linePaintProperty.GetStartPointValue().first.ConvertToPx(), ZERO_TEST);
-    EXPECT_EQ(linePaintProperty.GetEndPointValue().first.ConvertToPx(), ZERO_TEST);
+    EXPECT_EQ(linePaintProperty.GetStartPointValue().first.ConvertToPx(), START_VALUE);
+    EXPECT_EQ(linePaintProperty.GetEndPointValue().first.ConvertToPx(), END_VALUE);
 
     /**
      * @tc.steps3: call DrawLine and UpdateStrokeWidth with TEST.

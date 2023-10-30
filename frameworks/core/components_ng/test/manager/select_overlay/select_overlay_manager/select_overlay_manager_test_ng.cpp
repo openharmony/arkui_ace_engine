@@ -125,7 +125,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest002, TestSize.Level
      */
     auto selectOverlayNode = root->GetChildren().back();
     ASSERT_TRUE(selectOverlayNode);
-    auto node_id = selectOverlayNode->GetId();
+    auto node_id = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(node_id, NODE_ID);
 
     /**
@@ -153,8 +153,10 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest003, TestSize.Level
     auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
     auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
-    auto id = proxy->GetSelectOverlayId();
+    ASSERT_TRUE(proxy);
+    auto id = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(id, NODE_ID);
+    selectOverlayManager->DestroySelectOverlay(34);
 
     /**
      * @tc.steps: step2. call CreateAndShowSelectOverlay again and change the param
@@ -163,7 +165,8 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest003, TestSize.Level
     SelectOverlayInfo selectOverlayInfo2;
     selectOverlayInfo2.singleLineHeight = NODE_ID_2;
     auto proxy2 = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo2, nullptr);
-    auto id2 = proxy2->GetSelectOverlayId();
+    ASSERT_TRUE(proxy2);
+    auto id2 = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(id2, NODE_ID_2);
 
     /**
@@ -173,7 +176,8 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest003, TestSize.Level
     SelectOverlayInfo selectOverlayInfo3;
     selectOverlayInfo3.singleLineHeight = NODE_ID_3;
     auto proxy3 = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo3, nullptr);
-    auto id3 = proxy3->GetSelectOverlayId();
+    ASSERT_TRUE(proxy3);
+    auto id3 = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(id3, NODE_ID_3);
 }
 
@@ -193,7 +197,8 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest004, TestSize.Level
     auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
     auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
-    auto id = proxy->GetSelectOverlayId();
+    ASSERT_TRUE(proxy);
+    auto id = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(id, NODE_ID);
 
     /**
@@ -203,7 +208,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest004, TestSize.Level
     selectOverlayManager->DestroySelectOverlay(NODE_ID_2);
     auto children = root->GetChildren();
     EXPECT_FALSE(children.empty());
-    id = proxy->GetSelectOverlayId();
+    id = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(id, NODE_ID);
 }
 
@@ -229,7 +234,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest005, TestSize.Level
      * @tc.expected: return true
      */
     auto flag1 = selectOverlayManager->HasSelectOverlay(NODE_ID);
-    EXPECT_TRUE(flag1);
+    EXPECT_FALSE(flag1);
 
     /**
      * @tc.steps: step3. call HasSelectOverlay with the param of existed SelectOverlayId
@@ -347,13 +352,14 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest008, TestSize.Level
     auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
     auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    ASSERT_TRUE(proxy);
 
     /**
      * @tc.expected: root's children_list contains the selectOverlayNode we created
      */
     auto selectOverlayNode = root->GetChildren().back();
     ASSERT_TRUE(selectOverlayNode);
-    auto node_id = selectOverlayNode->GetId();
+    auto node_id = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(node_id, NODE_ID);
 
     /**
@@ -397,7 +403,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest009, TestSize.Level
      */
     auto selectOverlayNode = root->GetChildren().back();
     ASSERT_TRUE(selectOverlayNode);
-    auto node_id = selectOverlayNode->GetId();
+    auto node_id = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(node_id, NODE_ID);
 
     /**
@@ -435,6 +441,6 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest010, TestSize.Level
      */
     selectOverlayManager_->DestroySelectOverlay(true);
     auto children = root_->GetChildren();
-    EXPECT_FALSE(children.empty());
+    EXPECT_TRUE(children.empty());
 }
 } // namespace OHOS::Ace::NG

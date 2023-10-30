@@ -119,9 +119,8 @@ void PanRecognizer::OnRejected()
 
 void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end)
 {
-    PointF originPoint(event.x, event.y);
-    PointF windowPoint = originPoint;
-    Transform(windowPoint, originPoint);
+    PointF windowPoint(event.x, event.y);
+    NGGestureRecognizer::Transform(windowPoint, GetNodeId());
 
     TouchEvent transformEvent = event;
     transformEvent.x = windowPoint.GetX();
@@ -204,7 +203,13 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
-    UpdateTouchPointInVelocityTracker(event, true);
+    
+    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+        UpdateTouchPointInVelocityTracker(event, true);
+    } else if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
+        velocityTracker_.Reset();
+        UpdateTouchPointInVelocityTracker(event, true);
+    }
 
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -247,17 +252,15 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
-    PointF originPoint(event.GetOffset().GetX(), event.GetOffset().GetY());
-    PointF originTouchPoint(touchPoints_[event.id].GetOffset().GetX(), touchPoints_[event.id].GetOffset().GetY());
-    PointF windowPoint = originPoint;
-    PointF windowTouchPoint = originTouchPoint;
-    Transform(windowPoint, originPoint);
-    Transform(windowTouchPoint, originTouchPoint);
+    PointF windowPoint(event.GetOffset().GetX(), event.GetOffset().GetY());
+    PointF windowTouchPoint(touchPoints_[event.id].GetOffset().GetX(), touchPoints_[event.id].GetOffset().GetY());
+    NGGestureRecognizer::Transform(windowPoint, GetNodeId());
+    NGGestureRecognizer::Transform(windowTouchPoint, GetNodeId());
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
     mainDelta_ = GetMainAxisDelta();
     UpdateTouchPointInVelocityTracker(event);
-    averageDistance_ += delta_;
+    averageDistance_ += delta_ / static_cast<double>(touchPoints_.size());
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] += delta_;
     time_ = event.time;
@@ -466,8 +469,10 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
 #ifdef ENABLE_DRAG_FRAMEWORK
         info.SetPointerId(touchPoint.id);
 #endif // ENABLE_DRAG_FRAMEWORK
+        PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
+        NGGestureRecognizer::Transform(localPoint, GetNodeId());
         info.SetGlobalPoint(globalPoint_)
-            .SetLocalLocation(Offset(globalPoint_.GetX(), globalPoint_.GetY()) - coordinateOffset_);
+            .SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTargetDisplayId(touchPoint.targetDisplayId);

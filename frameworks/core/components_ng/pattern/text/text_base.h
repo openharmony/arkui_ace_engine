@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_BASE_H
 
 #include "base/memory/ace_type.h"
-#include "core/components_ng/manager/select_overlay/selection_host.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
@@ -27,8 +27,25 @@ using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>
 
 enum class MouseStatus { PRESSED, RELEASED, MOVE, NONE };
 
-class TextBase : public SelectionHost {
-    DECLARE_ACE_TYPE(TextBase, SelectionHost);
+struct HandleMoveStatus {
+    bool isFirsthandle = false;
+    int32_t position = -1;
+    OffsetF handleOffset;
+
+    void Reset()
+    {
+        isFirsthandle = false;
+        position = -1;
+    }
+
+    bool IsValid()
+    {
+        return position >= 0;
+    }
+};
+
+class TextBase : public SelectOverlayClient {
+    DECLARE_ACE_TYPE(TextBase, SelectOverlayClient);
 
 public:
     TextBase() = default;
@@ -47,6 +64,21 @@ public:
     MouseStatus GetMouseStatus() const
     {
         return mouseStatus_;
+    }
+
+    static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false)
+    {
+        char16_t aroundChar = 0;
+        if (checkPrev) {
+            if (static_cast<size_t>(extend) <= text.length()) {
+                aroundChar = text[std::max(0, extend - 1)];
+            }
+        } else {
+            if (static_cast<size_t>(extend) <= (text.length())) {
+                aroundChar = text[std::min(static_cast<int32_t>(text.length() - 1), extend)];
+            }
+        }
+        return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
     }
 
 protected:

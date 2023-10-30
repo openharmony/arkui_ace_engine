@@ -17,6 +17,8 @@
 
 #include <utility>
 
+#include "include/core/SkGraphics.h"
+
 #include "base/image/pixel_map.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
 #include "frameworks/core/image/sk_image_cache.h"
@@ -204,5 +206,12 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
 #else // !ENABLE_ROSEN_BACKEND
     return false;
 #endif
+}
+
+namespace OHOS:Ace {
+void ImageCache::Purge()
+{
+    SkGraphics::PurgeResourceCache();
+}
 }
 } // namespace OHOS::Ace::NG

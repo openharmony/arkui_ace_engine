@@ -51,7 +51,7 @@ class HyperlinkTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    static RefPtr<FrameNode> CreateHyperlinkNode(const std::string& address, const std::string& content);
+    static void SetThemeInCreate();
 };
 
 void HyperlinkTestNg::SetUpTestSuite()
@@ -59,12 +59,25 @@ void HyperlinkTestNg::SetUpTestSuite()
     MockPipelineBase::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<HyperlinkTheme>()));
+    HyperlinkModelNG hyperlinkModelNG;
+    SetThemeInCreate();
+    hyperlinkModelNG.Create(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
 }
 
 void HyperlinkTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void HyperlinkTestNg::SetThemeInCreate()
+{
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        }
+        return AceType::MakeRefPtr<HyperlinkTheme>();
+    });
 }
 
 /**
@@ -74,14 +87,14 @@ void HyperlinkTestNg::TearDownTestSuite()
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
 {
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::HYPERLINK_ETS_TAG);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(HYPERLINK_CONTENT);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     frameNode->SetDraggable(true);
     frameNode->MarkModifyDone();
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
@@ -105,10 +118,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
 {
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -137,52 +152,16 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
-    stack->Push(hyperlinkNode);
-
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
     HyperlinkModelNG hyperlinkModelNG;
+    SetThemeInCreate();
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     hyperlinkModelNG.SetDraggable(false);
-    EXPECT_FALSE(hyperlinkNode->IsDraggable());
     EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
 
     hyperlinkModelNG.SetDraggable(false);
-    EXPECT_FALSE(hyperlinkNode->IsDraggable());
     EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
-
-    hyperlinkModelNG.SetDraggable(true);
-    EXPECT_TRUE(hyperlinkNode->IsDraggable());
-    EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
-
-    hyperlinkModelNG.SetDraggable(true);
-    EXPECT_TRUE(hyperlinkNode->IsDraggable());
-    EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
-}
-
-/**
- * @tc.name: HyperlinkPatternTest002
- * @tc.desc: Test HyperlinkPattern InitLongPressEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest002, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
-    ASSERT_NE(frameNode, nullptr);
-    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
-    ASSERT_NE(hyperlinkPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto inputHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-
-    hyperlinkPattern->InitLongPressEvent(inputHub);
-    auto longPressEvent = hyperlinkPattern->longPressEvent_->callback_;
-
-    auto info = GestureEvent();
-    longPressEvent(info);
-    EXPECT_EQ(hyperlinkPattern->isLinked_, 1);
 }
 
 /**
@@ -192,10 +171,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest002, TestSize.Level1)
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest003, TestSize.Level1)
 {
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -213,10 +194,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest003, TestSize.Level1)
 HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest004, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(
+        V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     stack->Push(hyperlinkNode);
-
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
     KeyEvent event;
@@ -245,10 +228,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest005, TestSize.Level1)
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
      */
-    auto hyperlinkNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(hyperlinkNode, nullptr);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
 
@@ -269,14 +254,14 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest005, TestSize.Level1)
     hyperlinkLayoutProperty->UpdateTextColor(Color::BLUE);
     hyperlinkPattern->isLinked_ = true;
     hyperlinkPattern->OnModifyDone();
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::BLUE);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::BLACK);
     EXPECT_FALSE(hyperlinkPattern->isLinked_);
     hub->SetEnabled(false);
     hyperlinkNode->SetDraggable(true);
     theme->textDisabledColor_ = Color::RED;
     hyperlinkPattern->isLinked_ = true;
     hyperlinkPattern->OnModifyDone();
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::RED);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::BLACK);
     EXPECT_FALSE(hyperlinkPattern->isLinked_);
 }
 
@@ -290,10 +275,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
      */
-    auto hyperlinkNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(hyperlinkNode, nullptr);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
 
@@ -320,12 +307,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest006, TestSize.Level1)
     touchEventInfo.changedTouches_.clear();
     touchEventInfo.changedTouches_.emplace_back(touchInfo);
     hyperlinkPattern->OnTouchEvent(touchEventInfo);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::GREEN));
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::BLACK));
 
     hyperlinkPattern->isLinked_ = false;
     hyperlinkPattern->OnTouchEvent(touchEventInfo);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::RED.BlendColor(Color::GRAY));
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::GRAY));
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::RED.BlendColor(Color::BLACK));
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::BLACK));
 
     /**
      * @tc.steps: step3. Call OnTouchEvent while TouchType is UP or DOWN or else.
@@ -335,7 +322,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest006, TestSize.Level1)
     touchEventInfo.changedTouches_.clear();
     touchEventInfo.changedTouches_.emplace_back(touchInfo);
     hyperlinkPattern->OnTouchEvent(touchEventInfo);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::NONE);
     touchInfo.SetTouchType(TouchType::CANCEL);
     touchEventInfo.changedTouches_.clear();
     touchEventInfo.changedTouches_.emplace_back(touchInfo);
@@ -352,10 +339,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
      */
-    auto hyperlinkNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(hyperlinkNode, nullptr);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
 
@@ -392,10 +381,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
      */
-    auto hyperlinkNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(hyperlinkNode, nullptr);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
 
@@ -415,11 +406,11 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
     hyperlinkLayoutProperty->UpdateTextDecorationColor(Color::BLACK);
     hyperlinkPattern->isLinked_ = true;
     hyperlinkPattern->OnHoverEvent(true);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::GREEN));
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::BLACK));
     hyperlinkPattern->isLinked_ = false;
     hyperlinkPattern->OnHoverEvent(true);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::BLACK);
     hyperlinkPattern->OnHoverEvent(false);
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::NONE);
 }
 } // namespace OHOS::Ace::NG

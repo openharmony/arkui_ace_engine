@@ -66,7 +66,6 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     NAPI_ASSERT(env, argc >= ARG_NUM_1, "Wrong number of arguments");
 
     std::string result = CommonNapiUtils::GetStringFromValueUtf8(env, argv[0]);
-    LOGD("Qrcode JsCreate result is %{public}s", result.c_str());
 
     QRCodeModel::GetInstance()->Create(result);
     return CommonNapiUtils::CreateNull(env);
@@ -122,7 +121,6 @@ napi_value Init(napi_env env, napi_value exports)
 
 extern "C" __attribute__((visibility("default"))) void NAPI_arkui_qrcode_GetJSCode(const char** buf, int* bufLen)
 {
-    LOGD("QRCodeModelNapi:: NAPI_arkui_qrcode_GetJSCode start");
     if (buf != nullptr) {
         *buf = _binary_arkui_qrcode_js_start;
     }

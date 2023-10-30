@@ -36,7 +36,6 @@ void JSColumnSplit::JsResizeable(bool resizeable)
 void JSColumnSplit::JsDivider(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        LOGW("Invalid params");
         return;
     }
 
@@ -58,7 +57,6 @@ void JSColumnSplit::JsClip(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (clipShape == nullptr) {
-            LOGD("clipShape is null");
             return;
         }
         ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
@@ -81,6 +79,7 @@ void JSColumnSplit::JSBind(BindingTarget globalObj)
     JSClass<JSColumnSplit>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSColumnSplit>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSColumnSplit>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSColumnSplit>::StaticMethod("clip", &JSColumnSplit::JsClip);
     JSClass<JSColumnSplit>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

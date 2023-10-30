@@ -226,7 +226,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg007, TestSize.Lev
      * @tc.steps1: call ToRSTextAlign and set input align is LEFT.
      * @tc.expected: the return retTextAlign is the same as RSTextAlign::LEFT.
      */
-    auto testTextAlign = static_cast<TextAlign>(0);
+    auto testTextAlign = static_cast<TextAlign>(4);
 
     RSTextAlign retTextAlign = ToRSTextAlign(testTextAlign);
     EXPECT_EQ(retTextAlign, RSTextAlign::LEFT);

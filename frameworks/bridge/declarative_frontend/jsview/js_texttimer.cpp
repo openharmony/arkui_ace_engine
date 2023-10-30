@@ -64,7 +64,6 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
     auto controller = TextTimerModel::GetInstance()->Create();
     if (info.Length() < 1 || !info[0]->IsObject()) {
         SetFontDefault();
-        LOGI("TextTimer create error, info is non-valid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -80,12 +79,10 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
                     TextTimerModel::GetInstance()->SetInputCount(inputCount);
                 } else {
                     TextTimerModel::GetInstance()->SetInputCount(TIME_DEFAULT_COUNT);
-                    LOGE("Parameter out of range, use default value.");
                 }
             }
             if (count->IsUndefined() || count->IsNull()) {
                 TextTimerModel::GetInstance()->SetInputCount(TIME_DEFAULT_COUNT);
-                LOGE("Parameter is undefined or null, use default value.");
             }
         }
     }
@@ -131,12 +128,10 @@ void JSTextTimer::SetFontDefault()
 void JSTextTimer::SetFormat(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
     if (!info[0]->IsString()) {
-        LOGE("The arg is not string, it is supposed to be a string");
         TextTimerModel::GetInstance()->SetFormat(DEFAULT_FORMAT);
         return;
     }
@@ -168,7 +163,6 @@ void JSTextTimer::SetFormat(const JSCallbackInfo& info)
 void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("JSTextInput::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -195,7 +189,6 @@ void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
 void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
@@ -212,7 +205,6 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
 void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
@@ -239,7 +231,6 @@ void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)
 void JSTextTimer::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        LOGE("TextTimer fontStyle(%{public}d) illegal value", value);
         return;
     }
     TextTimerModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
@@ -248,12 +239,10 @@ void JSTextTimer::SetFontStyle(int32_t value)
 void JSTextTimer::SetFontFamily(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
         return;
     }
     TextTimerModel::GetInstance()->SetFontFamily(fontFamilies);

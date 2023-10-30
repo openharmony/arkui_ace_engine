@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "core/components_ng/pattern/data_panel/data_panel_paint_method.h"
+
 #include "core/components_ng/property/gradient_property.h"
 namespace OHOS::Ace::NG {
 
@@ -65,7 +66,6 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         shadowColorsLastLength = shadowOption.colors.size();
     }
 
-    dataPanelModifier_->UpdateDate();
     dataPanelModifier_->SetValues(values_);
     dataPanelModifier_->SetMax(max_);
     dataPanelModifier_->SetDataPanelType(dataPanelType_);
@@ -81,6 +81,7 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     dataPanelModifier_->SetShadowOffsetX(shadowOption.offsetX);
     dataPanelModifier_->SetShadowOffsetY(shadowOption.offsetY);
     dataPanelModifier_->SetShadowColors(shadowOption.colors, shadowColorsLastLength);
+    dataPanelModifier_->UpdateDate();
 }
 
 void DataPanelPaintMethod::CreateGradient(const std::pair<Color, Color>& itemParam, Gradient& gradient) const

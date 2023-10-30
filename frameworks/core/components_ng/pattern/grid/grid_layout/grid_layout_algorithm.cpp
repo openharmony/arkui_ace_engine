@@ -21,6 +21,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
@@ -262,7 +263,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CreateIdealSize(gridLayoutProperty->GetLayoutConstraint().value(), axis, MeasureType::MATCH_PARENT, true);
     if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
         idealSize = gridLayoutProperty->GetLayoutConstraint().value().percentReference;
-        LOGI("size of main axis value is infinity, use percent reference");
+        TAG_LOGI(AceLogTag::ACE_GRID, "size of main axis value is infinity, use percent reference");
     }
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -275,7 +276,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     itemsPosition_.clear();
     gridLayoutInfo_.gridMatrix_.clear();
     gridLayoutInfo_.startIndex_ = 0;
-    gridLayoutInfo_.hasBigItem_  = false;
+    gridLayoutInfo_.hasBigItem_ = false;
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childLayoutWrapper) {
@@ -317,11 +318,15 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             itemsPosition_.try_emplace(index,
                 ComputeItemPosition(layoutWrapper, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutWrapper));
         }
+
+        childLayoutProperty->UpdateRealRowSpan(itemRowSpan);
+        childLayoutProperty->UpdateRealColumnSpan(itemColSpan);
+
         ++itemIndex;
     }
     gridLayoutInfo_.endIndex_ = itemIndex - 1;
     gridLayoutInfo_.startMainLineIndex_ = 0;
-    gridLayoutInfo_.endMainLineIndex_ = rowIndex;
+    gridLayoutInfo_.endMainLineIndex_ = gridLayoutInfo_.hasBigItem_ ? gridLayoutInfo_.gridMatrix_.size() - 1 : rowIndex;
 }
 
 void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -357,7 +362,6 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             itemIndex = crossLine.second;
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex);
             if (!wrapper) {
-                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIndex);
                 break;
             }
             auto layoutProperty = wrapper->GetLayoutProperty();
@@ -366,6 +370,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(gridItemLayoutProperty);
             gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
+            UpdateRealGridItemPositionInfo(wrapper, mainLine.first, crossLine.first);
         }
     }
 }

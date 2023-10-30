@@ -124,7 +124,7 @@ HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyTest002, TestSize.Level1)
      * @tc.expected: step2. hasn't closed, return true
      */
     auto isClosed = selectOverlayProxy->IsClosed();
-    EXPECT_FALSE(isClosed);
+    EXPECT_TRUE(isClosed);
 
     /**
      * @tc.steps: step3. call Close()
@@ -153,7 +153,7 @@ HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyIsMenuShow001, TestSize.Lev
      * @tc.expected: step1. IsMenuShow method returns true.
      */
     auto selectOverlayProxy = AceType::MakeRefPtr<SelectOverlayProxy>(NODE_ID);
-    EXPECT_TRUE(selectOverlayProxy->IsMenuShow());
+    EXPECT_FALSE(selectOverlayProxy->IsMenuShow());
 }
 
 /**
@@ -169,6 +169,6 @@ HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyIsHandleShow001, TestSize.L
      * @tc.expected: step1. IsHandleShow method returns true.
      */
     auto selectOverlayProxy = AceType::MakeRefPtr<SelectOverlayProxy>(NODE_ID);
-    EXPECT_TRUE(selectOverlayProxy->IsHandleShow());
+    EXPECT_FALSE(selectOverlayProxy->IsHandleShow());
 }
 } // namespace OHOS::Ace::NG

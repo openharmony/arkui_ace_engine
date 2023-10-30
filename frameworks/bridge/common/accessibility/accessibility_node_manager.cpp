@@ -171,7 +171,6 @@ inline int32_t GetRootNodeIdFromPage(const RefPtr<JsAcePage>& page)
         return domDocument->GetRootNodeId();
     }
 #endif
-    LOGW("Failed to get root dom node");
     return -1;
 }
 
@@ -233,8 +232,6 @@ void AccessibilityNodeManager::SetRunningPage(const RefPtr<JsAcePage>& page)
         auto domDocument = page ? page->GetDomDocument() : nullptr;
         if (domDocument) {
             SetRootNodeId(domDocument->GetRootNodeId());
-        } else {
-            LOGE("domDocument is null");
         }
     }
 #endif
@@ -262,7 +259,6 @@ std::string AccessibilityNodeManager::GetNodeChildIds(const RefPtr<Accessibility
 void AccessibilityNodeManager::AddNodeWithId(const std::string& key, const RefPtr<AccessibilityNode>& node)
 {
     if (!node) {
-        LOGE("add node with id failed");
         return;
     }
     nodeWithIdMap_[key] = node;
@@ -271,7 +267,6 @@ void AccessibilityNodeManager::AddNodeWithId(const std::string& key, const RefPt
 void AccessibilityNodeManager::AddNodeWithTarget(const std::string& key, const RefPtr<AccessibilityNode>& node)
 {
     if (!node) {
-        LOGE("add node with target failed");
         return;
     }
     nodeWithTargetMap_[key] = node;
@@ -280,7 +275,6 @@ void AccessibilityNodeManager::AddNodeWithTarget(const std::string& key, const R
 void AccessibilityNodeManager::AddComposedElement(const std::string& key, const RefPtr<ComposedElement>& node)
 {
     if (!node) {
-        LOGE("add composed element failed");
         return;
     }
     composedElementIdMap_[key] = node;
@@ -288,7 +282,6 @@ void AccessibilityNodeManager::AddComposedElement(const std::string& key, const 
 
 void AccessibilityNodeManager::RemoveComposedElementById(const std::string& key)
 {
-    LOGD("remove composed element id:%{public}s", key.c_str());
     auto it = composedElementIdMap_.find(key);
     if (it != composedElementIdMap_.end()) {
         composedElementIdMap_.erase(it);
@@ -304,7 +297,6 @@ WeakPtr<ComposedElement> AccessibilityNodeManager::GetComposedElementFromPage(No
     if (nodeId == 0 && indexPage) {
         auto rootNode = GetRootNodeIdFromPage(indexPage);
         if (rootNode < 0) {
-            LOGW("Failed to get page root node");
             return nullptr;
         }
         nodeId = rootNode + ROOT_STACK_BASE;
@@ -312,7 +304,6 @@ WeakPtr<ComposedElement> AccessibilityNodeManager::GetComposedElementFromPage(No
 
     const auto itNode = composedElementIdMap_.find(std::to_string(nodeId));
     if (itNode == composedElementIdMap_.end()) {
-        LOGW("Failed to get ComposedElement from Page, id:%{public}d", nodeId);
         return nullptr;
     }
     return itNode->second;
@@ -327,7 +318,6 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::GetAccessibilityNodeFromPage
     if (nodeId == 0 && indexPage) {
         auto rootNode = GetRootNodeIdFromPage(indexPage);
         if (rootNode < 0) {
-            LOGW("Failed to get page root node");
             return nullptr;
         }
         nodeId = rootNode + ROOT_STACK_BASE;
@@ -340,7 +330,6 @@ std::string AccessibilityNodeManager::GetInspectorNodeById(NodeId nodeId) const
 {
     auto node = GetAccessibilityNodeFromPage(nodeId);
     if (!node) {
-        LOGE("AccessibilityNodeManager::GetInspectorNodeById, no node with id:%{public}d", nodeId);
         return "";
     }
     auto jsonNode = JsonUtil::Create(true);
@@ -422,7 +411,8 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateAccessibilityNode(
 RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibilityNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex)
 {
-    LOGD("create AccessibilityNode %{public}s, id %{public}d, parent id %{public}d, itemIndex %{public}d", tag.c_str(),
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "create AccessibilityNode %{public}s, id %{public}d, parent id %{public}d, itemIndex %{public}d", tag.c_str(),
         nodeId, parentNodeId, itemIndex);
     RefPtr<AccessibilityNode> parentNode;
     if (parentNodeId != -1) {
@@ -437,7 +427,6 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibili
             std::lock_guard<std::mutex> lock(mutex_);
             auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
             if (!result.second) {
-                LOGD("the accessibility node has already in the map");
                 return nullptr;
             }
         }
@@ -463,13 +452,13 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibili
 RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateCommonAccessibilityNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex)
 {
-    LOGD("create AccessibilityNode %{public}s, id %{public}d, parent id %{public}d, itemIndex %{public}d", tag.c_str(),
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "create AccessibilityNode %{public}s, id %{public}d, parent id %{public}d, itemIndex %{public}d", tag.c_str(),
         nodeId, parentNodeId, itemIndex);
     RefPtr<AccessibilityNode> parentNode;
     if (parentNodeId != -1) {
         parentNode = GetAccessibilityNodeById(parentNodeId);
         if (!parentNode) {
-            LOGD("Parent node %{private}d not exists", parentNodeId);
             EventReport::SendAccessibilityException(AccessibilityExcepType::CREATE_ACCESSIBILITY_NODE_ERR);
             return nullptr;
         }
@@ -494,7 +483,6 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateCommonAccessibilityNod
         auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
 
         if (!result.second) {
-            LOGD("the accessibility node has already in the map");
             return nullptr;
         }
     }
@@ -558,7 +546,6 @@ void AccessibilityNodeManager::RemoveAccessibilityNodes(RefPtr<AccessibilityNode
             parentNode->RemoveNode(node);
         }
     }
-    LOGD("remove accessibility node %{public}d, remain num %{public}zu", node->GetNodeId(), accessibilityNodes_.size());
     std::lock_guard<std::mutex> lock(mutex_);
     accessibilityNodes_.erase(node->GetNodeId());
     RemoveVisibleChangeNode(node->GetNodeId());
@@ -568,7 +555,6 @@ void AccessibilityNodeManager::RemoveAccessibilityNodeById(NodeId nodeId)
 {
     auto accessibilityNode = GetAccessibilityNodeById(nodeId);
     if (!accessibilityNode) {
-        LOGD("the accessibility node %{public}d is not in the map", nodeId);
         return;
     }
     RemoveAccessibilityNodes(accessibilityNode);
@@ -579,7 +565,6 @@ void AccessibilityNodeManager::ClearPageAccessibilityNodes(int32_t pageId)
     auto rootNodeId = pageId + ROOT_STACK_BASE;
     auto accessibilityNode = GetAccessibilityNodeById(rootNodeId);
     if (!accessibilityNode) {
-        LOGD("the accessibility node %{public}d is not in the map", rootNodeId);
         return;
     }
     RemoveAccessibilityNodes(accessibilityNode);
@@ -594,7 +579,6 @@ void AccessibilityNodeManager::TriggerVisibleChangeEvent()
         auto visibleNodeId = visibleChangeNode.first;
         auto accessibilityNode = GetAccessibilityNodeById(visibleNodeId);
         if (!accessibilityNode) {
-            LOGI("No this accessibility node.");
             continue;
         }
         // IntersectionObserver observes size exclude margin.
@@ -620,14 +604,12 @@ void AccessibilityNodeManager::TriggerVisibleChangeEvent()
             auto visibleRatio = visibleRect.Width() * visibleRect.Height() / (globalRect.Width() * globalRect.Height());
             visibleRatio = std::clamp(visibleRatio, 0.0, 1.0);
             if (GreatNotEqual(visibleRatio, nodeCallbackInfo.visibleRatio) && !nodeCallbackInfo.currentVisibleType) {
-                LOGI("Fire visible event %{public}lf", visibleRatio);
                 nodeCallbackInfo.currentVisibleType = true;
                 if (nodeCallbackInfo.callback) {
                     nodeCallbackInfo.callback(true, visibleRatio);
                 }
             }
             if (LessOrEqual(visibleRatio, nodeCallbackInfo.visibleRatio) && nodeCallbackInfo.currentVisibleType) {
-                LOGI("Fire invisible event %{public}lf", visibleRatio);
                 nodeCallbackInfo.currentVisibleType = false;
                 if (nodeCallbackInfo.callback) {
                     nodeCallbackInfo.callback(false, visibleRatio);
@@ -692,11 +674,11 @@ void AccessibilityNodeManager::DumpProperty(const std::vector<std::string>& para
 std::unique_ptr<JsonValue> AccessibilityNodeManager::DumpComposedElementsToJson() const
 {
     auto json = JsonUtil::Create(true);
-    auto infos = JsonUtil::CreateArray(false);
+    auto infos = JsonUtil::CreateArray(true);
     for (auto& [id, element] : composedElementIdMap_) {
         auto inspector = element.Upgrade();
         if (inspector) {
-            auto info = JsonUtil::Create(false);
+            auto info = JsonUtil::Create(true);
             info->Put("id", id.c_str());
             info->Put("type", TypeInfoHelper::TypeName(*inspector));
             infos->Put(info);
@@ -727,8 +709,6 @@ void AccessibilityNodeManager::SetCardViewPosition(int id, float offsetX, float 
         cardId_ = id;
     }
     isOhosHostCard_ = true;
-    LOGD(
-        "setcardview id=%{public}d offsetX=%{public}f, offsetY=%{public}f", id, cardOffset_.GetX(), cardOffset_.GetY());
 }
 
 void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
@@ -737,7 +717,6 @@ void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
     auto composedElement = GetComposedElementFromPage(id);
     auto inspector = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement.Upgrade());
     if (!inspector) {
-        LOGW("this is not Inspector composed element");
         return;
     }
     auto rectInLocal = inspector->GetRenderRectInLocal();
@@ -787,7 +766,6 @@ bool AccessibilityNodeManager::GetDefaultAttrsByType(
     if (creatorIndex >= 0) {
         inspectNode = inspectNodeCreators[creatorIndex].value(nodeId, type);
     } else {
-        LOGW("node type %{public}s is invalid", type.c_str());
         return false;
     }
     inspectNode->InitCommonStyles();
@@ -801,7 +779,6 @@ bool AccessibilityNodeManager::GetDefaultAttrsByType(
 void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
 {
     if (!DumpLog::GetInstance().GetDumpFile()) {
-        LOGE("AccessibilityNodeManager::GetDumpFile fail");
         return;
     }
 

@@ -21,6 +21,7 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/referenced.h"
+#include "core/common/interaction/interaction_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/drag_event.h"
@@ -109,7 +110,9 @@ struct DragDropInfo {
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
+using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
+using OnDragCallbackCore = std::function<void(const DragNotifyMsgCore&)>;
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
@@ -456,10 +459,11 @@ public:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
-    OnDragCallback GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
+    OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 
     std::function<void()> GetMousePixelMapCallback(const GestureEvent& info);
-    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f) const;
+    OffsetF GetPixelMapOffset(
+        const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();

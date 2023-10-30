@@ -51,6 +51,7 @@ void ScrollFadePainter::Paint(RSCanvas& canvas, const SizeF& size, const OffsetF
         { clipRect.Left(), clipRect.Top(), clipRect.Right(), clipRect.Bottom() }, RSClipOp::INTERSECT);
     canvas.DrawCircle(
         { center.GetX(), center.GetY() }, radius);
+    canvas.DetachBrush();
     canvas.Restore();
 }
 

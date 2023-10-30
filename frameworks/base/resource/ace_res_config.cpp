@@ -933,7 +933,6 @@ bool AceResConfig::ParseConfig(const std::vector<KeyParam>& keyParams)
                 screenLong_ = static_cast<LongScreenType>(keyParam.value);
                 break;
             default:
-                LOGE("unknown KeyType:%{public}d", keyParam.keyType);
                 break;
         }
     }

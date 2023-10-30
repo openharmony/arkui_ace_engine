@@ -274,7 +274,8 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         point.type = TouchType::UP;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d",
+        point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
         LOGI("the %{public}d touch test result does not exist!", point.id);

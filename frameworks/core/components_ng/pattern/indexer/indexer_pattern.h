@@ -163,6 +163,7 @@ private:
     int32_t selected_ = 0;
     int32_t animateSelected_ = -1;
     int32_t lastSelected_ = -1;
+    bool initialized_ = false;
     int32_t childHoverIndex_ = -1;
     int32_t childFocusIndex_ = -1;
     int32_t childPressIndex_ = -1;
@@ -175,6 +176,7 @@ private:
     int32_t lastFireSelectIndex_ = -1;
     float lastItemSize_ = -1.0f;
     bool lastIndexFromPress_ = false;
+    bool selectChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

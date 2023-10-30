@@ -41,6 +41,12 @@ public:
     GridEventHub() = default;
     ~GridEventHub() override = default;
 
+    void FireOnDisappear() override
+    {
+        EventHub::FireOnDisappear();
+        HandleOnItemDragCancel();
+    }
+
     void SetOnScrollToIndex(ScrollToIndexFunc&& onScrollToIndex)
     {
         onScrollToIndex_ = std::move(onScrollToIndex);

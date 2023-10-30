@@ -29,6 +29,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -174,6 +175,7 @@ public:
 
     virtual void SetFrontBlur(const Dimension& radius) = 0;
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
+    virtual void SetBlendMode(BlendMode blendMode) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
     virtual void SetWindowBlur(float progress, WindowBlurStyle blurStyle) = 0;
     virtual void SetBrightness(const Dimension& value) = 0;

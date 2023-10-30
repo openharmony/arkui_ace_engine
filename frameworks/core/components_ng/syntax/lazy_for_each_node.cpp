@@ -85,6 +85,7 @@ void LazyForEachNode::PostIdleTask()
         node->needPredict_ = false;
         auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
         if (node->builder_) {
+            node->GetChildren();
             auto preBuildResult = node->builder_->PreBuild(deadline, node->itemConstraint_, canRunLongPredictTask);
             if (!preBuildResult) {
                 node->PostIdleTask();

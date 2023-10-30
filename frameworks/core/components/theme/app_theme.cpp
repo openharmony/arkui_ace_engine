@@ -23,12 +23,10 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
 {
     RefPtr<AppTheme> theme = AceType::Claim(new AppTheme());
     if (!themeConstants) {
-        LOGI("Build AppTheme error, themeConstants is null!");
         return theme;
     }
     auto themeStyle = themeConstants->GetThemeStyle();
     if (!themeStyle) {
-        LOGI("Build AppTheme error, no theme resource, use prebuild color!");
         theme->backgroundColor_ = themeConstants->GetColor(THEME_APP_BACKGROUND);
         return theme;
     }
@@ -46,5 +44,4 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
     }
     return theme;
 }
-
 } // namespace OHOS::Ace

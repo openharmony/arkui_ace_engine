@@ -102,6 +102,7 @@ private:
     void GetFlexItemProperties(const ContentInfo& content, FlexItemProperties& flexItemProperties);
     void CalcFlexGrowLayout(
         const RefPtr<LayoutWrapper>& itemWrapper, const FlexItemProperties& flexItemProperties, float remainSpace);
+    bool UserDefinedCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
 
     WrapDirection direction_ = WrapDirection::VERTICAL;
     WrapAlignment alignment_ = WrapAlignment::START;

@@ -36,9 +36,8 @@ void NavigatorEventHub::NavigatePage()
             delegate->Back(url_, params_);
             break;
         default:
-            LOGE("Navigator type is invalid!");
+            break;
     }
-    LOGD("navigate success");
 }
 
 void NavigatorEventHub::SetActive(bool active)
