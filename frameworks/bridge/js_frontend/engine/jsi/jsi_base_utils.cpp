@@ -29,6 +29,9 @@
 
 namespace OHOS::Ace::Framework {
 constexpr char JS_CRASH_CODE[] = "100001";
+const std::string NAME = "name";
+const std::string MESSAGE = "message";
+const std::string STACK = "stack";
 
 int32_t GetLineOffset(const AceType* data)
 {
@@ -121,6 +124,28 @@ std::string JsiBaseUtils::GenerateErrorMsg(
         .append(GetMsgStr(rawStack))
         .append("\"}");
     return errMsg;
+}
+
+JsErrorObject JsiBaseUtils::GenerateJsErrorObject(
+    const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
+{
+    if (error == nullptr) {
+        return {};
+    }
+    JsErrorObject errInfo;
+    shared_ptr<JsValue> name = error->GetProperty(runtime, NAME);
+    if (name != nullptr) {
+        errInfo.name = name->ToString(runtime);
+    }
+    shared_ptr<JsValue> message = error->GetProperty(runtime, MESSAGE);
+    if (message != nullptr) {
+        errInfo.message = message->ToString(runtime);
+    }
+    shared_ptr<JsValue> stack = error->GetProperty(runtime, STACK);
+    if (stack != nullptr) {
+        errInfo.stack = stack->ToString(runtime);
+    }
+    return errInfo;
 }
 
 std::string JsiBaseUtils::GenerateSummaryBody(
@@ -562,12 +587,13 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
         arkJSRuntime->GetErrorEventHandler()(JS_CRASH_CODE, msg);
         return;
     }
+    auto errorInfo = GenerateJsErrorObject(error, runtime);
 
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
     EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), "", summaryBody);
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-    ExceptionHandler::HandleJsException(summaryBody);
+    ExceptionHandler::HandleJsException(summaryBody, errorInfo);
 #endif
 }
 
