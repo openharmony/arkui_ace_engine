@@ -40,6 +40,7 @@ public:
     virtual void DeleteBackward(int32_t length) {};
     virtual void DeleteForward(int32_t length) {};
     virtual void SetInputMethodStatus(bool keyboardShown) {}
+    virtual void NotifyKeyboardClosedByUser() {}
     virtual std::u16string GetLeftTextOfCursor(int32_t number)
     {
         return StringUtils::DEFAULT_USTRING;

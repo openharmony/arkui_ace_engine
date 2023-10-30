@@ -148,6 +148,8 @@ public:
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }
 
+    void DumpAdvanceInfo() override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

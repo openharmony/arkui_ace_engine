@@ -91,6 +91,11 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
+    if (fontSize.IsNegative()) {
+        auto theme = GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        fontSize = theme->GetTextStyle().GetFontSize();
+    }
 
     SpanModel::GetInstance()->SetFontSize(fontSize);
 }

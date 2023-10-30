@@ -16,7 +16,7 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-module_output_path = "arkui/manifest_fuzzer"
+module_output_path = "ace_engine/ace_engine/manifest_fuzzer"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ManifestFuzzTest") {
@@ -67,6 +67,7 @@ ohos_fuzztest("ManifestFuzzTest") {
     "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
 
     # event
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",

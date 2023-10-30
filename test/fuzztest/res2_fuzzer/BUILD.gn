@@ -16,7 +16,7 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-module_output_path = "arkui/res2"
+module_output_path = "ace_engine/ace_engine/res2"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("Res2FuzzTest") {
@@ -77,14 +77,15 @@ ohos_fuzztest("Res2FuzzTest") {
 
     # mock
     #"$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
 
     #fuzz
-    "$ace_root/test/fuzztest/res2_fuzzer/res2_fuzzer.cpp",
     "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
     "$ace_root/adapter/ohos/osal/system_properties.cpp",
     "$ace_root/frameworks/base/resource/ace_res_config.cpp",
     "$ace_root/frameworks/base/resource/ace_res_key_parser.cpp",
     "$ace_root/frameworks/core/common/flutter/flutter_asset_manager.cpp",
+    "$ace_root/test/fuzztest/res2_fuzzer/res2_fuzzer.cpp",
 
     #"$ace_root/frameworks/base/log/ace_trace.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",

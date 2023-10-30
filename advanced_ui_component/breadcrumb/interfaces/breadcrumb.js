@@ -57,6 +57,7 @@ export class Breadcrumb extends ViewPU {
     this.iconWidth = 24;
     this.labelSpace = 4;
     this.labelHeight = 40;
+    this.labelBorderWidth = 2;
     this.setInitiallyProvidedValue(t);
     this.declareWatch("labelInfo", this.onInfoChanged)
   }
@@ -92,7 +93,8 @@ export class Breadcrumb extends ViewPU {
     void 0 !== e.labelPadding && (this.labelPadding = e.labelPadding);
     void 0 !== e.iconWidth && (this.iconWidth = e.iconWidth);
     void 0 !== e.labelSpace && (this.labelSpace = e.labelSpace);
-    void 0 !== e.labelHeight && (this.labelHeight = e.labelHeight)
+    void 0 !== e.labelHeight && (this.labelHeight = e.labelHeight);
+    void 0 !== e.labelBorderWidth && (this.labelBorderWidth = e.labelBorderWidth)
   }
   updateStateVars(e) {}
   purgeVariableDependenciesOnElmtId(e) {
@@ -176,12 +178,19 @@ export class Breadcrumb extends ViewPU {
   }
   onPlaceChildren(e, t, i) {
     let s = 0;
+    let h = {
+      x: -999999,
+      y: -999999
+    };
     t.forEach(((e, t) => {
-      e.layout({
-        x: s,
-        y: 0
-      });
-      s += e.measureResult.width
+      let i = e.measureResult.width;
+      if (t % 2 != 0 || i !== 2 * this.labelBorderWidth) {
+        e.layout({
+          x: s,
+          y: 0
+        });
+        s += i
+      } else e.layout(h)
     }))
   }
   onMeasureSize(e, t, i) {
@@ -529,6 +538,10 @@ export class Breadcrumb extends ViewPU {
             this.showMenu && (this.showMenu = !1);
             this.onLabelDrop && this.onLabelDrop(this.labels.indexOf(i), e)
           }));
+          MenuItem.onDragEnd((e => {
+            this.onLabelDragCancel && e.getResult() != DragResult.DRAG_SUCCESSFUL && this.onLabelDragCancel(
+              e)
+          }));
           s || MenuItem.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -554,7 +567,7 @@ export class Breadcrumb extends ViewPU {
             this.observeComponentCreation(((e, i) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
               Button.createWithChild();
-              Button.borderWidth(2);
+              Button.borderWidth(this.labelBorderWidth);
               Button.clip(!0);
               Button.type(ButtonType.Normal);
               Button.backgroundColor(ObservedObject.GetRawObject(this.bgColor));
@@ -594,8 +607,11 @@ export class Breadcrumb extends ViewPU {
                 this.onLabelDragLeave && this.onLabelDragLeave(t, e)
               }));
               Button.onDrop(((e, i) => {
-                this.onLabelDrop && (t === this.labels.length - 1 && this.onLabelDragCancel ?
-                  this.onLabelDragCancel(e) : this.onLabelDrop(t, e))
+                this.onLabelDrop && this.onLabelDrop(t, e)
+              }));
+              Button.onDragEnd((e => {
+                this.onLabelDragCancel && e.getResult() != DragResult.DRAG_SUCCESSFUL &&
+                  this.onLabelDragCancel(e)
               }));
               i || Button.pop();
               ViewStackProcessor.StopGetAccessRecording()
@@ -704,7 +720,7 @@ export class Breadcrumb extends ViewPU {
                   Button.createWithChild();
                   Button.clip(!0);
                   Button.type(ButtonType.Normal);
-                  Button.borderWidth(2);
+                  Button.borderWidth(this.labelBorderWidth);
                   Button.backgroundColor(ObservedObject.GetRawObject(this.bgColor));
                   Button.borderRadius({
                     id: -1,
@@ -757,6 +773,7 @@ export class Breadcrumb extends ViewPU {
                       builder: this.menu.bind(this)
                     },
                     enableArrow: !1,
+                    popupColor: Color.Transparent,
                     onStateChange: e => {
                       if (!e.isVisible) {
                         this.labels.indexOf(this.menuInfo[0]) != this
@@ -870,8 +887,11 @@ export class Breadcrumb extends ViewPU {
                 this.onLabelDragLeave && this.onLabelDragLeave(t, e)
               }));
               Row.onDrop(((e, i) => {
-                this.onLabelDrop && (t === this.labels.length - 1 && this.onLabelDragCancel ?
-                  this.onLabelDragCancel(e) : this.onLabelDrop(t, e))
+                this.onLabelDrop && this.onLabelDrop(t, e)
+              }));
+              Row.onDragEnd((e => {
+                this.onLabelDragCancel && e.getResult() != DragResult.DRAG_SUCCESSFUL &&
+                  this.onLabelDragCancel(e)
               }));
               i || Row.pop();
               ViewStackProcessor.StopGetAccessRecording()
@@ -886,7 +906,7 @@ export class Breadcrumb extends ViewPU {
                   Image.width(24);
                   Image.height(24);
                   Image.margin({
-                    left: 6
+                    left: 8
                   });
                   t || Image.pop();
                   ViewStackProcessor.StopGetAccessRecording()

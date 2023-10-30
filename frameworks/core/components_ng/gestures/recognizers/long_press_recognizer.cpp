@@ -113,7 +113,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     LOGI("long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
     int32_t curDuration = duration_;
-#ifndef PREVIEW
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     int64_t currentTimeStamp = GetSysTimestamp();
     int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
     if (currentTimeStamp > eventTimeStamp) {
@@ -153,13 +153,13 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 {
     LOGD("long press recognizer receives touch up event");
-    if (currentFingers_ < fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         LOGW("LongPressGesture current finger number is less than requiried finger number.");
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onActionUpdate_, false);
-        if (currentFingers_ == fingers_) {
+        if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
             SendCallbackMsg(onActionEnd_, false);
         }
     } else {
@@ -170,7 +170,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("long press recognizer receives touch move event");
-    if (currentFingers_ < fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         LOGW("LongPressGesture current finger number is less than requiried finger number.");
         return;
     }

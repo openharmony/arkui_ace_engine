@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/gauge/gauge_accessibility_property.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_property.h"
+#include "core/components_ng/pattern/gauge/gauge_modifier.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -40,7 +41,10 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<GaugePaintMethod>(WeakClaim(this));
+        if (!gaugeModifier_) {
+            gaugeModifier_ = AceType::MakeRefPtr<GaugeModifier>();
+        }
+        return MakeRefPtr<GaugePaintMethod>(WeakClaim(this), gaugeModifier_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -154,6 +158,7 @@ private:
 
     RefPtr<ImageLoadingContext> indicatorIconLoadingCtx_;
     RefPtr<CanvasImage> indicatorIconCanvasImage_;
+    RefPtr<GaugeModifier> gaugeModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GaugePattern);
 };

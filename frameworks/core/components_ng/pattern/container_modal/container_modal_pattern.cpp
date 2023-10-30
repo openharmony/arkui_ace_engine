@@ -38,20 +38,26 @@ constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
 } // namespace
 
-void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
+void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
     auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
     CHECK_NULL_VOID(columnNode);
     auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(titleNode);
-    auto stackNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
-    CHECK_NULL_VOID(stackNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
+    if (needUpdate) {
+        LOGI("title is need update, isFocus_: %{public}d", isFocus_);
+        ChangeTitle(titleNode, isFocus_);
+        return;
+    }
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stackNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
+    CHECK_NULL_VOID(stackNode);
     auto windowManager = pipelineContext->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     windowMode_ = windowManager->GetWindowMode();
@@ -165,7 +171,7 @@ void ContainerModalPattern::InitContainerEvent()
         if (info.GetChangedTouches().begin()->GetTouchType() != TouchType::DOWN) {
             return;
         }
-        if (floatingLayoutProperty->GetVisibilityValue() != VisibleType::VISIBLE) {
+        if (floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE) != VisibleType::VISIBLE) {
             return;
         }
         // step4. Touch other area to hide floating title.
@@ -210,7 +216,7 @@ void ContainerModalPattern::InitContainerEvent()
             return;
         }
         if ((info.GetLocalLocation().GetY() >= titlePopupDistance || action == MouseAction::WINDOW_LEAVE) &&
-            floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
+            floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
             AnimationUtils::Animate(
                 option,
                 [context, titlePopupDistance]() {
@@ -392,7 +398,7 @@ bool ContainerModalPattern::CanShowFloatingTitle()
         return false;
     }
 
-    if (floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
+    if (floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
         LOGI("Floating tittle is visible now, no need to show again.");
         return false;
     }

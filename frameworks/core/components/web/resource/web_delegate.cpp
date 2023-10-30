@@ -91,7 +91,7 @@ const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 
-constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
+constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1;
 
 static bool IsDeviceTabletOr2in1()
 {
@@ -5463,5 +5463,26 @@ void WebDelegate::SetToken()
     if (nweb_) {
         nweb_->SetToken(static_cast<void*>(token));
     }
+}
+
+void WebDelegate::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnOverScrollFlingVelocity(xVelocity, yVelocity, isFling);
+}
+
+void WebDelegate::OnScrollState(bool scrollState)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnScrollState(scrollState);
+}
+
+void WebDelegate::OnRootLayerChanged(int width, int height)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnRootLayerChanged(width, height);
 }
 } // namespace OHOS::Ace

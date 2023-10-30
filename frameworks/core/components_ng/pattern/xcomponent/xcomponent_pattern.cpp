@@ -273,6 +273,11 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (renderContextForSurface_) {
         renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), drawSize.Width(), drawSize.Height());
     }
+    // XComponentType::SURFACE has set surface default size in RSSurfaceNode->SetBounds()
+    if (type_ == XComponentType::TEXTURE) {
+        renderSurface_->SetSurfaceDefaultSize(
+            static_cast<int32_t>(drawSize.Width()), static_cast<int32_t>(drawSize.Height()));
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();

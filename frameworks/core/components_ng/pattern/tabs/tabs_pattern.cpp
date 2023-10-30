@@ -72,10 +72,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             tabBarPattern->SetIndicator(index);
         }
         tabBarPattern->UpdateIndicator(index);
-        if (tabBarPattern->GetTabBarStyle() != TabBarStyle::SUBTABBATSTYLE ||
-                tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) != Axis::HORIZONTAL) {
-            tabBarPattern->UpdateTextColor(index);
-        }
+        tabBarPattern->UpdateTextColor(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
                 tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
@@ -282,5 +279,35 @@ WeakPtr<FocusHub> TabsPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         }
     }
     return nullptr;
+}
+
+void TabsPattern::BeforeCreateLayoutWrapper()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto tabContentNum = swiperNode->TotalChildCount();
+    auto tabsLayoutProperty = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    auto index = tabsLayoutProperty->GetIndex().value_or(0);
+    if (index > tabContentNum - 1) {
+        index = 0;
+    }
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateIndicator(index);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->UpdateTextColor(index);
+
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateIndex(index);
+    tabsLayoutProperty->UpdateIndex(index);
 }
 } // namespace OHOS::Ace::NG

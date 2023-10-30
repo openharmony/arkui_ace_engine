@@ -140,6 +140,7 @@ public:
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
+    virtual void SetWrapContent(bool isWrapContentEnabled) {};
 
 private:
     static std::unique_ptr<WebModel> instance_;

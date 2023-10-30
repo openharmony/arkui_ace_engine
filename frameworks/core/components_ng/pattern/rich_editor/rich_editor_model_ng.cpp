@@ -42,9 +42,8 @@ void RichEditorModelNG::Create()
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<RichEditorTheme>();
-    CHECK_NULL_VOID(theme);
-    SetDraggable(theme->GetDraggable());
+    auto draggable = pipeline->GetDraggable<RichEditorTheme>();
+    SetDraggable(draggable);
 }
 
 void RichEditorModelNG::SetDraggable(bool draggable)

@@ -78,7 +78,7 @@ var WordBreak;
   WordBreak[WordBreak["NORMAL"] = 0] = "normal";
   WordBreak[WordBreak["BREAK_ALL"] = 1] = "break-all";
   WordBreak[WordBreak["BREAK_WORD"] = 2] = "break-word";
-})(WordBreak || (WordBreak = {}))
+})(WordBreak || (WordBreak = {}));
 
 var Curve;
 (function (Curve) {
@@ -249,6 +249,13 @@ var Alignment;
   Alignment[Alignment["Bottom"] = 7] = "Bottom";
   Alignment[Alignment["BottomEnd"] = 8] = "BottomEnd";
 })(Alignment || (Alignment = {}));
+
+var BlendMode;
+(function (BlendMode) {
+  BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
+  BlendMode[BlendMode["DESTINATION_IN"] = 1] = "DESTINATION_IN";
+  BlendMode[BlendMode["SOURCE_IN"] = 2] = "SOURCE_IN";
+})(BlendMode || (BlendMode = {}));
 
 var TextOverflow;
 (function (TextOverflow) {

@@ -91,12 +91,15 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     and also notify with this.aboutToChange();
   */
   private setValueInternal(newValue: T): boolean {
+    stateMgmtProfiler.begin("ObservedPropertyPU.setValueInternal");
     if (newValue === this.wrappedValue_) {
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] newValue unchanged`);
+      stateMgmtProfiler.end();
       return false;
     }
 
     if (!this.checkIsSupportedValue(newValue)) {
+      stateMgmtProfiler.end();
       return false;
     }
 
@@ -117,6 +120,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: setValueInternal: new value is an Object, needs to be wrapped in an ObservedObject.`);
       this.wrappedValue_ = ObservedObject.createNew(newValue, this);
     }
+    stateMgmtProfiler.end();
     return true;
   }
 

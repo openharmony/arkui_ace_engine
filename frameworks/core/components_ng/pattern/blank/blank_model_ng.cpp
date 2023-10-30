@@ -73,10 +73,6 @@ void BlankModelNG::SetHeight(const Dimension& height)
 
 void BlankModelNG::SetColor(const Color& color)
 {
-    auto blankNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(blankNode);
-    auto paintProperty = blankNode->GetPaintProperty<BlankPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateColor(color);
+    ACE_UPDATE_PAINT_PROPERTY(BlankPaintProperty, Color, color);
 }
 } // namespace OHOS::Ace::NG

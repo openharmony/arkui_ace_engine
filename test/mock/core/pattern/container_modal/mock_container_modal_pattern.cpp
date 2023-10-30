@@ -17,7 +17,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ContainerModalPattern::ShowTitle(bool /* isShow */, bool hasDeco)
+void ContainerModalPattern::ShowTitle(bool /* isShow */, bool hasDeco, bool needUpdate)
 {
     hasDeco_ = hasDeco;
     windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;

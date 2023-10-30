@@ -24,7 +24,7 @@ void UpdateGridItemRowAndColumnInfo(const RefPtr<LayoutWrapper>& itemLayoutWrapp
     CHECK_NULL_VOID(gridItemHost);
     auto gridItemPattern = gridItemHost->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(gridItemPattern);
-    gridItemPattern->SetScrollIrregularItemInfo(irregualItemInfo);
+    gridItemPattern->SetIrregularItemInfo(irregualItemInfo);
 }
 } // namespace
 
@@ -42,7 +42,7 @@ void GridScrollWithOptionsLayoutAlgorithm::AdjustRowColSpan(
     } else {
         currentItemRowStart_ = result.first;
         currentItemRowSpan_ = result.second;
-        currentItemRowEnd_ = currentItemColStart_ + currentItemColSpan_ - 1;
+        currentItemRowEnd_ = currentItemRowStart_ + currentItemRowSpan_ - 1;
         currentItemColStart_ = -1;
         currentItemColEnd_ = -1;
         currentItemColSpan_ = 1;
@@ -50,14 +50,14 @@ void GridScrollWithOptionsLayoutAlgorithm::AdjustRowColSpan(
 
     if (currentItemRowSpan_ > 1 || currentItemColSpan_ > 1) {
         gridLayoutInfo_.hasBigItem_ = true;
-
+        bool isVertical = gridLayoutInfo_.axis_ == Axis::VERTICAL;
         GridItemIndexInfo irregualItemInfo;
-        irregualItemInfo.mainStart = currentItemRowStart_;
-        irregualItemInfo.mainEnd = currentItemRowEnd_;
-        irregualItemInfo.mainSpan = currentItemRowSpan_;
-        irregualItemInfo.crossStart = currentItemColStart_;
-        irregualItemInfo.crossEnd = currentItemColEnd_;
-        irregualItemInfo.crossSpan = currentItemColSpan_;
+        irregualItemInfo.mainStart = isVertical ? currentItemRowStart_ : currentItemColStart_;
+        irregualItemInfo.mainEnd = isVertical ? currentItemRowEnd_ : currentItemColEnd_;
+        irregualItemInfo.mainSpan = isVertical ? currentItemRowSpan_ : currentItemColSpan_;
+        irregualItemInfo.crossStart = isVertical ? currentItemColStart_ : currentItemRowStart_;
+        irregualItemInfo.crossEnd = isVertical ? currentItemColEnd_ : currentItemRowEnd_;
+        irregualItemInfo.crossSpan = isVertical ? currentItemColSpan_ : currentItemRowSpan_;
         UpdateGridItemRowAndColumnInfo(itemLayoutWrapper, irregualItemInfo);
     }
 }
@@ -173,13 +173,12 @@ static void JumpToLastIrregularItem(
 static void ResetInvalidCrossSpan(uint32_t crossCount, int32_t& crossSpan)
 {
     if (crossSpan > static_cast<int32_t>(crossCount) || crossSpan <= 0) {
-        LOGI("crossSpan %{public}d invalid, use 1", crossSpan);
         crossSpan = 1;
     }
 }
 
 static void InitIrregularItemsPosition(std::map<int32_t, int32_t>& irregularItemsPosition,
-    const GridLayoutOptions& options, int32_t firstIrregularIndex, Axis axis, uint32_t crossCount)
+    const GridLayoutOptions& options, int32_t firstIrregularIndex, Axis axis, int32_t crossCount)
 {
     if (irregularItemsPosition.empty()) {
         auto sum = firstIrregularIndex;
@@ -199,8 +198,8 @@ static void InitIrregularItemsPosition(std::map<int32_t, int32_t>& irregularItem
 std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartAndSpanWithUserFunction(
     int32_t itemIndex, const GridLayoutOptions& options, int32_t firstIrregularIndex)
 {
-    InitIrregularItemsPosition(
-        gridLayoutInfo_.irregularItemsPosition_, options, firstIrregularIndex, gridLayoutInfo_.axis_, crossCount_);
+    InitIrregularItemsPosition(gridLayoutInfo_.irregularItemsPosition_, options, firstIrregularIndex,
+        gridLayoutInfo_.axis_, static_cast<int32_t>(crossCount_));
     auto sum = firstIrregularIndex;
     auto lastIndex = firstIrregularIndex;
     JumpToLastIrregularItem(gridLayoutInfo_.irregularItemsPosition_, sum, lastIndex, itemIndex);

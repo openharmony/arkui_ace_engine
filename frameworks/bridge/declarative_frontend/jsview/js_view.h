@@ -144,6 +144,8 @@ public:
         return viewNode_.Upgrade();
     }
 
+    virtual void OnDumpInfo(const std::vector<std::string>& params) {}
+
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
@@ -372,6 +374,8 @@ public:
     {
         return isRecycleRerender_;
     }
+
+    void OnDumpInfo(const std::vector<std::string>& params) override;
 
 private:
     void MarkNeedUpdate() override;

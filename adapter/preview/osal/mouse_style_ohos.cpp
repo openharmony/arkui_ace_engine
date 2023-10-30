@@ -24,19 +24,19 @@ RefPtr<MouseStyle> MouseStyle::CreateMouseStyle()
 
 bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle) const
 {
-    LOGI("Not supported in previewer");
+    LOGI("Set pointer style is not supported in previewer");
     return true;
 }
 
 int32_t MouseStyleOhos::GetPointerStyle(int32_t windowId, int32_t& pointerStyle) const
 {
-    LOGI("Not supported in previewer");
+    LOGI("Get pointer style is not supported in previewer");
     return 0;
 }
 
 bool MouseStyleOhos::ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const
 {
-    LOGI("Not supported in previewer");
+    LOGI("Change pointer style is not supported in previewer");
     return true;
 }
 

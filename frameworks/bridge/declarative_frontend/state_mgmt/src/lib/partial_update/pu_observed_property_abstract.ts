@@ -81,32 +81,33 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // use function only for debug output and DFX.
   public debugInfoSubscribers(): string {
     return (this.owningView_)
-      ? `owned by ${this.debugInfoOwningView()} `
-      : `owned by: owning view not known`;
+      ? `|--Owned by ${this.debugInfoOwningView()} `
+      : `|--Owned by: owning view not known`;
   }
 
   public debugInfoSyncPeers(): string {
     if (!this.subscriberRefs_.size) {
-      return "sync peers: none";
+      return "|--Sync peers: none";
     }
-    let result: string = `sync peers:\n`;
+    let result: string = `|--Sync peers: {`;
     let sepa: string = "";
     this.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
       if ("debugInfo" in subscriber) {
-        result += `    ${sepa}${(subscriber as ObservedPropertyAbstractPU<any>).debugInfo()}`;
+        result += `\n    ${sepa}${(subscriber as ObservedPropertyAbstractPU<any>).debugInfo()}`;
         sepa = ", ";
       }
     });
+    result += "\n  }"
     return result;
   }
 
   public debugInfoDependentElmtIds(): string {
     if (!this.dependentElementIds_.size) {
-      return `dependent components: no dependent elmtIds`;
+      return `|--Dependent components: no dependent elmtIds`;
     }
     let result: string = this.dependentElementIds_.size < 25
-      ? `dependent components: ${this.dependentElementIds_.size} elmtIds: `
-      : `WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
+      ? `|--Dependent components: ${this.dependentElementIds_.size} elmtIds: `
+      : `|--WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
     let sepa: string = "";
     if (this.owningView_) {
       this.dependentElementIds_.forEach((elmtId: number) => {
@@ -200,6 +201,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   protected notifyPropertyHasBeenReadPU() {
+    stateMgmtProfiler.begin("ObservedPropertyAbstractPU.notifyPropertyHasBeenRead");
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasBeenReadPU.`)
     this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {
@@ -213,9 +215,11 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       }
     });
     this.recordDependentUpdate();
+    stateMgmtProfiler.end();
   } 
 
   protected notifyPropertyHasChangedPU() {
+    stateMgmtProfiler.begin("ObservedPropertyAbstractPU.notifyPropertyHasChangedPU");
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`)
     if (this.owningView_) {
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
@@ -235,6 +239,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         }
       }
     });
+    stateMgmtProfiler.end();
   }  
 
   
@@ -308,7 +313,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     });
 
     // never gets here if errorReport.varValueCheckFailed throws an exception
-    // but should nto depend on its implementation
+    // but should not depend on its implementation
     return false;
   }
 

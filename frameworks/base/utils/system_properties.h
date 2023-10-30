@@ -234,6 +234,11 @@ public:
         return debugBoundaryEnabled_;
     }
 
+    static bool GetDownloadByNetworkEnabled()
+    {
+        return downloadByNetworkEnabled_;
+    }
+
     static bool GetTraceEnabled()
     {
         return traceEnabled_;
@@ -380,6 +385,8 @@ public:
 
     static bool IsFormAnimationLimited();
 
+    static bool GetResourceDecoupling();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -410,6 +417,7 @@ private:
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
     static bool debugBoundaryEnabled_;
+    static bool downloadByNetworkEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
     static bool astcEnabled_;
@@ -417,6 +425,7 @@ private:
     static int32_t astcPsnr_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
+    static bool resourceDecoupling_;
 };
 
 } // namespace OHOS::Ace

@@ -16,52 +16,31 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_ADAPTER_WRAPPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_ADAPTER_WRAPPER_H
 
-#include <EGL/egl.h>
+#include <memory>
+
+#include "custom/shader_input_buffer.h"
+#include "ohos/texture_layer.h"
+#include "widget_adapter.h"
 
 #include "base/geometry/animatable_float.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/quaternion.h"
 #include "base/geometry/vec3.h"
-#include "core/components_ng/pattern/model/model_layout_property.h"
 #include "core/components_ng/pattern/model/model_paint_property.h"
 #include "core/components_ng/pattern/model/model_touch_handler.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/scene_viewer_touch_event.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/shader_input_buffer.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/ohos/texture_layer.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/scene_viewer_adapter.h"
 
 namespace OHOS::Ace::NG {
-#define MAX_INVALID std::numeric_limits<double>::max()
-struct SceneViewerAdapterProperties {
-    // Scene properties
-    std::string gltfSrc_ = "";
-    std::string backgroundSrc_ = "";
-    OHOS::Render3D::SceneViewerBackgroundType bgType_ = OHOS::Render3D::SceneViewerBackgroundType::CUBE_MAP;
 
-    // FOV
-    float zNear_ = 0.5f;
-    float zFar_ = 50.0f;
+struct CameraProperty {
+    Render3D::Position position_;
+    Render3D::Vec3 lookAt_ { 0.0f, 0.0f, 0.0f };
+    Render3D::Vec3 up_ { 0.0f, 1.0f, 0.0f };
+    Render3D::Quaternion rotation_ { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
+    float near_ = 0.5f;
+    float far_ = 50.0f;
     float fov_ = 60.0f;
-
-    // Camera properties.
-    OHOS::Render3D::Position cameraPosition_;
-    Vec3 cameraLookAt_ = Vec3(0.0f, 0.0f, 0.0f);
-    Vec3 cameraUp_ = Vec3(0.0f, 1.0f, 0.0f);
-
-    // Invalid by default. Either camera of rotation or lookat is used at the end.
-    Quaternion cameraRotation_ = Quaternion(MAX_INVALID,
-        MAX_INVALID, MAX_INVALID, MAX_INVALID);
-
-    std::vector<RefPtr<OHOS::Render3D::SVLight>> lights_;
-    std::vector<RefPtr<OHOS::Render3D::GLTFAnimation>> animations_;
-    std::vector<RefPtr<OHOS::Render3D::SVGeometry>> geometries_;
-    std::vector<RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>> customRenders_;
-
-    // Shader properties.
-    std::string shaderPath_ = "";
-    std::vector<std::string> imageTexturePaths_;
-    std::vector<RefPtr<OHOS::Render3D::ShaderInputBuffer>> shaderInputBuffers_;
 };
 
 class ModelAdapterWrapper : public virtual AceType {
@@ -69,57 +48,51 @@ class ModelAdapterWrapper : public virtual AceType {
 public:
     using PaintFinishCallback = std::function<void()>;
 
-    ModelAdapterWrapper(uint32_t key);
-    ~ModelAdapterWrapper() = default;
+    ModelAdapterWrapper(uint32_t key, Render3D::SurfaceType surfaceType);
+    ~ModelAdapterWrapper() override;
 
-    void OnMeasureContent(const RefPtr<ModelLayoutProperty>& modelLayoutProperty, SizeF size);
-    void OnPaint(const RefPtr<ModelPaintProperty>& modelPaintProperty);
-    void OnPaintFinish();
     void SetPaintFinishCallback(PaintFinishCallback callback);
-    bool IsInitialized();
-    bool IsReady();
     bool NeedsRepaint();
-    SkDrawable* GetDrawable(OffsetF offset);
-    std::shared_ptr<OHOS::Render3D::TextureLayer> GetTextureLayer(OffsetF offset);
     bool HandleTouchEvent(const TouchEventInfo& info);
 
+    void OnPaint3D(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void OnPaintFinish();
+    void OnRebuildFrame(RefPtr<RenderContext>& context);
+    void OnAttachToFrameNode(const RefPtr<RenderContext>& context);
+    void OnDirtyLayoutWrapperSwap(float offsetX, float offsetY, float width, float height, float scale,
+        bool recreateWindow);
+    void OnPaint3DSceneTexture(SkCanvas* skCanvas);
+
 private:
+    void CreateTextureLayer();
+    void CreateWidgetAdapter();
+
     uint32_t GetKey();
     void Initialize();
-    void CreateTextureLayer(const EGLContext& eglContext);
-    void UpdateTextureLayer();
-    void CreateSceneViewerAdapter(const EGLContext& eglContext);
-    void UpdateSceneViewerAdapter(const SceneViewerAdapterProperties& properties);
-    SceneViewerAdapterProperties ExtractLayoutProperties(const RefPtr<ModelLayoutProperty>& modelLayoutProperty);
-    SceneViewerAdapterProperties ExtractPaintProperties(const RefPtr<ModelPaintProperty>& modelPaintProperty);
-    void UnloadScene();
-    EGLContext GetRenderContext();
+    void UnloadSceneAndBackground();
     void DrawFrame();
-    void UpdateCamera(const SceneViewerAdapterProperties& properties);
-    void UpdateLights(const SceneViewerAdapterProperties& properties);
-    void UpdateGLTFAnimations(const SceneViewerAdapterProperties& properties);
-    void UpdateGeometries(const SceneViewerAdapterProperties& properties);
-    void HandleCameraMove(const OHOS::Render3D::SceneViewerTouchEvent& event);
-    void UpdateCustomRenders(const SceneViewerAdapterProperties& properties);
-    void UpdateShaderPath(const SceneViewerAdapterProperties& properties);
-    void UpdateImageTexturePaths(const SceneViewerAdapterProperties& properties);
-    void UpdateShaderInputBuffers(const SceneViewerAdapterProperties& properties);
+    void UpdateCamera(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void UpdateLights(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void UpdateGLTFAnimations(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void UpdateGeometries(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void UpdateScene(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void UpdateEnviroment(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void UpdateCustomRender(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void UpdateShaderPath(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void UpdateImageTexturePaths(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void UpdateShaderInputBuffers(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void HandleCameraMove(const Render3D::PointerEvent& event);
 
-private:
-    uint32_t key_ = -1;
-    SizeF size_ { 0.0f, 0.0f };
+    uint32_t key_ = UINT32_MAX;
     PaintFinishCallback callback_ = nullptr;
-    bool needsRepaint_ = false;
-    bool sceneIsSetUp_ = false;
+    bool needsSyncPaint_ = true;
 
-    std::shared_ptr<OHOS::Render3D::SceneViewerAdapter> sceneViewerAdapter_;
-    std::shared_ptr<OHOS::Render3D::TextureInfo> textureInfo_;
-    std::shared_ptr<OHOS::Render3D::TextureLayer> textureLayer_;
+    std::shared_ptr<Render3D::WidgetAdapter> widgetAdapter_;
+    std::unique_ptr<Render3D::TextureLayer> textureLayer_;
     RefPtr<ModelTouchHandler> touchHandler_;
-    EGLContext eglContext_ = EGL_NO_CONTEXT;
+    Render3D::SurfaceType surfaceType_;
+
     ACE_DISALLOW_COPY_AND_MOVE(ModelAdapterWrapper);
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_ADAPTER_WRAPPER_H

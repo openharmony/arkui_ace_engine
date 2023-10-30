@@ -35,6 +35,7 @@
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/pipeline/pipeline_base.h"
+#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 namespace OHOS::Ace {
 
@@ -231,6 +232,7 @@ public:
     static int32_t CurrentId();
     static RefPtr<Container> Current();
     static RefPtr<Container> GetActive();
+    static RefPtr<Container> GetFoucsed();
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static void UpdateCurrent(int32_t id);
 
@@ -247,7 +249,7 @@ public:
     static bool IsCurrentUseNewPipeline()
     {
         auto container = Current();
-        return container ? container->useNewPipeline_ : false;
+        return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
     }
 
     // SetCurrentUsePartialUpdate is called when initial render on a page
@@ -310,7 +312,7 @@ public:
         return false;
     }
 
-    virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = {false, false}) {}
+    virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = { false, false }) {}
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)
@@ -356,20 +358,14 @@ public:
 
     static bool LessThanAPIVersion(PlatformVersion version)
     {
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)) {
-            return true;
-        }
-        return false;
+        return PipelineBase::GetCurrentContext() &&
+               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version);
     }
 
     static bool GreatOrEqualAPIVersion(PlatformVersion version)
     {
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)) {
-            return true;
-        }
-        return false;
+        return PipelineBase::GetCurrentContext() &&
+               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
     }
 
 protected:

@@ -798,11 +798,13 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
 }
 
 void FrontendDelegateDeclarative::InitializeRouterManager(
-    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback)
+    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
+    NG::UpdateRootComponentCallback&& updateRootComponentCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
     pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
     pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
+    pageRouterManager_->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 }
 
 // Start FrontendDelegate overrides.
@@ -979,10 +981,8 @@ void FrontendDelegateDeclarative::AddRouterTask(const RouterTask& task)
 {
     if (routerQueue_.size() < MAX_ROUTER_STACK) {
         routerQueue_.emplace(task);
-        LOGI("router queue's size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
+        LOGD("router queue's size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
             static_cast<uint32_t>(task.action), task.target.url.c_str());
-    } else {
-        LOGW("router queue is full");
     }
 }
 
@@ -1362,7 +1362,6 @@ Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
 void FrontendDelegateDeclarative::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
-    LOGD("FrontendDelegateDeclarative ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
@@ -1370,7 +1369,8 @@ void FrontendDelegateDeclarative::ShowToast(
                         const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
+            TAG_LOGD(AceLogTag::ACE_PROMPT_ACTION_TOAST,
+                "Begin to show toast message %{public}s,duration is %{public}d", message.c_str(), durationTime);
             overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
         };
         MainWindowOverlay(std::move(task));
@@ -2816,7 +2816,7 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
 
     if (!Container::IsCurrentUseNewPipeline()) {
         std::lock_guard<std::mutex> lock(mutex_);
-        auto jsonRouterStack = JsonUtil::CreateArray(false);
+        auto jsonRouterStack = JsonUtil::CreateArray(true);
         for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
             jsonRouterStack->Put("", pageRouteStack_[index].url.c_str());
         }

@@ -13,16 +13,19 @@
  * limitations under the License.
  */
 
+#include <array>
 #include <utility>
 
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "bridge/card_frontend/card_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #ifdef NG_BUILD
@@ -133,6 +136,7 @@
 #include "bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "bridge/declarative_frontend/jsview/js_span.h"
 #include "bridge/declarative_frontend/jsview/js_stack.h"
+#include "bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_stepper.h"
 #include "bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
@@ -160,6 +164,9 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
 
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -228,13 +235,11 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
-        LOGE("loadDocument: argument provided is not a View!");
         return;
     }
 
     auto container = Container::Current();
     if (!container) {
-        LOGE("loadDocument: Container is null");
         return;
     }
     if (container->IsUseNewPipeline()) {
@@ -277,7 +282,6 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         }
         Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
         if (!pageNode->GetChildren().empty()) {
-            LOGW("the page has already add node, clean");
             auto oldChild = AceType::DynamicCast<NG::CustomNode>(pageNode->GetChildren().front());
             if (oldChild) {
                 oldChild->Reset();
@@ -318,6 +322,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             return false;
         });
         auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(pageRootNode);
+
         pagePattern->SetPageTransitionFunc(
             [weakCustom = WeakPtr<NG::CustomNodeBase>(customNode), weakPage = WeakPtr<NG::FrameNode>(pageNode)]() {
                 auto custom = weakCustom.Upgrade();
@@ -329,6 +334,15 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
                     NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
                 }
             });
+        auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
+        CHECK_NULL_VOID(context);
+        context->RegisterDumpInfoListener(
+            [weakView = Referenced::WeakClaim(view)](const std::vector<std::string>& params) {
+                auto view = weakView.Upgrade();
+                if (view) {
+                    view->OnDumpInfo(params);
+                }
+            });
         return;
     }
 
@@ -336,9 +350,8 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     JsiDeclarativeEngineInstance::RootViewHandle(obj);
 
-    LOGI("Load Document setting root view, page[%{public}d]", page->GetPageId());
     Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
-    LOGD("Loading page root component: Setting pipeline to use %{public}s.",
+    LOGI("Loading page[%{public}d] root component: Setting pipeline to use %{public}s.", page->GetPageId(),
         view->isFullUpdate() ? "Full Update" : "Partial Update");
     auto rootComponent = AceType::DynamicCast<Component>(view->CreateViewNode());
     std::list<RefPtr<Component>> stackChildren;
@@ -602,6 +615,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PanGestureOptions", JSPanGestureOption::JSBind },
     { "CustomDialogController", JSCustomDialogController::JSBind },
     { "Scroller", JSScroller::JSBind },
+    { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "TabsController", JSTabsController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
@@ -675,6 +689,7 @@ void RegisterAllModule(BindingTarget globalObj)
     JSSwiperController::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
+    JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
@@ -713,6 +728,7 @@ void RegisterAllFormModule(BindingTarget globalObj)
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
+    JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
@@ -733,7 +749,6 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
 {
     auto func = bindFuncs.find(module);
     if (func == bindFuncs.end()) {
-        LOGI("JS module not exist, try to find in extra, name: %{public}s", module.c_str());
         RegisterExtraViewByName(globalObj, module);
         return;
     }
@@ -758,7 +773,6 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 {
     auto func = bindFuncs.find(moduleName);
     if (func == bindFuncs.end()) {
-        LOGI("JS module not exist, try to find in extra, name: %{public}s", moduleName.c_str());
         RegisterExtraViewByName(globalObj, moduleName);
         return;
     }
@@ -803,25 +817,21 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
 {
     // globalObj is panda::Local<panda::ObjectRef>
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
-    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("UINodeRegisterCleanUpFunction");
+    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("uiNodeRegisterCleanUpFunction");
     const JSRef<JSVal> globalCleanUpFunc = globalObject->GetProperty("globalRegisterCleanUpFunction");
 
     if (globalFuncVal->IsFunction()) {
-        LOGD("UINodeRegisterCleanUpFunction is a valid function");
         const auto globalFunc = JSRef<JSFunc>::Cast(globalFuncVal);
         const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
             jsFunc->Call(globalObject);
         };
         ElementRegister::GetInstance()->RegisterJSUINodeRegisterCallbackFunc(callback);
     } else if (globalCleanUpFunc->IsFunction()) {
-        LOGD("globalRegisterCleanUpFunction is a valid function");
         const auto globalFunc = JSRef<JSFunc>::Cast(globalCleanUpFunc);
         const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
             jsFunc->Call(globalObject);
         };
         ElementRegister::GetInstance()->RegisterJSUINodeRegisterGlobalFunc(callback);
-    } else {
-        LOGE("Unable to register JS functions for the unregistration of Element ID. Internal error!");
     }
 }
 
@@ -851,7 +861,10 @@ void JsBindFormViews(
         JSContainerBase::JSBind(globalObj);
         JSShapeAbstract::JSBind(globalObj);
         JSView::JSBind(globalObj);
+        JSDumpLog::JSBind(globalObj);
+        JSDumpRegister::JSBind(globalObj);
         JSLocalStorage::JSBind(globalObj);
+        JSStateMgmtProfiler::JSBind(globalObj);
 
         JSEnvironment::JSBind(globalObj);
         JSViewContext::JSBind(globalObj);
@@ -859,19 +872,17 @@ void JsBindFormViews(
         JSTouchHandler::JSBind(globalObj);
         JSPersistent::JSBind(globalObj);
         JSScroller::JSBind(globalObj);
+        JSListScroller::JSBind(globalObj);
 
         JSProfiler::JSBind(globalObj);
         JSCommonView::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {
-        LOGI("Register modules on demand.");
         for (const std::string& module : formModuleList) {
-            LOGD("Register module: %{public}s", module.c_str());
             RegisterFormModuleByName(globalObj, module);
         }
     } else {
-        LOGI("Register all modules");
         RegisterAllFormModule(globalObj);
     }
 }
@@ -882,7 +893,10 @@ void JsBindViews(BindingTarget globalObj)
     JSContainerBase::JSBind(globalObj);
     JSShapeAbstract::JSBind(globalObj);
     JSView::JSBind(globalObj);
+    JSDumpLog::JSBind(globalObj);
+    JSDumpRegister::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
+    JSStateMgmtProfiler::JSBind(globalObj);
 
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
@@ -896,6 +910,7 @@ void JsBindViews(BindingTarget globalObj)
     JSShareData::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
+    JSListScroller::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
@@ -903,10 +918,8 @@ void JsBindViews(BindingTarget globalObj)
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;
     if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
-        LOGI("JsRegisterViews register collection modules");
         JsRegisterModules(globalObj, jsModules);
     } else {
-        LOGI("JsRegisterViews register all modules");
         RegisterAllModule(globalObj);
     }
 }

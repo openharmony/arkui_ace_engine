@@ -1,0 +1,79 @@
+{
+  "files": [
+    // common
+    // declarations of C++ exposed classes
+    "src/lib/common/ace_console.native.d.ts",
+    "src/lib/common/ace_trace.native.d.ts",
+    "src/lib/common/state_mgmt_profiler.ts",
+    "src/lib/common/state_mgmt_profiler.native.d.ts",
+    "src/lib/common/environment_setting.d.ts",
+    "src/lib/common/storage.d.ts",
+    "src/lib/common/local_storage_native.d.ts",
+    "src/lib/common/lazy_foreach.d.ts",
+    "src/lib/common/ifelse_native.d.ts",
+
+    // internal interfaces
+    "src/lib/common/i_environment_backend.ts",
+    "src/lib/common/i_storage.ts",
+
+    // sdk
+    "src/lib/sdk/i_animatable_arithmetic.ts",
+    "src/lib/sdk/i_data_source.d.ts",
+    "src/lib/sdk/i_property_subscriber.ts",
+    "src/lib/sdk/local_storage.ts",
+    "src/lib/sdk/app_storage.ts",
+    "src/lib/sdk/subscriber_lookup.ts",
+    "src/lib/sdk/subscribed_abstract_property.ts",
+    "src/lib/sdk/subscribable_abstract.ts",
+    "src/lib/sdk/persistent_storage.ts",
+    "src/lib/sdk/environment.ts",
+
+    // common
+    "src/lib/common/state_mgmt_console_trace.ts",
+    "src/lib/common/observed_object.ts",
+    "src/lib/common/observed_property_abstract.ts",
+
+    // full_update specific
+    "src/lib/full_update/fu_view_native.d.ts",
+    "src/lib/full_update/fu_observed_property_object_abstract.ts",
+    "src/lib/full_update/fu_observed_property_simple_abstract.ts",
+    "src/lib/full_update/fu_observed_property_object.ts",
+    "src/lib/full_update/fu_observed_property_simple.ts",
+    "src/lib/full_update/fu_synced_property_object_two_way.ts",
+    "src/lib/full_update/fu_synced_property_simple_one_way.ts",
+    "src/lib/full_update/fu_synced_property_simple_two_way.ts",
+    "src/lib/full_update/fu_synced_property_object_nested.ts",
+    "src/lib/full_update/fu_view.ts",
+
+    // partial_update specifc
+    "src/lib/partial_update/pu_types_events.ts",
+    "src/lib/partial_update/pu_viewstack_processor.d.ts",
+    "src/lib/partial_update/pu_foreach.d.ts",
+    "src/lib/partial_update/pu_view_native.d.ts",
+    "src/lib/partial_update/pu_observed_property_abstract.ts",
+    "src/lib/partial_update/pu_observed_property.ts",
+    "src/lib/partial_update/pu_synced_property_one_way.ts",
+    "src/lib/partial_update/pu_synced_property_two_way.ts",
+    "src/lib/partial_update/pu_synced_property_object_nested.ts",
+    "src/lib/partial_update/pu_uinode_registry_proxy.ts",
+    "src/lib/partial_update/pu_view.ts",
+    "src/lib/partial_update/pu_recycle_manager.ts",
+    "src/lib/partial_update/pu_builder_proxy.ts",
+
+    // init
+    "src/index.ts",
+  ],
+  "compilerOptions": {
+    "module": "none",
+    "target": "ES2016",
+    "outDir": "./distProfile/",
+    "outFile": "./distProfile/stateMgmt.js",
+    "rootDir": "./src/",
+    "declaration": false,
+    "noEmitOnError": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "ES2016"
+    ],
+  }
+}

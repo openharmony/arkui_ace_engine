@@ -453,6 +453,7 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
     paintProp->UpdateHasIcon(true);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
     /**
      * @tc.steps: step2. excute GetOverlayDrawFunction.

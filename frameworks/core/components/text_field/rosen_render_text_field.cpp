@@ -399,7 +399,11 @@ void RosenRenderTextField::PaintSelection(RSCanvas* canvas) const
 #else
         auto rect = RSRect(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom());
 
+#ifndef USE_GRAPHIC_TEXT_GINE
         if (box.direction == txt::TextDirection::ltr) {
+#else
+        if (box.direction == Rosen::TextDirection::LTR) {
+#endif
             rect = RSRect(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom());
         }
         canvas->AttachBrush(brush);
@@ -1068,7 +1072,6 @@ std::shared_ptr<RSShaderEffect> RosenRenderTextField::MakeGradientShader(double 
         }
     }
 #ifndef USE_ROSEN_DRAWING
-
     return SkGradientShader::MakeLinear(pts, &colors[start], &pos[start], renderCount, SkTileMode::kClamp);
 #else
     std::vector<RSColorQuad> colors;
@@ -1601,8 +1604,11 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveUp()
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() - PreferredLineHeight();
     return static_cast<int32_t>(paragraph_
+#ifndef USE_GRAPHIC_TEXT_GINE
+                                    ->GetGlyphPositionAtCoordinate(
+#else
                                     ->GetGlyphIndexByCoordinate(
-
+#endif
 #ifndef USE_GRAPHIC_TEXT_GINE
                                         caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
                                     .position);
@@ -1619,7 +1625,12 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveDown()
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() + PreferredLineHeight();
     return static_cast<int32_t>(paragraph_
+
+#ifndef USE_GRAPHIC_TEXT_GINE
+                                    ->GetGlyphPositionAtCoordinate(
+#else
                                     ->GetGlyphIndexByCoordinate(
+#endif
 
 #ifndef USE_GRAPHIC_TEXT_GINE
                                         caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
@@ -1642,7 +1653,13 @@ int32_t RosenRenderTextField::GetCursorPositionForClick(const Offset& offset)
     if (realTextDirection_ == TextDirection::RTL && GreatOrEqual(clickOffset_.GetX(), rightBoundary)) {
         return 0;
     }
-    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).index);
+    return static_cast<int32_t>(
+
+#ifndef USE_GRAPHIC_TEXT_GINE
+        paragraph_->GetGlyphPositionAtCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).position);
+#else
+        paragraph_->GetGlyphIndexByCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).index);
+#endif
 }
 
 int32_t RosenRenderTextField::AdjustCursorAndSelection(int32_t currentCursorPosition)

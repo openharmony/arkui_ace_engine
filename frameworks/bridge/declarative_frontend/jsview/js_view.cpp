@@ -643,7 +643,9 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         }
         AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
-        jsView->jsViewFunction_->ExecuteAboutToRecycle();
+        if (!recycleNode->HasRecycleRenderFunc()) {
+            jsView->jsViewFunction_->ExecuteAboutToRecycle();
+        }
         jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
     };
 
@@ -655,6 +657,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteSetActive(active);
+    };
+
+    auto onDumpInfoFunc = [weak = AceType::WeakClaim(this)](const std::vector<std::string>& params) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteOnDumpInfo(params);
     };
 
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
@@ -670,6 +679,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .setActiveFunc = std::move(setActiveFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
+        .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName() };
 
@@ -876,6 +886,12 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     } else {
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
     }
+}
+
+void JSViewPartialUpdate::OnDumpInfo(const std::vector<std::string>& params)
+{
+    CHECK_NULL_VOID(jsViewFunction_);
+    jsViewFunction_->ExecuteOnDumpInfo(params);
 }
 
 void JSViewPartialUpdate::JSBind(BindingTarget object)

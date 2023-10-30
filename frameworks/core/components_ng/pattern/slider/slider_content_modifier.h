@@ -235,7 +235,6 @@ public:
     {
         CHECK_NULL_VOID(isVisible_ != isVisible);
         isVisible_ = isVisible;
-        LOGD("SliderContentModifier SetVisible %d", isVisible_);
     }
 
     bool GetVisible() const

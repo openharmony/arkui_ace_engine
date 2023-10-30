@@ -858,6 +858,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
 
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
 

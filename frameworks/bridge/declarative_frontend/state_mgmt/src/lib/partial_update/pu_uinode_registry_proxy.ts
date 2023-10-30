@@ -52,13 +52,13 @@ type RemovedElementInfo = { elmtId : number, tag : string };
 
 // Define a global function
 function globalRegisterCleanUpFunction(): void {
-    stateMgmtConsole.debug("globalRegisterCleanUpFunction - called from C++ on CleanUp");
+    stateMgmtConsole.debug('globalRegisterCleanUpFunction - called from C++ on CleanUp');
     UINodeRegisterProxy.obtainDeletedElmtIds();
 }
 
 class UINodeRegisterProxy {
-    public static UINodeRegisterCleanUpFunction() : void {
-        stateMgmtConsole.debug(`UINodeRegisterProxy. static UINodeRegisterCleanUpFunction:`);
+    public static uiNodeRegisterCleanUpFunction() : void {
+        stateMgmtConsole.debug('UINodeRegisterProxy. static uiNodeRegisterCleanUpFunction:');
         UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
     }
     
@@ -68,7 +68,7 @@ class UINodeRegisterProxy {
     }
 
     public static accountElmtIdsAsUnregistered(elmtIds: number[]): void {
-         stateMgmtConsole.debug(`UINodeRegisterProxy.accountElmtIdsAsUnregistered elmtIds`,elmtIds);
+        stateMgmtConsole.debug('UINodeRegisterProxy.accountElmtIdsAsUnregistered elmtIds', elmtIds);
         UINodeRegisterProxy.instance_.accountElmtIdsAsUnregistered(elmtIds);
     }
 
@@ -84,8 +84,16 @@ class UINodeRegisterProxy {
         return UINodeRegisterProxy.instance_.elmtIdsToUnregister_.size > 0;
     }
 
-    public static dump() {
+    public static dump(): void {
         UINodeRegisterProxy.instance_.dump();
+    }
+
+    /*
+    A function to expose debug info of the UINodeRegisterProxy
+    The function is intended to be used with debug or DFX log only
+    */
+    public static debugInfoElements(): string {
+        return UINodeRegisterProxy.instance_.debugInfoElementsInternal();
     }
 
     // private properties & functions:
@@ -97,7 +105,7 @@ class UINodeRegisterProxy {
     */
     private obtainDeletedElmtIds(): void {
 
-        stateMgmtConsole.debug(`UINodeRegisterProxy.obtainDeletedElmtIds: `);
+        stateMgmtConsole.debug('UINodeRegisterProxy.obtainDeletedElmtIds: ');
 
         let removedElementsInfo = new Array<RemovedElementInfo>();
         ViewStackProcessor.moveDeletedElmtIds(removedElementsInfo);
@@ -149,11 +157,17 @@ class UINodeRegisterProxy {
         return false;
     }
 
-    /*
-  dump the state  of UINodeRegisterProxy to log
-  does nothing in release build
-*/
+    /* dump the state  of UINodeRegisterProxy to log
+    does nothing in release build
+    */
     private dump() {
+        stateMgmtConsole.debug(this.debugInfoElementsInternal());
+    }
+
+    /* Generates debug info got UINodeRegisterProxy
+    This function is intended for use with debug or DFX log
+    */
+    private debugInfoElementsInternal(): string {
         const formatElementInfo = () : string => {
             let result = '[ ';
             let sepa = "";
@@ -165,19 +179,24 @@ class UINodeRegisterProxy {
             return result;
         };
 
-        stateMgmtConsole.debug(`UINodeRegisterProxy dump: `);
-        if (this.elmtIdsToUnregister_.size < 50) {
-            stateMgmtConsole.debug(`- ${this.elmtIdsToUnregister_.size} elmtIds need unregister: ${formatElementInfo()}.`);
-        } else {
-            stateMgmtConsole.debug(`- WARNING: ${this.elmtIdsToUnregister_.size} elmtIds need unregister (exceptionally high number, possible framework error): ${formatElementInfo()}.`);            
+        let retVal: string = "UINodeRegisterProxy debug info: ";
+        if(this.elmtIdsToUnregister_.size < 50) {
+            retVal += `\n- ${this.elmtIdsToUnregister_.size} elmtIds need unregister: ${formatElementInfo()}.`
         }
-        stateMgmtConsole.debug(`- ${this.elmtIdsUnregisteredAheadOfTime_.size} elmtIds marked as unregistered already: ${JSON.stringify(Array.from(this.elmtIdsUnregisteredAheadOfTime_))} .`);
+        else {
+            retVal += `\n- WARNING: ${this.elmtIdsToUnregister_.size} elmtIds need unregister (exceptionally high number, possible framework error): ${formatElementInfo()}.`
+        }
+        retVal += `\n- ${this.elmtIdsUnregisteredAheadOfTime_.size} elmtIds marked as unregistered already: ${JSON.stringify(Array.from(this.elmtIdsUnregisteredAheadOfTime_))} .`;
+
+        return retVal;
     }
+
 
     private static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
     private elmtIdsToUnregister_: Set<number> = new Set<number>();
     private tagByElmtId_ : Map<number, string> = new Map<number, string>();
     private elmtIdsUnregisteredAheadOfTime_: Set<number> = new Set<number>();
+
 }
 
-const UINodeRegisterCleanUpFunction = UINodeRegisterProxy.UINodeRegisterCleanUpFunction;
+const uiNodeRegisterCleanUpFunction = UINodeRegisterProxy.uiNodeRegisterCleanUpFunction;

@@ -48,7 +48,6 @@ void ManifestParser::Parse(const std::string& contents)
 {
     auto rootJson = JsonUtil::ParseJsonString(contents);
     if (!rootJson || !rootJson->IsValid()) {
-        LOGE("the manifest is illegal");
         return;
     }
     manifestAppInfo_->AppInfoParse(rootJson);

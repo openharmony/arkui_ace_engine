@@ -32,6 +32,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -137,6 +138,14 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         frameSize_ = SizeF(hasIdealWidth_ ? crossLengthLimit_ : totalCrossLength_, mainLengthLimit_);
     }
+    auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && calcLayoutConstraint) {
+        OptionalSizeF finalSize(frameSize_.Width(), frameSize_.Height());
+        finalSize = UpdateOptionSizeByCalcLayoutConstraint(finalSize, calcLayoutConstraint,
+            layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+        frameSize_.SetHeight(finalSize.Height().value_or(frameSize_.Height()));
+        frameSize_.SetWidth(finalSize.Width().value_or(frameSize_.Width()));
+    }
     AddPaddingToSize(padding_, frameSize_);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
     frameOffset_ = layoutWrapper->GetGeometryNode()->GetFrameOffset();
@@ -165,6 +174,9 @@ void WrapLayoutAlgorithm::StretchItemsInContent(LayoutWrapper* layoutWrapper, co
     }
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (const auto& item : content.itemList) {
+        if (UserDefinedCrossAxisSize(item) && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            continue;
+        }
         auto itemCrossAxisLength = GetItemCrossAxisLength(item->GetGeometryNode());
         // if content cross axis size is larger than item cross axis size,
         // measure items again with content cross axis size as ideal size
@@ -605,6 +617,19 @@ void WrapLayoutAlgorithm::CalcFlexGrowLayout(
         }
         itemWrapper->Measure(layoutConstraintValue);
     }
+}
+
+bool WrapLayoutAlgorithm::UserDefinedCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    if (layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()) {
+        auto userDefinedIdealSize = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
+        if (userDefinedIdealSize.has_value()) {
+            return isHorizontal_ ? userDefinedIdealSize->Height().has_value()
+                                 : userDefinedIdealSize->Width().has_value();
+        }
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

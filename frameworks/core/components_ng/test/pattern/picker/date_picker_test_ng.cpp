@@ -36,8 +36,8 @@
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
@@ -1202,9 +1202,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
     canvasDrawFunction(rsCanvas);
 }
 
@@ -1241,6 +1239,8 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest002, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     canvasDrawFunction(rsCanvas);
 }
 
@@ -2422,8 +2422,8 @@ HWTEST_F(DatePickerTestNg, DatePickerTest017, TestSize.Level1)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData.datePickerProperty,
-        settingData.properties, settingData.isLunar, false);
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(
+        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -2432,8 +2432,8 @@ HWTEST_F(DatePickerTestNg, DatePickerTest017, TestSize.Level1)
     datePickerNode->MountToParent(pickerStack);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
-    auto contentRow = DatePickerDialogView::CreateButtonNode(monthDaysNode, datePickerNode,
-        dialogEvent, std::move(dialogCancelEvent));
+    auto contentRow = DatePickerDialogView::CreateButtonNode(
+        monthDaysNode, datePickerNode, dialogEvent, std::move(dialogCancelEvent));
     contentRow->AddChild(DatePickerDialogView::CreateDividerNode(datePickerNode), 1);
     auto buttonTitleNode = DatePickerDialogView::CreateTitleButtonNode(datePickerNode);
     datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
@@ -3493,7 +3493,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
     auto childSize = static_cast<int32_t>(columnNode_->GetChildren().size());
     auto midSize = childSize / MIDDLE_OF_COUNTS;
     columnPattern_->optionProperties_[midSize].height = SECLECTED_TEXTNODE_HEIGHT;
-    columnPattern_->optionProperties_[midSize-1].height = OTHER_TEXTNODE_HEIGHT;
+    columnPattern_->optionProperties_[midSize - 1].height = OTHER_TEXTNODE_HEIGHT;
 
     /**
      * @tc.steps: step2. Set height 50.0 for column and call AddHotZoneRectToText.

@@ -167,7 +167,7 @@ private:
     RefPtr<FrameNode> BuildSheetInfoTitle(const std::string& title);
     RefPtr<FrameNode> BuildSheetInfoIcon(const std::string& icon);
     // build actionMenu
-    RefPtr<FrameNode> BuildMenu(const std::vector<ButtonInfo>& buttons);
+    RefPtr<FrameNode> BuildMenu(const std::vector<ButtonInfo>& buttons, bool hasTitle);
 
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;

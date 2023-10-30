@@ -62,7 +62,8 @@ public:
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override {};
     void SetSelectionMenuHidden(bool selectionMenuHidden) override {};
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override {};
-
+    void SetMaxLength(uint32_t value) override {};
+    void ResetMaxLength() override {};
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
         const RefPtr<TextFieldTheme>& theme);

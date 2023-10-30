@@ -858,4 +858,30 @@ void WebClientImpl::OnOverScroll(float xOffset, float yOffset)
     CHECK_NULL_VOID(delegate);
     delegate->OnOverScroll(xOffset, yOffset);
 }
+
+void WebClientImpl::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnOverScrollFlingVelocity(xVelocity, yVelocity, isFling);
+}
+
+void WebClientImpl::OnOverScrollFlingEnd() {}
+
+void WebClientImpl::OnScrollState(bool scrollState)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnScrollState(scrollState);
+}
+
+void WebClientImpl::OnRootLayerChanged(int width, int height)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnRootLayerChanged(width, height);
+}
 } // namespace OHOS::Ace

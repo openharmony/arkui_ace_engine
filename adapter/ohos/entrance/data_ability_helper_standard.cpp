@@ -33,10 +33,14 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
 {
     if (useStageModel) {
         runtimeContext_ = runtimeContext;
+#ifdef MEDIA_LIBRARY_EXISTS
         mgr_.InitMediaLibraryManager(runtimeContext->GetToken());
+#endif
     } else {
         context_ = context;
+#ifdef MEDIA_LIBRARY_EXISTS
         mgr_.InitMediaLibraryManager(context->GetToken());
+#endif
     }
 }
 
@@ -45,8 +49,12 @@ void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::str
 #ifdef PREVIEW
     return nullptr;
 #else
+#ifdef MEDIA_LIBRARY_EXISTS
     Uri fileUri(uri);
     return mgr_.GetThumbnail(fileUri).release();
+#else
+    return nullptr;
+#endif
 #endif
 }
 

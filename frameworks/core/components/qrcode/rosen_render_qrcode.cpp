@@ -105,6 +105,7 @@ SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::Qr
     }
     skBitmap.allocPixels(imageInfo);
     void* rawData = skBitmap.getPixels();
+    CHECK_NULL_RETURN(rawData, skBitmap);
     uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
     int32_t blockWidth = width / qrCode.getSize();
     for (int32_t i = 0; i < width; i++) {
@@ -128,6 +129,7 @@ RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::Qr
     }
     bitmap.Build(width, width, format);
     void* rawData = bitmap.GetPixels();
+    CHECK_NULL_RETURN(rawData, bitmap);
     uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
     int32_t blockWidth = width / qrCode.getSize();
     for (int32_t i = 0; i < width; i++) {

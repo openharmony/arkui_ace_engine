@@ -20,7 +20,6 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
-#include "base/log/log_wrapper.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"

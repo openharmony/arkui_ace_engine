@@ -262,4 +262,17 @@ void ToggleButtonPattern::OnRestoreInfo(const std::string& restoreInfo)
     toggleButtonPaintProperty->UpdateIsOn(jsonIsOn->GetBool());
     OnModifyDone();
 }
+
+void ToggleButtonPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
+    CHECK_NULL_VOID(toggleTheme);
+    checkedColor_ = toggleTheme->GetCheckedColor();
+    unCheckedColor_ = toggleTheme->GetBackgroundColor();
+    OnModifyDone();
+}
 } // namespace OHOS::Ace::NG

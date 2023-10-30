@@ -26,8 +26,6 @@ void DataPanelLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> DataPanelLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    LOGD("Layout constraint is %{public}s", contentConstraint.ToString().c_str());
-
     // 1.If user set the width and height, use the selfIdealSize.
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();

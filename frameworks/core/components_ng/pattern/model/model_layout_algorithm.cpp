@@ -24,23 +24,20 @@ ModelLayoutAlgorithm::ModelLayoutAlgorithm(const WeakPtr<ModelAdapterWrapper>& a
 std::optional<SizeF> ModelLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto modelLayoutProperty = DynamicCast<ModelLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto modelLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(modelLayoutProperty, std::nullopt);
 
     // 1. Width and height are set properly - return content constraint as component size
     if (contentConstraint.selfIdealSize.IsValid()) {
         auto size = contentConstraint.selfIdealSize.ConvertToSizeT();
         LOGD("MODEL_NG: Size => width: %f, height: %f ", size.Width(), size.Height());
-        auto adapter = modelAdapter_.Upgrade();
-        CHECK_NULL_RETURN(adapter, size);
-        adapter->OnMeasureContent(modelLayoutProperty, size);
         return size;
     }
 
     SizeF componentSize(0.0f, 0.0f);
     do {
         // 2.1 Width and height are not set. Determine size from parent.
-        const auto& modelLayoutProperty = DynamicCast<ModelLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        const auto& modelLayoutProperty = layoutWrapper->GetLayoutProperty();
         SizeF layoutConstraintMaxSize = modelLayoutProperty->GetLayoutConstraint()->maxSize;
         if (contentConstraint.selfIdealSize.IsNull()) {
             componentSize.SetSizeT(layoutConstraintMaxSize);
@@ -68,9 +65,6 @@ std::optional<SizeF> ModelLayoutAlgorithm::MeasureContent(
 
     auto size = contentConstraint.Constrain(componentSize);
     LOGD("MODEL_NG: Size => width: %f, height: %f ", size.Width(), size.Height());
-    auto adapter = modelAdapter_.Upgrade();
-    CHECK_NULL_RETURN(adapter, size);
-    adapter->OnMeasureContent(modelLayoutProperty, size);
     return size;
 }
 } // namespace OHOS::Ace::NG

@@ -335,6 +335,10 @@ public:
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+    // call by recycle framework.
+    virtual void OnRecycle() {}
+    virtual void OnReuse() {}
+
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     virtual void OnAreaChangedInner() {}
@@ -361,6 +365,9 @@ public:
     {
         return -1;
     }
+
+    virtual void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}

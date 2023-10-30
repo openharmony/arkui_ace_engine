@@ -72,9 +72,9 @@ void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& js
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
-    auto capsuleStyle = JsonUtil::Create(false);
-    auto fontStyle = JsonUtil::Create(false);
-    auto font = JsonUtil::Create(false);
+    auto capsuleStyle = JsonUtil::Create(true);
+    auto fontStyle = JsonUtil::Create(true);
+    auto font = JsonUtil::Create(true);
     capsuleStyle->Put("borderWidth", (GetBorderWidth().value_or(progressTheme->GetBorderWidth())).ToString().c_str());
     capsuleStyle->Put(
         "borderColor", (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());

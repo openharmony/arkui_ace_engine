@@ -59,12 +59,12 @@ void JSIfElse::JSBind(BindingTarget globalObj)
 void JSIfElse::CanRetake(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGW("CanRetake needs only 1 param");
+        TAG_LOGW(AceLogTag::ACE_IF, "CanRetake needs only 1 param");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
     if (!info[0]->IsString()) {
-        LOGW("CanRetake needs string param");
+        TAG_LOGW(AceLogTag::ACE_IF, "CanRetake needs string param");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
@@ -82,7 +82,6 @@ void JSIfElse::SetBranchId(const JSCallbackInfo& info)
     IfElseModel::GetInstance()->SetBranchId(branchid, removedElmtIds);
 
     if ((info.Length() < paramsLength) || (!info[0]->IsNumber()) || (!info[1]->IsArray())) {
-        LOGE("invalid JS function signature: required SetBranchId(branchId, Array<number>)");
         return;
     }
 
@@ -93,7 +92,7 @@ void JSIfElse::SetBranchId(const JSCallbackInfo& info)
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
     size_t index = jsArr->Length();
     for (const auto& rmElmtId : removedElmtIds) {
-        LOGD("rmElmtId %{public}d", rmElmtId);
+        TAG_LOGD(AceLogTag::ACE_IF, "rmElmtId %{public}d", rmElmtId);
         jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(rmElmtId)));
     }
 }

@@ -53,10 +53,11 @@ public:
         LayoutProperty::ToJsonValue(json);
         json->Put("color", propColor_.value_or(Color::BLUE).ColorToString().c_str());
         json->Put("content", propContent_.value_or("").c_str());
+        json->Put("address", propAddress_.value_or("").c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Address, std::string, PROPERTY_UPDATE_NORMAL);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(HyperlinkLayoutProperty);

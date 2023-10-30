@@ -22,8 +22,9 @@ ModalUIExtensionProxyImpl::ModalUIExtensionProxyImpl(const sptr<Rosen::Session>&
 
 void ModalUIExtensionProxyImpl::SendData(const AAFwk::WantParams& params)
 {
-    if (session_) {
-        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto session = session_.promote();
+    if (session) {
+        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session.GetRefPtr()));
         extensionSession->TransferComponentData(params);
     }
 }

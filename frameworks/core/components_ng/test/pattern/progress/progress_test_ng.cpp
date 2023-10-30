@@ -1162,6 +1162,7 @@ HWTEST_F(ProgressTestNg, ProgressModifier003, TestSize.Level1)
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
@@ -1892,6 +1893,7 @@ HWTEST_F(ProgressTestNg, CapsuleProgressModifier001, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
@@ -1968,6 +1970,7 @@ HWTEST_F(ProgressTestNg, CapsuleProgressModifier002, TestSize.Level1)
     EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
 
     /**
      * @tc.steps: step2. Set value while sweeping.

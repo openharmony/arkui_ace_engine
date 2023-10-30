@@ -47,6 +47,7 @@ void GridLayoutInfo::ClearDragState()
 {
     positionItemIndexMap_.clear();
     currentMovingItemPosition_ = -1;
+    currentRect_.Reset();
 }
 
 void GridLayoutInfo::MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex)
@@ -122,5 +123,105 @@ void GridLayoutInfo::UpdateEndLine(float mainSize, float mainGap)
             break;
         }
     }
+}
+
+float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
+{
+    float lineHeight = 0.0f;
+    for (const auto& item : lineHeightMap_) {
+        auto line = gridMatrix_.find(item.first);
+        if (line == gridMatrix_.end()) {
+            continue;
+        }
+        if (line->second.empty()) {
+            continue;
+        }
+        lineHeight = item.second;
+        break;
+    }
+    auto lines = startIndex_ / crossCount_;
+    return lines * (lineHeight + mainGap) - currentOffset_;
+}
+
+float GridLayoutInfo::GetContentOffset(float mainGap) const
+{
+    if (!hasBigItem_) {
+        return GetCurrentOffsetOfRegularGrid(mainGap);
+    }
+
+    float heightSum = 0;
+    int32_t itemCount = 0;
+    float height = 0;
+    for (const auto& item : lineHeightMap_) {
+        auto line = gridMatrix_.find(item.first);
+        if (line == gridMatrix_.end()) {
+            continue;
+        }
+        if (line->second.empty()) {
+            continue;
+        }
+        auto lineStart = line->second.begin()->second;
+        auto lineEnd = line->second.rbegin()->second;
+        itemCount += (lineEnd - lineStart + 1);
+        heightSum += item.second + mainGap;
+    }
+    if (itemCount == 0) {
+        return 0;
+    }
+    auto averageHeight = heightSum / itemCount;
+    height = startIndex_ * averageHeight - currentOffset_;
+    if (itemCount >= (childrenCount_ - 1)) {
+        height = GetStartLineOffset(mainGap);
+    }
+    return height;
+}
+
+float GridLayoutInfo::GetContentHeight(float mainGap) const
+{
+    if (!hasBigItem_) {
+        float lineHeight = 0.0f;
+        for (const auto& item : lineHeightMap_) {
+            auto line = gridMatrix_.find(item.first);
+            if (line == gridMatrix_.end()) {
+                continue;
+            }
+            if (line->second.empty()) {
+                continue;
+            }
+            lineHeight = item.second;
+            break;
+        }
+        auto lines = (childrenCount_ - 1) / crossCount_;
+        if ((childrenCount_ - 1) % crossCount_ == 0) {
+            return lines * lineHeight + (lines - 1) * mainGap;
+        }
+        return (lines + 1) * lineHeight + lines * mainGap;
+    }
+    float heightSum = 0;
+    int32_t itemCount = 0;
+    float estimatedHeight = 0;
+    for (const auto& item : lineHeightMap_) {
+        auto line = gridMatrix_.find(item.first);
+        if (line == gridMatrix_.end()) {
+            continue;
+        }
+        if (line->second.empty()) {
+            continue;
+        }
+        auto lineStart = line->second.begin()->second;
+        auto lineEnd = line->second.rbegin()->second;
+        itemCount += (lineEnd - lineStart + 1);
+        heightSum += item.second + mainGap;
+    }
+    if (itemCount == 0) {
+        return 0;
+    }
+    auto averageHeight = heightSum / itemCount;
+    if (itemCount >= (childrenCount_ - 1)) {
+        estimatedHeight = heightSum - mainGap;
+    } else {
+        estimatedHeight = heightSum + (childrenCount_ - itemCount) * averageHeight;
+    }
+    return estimatedHeight;
 }
 } // namespace OHOS::Ace::NG

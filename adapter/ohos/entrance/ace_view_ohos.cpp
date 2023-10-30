@@ -98,6 +98,11 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
     LogPointInfo(pointerEvent);
     DispatchEventToPerf(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
+    if (pointerAction != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent dispatched in ace_view, eventInfo: id:%{public}d ",
+            pointerEvent->GetId());
+    }
+
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
         if (pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
@@ -158,14 +163,17 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
     }
     int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN
-        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN) {
         inputType = LAST_DOWN;
         isFirstMove = true;
     } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP
-        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
         inputType = LAST_UP;
         isFirstMove = false;
-    } else if (isFirstMove && pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) {
+    } else if (isFirstMove && (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE)) {
         inputType = FIRST_MOVE;
         isFirstMove = false;
     }
@@ -259,9 +267,18 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
             touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
     }
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent processed in ace_view, eventInfo: id:%{public}d, "
+            "pointX=%{public}f pointY=%{public}f type=%{public}d timeStamp=%{public}lld",
+            pointerEvent->GetId(), touchPoint.x, touchPoint.y,
+            (int)touchPoint.type, touchPoint.time.time_since_epoch().count());
+    }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID(pointerEvent);
-        LOGD("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
+        if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
+                pointerEvent->GetId());
+        }
         pointerEvent->MarkProcessed();
     };
     if (touchPoint.type != TouchType::UNKNOWN) {
@@ -349,6 +366,16 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     };
 
     CHECK_NULL_VOID(axisEventCallback_);
+    if (event.action == AxisAction::BEGIN) {
+        /* The first step of axis event is equivalent to touch event START + UPDATE.
+         * Create a fake UPDATE event here to adapt to axis event.
+         * As the event would pass through sceneboard process. A simple MMI axis event(e.g START-END) would
+         * be added a fake UPDATE in sceneboard(START-UPDATE-END), then be added another UPDATE in
+         * application(START-UPDATE-UPDATE-END). The second UPDATE provides no additional movement.
+         */
+        axisEventCallback_(event, nullptr);
+        event.action = AxisAction::UPDATE;
+    }
     axisEventCallback_(event, markProcess);
 }
 

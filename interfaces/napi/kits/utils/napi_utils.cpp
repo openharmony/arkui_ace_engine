@@ -14,7 +14,12 @@
  */
 
 #include "napi_utils.h"
+
 #include "js_native_api_types.h"
+
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_wrapper.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -163,6 +168,33 @@ RefPtr<ThemeConstants> GetThemeConstants(const std::optional<std::string>& bundl
     return themeManager->GetThemeConstants();
 }
 
+RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info)
+{
+    auto bundleName = info.bundleName;
+    auto moduleName = info.moduleName;
+
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        if (bundleName.has_value() && moduleName.has_value()) {
+            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName.value_or(""), moduleName.value_or("")); 
+            resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        } else {
+            resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        }
+        if (!resourceAdapter) {
+            return nullptr;
+        }
+    } else {
+        themeConstants = GetThemeConstants(info.bundleName, info.moduleName);
+        if (!themeConstants) {
+            return nullptr;
+        }
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    return resourceWrapper;
+}
+
 bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
 {
     napi_value idNApi = nullptr;
@@ -261,15 +293,11 @@ std::string DimensionToString(Dimension dimension)
 
 bool ParseString(const ResourceInfo& info, std::string& result)
 {
-    auto themeConstants = GetThemeConstants(info.bundleName, info.moduleName);
-    if (!themeConstants) {
-        LOGE("themeConstants is nullptr");
-        return false;
-    }
+    auto resourceWrapper = CreateResourceWrapper(info);
 
     if (info.type == static_cast<int>(ResourceType::PLURAL)) {
         auto count = StringUtils::StringToDouble(info.params[0]);
-        auto pluralResults = themeConstants->GetStringArray(info.resId);
+        auto pluralResults = resourceWrapper->GetStringArray(info.resId);
         auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(count);
         auto iter = std::find(pluralResults.begin(), pluralResults.end(), pluralChoice);
         std::string originStr;
@@ -280,11 +308,11 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         result = originStr;
     } else if (info.type == static_cast<int>(ResourceType::RAWFILE)) {
         auto fileName = info.params[0];
-        result = themeConstants->GetRawfile(fileName);
+        result = resourceWrapper->GetRawfile(fileName);
     } else if (info.type == static_cast<int>(ResourceType::FLOAT)) {
-        result = DimensionToString(themeConstants->GetDimension(info.resId));
+        result = DimensionToString(resourceWrapper->GetDimension(info.resId));
     } else {
-        auto originStr = themeConstants->GetString(info.resId);
+        auto originStr = resourceWrapper->GetString(info.resId);
         ReplaceHolder(originStr, info.params, 0);
         result = originStr;
     }

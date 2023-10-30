@@ -86,6 +86,8 @@ public:
     void FlushAfterLayoutTask();
     void FlushAfterRenderTask();
 
+    void FlushDelayJsActive();
+
     void UpdateCurrentPageId(uint32_t id)
     {
         currentPageId_ = id;

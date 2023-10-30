@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 
 #include "base/geometry/dimension.h"
-#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
@@ -94,7 +93,6 @@ void ProgressModelNG::SetValue(double value)
     CHECK_NULL_VOID(progressPaintProperty);
     auto maxValue = progressPaintProperty->GetMaxValue();
     if (value > maxValue) {
-        LOGE("value is lager than total , set value equals total");
         value = maxValue.value_or(0);
     }
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);

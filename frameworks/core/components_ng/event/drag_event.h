@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_DRAG_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_DRAG_EVENT_H
 
+#include <functional>
 #include <list>
 
 #include "base/memory/ace_type.h"
@@ -67,6 +68,19 @@ private:
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
 };
+class DragStatusListener : public AceType {
+    DECLARE_ACE_TYPE(DragStatusListener, AceType);
+
+public:
+    DragStatusListener() = default;
+    ~DragStatusListener() = default;
+
+    virtual void OnDragStarted(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+    virtual void OnDragEntered(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+    virtual void OnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+    virtual void OnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+    virtual void OnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+};
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(DragEventActuator, GestureEventActuator)
@@ -117,7 +131,7 @@ public:
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
-    void GetTextPixelMap(bool startDrag);
+    void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
     OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode);
 #endif // ENABLE_DRAG_FRAMEWORK
     PanDirection GetDirection() const
@@ -144,11 +158,6 @@ public:
         return isNotInPreviewState_;
     }
 
-    void ResetTextReceivedLongPress()
-    {
-        isTextReceivedLongPress_ = false;
-    }
-
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;
@@ -165,7 +174,6 @@ private:
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
-    bool isTextReceivedLongPress_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

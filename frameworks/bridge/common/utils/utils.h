@@ -96,18 +96,15 @@ template<class T>
 bool GetAssetContentImpl(const RefPtr<AssetManager>& assetManager, const std::string& url, T& content)
 {
     if (!assetManager) {
-        LOGE("AssetManager is null");
         return false;
     }
     auto jsAsset = assetManager->GetAsset(url);
     if (jsAsset == nullptr) {
-        LOGW("uri:%{public}s Asset is null", url.c_str());
         return false;
     }
     auto bufLen = jsAsset->GetSize();
     auto buffer = jsAsset->GetData();
     if ((buffer == nullptr) || (bufLen <= 0)) {
-        LOGE("uri:%{private}s buffer is null", url.c_str());
         return false;
     }
     content.assign(buffer, buffer + bufLen);
@@ -118,12 +115,10 @@ template<class T>
 bool GetAssetContentAllowEmpty(const RefPtr<AssetManager>& assetManager, const std::string& url, T& content)
 {
     if (!assetManager) {
-        LOGE("AssetManager is null");
         return false;
     }
     auto jsAsset = assetManager->GetAsset(url);
     if (jsAsset == nullptr) {
-        LOGW("uri:%{public}s Asset is null", url.c_str());
         return false;
     }
     auto bufLen = jsAsset->GetSize();
@@ -135,7 +130,6 @@ bool GetAssetContentAllowEmpty(const RefPtr<AssetManager>& assetManager, const s
 inline std::string GetAssetPathImpl(const RefPtr<AssetManager>& assetManager, const std::string& url)
 {
     if (!assetManager) {
-        LOGE("AssetManager is null");
         return {};
     }
     return assetManager->GetAssetPath(url, true);
@@ -146,7 +140,6 @@ inline std::unique_ptr<JsonValue> ParseFileData(const std::string& data)
     const char* endMsg = nullptr;
     auto fileData = JsonUtil::ParseJsonString(data, &endMsg);
     if (!fileData) {
-        LOGE("parse i18n data failed, error: %{private}s", endMsg);
         return nullptr;
     }
     return fileData;
