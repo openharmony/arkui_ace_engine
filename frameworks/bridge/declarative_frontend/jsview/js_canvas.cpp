@@ -84,24 +84,21 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
     }
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    std::function<void(uint32_t)> readyEvent;
     if (Container::IsCurrentUsePartialUpdate()) {
-        readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                         uint32_t accountableCanvasElement) {
+        auto readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Canvas.onReady");
-            ViewStackModel::GetInstance()->StartGetAccessRecordingFor(accountableCanvasElement);
             func->Execute();
-            ViewStackModel::GetInstance()->StopGetAccessRecording();
         };
+        CanvasModel::GetInstance()->SetOnReady(std::move(readyEvent));
     } else {
-        readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                         uint32_t accountableCanvasElement) {
+        auto readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                              uint32_t accountableCanvasElement) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Canvas.onReady");
             func->Execute();
         };
+        CanvasModel::GetInstance()->SetOnReady(std::move(readyEvent));
     }
-    CanvasModel::GetInstance()->SetOnReady(std::move(readyEvent));
 }
 } // namespace OHOS::Ace::Framework

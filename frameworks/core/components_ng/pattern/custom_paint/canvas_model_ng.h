@@ -23,7 +23,7 @@ class ACE_EXPORT CanvasModelNG : public OHOS::Ace::CanvasModel {
 public:
     RefPtr<AceType> Create() override;
     RefPtr<AceType> GetTaskPool(RefPtr<AceType>& pattern) override;
-    void SetOnReady(std::function<void(uint32_t)>&& onReady) override;
+    void SetOnReady(std::function<void()>&& onReady) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_MODEL_NG_H
