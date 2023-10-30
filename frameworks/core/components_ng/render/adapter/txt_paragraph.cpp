@@ -378,6 +378,10 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
 #ifndef USE_GRAPHIC_TEXT_GINE
     bool isLtr = textBox.direction == txt::TextDirection::ltr;
 #else
+    if (isnan(textBox.rect.GetRight()) || isnan(textBox.rect.GetLeft())) {
+        LOGI("Right or left of textBox is NaN.");
+        return false;
+    }
     bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
 #endif
     // Caret is within width of the downstream glyphs.
