@@ -1617,6 +1617,10 @@ void PipelineContext::OnShow()
 void PipelineContext::OnHide()
 {
     CHECK_RUN_ON(UI);
+    auto dragDropManager = GetDragDropManager();
+    if (dragDropManager && dragDropManager->IsItemDragging()) {
+        dragDropManager->CancelItemDrag();
+    }
     onShow_ = false;
     window_->OnHide();
     RequestFrame();
