@@ -185,6 +185,9 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+
+    // disable drag event
+    host->SetDraggable(false);
 }
 
 void SearchPattern::InitTextFieldValueChangeEvent()
