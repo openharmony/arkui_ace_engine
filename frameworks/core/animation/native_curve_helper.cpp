@@ -47,7 +47,6 @@ Rosen::RSAnimationTimingCurve NativeCurveHelper::ToNativeCurve(const RefPtr<Curv
             [weak = WeakPtr<Curve>(curve)](float fraction) -> float {
                 auto curve = weak.Upgrade();
                 if (curve == nullptr) {
-                    LOGE("transform to native curve failed, curve is null!");
                     return 1.0f;
                 }
 

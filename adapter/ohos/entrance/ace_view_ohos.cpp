@@ -107,10 +107,8 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         // mouse event
         if (pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
-            LOGD("ProcessAxisEvent");
             view->ProcessAxisEvent(pointerEvent);
         } else {
-            LOGD("ProcessMouseEvent");
 #ifdef ENABLE_DRAG_FRAMEWORK
             view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -118,7 +116,6 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         }
     } else {
         // touch event
-        LOGD("ProcessTouchEvent");
 #ifdef ENABLE_DRAG_FRAMEWORK
         view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -256,7 +253,6 @@ void AceViewOhos::RegisterRotationEventCallback(RotationEventCallBack&& callback
 
 void AceViewOhos::Launch()
 {
-    LOGD("Launch shell holder.");
 }
 
 void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -285,8 +281,6 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         if (touchEventCallback_) {
             touchEventCallback_(touchPoint, markProcess);
         }
-    } else {
-        LOGW("Unknown event.");
     }
 }
 
@@ -322,7 +316,6 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
             break;
         }
         default:
-            LOGD("unknown type %{public}d", orgAction);
             break;
     }
 }
@@ -330,7 +323,7 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
 
 void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
 {
-    TAG_LOGD(AceLogTag::ACE_DRAG, "ProcessDragEvent");
+    TAG_LOGD(AceLogTag::ACE_DRAG, "Process drag event");
     CHECK_NULL_VOID(dragEventCallback_);
     dragEventCallback_(x, y, action);
 }
@@ -402,7 +395,6 @@ bool AceViewOhos::ProcessRotationEvent(float rotationValue)
 bool AceViewOhos::Dump(const std::vector<std::string>& params)
 {
     if (params.empty() || params[0] != "-drawcmd") {
-        LOGE("Unsupported parameters.");
         return false;
     }
     if (DumpLog::GetInstance().GetDumpFile()) {
