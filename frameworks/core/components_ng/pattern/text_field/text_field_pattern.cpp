@@ -1387,6 +1387,9 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
 {
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+    if (mouseStatus_ != MouseStatus::NONE && IsNormalInlineState()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2349,8 +2352,7 @@ void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
     auto focusHub = GetFocusHub();
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE &&
-        (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately())) {
+    if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
         StopTwinkling();
         return;
     }
@@ -4663,7 +4665,7 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
                GreatOrEqual(offset.GetX() + paintRect.Width(), contentRect_.GetX());
     }
     return contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) &&
-             contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON });
+           contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON });
 }
 
 void TextFieldPattern::DumpAdvanceInfo()
@@ -4882,7 +4884,7 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
         }
     } else {
         auto caretOffset = selectController_->GetCaretRect().GetOffset() +
-                            (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
+                           (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
         selectController_->UpdateCaretOffset(caretOffset);
     }
 }
