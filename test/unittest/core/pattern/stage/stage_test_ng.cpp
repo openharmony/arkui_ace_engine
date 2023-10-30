@@ -613,7 +613,6 @@ HWTEST_F(StageTestNg, PagePatternTest005, TestSize.Level1)
     auto child = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, "child");
     parent->AddChild(node);
     node->AddChild(child);
-    // PagePattern pattern(AceType::MakeRefPtr<PageInfo>());
     auto pattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     pattern->AttachToFrameNode(node);
     pattern->ReloadPage();
