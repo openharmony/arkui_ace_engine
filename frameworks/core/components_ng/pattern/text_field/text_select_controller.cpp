@@ -151,6 +151,9 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
             pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
     }
     UpdateHandleIndex(start, end);
+    if (CaretAtLast() && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
+        UpdateHandleIndex(GetCaretIndex());
+    }
     if (IsSelected()) {
         MoveSecondHandleToContentRect(GetSecondHandleIndex());
     } else {

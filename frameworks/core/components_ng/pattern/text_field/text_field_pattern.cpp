@@ -1816,6 +1816,9 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         focusHub->RequestFocusImmediately();
         return;
     }
+    if (isSingleHandle_) {
+        CloseSelectOverlay(true);
+    }
     selectController_->UpdateSelectByOffset(info.GetLocalLocation());
     if (IsSelected()) {
         StopTwinkling();
