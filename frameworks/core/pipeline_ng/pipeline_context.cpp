@@ -1377,30 +1377,24 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
             manager->OnDragEnd({ 0.0f, 0.0f }, "");
         }
     }
+
     auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
     auto curMainView = FocusHub::GetCurrentMainView();
     auto isViewRootScopeFocused = curMainView ? curMainView->GetIsViewRootScopeFocused() : true;
     isTabJustTriggerOnKeyEvent_ = false;
-    if (isKeyTabDown && isViewRootScopeFocused) {
-        if (curMainView) {
-            auto viewRootScope = curMainView->GetMainViewRootScope();
-            if (viewRootScope && viewRootScope->GetFocusDependence() == FocusDependence::SELF &&
-                viewRootScope->IsCurrentFocus()) {
-                curMainView->SetIsDefaultHasFocused(true);
-                curMainView->SetIsViewRootScopeFocused(viewRootScope, false);
-                viewRootScope->InheritFocus();
-                isTabJustTriggerOnKeyEvent_ = true;
-            }
-        }
+    if (isKeyTabDown && isViewRootScopeFocused && curMainView) {
+        // Current focused on the view root scope. Tab key used to extend focus.
+        // If return true. This tab key will just trigger onKeyEvent process.
+        isTabJustTriggerOnKeyEvent_ = curMainView->HandleFocusOnMainView();
     }
-    // TAB key set focus state from inactive to active.
-    // If return success. This tab key will just trigger onKeyEvent process.
+
+    // Tab key set focus state from inactive to active.
+    // If return true. This tab key will just trigger onKeyEvent process.
     bool isHandleFocusActive = isKeyTabDown && SetIsFocusActive(true);
     isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent_ || isHandleFocusActive;
-    auto lastPage = stageManager_ ? stageManager_->GetLastPage() : nullptr;
-    auto mainNode = lastPage ? lastPage : rootNode_;
-    CHECK_NULL_RETURN(mainNode, false);
-    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
+
+    auto curMainViewFrameNode = curMainView ? curMainView->GetFrameNode() : nullptr;
+    if (!eventManager_->DispatchTabIndexEventNG(event, curMainViewFrameNode)) {
         auto result = eventManager_->DispatchKeyEventNG(event, rootNode_);
         if (!result && event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
             CHECK_NULL_RETURN(overlayManager_, false);
