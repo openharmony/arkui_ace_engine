@@ -245,7 +245,6 @@ public:
     void UpdateContent(const std::string& content)
     {
         if (spanItem_->content == content) {
-            LOGD("the content is same, just ignore");
             return;
         }
         spanItem_->content = content;

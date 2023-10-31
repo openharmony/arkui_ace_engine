@@ -764,7 +764,6 @@ void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 
 void SearchPattern::HandleFocusEvent()
 {
-    LOGI("Search %{public}d on focus", GetHost()->GetId());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -776,7 +775,6 @@ void SearchPattern::HandleFocusEvent()
 
 void SearchPattern::HandleBlurEvent()
 {
-    LOGI("Search %{public}d on blur", GetHost()->GetId());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -806,7 +804,6 @@ void SearchPattern::InitClickEvent()
 
 void SearchPattern::HandleClickEvent(GestureEvent& info)
 {
-    LOGI("Search %{public}d on click", GetHost()->GetId());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));

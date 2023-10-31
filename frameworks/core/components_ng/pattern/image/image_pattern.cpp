@@ -654,7 +654,6 @@ void ImagePattern::OpenSelectOverlay()
     CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "Opening select overlay");
     selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info, WeakClaim(this));
 
     // paint selected mask effect
@@ -667,7 +666,6 @@ void ImagePattern::CloseSelectOverlay()
         return;
     }
     if (!selectOverlay_->IsClosed()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "closing select overlay");
         selectOverlay_->Close();
     }
     selectOverlay_ = nullptr;

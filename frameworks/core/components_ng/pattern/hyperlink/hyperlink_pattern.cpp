@@ -100,7 +100,6 @@ void HyperlinkPattern::OnModifyDone()
 void HyperlinkPattern::LinkToAddress()
 {
 #if defined(PREVIEW)
-    LOGW("Unable to jump in preview.");
     return;
 #else
     isLinked_ = true;
@@ -232,7 +231,6 @@ bool HyperlinkPattern::OnKeyEvent(const KeyEvent& event)
 
 void HyperlinkPattern::OnHoverEvent(bool isHovered)
 {
-    LOGD("Hyperlink OnHoverEvent in. isHovered: %{public}d", isHovered);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
@@ -263,7 +261,8 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
 
 void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
 {
-    LOGD("Hyperlink OnMouseEvent in. Button: %{public}d, Action: %{public}d", info.GetButton(), info.GetAction());
+    TAG_LOGD(AceLogTag::ACE_HYPERLINK, "Hyperlink OnMouseEvent in. Button: %{public}d, Action: %{public}d",
+        info.GetButton(), info.GetAction());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto frame = GetHost();

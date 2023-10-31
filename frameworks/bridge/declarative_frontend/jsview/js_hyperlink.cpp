@@ -81,10 +81,6 @@ void JSHyperlink::Create(const JSCallbackInfo& args)
 
 void JSHyperlink::SetColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     Color color;
     if (!ParseJsColor(info[0], color)) {
         return;
