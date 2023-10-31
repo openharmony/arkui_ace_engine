@@ -93,7 +93,6 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             HandleTouchCancelEvent(point);
             break;
         default:
-            LOGW("unknown touch type");
             break;
     }
     return true;
@@ -115,7 +114,6 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
             break;
         default:
             HandleTouchCancelEvent(event);
-            LOGW("unknown touch type");
             break;
     }
     return true;
@@ -131,7 +129,6 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
 
     auto referee = GetCurrentGestureReferee();
     if (!referee) {
-        LOGW("the referee is nullptr");
         recognizer->OnRejected();
         return;
     }

@@ -80,6 +80,7 @@ enum class AceLogTag : uint8_t {
     ACE_FORM,
     ACE_DRAG,
     ACE_VIDEO,
+    ACE_COMPONENT_SNAPSHOT,
     ACE_CANVAS,
     ACE_REFRESH,
     ACE_SCROLL,

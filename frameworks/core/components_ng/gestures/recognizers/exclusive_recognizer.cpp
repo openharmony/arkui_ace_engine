@@ -32,18 +32,19 @@ namespace OHOS::Ace::NG {
 
 void ExclusiveRecognizer::OnAccepted()
 {
-    LOGD("the exclusive gesture recognizer has been accepted, active recognizer: %{public}s",
-        AceType::TypeName(activeRecognizer_));
     refereeState_ = RefereeState::SUCCEED;
     if (activeRecognizer_) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "The exclusive gesture recognizer has been accepted, active recognizer: %{public}s",
+            AceType::TypeName(activeRecognizer_));
         activeRecognizer_->OnAccepted();
-    } else {
-        LOGW("the active recognizer is null");
     }
 
     for (const auto& recognizer : recognizers_) {
         if (recognizer && (recognizer != activeRecognizer_)) {
-            LOGD("the sub gesture %{public}s is rejected because %{public}s is accepted", AceType::TypeName(recognizer),
+            TAG_LOGI(AceLogTag::ACE_GESTURE,
+                "The sub gesture %{public}s is rejected because %{public}s is accepted",
+                AceType::TypeName(recognizer),
                 AceType::TypeName(activeRecognizer_));
             if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
                 auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
@@ -66,7 +67,8 @@ void ExclusiveRecognizer::OnRejected()
             continue;
         }
         if (recognizer->GetRefereeState() == RefereeState::FAIL) {
-            LOGE("the %{public}s gesture recognizer already failed", AceType::TypeName(recognizer));
+            TAG_LOGI(AceLogTag::ACE_GESTURE,
+                "The %{public}s gesture recognizer already failed", AceType::TypeName(recognizer));
         }
         if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
             auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
@@ -117,7 +119,6 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
             break;
         }
         default:
-            LOGW("exclusive recognizer received unknown touch type");
             break;
     }
 
@@ -143,7 +144,6 @@ bool ExclusiveRecognizer::HandleEvent(const AxisEvent& event)
             break;
         }
         default:
-            LOGW("exclusive recognizer received unknown touch type");
             break;
     }
 
@@ -172,7 +172,6 @@ RefPtr<NGGestureRecognizer> ExclusiveRecognizer::UnBlockGesture()
                                  (member->GetRefereeState() == RefereeState::SUCCEED_BLOCKED));
         });
     if (iter == recognizers_.end()) {
-        LOGD("no blocked gesture in recognizers");
         return nullptr;
     }
     return *iter;
@@ -183,7 +182,6 @@ void ExclusiveRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     CHECK_NULL_VOID(recognizer);
 
     if (IsRefereeFinished()) {
-        LOGW("the exclusiveRecognizer has already finished referee");
         recognizer->OnRejected();
         return;
     }
@@ -199,7 +197,6 @@ void ExclusiveRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
             HandleRejectDisposal(recognizer);
             break;
         default:
-            LOGW("handle known gesture disposal %{public}d", disposal);
             break;
     }
 }
@@ -213,7 +210,6 @@ void ExclusiveRecognizer::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>
     }
 
     if (CheckNeedBlocked(recognizer)) {
-        LOGD("%{public}s recognizer has to be blocked", AceType::TypeName(recognizer));
         recognizer->OnBlocked();
         return;
     }

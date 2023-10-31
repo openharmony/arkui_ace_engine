@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <list>
 
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
@@ -1063,6 +1064,11 @@ int32_t GestureEventHub::SetDragData(const RefPtr<UnifiedData>& unifiedData, std
         return -1;
     }
     int32_t ret = UdmfClient::GetInstance()->SetData(unifiedData, udKey);
+    if (ret != 0) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF Setdata failed:%{public}d", ret);
+        }
+    }
     return ret;
 }
 OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)

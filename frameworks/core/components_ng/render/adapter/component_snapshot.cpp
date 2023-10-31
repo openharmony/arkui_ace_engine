@@ -19,6 +19,7 @@
 
 #include "transaction/rs_interfaces.h"
 
+#include "base/log/log_wrapper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
@@ -93,7 +94,7 @@ void ComponentSnapshot::Create(
     }
 
     FrameNode::ProcessOffscreenNode(node);
-    LOGD("ProcessOffscreenNode finished, root size = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Process off screen Node finished, root size = %{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str());
 
     if (enableInspector) {
@@ -108,7 +109,8 @@ void ComponentSnapshot::Create(
     executor->PostDelayedTask(
         [callback, node, enableInspector]() mutable {
             auto rsNode = GetRsNode(node);
-            LOGI("TakeSurfaceCaptureForUI rootNode = %{public}s", node->GetTag().c_str());
+            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "Begin to take surfaceCapture for ui, rootNode = %{public}s", node->GetTag().c_str());
             auto& rsInterface = Rosen::RSInterfaces::GetInstance();
             rsInterface.TakeSurfaceCaptureForUI(
                 rsNode, std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr));
