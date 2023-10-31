@@ -1134,6 +1134,13 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         CHECK_NULL_RETURN(pattern, itemInfo);
         auto host = pattern->GetHost();
         CHECK_NULL_RETURN(host, itemInfo);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(hub, itemInfo);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gestureHub, itemInfo);
+        if (!gestureHub->GetIsTextDraggable()) {
+            return itemInfo;
+        }
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, itemInfo);
         if (pattern->SelectOverlayIsOn() || pattern->imeAttached_ || pattern->showSelect_) {
@@ -1283,6 +1290,7 @@ void TextFieldPattern::InitDragDropEvent()
             CHECK_NULL_VOID(layoutProperty);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+        pattern->selectController_->ResetHandles();
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 
