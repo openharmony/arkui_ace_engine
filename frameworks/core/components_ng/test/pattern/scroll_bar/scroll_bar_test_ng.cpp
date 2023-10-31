@@ -769,4 +769,234 @@ HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
     callback();
     ASSERT_NE(pattern->disappearAnimation_, nullptr);
 }
+
+/**
+ * @tc.name: ScrollBarTest006
+ * @tc.desc: Test OnModifyDone of ScrollBarPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    RefPtr<ScrollProxy> scrollProxy;
+    ScrollBarModelNG scrollBarModelNG;
+    auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
+    scrollBarModelNG.Create(proxy, true, true, -1, -1);
+
+    /**
+     * @tc.steps: step2. Get scrollBar frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto scrollBarPattern = frameNode->GetPattern<ScrollBarPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollBarLayoutProperty>();
+
+    /**
+     * @tc.steps: step3. Get scrollBar accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    scrollBarPattern->OnModifyDone();
+    EXPECT_EQ(scrollBarPattern->GetDisplayMode(), DisplayMode::AUTO);
+    EXPECT_EQ(scrollBarPattern->GetAxis(), Axis::VERTICAL);
+
+    layoutProperty->UpdateDisplayMode(DisplayMode::OFF);
+    layoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    scrollBarPattern->OnModifyDone();
+    EXPECT_EQ(scrollBarPattern->GetDisplayMode(), DisplayMode::OFF);
+    EXPECT_EQ(scrollBarPattern->GetAxis(), Axis::HORIZONTAL);
+
+    layoutProperty->UpdateDisplayMode(DisplayMode::AUTO);
+    layoutProperty->UpdateAxis(Axis::VERTICAL);
+    scrollBarPattern->OnModifyDone();
+    EXPECT_EQ(scrollBarPattern->GetDisplayMode(), DisplayMode::AUTO);
+    EXPECT_EQ(scrollBarPattern->GetAxis(), Axis::VERTICAL);
+
+    layoutProperty->UpdateDisplayMode(DisplayMode::ON);
+    layoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    scrollBarPattern->OnModifyDone();
+    EXPECT_EQ(scrollBarPattern->GetDisplayMode(), DisplayMode::ON);
+    EXPECT_EQ(scrollBarPattern->GetAxis(), Axis::HORIZONTAL);
+}
+
+/**
+ * @tc.name: ScrollBarTest007
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap of ScrollBarPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    RefPtr<ScrollProxy> scrollProxy;
+    ScrollBarModelNG scrollBarModelNG;
+    auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
+    scrollBarModelNG.Create(proxy, true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::AUTO));
+
+    /**
+     * @tc.steps: step2. Get scrollBar frameNode to create scrollBar layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollBarLayoutProperty>();
+    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+    auto scrollLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(scrollLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. Create child layoutWrapper and add it to scrollBar frameNode layoutWrapper.
+     * @tc.expected: step3. related function is called.
+     */
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ViewStackProcessor::GetInstance()->Push(childFrameNode);
+    RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childFrameNode, childGeometryNode, childLayoutProperty);
+    childLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(SCROLL_BAR_CHILD_WIDTH), CalcLength(SCROLL_BAR_CHILD_HEIGHT)));
+    auto childLayoutAlgorithm = childFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    childLayoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(childLayoutAlgorithm));
+    layoutWrapper->AppendChild(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step4. Verify the OnDirtyLayoutWrapperSwap function of scrollBar.
+     * @tc.expected: step4. Compare return value with expected value.
+     */
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = false;
+    pattern->SetControlDistance(10.0f);
+    EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), true);
+
+    EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), false);
+
+    pattern->SetControlDistance(-10.0f);
+    EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), true);
+
+    layoutProperty->UpdateDisplayMode(DisplayMode::ON);
+    pattern->OnModifyDone();
+    pattern->SetControlDistance(5.0f);
+    EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), true);
+}
+
+/**
+ * @tc.name: ScrollBarTest008
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap of ScrollBarPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    RefPtr<ScrollProxy> scrollProxy;
+    ScrollBarModelNG scrollBarModelNG;
+    auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
+    scrollBarModelNG.Create(proxy, true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::AUTO));
+
+    /**
+     * @tc.steps: step2. Get scrollBar frameNode to create scrollBar layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollBarLayoutProperty>();
+    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+
+    /**
+     * @tc.steps: step3. Verify the scrollPositionCallback_ function of scrollBar.
+     * @tc.expected: step3. Compare return value with expected value.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pattern, nullptr);
+    context->SetMinPlatformVersion(10);
+    pattern->InitPanRecognizer();
+    EXPECT_NE(pattern->panRecognizer_, nullptr);
+}
+
+/**
+ * @tc.name: ScrollBarTest009
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap of ScrollBarPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    RefPtr<ScrollProxy> scrollProxy;
+    ScrollBarModelNG scrollBarModelNG;
+    auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
+    scrollBarModelNG.Create(proxy, true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::AUTO));
+
+    /**
+     * @tc.steps: step2. Get scrollBar frameNode to create scrollBar layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollBarLayoutProperty>();
+    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+    auto scrollLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(scrollLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. Create child layoutWrapper and add it to scrollBar frameNode layoutWrapper.
+     * @tc.expected: step3. related function is called.
+     */
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ViewStackProcessor::GetInstance()->Push(childFrameNode);
+    RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childFrameNode, childGeometryNode, childLayoutProperty);
+    childLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(SCROLL_BAR_CHILD_WIDTH), CalcLength(SCROLL_BAR_CHILD_HEIGHT)));
+    auto childLayoutAlgorithm = childFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    childLayoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(childLayoutAlgorithm));
+    layoutWrapper->AppendChild(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step4. Call the measure and layout function of scrollBar to calculate the size and offset.
+     */
+    scrollLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    scrollLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step5. Verify the scrollPositionCallback_ function of scrollBar.
+     * @tc.expected: step5. Compare return value with expected value.
+     */
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = false;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    auto distance = pattern->scrollableDistance_;
+
+    EXPECT_EQ(pattern->scrollPositionCallback_(distance - 100, 1), true);
+    EXPECT_EQ(pattern->currentOffset_, distance - 100);
+
+    EXPECT_EQ(pattern->scrollPositionCallback_(100, 1), true);
+    EXPECT_EQ(pattern->currentOffset_, distance);
+
+    EXPECT_EQ(pattern->scrollPositionCallback_(100, 1), false);
+    EXPECT_EQ(pattern->currentOffset_, distance);
+}
 } // namespace OHOS::Ace::NG
