@@ -80,10 +80,7 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED) {
-        GestureEvent info;
-        info.SetTimeStamp(time_);
-        info.SetAngle(resultAngle_);
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         SendCallbackMsg(onActionEnd_);
     }
 }
