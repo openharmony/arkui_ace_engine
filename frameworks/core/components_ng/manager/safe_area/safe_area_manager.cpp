@@ -94,9 +94,6 @@ bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
 
 SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 {
-    if (ignoreSafeArea_ || !isFullScreen_) {
-        return {};
-    }
     return systemSafeArea_;
 }
 
