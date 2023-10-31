@@ -86,6 +86,7 @@ public:
     void GetExtraInfoFromClipboard(std::string& extraInfo);
     void RestoreClipboardData();
     void DestroyDragWindow();
+    void CancelItemDrag();
 #ifdef ENABLE_DRAG_FRAMEWORK
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
     void RequireSummary();
@@ -182,6 +183,11 @@ public:
     bool IsDragging()
     {
         return dragDropState_ == DragDropMgrState::DRAGGING;
+    }
+
+    bool IsItemDragging() const
+    {
+        return dragDropState_ == DragDropMgrState::DRAGGING && draggedGridFrameNode_ != nullptr;
     }
 
     bool IsAboutToPreview()
