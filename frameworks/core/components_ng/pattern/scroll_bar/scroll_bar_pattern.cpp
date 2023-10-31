@@ -194,6 +194,7 @@ void ScrollBarPattern::StartDisappearAnimator()
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    SetOpacity(UINT8_MAX);
     disapplearDelayTask_.Reset([weak = WeakClaim(this)] {
         auto scrollBar = weak.Upgrade();
         CHECK_NULL_VOID(scrollBar);
