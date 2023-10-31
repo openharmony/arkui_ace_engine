@@ -67,6 +67,7 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
         ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Axis, AXIS[directionValue]);
         ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, DisplayMode, DISPLAY_MODE[stateValue]);
         auto visible = (DISPLAY_MODE[stateValue] == DisplayMode::OFF) ? VisibleType::INVISIBLE : VisibleType::VISIBLE;
+        pattern->SetOpacity(0);
         ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Visibility, visible);
     }
 }
