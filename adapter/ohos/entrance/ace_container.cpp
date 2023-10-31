@@ -41,6 +41,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/card_frontend/card_frontend.h"
@@ -652,6 +653,12 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess]() {
+                if (event.type != TouchType::MOVE) {
+                    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Process in ace_container: "
+                        "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
+                        "type=%{public}d timeStamp=%{public}lld", event.pointerEvent->GetId(),
+                        event.x, event.y, (int)event.type, event.time.time_since_epoch().count());
+                }
                 context->OnTouchEvent(event);
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
@@ -690,7 +697,12 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() { result = context->OnKeyEvent(event); }, TaskExecutor::TaskType::UI);
+            [context, event, &result]() {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Process KeyEvent in ace_container, eventInfo:"
+                    "code:%{public}d, action%{public}d", event.code, event.action);
+                result = context->OnKeyEvent(event);
+            },
+            TaskExecutor::TaskType::UI);
         return result;
     };
     aceView_->RegisterKeyEventCallback(keyEventCallback);
@@ -1560,6 +1572,15 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.direction.empty() || !parsedConfig.densitydpi.empty()) {
         configurationChange.DirectionOrDpiUpdate = true;
+        if (!parsedConfig.direction.empty()) {
+            auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
+            if (parsedConfig.direction == "horizontal") {
+                resDirection = DeviceOrientation::LANDSCAPE;
+            } else if (parsedConfig.direction == "vertical") {
+                resDirection = DeviceOrientation::PORTRAIT;
+            }
+            resConfig.SetOrientation(resDirection);
+        }
     }
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);

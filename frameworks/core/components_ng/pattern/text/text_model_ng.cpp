@@ -34,6 +34,11 @@ void TextModelNG::Create(const std::string& content)
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     stack->Push(frameNode);
 
+    // set draggable for framenode
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto draggable = pipeline->GetDraggable<TextTheme>();
+    frameNode->SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
 }
 
@@ -94,6 +99,11 @@ void TextModelNG::SetFontFamily(const std::vector<std::string>& value)
 void TextModelNG::SetWordBreak(Ace::WordBreak value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value);
+}
+
+void TextModelNG::SetEllipsisMode(EllipsisMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value);
 }
 
 void TextModelNG::SetTextAlign(Ace::TextAlign value)

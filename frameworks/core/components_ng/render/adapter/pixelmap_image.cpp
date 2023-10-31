@@ -23,6 +23,9 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 
+#ifdef USE_ROSEN_DRAWING
+#include "render_service_base/include/pipeline/rs_recording_canvas.h"
+#endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -93,7 +96,7 @@ void PixelMapImage::DrawToRSCanvas(
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
-    auto recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
+    auto recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     std::vector<RSPoint> radius;
     for (int ii = 0; ii < 4; ii++) {
         RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
@@ -110,9 +113,8 @@ void PixelMapImage::DrawToRSCanvas(
     Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0 };
-    RSSamplingOptions smapling;
     recordingCanvas.AttachBrush(brush);
-    recordingCanvas.DrawPixelMap(pixmap->GetPixelMapSharedPtr(), rsImageInfo, smapling);
+    recordingCanvas.DrawExtendPixelMap(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 #endif
 #endif
@@ -134,12 +136,19 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
     recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
-#else
-    LOGE("Drawing is not supported");
 #endif
 #else
-    // TODO Drawing
-    LOGE("Drawing is not supported");
+#ifdef ENABLE_ROSEN_BACKEND
+    auto recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
+    RSBrush brush;
+    RSSamplingOptions options;
+    RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
+
+    auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    recordingCanvas.AttachBrush(brush);
+    LOGE("Drawing is not supported, DrawPixelMapRect is not define");
+    recordingCanvas.DetachBrush();
+#endif
 #endif
 }
 

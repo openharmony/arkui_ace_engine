@@ -80,10 +80,17 @@ private:
         SkCanvas* canvas, const Offset& offset, const CalendarDay& day, const Rosen::TextStyle& textStyle) const;
 #endif
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
     void PaintDay(
         RSCanvas* canvas, const Offset& offset, const CalendarDay& day, txt::TextStyle& textStyle) const;
     void PaintLunarDay(RSCanvas* canvas, const Offset& offset, const CalendarDay& day,
         const txt::TextStyle& textStyle) const;
+#else
+    void PaintDay(
+        RSCanvas* canvas, const Offset& offset, const CalendarDay& day, Rosen::TextStyle& textStyle) const;
+    void PaintLunarDay(RSCanvas* canvas, const Offset& offset, const CalendarDay& day,
+        const Rosen::TextStyle& textStyle) const;
+#endif
 #endif
 #ifndef USE_GRAPHIC_TEXT_GINE
     void SetNonFocusStyle(const CalendarDay& day, txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
@@ -129,8 +136,13 @@ private:
         const CalendarDay& day, SkColor workColor, SkColor offColor, Rosen::TextStyle& workStateStyle) const;
 #endif
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
     void SetWorkStateStyle(const CalendarDay& day, RSColorQuad workColor,
         RSColorQuad offColor, txt::TextStyle& workStateStyle) const;
+#else
+    void SetWorkStateStyle(const CalendarDay& day, RSColorQuad workColor,
+        RSColorQuad offColor, Rosen::TextStyle& workStateStyle) const;
+#endif
 #endif
     void SetCalendarTheme();
     bool IsOffDay(const CalendarDay& day) const;

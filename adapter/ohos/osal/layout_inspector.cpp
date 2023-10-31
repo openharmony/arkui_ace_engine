@@ -25,6 +25,8 @@
 #include "wm/window.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
@@ -92,6 +94,24 @@ SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
     sk_sp<SkColorSpace> colorSpace = ColorSpaceToSkColorSpace(pixmap);
     return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
 }
+
+const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
+{
+    auto container = AceEngine::Get().GetContainer(containerId);
+    if (containerId >= MIN_SUBCONTAINER_ID && containerId < MIN_PLUGIN_SUBCONTAINER_ID) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(
+            SubwindowManager::GetInstance()->GetParentContainerId(containerId));
+        CHECK_NULL_RETURN(subwindow, nullptr);
+        if (AceType::InstanceOf<SubwindowOhos>(subwindow)) {
+            auto subWindowOhos = AceType::DynamicCast<SubwindowOhos>(subwindow);
+            CHECK_NULL_RETURN(subWindowOhos, nullptr);
+            return subWindowOhos->GetSubWindow();
+        }
+    } else {
+        return OHOS::Rosen::Window::GetTopWindowWithId(container->GetWindowId());
+    }
+    return nullptr;
+}
 } // namespace
 
 bool LayoutInspector::layoutInspectorStatus_ = false;
@@ -130,7 +150,6 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
 
 void LayoutInspector::SetCallback(int32_t instanceId)
 {
-    LOGI("SetCallback start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
@@ -146,10 +165,10 @@ void LayoutInspector::SetCallback(int32_t instanceId)
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
-    LOGI("CreateLayoutInfo start");
-    ContainerScope sope(containerId);
-    auto container = AceEngine::Get().GetContainer(containerId);
+    auto  container = Container::GetFoucsed();
     CHECK_NULL_VOID(container);
+    containerId = container->GetInstanceId();
+    ContainerScope socpe(containerId);
     std::string treeJsonStr;
     GetInspectorTreeJsonStr(treeJsonStr, containerId);
     auto message = JsonUtil::Create(true);
@@ -174,7 +193,11 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
     treeJsonStr = NG::Inspector::GetInspector(true);
 #else
     if (container->IsUseNewPipeline()) {
-        treeJsonStr = NG::Inspector::GetInspector(true);
+        if (containerId >= MIN_SUBCONTAINER_ID && containerId < MIN_PLUGIN_SUBCONTAINER_ID) {
+            treeJsonStr = NG::Inspector::GetSubWindowInspector(true);
+        } else {
+            treeJsonStr = NG::Inspector::GetInspector(true);
+        }
     } else {
         auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
         CHECK_NULL_VOID(pipelineContext);
@@ -187,8 +210,7 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
 {
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID(container);
-
-    OHOS::sptr<OHOS::Rosen::Window> window = OHOS::Rosen::Window::GetTopWindowWithId(container->GetWindowId());
+    OHOS::sptr<OHOS::Rosen::Window> window = GetWindow(containerId);
     CHECK_NULL_VOID(window);
     auto pixelMap = window->Snapshot();
     CHECK_NULL_VOID(pixelMap);
@@ -207,8 +229,6 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     auto deviceDpi = defaultDisplay->GetDpi();
     auto deviceWidth = defaultDisplay->GetWidth();
     auto deviceHeight = defaultDisplay->GetHeight();
-    LOGI("GetSnapshotJson: deviceWidth: %{public}d, deviceHeight: %{public}d, dpi: %{public}d", deviceWidth,
-        deviceHeight, deviceDpi);
     message->Put("type", "snapShot");
     message->Put("format", PNG_TAG);
     message->Put("width", (*pixelMap).GetWidth());
@@ -223,7 +243,9 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     SkString info(encodeLength);
     SkBase64::Encode(data->data(), data->size(), info.writable_str());
     message->Put("pixelMapBase64", info.c_str());
-    LOGI("GetSnapshotJson pixelMapBase64:%{public}s", info.c_str());
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "GetSnapshotJson: deviceWidth: %{public}d, deviceHeight: %{public}d, dpi: %{public}d", deviceWidth,
+        deviceHeight, deviceDpi);
 }
 
 } // namespace OHOS::Ace

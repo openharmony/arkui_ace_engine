@@ -152,6 +152,8 @@ void RefreshPattern::InitOnKeyEvent()
 void RefreshPattern::QuickStartFresh()
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SwitchToRefresh();
+        UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio(scrollOffset_.GetY()));
         QuickFirstChildAppear();
         return;
     }
@@ -170,6 +172,8 @@ void RefreshPattern::QuickStartFresh()
 void RefreshPattern::QuickEndFresh()
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SwitchToFinish();
+        UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio(scrollOffset_.GetY()));
         QuickFirstChildDisappear();
         return;
     }
@@ -314,24 +318,21 @@ void RefreshPattern::HandleDragUpdate(float delta)
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         QuiteAnimation();
         scrollOffset_.SetY(GetScrollOffset(delta));
-        if (isSourceFromAnimation_) {
-            UpdateFirstChildPlacement(scrollOffset_.GetY());
-            return;
-        }
         if (NearEqual(scrollOffset_.GetY(), 0.0f)) {
             SwitchToFinish();
-            UpdateFirstChildPlacement(scrollOffset_.GetY());
-            return;
+            UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, 0.0f);
         }
-        if (!isRefreshing_) {
-            UpdateLoadingProgressStatus(GetLoadingProgressStatus(), GetFollowRatio(scrollOffset_.GetY()));
-            if (LessNotEqual(scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
-                UpdateRefreshStatus(RefreshStatus::DRAG);
+        if (!isSourceFromAnimation_) {
+            if (!isRefreshing_) {
+                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio(scrollOffset_.GetY()));
+                if (LessNotEqual(scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+                    UpdateRefreshStatus(RefreshStatus::DRAG);
+                } else {
+                    UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
+                }
             } else {
-                UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
+                UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio(scrollOffset_.GetY()));
             }
-        } else if (progressChild_ && GetLoadingProgressStatus() == RefreshAnimationState::RECYCLE) {
-            UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio(scrollOffset_.GetY()));
         }
         UpdateFirstChildPlacement(scrollOffset_.GetY());
         bool exitFlag = Positive(scrollOffset_.GetY()) || NonNegative(delta);
@@ -341,7 +342,6 @@ void RefreshPattern::HandleDragUpdate(float delta)
         return;
     }
     if (NearZero(delta) || isRefreshing_) {
-        LOGI("Delta is near zero or isRefreshing!");
         return;
     }
     scrollOffset_.SetY(GetScrollOffset(delta));
@@ -511,7 +511,13 @@ void RefreshPattern::HandleDragEnd(float speed)
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
-    LoadingProgressExit();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAnimationClosure([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->LoadingProgressExit();
+    });
 }
 
 void RefreshPattern::HandleDragCancel()
@@ -852,25 +858,8 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         isRefreshing_ = false;
         FireChangeEvent("false");
     }
-    if (progressChild_) {
-        switch (refreshStatus_) {
-            case RefreshStatus::INACTIVE:
-                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, 0.0f);
-                break;
-            case RefreshStatus::DRAG:
-                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio(scrollOffset_.GetY()));
-                break;
-            case RefreshStatus::REFRESH:
-                UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
-                break;
-            case RefreshStatus::DONE:
-                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, 0.0f);
-                break;
-            default:
-                break;
-        }
-    }
     FireStateChange(static_cast<int>(refreshStatus_));
+    TAG_LOGD(AceLogTag::ACE_REFRESH, "refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 
 void RefreshPattern::SwitchToFinish()
@@ -1069,8 +1058,12 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     } else if (!NearEqual(dealSpeed, 0.0f)) {
         scrollOffset_.SetY(scrollOffset_.GetY() + FAKE_VALUE);
     }
-    if (NearEqual(scrollOffset_.GetY(), targetOffset)) {
-        return;
+    if (refreshStatus_ == RefreshStatus::OVER_DRAG &&
+        NearEqual(targetOffset, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+        SwitchToRefresh();
+        UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 0.0f);
+    } else if (NearEqual(targetOffset, 0.0f)) {
+        SwitchToFinish();
     }
     if (!offsetProperty_) {
         ResetOffsetProperty();
@@ -1110,11 +1103,13 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
 
 float RefreshPattern::GetTargetOffset()
 {
+    if (isSourceFromAnimation_) {
+        return 0.0f;
+    }
     auto targetOffset = 0.0f;
     switch (refreshStatus_) {
         case RefreshStatus::OVER_DRAG:
             if (GreatOrEqual(scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
-                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 0.0f);
                 targetOffset = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
             }
             break;
@@ -1134,14 +1129,12 @@ void RefreshPattern::SpeedAnimationFinish()
 {
     updatePerFrame_ = false;
     if (NearEqual(scrollOffset_.GetY(), 0.0f)) {
-        SwitchToFinish();
         UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, 0.0f);
         UpdateFirstChildPlacement(scrollOffset_.GetY());
         return;
     }
-    if (NearEqual(scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx())) &&
-        refreshStatus_ == RefreshStatus::OVER_DRAG) {
-        SwitchToRefresh();
+    if (isRefreshing_) {
+        UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
     }
     UpdateFirstChildPlacement(scrollOffset_.GetY());
 }
@@ -1215,7 +1208,7 @@ void RefreshPattern::QuickFirstChildAppear()
                 return;
             }
             pattern->updatePerFrame_ = false;
-            pattern->SwitchToRefresh();
+            pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
         });
 }
 
@@ -1261,7 +1254,8 @@ void RefreshPattern::QuickFirstChildDisappear()
                 return;
             }
             pattern->updatePerFrame_ = false;
-            pattern->SwitchToFinish();
+            pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, 0.0f);
+            pattern->UpdateFirstChildPlacement(0.0f);
         });
 }
 

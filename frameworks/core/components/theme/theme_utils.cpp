@@ -133,7 +133,6 @@ ResValueWrapper ThemeUtils::ParseStyleValue(
             if (value.size() < CUSTOM_STYLE_STRING_MAX_SIZE) {
                 resultValue.value = value;
             } else {
-                LOGE("Custom style value size over limit!");
                 resultValue.type = ThemeConstantsType::ERROR;
             }
             break;
@@ -161,18 +160,16 @@ std::string ThemeUtils::ProcessImageSource(const std::string& imageSrc, const Re
     }
 
     if (!themeConstants) {
-        LOGE("themeConstants is null, process image source failed");
         return "";
     }
     if (resId == 0 && !themeConstants->GetResourceIdByName(resName, "media", resId)) {
-        LOGE("get image id failed");
+        TAG_LOGW(AceLogTag::ACE_THEME, "get image id failed, name: %{public}s", resName.c_str());
         return "";
     }
 
     std::string imagePath = themeConstants->GetString(resId);
     auto seperatorPos = imagePath.rfind('.');
     if (seperatorPos == std::string::npos) {
-        LOGE("get image suffix failed");
         return "";
     }
     // image format suffix, such as ".png",".svg" and so on.
@@ -189,7 +186,6 @@ std::string ThemeUtils::ProcessImageSource(const std::string& imageSrc, const Re
             colorMode = "dark";
             break;
         default:
-            LOGW("color mode is undefined");
             colorMode = "undefined";
             break;
     }

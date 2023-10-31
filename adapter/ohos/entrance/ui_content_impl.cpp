@@ -64,6 +64,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/image/image_file_cache.h"
 #ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
@@ -107,21 +108,19 @@ public:
 
     void OnFinish() const override
     {
-        LOGI("UIContent OnFinish");
         CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
     void OnStartAbility(const std::string& address) override
     {
-        LOGI("UIContent OnStartAbility");
         CHECK_NULL_VOID(onStartAbility_);
         onStartAbility_(address);
     }
 
     void OnStatusBarBgColorChanged(uint32_t color) override
     {
-        LOGI("UIContent OnStatusBarBgColorChanged");
+        LOGI("StartsBar background color changed.");
     }
 
 private:
@@ -221,7 +220,6 @@ public:
     ~DragWindowListener() = default;
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragWindowListener::OnDrag called.");
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         int32_t instanceId = instanceId_;
@@ -285,7 +283,6 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 {
     CHECK_NULL_VOID(context);
     context_ = context->weak_from_this();
-    LOGI("Create UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -300,14 +297,12 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     SetConfiguration(context->GetConfiguration());
     context_ = context->weak_from_this();
-    TAG_LOGI(AceLogTag::ACE_FORM, "Create form UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
     context_ = ability->GetAbilityContext();
-    LOGI("Create UIContentImpl successfully.");
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -1346,6 +1341,12 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
+
+    if (isFormRender_) {
+        LOGD("Remove card for bundle %{public}s, module %{public}s", bundleName_.c_str(), moduleName_.c_str());
+        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName_, moduleName_);
+    }
+
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
@@ -1432,10 +1433,18 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    LOGD("UIContentImpl ProcessPointerEvent begin");
     auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        auto info = Platform::AceContainer::GetContentInfo(instanceId_);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
+            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "ViewPosX = %{public}d, ViewPosY = %{public}d, ContentInfo = %{public}s",
+            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(),
+            container->GetViewPosY(), info.c_str());
+    }
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     return true;
@@ -1443,9 +1452,11 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGD("UIContentImpl: OnKeyUp called, keyEvent info: keyCode is %{public}d,"
-         "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-        touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
+        "keyEvent info: keyCode is %{public}d, "
+        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
+        touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(),
+        touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
@@ -1562,6 +1573,26 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
+{
+    LOGI("UIContentImpl: UpdateMaximizeMode, maximize mode is %{public}d", mode);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, mode]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto windowManager = pipelineContext->GetWindowManager();
+            CHECK_NULL_VOID(windowManager);
+            windowManager->SetCurrentWindowMaximizeMode(static_cast<OHOS::Ace::MaximizeMode>(mode));
+            pipelineContext->ShowContainerTitle(true, true, true);
         },
         TaskExecutor::TaskType::UI);
 }

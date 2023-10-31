@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_focus_function.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace::Framework {
 
 void JsFocusFunction::Execute(int direction)

@@ -39,7 +39,6 @@ PinchRecognizer::PinchRecognizer(int32_t fingers, double distance)
     : MultiFingersRecognizer(fingers), distance_(distance)
 {
     if (fingers_ > MAX_PINCH_FINGERS || fingers_ < DEFAULT_PINCH_FINGERS) {
-        LOGW("pinchRecognizer fingers_ is illegal, change to DEFAULT_PINCH_FINGERS.");
         fingers_ = DEFAULT_PINCH_FINGERS;
     }
     if (distance_ <= 0) {
@@ -49,6 +48,7 @@ PinchRecognizer::PinchRecognizer(int32_t fingers, double distance)
 
 void PinchRecognizer::OnAccepted()
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch gesture has been accepted");
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
@@ -59,7 +59,7 @@ void PinchRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
-    LOGD("pinch gesture has been rejected!");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
@@ -72,12 +72,11 @@ bool PinchRecognizer::IsCtrlBeingPressed()
 
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    LOGD("pinch recognizer receives touch down event, begin to detect pinch event");
     if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
         return;
     }
-
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Pinch recognizer receives touch down event, begin to detect pinch event");
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
 
@@ -90,12 +89,11 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
-    LOGD("pinch recognizer receives axis start event, begin to detect pinch event");
     if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
         return;
     }
-
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Pinch recognizer receives touch down event, begin to detect pinch event");
     if (refereeState_ == RefereeState::READY) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);
@@ -105,9 +103,9 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    LOGD("pinch recognizer receives touch up event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch end event");
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
-        LOGW("PinchGesture current finger number is less than requiried finger number.");
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
@@ -124,8 +122,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    LOGD("pinch recognizer receives axis end event");
-
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives axis end event");
     if (isPinchEnd_) {
         return;
     }
@@ -141,9 +138,7 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    LOGD("pinch recognizer receives touch move event");
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
-        LOGW("PinchGesture current finger number is less than requiried finger number.");
         return;
     }
 
@@ -180,8 +175,6 @@ void PinchRecognizer::OnFlushTouchEventsEnd()
 
 void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
-    LOGD("pinch recognizer receives axis update event");
-
     if (isPinchEnd_) {
         return;
     }
@@ -221,7 +214,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    LOGD("pinch recognizer receives touch cancel event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch cancel event");
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -234,7 +227,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    LOGD("pinch recognizer receives axis cancel event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives axis cancel event");
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;

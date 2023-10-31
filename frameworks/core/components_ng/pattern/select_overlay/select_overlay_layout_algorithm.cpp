@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 
+#include <cmath>
+
 #include <optional>
 
 #include "base/geometry/ng/offset_t.h"
@@ -36,7 +38,7 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!CheckInShowArea(*info_)) {
         menu->SetActive(false);
         return;
-    } else if (!info_->firstHandle.isShow && !info_->secondHandle.isShow) {
+    } else if (!info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible) {
         menu->SetActive(false);
     } else {
         menu->SetActive(true);
@@ -64,7 +66,7 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         offset =
             OffsetF(menuContext->GetOffset()->GetX().ConvertToPx(), menuContext->GetOffset()->GetY().ConvertToPx());
     }
-    if (!info_->menuInfo.menuIsShow) {
+    if (!info_->menuInfo.menuIsShow || info_->menuInfo.menuDisable) {
         hasExtensionMenu_ = false;
         return;
     }

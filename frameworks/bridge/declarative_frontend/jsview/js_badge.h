@@ -28,9 +28,6 @@ public:
 
 private:
     static BadgeParameters CreateBadgeParameters(const JSCallbackInfo& info);
-    static void SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge);
-    static void SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge);
-    static void SetPosition(const JSRef<JSObject>& obj,  RefPtr<OHOS::Ace::BadgeComponent>& badge);
 };
 } // namespace OHOS::Ace::Framework
 

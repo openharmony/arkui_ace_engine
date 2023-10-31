@@ -106,9 +106,11 @@ void SwiperModelNG::SetItemSpace(const Dimension& itemSpace)
 
 void SwiperModelNG::SetCachedCount(int32_t cachedCount)
 {
-    if (cachedCount < 0) {
-        return;
-    }
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCachedCount(cachedCount);
 
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount);
 }

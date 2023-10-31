@@ -83,4 +83,16 @@ std::string InputEventHub::GetHoverEffectStr() const
     }
 }
 
+void InputEventHub::SetHoverEffect(HoverEffectType type)
+{
+    if (!hoverEffectActuator_) {
+        hoverEffectActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+    }
+    auto frameNode = GetFrameNode();
+    if (frameNode && hoverEffectType_ != type) {
+        frameNode->AnimateHoverEffect(false);
+    }
+    hoverEffectType_ = type;
+}
+
 } // namespace OHOS::Ace::NG

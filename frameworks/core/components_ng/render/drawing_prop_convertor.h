@@ -35,5 +35,6 @@ RSWordBreakType ToRSWordBreakType(const WordBreak& wordBreak);
 RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle);
 RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration);
 RSFontWeight ToRSFontWeight(FontWeight fontWeight);
+RSEllipsisMode ToRSEllipsisMode(EllipsisMode modal);
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_H

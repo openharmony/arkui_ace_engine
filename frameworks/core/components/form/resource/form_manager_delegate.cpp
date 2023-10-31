@@ -545,7 +545,8 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
         return;
     }
     auto uri = eventAction->GetValue("uri");
-    if (uri->IsValid()) {
+    auto abilityName = eventAction->GetValue("abilityName");
+    if (uri->IsValid() && !abilityName->IsValid()) {
         CHECK_NULL_VOID(formUtils_);
         auto context = context_.Upgrade();
         CHECK_NULL_VOID(context);

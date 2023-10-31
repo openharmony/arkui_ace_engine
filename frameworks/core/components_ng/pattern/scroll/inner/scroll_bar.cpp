@@ -27,7 +27,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BAR_DISAPPRAE_DELAY_DURATION = 2000; // 2000ms
 constexpr double BAR_ADAPT_EPSLION = 1.0;
-constexpr double FRICTION_VELOCITY_THRESHOLD = 100.0;
 } // namespace
 
 ScrollBar::ScrollBar()
@@ -99,7 +98,6 @@ void ScrollBar::UpdateScrollBarRegion(
         viewPortSize_ = size;
         lastOffset_ = lastOffset;
         estimatedHeight_ = estimatedHeight;
-        opacity_ = UINT8_MAX;
         SetBarRegion(offset, size);
         if (shapeMode_ == ShapeMode::RECT) {
             SetRectTrickRegion(offset, size, lastOffset, estimatedHeight);
@@ -178,7 +176,7 @@ void ScrollBar::SetRectTrickRegion(
         }
         double normalWidth = NormalizeToPx(normalWidth_);
         if (LessOrEqual(activeSize, normalWidth)) {
-            if (!isOutOfBoundary_) {
+            if (GreatNotEqual(normalWidth, mainSize)) {
                 auto pipelineContext = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
@@ -252,7 +250,7 @@ void ScrollBar::SetRectTrickRegion(
         }
         // If the scrollBar length changes, start the adaptation animation
         if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation &&
-            !Negative(inactiveMainOffset)) {
+            !Negative(inactiveMainOffset) && !normalWidthUpdate_) {
             PlayScrollBarAdaptAnimation();
         } else {
             needAdaptAnimation_ = false;
@@ -300,10 +298,11 @@ double ScrollBar::GetNormalWidthToPx() const
 
 float ScrollBar::CalcPatternOffset(float scrollBarOffset) const
 {
-    if (!isDriving_ || NearZero(offsetScale_)) {
+    if (!isDriving_ || NearZero(barRegionSize_ - activeRect_.Height())) {
         return scrollBarOffset;
     }
-    return -scrollBarOffset / offsetScale_;
+    auto mainSize = (positionMode_ == PositionMode::BOTTOM ? viewPortSize_.Width() : viewPortSize_.Height());
+    return -scrollBarOffset * (estimatedHeight_ - mainSize) / (barRegionSize_ - activeRect_.Height());
 }
 
 double ScrollBar::NormalizeToPx(const Dimension& dimension) const
@@ -513,9 +512,9 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     }
     frictionPosition_ = 0.0;
     if (frictionMotion_) {
-        frictionMotion_->Reset(friction_, 0, velocity, FRICTION_VELOCITY_THRESHOLD);
+        frictionMotion_->Reset(friction_, 0, velocity);
     } else {
-        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity, FRICTION_VELOCITY_THRESHOLD);
+        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity);
         frictionMotion_->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
             auto scrollBar = weakBar.Upgrade();
             CHECK_NULL_VOID(scrollBar);

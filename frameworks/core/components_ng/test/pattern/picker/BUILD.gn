@@ -84,6 +84,7 @@ ohos_unittest("date_picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
     "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_client.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
@@ -207,7 +208,7 @@ ohos_unittest("date_picker_test_ng") {
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
     "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
-    "datepicker_test_ng.cpp",
+    "date_picker_test_ng.cpp",
   ]
 
   deps = [

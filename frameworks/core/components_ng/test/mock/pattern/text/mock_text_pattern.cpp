@@ -41,18 +41,14 @@ void TextPattern::BeforeCreateLayoutWrapper() {}
 
 void TextPattern::OnVisibleChange(bool isVisible) {}
 
-void TextPattern::DumpInfo() {}
+void TextPattern::DumpAdvanceInfo() {}
 
 float TextPattern::GetLineHeight() const
 {
     return {};
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
-#else
-std::vector<RSTextRect> TextPattern::GetTextBoxes()
-#endif
+std::vector<RectF> TextPattern::GetTextBoxes()
 {
     return {};
 }

@@ -71,6 +71,8 @@ public:
 
     void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
 
+    void SetFrameWithoutAnimation(const RectF& paintRect) override;
+
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
@@ -153,6 +155,7 @@ public:
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
 
     void OnBackShadowUpdate(const Shadow& shadow) override;
+    void OnBackBlendModeUpdate(BlendMode blendMode) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
@@ -333,6 +336,7 @@ private:
     void OnUseEffectUpdate(bool useEffect) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
+    void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 

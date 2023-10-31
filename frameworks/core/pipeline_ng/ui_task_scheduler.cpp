@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 
 namespace OHOS::Ace::NG {
 uint64_t UITaskScheduler::frameId_ = 0;
@@ -40,7 +41,7 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_NULL_VOID(dirty);
     auto result = dirtyRenderNodes_[dirty->GetPageId()].emplace(dirty);
     if (!result.second) {
-        LOGW("fail to emplace %{public}s render node", dirty->GetTag().c_str());
+        LOGW("Fail to emplace %{public}s render node", dirty->GetTag().c_str());
     }
 }
 
@@ -99,8 +100,6 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
                     if (frameInfo_ != nullptr) {
                         frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::RENDER);
                     }
-                } else {
-                    LOGW("need to use multithread feature");
                 }
             }
         }
@@ -142,8 +141,14 @@ void UITaskScheduler::FlushTask()
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
     }
+    FlushDelayJsActive();
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
+}
+
+void UITaskScheduler::FlushDelayJsActive()
+{
+    CustomNode::FlushDelayJsActive();
 }
 
 void UITaskScheduler::AddPredictTask(PredictTask&& task)

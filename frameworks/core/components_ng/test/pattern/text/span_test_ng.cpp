@@ -679,6 +679,6 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue003, TestSize.Level1)
     spanNode->ToJsonValue(json);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
-    EXPECT_FALSE(json->Contains("decoration"));
+    EXPECT_TRUE(json->Contains("decoration"));
 }
 } // namespace OHOS::Ace::NG

@@ -594,6 +594,11 @@ public:
         }
     }
 
+    void SetBlendMode(BlendMode blendMode) override
+    {
+        ViewAbstract::SetBlendMode(blendMode);
+    }
+
     void SetColorBlend(const Color& value) override
     {
         ViewAbstract::SetColorBlend(value);
@@ -936,11 +941,6 @@ public:
     }
 
 private:
-    void RegisterMenuAppearCallback(
-        std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
-    void RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam);
-    void RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam);
-    void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 

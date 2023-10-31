@@ -282,4 +282,23 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
+void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info)
+{
+    bool isHardKeyboardConnected = false;
+    MiscServices::PanelType panelType = info.panelInfo.panelType;
+    bool panelVisible = info.visible;
+    MiscServices::Trigger triggerFrom = info.trigger;
+    if (!isHardKeyboardConnected && panelType == MiscServices::PanelType::SOFT_KEYBOARD && !panelVisible &&
+        triggerFrom == MiscServices::Trigger::IME_APP) {
+        LOGI("[OnTextChangedListenerImpl] NotifyPanelStatusInfo soft keyboard is closed by user.");
+        auto task = [textField = pattern_] {
+            auto client = textField.Upgrade();
+            CHECK_NULL_VOID(client);
+            ContainerScope scope(client->GetInstanceId());
+            client->NotifyKeyboardClosedByUser();
+        };
+        PostTaskToUI(task);
+    }
+}
+
 } // namespace OHOS::Ace::NG

@@ -92,8 +92,6 @@ void TextTimerPattern::InitTimerDisplay()
             auto timer = weak.Upgrade();
             if (timer) {
                 timer->Tick(duration);
-            } else {
-                LOGW("empty timer, skip tick callback.");
             }
         };
         auto context = PipelineContext::GetCurrentContext();

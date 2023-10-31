@@ -14,8 +14,12 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
+
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
@@ -283,5 +287,50 @@ void GridItemPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
         static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPaintPadding),
         static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPaintPadding));
+}
+void GridItemPattern::DumpAdvanceInfo()
+{
+    auto property = GetLayoutProperty<GridItemLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    property->GetMainIndex().has_value()
+        ? DumpLog::GetInstance().AddDesc("MainIndex:" + std::to_string(property->GetMainIndex().value()))
+        : DumpLog::GetInstance().AddDesc("MainIndex:null");
+    property->GetCrossIndex().has_value()
+        ? DumpLog::GetInstance().AddDesc("CrossIndex:" + std::to_string(property->GetCrossIndex().value()))
+        : DumpLog::GetInstance().AddDesc("CrossIndex:null");
+    property->GetRowStart().has_value()
+        ? DumpLog::GetInstance().AddDesc("RowStart:" + std::to_string(property->GetRowStart().value()))
+        : DumpLog::GetInstance().AddDesc("RowStart:null");
+    property->GetRowEnd().has_value()
+        ? DumpLog::GetInstance().AddDesc("RowEnd:" + std::to_string(property->GetRowEnd().value()))
+        : DumpLog::GetInstance().AddDesc("RowEnd:null");
+    property->GetColumnStart().has_value()
+        ? DumpLog::GetInstance().AddDesc("ColumnStart:" + std::to_string(property->GetColumnStart().value()))
+        : DumpLog::GetInstance().AddDesc("ColumnStart:null");
+    property->GetColumnEnd().has_value()
+        ? DumpLog::GetInstance().AddDesc("ColumnEnd:" + std::to_string(property->GetColumnEnd().value()))
+        : DumpLog::GetInstance().AddDesc("ColumnEnd:null");
+    enableOpacity_.has_value()
+        ? DumpLog::GetInstance().AddDesc("enableOpacity:" + std::to_string(enableOpacity_.value()))
+        : DumpLog::GetInstance().AddDesc("enableOpacity:null");
+    selectable_ ? DumpLog::GetInstance().AddDesc("selectable_:true")
+                : DumpLog::GetInstance().AddDesc("selectable_:false");
+    isSelected_ ? DumpLog::GetInstance().AddDesc("isSelected_:true")
+                : DumpLog::GetInstance().AddDesc("isSelected_:false");
+    isHover_ ? DumpLog::GetInstance().AddDesc("isHover_:true") : DumpLog::GetInstance().AddDesc("isHover_:false");
+    isPressed_ ? DumpLog::GetInstance().AddDesc("isPressed_:true") : DumpLog::GetInstance().AddDesc("isPressed_:false");
+    switch (gridItemStyle_) {
+        case GridItemStyle::NONE: {
+            DumpLog::GetInstance().AddDesc("GridItemStyle:NONE");
+            break;
+        }
+        case GridItemStyle::PLAIN: {
+            DumpLog::GetInstance().AddDesc("GridItemStyle:PLAIN");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

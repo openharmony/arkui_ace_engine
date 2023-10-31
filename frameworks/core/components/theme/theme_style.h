@@ -123,7 +123,7 @@ public:
     {
         auto findIter = attributes_.find(attr);
         if (findIter == attributes_.end()) {
-            LOGE("style %{public}s not contains %{public}s!", name_.c_str(), attr.c_str());
+            TAG_LOGW(AceLogTag::ACE_THEME, "style %{public}s not contains %{public}s!", name_.c_str(), attr.c_str());
             return errorValue;
         }
         const auto& valueWrapper = findIter->second;
@@ -141,7 +141,7 @@ public:
         }
         auto valuePair = valueWrapper.GetValue<T>(errorValue);
         if (!valuePair.first) {
-            LOGE("style %{public}s get attr %{public}s error!", name_.c_str(), attr.c_str());
+            TAG_LOGW(AceLogTag::ACE_THEME, "style %{public}s get attr %{public}s error!", name_.c_str(), attr.c_str());
         }
         return valuePair.second;
     }
@@ -178,7 +178,7 @@ public:
         }
         auto valuePair = findIter->second.GetValue<T>(defaultValue);
         if (!valuePair.first) {
-            LOGE("style %{public}s get state %{public}u error!", name_.c_str(), state);
+            TAG_LOGW(AceLogTag::ACE_THEME, "style %{public}s get state %{public}u error!", name_.c_str(), state);
         }
         return valuePair.second;
     }

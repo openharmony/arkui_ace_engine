@@ -65,6 +65,11 @@ public:
     void SetHasSelectAttr(bool value) override {};
     void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override {};
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override {};
+    void SetSingleRange(bool isSingleRange) override {};
+    bool GetSingleRange() override
+    {
+        return true;
+    }
 };
 
 class ACE_EXPORT TextPickerDialogModelImpl : public TextPickerDialogModel {

@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,33 +87,37 @@ public:
     void MockPipelineContextGetTheme();
 
 protected:
-    static void CreateCalendarPicker(RefPtr<OHOS::Ace::MockThemeManager> themeManager);
-    static RefPtr<FrameNode> CalendarDialogShow(
-        RefPtr<OHOS::Ace::MockThemeManager> themeManager, RefPtr<FrameNode> entryNode);
+    static void CreateCalendarPicker();
+    static RefPtr<FrameNode> CalendarDialogShow(RefPtr<FrameNode> entryNode);
 };
 
 void CalendarPickerTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+            if (type == CalendarTheme::TypeId()) {
+                return AceType::MakeRefPtr<CalendarTheme>();
+            } else if (type == IconTheme::TypeId()) {
+                return AceType::MakeRefPtr<IconTheme>();
+            } else if (type == DialogTheme::TypeId()) {
+                return AceType::MakeRefPtr<DialogTheme>();
+            } else {
+                return AceType::MakeRefPtr<PickerTheme>();
+            }
+        });
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void CalendarPickerTestNg::TearDownTestCase()
 {
+    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
     MockPipelineBase::TearDown();
 }
 
-void CalendarPickerTestNg::CreateCalendarPicker(RefPtr<OHOS::Ace::MockThemeManager> themeManager)
+void CalendarPickerTestNg::CreateCalendarPicker()
 {
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     CalendarSettingData settingData;
     CalendarPickerModelNG calendarPickerModel;
 
@@ -121,9 +125,6 @@ void CalendarPickerTestNg::CreateCalendarPicker(RefPtr<OHOS::Ace::MockThemeManag
     DimensionOffset offset;
     calendarPickerModel.SetEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_START, offset);
 
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())); // SetTextStyle
     PickerTextStyle textStyle;
     calendarPickerModel.SetTextStyle(textStyle);
     auto onChange = [](const std::string& /* info */) {};
@@ -131,32 +132,8 @@ void CalendarPickerTestNg::CreateCalendarPicker(RefPtr<OHOS::Ace::MockThemeManag
     calendarPickerModel.SetChangeEvent(onChange);
 }
 
-RefPtr<FrameNode> CalendarPickerTestNg::CalendarDialogShow(
-    RefPtr<OHOS::Ace::MockThemeManager> themeManager, RefPtr<FrameNode> entryNode)
+RefPtr<FrameNode> CalendarPickerTestNg::CalendarDialogShow(RefPtr<FrameNode> entryNode)
 {
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // show
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateDialogNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
-
     CalendarSettingData settingData;
     DialogProperties properties;
     properties.alignment = DialogAlignment::BOTTOM;
@@ -179,14 +156,11 @@ RefPtr<FrameNode> CalendarPickerTestNg::CalendarDialogShow(
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest001, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
     /**
      * @tc.steps: step1. Create Calendar Picker
      * @tc.expected: step1. Create Calendar successfully
      */
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -200,7 +174,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest001, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
 
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     RefPtr<CalendarTheme> theme = MockPipelineBase::GetCurrent()->GetTheme<CalendarTheme>();
     ASSERT_NE(theme, nullptr);
 
@@ -219,35 +192,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest001, TestSize.Level1)
      * @tc.steps: step2. Click Calendar Picker
      * @tc.expected: step2. Show Calendar Dialog
      */
-
     auto gesture = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gesture, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     auto result = gesture->ActClick();
     EXPECT_TRUE(result);
@@ -256,8 +202,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest001, TestSize.Level1)
      * @tc.steps: step3. Handle KEY_TAB on Calendar Picker
      * @tc.expected: step3. Focus changed
      */
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
-
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     KeyEvent keyEventOne(KeyCode::KEY_TAB, KeyAction::DOWN);
@@ -277,10 +221,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest001, TestSize.Level1)
     auto textRenderContext = textFrameNode->GetRenderContext();
     ASSERT_NE(textRenderContext, nullptr);
 
-    EXPECT_EQ(
-        textRenderContext->GetBackgroundColorValue().ColorToString(), theme->GetBackgroundHoverColor().ColorToString());
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
+    EXPECT_EQ(textRenderContext->GetBackgroundColorValue().ColorToString(),
+        theme->GetBackgroundHoverColor().ColorToString());
 }
 
 /**
@@ -290,34 +232,16 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest001, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest002, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     CalendarSettingData settingData;
     CalendarPickerModelNG calendarPickerModel;
 
     calendarPickerModel.Create(settingData);
-
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())); // SetTextStyle
     PickerTextStyle textStyle;
     textStyle.fontSize = Dimension(100);
     calendarPickerModel.SetTextStyle(textStyle);
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -327,27 +251,10 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest002, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest003, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     CalendarSettingData settingData;
     CalendarPickerModelNG calendarPickerModel;
 
     calendarPickerModel.Create(settingData);
-
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())); // SetTextStyle
     PickerTextStyle textStyle;
     textStyle.fontSize = Dimension();
     calendarPickerModel.SetTextStyle(textStyle);
@@ -357,8 +264,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest003, TestSize.Level1)
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -368,9 +273,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest003, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest001, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -380,8 +283,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest001, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     KeyEvent keyEventOne(KeyCode::KEY_TAB, KeyAction::DOWN);
@@ -433,8 +334,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest001, TestSize.Level1)
     KeyEvent keyEventEight(KeyCode::KEY_NUMPAD_ENTER, KeyAction::DOWN);
     result = pickerPattern->HandleFocusEvent(keyEventEight);
     EXPECT_TRUE(result);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -444,9 +343,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest001, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest002, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -456,8 +353,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest002, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
 
@@ -486,7 +381,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest002, TestSize.Level1)
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
     result = pickerPattern->HandleKeyEvent(keyEventOne);
     EXPECT_TRUE(result);
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 /**
  * @tc.name: CalendarPickerPatternTest003
@@ -495,9 +389,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest002, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest003, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -507,11 +399,9 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest003, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->HandleBlurEvent();
     EXPECT_EQ(pickerPattern->selected_, CalendarPickerSelectedType::OTHER);
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -521,9 +411,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest003, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest004, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -535,8 +423,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest004, TestSize.Level1)
     ASSERT_NE(pickerPattern, nullptr);
 
     pickerPattern->HandleTaskCallback();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -546,9 +432,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest004, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest005, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -558,8 +442,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest005, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
 
@@ -576,8 +458,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest005, TestSize.Level1)
 
     result = pickerPattern->HandleKeyEvent(keyEvenTwo);
     EXPECT_TRUE(result);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -587,9 +467,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest005, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest006, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -608,8 +486,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest006, TestSize.Level1)
 
     pickerPattern->SetDialogShow(false);
     EXPECT_TRUE(pickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -619,9 +495,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest006, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest007, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -652,8 +526,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest007, TestSize.Level1)
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     EXPECT_TRUE(pickerPattern->HasButtonFlexNode());
     EXPECT_TRUE(pickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -663,9 +535,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest007, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest008, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -673,14 +543,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest008, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     ASSERT_NE(frameNode, nullptr);
 
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
     ASSERT_NE(pickerPattern->hoverListener_, nullptr);
     ASSERT_NE(pickerPattern->hoverListener_->onHoverCallback_, nullptr);
     pickerPattern->hoverListener_->onHoverCallback_(true);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -690,9 +557,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest008, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest010, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -705,8 +570,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest010, TestSize.Level1)
 
     pickerPattern->SetDialogShow(true);
     pickerPattern->HandleBlurEvent();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -716,9 +579,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest010, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest011, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -729,7 +590,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest011, TestSize.Level1)
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
 
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     KeyEvent keyEventOne(KeyCode::KEY_SPACE, KeyAction::UP);
     pickerPattern->isFirtFocus_ = true;
     pickerPattern->HandleKeyEvent(keyEventOne);
@@ -737,8 +597,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest011, TestSize.Level1)
     KeyEvent keyEventTwo(KeyCode::KEY_TAB, KeyAction::DOWN);
     pickerPattern->isFirtFocus_ = false;
     EXPECT_FALSE(pickerPattern->HandleKeyEvent(keyEventTwo));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -748,9 +606,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest011, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest012, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -760,8 +616,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest012, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
     KeyEvent keyEventOne;
@@ -799,8 +653,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest012, TestSize.Level1)
     KeyEvent keyEventSeven;
     keyEventSeven.action = KeyAction::UP;
     pickerPattern->HandleFocusEvent(keyEventSeven);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -810,9 +662,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest012, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest013, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -845,8 +695,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest013, TestSize.Level1)
     json->Put("day", 1);
     pickerPattern->SetDate(json->ToString());
     EXPECT_FALSE(pickerPattern->HandleYearKeyEvent(0));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -856,9 +704,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest013, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest014, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -876,8 +722,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest014, TestSize.Level1)
     json->Put("day", 1);
     pickerPattern->SetDate(json->ToString());
     EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(999));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -887,9 +731,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest014, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest015, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -907,8 +749,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest015, TestSize.Level1)
     json->Put("day", 29);
     pickerPattern->SetDate(json->ToString());
     EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(799));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -918,9 +758,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest015, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest016, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -961,8 +799,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest016, TestSize.Level1)
     pickerPattern->SetDate(json->ToString());
     pickerPattern->HandleMonthKeyEvent(10);
     EXPECT_TRUE(pickerPattern->isKeyWaiting_);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -972,9 +808,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest016, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest017, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -992,8 +826,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest017, TestSize.Level1)
     json->Put("day", 31);
     pickerPattern->SetDate(json->ToString());
     pickerPattern->HandleMonthKeyEvent(1);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1003,9 +835,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest017, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest018, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1037,8 +867,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest018, TestSize.Level1)
     json->Put("day", 1);
     pickerPattern->SetDate(json->ToString());
     pickerPattern->HandleDayKeyEvent(1);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1048,9 +876,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest018, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest019, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1068,8 +894,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest019, TestSize.Level1)
     json->Put("day", 1);
     pickerPattern->SetDate(json->ToString());
     pickerPattern->HandleDayKeyEvent(1);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1079,9 +903,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest019, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest020, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1091,8 +913,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest020, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     KeyEvent keyEventOne;
     keyEventOne.code = KeyCode::KEY_STAR;
@@ -1105,8 +925,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest020, TestSize.Level1)
     KeyEvent keyEventThree;
     keyEventThree.code = KeyCode::KEY_0;
     EXPECT_FALSE(pickerPattern->HandleNumberKeyEvent(keyEventThree));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1116,9 +934,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest020, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest021, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1149,8 +965,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest021, TestSize.Level1)
     pickerPattern->taskCount_ = 1;
     pickerPattern->isKeyWaiting_ = false;
     pickerPattern->HandleTaskCallback();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1160,9 +974,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest021, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest022, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1182,8 +994,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest022, TestSize.Level1)
     pickerPattern->SetDate(json->ToString());
     pickerPattern->HandleTaskCallback();
     EXPECT_FALSE(pickerPattern->isKeyWaiting_);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1193,9 +1003,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest022, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest023, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1205,8 +1013,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest023, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
     pickerPattern->HandleTextHoverEvent(true, 0);
@@ -1219,8 +1025,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest023, TestSize.Level1)
 
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
     pickerPattern->HandleTextHoverEvent(false, 4);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1230,9 +1034,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest023, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest024, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1242,8 +1044,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest024, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
     auto json = JsonUtil::Create(true);
@@ -1267,8 +1067,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest024, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 802);
     EXPECT_EQ(json->GetUInt("month"), 3);
     EXPECT_EQ(json->GetUInt("day"), 1);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1278,9 +1076,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest024, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest025, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1290,8 +1086,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest025, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::MONTH;
     auto json = JsonUtil::Create(true);
@@ -1304,8 +1098,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest025, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 800);
     EXPECT_EQ(json->GetUInt("month"), 11);
     EXPECT_EQ(json->GetUInt("day"), 30);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1315,9 +1107,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest025, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest026, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1327,8 +1117,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest026, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::MONTH;
     auto json = JsonUtil::Create(true);
@@ -1341,8 +1129,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest026, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 801);
     EXPECT_EQ(json->GetUInt("month"), 1);
     EXPECT_EQ(json->GetUInt("day"), 31);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1352,9 +1138,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest026, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest027, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1364,8 +1148,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest027, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     auto json = JsonUtil::Create(true);
@@ -1378,8 +1160,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest027, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 802);
     EXPECT_EQ(json->GetUInt("month"), 1);
     EXPECT_EQ(json->GetUInt("day"), 1);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1389,9 +1169,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest027, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest028, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1401,8 +1179,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest028, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
     auto json = JsonUtil::Create(true);
@@ -1415,8 +1191,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest028, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 801);
     EXPECT_EQ(json->GetUInt("month"), 2);
     EXPECT_EQ(json->GetUInt("day"), 28);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1426,9 +1200,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest028, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest029, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1438,8 +1210,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest029, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::MONTH;
     auto json = JsonUtil::Create(true);
@@ -1452,8 +1222,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest029, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 800);
     EXPECT_EQ(json->GetUInt("month"), 12);
     EXPECT_EQ(json->GetUInt("day"), 31);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1463,9 +1231,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest029, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest030, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1475,8 +1241,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest030, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::MONTH;
     auto json = JsonUtil::Create(true);
@@ -1489,8 +1253,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest030, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 801);
     EXPECT_EQ(json->GetUInt("month"), 6);
     EXPECT_EQ(json->GetUInt("day"), 30);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1500,9 +1262,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest030, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest031, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1512,8 +1272,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest031, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     auto json = JsonUtil::Create(true);
@@ -1526,8 +1284,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest031, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 801);
     EXPECT_EQ(json->GetUInt("month"), 1);
     EXPECT_EQ(json->GetUInt("day"), 31);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1537,9 +1293,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest031, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest032, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1549,8 +1303,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest032, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     auto json = JsonUtil::Create(true);
@@ -1563,7 +1315,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest032, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 800);
     EXPECT_EQ(json->GetUInt("month"), 12);
     EXPECT_EQ(json->GetUInt("day"), 31);
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1573,9 +1324,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest032, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest033, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1585,8 +1334,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest033, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     auto json = JsonUtil::Create(true);
@@ -1599,8 +1346,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest033, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 801);
     EXPECT_EQ(json->GetUInt("month"), 1);
     EXPECT_EQ(json->GetUInt("day"), 31);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1610,9 +1355,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest033, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest034, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1624,12 +1367,9 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest034, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     layoutProperty->UpdateDialogAlignType(CalendarEdgeAlign::EDGE_ALIGN_CENTER);
     pickerPattern->CalculateDialogOffset();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1639,9 +1379,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest034, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest035, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1653,12 +1391,9 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest035, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     layoutProperty->UpdateDialogAlignType(CalendarEdgeAlign::EDGE_ALIGN_END);
     pickerPattern->CalculateDialogOffset();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1683,9 +1418,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest036, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest037, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1695,8 +1428,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest037, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
     auto json = JsonUtil::Create(true);
@@ -1709,8 +1440,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest037, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 1);
     EXPECT_EQ(json->GetUInt("month"), 1);
     EXPECT_EQ(json->GetUInt("day"), 31);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1720,9 +1449,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest037, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest038, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1732,8 +1459,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest038, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::MONTH;
     auto json = JsonUtil::Create(true);
@@ -1746,8 +1471,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest038, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 1);
     EXPECT_EQ(json->GetUInt("month"), 1);
     EXPECT_EQ(json->GetUInt("day"), 31);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1757,9 +1480,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest038, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest039, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1769,8 +1490,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest039, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     auto json = JsonUtil::Create(true);
@@ -1783,8 +1502,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest039, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 1);
     EXPECT_EQ(json->GetUInt("month"), 1);
     EXPECT_EQ(json->GetUInt("day"), 1);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1794,9 +1511,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest039, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest040, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1806,8 +1521,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest040, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
     auto json = JsonUtil::Create(true);
@@ -1820,8 +1533,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest040, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 5000);
     EXPECT_EQ(json->GetUInt("month"), 2);
     EXPECT_EQ(json->GetUInt("day"), 28);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1831,9 +1542,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest040, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest041, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1843,8 +1552,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest041, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::MONTH;
     auto json = JsonUtil::Create(true);
@@ -1857,8 +1564,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest041, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 5000);
     EXPECT_EQ(json->GetUInt("month"), 12);
     EXPECT_EQ(json->GetUInt("day"), 31);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1868,9 +1573,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest041, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest042, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1880,8 +1583,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest042, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     auto json = JsonUtil::Create(true);
@@ -1894,8 +1595,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest042, TestSize.Level1)
     EXPECT_EQ(json->GetUInt("year"), 5000);
     EXPECT_EQ(json->GetUInt("month"), 12);
     EXPECT_EQ(json->GetUInt("day"), 31);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1905,9 +1604,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest042, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest043, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1917,15 +1614,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest043, TestSize.Level1)
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     ASSERT_NE(focusHub->onBlurInternal_, nullptr);
 
     focusHub->onBlurInternal_();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1935,9 +1629,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest043, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest044, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1946,15 +1638,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest044, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
     KeyEvent event;
     EXPECT_FALSE(pickerPattern->HandleBlurEvent(event));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1964,9 +1653,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest044, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest045, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -1975,7 +1662,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest045, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     auto context = frameNode->GetContext();
     ASSERT_NE(context, nullptr);
@@ -1983,8 +1669,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest045, TestSize.Level1)
 
     std::function<void()> task;
     pickerPattern->PostTaskToUI(task);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1994,9 +1678,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest045, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest046, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -2005,12 +1687,9 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest046, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     pickerPattern->OnWindowSizeChanged(100, 200, WindowSizeChangeReason::ROTATION);
     pickerPattern->OnWindowSizeChanged(100, 200, WindowSizeChangeReason::RECOVER);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 /**
  * @tc.name: CalendarPickerPatternTest047
@@ -2019,9 +1698,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest046, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest047, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -2032,15 +1709,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest047, TestSize.Level1)
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
 
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
-
     pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
     KeyEvent keyEvent;
     keyEvent.code = KeyCode::KEY_TAB, pickerPattern->isFirtFocus_ = false;
     pickerPattern->SetDialogShow(false);
     EXPECT_FALSE(pickerPattern->HandleFocusEvent(keyEvent));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2050,9 +1723,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest047, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest048, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -2061,11 +1732,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest048, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     bool isPressed = true;
     pickerPattern->HandleButtonTouchEvent(isPressed, 0);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2075,9 +1743,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest048, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest049, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -2086,11 +1752,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest049, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     pickerPattern->SetDialogShow(true);
     pickerPattern->ShowDialog();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2100,14 +1763,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest049, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest001, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2116,33 +1777,17 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest001, TestSize.Level1)
     ASSERT_NE(calendarDialogNode, nullptr);
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     TouchEventInfo info("touch");
     TouchLocationInfo touchInfo1(1);
     touchInfo1.SetTouchType(TouchType::DOWN);
     info.AddTouchLocationInfo(std::move(touchInfo1));
     dialogPattern->touchListener_->GetTouchEventCallback()(info);
 
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
-
     auto gesture = calendarDialogNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gesture, nullptr);
 
     auto result = gesture->ActClick();
     EXPECT_TRUE(result);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2152,40 +1797,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest001, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest002, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // show
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateDialogNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateButtonNode
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateButtonNode
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateDividerNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()));
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;
@@ -2218,8 +1829,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest002, TestSize.Level1)
     ASSERT_NE(gesture, nullptr);
 
     gesture->ActClick();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2245,40 +1854,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest003, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest004, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // show
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateDialogNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateButtonNode
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateButtonNode
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateDividerNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()));
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;
@@ -2306,8 +1881,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest004, TestSize.Level1)
 
     std::string info = " ";
     eventHub->UpdateRequestDataEvent(info);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2317,12 +1890,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest004, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest005, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateButtonNode
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     int32_t calendarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto calendarNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, calendarNodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -2335,8 +1902,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest005, TestSize.Level1)
     ASSERT_NE(gesture, nullptr);
     gesture->CheckClickActuator();
     gesture->ActClick();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2346,9 +1911,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest005, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest006, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -2356,7 +1919,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest006, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2376,8 +1939,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest006, TestSize.Level1)
     auto changeEvent = [](const std::string& /* info */) {};
     CalendarSettingData settingData;
     calendarDialogView.OnSelectedChangeEvent(1, info, changeEvent, settingData);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2387,9 +1948,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest006, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest007, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -2397,7 +1956,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest007, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2413,8 +1972,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest007, TestSize.Level1)
     auto changeEvent = [](const std::string& /* info */) {};
     CalendarSettingData settingData;
     calendarDialogView.OnSelectedChangeEvent(1, callbackInfo, changeEvent, settingData);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2424,10 +1981,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest007, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerEventHubTest001, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -2453,8 +2007,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerEventHubTest001, TestSize.Level1)
     calendarpickerEventHub->UpdateChangeEvent(info);
     calendarpickerEventHub->UpdateOnChangeEvent(info);
     calendarpickerEventHub->FireLayoutChangeEvent();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2464,15 +2016,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerEventHubTest001, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest001, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2482,12 +2031,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest001, TestSize.Level1)
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     KeyEvent keyEventOne(KeyCode::KEY_TAB, KeyAction::DOWN);
     auto result = dialogPattern->HandleKeyEvent(keyEventOne);
@@ -2520,7 +2063,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest001, TestSize.Level1)
     KeyEvent keyEventEight(KeyCode::KEY_SPACE, KeyAction::DOWN);
     result = dialogPattern->HandleKeyEvent(keyEventEight);
     EXPECT_TRUE(result);
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2530,15 +2072,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest001, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest002, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2548,8 +2087,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest002, TestSize.Level1)
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     KeyEvent keyEventOne(KeyCode::KEY_TAB, KeyAction::DOWN);
     auto result = dialogPattern->HandleKeyEvent(keyEventOne);
@@ -2581,8 +2118,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest002, TestSize.Level1)
     KeyEvent keyEventSeven(KeyCode::KEY_ENTER, KeyAction::DOWN);
     result = dialogPattern->HandleKeyEvent(keyEventSeven);
     EXPECT_TRUE(result);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2592,15 +2127,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest002, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest003, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2612,7 +2144,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest003, TestSize.Level1)
     ASSERT_NE(dialogPattern, nullptr);
 
     dialogPattern->AddHotZoneRect();
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2622,15 +2153,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest003, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest004, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2656,8 +2184,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest004, TestSize.Level1)
     EXPECT_EQ(newSelectedDay.GetYear(), 799);
     EXPECT_EQ(newSelectedDay.GetMonth(), 2);
     EXPECT_EQ(newSelectedDay.GetDay(), 28);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2667,15 +2193,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest004, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest005, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2688,8 +2211,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest005, TestSize.Level1)
 
     auto result = dialogPattern->IsAtomicNode();
     EXPECT_TRUE(result);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2699,15 +2220,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest005, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest006, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2718,15 +2236,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest006, TestSize.Level1)
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
 
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
-    ;
-
     dialogPattern->HandleEntryLayoutChange();
     EXPECT_FALSE(dialogPattern->isFirstAddhotZoneRect_);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2736,9 +2247,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest006, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest007, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -2746,7 +2255,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest007, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2762,8 +2271,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest007, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     EXPECT_TRUE(dialogPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2773,15 +2280,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest007, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest008, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2791,8 +2295,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest008, TestSize.Level1)
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 
     auto eventHub = calendarDialogNode->GetOrCreateFocusHub();
     ASSERT_NE(eventHub, nullptr);
@@ -2851,8 +2353,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest008, TestSize.Level1)
     KeyEvent keyEventFour(KeyCode::KEY_TAB, KeyAction::UP);
     dialogPattern->isFocused_ = false;
     eventHub->ProcessOnKeyEventInternal(keyEventFour);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2862,23 +2362,18 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest008, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest009, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
     auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
@@ -2890,8 +2385,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest009, TestSize.Level1)
     eventHub->focusType_ = FocusType::NODE;
     eventHub->focusStyleType_ = FocusStyleType::CUSTOM_REGION;
     eventHub->PaintFocusState();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2901,14 +2394,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest009, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest010, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2927,8 +2418,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest010, TestSize.Level1)
     ASSERT_NE(gesture, nullptr);
     gesture->CheckClickActuator();
     gesture->ActClick();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2938,9 +2427,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest010, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest011, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -2948,7 +2435,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest011, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -2958,7 +2445,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest011, TestSize.Level1)
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     dialogPattern->InitOnTouchEvent();
 
     TouchEventInfo info("test");
@@ -2974,8 +2460,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest011, TestSize.Level1)
     info.touches_.emplace_front(lInfo);
     dialogPattern->touchListener_->callback_(info);
     EXPECT_FALSE(dialogPattern->isFocused_);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -2985,9 +2469,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest011, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest012, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -2995,7 +2477,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest012, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -3005,8 +2487,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest012, TestSize.Level1)
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 
     KeyEvent keyEventOne(KeyCode::KEY_0, KeyAction::DOWN);
     dialogPattern->focusAreaID_ = 3;
@@ -3043,8 +2523,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest012, TestSize.Level1)
     KeyEvent keyEventCall(KeyCode::KEY_CALL, KeyAction::DOWN);
     dialogPattern->focusAreaID_ = 0;
     EXPECT_FALSE(dialogPattern->HandleKeyEvent(keyEventCall));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3054,9 +2532,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest012, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest013, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -3064,7 +2540,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest013, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -3121,8 +2597,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest013, TestSize.Level1)
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::DOWN;
     EXPECT_FALSE(dialogPattern->HandleCalendarNodeKeyEvent(keyEvent));
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3132,9 +2606,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest013, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest014, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -3142,7 +2614,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest014, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -3189,8 +2661,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest014, TestSize.Level1)
     isPrev.month.year = 1999;
     isPrev.month.month = 2;
     dialogPattern->FocusedLastFocusedDay();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3200,9 +2670,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest014, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest015, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -3210,7 +2678,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest015, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -3229,8 +2697,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest015, TestSize.Level1)
     dialogPattern->PaintNonCurrentMonthFocusState(currentMonthData.days.size() + 1);
     dialogPattern->PaintNonCurrentMonthFocusState(0);
     dialogPattern->PaintNonCurrentMonthFocusState(currentMonthData.days.size() - 1);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3240,9 +2706,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest015, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest016, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -3250,7 +2714,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest016, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -3264,8 +2728,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest016, TestSize.Level1)
     RoundRect paintRect;
     dialogPattern->focusAreaID_ = 1;
     dialogPattern->GetInnerFocusPaintRect(paintRect);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3275,9 +2737,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest016, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest017, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -3285,7 +2745,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest017, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -3295,7 +2755,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest017, TestSize.Level1)
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 
     dialogPattern->focusAreaID_ = 0;
     dialogPattern->focusAreaChildID_ = 0;
@@ -3308,8 +2767,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest017, TestSize.Level1)
     dialogPattern->focusAreaID_ = 2;
     dialogPattern->focusAreaChildID_ = 2;
     dialogPattern->ChangeEntryState();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3319,40 +2776,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest017, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest018, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // show
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateDialogNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateButtonNode
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateButtonNode
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateDividerNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()));
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;
@@ -3402,9 +2825,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest019, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest020, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -3412,7 +2833,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest020, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -3427,8 +2848,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest020, TestSize.Level1)
     calendarMax.year = 5000;
     calendarMax.month = 12;
     dialogPattern->GetNextMonth(calendarMax);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3438,9 +2857,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest020, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest021, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -3448,7 +2865,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest021, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -3463,8 +2880,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest021, TestSize.Level1)
     calendarMin.year = 1;
     calendarMin.month = 1;
     dialogPattern->GetLastMonth(calendarMin);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3474,40 +2889,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest021, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest022, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // show
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // SetCalendarPaintProperties
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateCalendarMonthNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>())) // CreateTitleImageNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateDialogNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateButtonNode
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateButtonNode
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>())) // CreateDividerNode
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()));
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;
@@ -3544,23 +2925,18 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest022, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest023, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
     auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
@@ -3573,8 +2949,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest023, TestSize.Level1)
 
     MouseInfo info;
     inputHub->mouseEventActuator_->userCallback_->onMouseCallback_(info);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3584,23 +2958,18 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest023, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest024, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
     auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
@@ -3609,8 +2978,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest024, TestSize.Level1)
     ASSERT_NE(dialogPattern->hoverListener_, nullptr);
     ASSERT_NE(dialogPattern->hoverListener_->onHoverCallback_, nullptr);
     dialogPattern->hoverListener_->onHoverCallback_(false);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3620,30 +2987,24 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest024, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest025, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
     auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
 
     Offset globalLocation;
     dialogPattern->HandleEntryNodeHoverEvent(true, globalLocation);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3653,15 +3014,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest025, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest026, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -3672,15 +3030,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest026, TestSize.Level1)
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
 
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
-
     auto eventHub = calendarDialogNode->GetOrCreateFocusHub();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onBlurInternal_, nullptr);
 
     eventHub->onBlurInternal_();
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3690,23 +3044,18 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest026, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest027, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
-    auto dialogNode = CalendarDialogShow(themeManager, AceType::DynamicCast<FrameNode>(element));
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
     auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
-
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
@@ -3715,8 +3064,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest027, TestSize.Level1)
     ASSERT_NE(dialogPattern->hoverListener_, nullptr);
     ASSERT_NE(dialogPattern->hoverListener_->onHoverCallback_, nullptr);
     dialogPattern->hoverListener_->onHoverCallback_(true);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3726,17 +3073,13 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest027, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutPropertyTest001, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     ASSERT_NE(frameNode, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     auto clone = layoutProperty->Clone();
@@ -3747,7 +3090,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutPropertyTest001, TestSize.Lev
     clone.Reset();
 
     ASSERT_NE(json, nullptr);
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3757,17 +3099,13 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutPropertyTest001, TestSize.Lev
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutPropertyTest002, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     ASSERT_NE(frameNode, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
 
@@ -3779,8 +3117,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutPropertyTest002, TestSize.Lev
     layoutProperty->ToJsonValue(json);
     layoutProperty->propDialogAlignType_ = CalendarEdgeAlign::EDGE_ALIGN_END;
     layoutProperty->ToJsonValue(json);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3790,9 +3126,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutPropertyTest002, TestSize.Lev
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutAlgorithmTest001, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -3900,8 +3234,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutAlgorithmTest001, TestSize.Le
     ASSERT_NE(image2NodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(image2NodeLayoutWrapper);
 
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
-
     LayoutConstraintF LayoutConstraintVaildSize;
     LayoutConstraintVaildSize.selfIdealSize.SetWidth(10000);
     LayoutConstraintVaildSize.selfIdealSize.SetHeight(25000);
@@ -3910,8 +3242,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutAlgorithmTest001, TestSize.Le
 
     calendarPickerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_NE(calendarPickerLayoutAlgorithm, nullptr);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3921,9 +3251,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutAlgorithmTest001, TestSize.Le
  */
 HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutAlgorithmTest002, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    CreateCalendarPicker(themeManager);
+    CreateCalendarPicker();
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
@@ -3999,8 +3327,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutAlgorithmTest002, TestSize.Le
     ASSERT_NE(dayContentNodeLayoutWrapper, nullptr);
     contentNodeLayoutWrapper->AppendChild(dayContentNodeLayoutWrapper);
 
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
-
     LayoutConstraintF LayoutConstraintVaildSize;
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildSize);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
@@ -4012,7 +3338,5 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutAlgorithmTest002, TestSize.Le
     EXPECT_NE(calendarPickerLayoutAlgorithm, nullptr);
     calendarPickerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_NE(calendarPickerLayoutAlgorithm, nullptr);
-
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 } // namespace OHOS::Ace::NG

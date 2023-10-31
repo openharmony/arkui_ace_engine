@@ -22,6 +22,15 @@
 
 namespace OHOS::Ace::Framework {
 
+class JSListScroller : public JSScroller {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSListScroller* scroller);
+
+    void GetItemRectInGroup(const JSCallbackInfo& args);
+};
+
 class JSList : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);

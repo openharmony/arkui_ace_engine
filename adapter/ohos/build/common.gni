@@ -175,6 +175,13 @@ if (enable_drag_framework) {
   defines += [ "ENABLE_DRAG_FRAMEWORK" ]
 }
 
+if (defined(global_parts_info.multimedia_media_library)) {
+  media_library_exists = true
+  defines += [ "MEDIA_LIBRARY_EXISTS" ]
+} else {
+  media_library_exists = false
+}
+
 cflags_cc = [
   "-Wno-thread-safety-attributes",
   "-Wno-thread-safety-analysis",

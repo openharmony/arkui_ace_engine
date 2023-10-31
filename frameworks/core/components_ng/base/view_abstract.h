@@ -150,6 +150,7 @@ public:
     static void SetDynamicLightUp(float rate, float lightUpDegree);
     static void SetFrontBlur(const Dimension& radius);
     static void SetBackShadow(const Shadow& shadow);
+    static void SetBlendMode(BlendMode blendMode);
 
     // graphics
     static void SetBrightness(const Dimension& value);
@@ -311,6 +312,8 @@ public:
     static void UpdateAnimatableArithmeticProperty(
         const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
     static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
+
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
 
 private:
     static void AddDragFrameNodeToManager();

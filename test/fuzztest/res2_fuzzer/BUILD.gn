@@ -16,7 +16,7 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-module_output_path = "arkui/res2"
+module_output_path = "ace_engine/ace_engine/res2"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("Res2FuzzTest") {

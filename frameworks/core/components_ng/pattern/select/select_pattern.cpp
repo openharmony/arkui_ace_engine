@@ -77,9 +77,6 @@ void SelectPattern::OnModifyDone()
 void SelectPattern::ShowSelectMenu()
 {
     CHECK_NULL_VOID(!options_.empty());
-    if (menuWrapper_) {
-        LOGI("start executing click callback %d", menuWrapper_->GetId());
-    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
@@ -92,7 +89,6 @@ void SelectPattern::ShowSelectMenu()
     menuLayoutProps->UpdateTargetSize(selectSize_);
     auto offset = GetHost()->GetPaintRectOffset();
     offset.AddY(selectSize_.Height());
-    LOGD("select offset %{public}s size %{public}s", offset.ToString().c_str(), selectSize_.ToString().c_str());
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
 }
 
@@ -187,7 +183,6 @@ void SelectPattern::RegisterOnPress()
         CHECK_NULL_VOID(renderContext);
         // update press status, repaint background color
         if (touchType == TouchType::DOWN) {
-            LOGD("triggers option press");
             pattern->SetBgBlendColor(theme->GetClickedColor());
             pattern->PlayBgColorAnimation(false);
         }
@@ -312,8 +307,7 @@ void SelectPattern::SetSelected(int32_t index)
     if (index == selected_) {
         return;
     }
-    if (index >= options_.size() || index < 0) {
-        LOGW("newly selected index invalid");
+    if (index >= static_cast<int32_t>(options_.size()) || index < 0) {
         selected_ = -1;
         ResetOptionProps();
         return;
@@ -375,10 +369,10 @@ void SelectPattern::BuildChild()
     if (!hasTextNode) {
         text_->MountToParent(row);
     }
+    spinner_->MarkModifyDone();
     if (!hasSpinnerNode) {
         spinner_->MountToParent(row);
     }
-    spinner_->MarkModifyDone();
     if (!hasRowNode) {
         row->MountToParent(select);
     }
@@ -526,7 +520,7 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 void SelectPattern::SetSelectedOptionBgColor(const Color& color)
 {
     selectedBgColor_ = color;
-    if (selected_ >= 0 && selected_ < options_.size()) {
+    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetBgColor(color);
@@ -536,7 +530,7 @@ void SelectPattern::SetSelectedOptionBgColor(const Color& color)
 void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
 {
     selectedFont_.FontSize = value;
-    if (selected_ >= 0 && selected_ < options_.size()) {
+    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetFontSize(value);
@@ -546,7 +540,7 @@ void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
 void SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     selectedFont_.FontStyle = value;
-    if (selected_ >= 0 && selected_ < options_.size()) {
+    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetItalicFontStyle(value);
@@ -556,7 +550,7 @@ void SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value
 void SelectPattern::SetSelectedOptionFontWeight(const FontWeight& value)
 {
     selectedFont_.FontWeight = value;
-    if (selected_ >= 0 && selected_ < options_.size()) {
+    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetFontWeight(value);
@@ -566,7 +560,7 @@ void SelectPattern::SetSelectedOptionFontWeight(const FontWeight& value)
 void SelectPattern::SetSelectedOptionFontFamily(const std::vector<std::string>& value)
 {
     selectedFont_.FontFamily = value;
-    if (selected_ >= 0 && selected_ < options_.size()) {
+    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetFontFamily(value);
@@ -576,7 +570,7 @@ void SelectPattern::SetSelectedOptionFontFamily(const std::vector<std::string>& 
 void SelectPattern::SetSelectedOptionFontColor(const Color& color)
 {
     selectedFont_.FontColor = color;
-    if (selected_ >= 0 && selected_ < options_.size()) {
+    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetFontColor(color);
@@ -614,7 +608,7 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(newSelected);
     // set lastSelected option props back to default (unselected) values
-    if (selected_ >= 0 && selected_ < options_.size()) {
+    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         CHECK_NULL_VOID(options_[selected_]);
         auto lastSelected = options_[selected_]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(lastSelected);
@@ -690,14 +684,13 @@ void SelectPattern::UpdateText(int32_t index)
     CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
-    if (index >= options_.size() || index < 0) {
+    if (index >= static_cast<int32_t>(options_.size()) || index < 0) {
         return;
     }
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(newSelected);
     textProps->UpdateContent(newSelected->GetText());
     text_->MarkModifyDone();
-    LOGD("new text = %s", newSelected->GetText().c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -956,5 +949,22 @@ void SelectPattern::OnColorConfigurationUpdate()
     }
     SetOptionBgColor(selectTheme->GetBackgroundColor());
     host->SetNeedCallChildrenUpdate(false);
+}
+
+void SelectPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateText(pattern->selected_);
+        },
+        TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace::NG

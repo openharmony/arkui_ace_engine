@@ -50,7 +50,6 @@ std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRu
     LOGD("Current ID is %{public}d", currentInstance);
     auto it = contexts_.find(currentInstance);
     if (it == contexts_.end()) {
-        LOGW("Context with ID %{public}d not found!", currentInstance);
         return runtime->NewUndefined();
     }
     return it->second;
@@ -77,8 +76,6 @@ void JsiContextModule::RemoveContext(int32_t key)
     auto it = contexts_.find(key);
     if (it != contexts_.end()) {
         contexts_.erase(it);
-    } else {
-        LOGW("Context with key %{public}d does not exist!", key);
     }
 }
 

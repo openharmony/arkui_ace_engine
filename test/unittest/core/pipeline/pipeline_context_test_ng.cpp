@@ -422,27 +422,33 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_->children_.push_back(frameNode_1);
     focusHub = frameNode_1->eventHub_->GetOrCreateFocusHub();
     focusHub->SetIsDefaultHasFocused(true);
-    EXPECT_FALSE(context_->RequestDefaultFocus());
+    EXPECT_FALSE(context_->RequestDefaultFocus(focusHub));
     /**
      * @tc.steps6: call SetIsDefaultHasFocused with false and create a new frameNode
                 init frameNode_2's focusHub
      * @tc.expected: RequestDefaultFocus returns true while IsFocusableWholePath return true
                     RequestDefaultFocus returns false while IsFocusableWholePath return false.
      */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    focusHub->focusable_ = true;
     focusHub->SetIsDefaultHasFocused(false);
-    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     auto frameNodeId_2 = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_2, nullptr);
-    frameNode_2->parent_ = nullptr;
+    frameNode_1->children_.push_back(frameNode_2);
+    frameNode_2->parent_ = frameNode_1;
     auto newFocusHub = frameNode_2->eventHub_->GetOrCreateFocusHub();
-    focusHub->focusCallbackEvents_->SetDefaultFocusNode(newFocusHub);
+    newFocusHub->SetIsDefaultFocus(true);
     newFocusHub->SetFocusType(FocusType::NODE);
     frameNode_2->eventHub_->enabled_ = true;
     newFocusHub->focusable_ = true;
     newFocusHub->parentFocusable_ = true;
-    EXPECT_TRUE(context_->RequestDefaultFocus());
-    newFocusHub->SetFocusType(FocusType::DISABLE);
-    EXPECT_FALSE(context_->RequestDefaultFocus());
+    EXPECT_TRUE(context_->RequestDefaultFocus(focusHub));
+    focusHub->SetIsDefaultHasFocused(false);
+    focusHub->currentFocus_ = false;
+    focusHub->focusable_ = false;
+    newFocusHub->currentFocus_ = false;
+    newFocusHub->focusable_ = false;
+    EXPECT_FALSE(context_->RequestDefaultFocus(focusHub));
 
     /**
      * @tc.steps7: Create a new frameNode and call AddDirtyDefaultFocus
@@ -464,7 +470,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     EXPECT_FALSE(context_->dirtyFocusNode_.Upgrade());
     EXPECT_FALSE(context_->dirtyFocusScope_.Upgrade());
 
-    context_->MarkRootFocusNeedUpdate();
     auto frameNodeId_4 = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_4 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_4, nullptr);
     auto eventHubRoot = frameNode_4->GetEventHub<EventHub>();
@@ -474,7 +479,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
 
     context_->rootNode_ = frameNode_4;
     context_->FlushFocus();
-    EXPECT_FALSE(context_->isRootFocusNeedUpdate_);
+    EXPECT_TRUE(focusHubRoot->IsCurrentFocus());
 }
 
 /**
@@ -1358,13 +1363,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
         { "-rotation" }, { "-animationscale" }, { "-velocityscale" }, { "-scrollfriction" }, { "-threadstuck" },
         { "test" } };
     int turn = 0;
-    int falseInfoNum = 6;
     for (; turn < params.size(); turn++) {
-        if (turn < params.size() - falseInfoNum) {
-            EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
-        } else {
-            EXPECT_FALSE(context_->OnDumpInfo(params[turn]));
-        }
+        EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
     }
 }
 
@@ -2629,8 +2629,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg057, TestSize.Level1)
     auto needRenderNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto needRenderNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, needRenderNodeId, nullptr);
     context_->SetNeedRenderNode(needRenderNode);
-    context_->InspectDrew();
     EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 1);
+    context_->InspectDrew();
+    EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 0);
 }
 
 /**

@@ -114,9 +114,10 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         heightFinal =
             std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
     }
-    if (NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
+        NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
         // text content is empty
-        return SizeF { 0.0f, 0.0f };
+        return SizeF {};
     }
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
@@ -201,13 +202,18 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     auto frameNode = layoutWrapper->GetHostNode();
     const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    auto iterItems = children.begin();
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
         }
         auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
         if (imageSpanItem) {
+            int32_t targetId = imageSpanItem->imageNodeId;
+            auto iterItems = children.begin();
+            // find the Corresponding ImageNode for every ImageSpanItem
+            while (iterItems != children.end() && (*iterItems) && (*iterItems)->GetHostNode()->GetId() != targetId) {
+                iterItems++;
+            }
             if (iterItems == children.end() || !(*iterItems)) {
                 continue;
             }
@@ -312,7 +318,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     size_t index = 0;
-    std::vector<Rect> rectsForPlaceholders;
+    std::vector<RectF> rectsForPlaceholders;
     GetPlaceholderRects(rectsForPlaceholders);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     // children only contains the image span.
@@ -447,8 +453,7 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
 {
     if (!textStyle.GetAdaptTextSize()) {
         if (!CreateParagraphAndLayout(
-                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper))
-        {
+                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
             return false;
         }
     } else {
@@ -476,8 +481,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle
     const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper)
 {
     if (!AdaptMaxTextSize(
-            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper))
-    {
+            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
         return false;
     }
 
@@ -712,8 +716,7 @@ void TextLayoutAlgorithm::ApplyIndent(const TextStyle& textStyle, double width)
     double indent = 0.0;
     if (textStyle.GetTextIndent().Unit() != DimensionUnit::PERCENT) {
         if (!textStyle.GetTextIndent().NormalizeToPx(
-                pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), width, indent))
-        {
+                pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), width, indent)) {
             return;
         }
     } else {
@@ -733,9 +736,9 @@ bool TextLayoutAlgorithm::IncludeImageSpan(LayoutWrapper* layoutWrapper)
 }
 
 void TextLayoutAlgorithm::GetSpanAndImageSpanList(
-    std::list<RefPtr<SpanItem>>& spanList, std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList)
+    std::list<RefPtr<SpanItem>>& spanList, std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>>& imageSpanList)
 {
-    std::vector<Rect> rectsForPlaceholders;
+    std::vector<RectF> rectsForPlaceholders;
     paragraph_->GetRectsForPlaceholders(rectsForPlaceholders);
 
     for (const auto& child : spanItemChildren_) {
@@ -756,7 +759,7 @@ void TextLayoutAlgorithm::GetSpanAndImageSpanList(
 
 void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
     const std::list<RefPtr<SpanItem>>& spanList,
-    std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines)
+    std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines)
 {
     int32_t currentLine = 0;
     size_t currentLength = 0;
@@ -765,12 +768,12 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
             continue;
         }
         std::string textValue = child->content;
-        std::vector<Rect> selectedRects;
+        std::vector<RectF> selectedRects;
         if (!textValue.empty()) {
             paragraph_->GetRectsForRange(currentLength, currentLength + textValue.size(), selectedRects);
         }
         currentLength += textValue.size();
-        Rect currentRect;
+        RectF currentRect;
         auto preLinetLastSpan = spanContentLines.rbegin();
         double preLineFontSize = textStyle.GetFontSize().Value();
         if (preLinetLastSpan != spanContentLines.rend()) {
@@ -808,8 +811,8 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
 }
 
 void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyle,
-    std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList,
-    std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines)
+    std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>>& imageSpanList,
+    std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -825,7 +828,7 @@ void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyl
 
             auto offset = imageSpanItem->second.first.GetOffset();
             auto imageSpanItemRect = imageSpanItem->second.first;
-            imageSpanItemRect.SetOffset(Offset(spanItem->second.first.GetOffset().GetX(), offset.GetY()));
+            imageSpanItemRect.SetOffset(OffsetF(spanItem->second.first.GetOffset().GetX(), offset.GetY()));
             bool isIntersectWith = spanItem->second.first.IsIntersectWith(imageSpanItemRect);
             if (!isIntersectWith) {
                 break;
@@ -856,11 +859,11 @@ void TextLayoutAlgorithm::SetImageSpanTextStyle(const TextStyle& textStyle)
     CHECK_NULL_VOID(paragraph_);
 
     std::list<RefPtr<SpanItem>> spanList;
-    std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>> imageSpanList;
+    std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>> imageSpanList;
     GetSpanAndImageSpanList(spanList, imageSpanList);
 
     // split text content by lines
-    std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>> spanContentLines;
+    std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>> spanContentLines;
     SplitSpanContentByLines(textStyle, spanList, spanContentLines);
 
     // set imagespan textstyle
@@ -890,7 +893,7 @@ size_t TextLayoutAlgorithm::GetLineCount() const
     return paragraph_->GetLineCount();
 }
 
-void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<Rect>& rects)
+void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects)
 {
     CHECK_NULL_VOID(paragraph_);
     paragraph_->GetRectsForPlaceholders(rects);
@@ -898,12 +901,14 @@ void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<Rect>& rects)
 
 ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
 {
-    return { .direction = GetTextDirection(content),
+    return {
+        .direction = GetTextDirection(content),
         .align = textStyle.GetTextAlign(),
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
-        .textOverflow = textStyle.GetTextOverflow()
+        .ellipsisMode = textStyle.GetEllipsisMode(),
+        .textOverflow = textStyle.GetTextOverflow(),
     };
 }
 } // namespace OHOS::Ace::NG

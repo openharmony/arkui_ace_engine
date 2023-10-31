@@ -1661,6 +1661,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
+    JSClass<JSWeb>::StaticMethod("wrapContent", &JSWeb::WrapContent);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -3668,5 +3669,10 @@ void JSWeb::OnOverScroll(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOverScrollId(jsCallback);
+}
+
+void JSWeb::WrapContent(bool isWrapContentEnabled)
+{
+    WebModel::GetInstance()->SetWrapContent(isWrapContentEnabled);
 }
 } // namespace OHOS::Ace::Framework

@@ -118,7 +118,6 @@ static AnimationDirection StringToAnimationDirection(const std::string& directio
 
 static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shared_ptr<AnimatorOption>& option)
 {
-    LOGI("JsAnimator: ParseAnimatorOption");
     size_t argc = 1;
     napi_value argv;
     napi_get_cb_info(env, info, &argc, &argv, NULL, NULL);
@@ -183,7 +182,6 @@ static RefPtr<Animator> GetAnimatorInResult(napi_env env, napi_callback_info inf
     napi_get_cb_info(env, info, NULL, NULL, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         return nullptr;
     }
     return animatorResult->GetAnimator();
@@ -191,26 +189,22 @@ static RefPtr<Animator> GetAnimatorInResult(napi_env env, napi_callback_info inf
 
 static napi_value JSReset(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSReset");
     AnimatorResult* animatorResult = nullptr;
     napi_value thisVar;
     napi_get_cb_info(env, info, NULL, NULL, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         NapiThrow(env, "Internal error. Unwrap animator result is failed.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        LOGE("Option is null in AnimatorResult");
         NapiThrow(env, "Internal error. Option is null in AnimatorResult.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     ParseAnimatorOption(env, info, option);
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGW("animator is null");
         NapiThrow(env, "Internal error. Animator is null in AnimatorResult.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
@@ -225,7 +219,6 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(env, &scope);
             if (scope == nullptr) {
-                LOGW("JsAnimator: open handle scope failed");
                 return;
             }
             napi_value ret = nullptr;
@@ -233,7 +226,6 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
             napi_value onframe = nullptr;
             auto result = napi_get_reference_value(env, onframeRef, &onframe);
             if (result != napi_ok || onframe == nullptr) {
-                LOGW("JsAnimator: get onframe in callback failed");
                 napi_close_handle_scope(env, scope);
                 return;
             }
@@ -251,7 +243,6 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
 // since API 9 deprecated
 static napi_value JSUpdate(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSUpdate");
     return JSReset(env, info);
 }
 
@@ -262,9 +253,8 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
         ft->SetFrameTraceLimit();
     }
     auto animator = GetAnimatorInResult(env, info);
-    LOGI("JsAnimator: JSPlay, id:%{public}d", animator ? animator->GetId() : -1);
+    LOGD("JsAnimator: JSPlay, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     if (!animator->HasScheduler()) {
@@ -279,9 +269,8 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
 static napi_value JSFinish(napi_env env, napi_callback_info info)
 {
     auto animator = GetAnimatorInResult(env, info);
-    LOGI("JsAnimator: JSFinish, id:%{public}d", animator ? animator->GetId() : -1);
+    LOGD("JsAnimator: JSFinish, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     animator->Finish();
@@ -293,9 +282,8 @@ static napi_value JSFinish(napi_env env, napi_callback_info info)
 static napi_value JSPause(napi_env env, napi_callback_info info)
 {
     auto animator = GetAnimatorInResult(env, info);
-    LOGI("JsAnimator: JSPause, id:%{public}d", animator ? animator->GetId() : -1);
+    LOGD("JsAnimator: JSPause, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     animator->Pause();
@@ -307,9 +295,8 @@ static napi_value JSPause(napi_env env, napi_callback_info info)
 static napi_value JSCancel(napi_env env, napi_callback_info info)
 {
     auto animator = GetAnimatorInResult(env, info);
-    LOGI("JsAnimator: JSCancel, id:%{public}d", animator ? animator->GetId() : -1);
+    LOGD("JsAnimator: JSCancel, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     animator->Cancel();
@@ -321,9 +308,8 @@ static napi_value JSCancel(napi_env env, napi_callback_info info)
 static napi_value JSReverse(napi_env env, napi_callback_info info)
 {
     auto animator = GetAnimatorInResult(env, info);
-    LOGI("JsAnimator: JSReverse, id:%{public}d", animator ? animator->GetId() : -1);
+    LOGD("JsAnimator: JSReverse, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     if (!animator->HasScheduler()) {
@@ -337,7 +323,6 @@ static napi_value JSReverse(napi_env env, napi_callback_info info)
 
 static napi_value SetOnframe(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: SetOnframe");
     AnimatorResult* animatorResult = nullptr;
     size_t argc = 1;
     napi_value thisVar = nullptr;
@@ -345,17 +330,14 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, &onframe, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        LOGE("option is null");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     animator->ClearInterpolators();
@@ -373,7 +355,6 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
-            LOGW("JsAnimator: open handle scope failed");
             return;
         }
         napi_value ret = nullptr;
@@ -381,7 +362,6 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
         napi_value onframe = nullptr;
         auto result = napi_get_reference_value(env, onframeRef, &onframe);
         if (result != napi_ok || onframe == nullptr) {
-            LOGW("JsAnimator: get onframe in callback failed");
             napi_close_handle_scope(env, scope);
             return;
         }
@@ -400,7 +380,6 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
 
 static napi_value SetOnfinish(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: SetOnfinish");
     AnimatorResult* animatorResult = nullptr;
     size_t argc = 1;
     napi_value thisVar = nullptr;
@@ -408,17 +387,14 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, &onfinish, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        LOGE("option is null");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     // convert onfinish function to reference
@@ -431,18 +407,15 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     animatorResult->SetOnfinishRef(onfinishRef);
     animator->ClearStopListeners();
     animator->AddStopListener([env, onfinishRef] {
-        LOGI("JsAnimator: onfinish");
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
-            LOGW("JsAnimator: open handle scope failed");
             return;
         }
         napi_value ret = nullptr;
         napi_value onfinish = nullptr;
         auto result = napi_get_reference_value(env, onfinishRef, &onfinish);
         if (result != napi_ok || onfinish == nullptr) {
-            LOGW("JsAnimator: get onfinish in callback failed");
             napi_close_handle_scope(env, scope);
             return;
         }
@@ -456,7 +429,6 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
 
 static napi_value SetOncancel(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: SetOncancel");
     AnimatorResult* animatorResult = nullptr;
     size_t argc = 1;
     napi_value thisVar = nullptr;
@@ -464,17 +436,14 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, &oncancel, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        LOGE("option is null");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     // convert oncancel function to reference
@@ -487,18 +456,15 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
     animatorResult->SetOncancelRef(oncancelRef);
     animator->ClearIdleListeners();
     animator->AddIdleListener([env, oncancelRef] {
-        LOGI("JsAnimator: oncancel");
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
-            LOGW("JsAnimator: open handle scope failed");
             return;
         }
         napi_value ret = nullptr;
         napi_value oncancel = nullptr;
         auto result = napi_get_reference_value(env, oncancelRef, &oncancel);
         if (result != napi_ok || oncancel == nullptr) {
-            LOGW("JsAnimator: get oncancel in callback failed");
             napi_close_handle_scope(env, scope);
             return;
         }
@@ -512,7 +478,6 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
 
 static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: SetOnrepeat");
     AnimatorResult* animatorResult = nullptr;
     size_t argc = 1;
     napi_value thisVar = nullptr;
@@ -520,17 +485,14 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, &onrepeat, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        LOGE("option is null");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     // convert onrepeat function to reference
@@ -543,18 +505,15 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
     animatorResult->SetOnrepeatRef(onrepeatRef);
     animator->ClearRepeatListeners();
     animator->AddRepeatListener([env, onrepeatRef] {
-        LOGI("JsAnimator: onrepeat");
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
-            LOGW("JsAnimator: open handle scope failed");
             return;
         }
         napi_value ret = nullptr;
         napi_value onrepeat = nullptr;
         auto result = napi_get_reference_value(env, onrepeatRef, &onrepeat);
         if (result != napi_ok || onrepeat == nullptr) {
-            LOGW("JsAnimator: get onrepeat in callback failed");
             napi_close_handle_scope(env, scope);
             return;
         }
@@ -568,7 +527,6 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
 
 static napi_value JSCreate(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSCreate");
     auto option = std::make_shared<AnimatorOption>();
     ParseAnimatorOption(env, info, option);
     auto animator = CREATE_ANIMATOR();
@@ -606,13 +564,11 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
 // since API 9 deprecated
 static napi_value JSCreateAnimator(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSCreateAnimator");
     return JSCreate(env, info);
 }
 
 static napi_value AnimatorExport(napi_env env, napi_value exports)
 {
-    LOGI("JsAnimator: AnimatorExport");
     napi_property_descriptor animatorDesc[] = {
         DECLARE_NAPI_FUNCTION("create", JSCreate),
         DECLARE_NAPI_FUNCTION("createAnimator", JSCreateAnimator),
@@ -650,11 +606,9 @@ void AnimatorResult::ApplyOption()
 void AnimatorResult::Destroy(napi_env env)
 {
     if (animator_) {
-        LOGI("JsAnimator: animator object start destroying, isStopped:%{public}d, id:%{public}d",
-            animator_->IsStopped(), animator_->GetId());
         if (!animator_->IsStopped()) {
             animator_->Stop();
-            LOGW("JsAnimator: animator force stopping done, id:%{public}d", animator_->GetId());
+            LOGI("Animator force stopping done, id:%{public}d", animator_->GetId());
         }
     }
     if (onframe_ != nullptr) {

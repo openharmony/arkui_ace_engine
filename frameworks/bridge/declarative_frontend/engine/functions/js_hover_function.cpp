@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace::Framework {
 void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
 {

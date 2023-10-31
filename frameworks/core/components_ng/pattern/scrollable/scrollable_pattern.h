@@ -295,6 +295,15 @@ public:
         return scrollSource_;
     }
 
+    static float CalculateFriction(float gamma)
+    {
+        constexpr float RATIO = 1.848f;
+        if (GreatOrEqual(gamma, 1.0)) {
+            gamma = 1.0f;
+        }
+        return exp(-RATIO * gamma);
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -373,7 +382,7 @@ private:
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
-    float GetOffsetWithLimit(float position, float offset) const;
+    float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
 
     bool ProcessAssociatedScroll(double offset, int32_t source);
@@ -411,6 +420,8 @@ private:
     /*
      *  End of NestableScrollContainer implementations
      *******************************************************************************/
+
+    bool HandleOverScroll(float velocity);
 
     void CreateRefreshCoordination()
     {

@@ -28,7 +28,6 @@ ace_unittest("rich_editor_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
     "$ace_root/frameworks/core/event/key_event.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "rich_editor_test_ng.cpp",
   ]
 }

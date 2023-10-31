@@ -59,6 +59,7 @@
                 "i18n",
                 "hicollie",
                 "netmanager_base",
+                "netstack",
                 "init",
                 "image_framework",
                 "player_framework",

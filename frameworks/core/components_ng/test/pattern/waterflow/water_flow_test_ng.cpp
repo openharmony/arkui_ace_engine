@@ -150,6 +150,7 @@ void WaterFlowTestNg::CreateWaterFlowItem(int32_t number)
     for (int32_t i = 0; i < number; i++) {
         WaterFlowItemModelNG waterFlowItemModel;
         waterFlowItemModel.Create();
+        SetWidth(Dimension(ITEM_HEIGHT));
         SetHeight(Dimension(ITEM_HEIGHT));
         ViewStackProcessor::GetInstance()->Pop();
     }
@@ -1097,5 +1098,152 @@ HWTEST_F(WaterFlowTestNg, Property010, TestSize.Level1)
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
     EXPECT_NE(json, nullptr);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutInfoTest002
+ * @tc.desc: Test functions in WaterFlowLayoutInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Waterflow node
+     */
+    CreateWithItem([](WaterFlowModelNG model) {});
+
+    /**
+     * @tc.steps: Test GetStartMainPos and GetMainHeight
+     * @tc.expected: step2. Check whether the return value is correct.
+     */
+    int32_t crossIndex = pattern_->layoutInfo_.waterFlowItems_.rbegin()->first;
+    int32_t itemIndex = pattern_->layoutInfo_.waterFlowItems_.rbegin()->second.rbegin()->first;
+    EXPECT_EQ(pattern_->layoutInfo_.GetStartMainPos(crossIndex + 1, itemIndex), 0.0f);
+    EXPECT_EQ(pattern_->layoutInfo_.GetMainHeight(crossIndex + 1, itemIndex), 0.0f);
+
+    EXPECT_EQ(pattern_->layoutInfo_.GetStartMainPos(crossIndex, itemIndex + 1), 0.0f);
+    EXPECT_EQ(pattern_->layoutInfo_.GetMainHeight(crossIndex, itemIndex + 1), 0.0f);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutInfoTest003
+ * @tc.desc: Test functions in WaterFlowLayoutInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Waterflow node
+     */
+    CreateWithItem([](WaterFlowModelNG model) {});
+
+    /**
+     * @tc.steps: Test GetMainCount function
+     * @tc.expected: step2. Check whether the size is correct.
+     */
+    std::size_t waterFlowItemsSize = pattern_->layoutInfo_.waterFlowItems_.size();
+    int32_t mainCount = pattern_->layoutInfo_.GetMainCount();
+
+    int32_t index = pattern_->layoutInfo_.waterFlowItems_.rbegin()->first;
+    pattern_->layoutInfo_.waterFlowItems_[index + 1] = std::map<int32_t, std::pair<float, float>>();
+    EXPECT_EQ(pattern_->layoutInfo_.waterFlowItems_.size(), waterFlowItemsSize + 1);
+    EXPECT_EQ(pattern_->layoutInfo_.GetMainCount(), mainCount);
+
+    auto lastItem = pattern_->layoutInfo_.waterFlowItems_.begin()->second.rbegin();
+    float mainSize = lastItem->second.first + lastItem->second.second - 1.0f;
+    EXPECT_FALSE(pattern_->layoutInfo_.IsAllCrossReachend(mainSize));
+
+    pattern_->layoutInfo_.ClearCacheAfterIndex(index + 1);
+    EXPECT_EQ(pattern_->layoutInfo_.waterFlowItems_.size(), waterFlowItemsSize + 1);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutInfoTest004
+ * @tc.desc: Test Reset functions in WaterFlowLayoutInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Waterflow node
+     */
+    CreateWithItem([](WaterFlowModelNG model) {});
+
+    /**
+     * @tc.steps: Test Reset function
+     * @tc.expected: step2. Check whether the endIndex_ is correct.
+     */
+    int32_t resetFrom = pattern_->layoutInfo_.endIndex_;
+    pattern_->layoutInfo_.Reset(resetFrom);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, resetFrom);
+
+    pattern_->layoutInfo_.Reset(resetFrom - 1);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 0);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutInfoTest005
+ * @tc.desc: Test functions in WaterFlowLayoutInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Waterflow node
+     */
+    CreateWithItem([](WaterFlowModelNG model) {});
+
+    /**
+     * @tc.steps: Test GetMaxMainHeight function
+     * @tc.expected: step2. Check whether the return value is correct.
+     */
+    float maxMainHeight = pattern_->layoutInfo_.GetMaxMainHeight();
+    int32_t crossIndex = pattern_->layoutInfo_.waterFlowItems_.rbegin()->first;
+    pattern_->layoutInfo_.waterFlowItems_[crossIndex + 1][0] = std::pair<float, float>(1.0f, maxMainHeight);
+    EXPECT_EQ(pattern_->layoutInfo_.GetMaxMainHeight(), maxMainHeight + 1.0f);
+
+     /**
+     * @tc.steps: Test GetCrossIndexForNextItem function
+     * @tc.expected: step3. Check whether the return value is correct.
+     */
+    pattern_->layoutInfo_.waterFlowItems_[crossIndex + 1][1] = std::pair<float, float>(0.0f, 0.0f);
+    FlowItemIndex position = pattern_->layoutInfo_.GetCrossIndexForNextItem();
+    EXPECT_EQ(position.crossIndex, crossIndex + 1);
+    EXPECT_EQ(position.lastItemIndex, 1);
+}
+
+/**
+ * @tc.name: WaterFlowGetItemRectTest001
+ * @tc.desc: Test WaterFlow GetItemRect function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemRectTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init WaterFlow and then slide by Scroller.
+     */
+    CreateWithItem([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateWaterFlowItem(15);
+    });
+
+    /**
+     * @tc.steps: step2. Get invalid WaterFlowItem Rect.
+     * @tc.expected: Return 0 when input invalid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(-1), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(12), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(13), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(15), Rect()));
+
+    /**
+     * @tc.steps: step3. Get valid WaterFlowItem Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, ITEM_HEIGHT, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5),
+        Rect(DEVICE_WIDTH / 4, ITEM_HEIGHT, ITEM_HEIGHT, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(10),
+        Rect(DEVICE_WIDTH / 2, ITEM_HEIGHT * 2, ITEM_HEIGHT, ITEM_HEIGHT)));
 }
 } // namespace OHOS::Ace::NG

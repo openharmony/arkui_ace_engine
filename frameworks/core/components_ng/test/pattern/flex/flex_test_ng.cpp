@@ -1357,7 +1357,7 @@ HWTEST_F(FlexTestNg, FlexRowLayoutTest008, TestSize.Level1)
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
         auto childOffset = childWrapper->GetGeometryNode()->GetFrameOffset();
-        EXPECT_EQ(childSize, SizeF(TWENTY_PERCENT_WIDTH, ROW_HEIGHT));
+        EXPECT_EQ(childSize, SizeF(TWENTY_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
         EXPECT_EQ(childOffset, OffsetF(i * (TWENTY_PERCENT_WIDTH + horizontalRemaining / 2), 0.0f));
     }
 }

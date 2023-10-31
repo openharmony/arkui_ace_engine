@@ -19,6 +19,8 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t ERROR = -1;
+
 void TextFieldController::Focus(bool focus) {}
 
 void TextFieldController::ShowError(const std::string& errorText) {}
@@ -34,6 +36,32 @@ void TextFieldController::CaretPosition(int32_t caretPosition)
     if (setCaretPosition_) {
         setCaretPosition_(caretPosition);
     }
+}
+
+int32_t TextFieldController::GetCaretIndex()
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    if (textFieldPattern) {
+        return textFieldPattern->GetCaretIndex();
+    }
+    if (getCaretIndex_) {
+        return getCaretIndex_();
+    }
+
+    return ERROR;
+}
+
+NG::OffsetF TextFieldController::GetCaretPosition()
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    if (textFieldPattern) {
+        return textFieldPattern->GetCaretOffset();
+    }
+    if (getCaretPosition_) {
+        return getCaretPosition_();
+    }
+
+    return OffsetF(ERROR, ERROR);
 }
 
 void TextFieldController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
@@ -60,14 +88,14 @@ Rect TextFieldController::GetTextContentRect()
         rect.SetTop(y);
         textFieldPattern->UpdateRectByAlignment(rect);
         if (textFieldPattern->IsOperation()) {
-            return Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+            return { rect.GetX(), rect.GetY(), rect.Width(), rect.Height() };
         }
         if (NearEqual(rect.GetX(), -Infinity<float>())) {
-            return Rect(textFieldPattern->GetPaddingLeft(), rect.GetY(), 0, 0);
+            return { textFieldPattern->GetPaddingLeft(), rect.GetY(), 0, 0 };
         }
-        return Rect(rect.GetX(), rect.GetY(), 0, 0);
+        return { rect.GetX(), rect.GetY(), 0, 0 };
     }
-    return Rect(0, 0, 0, 0);
+    return { 0, 0, 0, 0 };
 }
 
 int32_t TextFieldController::GetTextContentLinesNum()
@@ -78,16 +106,10 @@ int32_t TextFieldController::GetTextContentLinesNum()
         if (!textFieldPattern->IsOperation()) {
             return lines;
         }
-        RectF textRect = textFieldPattern->GetTextRect();
-        
-        if ((int32_t)textFieldPattern->GetLineHeight() == 0) {
-            return lines;
-        }
-        lines = (int32_t)textRect.Height() / (int32_t)textFieldPattern->GetLineHeight();
+        lines = textFieldPattern->GetLineCount();
         return lines;
-    } else {
-        lines = getTextContentLinesNum_();
     }
+    lines = getTextContentLinesNum_();
     return lines;
 }
 

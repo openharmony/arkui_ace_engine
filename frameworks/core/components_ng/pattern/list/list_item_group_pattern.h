@@ -120,9 +120,9 @@ public:
         return itemDisplayEndIndex_;
     }
 
-    int32_t GetDiasplayStartIndexInGroup() const
+    int32_t GetDisplayStartIndexInGroup() const
     {
-        return itemDiasplayStartIndex_;
+        return itemDisplayStartIndex_;
     }
 
     int32_t GetEndIndexInGroup() const
@@ -154,7 +154,7 @@ private:
     int32_t itemStartIndex_ = 0;
     int32_t itemTotalCount_ = -1;
     int32_t itemDisplayEndIndex_ = -1;
-    int32_t itemDiasplayStartIndex_ = -1;
+    int32_t itemDisplayStartIndex_ = -1;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;

@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include <array>
+#include <memory>
 #include <optional>
 #include <string>
 #include <utility>
 
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #define private public
@@ -25,23 +26,30 @@
 
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/render/mock_paragraph.h"
 
 #include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
+#include "base/geometry/ng/offset_t.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "base/utils/string_utils.h"
+#include "core/common/ime/constant.h"
+#include "core/common/ime/text_editing_value.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/ime/text_selection.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/components_ng/test/pattern/test_ng.h"
 #include "core/event/key_event.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 #undef private
@@ -51,7 +59,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
+namespace {
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -63,35 +71,49 @@ struct TestItem {
     TestItem() = default;
 };
 
+constexpr double ICON_SIZE = 24;
+constexpr double ICON_HOT_ZONE_SIZE = 40;
+constexpr double FONT_SIZE = 16;
+constexpr int32_t DEFAULT_NODE_ID = 1;
+constexpr int32_t MAX_BACKWARD_NUMBER = 30;
+const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 using TextFiledModelUpdater = std::function<void(TextFieldModelNG&)>;
+} // namespace
 
 class TextFieldTestBase : public testing::Test {
-public:
+protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    void SetUp() override;
     void TearDown() override;
 
-protected:
-    RefPtr<FrameNode> CreateTextFieldNode(int32_t id, std::string text, std::string placeHolder, bool isTextArea,
-        TextFiledModelUpdater&& modelUpdater = nullptr);
-    void CreateOrUpdate(int32_t id, std::string text, std::string placeHolder, bool isTextArea,
-        TextFiledModelUpdater&& modelUpdater = nullptr);
-    RefPtr<FrameNode> frameNode_;
-    RefPtr<TextFieldPattern> pattern_;
-    RefPtr<MockThemeManager> mockThemeManager_ = AceType::MakeRefPtr<MockThemeManager>();
-    int32_t id_ = -1;
-    std::string text_ = "abcedefghijklmnopqrstuvwxyz";
-    std::string placeHolder_ = "abcedefghijklmnopqrstuvwxyz";
+    RefPtr<FrameNode> CreateTextFieldNode(
+        const std::string& text, const std::string& placeHolder, std::function<void(TextFieldModelNG&)>&& modelUpdater);
+    void RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode);
+    RefPtr<TextFieldPattern> GetPattern(const RefPtr<FrameNode>& frameNode);
+    void GetFocus(const RefPtr<FrameNode>& frameNode);
 };
 
 void TextFieldTestBase::SetUpTestSuite()
 {
     MockContainer::SetUp();
     MockPipelineBase::SetUp();
-    MockPipelineBase::GetCurrent()->SetRootSize(500, 500);
-    MockPipelineBase::GetCurrent()->rootNode_ =
-        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<RootPattern>());
+    MockPipelineBase::GetCurrent()->SetRootSize(DEVICE_WIDTH, DEVICE_HEIGHT);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    textFieldTheme->iconSize_ = Dimension(ICON_SIZE, DimensionUnit::VP);
+    textFieldTheme->iconHotZoneSize_ = Dimension(ICON_HOT_ZONE_SIZE, DimensionUnit::VP);
+    textFieldTheme->fontSize_ = Dimension(FONT_SIZE, DimensionUnit::FP);
+    textFieldTheme->fontWeight_ = FontWeight::W400;
+    textFieldTheme->textColor_ = Color::FromString("#ff182431");
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == ScrollBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<ScrollBarTheme>();
+            }
+            return textFieldTheme;
+        });
     MockPipelineBase::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
@@ -100,68 +122,63 @@ void TextFieldTestBase::TearDownTestSuite()
 {
     MockContainer::TearDown();
     MockPipelineBase::TearDown();
+    MockParagraph::TearDown();
 }
 
-void TextFieldTestBase::SetUp()
-{
-    MockPipelineBase::GetCurrent()->SetThemeManager(mockThemeManager_);
-    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
-    textFieldTheme->iconSize_ = Dimension(24, DimensionUnit::VP);
-    textFieldTheme->iconHotZoneSize_ = Dimension(40, DimensionUnit::VP);
-    textFieldTheme->fontSize_ = Dimension(16, DimensionUnit::FP);
-    textFieldTheme->fontWeight_ = FontWeight::W400;
-    textFieldTheme->textColor_ = Color::FromString("#ff182431");
-
-    EXPECT_CALL(*mockThemeManager_, GetTheme(_))
-        .WillRepeatedly([this, textFieldTheme = textFieldTheme](ThemeType type) -> RefPtr<Theme> {
-            if (type == ScrollBarTheme::TypeId()) {
-                return AceType::MakeRefPtr<ScrollBarTheme>();
-            }
-            return textFieldTheme;
-        });
-    CreateOrUpdate(1, text_, placeHolder_, false);
-}
-
-void TextFieldTestBase::TearDown()
-{
-    ElementRegister::GetInstance()->Clear();
-    auto* stack = ViewStackProcessor::GetInstance();
-    while (!stack->elementsStack_.empty()) {
-        stack->elementsStack_.pop();
-    }
-}
+void TextFieldTestBase::TearDown() {}
 
 RefPtr<FrameNode> TextFieldTestBase::CreateTextFieldNode(
-    int32_t id, std::string text, std::string placeHolder, bool isTextArea, TextFiledModelUpdater&& modelUpdater)
+    const std::string& text, const std::string& placeHolder, std::function<void(TextFieldModelNG&)>&& modelUpdater)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    stack->StartGetAccessRecordingFor(id);
+    stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateNode(placeHolder, text, isTextArea);
+    textFieldModelNG.CreateTextInput(placeHolder, text);
     if (modelUpdater) {
         modelUpdater(textFieldModelNG);
     }
     stack->StopGetAccessRecording();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    stack->elementsStack_.pop();
-    ElementRegister::GetInstance()->AddUINode(frameNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, GetHeight()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, GetLongestLine()).Times(AnyNumber());
+    RunMeasureAndLayout(frameNode);
     return frameNode;
 }
 
-void TextFieldTestBase::CreateOrUpdate(
-    int32_t id, std::string text, std::string placeHolder, bool /*isTextArea*/, TextFiledModelUpdater&& modelUpdater)
+void TextFieldTestBase::RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode)
 {
-    frameNode_ = CreateTextFieldNode(1, text, placeHolder, false, std::move(modelUpdater));
-    ASSERT_NE(frameNode_, nullptr);
-    pattern_ = frameNode_->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern_, nullptr);
-    pattern_->OnModifyDone();
-    id_ = frameNode_->GetId();
+    frameNode->SetActive();
+    frameNode->SetRootMeasureNode(true);
+    frameNode->UpdateLayoutPropertyFlag();
+    frameNode->SetSkipSyncGeometryNode(false);
+    frameNode->Measure(frameNode->GetLayoutConstraint());
+    frameNode->Layout();
+    frameNode->SetRootMeasureNode(false);
 }
 
-namespace CaretTest {
+void TextFieldTestBase::GetFocus(const RefPtr<FrameNode>& frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto focushHub = pattern->GetFocusHub();
+    focushHub->currentFocus_ = true;
+    pattern->HandleFocusEvent();
+    RunMeasureAndLayout(frameNode);
+}
+
+RefPtr<TextFieldPattern> TextFieldTestBase::GetPattern(const RefPtr<FrameNode>& frameNode)
+{
+    return frameNode->GetPattern<TextFieldPattern>();
+}
+
 class TextFieldCaretTest : public TextFieldTestBase {};
+class TextFieldControllerTest : public TextFieldTestBase {};
+class TextFieldKeyHandlerTest : public TextFieldTestBase {};
 
 /**
  * @tc.name: CaretPosition001
@@ -171,28 +188,26 @@ class TextFieldCaretTest : public TextFieldTestBase {};
 HWTEST_F(TextFieldCaretTest, CaretPosition001, TestSize.Level1)
 {
     /**
-     * @tc.steps: Check caret position when the text is unchanged.
-     * @tc.expected: Previous caret position is same as the current.
+     * @tc.steps: Create Text filed node with default text and placeholder
      */
-    ASSERT_NE(pattern_, nullptr);
-    auto prevCaretPosition = pattern_->GetTextEditingValue().GetWideText().length() / 2;
-    pattern_->SetCaretPosition(prevCaretPosition);
-
-    CreateOrUpdate(id_, text_, placeHolder_, false);
-    auto currentCaretPosition = pattern_->GetTextEditingValue().caretPosition;
-    EXPECT_EQ(prevCaretPosition, currentCaretPosition) << "caret position should not change when text unchanged";
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
 
     /**
-     * @tc.steps: Check caret position when the text is changed.
-     * @tc.expected: Previous caret position is not same as the current.
+     * @tc.expected: Current caret position is end of text
      */
-    auto newText = text_ + "_new";
-    CreateOrUpdate(id_, newText, placeHolder_, false);
-    currentCaretPosition = pattern_->GetTextEditingValue().caretPosition;
-    EXPECT_NE(prevCaretPosition, currentCaretPosition) << "caret position should update when text changed";
-    auto actualCaretPosition = StringUtils::ToWstring(newText).length();
-    EXPECT_EQ(actualCaretPosition, currentCaretPosition)
-        << "caret position should be at the end of the text when text changed";
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.size());
+
+    /**
+     * @tc.steps: Changed new text and remeasure and layout
+     */
+    pattern->InsertValue("new");
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.size() + 3);
 }
 
 /**
@@ -203,72 +218,63 @@ HWTEST_F(TextFieldCaretTest, CaretPosition001, TestSize.Level1)
 HWTEST_F(TextFieldCaretTest, CaretPosition002, TestSize.Level1)
 {
     /**
-     * @tc.steps: Check caret position after call SetType.
-     * @tc.expected: caret position is same as the expected.
+     * @tc.steps: Create Text filed node with default text and placeholder and set input type
      */
-    auto textLength = pattern_->GetTextEditingValue().GetWideText().length();
-    auto caretPosition = pattern_->GetTextEditingValue().caretPosition;
-    EXPECT_EQ(textLength, caretPosition) << "default input type";
-
     std::string text = "openharmony@huawei.com+*0123456789";
     std::vector<TestItem<TextInputType, int32_t>> testItems;
-    testItems.emplace_back(TextInputType::TEXT, 34, "TextInputType::TEXT");
+    testItems.emplace_back(TextInputType::TEXT, text.size(), "TextInputType::TEXT");
     testItems.emplace_back(TextInputType::NUMBER, 10, "TextInputType::NUMBER");
     testItems.emplace_back(TextInputType::PHONE, 12, "TextInputType::PHONE");
-    testItems.emplace_back(TextInputType::EMAIL_ADDRESS, 32, "TextInputType::EMAIL_ADDRESS");
-    testItems.emplace_back(TextInputType::VISIBLE_PASSWORD, 34, "TextInputType::VISIBLE_PASSWORD");
-    for (auto testItem : testItems) {
-        CreateOrUpdate(
-            id_, text, placeHolder_, false, [type = testItem.item](TextFieldModelNG& model) { model.SetType(type); });
-        auto errorMessage = "inputType is " + testItem.error + ", text is " + pattern_->GetEditingValue().text;
-        EXPECT_EQ(pattern_->GetEditingValue().caretPosition, testItem.expected) << errorMessage;
+    testItems.emplace_back(TextInputType::EMAIL_ADDRESS, text.size() - 2, "TextInputType::EMAIL_ADDRESS");
+    testItems.emplace_back(TextInputType::VISIBLE_PASSWORD, text.size() - 2, "TextInputType::VISIBLE_PASSWORD");
+
+    /**
+     * @tc.expected: Check if the text filter rules for the input box are compliant
+     */
+    for (const auto& testItem : testItems) {
+        auto frameNode = CreateTextFieldNode(
+            text, DEFAULT_PLACE_HOLDER, [testItem](TextFieldModelNG& model) { model.SetType(testItem.item); });
+        auto pattern = GetPattern(frameNode);
+        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern->GetTextValue();
+        EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), testItem.expected) << errorMessage;
     }
 }
 
 /**
  * @tc.name: CaretPosition003
- * @tc.desc: Test caret position on SetCaretPosition.
+ * @tc.desc: Test caret position on SetCaretPosition
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldCaretTest, CaretPosition003, TestSize.Level1)
 {
     /**
-     * @tc.steps: Check caret position after call SetCaretPosition.
-     * @tc.expected: caret position is same as the expected.
+     * @tc.steps: Create Text filed node with default text
+     * @tc.expected: Cursor movement position matches the actual position
      */
-    auto length = static_cast<int32_t>(pattern_->GetTextEditingValue().GetWideText().length());
-    std::vector<TestItem<int32_t, int32_t>> testItems;
-    for (auto position = 0; position <= length; position++) {
-        testItems.emplace_back(position, position);
-    }
-    for (auto testItem : testItems) {
-        pattern_->SetCaretPosition(testItem.item);
-        EXPECT_EQ(pattern_->GetEditingValue().caretPosition, testItem.expected);
-    }
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    auto controller = pattern->GetTextFieldController();
+    controller->CaretPosition(static_cast<int>(DEFAULT_TEXT.size() - 2));
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size() - 2));
 }
 
 /**
  * @tc.name: CaretPosition004
- * @tc.desc: Test caret position on SetMaxLength.
+ * @tc.desc: Test caret position on SetMaxLength
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldCaretTest, CaretPosition004, TestSize.Level1)
 {
     /**
-     * @tc.steps: Check caret position after call SetMaxLength.
-     * @tc.expected: caret position is same as the expected.
+     * @tc.steps: Create Text filed node with default text and placeholder
+     * @tc.expected: Cursor movement position matches the actual position
      */
-    auto length = static_cast<int32_t>(pattern_->GetTextEditingValue().GetWideText().length());
-    pattern_->SetCaretPosition(length / 2);
-
-    std::vector<TestItem<int32_t, int32_t>> testItems;
-    testItems.emplace_back(length, length / 2, "caret position is less than max length");
-    testItems.emplace_back(length / 2 - 1, length / 2 - 1, "caret position is greater than max length");
-    for (auto testItem : testItems) {
-        CreateOrUpdate(id_, text_, placeHolder_, false,
-            [maxLength = testItem.item](TextFieldModelNG& model) { model.SetMaxLength(maxLength); });
-        EXPECT_EQ(pattern_->GetEditingValue().caretPosition, testItem.expected) << testItem.error;
-    }
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER,
+        [](TextFieldModelNG& model) { model.SetMaxLength(DEFAULT_TEXT.size() - 2); });
+    auto pattern = GetPattern(frameNode);
+    auto controller = pattern->GetTextFieldController();
+    controller->CaretPosition(static_cast<int>(DEFAULT_TEXT.size() - 2));
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size() - 2));
 }
 
 /**
@@ -279,154 +285,441 @@ HWTEST_F(TextFieldCaretTest, CaretPosition004, TestSize.Level1)
 HWTEST_F(TextFieldCaretTest, CaretPosition005, TestSize.Level1)
 {
     /**
-     * @tc.steps: Check caret position after call SetInputFilter.
-     * @tc.expected: caret position is same as the expected.
+     * @tc.steps: Initialize text and filter patterns
      */
     std::string text = "abcdefghABCDEFG0123456789";
     std::vector<TestItem<std::string, int32_t>> testItems;
-
     testItems.emplace_back("", StringUtils::ToWstring(text).length());
     testItems.emplace_back("[0-9]", 10);
     testItems.emplace_back("[A-Z]", 7);
     testItems.emplace_back("[a-z]", 8);
-    for (auto testItem : testItems) {
-        CreateOrUpdate(id_, text, placeHolder_, false,
-            [filter = testItem.item](TextFieldModelNG& model) { model.SetInputFilter(filter, nullptr); });
-        auto errorMessage = "input filter is " + testItem.item + ", text is " + pattern_->GetEditingValue().text;
-        EXPECT_EQ(pattern_->GetEditingValue().caretPosition, testItem.expected) << errorMessage;
+
+    /**
+     * @tc.expected: Check if the text filter patterns for the input box are compliant
+     */
+    for (const auto& testItem : testItems) {
+        auto frameNode = CreateTextFieldNode(text, DEFAULT_PLACE_HOLDER,
+            [testItem](TextFieldModelNG& model) { model.SetInputFilter(testItem.item, nullptr); });
+        auto pattern = GetPattern(frameNode);
+        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern->GetTextValue();
+        EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), testItem.expected) << errorMessage;
     }
 }
 
 /**
- * @tc.name: CaretPosition006
- * @tc.desc: Test caret position when focus changed.
+ * @tc.name: CaretPosition005
+ * @tc.desc: Test input string at the cursor position
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldCaretTest, CaretPosition006, TestSize.Level1)
 {
     /**
-     * @tc.steps: Check caret position after call HandleFocusEvent or HandleBlurEvent.
-     * @tc.expected: caret position is same as the expected.
+     * @tc.steps: Initialize text input and get select controller, update caret position and insert value
      */
-    pattern_->HandleFocusEvent();
-    EXPECT_TRUE(pattern_->cursorVisible_) << "show cursor on focus";
-    pattern_->HandleBlurEvent();
-    EXPECT_FALSE(pattern_->cursorVisible_) << "hide cursor on blur";
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    auto controller = pattern->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    pattern->InsertValue("new");
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue(), "abnewcdefghijklmnopqrstuvwxyz");
+    EXPECT_EQ(controller->GetCaretIndex(), 5);
 }
 
 /**
- * @tc.name: CaretPosition007
- * @tc.desc: Test caret position with the clipboard.
+ * @tc.name: CaretPosition006
+ * @tc.desc: Test stop edting input mode
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldCaretTest, CaretPosition007, TestSize.Level1)
 {
     /**
-     * @tc.steps: Check caret position after call HandleOnCut,HandleOnPaste,HandleOnSelectAll.
-     * @tc.expected: caret position is same as the expected.
+     * @tc.steps: Initialize text input node
      */
-    CreateOrUpdate(
-        id_, text_, placeHolder_, false, [](TextFieldModelNG& model) { model.SetCopyOption(CopyOptions::InApp); });
-    auto len = pattern_->GetEditingValue().GetWideText().length();
-    auto selectStart = len / 2;
-    auto selectEnd = len;
-    pattern_->UpdateSelection(selectStart, selectEnd);
-    pattern_->SetInSelectMode(SelectionMode::SELECT);
-    pattern_->HandleOnCut();
-    EXPECT_EQ(pattern_->GetEditingValue().caretPosition, selectStart)
-        << "caret position should equals with first handle position";
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
 
-    len = pattern_->GetEditingValue().GetWideText().length();
-    pattern_->SetInSelectMode(SelectionMode::SELECT);
-    pattern_->UpdateSelection(0, len / 2);
-    pattern_->HandleOnCopy();
-    EXPECT_TRUE(pattern_->cursorVisible_) << "show cursor when call HandleOnCopy";
-    pattern_->SetCaretPosition(len);
-    pattern_->HandleOnPaste();
-    EXPECT_EQ(pattern_->GetEditingValue().caretPosition, len + len / 2)
-        << ("caret position equals with [last position] + [copy data length]");
+    /**
+     * @tc.expected: The cursor is neither blinking nor visible when unfocused
+     */
+    EXPECT_EQ(pattern->caretStatus_, CaretStatus::NONE);
+    EXPECT_FALSE(pattern->GetCursorVisible());
 
-    len = pattern_->GetEditingValue().GetWideText().length();
-    pattern_->HandleOnSelectAll(false);
-    EXPECT_EQ(pattern_->GetEditingValue().caretPosition, len) << ("caret position equals with text length");
+    /**
+     * @tc.steps: Manually trigger focus and perform measure and layout again
+     * @tc.expected: Check if the cursor is twinking
+     */
+    GetFocus(frameNode);
+    EXPECT_EQ(pattern->caretStatus_, CaretStatus::SHOW);
+    EXPECT_TRUE(pattern->GetCursorVisible());
+
+    /**
+     * @tc.steps: Get text filed controller and stop editing
+     */
+    auto controller = pattern->GetTextFieldController();
+    controller->StopEditing();
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the cursor stop twinking
+     */
+    EXPECT_EQ(pattern->caretStatus_, CaretStatus::HIDE);
+    EXPECT_FALSE(pattern->GetCursorVisible());
 }
 
 /**
- * @tc.name: CaretPosition008
- * @tc.desc: Test caret position with the keyboard event.
+ * @tc.name: OnTextChangedListenerCaretPosition001
+ * @tc.desc: Test the soft keyboard interface
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldCaretTest, CaretPosition008, TestSize.Level1)
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition001, TestSize.Level1)
 {
     /**
-     * @tc.steps: text is abcedefghijkl*mnopqrstuvwxyz, * is caret position.
-     *            1. abcedefghijkl*nopqrstuvwxyz -- delete forward
-     *            2. abcedefghijk*nopqrstuvwxyz -- delete backward
-     *            3. abcedefghijk@*nopqrstuvwxyz -- insert 8
-     *            4. abcedefghijk@*stuvwxyz -- select right 5(nopqr) and cut
-     *            5. abcedefghijk@nopqr*stuvwxyz -- paste 5(nopqr)
-     *            6. abcedefghijk@*stuvwxyz -- undo step 5
-     *            7. abcedefghijk@nopqr*stuvwxyz -- redo step 6
-     *            8. abcedefghijk@nopqrstuvwxyz* -- select all
-     * @tc.expected: caret position is same as the expected.
+     * @tc.steps: Initialize text input node and call text changed listener update edting value
      */
-    auto length = static_cast<int>(pattern_->GetTextEditingValue().GetWideText().length());
-    pattern_->SetCaretPosition(length / 2);
-    pattern_->imeAttached_ = true;
-    KeyEvent event;
-    event.code = KeyCode::KEY_FORWARD_DEL;
-    event.action = KeyAction::DOWN;
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetTextEditingValue().caretPosition, length / 2) << "delete forward";
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    GetFocus(frameNode);
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "new text";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    RunMeasureAndLayout(frameNode);
 
-    event.code = KeyCode::KEY_DEL;
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetTextEditingValue().caretPosition, length / 2 - 1) << "delete backward";
-
-    event.code = KeyCode::KEY_2;
-    event.pressedCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_2 };
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetTextEditingValue().caretPosition, length / 2) << "insert one";
-
-    event.code = KeyCode::KEY_DPAD_RIGHT;
-    event.pressedCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_DPAD_RIGHT };
-    pattern_->UpdateSelection(length / 2);
-    auto selectCount = 5;
-    for (auto i = 0; i < selectCount; i++) {
-        pattern_->OnKeyEvent(event);
-    }
-    event.code = KeyCode::KEY_X;
-    event.pressedCodes = { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X };
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetTextEditingValue().caretPosition, length / 2)
-        << ("cut " + std::to_string(selectCount) + " characters");
-
-    event.code = KeyCode::KEY_V;
-    event.pressedCodes = { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V };
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetTextEditingValue().caretPosition, length / 2 + selectCount)
-        << ("paste " + std::to_string(selectCount) + " characters");
-
-    event.code = KeyCode::KEY_Z;
-    event.pressedCodes = { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Z };
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetTextEditingValue().caretPosition, length / 2)
-        << ("undo, the caret position is at last position");
-
-    event.code = KeyCode::KEY_Y;
-    event.pressedCodes = { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Y };
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetTextEditingValue().caretPosition, length / 2 + selectCount)
-        << ("redo, the caret position equals with step 5");
-
-    length = static_cast<int>(pattern_->GetTextEditingValue().GetWideText().length());
-    event.code = KeyCode::KEY_A;
-    event.pressedCodes = { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A };
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetTextEditingValue().caretPosition, length)
-        << ("select all, caret position is at the end of text");
-
-    pattern_->imeAttached_ = false;
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare("new text"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), value.text.length());
 }
-} // namespace CaretTest
-}; // namespace OHOS::Ace::NG
+
+/**
+ * @tc.name: OnTextChangedListenerCaretPosition002
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text input node and call delete backward
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    GetFocus(frameNode);
+    pattern->DeleteBackward(3);
+    pattern->DeleteBackward(2);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare("abcdefghijklmnopqrstu"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.length() - 5);
+
+    /**
+     * @tc.steps: Move the cursor and then delete text
+     */
+    auto textFiledController = pattern->GetTextFieldController();
+    textFiledController->CaretPosition(5);
+    pattern->DeleteBackward(5);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare("fghijklmnopqrstu"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 0);
+
+    /**
+     * @tc.steps: Trigger a backspace key press that exceeds the length of the text
+     */
+    pattern->DeleteBackward(MAX_BACKWARD_NUMBER);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare("fghijklmnopqrstu"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: OnTextChangedListenerCaretPosition003
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize insert text and expected values
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    pattern->DeleteForward(3);
+    pattern->DeleteForward(2);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare(DEFAULT_TEXT), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.length());
+
+    /**
+     * @tc.steps: Move the cursor and then delete text forward.
+     */
+    auto textFiledController = pattern->GetTextFieldController();
+    textFiledController->CaretPosition(5);
+    pattern->DeleteForward(30);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare("abcde"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 5);
+}
+
+/**
+ * @tc.name: OnTextChangedListenerCaretPosition004
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize insert text and expected values when 'IsSelected() = false'
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    pattern->InsertValue("abc");
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare(DEFAULT_TEXT + "abc"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), DEFAULT_TEXT.length() + 3);
+
+    /**
+     * @tc.steps: Move the cursor and then insert text forward.
+     */
+    auto textFiledController = pattern->GetTextFieldController();
+    textFiledController->CaretPosition(0);
+    pattern->InsertValue("abcde");
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern->contentController_->
+        GetTextValue().compare("abcde" + DEFAULT_TEXT + "abc"), 0);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 5);
+}
+
+/**
+ * @tc.name: OnTextChangedListenerCaretPosition005
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize insert text and expected values
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    int32_t start = 5;
+    int32_t end = 10;
+    pattern->HandleSetSelection(start, end);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new handle positions are correct
+     */
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 5);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 10);
+}
+
+/**
+ * @tc.name: OnTextChangedListenerCaretPosition006
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCaretTest, OnTextChangedListenerCaretPosition006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize insert text and expected values
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+    std::vector<std::int32_t> action = {
+        ACTION_SELECT_ALL,
+        ACTION_CUT,
+        ACTION_COPY,
+        ACTION_PASTE,
+    };
+    pattern->HandleExtendAction(action[0]);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new handle positions are correct
+     */
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 26);
+
+    /**
+     * @tc.steps: Move the handles and then cut text snippet.
+     */
+    int32_t start = 5;
+    int32_t end = 10;
+    std::string expectStr = "fghij";
+    auto callback1 = [expectStr](const std::string& str) -> void {
+        EXPECT_EQ(expectStr, str);
+    };
+    frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model)-> void {
+        model.SetOnCut(callback1);
+    });
+    pattern = GetPattern(frameNode);
+    pattern->HandleSetSelection(start, end);
+    pattern->HandleExtendAction(action[1]);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.expected: Check if the new handle positions are correct
+     * Verify the cut data
+     */
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 5);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 5);
+    EXPECT_EQ(pattern->GetTextSelectController()->GetCaretIndex(), 5);
+    EXPECT_EQ(pattern->contentController_->
+        GetTextValue().compare("abcdeklmnopqrstuvwxyz"), 0);
+
+    /**
+     * @tc.steps: Move the handles and then cut text snippet.
+     * Verify the copy and paste data.
+     */
+    auto callback2 = [expectStr](const std::string& str) -> void {
+        EXPECT_EQ(expectStr, str);
+    };
+    frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model)-> void {
+        model.SetOnCopy(callback1);
+        model.SetOnPaste(callback2);
+    });
+    pattern = GetPattern(frameNode);
+    pattern->HandleSetSelection(start, end);
+    pattern->HandleExtendAction(action[2]);
+    pattern->HandleExtendAction(action[3]);
+    RunMeasureAndLayout(frameNode);
+    EXPECT_EQ(pattern->contentController_->GetTextValue().compare(DEFAULT_TEXT), 0);
+}
+
+/**
+ * @tc.name: ContentController001
+ * @tc.desc: Test ContentController in different input type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize insert text and expected values
+     */
+    std::vector<std::string> insertValues = {
+        "openharmony123_ *+%$",
+        "openharmony123456*+&@huawei.com",
+        "openharmony#15612932075*.com",
+        "open_harmony@@huawei.com*+$helloworld",
+        "open_harmony123 password*+#",
+    };
+    std::vector<TestItem<TextInputType, std::string>> testItems;
+    testItems.emplace_back(TextInputType::TEXT, "openharmony123_ *+%$", "TextInputType::TEXT");
+    testItems.emplace_back(TextInputType::NUMBER, "123456", "TextInputType::NUMBER");
+    testItems.emplace_back(TextInputType::PHONE, "#15612932075*", "TextInputType::PHONE");
+    testItems.emplace_back(
+        TextInputType::EMAIL_ADDRESS, "open_harmony@huawei.comhelloworld", "TextInputType::EMAIL_ADDRESS");
+    testItems.emplace_back(
+        TextInputType::VISIBLE_PASSWORD, "openharmony123 password*+#", "TextInputType::VISIBLE_PASSWORD");
+
+    /**
+     * @tc.expected: Check if text filtering meets expectations
+     */
+    int index = 0;
+    for (const auto& testItem : testItems) {
+        auto frameNode = CreateTextFieldNode(
+            "", DEFAULT_PLACE_HOLDER, [testItem](TextFieldModelNG& model) { model.SetType(testItem.item); });
+        auto pattern = GetPattern(frameNode);
+        pattern->contentController_->InsertValue(0, insertValues[index]);
+        index++;
+        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern->GetTextValue();
+        EXPECT_EQ(pattern->contentController_->GetTextValue().compare(testItem.expected), 0) << errorMessage;
+    }
+}
+
+/**
+ * @tc.name: ContentController002
+ * @tc.desc: Test ContentController in different input filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, ContentController002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text and filter patterns
+     */
+    std::string text = "CabcdefgABhCDEFG0123a456A789";
+    std::vector<TestItem<std::string, std::string>> testItems;
+    testItems.emplace_back("", "CabcdefgABhCDEFG0123a456A789", "None");
+    testItems.emplace_back("[0-9]", "0123456789", "Input filter [0-9]");
+    testItems.emplace_back("[A-Z]", "CABCDEFGA", "Input filter [A-Z]");
+    testItems.emplace_back("[a-z]", "abcdefgha", "Input filter [a-z]");
+
+    /**
+     * @tc.expected: Check if the text filter patterns for the input box are compliant
+     */
+    for (const auto& testItem : testItems) {
+        auto frameNode = CreateTextFieldNode("", DEFAULT_PLACE_HOLDER,
+            [testItem](TextFieldModelNG& model) { model.SetInputFilter(testItem.item, nullptr); });
+        auto pattern = GetPattern(frameNode);
+        pattern->contentController_->InsertValue(0, text);
+        auto errorMessage = testItem.error + ", text is " + pattern->GetTextValue();
+        EXPECT_EQ(pattern->contentController_->GetTextValue().compare(testItem.expected), 0) << errorMessage;
+    }
+}
+
+/**
+ * @tc.name: ContentController003
+ * @tc.desc: Test ContentController in different input filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, ContentController003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text and filter patterns
+     */
+    auto frameNode = CreateTextFieldNode(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, nullptr);
+    auto pattern = GetPattern(frameNode);
+
+    /**
+     * @tc.expected: Check if text is selected based on corresponding left and right coordinates
+     */
+    auto selectedValue = pattern->contentController_->GetSelectedValue(1, 4);
+    EXPECT_EQ(selectedValue.compare("bcd"), 0) << "Text is " + selectedValue;
+
+    /**
+     * @tc.expected: Check if text is selected based on preceding coordinates
+     */
+    auto beforeSelectedValue = pattern->contentController_->GetValueBeforeIndex(3);
+    EXPECT_EQ(beforeSelectedValue.compare("abc"), 0) << "Text is " + beforeSelectedValue;
+
+    /**
+     * @tc.expected: Check if text is selected based on trailing coordinates
+     */
+    auto afterSelectedValue = pattern->contentController_->GetValueAfterIndex(3);
+    EXPECT_EQ(afterSelectedValue.compare("defghijklmnopqrstuvwxyz"), 0) << "Text is " + afterSelectedValue;
+}
+} // namespace OHOS::Ace::NG

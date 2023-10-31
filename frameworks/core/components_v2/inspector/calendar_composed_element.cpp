@@ -263,7 +263,7 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ConvertThemeToTodayStyle(con
     Color focusedLunarColor = theme.focusedLunarColor;
     Color focusedAreaBackgroundColor = theme.focusedAreaBackgroundColor;
     Dimension focusedAreaRadius = theme.focusedAreaRadius;
-    auto todayStyle = JsonUtil::Create(false);
+    auto todayStyle = JsonUtil::Create(true);
     todayStyle->Put("focusedDayColor", ConvertColorToString(focusedDayColor).c_str());
     todayStyle->Put("focusedLunarColor", ConvertColorToString(focusedLunarColor).c_str());
     todayStyle->Put("focusedAreaBackgroundColor", ConvertColorToString(focusedAreaBackgroundColor).c_str());

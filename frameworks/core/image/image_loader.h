@@ -31,9 +31,9 @@
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing_forward.h"
 #endif
+#include "base/network/download_manager_v2.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
-
 namespace OHOS::Ace {
 
 class ImageLoader : public virtual AceType {
@@ -70,6 +70,8 @@ public:
 #endif
     static void CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& data);
     static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string& key, const std::string& suffix);
+
+    static void WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData);
 };
 
 // File image provider: read image from file.
@@ -143,6 +145,7 @@ public:
     std::shared_ptr<RSData> LoadImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
 #endif
+    static bool DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync);
 };
 
 class InternalImageLoader final : public ImageLoader {

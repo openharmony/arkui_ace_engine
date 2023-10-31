@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
+#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
@@ -87,6 +88,14 @@ public:
     virtual bool IsAtEnd() const
     {
         return true;
+    }
+    virtual Rect GetItemRect(int32_t index) const
+    {
+        return Rect();
+    }
+    virtual Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
+    {
+        return Rect();
     }
 };
 } // namespace OHOS::Ace

@@ -30,7 +30,7 @@
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
-class ResourceManager : public AceType {
+class ACE_FORCE_EXPORT ResourceManager : public AceType {
     DECLARE_ACE_TYPE(ResourceManager, AceType);
 
 public:
@@ -74,6 +74,13 @@ public:
         std::unique_lock<std::shared_mutex> lock(mutex_);
         for (auto iter = resourceAdapters_.begin(); iter != resourceAdapters_.end(); ++iter) {
             iter->second->UpdateConfig(config);
+        }
+    }
+
+    void RemoveResourceAdapter(const std::string& bundleName, const std::string& moduleName)
+    {
+        if (!bundleName.empty() && !moduleName.empty()) {
+            resourceAdapters_.erase(std::make_pair(bundleName, moduleName));
         }
     }
 

@@ -78,6 +78,7 @@ using RSRoundRect = Testing::TestingRoundRect;
 using RSTextDirection = Testing::TextDirection;
 using RSTextAlign = Testing::TextAlign;
 using RSWordBreakType = Testing::WordBreakType;
+using RSEllipsisMode = Testing::EllipsisMode;
 using RSTextStyle = Testing::TestingTextStyle;
 using RSColorQuad = uint32_t;
 using RSScalar = float;

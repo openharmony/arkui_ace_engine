@@ -54,8 +54,8 @@ void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonValue->Put("fontSize", GetBadgeFontSize().value_or(DEFAULT_FONT_SIZE).ToString().c_str());
     jsonValue->Put("badgeColor", GetBadgeColor().value_or(DEFAULT_BADGE_COLOR).ColorToString().c_str());
     jsonValue->Put("badgeSize", GetBadgeCircleSize().value_or(DEFAULT_CIRCLE_SIZE).ToString().c_str());
-    jsonValue->Put("borderColor",
-        GetBadgeBorderColor().value_or(badgeTheme->GetBadgeBorderColor()).ColorToString().c_str());
+    jsonValue->Put(
+        "borderColor", GetBadgeBorderColor().value_or(badgeTheme->GetBadgeBorderColor()).ColorToString().c_str());
     jsonValue->Put("borderWidth", GetBadgeBorderWidth().value_or(badgeTheme->GetBadgeBorderWidth()).ToString().c_str());
     jsonValue->Put(
         "fontWeight", V2::ConvertWrapFontWeightToStirng(GetBadgeFontWeight().value_or(FontWeight::NORMAL)).c_str());

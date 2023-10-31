@@ -322,6 +322,8 @@ public:
         return bottomTabBarStyles_[position];
     }
 
+    void DumpAdvanceInfo() override;
+    
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
