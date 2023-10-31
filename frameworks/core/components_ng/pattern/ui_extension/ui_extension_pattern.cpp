@@ -811,7 +811,6 @@ void UIExtensionPattern::ProcessUIExtensionSessionDestructionResult(OHOS::Rosen:
 
 void UIExtensionPattern::onConfigurationUpdate()
 {
-
     session_->UpdateConfiguration();
 }
 
