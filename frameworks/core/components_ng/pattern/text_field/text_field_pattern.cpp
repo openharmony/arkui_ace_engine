@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <optional>
 #include <regex>
-#include <cstdint>
 #include <string>
 #include <utility>
 
@@ -919,7 +918,6 @@ void TextFieldPattern::HandleOnCameraInput()
 #endif
 #endif
 }
-
 
 void TextFieldPattern::StripNextLine(std::wstring& data)
 {
@@ -4663,7 +4661,7 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
                GreatOrEqual(offset.GetX() + paintRect.Width(), contentRect_.GetX());
     }
     return contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) &&
-             contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON });
+           contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON });
 }
 
 void TextFieldPattern::DumpAdvanceInfo()
@@ -4780,6 +4778,9 @@ bool TextFieldPattern::IsSingleHandle() const
 
 void TextFieldPattern::OnAttachToFrameNode()
 {
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -4882,7 +4883,7 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
         }
     } else {
         auto caretOffset = selectController_->GetCaretRect().GetOffset() +
-                            (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
+                           (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
         selectController_->UpdateCaretOffset(caretOffset);
     }
 }

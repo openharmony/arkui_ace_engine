@@ -78,7 +78,6 @@ void TextFieldModelNG::CreateNode(
     SetCaretColor(textFieldTheme->GetCursorColor());
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
-    textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
