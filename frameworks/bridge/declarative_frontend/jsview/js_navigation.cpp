@@ -508,8 +508,13 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-void JSNavigation::SetUsrNavigationMode(int32_t value)
+void JSNavigation::SetUsrNavigationMode(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsNumber()) {
+        NavigationModel::GetInstance()->SetUsrNavigationMode(NG::NavigationMode::AUTO);
+        return;
+    }
+    int32_t value = info[0]->ToNumber<int32_t>();
     if (value >= 0 && value <= NAVIGATION_MODE_RANGE) {
         NavigationModel::GetInstance()->SetUsrNavigationMode(static_cast<NG::NavigationMode>(value));
     }
