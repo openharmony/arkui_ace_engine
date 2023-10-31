@@ -18,9 +18,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph, float baselineOffset,
+TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, float baselineOffset,
     RefPtr<TextContentModifier> textContentModifier, RefPtr<TextOverlayModifier> textOverlayModifier)
-    : pattern_(pattern), paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset),
+    : pattern_(pattern), baselineOffset_(baselineOffset),
       textContentModifier_(std::move(textContentModifier)), textOverlayModifier_(std::move(textOverlayModifier))
 {}
 
@@ -32,10 +32,14 @@ RefPtr<Modifier> TextPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
 void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
-    CHECK_NULL_VOID(paragraph_);
     CHECK_NULL_VOID(textContentModifier_);
 
-    textContentModifier_->SetParagraph(paragraph_);
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+    auto paragraph = textPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
+
+    textContentModifier_->SetParagraph(paragraph);
 
     SizeF contentSize = paintWrapper->GetContentSize();
     textContentModifier_->SetContentSize(contentSize);
@@ -44,8 +48,6 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     textContentModifier_->SetPrintOffset(paintOffset);
 
-    auto textPattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(textPattern);
     auto frameNode = textPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
@@ -57,7 +59,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
-        if (paragraph_->GetTextWidth() > paintWrapper->GetContentSize().Width()) {
+        if (paragraph->GetTextWidth() > paintWrapper->GetContentSize().Width()) {
             textContentModifier_->StartTextRace();
         } else {
             textContentModifier_->StopTextRace();
@@ -73,7 +75,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto wideTextLength = pattern->GetDisplayWideTextLength();
     std::vector<RectF> drawObscuredRects;
     if (wideTextLength != 0) {
-        paragraph_->GetRectsForRange(0, wideTextLength, drawObscuredRects);
+        paragraph->GetRectsForRange(0, wideTextLength, drawObscuredRects);
     }
     textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
     if (renderContext->GetClipEdge().has_value()) {
@@ -94,15 +96,16 @@ RefPtr<Modifier> TextPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
 void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
-    CHECK_NULL_VOID(paragraph_);
     CHECK_NULL_VOID(textOverlayModifier_);
+
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+    auto paragraph = textPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
 
     auto offset = paintWrapper->GetContentOffset();
     auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     textOverlayModifier_->SetPrintOffset(paintOffset);
-
-    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textPattern);
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -110,7 +113,7 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     const auto& selection = textPattern->GetTextSelector();
     std::vector<RectF> selectedRects;
     if (selection.GetTextStart() != selection.GetTextEnd()) {
-        paragraph_->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
+        paragraph->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
     }
     auto contentRect = textPattern->GetTextContentRect();
     textOverlayModifier_->SetContentRect(contentRect);

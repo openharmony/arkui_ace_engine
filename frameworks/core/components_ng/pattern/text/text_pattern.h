@@ -308,6 +308,10 @@ public:
         return GetHost();
     }
 
+    RefPtr<Paragraph> GetParagraph()
+    {
+        return paragraph_;
+    }
 protected:
     virtual void HandleOnCopy();
     void InitMouseEvent();

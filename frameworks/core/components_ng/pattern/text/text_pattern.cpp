@@ -1372,7 +1372,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         contentMod_->SetIsCustomFont(true);
     }
     auto paintMethod =
-        MakeRefPtr<TextPaintMethod>(WeakClaim(this), paragraph_, baselineOffset_, contentMod_, overlayMod_);
+        MakeRefPtr<TextPaintMethod>(WeakClaim(this), baselineOffset_, contentMod_, overlayMod_);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, paintMethod);
     auto context = host->GetRenderContext();
