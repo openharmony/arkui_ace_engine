@@ -1500,6 +1500,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     TAG_LOGD(AceLogTag::ACE_WEB,
         "Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f", width, height, keyboard);
     CHECK_NULL_RETURN(delegate_, false);
+    delegate_->SetVirtualKeyBoardArg(width, height, keyboard);
     if (!isFocus_ || !isVisible_) {
         if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
             drawSize_.SetSize(drawSizeCache_);
@@ -1533,6 +1534,11 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
 
 void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height)
 {
+    CHECK_NULL_VOID(delegate_);
+    if (delegate_->ShouldVirtualKeyboardOverlay()) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "VirtualKeyboard Overlaycontent is true and does not require resizing");
+        return;
+    }
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto rect = frameNode->GetGeometryNode()->GetFrameRect();
