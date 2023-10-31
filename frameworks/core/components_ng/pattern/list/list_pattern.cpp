@@ -229,7 +229,17 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     SetScrollSource(SCROLL_FROM_NONE);
     isInitialized_ = true;
     MarkSelectedItems();
+    UpdateListDirectionInCardStyle();
     return true;
+}
+
+void ListPattern::UpdateListDirectionInCardStyle()
+{
+    if (isNeedToUpdateListDirection_) {
+        auto layoutProperty = GetLayoutProperty<ListLayoutProperty>();
+        layoutProperty->UpdateListDirection(Axis::VERTICAL);
+        isNeedToUpdateListDirection_ = false;
+    }
 }
 
 ScrollAlign ListPattern::GetScrollAlignByScrollSnapAlign() const
