@@ -1301,7 +1301,7 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
-        HandleTouchDown();
+        HandleTouchDown(info);
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
     } else if (touchType == TouchType::CANCEL) {
@@ -1309,8 +1309,25 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 }
 
-void SwiperPattern::HandleTouchDown()
+void SwiperPattern::HandleTouchDown(const TouchEventInfo& info)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (HasIndicatorNode()) {
+        auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+        CHECK_NULL_VOID(indicatorNode);
+        if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+            auto geometryNode = indicatorNode->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto hotRegion = geometryNode->GetFrameRect();
+            auto locationInfo = info.GetTouches().front();
+            auto touchPoint = PointF(static_cast<float>(locationInfo.GetLocalLocation().GetX()),
+                static_cast<float>(locationInfo.GetLocalLocation().GetY()));
+            if (hotRegion.IsInRegion(touchPoint)) {
+                return;
+            }
+        }
+    }
     if (indicatorController_) {
         indicatorController_->Stop();
     }
