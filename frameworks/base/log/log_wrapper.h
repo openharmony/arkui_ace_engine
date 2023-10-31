@@ -119,6 +119,7 @@ enum class AceLogTag : uint8_t {
     ACE_IF,
     ACE_FOREACH,
     ACE_LAZYFOREACH,
+    ACE_ANIMATION,
 };
 
 enum class LogDomain : uint32_t {
