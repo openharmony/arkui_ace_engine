@@ -52,7 +52,6 @@ public:
 
         auto jsEngine = EngineHelper::GetCurrentEngine();
         if (!jsEngine) {
-            LOGE("get jsEngine failed");
             return;
         }
         jsEngine->UnregisterLayoutInspectorCallback(layoutEvent_, componentId_);

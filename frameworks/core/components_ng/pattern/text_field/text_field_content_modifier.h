@@ -55,12 +55,9 @@ public:
     void SetTextRectX(const float value);
     float GetTextRectY();
     void SetTextAlign(const TextAlign value);
-    void SetShowCounter(bool value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
     void SetShowErrorState(bool value);
     void SetShowUnderlineState(bool value);
-    void SetShowPasswordIcon(const std::string& value);
-    void SetHidePasswordIcon(const std::string& value);
     void SetFontReady(bool value);
 
 private:
@@ -69,7 +66,6 @@ private:
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultFontStyle(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
-    void UpdatePaintConfig(RefPtr<CanvasImage>& passwordIconCanvasImage, DrawingContext context, RectF iconRect) const;
 
     WeakPtr<Pattern> pattern_;
     RefPtr<PropertyString> fontFamilyString_;
@@ -93,11 +89,8 @@ private:
     RefPtr<PropertyBool> textObscured_;
     RefPtr<PropertyBool> dragStatus_;
     RefPtr<PropertyInt> textAlign_;
-    RefPtr<PropertyBool> showCounter_;
     RefPtr<PropertyBool> showErrorState_;
     RefPtr<PropertyBool> showUnderline_;
-    RefPtr<PropertyString> showPasswordIconSrc_;
-    RefPtr<PropertyString> hidePasswordIconSrc_;
     RefPtr<PropertyInt> fontStyle_;
     RefPtr<PropertyBool> fontReady_;
 

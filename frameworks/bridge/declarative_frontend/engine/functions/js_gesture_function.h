@@ -25,13 +25,9 @@ class JsGestureFunction : public JsFunction {
     DECLARE_ACE_TYPE(JsGestureFunction, JsFunction)
 
 public:
-    explicit JsGestureFunction(const JSRef<JSFunc>& jsFunction)
-        : JsFunction(JSRef<JSObject>(), jsFunction) {}
+    explicit JsGestureFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
-    ~JsGestureFunction() override
-    {
-        LOGD("Destroy: JsGestureFunction");
-    };
+    ~JsGestureFunction() override {};
     void Execute() override;
     void Execute(const GestureEvent& info);
 

@@ -112,7 +112,7 @@ void TabBarModifier::PaintIndicator(DrawingContext& context, RectF indicator)
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    
+
     if (GreatNotEqual(indicatorHeight_->Get(), 0.0f)) {
         indicator.SetHeight(indicatorHeight_->Get());
     } else {

@@ -68,7 +68,7 @@ public:
     void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t targetId,
         const NG::OffsetF& offset, bool isAboveApps = false);
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
-    void HideMenuNG(bool showPreviewAnimation = true);
+    void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo);
     void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
@@ -98,8 +98,6 @@ public:
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
     void CloseDialog(int32_t instanceId);
-    void RegisterOnShowMenu(const std::function<void()>& callback);
-    void RegisterOnHideMenu(const std::function<void()>& callback);
     void RequestFocusSubwindow(int32_t instanceId);
 
 private:
@@ -128,8 +126,6 @@ private:
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
-    std::function<void()> onShowMenuCallback_;
-    std::function<void()> onHideMenuCallback_;
 };
 
 } // namespace OHOS::Ace

@@ -58,6 +58,7 @@ export struct Breadcrumb {
   iconWidth: number = 24; // the icon width of label.
   labelSpace: number = 4; // the space of icon and text in label.
   labelHeight: number = 40; // the height of visible label is always 40 vp.
+  labelBorderWidth: number = 2; // the border width of each label is 2 vp.
 
   // when the info length changed, update all the data.
   onInfoChanged() {
@@ -77,9 +78,18 @@ export struct Breadcrumb {
 
   onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
     let pos = 0;
+    let invisiblePos = { x: -999999, y: -999999 };
     children.forEach((child, index) => {
+      let childWidth = child.measureResult.width as number;
+
+      // if the label only has border, keep it far away.
+      if (index % 2 === 0 && childWidth === (2 * this.labelBorderWidth)) {
+        child.layout(invisiblePos);
+        return;
+      }
+
       child.layout({x: pos, y: 0})
-      pos += child.measureResult.width as number;
+      pos += childWidth;
     })
   }
 
@@ -588,6 +598,11 @@ export struct Breadcrumb {
               }
               this.onLabelDrop(this.labels.indexOf(item), event);
             })
+            .onDragEnd((event: DragEvent) => {
+              if (this.onLabelDragCancel && event.getResult() != DragResult.DRAG_SUCCESSFUL) {
+                this.onLabelDragCancel(event);
+              }
+            })
         })
       }
     }
@@ -627,7 +642,7 @@ export struct Breadcrumb {
           .padding({left: 6, right: 6})
           .clip(true)
         }
-        .borderWidth(2)
+        .borderWidth(this.labelBorderWidth)
         .clip(true)
         .type(ButtonType.Normal)
         .backgroundColor(this.bgColor)
@@ -673,10 +688,11 @@ export struct Breadcrumb {
           if (!this.onLabelDrop) {
             return;
           }
-          if (index === this.labels.length - 1 && this.onLabelDragCancel) {
+          this.onLabelDrop(index, event);
+        })
+        .onDragEnd((event: DragEvent) => {
+          if (this.onLabelDragCancel && event.getResult() != DragResult.DRAG_SUCCESSFUL) {
             this.onLabelDragCancel(event);
-          } else {
-            this.onLabelDrop(index, event);
           }
         })
 
@@ -701,7 +717,7 @@ export struct Breadcrumb {
           }
           .clip(true)
           .type(ButtonType.Normal)
-          .borderWidth(2)
+          .borderWidth(this.labelBorderWidth)
           .backgroundColor(this.bgColor)
           .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
           .stateStyles({
@@ -736,6 +752,7 @@ export struct Breadcrumb {
           .bindPopup(this.showMenu, {
             builder: this.menu,
             enableArrow: false,
+            popupColor: Color.Transparent,
             onStateChange: (e) => {
               if (!e.isVisible) {
                 if (this.labels.indexOf(this.menuInfo[0]) != this.hiddenLabels[0]) {
@@ -761,7 +778,7 @@ export struct Breadcrumb {
             Image(item.icon)
               .width(24)
               .height(24)
-              .margin({left: 6})
+              .margin({left: 8})
           }
 
           Text(item.text)
@@ -799,11 +816,11 @@ export struct Breadcrumb {
           if (!this.onLabelDrop) {
             return;
           }
-
-          if (index === this.labels.length - 1 && this.onLabelDragCancel) {
+          this.onLabelDrop(index, event);
+        })
+        .onDragEnd((event: DragEvent) => {
+          if (this.onLabelDragCancel && event.getResult() != DragResult.DRAG_SUCCESSFUL) {
             this.onLabelDragCancel(event);
-          } else {
-            this.onLabelDrop(index, event);
           }
         })
       }

@@ -69,24 +69,6 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
     RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
 {
-    RefPtr<NG::FrameNode> dialog;
-    while (!dialogs.empty()) {
-        dialog = AceType::DynamicCast<NG::FrameNode>(dialogs.back().Upgrade());
-        if (dialog && !dialog->IsRemoving()) {
-            // get the dialog not removed currently
-            break;
-        }
-        dialogs.pop_back();
-    }
-
-    if (dialogs.empty()) {
-        LOGW("dialogs are empty");
-        return;
-    }
-    if (!dialog) {
-        LOGW("dialog is null");
-        return;
-    }
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
@@ -101,7 +83,32 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->CloseDialog(dialog);
-    dialogs.pop_back();
+    
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    auto task = [&dialogs, weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
+        auto overlayManager = weakOverlayManager.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        RefPtr<NG::FrameNode> dialog;
+        while (!dialogs.empty()) {
+            dialog = AceType::DynamicCast<NG::FrameNode>(dialogs.back().Upgrade());
+            if (dialog && !dialog->IsRemoving()) {
+                // get the dialog not removed currently
+                break;
+            }
+            dialogs.pop_back();
+        }
+        if (dialogs.empty()) {
+            LOGW("dialogs are empty");
+            return;
+        }
+        if (!dialog) {
+            LOGW("dialog is null");
+            return;
+        }
+        overlayManager->CloseDialog(dialog);
+        dialogs.pop_back();
+    };
+    executor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace::NG

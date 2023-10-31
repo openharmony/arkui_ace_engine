@@ -31,7 +31,7 @@ class ContainerModalElement : public SoleChildElement {
 public:
     RefPtr<OverlayElement> GetOverlayElement() const;
     RefPtr<StageElement> GetStageElement() const;
-    void ShowTitle(bool isShow, bool hasDeco = true);
+    void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false);
     void WindowFocus(bool isFocus);
     void SetAppBgColor(const Color& color);
     void SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);

@@ -58,8 +58,10 @@ void WaterFlowPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto scrollBar = scrollBar_.Upgrade();
     CHECK_NULL_VOID(scrollBar);
     if (!scrollBar || !scrollBar->NeedPaint()) {
-        LOGD("no need paint scroll bar.");
         return;
+    }
+    if (scrollBar->GetPositionModeUpdate()) {
+        scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
     OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),

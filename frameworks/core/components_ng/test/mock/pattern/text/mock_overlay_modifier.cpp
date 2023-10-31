@@ -24,9 +24,9 @@ void TextOverlayModifier::SetPrintOffset(const OffsetF& paintOffset) {}
 
 void TextOverlayModifier::SetSelectedColor(uint32_t selectedColor) {}
 
-void TextOverlayModifier::SetSelectedRects(const std::vector<Rect>& selectedRects) {}
+void TextOverlayModifier::SetSelectedRects(const std::vector<RectF>& selectedRects) {}
 
-bool TextOverlayModifier::IsSelectedRectsChanged(const std::vector<Rect>& selectedRects)
+bool TextOverlayModifier::IsSelectedRectsChanged(const std::vector<RectF>& selectedRects)
 {
     return true;
 }

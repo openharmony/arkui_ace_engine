@@ -27,17 +27,12 @@ namespace {
 #define KEY_META_OR_CTRL_LEFT KeyCode::KEY_CTRL_LEFT
 #define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_CTRL_RIGHT
 #endif
-}
+} // namespace
 bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     LOGD("HandleKeyEvent event, caps lock %{public}d, key code %{public}d", keyEvent.enableCapsLock, keyEvent.code);
     auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!pattern->GetImeAttached()) {
-        return false;
-    }
-#endif
     if (keyEvent.action == KeyAction::DOWN) {
         std::string appendElement;
         if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
@@ -89,21 +84,21 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
         }
         if (keyEvent.code == KeyCode::KEY_DEL) {
 #if defined(PREVIEW)
-            pattern->DeleteForward(TextFieldPattern::GetGraphemeClusterLength(
-                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition));
+            pattern->DeleteForward(
+                TextFieldPattern::GetGraphemeClusterLength(pattern->GetWideText(), pattern->GetCaretIndex()));
 #else
-            pattern->DeleteBackward(TextFieldPattern::GetGraphemeClusterLength(
-                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition, true));
+            pattern->DeleteBackward(
+                TextFieldPattern::GetGraphemeClusterLength(pattern->GetWideText(), pattern->GetCaretIndex(), true));
 #endif
             return true;
         }
         if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
 #if defined(PREVIEW)
             pattern->DeleteBackward(TextFieldPattern::GetGraphemeClusterLength(
-                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition, true));
+                pattern->GetWideText(), pattern->GetCaretIndex(), true));
 #else
-            pattern->DeleteForward(TextFieldPattern::GetGraphemeClusterLength(
-                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition));
+            pattern->DeleteForward(
+                TextFieldPattern::GetGraphemeClusterLength(pattern->GetWideText(), pattern->GetCaretIndex()));
 #endif
             return true;
         }

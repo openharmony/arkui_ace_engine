@@ -41,7 +41,6 @@ void JSRowSplit::JsClip(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (clipShape == nullptr) {
-            LOGD("clipShape is null");
             return;
         }
         ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
@@ -63,6 +62,7 @@ void JSRowSplit::JSBind(BindingTarget globalObj)
     JSClass<JSRowSplit>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRowSplit>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRowSplit>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSRowSplit>::StaticMethod("clip", &JSRowSplit::JsClip);
     JSClass<JSRowSplit>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

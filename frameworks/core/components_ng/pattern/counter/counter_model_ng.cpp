@@ -238,12 +238,12 @@ void CounterModelNG::SetWidth(const Dimension& value)
 
 void CounterModelNG::SetControlWidth(const Dimension& value)
 {
-    LOGE("no support SetControlWidth");
+    TAG_LOGD(AceLogTag::ACE_COUNTER, "Counter is not support SetControlWidth");
 }
 
 void CounterModelNG::SetStateChange(bool value)
 {
-    LOGE("no support SetStateChange");
+    TAG_LOGD(AceLogTag::ACE_COUNTER, "Counter is not support SetStateChange");
 }
 
 void CounterModelNG::SetBackgroundColor(const Color& value)

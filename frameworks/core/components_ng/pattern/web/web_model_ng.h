@@ -142,6 +142,7 @@ public:
     void SetAudioResumeInterval(int32_t resumeInterval) override;
     void SetAudioExclusive(bool audioExclusive) override;
     void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetWrapContent(bool isWrapContentEnabled) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

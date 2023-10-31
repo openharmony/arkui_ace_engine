@@ -131,9 +131,10 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   }
 
   public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
-
+    stateMgmtProfiler.begin("SyncedPropertyOneWayPU.syncPeerHasChanged");
     if (this.source_ == undefined) {
       stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
+      stateMgmtProfiler.end();
       return;
     }
 
@@ -149,6 +150,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     } else {
       stateMgmtConsole.warn(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource?.debugInfo()}', Unexpected situation. syncPeerHasChanged from different sender than source_. Ignoring event.`)
     }
+    stateMgmtProfiler.end();
   }
 
   /**

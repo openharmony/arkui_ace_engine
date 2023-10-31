@@ -173,6 +173,7 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
                 auto customerOnDragEnd = customerOnDragEnd_;
                 customerOnDragEnd(info);
             }
+            break;
         }
         default:
             LOGW("unsuport DragFuncType");

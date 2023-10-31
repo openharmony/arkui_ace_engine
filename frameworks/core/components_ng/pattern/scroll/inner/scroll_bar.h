@@ -23,6 +23,7 @@
 #include "base/geometry/rect.h"
 #include "base/utils/utils.h"
 #include "core/animation/friction_motion.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/scroll/scroll_bar_theme.h"
@@ -71,21 +72,6 @@ enum class DisplayMode {
      * always display scrollbar.
      */
     ON,
-};
-
-enum class PositionMode {
-    /*
-     * display scrollbar on right.
-     */
-    RIGHT = 0,
-    /*
-     * display scrollbar on left.
-     */
-    LEFT,
-    /*
-     * display scrollbar on bottom.
-     */
-    BOTTOM,
 };
 
 class ScrollBar final : public AceType {
@@ -266,6 +252,11 @@ public:
         }
     }
 
+    bool GetPositionModeUpdate() const
+    {
+        return positionModeUpdate_;
+    }
+
     void SetShapeMode(ShapeMode shapeMode)
     {
         shapeMode_ = shapeMode;
@@ -315,11 +306,6 @@ public:
     bool IsHover() const
     {
         return isHover_;
-    }
-
-    uint8_t GetOpacity() const
-    {
-        return opacity_;
     }
 
     void PlayScrollBarDisappearAnimation()
@@ -571,7 +557,6 @@ private:
     Size viewPortSize_;
     Offset lastOffset_;
     double estimatedHeight_ = 0.0;
-    uint8_t opacity_ = UINT8_MAX;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;

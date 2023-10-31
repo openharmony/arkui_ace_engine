@@ -70,8 +70,8 @@ void GetEventDevice(int32_t sourceType, E& event)
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-void CalculatePointerEvent(
-    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale);
+void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
+    const NG::VectorF& scale, int32_t udegree = 0);
 
 void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, const int32_t udegree = 0);

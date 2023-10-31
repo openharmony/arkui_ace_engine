@@ -172,7 +172,6 @@ void IndexerModelNG::SetPopupHorizontalSpace(const Dimension& popupHorizontalSpa
     if (spaceValue >= 0) {
         ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupHorizontalSpace, popupHorizontalSpace);
     } else {
-        LOGW("PopupHorizontalSpace value is not valid");
         ACE_RESET_PAINT_PROPERTY(IndexerPaintProperty, PopupHorizontalSpace);
     }
 }
@@ -209,7 +208,6 @@ void IndexerModelNG::SetPopupItemBackground(const std::optional<Color>& popupIte
     if (popupItemBackground.has_value()) {
         ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupItemBackground, popupItemBackground.value());
     } else {
-        LOGW("PopupItemBackgroundColor value is not valid");
         ACE_RESET_PAINT_PROPERTY_WITH_FLAG(IndexerPaintProperty, PopupItemBackground, PROPERTY_UPDATE_RENDER);
     }
 }
@@ -219,7 +217,6 @@ void IndexerModelNG::SetPopupSelectedColor(const std::optional<Color>& popupSele
     if (popupSelectedColor.has_value()) {
         ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupSelectedColor, popupSelectedColor.value());
     } else {
-        LOGW("PopupSelectedColor value is not valid");
         ACE_RESET_PAINT_PROPERTY_WITH_FLAG(IndexerPaintProperty, PopupSelectedColor, PROPERTY_UPDATE_RENDER);
     }
 }
@@ -229,7 +226,6 @@ void IndexerModelNG::SetPopupUnselectedColor(const std::optional<Color>& popupUn
     if (popupUnselectedColor.has_value()) {
         ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupUnselectedColor, popupUnselectedColor.value());
     } else {
-        LOGW("PopupUnselectedColor value is not valid");
         ACE_RESET_PAINT_PROPERTY_WITH_FLAG(IndexerPaintProperty, PopupUnselectedColor, PROPERTY_UPDATE_RENDER);
     }
 }
@@ -239,7 +235,6 @@ void IndexerModelNG::SetFontSize(const Dimension& fontSize)
     if (fontSize.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, FontSize, fontSize);
     } else {
-        LOGW("FontSize value is not valid");
         ACE_RESET_LAYOUT_PROPERTY(IndexerLayoutProperty, FontSize);
     }
 }

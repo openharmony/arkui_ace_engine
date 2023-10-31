@@ -88,7 +88,11 @@ public:
 
     void UpdateSelectMenuInfo(const SelectMenuInfo& info);
 
+    void UpdateSelectMenuInfo(std::function<void(SelectMenuInfo& menuInfo)> updateAction);
+
     void UpdateShowArea(const RectF& area);
+
+    void SetSelectRegionVisible(bool isSelectRegionVisible);
 
     void SetHandleReverse(bool reverse);
 
@@ -140,7 +144,9 @@ public:
     }
 
     bool IsMenuShow();
+    bool IsSingleHandleMenuShow();
     bool IsHandleShow();
+    bool IsSingleHandle();
 
     void SetHasShowAnimation(bool animation)
     {

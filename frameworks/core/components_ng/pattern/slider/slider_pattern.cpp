@@ -65,6 +65,7 @@ void SliderPattern::OnModifyDone()
     stepRatio_ = step / (max - min);
     UpdateCircleCenterOffset();
     UpdateBlock();
+    InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
     InitPanEvent(gestureHub);
     InitMouseEvent(inputEventHub);
@@ -143,6 +144,16 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     borderBlank_ = (length - sliderLength_) * HALF;
 
     return true;
+}
+
+void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (clickListener_) {
+        return;
+    }
+    auto clickCallback = [](const GestureEvent& info) {};
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickEvent(clickListener_);
 }
 
 void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -228,6 +239,10 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchInfo = touchList.front();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
+        if (fingerId_ != -1) {
+            return;
+        }
+        fingerId_ = touchInfo.GetFingerId();
         axisFlag_ = false;
         // when Touch Down area is at Pan Area, value is unchanged.
         if (!AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
@@ -240,7 +255,11 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         mousePressedFlag_ = true;
         FireChangeEvent(SliderChangeMode::Begin);
         OpenTranslateAnimation();
-    } else if (touchType == TouchType::UP) {
+    } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        if (fingerId_ != touchInfo.GetFingerId()) {
+            return;
+        }
+        fingerId_ = -1;
         if (bubbleFlag_) {
             bubbleFlag_ = false;
         }
@@ -302,8 +321,18 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
             InitializeBubble();
         }
     } else {
-        UpdateValueByLocalLocation(info.GetLocalLocation());
-        UpdateBubble();
+        auto fingerList = info.GetFingerList();
+        if (fingerList.size() > 0) {
+            for (auto fingerInfo : fingerList) {
+                if (fingerInfo.fingerId_ == fingerId_) {
+                    UpdateValueByLocalLocation(fingerInfo.localLocation_);
+                    UpdateBubble();
+                }
+            }
+        } else {
+            UpdateValueByLocalLocation(info.GetLocalLocation());
+            UpdateBubble();
+        }
     }
     panMoveFlag_ = true;
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -625,8 +654,8 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     if (NearEqual(nextValue, -1.0)) {
         return false;
     }
+    nextValue = std::floor(nextValue / step) * step;
     nextValue = std::clamp(nextValue, min, max);
-    nextValue = std::round(nextValue / step) * step;
     if (NearEqual(nextValue, value_)) {
         return false;
     }
@@ -635,7 +664,6 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     valueRatio_ = (value_ - min) / (max - min);
     FireChangeEvent(SliderChangeMode::Begin);
     FireChangeEvent(SliderChangeMode::End);
-    LOGD("Move %{public}d steps, Value change to %{public}f", stepCount, value_);
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
 }
@@ -997,15 +1025,12 @@ void SliderPattern::OnAttachToFrameNode()
 void SliderPattern::OnVisibleChange(bool isVisible)
 {
     isVisible_ = isVisible;
-    LOGD("Slider OnVisibleChange: isVisible = %d", isVisible_);
     isVisible_ ? StartAnimation() : StopAnimation();
 }
 
 void SliderPattern::StartAnimation()
 {
     CHECK_NULL_VOID(sliderContentModifier_);
-    LOGD("Slider StartAnimation: isVisibleArea_ = %d, isVisible_ = %d, isShow_ = %d", isVisibleArea_, isVisible_,
-        isShow_);
     if (sliderContentModifier_->GetVisible()) {
         return;
     }
@@ -1023,7 +1048,6 @@ void SliderPattern::StopAnimation()
     if (!sliderContentModifier_->GetVisible()) {
         return;
     }
-    LOGD("Slider StopAnimation");
     sliderContentModifier_->SetVisible(false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1041,8 +1065,7 @@ void SliderPattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        LOGD("Slider VisibleAreaChange CallBack: visible = %d", visible);
-        pattern->isVisibleArea_  = visible;
+        pattern->isVisibleArea_ = visible;
         visible ? pattern->StartAnimation() : pattern->StopAnimation();
     };
     auto host = GetHost();
@@ -1057,14 +1080,12 @@ void SliderPattern::RegisterVisibleAreaChange()
 void SliderPattern::OnWindowHide()
 {
     isShow_ = false;
-    LOGD("Slider OnWindowHide");
     StopAnimation();
 }
 
 void SliderPattern::OnWindowShow()
 {
     isShow_ = true;
-    LOGD("Slider OnWindowShow");
     StartAnimation();
 }
 

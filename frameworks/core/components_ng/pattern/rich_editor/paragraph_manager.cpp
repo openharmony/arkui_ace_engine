@@ -30,23 +30,29 @@ float ParagraphManager::GetHeight() const
 int32_t ParagraphManager::GetIndex(Offset offset) const
 {
     CHECK_NULL_RETURN(!paragraphs_.empty(), 0);
-    for (auto&& info : paragraphs_) {
-        if (offset.GetY() > info.paragraph->GetHeight()) {
+    int idx = 0;
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
+        auto&& info = *it;
+        if (GreatNotEqual(offset.GetY(), info.paragraph->GetHeight())) {
+            if (idx == static_cast<int>(paragraphs_.size()) - 1) {
+                // in the last line
+                return info.end;
+            }
             // get offset relative to each paragraph
             offset.SetY(offset.GetY() - info.paragraph->GetHeight());
-            continue;
+        } else {
+            return info.paragraph->GetGlyphIndexByCoordinate(offset) + info.start;
         }
-        return info.paragraph->GetHandlePositionForClick(offset) + info.start;
     }
-    return paragraphs_.back().paragraph->GetHandlePositionForClick(offset) + paragraphs_.back().start;
+    return paragraphs_.back().paragraph->GetGlyphIndexByCoordinate(offset) + paragraphs_.back().start;
 }
 
-std::vector<Rect> ParagraphManager::GetRects(int32_t start, int32_t end) const
+std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const
 {
-    std::vector<Rect> res;
+    std::vector<RectF> res;
     float y = 0.0f;
     for (auto&& info : paragraphs_) {
-        std::vector<Rect> rects;
+        std::vector<RectF> rects;
         if (info.start > end) {
             break;
         }
@@ -64,12 +70,12 @@ std::vector<Rect> ParagraphManager::GetRects(int32_t start, int32_t end) const
     return res;
 }
 
-std::vector<Rect> ParagraphManager::GetPlaceholderRects() const
+std::vector<RectF> ParagraphManager::GetPlaceholderRects() const
 {
-    std::vector<Rect> res;
+    std::vector<RectF> res;
     float y = 0.0f;
     for (auto&& info : paragraphs_) {
-        std::vector<Rect> rects;
+        std::vector<RectF> rects;
         info.paragraph->GetRectsForPlaceholders(rects);
         for (auto& rect : rects) {
             rect.SetTop(rect.Top() + y);
@@ -81,7 +87,7 @@ std::vector<Rect> ParagraphManager::GetPlaceholderRects() const
     return res;
 }
 
-OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHeight) const
+OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHeight, bool downStreamFirst) const
 {
     CHECK_NULL_RETURN(!paragraphs_.empty(), {});
     auto it = paragraphs_.begin();
@@ -103,13 +109,50 @@ OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHe
 
     int32_t relativeIndex = index - it->start;
     auto&& paragraph = it->paragraph;
-    CaretMetrics metrics;
-    auto computeSuccess = paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics) ||
+    CaretMetricsF metrics;
+    auto computeSuccess = false;
+    if (downStreamFirst) {
+        computeSuccess = paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics) ||
                           paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics);
+    } else {
+        computeSuccess = paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics) ||
+                          paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics);
+    }
     CHECK_NULL_RETURN(computeSuccess, OffsetF(0.0f, y));
 
     selectLineHeight = metrics.height;
     return { static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY() + y) };
+}
+
+OffsetF ParagraphManager::ComputeCursorInfoByClick(
+    int32_t index, float& selectLineHeight, const OffsetF& lastTouchOffset) const
+{
+    CHECK_NULL_RETURN(!paragraphs_.empty(), {});
+    auto it = paragraphs_.begin();
+    float y = 0.0f;
+    while (it != paragraphs_.end()) {
+        if (index >= it->start && index < it->end) {
+            break;
+        }
+        y += it->paragraph->GetHeight();
+        ++it;
+    }
+
+    if (index == paragraphs_.back().end) {
+        --it;
+        y -= it->paragraph->GetHeight();
+    }
+
+    CHECK_NULL_RETURN(it != paragraphs_.end(), OffsetF(0.0f, y));
+
+    int32_t relativeIndex = index - it->start;
+    auto&& paragraph = it->paragraph;
+
+    CaretMetricsF caretCaretMetric;
+    paragraph->CalcCaretMetricsByPosition(relativeIndex, caretCaretMetric, lastTouchOffset);
+    selectLineHeight = caretCaretMetric.height;
+    return { static_cast<float>(caretCaretMetric.offset.GetX()),
+            static_cast<float>(caretCaretMetric.offset.GetY() + y) };
 }
 
 void ParagraphManager::Reset()

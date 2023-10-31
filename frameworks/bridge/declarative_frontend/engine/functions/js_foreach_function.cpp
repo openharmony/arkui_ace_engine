@@ -46,7 +46,6 @@ std::vector<std::string> JsForEachFunction::ExecuteIdentityMapper()
             JSRef<JSVal> jsKey = jsKeysArr->GetValueAt(i);
 
             if (!jsKey->IsString() && !jsKey->IsNumber()) {
-                LOGE("ForEach Item with invalid identifier.........");
                 continue;
             }
 

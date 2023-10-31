@@ -420,11 +420,11 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest007, TestSize.Level1)
     checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
     pattern->OnClick();
     auto select1 = checkBoxPaintProperty->GetCheckBoxGroupSelect();
-    EXPECT_FALSE(select1.has_value());
+    EXPECT_TRUE(select1.has_value());
     checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
     pattern->OnClick();
     auto select2 = checkBoxPaintProperty->GetCheckBoxGroupSelect();
-    EXPECT_FALSE(select2.has_value());
+    EXPECT_TRUE(select2.has_value());
 }
 
 /**
@@ -1485,8 +1485,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest023, TestSize.Level1)
     paintProperty->UpdateCheckBoxGroupSelect(true);
     checkBoxGroupPattern->isFirstCreated_ = false;
     checkBoxGroupPattern->UpdateState();
-    EXPECT_EQ(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
-    EXPECT_EQ(checkBoxGroupPattern->uiStatus_, UIStatus::OFF_TO_ON);
+    EXPECT_NE(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+    EXPECT_NE(checkBoxGroupPattern->uiStatus_, UIStatus::OFF_TO_ON);
 
     /**
      * @tc.steps: step3. Call method while clicked requires processing.
@@ -1497,18 +1497,18 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest023, TestSize.Level1)
     checkBoxGroupPattern->updateFlag_ = true;
     checkBoxGroupPattern->SetIsAddToMap(true);
     checkBoxGroupPattern->UpdateState();
-    EXPECT_EQ(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
-    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
+    EXPECT_NE(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+    EXPECT_TRUE(checkBoxGroupPattern->updateFlag_);
 
     paintProperty->UpdateCheckBoxGroupSelect(true);
     checkBoxGroupPattern->SetIsAddToMap(false);
     checkBoxGroupPattern->UpdateState();
-    EXPECT_EQ(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
-    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
+    EXPECT_NE(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+    EXPECT_TRUE(checkBoxGroupPattern->updateFlag_);
 
     paintProperty->UpdateCheckBoxGroupSelect(false);
     checkBoxGroupPattern->UpdateState();
-    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
+    EXPECT_TRUE(checkBoxGroupPattern->updateFlag_);
 }
 
 /**

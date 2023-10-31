@@ -18,7 +18,6 @@ ace_unittest("calendar_picker_test_ng") {
   sources = [
     "$ace_root/frameworks/core/components/picker/picker_data.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "calendar_picker_test_ng.cpp",
   ]
 }

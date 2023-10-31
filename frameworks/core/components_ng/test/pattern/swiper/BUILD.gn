@@ -17,8 +17,5 @@ ace_unittest("swiper_test_ng") {
   flutter_skia = true
   render = true
   type = "new"
-  sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
-    "swiper_test_ng.cpp",
-  ]
+  sources = [ "swiper_test_ng.cpp" ]
 }

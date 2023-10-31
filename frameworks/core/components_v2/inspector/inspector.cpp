@@ -143,7 +143,6 @@ std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& cont
 {
     auto inspectorElement = GetInspectorByKey(context->GetRootElement(), key);
     if (inspectorElement == nullptr) {
-        LOGE("no inspector with key:%{public}s is found", key.c_str());
         return "";
     }
 
@@ -161,7 +160,6 @@ std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& cont
 
 std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context, bool isLayoutInspector)
 {
-    LOGI("GetInspectorTree start");
     auto jsonRoot = JsonUtil::Create(true);
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
@@ -208,7 +206,6 @@ bool Inspector::SendEventByKey(
 {
     auto inspectorElement = GetInspectorByKey(context->GetRootElement(), key);
     if (inspectorElement == nullptr) {
-        LOGE("no inspector with key:%s is found", key.c_str());
         return false;
     }
 

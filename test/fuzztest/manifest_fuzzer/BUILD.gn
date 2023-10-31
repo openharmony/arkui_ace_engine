@@ -16,7 +16,7 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-module_output_path = "arkui/manifest_fuzzer"
+module_output_path = "ace_engine/ace_engine/manifest_fuzzer"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ManifestFuzzTest") {

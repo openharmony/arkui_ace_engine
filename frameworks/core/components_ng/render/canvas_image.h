@@ -86,7 +86,6 @@ public:
     inline ImagePaintConfig& GetPaintConfig()
     {
         if (!paintConfig_) {
-            LOGW("image paint config is null");
             paintConfig_ = std::make_unique<ImagePaintConfig>();
         }
         return *paintConfig_;

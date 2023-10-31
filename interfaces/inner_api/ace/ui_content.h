@@ -44,6 +44,7 @@ namespace Rosen {
 class Window;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
+enum class MaximizeMode : uint32_t;
 class RSSurfaceNode;
 class RSTransaction;
 } // namespace Rosen
@@ -111,6 +112,7 @@ public:
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
+    virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
 
     // Window color
     virtual uint32_t GetBackgroundColor() = 0;

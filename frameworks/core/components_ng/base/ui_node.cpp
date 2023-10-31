@@ -84,7 +84,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
-        LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
+        LOGD("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
              "%{public}d",
             (*it)->GetId(), child->GetTag().c_str(), child->GetId());
         return;
@@ -103,7 +103,6 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
 
     auto iter = std::find(children_.begin(), children_.end(), child);
     if (iter == children_.end()) {
-        LOGE("child is not exist.");
         return children_.end();
     }
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
@@ -370,7 +369,6 @@ void UINode::MovePosition(int32_t slot)
         std::advance(it, slot);
         if ((it != children.end()) && (*it == this)) {
             // Already at the right place
-            LOGD("Already at the right place");
             return;
         }
 
@@ -450,7 +448,9 @@ void UINode::DumpTree(int32_t depth)
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
-        DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+        if (IsDisappearing()) {
+            DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+        }
         DumpInfo();
         DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(GetChildren().size()));
     }
@@ -645,6 +645,8 @@ RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool fo
 
 void UINode::Build()
 {
+    ACE_SCOPED_TRACE("Build[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
+        GetParent() ? GetParent()->GetId() : 0);
     for (const auto& child : GetChildren()) {
         child->Build();
     }

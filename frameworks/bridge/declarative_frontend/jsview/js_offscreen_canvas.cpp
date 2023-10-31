@@ -119,7 +119,6 @@ void JSOffscreenCanvas::JSBind(BindingTarget globalObj)
 void JSOffscreenCanvas::Constructor(const JSCallbackInfo& args)
 {
     if (args.Length() < 2) {
-        LOGE("The arg is wrong, it is supposed to have at least 2 argument");
         return;
     }
     if (Container::IsCurrentUseNewPipeline() && args[0]->IsNumber() && args[1]->IsNumber()) {
@@ -144,9 +143,6 @@ void JSOffscreenCanvas::Destructor(JSOffscreenCanvas* context)
 {
     if (context != nullptr) {
         context->DecRefCount();
-    } else {
-        LOGE("context is null");
-        return;
     }
 }
 
@@ -169,7 +165,6 @@ void JSOffscreenCanvas::JsGetHeight(const JSCallbackInfo& info)
 void JSOffscreenCanvas::JsSetWidth(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
@@ -191,7 +186,6 @@ void JSOffscreenCanvas::JsSetWidth(const JSCallbackInfo& info)
 void JSOffscreenCanvas::JsSetHeight(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
 
@@ -230,11 +224,9 @@ void JSOffscreenCanvas::JsTransferToImageBitmap(const JSCallbackInfo& info)
 void JSOffscreenCanvas::JsGetContext(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument and at most 2 arguments");
         return;
     }
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        LOGE("Invalid arguments.");
         return;
     }
     if (!Container::IsCurrentUseNewPipeline()) {

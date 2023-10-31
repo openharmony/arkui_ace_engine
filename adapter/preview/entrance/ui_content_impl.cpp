@@ -69,7 +69,7 @@ void SetFontMgrConfig(const std::string& containerSdkPath)
         runtimeOS = "OHOS";
         containerFontBasePath = "";
     }
-    LOGI("Runtime OS is %{public}s, and the container fontBasePath is %{public}s", runtimeOS.c_str(),
+    LOGD("Runtime OS is %{public}s, and the container fontBasePath is %{public}s", runtimeOS.c_str(),
         containerFontBasePath.c_str());
     SkFontMgr::SetFontMgrConfig(runtimeOS, containerFontBasePath);
 }
@@ -139,19 +139,16 @@ private:
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
 {
-    LOGI("Ace lib loaded, CreateUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateFormContent(void* context, void* runtime, bool isCard)
 {
-    LOGI("Ace lib loaded, CreateFormUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime, isCard);
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* ability)
 {
-    LOGI("Ace lib loaded, Create SubWindowUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AppExecFwk::Ability*>(ability));
 }
 
@@ -237,7 +234,6 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 
 std::string UIContentImpl::GetContentInfo() const
 {
-    LOGI("UIContent GetContentInfo");
     return AceContainer::GetContentInfo(instanceId_);
 }
 
@@ -245,7 +241,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 {
     static std::once_flag onceFlag;
     std::call_once(onceFlag, []() {
-        LOGI("Initialize for current process.");
 #ifdef INIT_ICU_DATA_PATH
         std::string icuPath = ".";
         u_setDataDirectory(icuPath.c_str());
@@ -263,7 +258,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         deviceConfig_.orientation == DeviceOrientation::PORTRAIT ? 0 : 1, deviceConfig_.density, isRound_);
     SystemProperties::InitDeviceType(deviceConfig_.deviceType);
     SystemProperties::SetColorMode(deviceConfig_.colorMode);
-    LOGI("CreateContainer with JSDECLARATIVE frontend");
+    LOGI("CreateContainer with JSDECLARATIVE frontend, set MinPlatformVersion to %{public}d", compatibleVersion_);
     AceContainer::CreateContainer(instanceId_, FrontendType::DECLARATIVE_JS, useNewPipeline_);
     auto container = AceContainer::GetContainerInstance(instanceId_);
     CHECK_NULL_VOID(container);
@@ -327,7 +322,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->RunNativeEngineLoop();
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
-        LOGI("Set MinPlatformVersion to %{public}d", compatibleVersion_);
         pipelineContext->SetMinPlatformVersion(compatibleVersion_);
     }
     container->InitializeAppConfig(assetPath_, bundleName_, moduleName_, compileMode_);
@@ -360,7 +354,7 @@ uint32_t UIContentImpl::GetBackgroundColor()
         },
         TaskExecutor::TaskType::UI);
 
-    LOGI("UIContentImpl::GetBackgroundColor, value is %{public}u", bgColor);
+    LOGD("UIContentImpl::GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;
 }
 
@@ -389,25 +383,21 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    LOGI("Process MMI::PointerEvent");
     return EventDispatcher::GetInstance().DispatchTouchEvent(pointerEvent);
 }
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
 {
-    LOGI("Process MMI::KeyEvent");
     return EventDispatcher::GetInstance().DispatchKeyEvent(keyEvent);
 }
 
 bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
 {
-    LOGI("Process MMI::AxisEvent");
     return false;
 }
 
 bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
 {
-    LOGI("Process VsyncEvent");
     return false;
 }
 

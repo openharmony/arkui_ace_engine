@@ -81,12 +81,10 @@ public:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ProgressTheme>& theme) const
         {
             if (!themeStyle) {
-                LOGI("progress theme style is null");
                 return;
             }
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("progress_pattern", nullptr);
             if (!pattern) {
-                LOGE("Pattern of progress is null, please check!");
                 return;
             }
             const double defaultCachedAlpha = 0.4;

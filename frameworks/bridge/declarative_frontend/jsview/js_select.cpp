@@ -69,21 +69,15 @@ void JSSelect::Create(const JSCallbackInfo& info)
         for (size_t i = 0; i < size; i++) {
             std::string value;
             std::string icon;
-                JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
-                if (!indexVal->IsObject()) {
-                    LOGE("element of paramArray is not an object.");
-                    return;
-                }
-                auto indexObject = JSRef<JSObject>::Cast(indexVal);
-                auto selectValue = indexObject->GetProperty("value");
-                auto selectIcon = indexObject->GetProperty("icon");
-                if (!ParseJsString(selectValue, value)) {
-                    LOGW("selectValue is null");
-                }
-                if (!ParseJsMedia(selectIcon, icon)) {
-                    LOGI("selectIcon is null");
-                }
-
+            JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
+            if (!indexVal->IsObject()) {
+                return;
+            }
+            auto indexObject = JSRef<JSObject>::Cast(indexVal);
+            auto selectValue = indexObject->GetProperty("value");
+            auto selectIcon = indexObject->GetProperty("icon");
+            ParseJsString(selectValue, value);
+            ParseJsMedia(selectIcon, icon);
             params[i] = { value, icon };
         }
         SelectModel::GetInstance()->Create(params);
@@ -148,13 +142,12 @@ void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeE
 void JSSelect::Selected(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
     int32_t value = 0;
-    if (info.Length() > 0 && info[0]->IsNumber()) {
-        value = info[0]->ToNumber<int32_t>();
+    if (info.Length() > 0) {
+        ParseJsInteger<int32_t>(info[0], value);
     }
 
     if (value < -1) {
@@ -183,13 +176,12 @@ void ParseValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEven
 void JSSelect::Value(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
     std::string value;
-    if (info.Length() > 0 && info[0]->IsString()) {
-        value = info[0]->ToString();
+    if (info.Length() > 0) {
+        ParseJsString(info[0], value);
     }
 
     if (info.Length() > 1 && info[1]->IsFunction()) {
@@ -200,6 +192,20 @@ void JSSelect::Value(const JSCallbackInfo& info)
 
 void JSSelect::Font(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
+        auto textTheme = pipeline->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(textTheme);
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
+        SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
+        SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+        SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+        return;
+    }
+
     if (!info[0]->IsObject()) {
         return;
     }
@@ -239,7 +245,6 @@ void JSSelect::Font(const JSCallbackInfo& info)
 void JSSelect::FontColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -262,7 +267,6 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
 void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color bgColor;
@@ -282,27 +286,33 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
 
 void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        auto textTheme = pipeline->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(textTheme);
+        SelectModel::GetInstance()->SetSelectedOptionFontSize(selectTheme->GetFontSize());
+        SelectModel::GetInstance()->SetSelectedOptionFontWeight(textTheme->GetTextStyle().GetFontWeight());
+        SelectModel::GetInstance()->SetSelectedOptionFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+        SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+        return;
+    }
     if (!info[0]->IsObject()) {
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
-
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
     auto size = param->GetProperty("size");
     if (!size->IsNull()) {
         CalcDimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
             SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
         } else if (size->IsUndefined()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID(theme);
-            SelectModel::GetInstance()->SetSelectedOptionFontSize(theme->GetFontSize());
+            SelectModel::GetInstance()->SetSelectedOptionFontSize(selectTheme->GetFontSize());
         }
     }
     std::string weight;
@@ -315,13 +325,11 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
         }
         SelectModel::GetInstance()->SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight));
     }
-
     auto family = param->GetProperty("family");
     if (!family->IsNull() && family->IsString()) {
         auto familyVal = family->ToString();
         SelectModel::GetInstance()->SetSelectedOptionFontFamily(ConvertStrToFontFamilies(familyVal));
     }
-
     auto style = param->GetProperty("style");
     if (!style->IsNull() && style->IsNumber()) {
         auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
@@ -332,7 +340,6 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
 void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
@@ -353,12 +360,19 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
 void JSSelect::OptionBgColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color bgColor;
     if (!ParseJsColor(info[0], bgColor)) {
-        return;
+        if (info[0]->IsUndefined() || info[0]->IsNull()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID(theme);
+            bgColor = theme->GetBackgroundColor();
+        } else {
+            return;
+        }
     }
 
     SelectModel::GetInstance()->SetOptionBgColor(bgColor);
@@ -366,6 +380,20 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
 
 void JSSelect::OptionFont(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
+        auto textTheme = pipeline->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(textTheme);
+        SelectModel::GetInstance()->SetOptionFontSize(selectTheme->GetMenuFontSize());
+        SelectModel::GetInstance()->SetOptionFontWeight(textTheme->GetTextStyle().GetFontWeight());
+        SelectModel::GetInstance()->SetOptionFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+        SelectModel::GetInstance()->SetOptionItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+        return;
+    }
+
     if (!info[0]->IsObject()) {
         return;
     }
@@ -382,7 +410,7 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
             CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SelectTheme>();
             CHECK_NULL_VOID(theme);
-            SelectModel::GetInstance()->SetOptionFontSize(theme->GetFontSize());
+            SelectModel::GetInstance()->SetOptionFontSize(theme->GetMenuFontSize());
         }
     }
     std::string weight;
@@ -412,12 +440,19 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
 void JSSelect::OptionFontColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        if (info[0]->IsUndefined() || info[0]->IsNull()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID(theme);
+            textColor = theme->GetMenuFontColor();
+        } else {
+            return;
+        }
     }
 
     SelectModel::GetInstance()->SetOptionFontColor(textColor);
@@ -426,7 +461,6 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
 void JSSelect::OnSelected(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -446,7 +480,6 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
 void JSSelect::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     CalcDimension value;
@@ -460,7 +493,6 @@ void JSSelect::JsWidth(const JSCallbackInfo& info)
 void JSSelect::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -476,7 +508,6 @@ bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
 {
     if (info.Length() < 1) {
-        LOGE("%{public}s: The arg is supposed to have at least one argument", callerName.c_str());
         return false;
     }
     bool typeVerified = false;
@@ -515,10 +546,6 @@ bool CheckJSCallbackInfo(
                 break;
         }
     }
-    if (!typeVerified) {
-        LOGE("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
-            unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
-    }
     return typeVerified || infoTypes.size() == 0;
 }
 
@@ -547,7 +574,6 @@ void JSSelect::JsSize(const JSCallbackInfo& info)
 void JSSelect::JsPadding(const JSCallbackInfo& info)
 {
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not a string, number or object.");
         return;
     }
 
@@ -590,7 +616,6 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
 void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -603,7 +628,6 @@ void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -616,7 +640,6 @@ void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -629,7 +652,6 @@ void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -642,7 +664,6 @@ void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
 void JSSelect::SetSpace(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -650,11 +671,9 @@ void JSSelect::SetSpace(const JSCallbackInfo& info)
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        LOGI("JSSelect set space value is mull");
         value = selectTheme->GetContentSpinnerPadding();
     }
     if (LessNotEqual(value.Value(), 0.0) || value.Unit() == DimensionUnit::PERCENT) {
-        LOGI("JSSelect set space value is to small");
         value = selectTheme->GetContentSpinnerPadding();
     }
 
@@ -686,14 +705,21 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
         return;
     }
 
+    MenuAlign menuAlignObj;
+
     if (!info[0]->IsNumber()) {
-        return;
+        if (!(info[0]->IsUndefined() || info[0]->IsNull())) {
+            return;
+        }
+    } else {
+        menuAlignObj.alignType = static_cast<MenuAlignType>(info[0]->ToNumber<int32_t>());
     }
 
-    MenuAlign menuAlignObj;
-    menuAlignObj.alignType = static_cast<MenuAlignType>(info[0]->ToNumber<int32_t>());
-
     if (info.Length() > 1) {
+        if (info[1]->IsUndefined() || info[1]->IsNull()) {
+            SelectModel::GetInstance()->SetMenuAlign(menuAlignObj);
+            return;
+        }
         if (!info[1]->IsObject()) {
             return;
         }

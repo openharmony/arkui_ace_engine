@@ -24,7 +24,7 @@ void StageContext::Parse(const std::string& contents)
 {
     auto rootJson = JsonUtil::ParseJsonString(contents);
     if (!rootJson || !rootJson->IsValid()) {
-        LOGE("The config of stage application is illegal.");
+        LOGW("The format of stage application config is illegal.");
         return;
     }
     appInfo_->Parse(rootJson->GetValue("app"));

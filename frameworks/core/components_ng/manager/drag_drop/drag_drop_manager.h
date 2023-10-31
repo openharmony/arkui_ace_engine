@@ -161,9 +161,18 @@ public:
     void NotifyDragRegisterFrameNode(std::unordered_map<int32_t, WeakPtr<FrameNode>> nodes, DragEventType dragEventType,
         RefPtr<NotifyDragEvent>& notifyEvent);
 
-    void RegisterDragStatusListener(int32_t nodeId, const WeakPtr<FrameNode>& node);
+    void RegisterDragStatusListener(int32_t nodeId, const WeakPtr<FrameNode>& node)
+    {
+        auto ret = nodesForDragNotify_.try_emplace(nodeId, node);
+        if (!ret.second) {
+            nodesForDragNotify_[nodeId] = node;
+        }
+    }
 
-    void UnRegisterDragStatusListener(int32_t nodeId);
+    void UnRegisterDragStatusListener(int32_t nodeId)
+    {
+        nodesForDragNotify_.erase(nodeId);
+    }
 
     void SetNotifyInDraggedCallback(const std::function<void(void)>& callback)
     {

@@ -693,4 +693,44 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
+void JSListScroller::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSListScroller>::Declare("ListScroller");
+    JSClass<JSListScroller>::CustomMethod("getItemRectInGroup", &JSListScroller::GetItemRectInGroup);
+    JSClass<JSListScroller>::InheritAndBind<JSScroller>(globalObj, JSListScroller::Constructor,
+        JSListScroller::Destructor);
+}
+
+void JSListScroller::Constructor(const JSCallbackInfo& args)
+{
+    auto scroller = Referenced::MakeRefPtr<JSListScroller>();
+    scroller->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(scroller));
+}
+
+void JSListScroller::Destructor(JSListScroller* scroller)
+{
+    if (scroller != nullptr) {
+        scroller->DecRefCount();
+    }
+}
+
+void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
+{
+    int32_t index = -1;
+    int32_t indexInGroup = -1;
+    // Parameter passed into function must be 2.
+    if (args.Length() != 2 || !ConvertFromJSValue(args[0], index) || !ConvertFromJSValue(args[1], indexInGroup)) {
+        LOGW("Invalid object params.");
+        return;
+    }
+    auto scrollController = GetController().Upgrade();
+    if (scrollController) {
+        auto rectObj = CreateRectangle(scrollController->GetItemRectInGroup(index, indexInGroup));
+        JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
+        args.SetReturnValue(rect);
+    } else {
+        LOGE("controller_ is nullptr");
+    }
+}
 } // namespace OHOS::Ace::Framework

@@ -156,7 +156,6 @@ void JSRenderingContext::Constructor(const JSCallbackInfo& args)
             JSRenderingContextSettings* jsContextSetting =
                 JSRef<JSObject>::Cast(args[0])->Unwrap<JSRenderingContextSettings>();
             if (jsContextSetting == nullptr) {
-                LOGE("jsContextSetting is null");
                 return;
             }
             bool anti = jsContextSetting->GetAntialias();
@@ -207,11 +206,9 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
 void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     if (!info[0]->IsObject()) {
-        LOGE("The arg is not Object or String.");
         return;
     }
     uint32_t id = 0;

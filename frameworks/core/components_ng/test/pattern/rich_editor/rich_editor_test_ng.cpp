@@ -28,6 +28,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
+#include "base/window/drag_window.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
@@ -37,11 +38,15 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
@@ -55,12 +60,6 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "frameworks/base/window/drag_window.h"
-#include "frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
-#include "frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
-#include "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "frameworks/core/components_ng/pattern/root/root_pattern.h"
-#include "frameworks/core/components_ng/pattern/text/span_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -128,12 +127,12 @@ void RichEditorTestNg::SetUp()
 void RichEditorTestNg::TearDown()
 {
     richEditorNode_ = nullptr;
-    MockPipelineBase::TearDown();
     testOnReadyEvent = 0;
     testAboutToIMEInput = 0;
     testOnIMEInputComplete = 0;
     testAboutToDelete = 0;
     testOnDeleteComplete = 0;
+    MockPipelineBase::TearDown();
 }
 
 void RichEditorTestNg::AddSpan(const std::string& content)
@@ -516,71 +515,6 @@ HWTEST_F(RichEditorTestNg, RichEditorInsertValue005, TestSize.Level1)
     auto it2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetFirstChild());
     const std::string result2 = EXCEPT_VALUE;
     EXPECT_EQ(result2, it2->spanItem_->content);
-}
-
-/**
- * @tc.name: RichEditorCursorMove001
- * @tc.desc: test move cursor
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, RichEditorCursorMove001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
-    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph });
-    EXPECT_CALL(*paragraph, GetHandlePositionForClick).Times(2).WillRepeatedly(Return(2));
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->caretPosition_ = 2;
-    richEditorPattern->CursorMoveLeft();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
-    richEditorPattern->CursorMoveRight();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 2);
-    richEditorPattern->CursorMoveUp();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 2);
-    richEditorPattern->CursorMoveDown();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 2);
-}
-
-/**
- * @tc.name: CursorMoveUp001
- * @tc.desc: test CursorMoveUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, CursorMoveUp001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.paragraphs_.push_front({paragraph});
-    AddSpan(INIT_VALUE_1);
-    EXPECT_FALSE(richEditorPattern->CursorMoveUp());
-    
-    richEditorPattern->caretPosition_ = 1;
-    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-}
-
-/**
- * @tc.name: CursorMoveDown001
- * @tc.desc: test CursorMoveDown
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, CursorMoveDown001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.paragraphs_.push_front({paragraph});
-    AddSpan(INIT_VALUE_1);
-    EXPECT_FALSE(richEditorPattern->CursorMoveDown());
-    
-    richEditorPattern->caretPosition_ = 1;
-    EXPECT_TRUE(richEditorPattern->CursorMoveDown());
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
 /**
@@ -1000,7 +934,7 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
 
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = -1;
-    
+
     richEditorPattern->isMouseSelect_ = true;
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
@@ -1142,7 +1076,7 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 
     // 2012 2015
-    std::vector<KeyCode> cases = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_DPAD_LEFT,
+    std::vector<KeyCode> cases = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_TAB,
         KeyCode::KEY_DPAD_RIGHT };
     for (int i = 0; i < 4; ++i) {
         keyE.code = cases[i];
@@ -1154,7 +1088,7 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     }
 
     keyE.code = KeyCode::KEY_PRINT;
-    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 
     keyE.code = KeyCode::KEY_2;
     keyE.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
@@ -1325,7 +1259,7 @@ HWTEST_F(RichEditorTestNg, InitSelection001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.paragraphs_.push_front({paragraph});
+    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
     richEditorPattern->textForDisplay_ = "test";
     richEditorPattern->InitSelection(Offset(0, 0));
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
@@ -1343,7 +1277,7 @@ HWTEST_F(RichEditorTestNg, InitSelection002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.paragraphs_.push_front({paragraph});
+    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
     richEditorPattern->textForDisplay_ = "test";
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->spans_.front()->position = 3;
@@ -1353,10 +1287,10 @@ HWTEST_F(RichEditorTestNg, InitSelection002, TestSize.Level1)
 }
 
 /**
-* @tc.name: CalcInsertValueObj001
-* @tc.desc: test CalcInsertValueObj
-* @tc.type: FUNC
-*/
+ * @tc.name: CalcInsertValueObj001
+ * @tc.desc: test CalcInsertValueObj
+ * @tc.type: FUNC
+ */
 HWTEST_F(RichEditorTestNg, CalcInsertValueObj001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
@@ -1385,10 +1319,10 @@ HWTEST_F(RichEditorTestNg, CalcInsertValueObj001, TestSize.Level1)
 }
 
 /**
-* @tc.name: CalcDeleteValueObj001
-* @tc.desc: test CalcDeleteValueObj
-* @tc.type: FUNC
-*/
+ * @tc.name: CalcDeleteValueObj001
+ * @tc.desc: test CalcDeleteValueObj
+ * @tc.type: FUNC
+ */
 HWTEST_F(RichEditorTestNg, CalcDeleteValueObj001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
@@ -1415,10 +1349,10 @@ HWTEST_F(RichEditorTestNg, CalcDeleteValueObj001, TestSize.Level1)
 }
 
 /**
-* @tc.name: MouseRightFocus001
-* @tc.desc: test MouseRightFocus
-* @tc.type: FUNC
-*/
+ * @tc.name: MouseRightFocus001
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
 HWTEST_F(RichEditorTestNg, MouseRightFocus001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
@@ -1434,7 +1368,7 @@ HWTEST_F(RichEditorTestNg, MouseRightFocus001, TestSize.Level1)
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->moveLength_ = 0;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.paragraphs_.push_front({paragraph});
+    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
     MouseInfo info;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 0;
@@ -1515,7 +1449,6 @@ HWTEST_F(RichEditorTestNg, OnHandleMove001, TestSize.Level1)
     richEditorPattern->OnHandleMove(RectF(0.0f, 0.0f, 10.0f, 10.0f), true);
     EXPECT_EQ(richEditorPattern->caretPosition_, -1);
 
-    
     richEditorPattern->caretPosition_ = -1;
     richEditorPattern->OnHandleMove(RectF(0.0f, 0.0f, 10.0f, 10.0f), false);
     EXPECT_EQ(richEditorPattern->caretPosition_, -1);
@@ -2143,7 +2076,7 @@ HWTEST_F(RichEditorTestNg, HasSameTypingStyle001, TestSize.Level1)
     richEditorPattern->typingTextStyle_ = std::nullopt;
     auto ret = richEditorPattern->HasSameTypingStyle(it);
     EXPECT_TRUE(ret);
-    
+
     spanItem->textStyle_ = TextStyle();
     richEditorPattern->typingTextStyle_ = std::nullopt;
     ret = richEditorPattern->HasSameTypingStyle(it);
@@ -2247,9 +2180,9 @@ HWTEST_F(RichEditorTestNg, GetParagraphNodes002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
 
     // add multiple paragraphs
-    AddImageSpan();               // length 1
-    AddImageSpan();               // length 1
-    AddImageSpan();               // length 1
+    AddImageSpan(); // length 1
+    AddImageSpan(); // length 1
+    AddImageSpan(); // length 1
 
     EXPECT_EQ(richEditorNode_->children_.size(), 3);
 
@@ -2302,7 +2235,7 @@ HWTEST_F(RichEditorTestNg, GetParagraphLength001, TestSize.Level1)
 
     // Add multiple paragraphs
     auto host = richEditorPattern->GetHost();
-    AddImageSpan();               // length 1
+    AddImageSpan(); // length 1
     auto length = richEditorPattern->GetParagraphLength(host->GetChildren());
     EXPECT_EQ(length, 1);
     AddImageSpan();

@@ -68,6 +68,7 @@ public:
     void ExecuteRecycle(const std::string& viewName);
     void ExecuteAboutToRecycle();
     void ExecuteSetActive(bool active);
+    void ExecuteOnDumpInfo(const std::vector<std::string>& params);
 
     bool HasPageTransition() const;
     bool HasMeasure() const;
@@ -115,6 +116,7 @@ private:
     JSWeak<JSFunc> jsRecycleFunc_;
     JSWeak<JSFunc> jsAboutToRecycleFunc_;
     JSWeak<JSFunc> jsSetActive_;
+    JSWeak<JSFunc> jsOnDumpInfo_;
 
     JSExecutionContext context_;
 };

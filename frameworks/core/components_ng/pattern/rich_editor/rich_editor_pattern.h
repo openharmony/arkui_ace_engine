@@ -134,6 +134,10 @@ public:
     void DeleteBackward(int32_t length = 0) override;
     void DeleteForward(int32_t length) override;
     void SetInputMethodStatus(bool keyboardShown) override;
+    void NotifyKeyboardClosedByUser() override
+    {
+        FocusHub::LostFocusToViewRoot();
+    }
     bool CursorMoveLeft() override;
     bool CursorMoveRight() override;
     bool CursorMoveUp() override;
@@ -142,7 +146,7 @@ public:
     int32_t GetCaretPosition();
     int32_t GetTextContentLength();
     bool GetCaretVisible() const;
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight, bool downStreamFirst = false);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
@@ -188,6 +192,21 @@ public:
     OffsetF GetRightClickOffset() const
     {
         return rightClickOffset_;
+    }
+
+    OffsetF GetLastClickOffset() const
+    {
+        return lastClickOffset_;
+    }
+
+    void SetLastClickOffset(const OffsetF& lastClickOffset)
+    {
+        lastClickOffset_ = lastClickOffset;
+    }
+
+    void ResetLastClickOffset()
+    {
+        lastClickOffset_.Reset();
     }
 
     int32_t GetCaretSpanIndex()
@@ -243,11 +262,6 @@ public:
     void OnColorConfigurationUpdate() override {}
     bool IsDisabled() const;
     float GetLineHeight() const override;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
-#else
-    std::vector<RSTextRect> GetTextBoxes() override;
-#endif
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
@@ -270,6 +284,7 @@ private:
     void HandleBlurEvent();
     void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
+    void CalcCaretInfoByClick(GestureEvent& info);
     void HandleEnabled();
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
@@ -373,6 +388,7 @@ private:
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
     OffsetF rightClickOffset_;
+    OffsetF lastClickOffset_;
     std::string pasteStr_;
 
     // still in progress
@@ -391,8 +407,9 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
     std::map<std::pair<RichEditorType, ResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
     std::optional<RichEditorType> selectedType_;
-
+    
     std::function<void()> customKeyboardBuilder_;
+    Offset selectionMenuOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

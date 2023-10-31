@@ -78,8 +78,13 @@ void DrawCalendarText(
     SkCanvas* canvas, const std::string& text, const Rosen::TextStyle& textStyle, const Rect& boxRect, Rect& textRect)
 #endif
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
 void DrawCalendarText(RSCanvas* canvas,
     const std::string& text, const txt::TextStyle& textStyle, const Rect& boxRect, Rect& textRect)
+#else
+void DrawCalendarText(RSCanvas* canvas,
+    const std::string& text, const Rosen::TextStyle& textStyle, const Rect& boxRect, Rect& textRect)
+#endif
 #endif
 {
     // The lunar calendar description is truncated by more than three characters.
@@ -117,8 +122,13 @@ void DrawCalendarText(SkCanvas* canvas, const std::string& text, const txt::Text
 void DrawCalendarText(SkCanvas* canvas, const std::string& text, const Rosen::TextStyle& textStyle, const Rect& boxRect)
 #endif
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
 void DrawCalendarText(RSCanvas* canvas,
     const std::string& text, const txt::TextStyle& textStyle, const Rect& boxRect)
+#else
+void DrawCalendarText(RSCanvas* canvas,
+    const std::string& text, const Rosen::TextStyle& textStyle, const Rect& boxRect)
+#endif
 #endif
 {
     Rect textRect;
@@ -428,8 +438,13 @@ void RosenRenderCalendar::PaintDay(
     SkCanvas* canvas, const Offset& offset, const CalendarDay& day, Rosen::TextStyle& textStyle) const
 #endif
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderCalendar::PaintDay(
     RSCanvas* canvas, const Offset& offset, const CalendarDay& day, txt::TextStyle& textStyle) const
+#else
+void RosenRenderCalendar::PaintDay(
+    RSCanvas* canvas, const Offset& offset, const CalendarDay& day, Rosen::TextStyle& textStyle) const
+#endif
 #endif
 {
     // paint day
@@ -526,13 +541,21 @@ void RosenRenderCalendar::PaintDay(
                 }
 #else
                 if (day.dayMark == "work") {
+#ifndef USE_GRAPHIC_TEXT_GINE
                     workStateStyle.font_size = workDayMarkSize_;
+#else
+                    workStateStyle.fontSize = workDayMarkSize_;
+#endif
                     workStateStyle.color = isV2Component_ ?
                         RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(workDayMarkColor_),
                         RSColor::ColorQuadGetG(workDayMarkColor_), RSColor::ColorQuadGetB(workDayMarkColor_),
                         WEEKEND_TRANSPARENT) : nonCurrentMonthWorkDayMarkColor_;
                 } else if (day.dayMark == "off") {
+#ifndef USE_GRAPHIC_TEXT_GINE
                     workStateStyle.font_size = offDayMarkSize_;
+#else
+                    workStateStyle.fontSize = offDayMarkSize_;
+#endif
                     workStateStyle.color = isV2Component_ ?
                         RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(offDayMarkColor_),
                         RSColor::ColorQuadGetG(offDayMarkColor_), RSColor::ColorQuadGetB(offDayMarkColor_),
@@ -560,8 +583,13 @@ void RosenRenderCalendar::PaintLunarDay(
     SkCanvas* canvas, const Offset& offset, const CalendarDay& day, const Rosen::TextStyle& textStyle) const
 #endif
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderCalendar::PaintLunarDay(
     RSCanvas* canvas, const Offset& offset, const CalendarDay& day, const txt::TextStyle& textStyle) const
+#else
+void RosenRenderCalendar::PaintLunarDay(
+    RSCanvas* canvas, const Offset& offset, const CalendarDay& day, const Rosen::TextStyle& textStyle) const
+#endif
 #endif
 {
     Rect boxRect;

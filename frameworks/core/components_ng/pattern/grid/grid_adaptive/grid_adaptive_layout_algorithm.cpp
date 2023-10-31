@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 
 void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    gridLayoutInfo_.gridMatrix_.clear();
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
     auto layoutDirection = gridLayoutProperty->GetGridDirection().value_or(FlexDirection::ROW);
@@ -85,13 +86,12 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto maxCrossCount = std::max(static_cast<int32_t>(std::ceil(static_cast<float>(childrenCount) / mainCount_)), 1);
     crossCount_ = std::clamp(crossCount_, 1, maxCrossCount);
     displayCount_ = std::min(childrenCount, mainCount_ * crossCount_);
-    LOGI("axis: %{public}d, main count: %{public}d, cross count: %{public}d, displayCount: %{public}d, gridCellSize: "
-         "%{public}s",
-        axis, mainCount_, crossCount_, displayCount_, gridCellSize_.ToString().c_str());
 
     // Update frame size.
     auto rowCount = axis == Axis::HORIZONTAL ? crossCount_ : mainCount_;
     auto columnCount = axis == Axis::HORIZONTAL ? mainCount_ : crossCount_;
+    rowCount_ = rowCount;
+    columnCount_ = columnCount;
     idealSize.UpdateIllegalSizeWithCheck(
         OptionalSizeF(columnCount * gridCellSize_.Width() + (columnCount - 1) * columnsGap,
             rowCount * gridCellSize_.Height() + (rowCount - 1) * rowsGap));
@@ -140,7 +140,6 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             itemIdex = crossLine.second;
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIdex);
             if (!wrapper) {
-                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIdex);
                 continue;
             }
             auto layoutProperty = wrapper->GetLayoutProperty();
@@ -151,9 +150,13 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
         }
     }
+    gridLayoutInfo_.crossCount_ = columnCount_;
+    gridLayoutInfo_.endIndex_ = displayCount_ - 1;
+    gridLayoutInfo_.startMainLineIndex_ = 0;
+    gridLayoutInfo_.endMainLineIndex_ = rowCount_ - 1;
 }
 
-OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper) const
+OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper)
 {
     auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
     auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -185,9 +188,10 @@ OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutW
             rowIndex = mainCount_ - index % mainCount_ - 1;
             break;
         default:
-            LOGI("%{public}d is not support", layoutDirection);
+            TAG_LOGI(AceLogTag::ACE_GRID, "%{public}d is not support", layoutDirection);
             break;
     }
+    gridLayoutInfo_.gridMatrix_[rowIndex][columnIndex] = index;
 
     auto positionX = columnIndex * (gridCellSize_.Width() + columnsGap);
     auto positionY = rowIndex * (gridCellSize_.Height() + rowsGap);

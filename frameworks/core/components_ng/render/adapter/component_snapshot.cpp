@@ -42,15 +42,12 @@ public:
             return;
         }
         if (!pixelMap) {
-            LOGW("snapshot creation failed");
-
             callback_(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, [node = node_]() {
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 Inspector::RemoveOffscreenNode(frameNode);
             });
         } else {
-            LOGI("snapshot created successfully");
             callback_(pixelMap, Framework::ERROR_CODE_NO_ERROR, [node = node_]() {
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
@@ -78,13 +75,11 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
 {
     auto node = Inspector::GetFrameNodeByKey(componentId);
     if (!node) {
-        LOGW("node not found %{public}s", componentId.c_str());
         callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
     auto rsNode = GetRsNode(node);
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    LOGI("TakeSurfaceCaptureForUI");
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr));
 }
 
@@ -93,7 +88,6 @@ void ComponentSnapshot::Create(
 {
     auto node = AceType::DynamicCast<FrameNode>(customNode);
     if (!node) {
-        LOGW("builder is invalid");
         callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }

@@ -29,17 +29,14 @@ DeclarativeFrontendNG::~DeclarativeFrontendNG() noexcept
 void DeclarativeFrontendNG::Destroy()
 {
     CHECK_RUN_ON(JS);
-    LOGI("DeclarativeFrontendNG Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread
     delegate_.Reset();
     jsEngine_->Destroy();
     jsEngine_.Reset();
-    LOGI("DeclarativeFrontendNG Destroy end.");
 }
 
 bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
-    LOGI("DeclarativeFrontendNG initialize begin.");
     type_ = type;
     taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
@@ -62,13 +59,11 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
     } else {
         initJSEngineTask();
     }
-    LOGI("DeclarativeFrontendNG initialize end.");
     return true;
 }
 
 void DeclarativeFrontendNG::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    LOGI("DeclarativeFrontendNG AttachPipelineContext.");
     if (delegate_) {
         delegate_->AttachPipelineContext(context);
     }
@@ -76,7 +71,6 @@ void DeclarativeFrontendNG::AttachPipelineContext(const RefPtr<PipelineBase>& co
 
 void DeclarativeFrontendNG::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    LOGI("DeclarativeFrontendNG AttachSubPipelineContext.");
     if (!delegate_) {
         return;
     }
@@ -85,7 +79,6 @@ void DeclarativeFrontendNG::AttachSubPipelineContext(const RefPtr<PipelineBase>&
 
 void DeclarativeFrontendNG::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 {
-    LOGI("DeclarativeFrontendNG SetAssetManager.");
     if (delegate_) {
         delegate_->SetAssetManager(assetManager);
     }
@@ -323,7 +316,6 @@ void DeclarativeFrontendNG::OnRemoteTerminated()
 void DeclarativeFrontendNG::NotifyAppStorage(const std::string& key, const std::string& value)
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return;
     }
     delegate_->NotifyAppStorage(jsEngine_, key, value);
@@ -340,7 +332,6 @@ int32_t DeclarativeFrontendNG::GetRouterSize() const
 bool DeclarativeFrontendNG::OnStartContinuation()
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return false;
     }
     return delegate_->OnStartContinuation();
@@ -349,7 +340,6 @@ bool DeclarativeFrontendNG::OnStartContinuation()
 bool DeclarativeFrontendNG::OnRestoreData(const std::string& data)
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return false;
     }
     return delegate_->OnRestoreData(data);
@@ -407,14 +397,12 @@ void DeclarativeFrontendNG::NavigatePage(uint8_t type, const PageTarget& target,
 
 void DeclarativeFrontendNG::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
-    LOGW("OnWindowDisplayModeChanged not implemented");
     delegate_->OnWindowDisplayModeChanged(isShownInMultiWindow, data);
 }
 
 RefPtr<AccessibilityManager> DeclarativeFrontendNG::GetAccessibilityManager() const
 {
     if (!delegate_) {
-        LOGE("GetAccessibilityManager delegate is null");
         return nullptr;
     }
     return delegate_->GetJSAccessibilityManager();
@@ -424,7 +412,6 @@ WindowConfig& DeclarativeFrontendNG::GetWindowConfig()
 {
     if (!delegate_) {
         static WindowConfig windowConfig;
-        LOGW("delegate is null, return default config");
         return windowConfig;
     }
     return delegate_->GetWindowConfig();
@@ -553,7 +540,6 @@ void DeclarativeFrontendNG::SetColorMode(ColorMode colorMode)
 
 void DeclarativeFrontendNG::RebuildAllPages()
 {
-    LOGW("RebuildAllPages not implemented");
     if (delegate_) {
         delegate_->RebuildAllPages();
     }

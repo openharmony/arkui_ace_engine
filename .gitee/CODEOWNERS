@@ -11,6 +11,9 @@ adapter/ohos/capability/udmf/  @echoorchid @LongLie
 adapter/ohos/capability/window_connection/  @lushi1202
 adapter/ohos/capability/window_connection_ng/  @lushi1202
 adapter/ohos/entrance/pa_engine/  @jayleehw
+adapter/ohos/osal/ace_trace.cpp  @lushi1202
+adapter/ohos/osal/anr_thread.cpp  @lushi1202
+adapter/ohos/osal/log_wrapper.cpp  @lushi1202
 
 [Preview adapter]
 adapter/preview/ @laigerendaqiu
@@ -28,17 +31,29 @@ frameworks/core/components_ng/render/adapter/  @yan-shuifeng @sunfei2021
 frameworks/core/components_ng/layout/  @yan-shuifeng @yangfan229
 frameworks/core/components_ng/property/  @yan-shuifeng
 frameworks/core/components_ng/syntax/  @yan-shuifeng @lightningHo
-frameworks/core/components_ng/manager/safe_area/  @zhoutianer
+frameworks/core/components_ng/manager/safe_area/  @xiexiyun
 
 [Common source]
 frameworks/core/common/  @yan-shuifeng @sunfei2021
+
+[State Management]
+frameworks/bridge/declarative_frontend/state_mgmt/   @guido_grassel @s10021109
+frameworks/bridge/engine/stateMgmt.js   @guido_grassel @s10021109
+
+[JS Frontend Core]
+frameworks/bridge/declarative_frontend/jsview/js_view.h       @yan-shuifeng @guido_grassel 
+frameworks/bridge/declarative_frontend/jsview/js_view.cpp     @yan-shuifeng @guido_grassel 
+frameworks/bridge/declarative_frontend/jsview/js_view_functions.h     @yan-shuifeng @guido_grassel 
+frameworks/bridge/declarative_frontend/jsview/js_view_functions.cpp   @yan-shuifeng @guido_grassel 
+frameworks/bridge/declarative_frontend/view_stack_processor.cpp  @yan-shuifeng @guido_grassel 
+frameworks/bridge/declarative_frontend/view_stack_processor.h    @yan-shuifeng @guido_grassel 
 
 [UI Components]
 frameworks/core/components_ng/pattern/ability_component/  @lushi1202
 frameworks/core/components_ng/pattern/action_sheet/  @cheng-feiwang
 frameworks/core/components_ng/pattern/animator/  @hehongyang9
 frameworks/core/components_ng/pattern/app_bar/  @catpoison
-frameworks/core/components_ng/pattern/badge/  @nickyjd
+frameworks/core/components_ng/pattern/badge/  @Hu_ZeQi
 frameworks/core/components_ng/pattern/blank/  @xiexiyun
 frameworks/core/components_ng/pattern/bubble/  @cheng-feiwang
 frameworks/core/components_ng/pattern/button/  @luoying_ace_admin
@@ -49,44 +64,44 @@ frameworks/core/components_ng/pattern/checkbox/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/checkboxgroup/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/common_view/  @yangfan229
 frameworks/core/components_ng/pattern/container_modal/  @catpoison
-frameworks/core/components_ng/pattern/counter/  @luoying_ace_admin
+frameworks/core/components_ng/pattern/counter/  @aryawang
 frameworks/core/components_ng/pattern/custom/  @yan-shuifeng
 frameworks/core/components_ng/pattern/custom_paint/  @keerecles
-frameworks/core/components_ng/pattern/data_panel/  @xzken
+frameworks/core/components_ng/pattern/data_panel/  @Hu_ZeQi
 frameworks/core/components_ng/pattern/dialog/  @cheng-feiwang
 frameworks/core/components_ng/pattern/divider/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/effect_component/  @liuchao92
 frameworks/core/components_ng/pattern/flex/  @xiexiyun
 frameworks/core/components_ng/pattern/form/  @wangchensu1
-frameworks/core/components_ng/pattern/gauge/  @luoying_ace_admin
+frameworks/core/components_ng/pattern/gauge/  @Hu_ZeQi
 frameworks/core/components_ng/pattern/gesture/  @zheng-qiyi
 frameworks/core/components_ng/pattern/grid/  @zcdqs
 frameworks/core/components_ng/pattern/grid_col/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_row/  @xiexiyun
 frameworks/core/components_ng/pattern/hyperlink/  @techbuilding
-frameworks/core/components_ng/pattern/image/  @zhoutianer
+frameworks/core/components_ng/pattern/image/  @xiexiyun
 frameworks/core/components_ng/pattern/image_animator/  @hehongyang9
 frameworks/core/components_ng/pattern/indexer/  @aryawang
 frameworks/core/components_ng/pattern/linear_layout/  @xiexiyun
 frameworks/core/components_ng/pattern/linear_split/  @xiexiyun
 frameworks/core/components_ng/pattern/list/  @yeyinglong_admin
-frameworks/core/components_ng/pattern/loading_progress/  @cheng-feiwang
+frameworks/core/components_ng/pattern/loading_progress/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/marquee/  @aryawang
 frameworks/core/components_ng/pattern/menu/  @cheng-feiwang
 frameworks/core/components_ng/pattern/model/  @
-frameworks/core/components_ng/pattern/navigation/  @Armstrong15
-frameworks/core/components_ng/pattern/navigator/  @Armstrong15
-frameworks/core/components_ng/pattern/navrouter/  @Armstrong15
+frameworks/core/components_ng/pattern/navigation/  @tsj_2020
+frameworks/core/components_ng/pattern/navigator/  @tsj_2020
+frameworks/core/components_ng/pattern/navrouter/  @tsj_2020
 frameworks/core/components_ng/pattern/option/  @cheng-feiwang
 frameworks/core/components_ng/pattern/overlay/  @yangfan229
 frameworks/core/components_ng/pattern/panel/  @zhou-chaobo
-frameworks/core/components_ng/pattern/patternlock/  @cheng-feiwang
+frameworks/core/components_ng/pattern/patternlock/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/picker/  @cheng-feiwang
 frameworks/core/components_ng/pattern/plugin/  @wangchensu1 @keerecles @ZhangYu-Home
 frameworks/core/components_ng/pattern/preview_mock/  @laigerendaqiu
-frameworks/core/components_ng/pattern/progress/  @cheng-feiwang
-frameworks/core/components_ng/pattern/qrcode/  @techbuilding
+frameworks/core/components_ng/pattern/progress/  @Zhang-Dong-hui
+frameworks/core/components_ng/pattern/qrcode/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/radio/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/rating/  @cheng-feiwang
 frameworks/core/components_ng/pattern/recycle_view/  @guozejun
@@ -94,7 +109,7 @@ frameworks/core/components_ng/pattern/refresh/  @aryawang
 frameworks/core/components_ng/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/pattern/rich_editor/  @jyj-0306
+frameworks/core/components_ng/pattern/rich_editor/  @wu-yinxiao
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
@@ -113,11 +128,11 @@ frameworks/core/components_ng/pattern/swiper/  @xuzhidan
 frameworks/core/components_ng/pattern/swiper_indicator/  @xuzhidan
 frameworks/core/components_ng/pattern/tabs/  @xuzhidan
 frameworks/core/components_ng/pattern/text/  @lijuan124
-frameworks/core/components_ng/pattern/text_clock/  @lijuan124
+frameworks/core/components_ng/pattern/text_clock/  @aryawang
 frameworks/core/components_ng/pattern/text_drag/  @zhaojian2021
-frameworks/core/components_ng/pattern/text_field/  @xiexiyun
+frameworks/core/components_ng/pattern/text_field/  @jyj_0306  @lijuan124
 frameworks/core/components_ng/pattern/text_picker/  @cheng-feiwang
-frameworks/core/components_ng/pattern/texttimer/  @lijuan124
+frameworks/core/components_ng/pattern/texttimer/  @aryawang
 frameworks/core/components_ng/pattern/time_picker/  @cheng-feiwang
 frameworks/core/components_ng/pattern/toast/  @cheng-feiwang
 frameworks/core/components_ng/pattern/toggle/  @luoying_ace_admin
@@ -131,7 +146,7 @@ frameworks/core/components_ng/pattern/xcomponent/  @sunbees
 frameworks/core/components/ability_component/  @lushi1202
 frameworks/core/components/align/  @yangfan229
 frameworks/core/components/arc/  @aryawang
-frameworks/core/components/badge/  @nickyjd
+frameworks/core/components/badge/  @Hu_ZeQi
 frameworks/core/components/box/  @yangfan229
 frameworks/core/components/bubble/  @cheng-feiwang
 frameworks/core/components/button/  @luoying_ace_admin
@@ -147,7 +162,7 @@ frameworks/core/components/counter/  @luoying_ace_admin
 frameworks/core/components/coverage/  @
 frameworks/core/components/custom_dialog/  @cheng-feiwang
 frameworks/core/components/custom_paint/  @keerecles
-frameworks/core/components/data_panel/  @xzken
+frameworks/core/components/data_panel/  @Hu_ZeQi
 frameworks/core/components/declaration/  @cc520bf
 frameworks/core/components/dialog/  @cheng-feiwang
 frameworks/core/components/dialog_modal/  @cheng-feiwang
@@ -160,7 +175,7 @@ frameworks/core/components/flex/  @yangfan229
 frameworks/core/components/focus_animation/  @catpoison
 frameworks/core/components/focus_collaboration/  @catpoison
 frameworks/core/components/focusable/  @catpoison
-frameworks/core/components/font/  @jyj-0306
+frameworks/core/components/font/  @jyj_0306
 frameworks/core/components/foreach/  @yan-shuifeng
 frameworks/core/components/form/  @wangchensu1
 frameworks/core/components/gesture_listener/  @zheng-qiyi
@@ -168,15 +183,15 @@ frameworks/core/components/grid/  @zcdqs
 frameworks/core/components/grid_layout/  @zcdqs
 frameworks/core/components/hyperlink/  @techbuilding
 frameworks/core/components/ifelse/  @yan-shuifeng
-frameworks/core/components/image/  @zhoutianer
+frameworks/core/components/image/  @xiexiyun
 frameworks/core/components/indexer/  @aryawang
 frameworks/core/components/list/  @yeyinglong_admin
 frameworks/core/components/marquee/  @aryawang
 frameworks/core/components/menu/  @cheng-feiwang
 frameworks/core/components/mouse_listener/  @catpoison
 frameworks/core/components/multimodal/  @
-frameworks/core/components/navigation_bar/  @Armstrong15
-frameworks/core/components/navigator/  @Armstrong15
+frameworks/core/components/navigation_bar/  @tsj_2020
+frameworks/core/components/navigator/  @tsj_2020
 frameworks/core/components/option/  @cheng-feiwang
 frameworks/core/components/overlay/  @yangfan229
 frameworks/core/components/padding/  @yangfan229
@@ -188,9 +203,9 @@ frameworks/core/components/piece/  @cheng-feiwang
 frameworks/core/components/plugin/  @wangchensu1
 frameworks/core/components/popup/  @fengjituo111
 frameworks/core/components/positioned/  @yangfan229
-frameworks/core/components/progress/  @cheng-feiwang
+frameworks/core/components/progress/  @Zhang-Dong-hui
 frameworks/core/components/proxy/  @yan-shuifeng
-frameworks/core/components/qrcode/  @techbuilding
+frameworks/core/components/qrcode/  @Zhang-Dong-hui
 frameworks/core/components/rating/  @cheng-feiwang
 frameworks/core/components/refresh/  @aryawang
 frameworks/core/components/relative_container/  @nickyjd
@@ -215,15 +230,15 @@ frameworks/core/components/split_container/  @
 frameworks/core/components/stack/  @nickyjd
 frameworks/core/components/stage/  @yan-shuifeng
 frameworks/core/components/stepper/  @tsj_2020
-frameworks/core/components/svg/  @zhoutianer
+frameworks/core/components/svg/  @xiexiyun
 frameworks/core/components/swiper/  @xuzhidan
 frameworks/core/components/tab_bar/  @xuzhidan
 frameworks/core/components/text/  @lijuan124
-frameworks/core/components/text_clock/  @lijuan124
-frameworks/core/components/text_field/  @xiexiyun
+frameworks/core/components/text_clock/  @aryawang
+frameworks/core/components/text_field/  @jyj_0306  @lijuan124
 frameworks/core/components/text_overlay/  @yangfan229
 frameworks/core/components/text_span/  @lijuan124
-frameworks/core/components/texttimer/  @lijuan124
+frameworks/core/components/texttimer/  @aryawang
 frameworks/core/components/theme/  @yan-shuifeng
 frameworks/core/components/tip/  @
 frameworks/core/components/toast/  @
@@ -261,9 +276,9 @@ frameworks/core/gestures/  @zheng-qiyi
 frameworks/core/components_ng/gestures/  @zheng-qiyi
 
 [Image source]
-frameworks/core/image/  @zhoutianer
-frameworks/core/components_ng/image_provider/  @zhoutianer
-frameworks/core/components_ng/svg/  @zhoutianer
+frameworks/core/image/  @xiexiyun
+frameworks/core/components_ng/image_provider/  @xiexiyun
+frameworks/core/components_ng/svg/  @xiexiyun
 
 [Advanced UI Components]
 advanced_ui_component/ @youzhi92
@@ -315,7 +330,7 @@ frameworks/core/components_ng/test/pattern/ability_component/  @lushi1202
 frameworks/core/components_ng/test/pattern/action_sheet/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/animator/  @suiwuyue
 frameworks/core/components_ng/test/pattern/app_bar/  @suiwuyue
-frameworks/core/components_ng/test/pattern/badge/  @nickyjd
+frameworks/core/components_ng/test/pattern/badge/  @Hu_ZeQi
 frameworks/core/components_ng/test/pattern/blank/  @xiexiyun
 frameworks/core/components_ng/test/pattern/bubble/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/button/  @luoying_ace_admin
@@ -326,44 +341,44 @@ frameworks/core/components_ng/test/pattern/checkbox/  @luoying_ace_admin
 frameworks/core/components_ng/test/pattern/checkboxgroup/  @luoying_ace_admin
 frameworks/core/components_ng/test/pattern/common_view/  @yangfan229
 frameworks/core/components_ng/test/pattern/container_modal/  @suiwuyue
-frameworks/core/components_ng/test/pattern/counter/  @luoying_ace_admin
+frameworks/core/components_ng/test/pattern/counter/  @aryawang
 frameworks/core/components_ng/test/pattern/custom/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/custom_paint/  @keerecles
-frameworks/core/components_ng/test/pattern/data_panel/  @jinweiliu
+frameworks/core/components_ng/test/pattern/data_panel/  @Hu_ZeQi
 frameworks/core/components_ng/test/pattern/dialog/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/divider/  @luoying_ace_admin
 frameworks/core/components_ng/test/pattern/effect_component/  @liuchao92
 frameworks/core/components_ng/test/pattern/flex/  @yangfan229
 frameworks/core/components_ng/test/pattern/form/  @wangchensu1
-frameworks/core/components_ng/test/pattern/gauge/  @luoying_ace_admin
+frameworks/core/components_ng/test/pattern/gauge/  @Hu_ZeQi
 frameworks/core/components_ng/test/pattern/gesture/  @zheng-qiyi
 frameworks/core/components_ng/test/pattern/grid/  @suiwuyue
 frameworks/core/components_ng/test/pattern/grid_col/  @xiexiyun
 frameworks/core/components_ng/test/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/test/pattern/grid_row/  @xiexiyun
 frameworks/core/components_ng/test/pattern/hyperlink/  @jinweiliu
-frameworks/core/components_ng/test/pattern/image/  @zhoutianer
+frameworks/core/components_ng/test/pattern/image/  @xiexiyun
 frameworks/core/components_ng/test/pattern/image_animator/  @suiwuyue
 frameworks/core/components_ng/test/pattern/indexer/  @suiwuyue
 frameworks/core/components_ng/test/pattern/linear_layout/  @xiexiyun
 frameworks/core/components_ng/test/pattern/linear_split/  @xiexiyun
 frameworks/core/components_ng/test/pattern/list/  @suiwuyue
-frameworks/core/components_ng/test/pattern/loading_progress/  @cheng-feiwang
+frameworks/core/components_ng/test/pattern/loading_progress/  @Zhang-Dong-hui
 frameworks/core/components_ng/test/pattern/marquee/  @aryawang
 frameworks/core/components_ng/test/pattern/menu/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/model/ @
-frameworks/core/components_ng/test/pattern/navigation/  @Armstrong15
-frameworks/core/components_ng/test/pattern/navigator/  @Armstrong15
-frameworks/core/components_ng/test/pattern/navrouter/  @Armstrong15
+frameworks/core/components_ng/test/pattern/navigation/  @tsj_2020
+frameworks/core/components_ng/test/pattern/navigator/  @tsj_2020
+frameworks/core/components_ng/test/pattern/navrouter/  @tsj_2020
 frameworks/core/components_ng/test/pattern/option/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/overlay/  @yangfan229
 frameworks/core/components_ng/test/pattern/panel/  @zhou-chaobo
-frameworks/core/components_ng/test/pattern/patternlock/  @cheng-feiwang
+frameworks/core/components_ng/test/pattern/patternlock/  @Zhang-Dong-hui
 frameworks/core/components_ng/test/pattern/picker/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/plugin/  @wangchensu1
 frameworks/core/components_ng/test/pattern/preview_mock/  @laigerendaqiu
-frameworks/core/components_ng/test/pattern/progress/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/qrcode/  @jinweiliu
+frameworks/core/components_ng/test/pattern/progress/  @Zhang-Dong-hui
+frameworks/core/components_ng/test/pattern/qrcode/  @Zhang-Dong-hui
 frameworks/core/components_ng/test/pattern/radio/  @luoying_ace_admin
 frameworks/core/components_ng/test/pattern/rating/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/recycle_view/  @guozejun
@@ -371,7 +386,7 @@ frameworks/core/components_ng/test/pattern/refresh/  @suiwuyue
 frameworks/core/components_ng/test/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/test/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/test/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/test/pattern/rich_editor/  @jyj-0306
+frameworks/core/components_ng/test/pattern/rich_editor/  @wu-yinxiao
 frameworks/core/components_ng/test/pattern/root/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/scroll/  @suiwuyue
 frameworks/core/components_ng/test/pattern/scroll_bar/  @suiwuyue
@@ -390,11 +405,11 @@ frameworks/core/components_ng/test/pattern/swiper/  @xuzhidan
 frameworks/core/components_ng/test/pattern/swiper_indicator/  @xuzhidan
 frameworks/core/components_ng/test/pattern/tabs/  @xuzhidan
 frameworks/core/components_ng/test/pattern/text/  @lijuan124
-frameworks/core/components_ng/test/pattern/text_clock/  @lijuan124
+frameworks/core/components_ng/test/pattern/text_clock/  @aryawang
 frameworks/core/components_ng/test/pattern/text_drag/  @zhaojian2021
-frameworks/core/components_ng/test/pattern/text_field/  @xiexiyun
+frameworks/core/components_ng/test/pattern/text_field/  @jyj_0306  @lijuan124
 frameworks/core/components_ng/test/pattern/text_picker/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/texttimer/  @lijuan124
+frameworks/core/components_ng/test/pattern/texttimer/  @aryawang
 frameworks/core/components_ng/test/pattern/time_picker/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/toast/ @
 frameworks/core/components_ng/test/pattern/toggle/  @luoying_ace_admin
@@ -407,6 +422,6 @@ frameworks/core/components_ng/test/pattern/window_scene/  @liuchao92
 frameworks/core/components_ng/test/pattern/xcomponent/  @sunbees
 frameworks/core/components_ng/test/event/  @zhaojian2021 @catpoison
 frameworks/core/components_ng/test/syntax/  @yan-shuifeng @lightningHo
-frameworks/core/components_ng/test/svg/  @zhoutianer
-frameworks/core/components_ng/test/image_provider/  @zhoutianer
+frameworks/core/components_ng/test/svg/  @xiexiyun
+frameworks/core/components_ng/test/image_provider/  @xiexiyun
 frameworks/core/components_ng/test/animation/  @suiwuyue

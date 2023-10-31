@@ -74,22 +74,17 @@ void JSVideo::Create(const JSCallbackInfo& info)
 
     // Parse the src, if it is invalid, use the empty string.
     std::string videoSrc;
-    if (!ParseJsMedia(srcValue, videoSrc)) {
-        TAG_LOGW(AceLogTag::ACE_VIDEO, "Video parse src failed.");
-    }
+    ParseJsMedia(srcValue, videoSrc);
     VideoModel::GetInstance()->SetSrc(videoSrc);
 
     // Parse the rate, if it is invalid, set it as 1.0.
     double currentProgressRate = 1.0;
-    if (!ParseJsDouble(currentProgressRateValue, currentProgressRate)) {
-        TAG_LOGW(AceLogTag::ACE_VIDEO, "Video parse currentProgressRate failed.");
-    }
+    ParseJsDouble(currentProgressRateValue, currentProgressRate);
     VideoModel::GetInstance()->SetProgressRate(currentProgressRate);
 
     std::string previewUri;
     if (previewUriValue->IsUndefined() || previewUriValue->IsNull()) {
         // When it is undefined, just set the empty image.
-        TAG_LOGW(AceLogTag::ACE_VIDEO, "Video parse previewUri failed, it is null.");
         VideoModel::GetInstance()->SetPosterSourceInfo(previewUri);
         return;
     }

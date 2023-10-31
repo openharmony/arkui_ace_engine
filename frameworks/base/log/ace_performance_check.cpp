@@ -97,7 +97,7 @@ bool AceScopedPerformanceCheck::CheckIsRuleContainsPage(const std::string& ruleT
     // check for the presence of rule json
     CHECK_NULL_RETURN(AcePerformanceCheck::performanceInfo_, false);
     if (!AcePerformanceCheck::performanceInfo_->Contains(ruleType)) {
-        AcePerformanceCheck::performanceInfo_->Put(ruleType.c_str(), JsonUtil::CreateArray(false));
+        AcePerformanceCheck::performanceInfo_->Put(ruleType.c_str(), JsonUtil::CreateArray(true));
         return false;
     }
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue(ruleType);
@@ -118,7 +118,6 @@ std::string AceScopedPerformanceCheck::GetCurrentTime()
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto* local = std::localtime(&now);
     if (!local) {
-        LOGE("Get localtime failed");
         return {};
     }
 
@@ -199,14 +198,14 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9901");
-    auto pageJson = JsonUtil::Create(false);
+    auto pageJson = JsonUtil::Create(true);
     pageJson->Put("eventTime", eventTime.c_str());
     pageJson->Put("pagePath", codeInfo.sources.c_str());
     pageJson->Put("nodeCount", pageNodeCount);
     pageJson->Put("depth", pageDepth);
     // add children size > 100 of component to pageJson
     for (const auto& iter : pageNodeList) {
-        auto componentJson = JsonUtil::Create(false);
+        auto componentJson = JsonUtil::Create(true);
         componentJson->Put("name", iter.nodeTag.c_str());
         componentJson->Put("items", iter.childrenSize);
         componentJson->Put("sourceLine", GetCodeInfo(iter.codeRow, iter.codeCol).row);
@@ -215,7 +214,7 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
             componentsJson = pageJson->GetValue("components");
             componentsJson->Put(componentJson);
         } else {
-            componentsJson = JsonUtil::CreateArray(false);
+            componentsJson = JsonUtil::CreateArray(true);
             componentsJson->Put(componentJson);
             pageJson->Put("components", componentsJson);
         }
@@ -235,7 +234,7 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout(int64_t time, const std::s
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
-    auto pageJson = JsonUtil::Create(false);
+    auto pageJson = JsonUtil::Create(true);
     pageJson->Put("eventTime", eventTime.c_str());
     pageJson->Put("pagePath", codeInfo.sources.c_str());
     pageJson->Put("functionName", functionName.c_str());
@@ -252,7 +251,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9903");
-    auto pageJson = JsonUtil::Create(false);
+    auto pageJson = JsonUtil::Create(true);
     pageJson->Put("eventTime", eventTime.c_str());
     pageJson->Put("pagePath", codeInfo.sources.c_str());
     pageJson->Put("costTime", vsyncTimeout);
@@ -260,7 +259,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
         int64_t layoutTime = node.second.layoutTime / CONVERT_NANOSECONDS;
         if (layoutTime != 0 && layoutTime >= AceChecker::GetNodeTimeout() && node.second.nodeTag != "page" &&
             node.second.nodeTag != "ContainerModal" && node.second.nodeTag != "JsView") {
-            auto componentJson = JsonUtil::Create(false);
+            auto componentJson = JsonUtil::Create(true);
             componentJson->Put("name", node.second.nodeTag.c_str());
             componentJson->Put("costTime", layoutTime);
             componentJson->Put("sourceLine", GetCodeInfo(node.second.codeRow, node.second.codeCol).row);
@@ -269,7 +268,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
                 componentsJson = pageJson->GetValue("components");
                 componentsJson->Put(componentJson);
             } else {
-                componentsJson = JsonUtil::CreateArray(false);
+                componentsJson = JsonUtil::CreateArray(true);
                 componentsJson->Put(componentJson);
                 pageJson->Put("components", componentsJson);
             }
@@ -287,11 +286,11 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9904");
-    auto pageJson = JsonUtil::Create(false);
+    auto pageJson = JsonUtil::Create(true);
     pageJson->Put("eventTime", eventTime.c_str());
     pageJson->Put("pagePath", codeInfo.sources.c_str());
     for (const auto& iter : foreachNodeMap) {
-        auto componentJson = JsonUtil::Create(false);
+        auto componentJson = JsonUtil::Create(true);
         componentJson->Put("name", iter.second.nodeTag.c_str());
         componentJson->Put("items", iter.second.foreachItems + 1);
         componentJson->Put("sourceLine", GetCodeInfo(iter.second.codeRow, iter.second.codeCol).row);
@@ -300,7 +299,7 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(
             componentsJson = pageJson->GetValue("components");
             componentsJson->Put(componentJson);
         } else {
-            componentsJson = JsonUtil::CreateArray(false);
+            componentsJson = JsonUtil::CreateArray(true);
             componentsJson->Put(componentJson);
             pageJson->Put("components", componentsJson);
         }
@@ -317,11 +316,11 @@ void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9905");
-    auto pageJson = JsonUtil::Create(false);
+    auto pageJson = JsonUtil::Create(true);
     pageJson->Put("eventTime", eventTime.c_str());
     pageJson->Put("pagePath", codeInfo.sources.c_str());
     for (auto& node : flexNodeList) {
-        auto componentJson = JsonUtil::Create(false);
+        auto componentJson = JsonUtil::Create(true);
         componentJson->Put("name", node.nodeTag.c_str());
         componentJson->Put("flexTime", node.flexLayouts);
         componentJson->Put("sourceLine", GetCodeInfo(node.codeRow, node.codeCol).row);
@@ -330,7 +329,7 @@ void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
             componentsJson = pageJson->GetValue("components");
             componentsJson->Put(componentJson);
         } else {
-            componentsJson = JsonUtil::CreateArray(false);
+            componentsJson = JsonUtil::CreateArray(true);
             componentsJson->Put(componentJson);
             pageJson->Put("components", componentsJson);
         }

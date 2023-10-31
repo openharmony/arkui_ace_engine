@@ -100,7 +100,7 @@ bool AceResKeyParser::Parse(const std::string& deviceResConfigTag, std::vector<K
     const int32_t FUNC_LEN = static_cast<int32_t>(sizeof(functions) / sizeof(functions[0]));
     if (!keyParts.empty()) {
         if (!ParseMatch(keyParts, keyParams, functions, FUNC_LEN, styleRes)) {
-            LOGE("Invalid config:%{public}s", deviceResConfigTag.c_str());
+            LOGW("Invalid config:%{public}s", deviceResConfigTag.c_str());
             return false;
         }
         return true;
@@ -126,7 +126,7 @@ bool AceResKeyParser::DeclarativeParse(const std::string& deviceResConfigTag, st
     const int32_t FUNC_LEN = static_cast<int32_t>(sizeof(functions) / sizeof(functions[0]));
     if (!reskeyParts.empty()) {
         if (!ParseMatch(reskeyParts, keyParams, functions, FUNC_LEN, true)) {
-            LOGE("Invalid config:%{public}s", resConfigTag.c_str());
+            LOGW("Invalid config:%{public}s", resConfigTag.c_str());
             return false;
         }
         return true;
@@ -142,7 +142,7 @@ bool AceResKeyParser::ParseMatch(const std::vector<std::string>& keys, std::vect
             if (*iter == "res") {
                 continue;
             } else {
-                LOGE("Invalid first key part:%{private}s", iter->c_str());
+                LOGD("Invalid first key part:%{private}s", iter->c_str());
                 return false;
             }
         }
@@ -154,7 +154,7 @@ bool AceResKeyParser::ParseMatch(const std::vector<std::string>& keys, std::vect
             }
         }
         if (!parseRet) {
-            LOGE("Invalid key:%{private}s", iter->c_str());
+            LOGD("Invalid key:%{private}s", iter->c_str());
             return false;
         }
     }
@@ -291,7 +291,6 @@ std::string AceResKeyParser::GetMccByValue(uint32_t value) const
 {
     char mccStr[MAX_MCC_MNC_LEN] = { 0 };
     if (sprintf_s(mccStr, MAX_MCC_MNC_LEN, "mcc%03u", value) < 0) {
-        LOGE("output mcc exception");
         return "";
     }
     return std::string(mccStr);
@@ -301,7 +300,6 @@ std::string AceResKeyParser::GetMncShortLenByValue(uint32_t value) const
 {
     char mncStr[MAX_MCC_MNC_LEN] = { 0 };
     if (sprintf_s(mncStr, MAX_MCC_MNC_LEN, "mnc%02u", value) < 0) {
-        LOGE("output mnc short len exception");
         return "";
     }
     return std::string(mncStr);
@@ -311,7 +309,6 @@ std::string AceResKeyParser::GetMncByValue(uint32_t value) const
 {
     char mncStr[MAX_MCC_MNC_LEN] = { 0 };
     if (sprintf_s(mncStr, MAX_MCC_MNC_LEN, "mnc%03u", value) < 0) {
-        LOGE("output mnc len exception");
         return "";
     }
     return std::string(mncStr);

@@ -53,10 +53,12 @@ struct SelectHandleInfo {
 struct SelectMenuInfo {
     bool menuDisable = false;
     bool menuIsShow = false;
+    bool singleHandleMenuIsShow = false;
     bool showCopy = true;
     bool showPaste = true;
     bool showCopyAll = true;
     bool showCut = true;
+    bool showCameraInput = false;
     std::optional<OffsetF> menuOffset;
     std::function<void()> menuBuilder;
 
@@ -66,7 +68,7 @@ struct SelectMenuInfo {
             return true;
         }
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
-                 (showCut == info.showCut));
+                 (showCut == info.showCut) && (showCameraInput == info.showCameraInput));
     }
 };
 
@@ -75,6 +77,7 @@ struct SelectMenuCallback {
     std::function<void()> onPaste;
     std::function<void()> onSelectAll;
     std::function<void()> onCut;
+    std::function<void()> onCameraInput;
 
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
@@ -87,6 +90,7 @@ struct SelectOverlayInfo {
     bool handleReverse = false;
     // Used to determine the range of judgment that is parallel to the first and second handles.
     float singleLineHeight = 10.0f;
+    bool isSelectRegionVisible = false;
     SelectHandleInfo firstHandle;
     SelectHandleInfo secondHandle;
     HitTestMode hitTestMode = HitTestMode::HTMTRANSPARENT_SELF;

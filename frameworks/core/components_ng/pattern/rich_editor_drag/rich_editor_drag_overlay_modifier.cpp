@@ -66,5 +66,6 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
         }
         ++index;
     }
+    canvas.DetachBrush();
 }
 } // namespace OHOS::Ace::NG

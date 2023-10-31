@@ -14,9 +14,9 @@
  */
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
-#include "core/components/hyperlink/hyperlink_theme.h"
 
 #include "base/json/json_util.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
 #endif
@@ -27,11 +27,15 @@ void HyperlinkPattern::OnAttachToFrameNode() {}
 void HyperlinkPattern::EnableDrag()
 {
     auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
-                        const std::string& /* extraParams */) -> DragDropInfo {
+                         const std::string& /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
         auto hyperlinkPattern = weak.Upgrade();
         CHECK_NULL_RETURN(hyperlinkPattern, info);
-        std::string address = hyperlinkPattern->GetAddress();
+        auto host = hyperlinkPattern->GetHost();
+        CHECK_NULL_RETURN(host, info);
+        auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
+        CHECK_NULL_RETURN(hyperlinkLayoutProperty, info);
+        std::string address = hyperlinkLayoutProperty->GetAddress().value_or("");
         std::string content = hyperlinkPattern->GetTextForDisplay();
         auto json = JsonUtil::Create(true);
         json->Put("url", address.c_str());
@@ -66,7 +70,6 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
-    InitLongPressEvent(gestureHub);
 
     auto inputHub = hub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -112,7 +115,8 @@ void HyperlinkPattern::LinkToAddress()
     hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(theme->GetTextLinkedColor()));
     hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    pipeline->HyperlinkStartAbility(address_);
+    auto address = hyperlinkLayoutProperty->GetAddress().value_or("");
+    pipeline->HyperlinkStartAbility(address);
 #endif
 }
 
@@ -188,18 +192,6 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-}
-
-void HyperlinkPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    CHECK_NULL_VOID(!longPressEvent_);
-    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->LinkToAddress();
-    };
-    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gestureHub->SetLongPressEvent(longPressEvent_);
 }
 
 void HyperlinkPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -278,18 +270,15 @@ void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(frame);
     auto frameId = frame->GetId();
 
-    if (frame->IsOutOfTouchTestRegion({ static_cast<float>(info.GetGlobalLocation().GetX()),
-        static_cast<float>(info.GetGlobalLocation().GetY()) }, 0)) {
+    if (frame->IsOutOfTouchTestRegion(
+        { static_cast<float>(info.GetLocalLocation().GetX()) + GetHostFrameOffset()->GetX(),
+            static_cast<float>(info.GetLocalLocation().GetY()) + GetHostFrameOffset()->GetY() },
+        0)) {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
     } else {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
     }
-}
-
-void HyperlinkPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
-{
-    json->Put("address", address_.c_str());
 }
 } // namespace OHOS::Ace::NG

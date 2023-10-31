@@ -72,6 +72,7 @@ void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
         brush.SetColor(barColor);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect({ fgRect, filletRadius, filletRadius });
+        canvas.DetachBrush();
     }
 }
 
@@ -144,9 +145,6 @@ void ScrollBarOverlayModifier::SetCrossModeOffset(const Offset& offset)
 void ScrollBarOverlayModifier::StartBarAnimation(HoverAnimationType hoverAnimationType,
     OpacityAnimationType opacityAnimationType, bool needAdaptAnimation, const Rect& fgRect)
 {
-    LOGD("startBarAnimation hoverAnimationType:%{public}d, opacityAnimationType:%{public}d, "
-         "needAdaptAnimation:%{public}u, fgRect:%{public}s",
-        hoverAnimationType, opacityAnimationType, needAdaptAnimation, fgRect.ToString().c_str());
     CHECK_NULL_VOID(barX_);
     CHECK_NULL_VOID(barY_);
     CHECK_NULL_VOID(barWidth_);

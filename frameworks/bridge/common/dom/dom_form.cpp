@@ -66,7 +66,7 @@ void DOMForm::Submit()
         return;
     }
     // call on the ui thread.
-    auto json = JsonUtil::Create(false);
+    auto json = JsonUtil::Create(true);
     for (const auto& weak : formValueList_) {
         auto formValue = weak.Upgrade();
         if (formValue) {
