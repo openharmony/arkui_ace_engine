@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <optional>
 #include <regex>
-#include <cstdint>
 #include <string>
 #include <utility>
 
@@ -901,7 +900,6 @@ void TextFieldPattern::HandleOnCameraInput()
 #endif
 #endif
 }
-
 
 void TextFieldPattern::StripNextLine(std::wstring& data)
 {
@@ -4780,6 +4778,9 @@ bool TextFieldPattern::IsSingleHandle() const
 
 void TextFieldPattern::OnAttachToFrameNode()
 {
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
