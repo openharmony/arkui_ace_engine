@@ -146,7 +146,7 @@ public:
     int32_t GetCaretPosition();
     int32_t GetTextContentLength();
     bool GetCaretVisible() const;
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight, bool downStreamFirst = false);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
@@ -192,6 +192,21 @@ public:
     OffsetF GetRightClickOffset() const
     {
         return rightClickOffset_;
+    }
+
+    OffsetF GetLastClickOffset() const
+    {
+        return lastClickOffset_;
+    }
+
+    void SetLastClickOffset(const OffsetF& lastClickOffset)
+    {
+        lastClickOffset_ = lastClickOffset;
+    }
+
+    void ResetLastClickOffset()
+    {
+        lastClickOffset_.Reset();
     }
 
     int32_t GetCaretSpanIndex()
@@ -269,6 +284,7 @@ private:
     void HandleBlurEvent();
     void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
+    void CalcCaretInfoByClick(GestureEvent& info);
     void HandleEnabled();
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
@@ -372,6 +388,7 @@ private:
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
     OffsetF rightClickOffset_;
+    OffsetF lastClickOffset_;
     std::string pasteStr_;
 
     // still in progress

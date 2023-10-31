@@ -260,7 +260,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
             return;
         }
         fingerId_ = -1;
-        if (bubbleFlag_) {
+        if (bubbleFlag_ && !isFocusActive_) {
             bubbleFlag_ = false;
         }
         mousePressedFlag_ = false;
@@ -475,12 +475,23 @@ void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 
+    auto onFocus = [wp = WeakClaim(this)]() {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->focusFlag_ = true;
+        pattern->UpdateTipState();
+        pattern->UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        pattern->AddIsFocusActiveUpdateEvent();
+    };
+    focusHub->SetOnFocusInternal(std::move(onFocus));
+
     auto onBlur = [wp = WeakClaim(this)]() {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->bubbleFlag_ = false;
         pattern->focusFlag_ = false;
+        pattern->UpdateTipState();
         pattern->UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        pattern->RemoveIsFocusActiveUpdateEvent();
     };
     focusHub->SetOnBlurInternal(std::move(onBlur));
 }
@@ -583,7 +594,6 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SliderPattern::PaintFocusState()
 {
-    focusFlag_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RoundRect focusRect;
@@ -615,18 +625,6 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
             reverse ? MoveStep(-1) : MoveStep(1);
             if (showTips_) {
-                InitializeBubble();
-            }
-            PaintFocusState();
-            return true;
-        }
-    } else if (event.action == KeyAction::UP) {
-        if ((direction_ == Axis::HORIZONTAL &&
-                (event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT)) ||
-            (direction_ == Axis::VERTICAL &&
-                (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN))) {
-            if (showTips_) {
-                bubbleFlag_ = true;
                 InitializeBubble();
             }
             PaintFocusState();
@@ -698,7 +696,9 @@ void SliderPattern::HandleHoverEvent(bool isHover)
     hotFlag_ = isHover;
     mouseHoverFlag_ = mouseHoverFlag_ && isHover;
     if (!mouseHoverFlag_) {
-        bubbleFlag_ = false;
+        if (!isFocusActive_) {
+            bubbleFlag_ = false;
+        }
         axisFlag_ = false;
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -716,7 +716,7 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
         }
     }
     // when mouse hovers over slider, distinguish between hover block and Wheel operation.
-    if (!mouseHoverFlag_ && !axisFlag_) {
+    if (!mouseHoverFlag_ && !axisFlag_ && !isFocusActive_) {
         bubbleFlag_ = false;
     }
 
@@ -1092,5 +1092,60 @@ void SliderPattern::OnWindowShow()
 bool SliderPattern::IsSliderVisible()
 {
     return isVisibleArea_ && isVisible_ && isShow_;
+}
+
+void SliderPattern::UpdateTipState()
+{
+    if (focusFlag_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        isFocusActive_ = context->GetIsFocusActive();
+    } else {
+        isFocusActive_ = false;
+    }
+
+    bool showBubble = false;
+    if (showTips_ && focusFlag_) {
+        showBubble = isFocusActive_ || mousePressedFlag_;
+    }
+    if (showBubble != bubbleFlag_) {
+        bubbleFlag_ = showBubble;
+        UpdateBubble();
+    }
+}
+
+void SliderPattern::OnIsFocusActiveUpdate(bool isFocusActive)
+{
+    if (!focusFlag_) {
+        return;
+    }
+    isFocusActive_ = isFocusActive;
+    bool showBubble = false;
+    if (showTips_) {
+        showBubble = isFocusActive_ || mousePressedFlag_;
+    }
+    if (showBubble != bubbleFlag_) {
+        bubbleFlag_ = showBubble;
+        UpdateBubble();
+        UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void SliderPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = std::bind(&SliderPattern::OnIsFocusActiveUpdate, this, std::placeholders::_1);
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void SliderPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
 } // namespace OHOS::Ace::NG

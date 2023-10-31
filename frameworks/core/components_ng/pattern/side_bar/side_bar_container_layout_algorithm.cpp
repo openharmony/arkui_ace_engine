@@ -91,7 +91,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         (type_ != SideBarContainerType::OVERLAY)) {
         if (isControlButtonClick_) {
             type_ = SideBarContainerType::OVERLAY;
-        } else {
+        } else if (layoutProperty->GetAutoHide().value_or(true)) {
             sideBarStatus_ = SideBarStatus::HIDDEN;
             autoHide_ = true;
         }

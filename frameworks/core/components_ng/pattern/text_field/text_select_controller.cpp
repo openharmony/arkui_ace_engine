@@ -51,7 +51,7 @@ RectF TextSelectController::CalculateEmptyValueCaretRect() const
     CHECK_NULL_RETURN(layoutProperty, rect);
     rect.SetLeft(contentRect_.Left());
     rect.SetTop(contentRect_.Top());
-    rect.SetHeight(caretInfo_.rect.Height());
+    rect.SetHeight(textFiled->PreferredLineHeight());
     rect.SetWidth(caretInfo_.rect.Width());
     switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
         case TextAlign::START:
@@ -151,6 +151,9 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
             pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
     }
     UpdateHandleIndex(start, end);
+    if (CaretAtLast() && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
+        UpdateHandleIndex(GetCaretIndex());
+    }
     if (IsSelected()) {
         MoveSecondHandleToContentRect(GetSecondHandleIndex());
     } else {
@@ -233,11 +236,12 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
     auto textRect = textFiled->GetTextRect();
     if (textRect.Height() > contentRect_.Height()) {
         auto contentBottomBoundary = contentRect_.GetY() + contentRect_.Height();
-        if (handleRect.GetY() < contentRect_.GetY()) {
+        if (LessNotEqual(handleRect.GetY(), contentRect_.GetY()) &&
+            LessOrEqual(handleRect.Height(), contentRect_.Height())) {
             auto dy = contentRect_.GetY() - handleRect.GetY();
             textRect.SetOffset(OffsetF(textRect.GetX(), textRect.GetY() + dy));
             handleRect.SetOffset(OffsetF(handleRect.GetX(), handleRect.GetY() + dy));
-        } else if (handleRect.GetY() + handleRect.Height() > contentBottomBoundary) {
+        } else if (GreatNotEqual(handleRect.GetY() + handleRect.Height(), contentBottomBoundary)) {
             auto dy = handleRect.GetY() + handleRect.Height() - contentBottomBoundary;
             textRect.SetOffset(OffsetF(textRect.GetX(), textRect.GetY() - dy));
             handleRect.SetOffset(OffsetF(handleRect.GetX(), handleRect.GetY() - dy));
@@ -423,6 +427,7 @@ void TextSelectController::UpdateRecordCaretIndex(int32_t index) const
     auto textFiled = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFiled);
     textFiled->UpdateRecordCaretIndex(index);
+    textFiled->UpdateCaretInfoToController();
 }
 
 void TextSelectController::ResetHandles()

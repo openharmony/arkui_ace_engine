@@ -147,6 +147,7 @@ RefPtr<UINode> ViewStackProcessor::Finish()
     elementsStack_.pop();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     if (frameNode) {
+        frameNode->MarkBuildDone();
         frameNode->MarkModifyDone();
         auto renderContext = frameNode->GetRenderContext();
         if (renderContext) {

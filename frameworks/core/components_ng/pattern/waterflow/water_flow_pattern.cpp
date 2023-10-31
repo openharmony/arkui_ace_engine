@@ -269,4 +269,20 @@ void WaterFlowPattern::OnRestoreInfo(const std::string& restoreInfo)
     Dimension dimension(info->GetDouble("offset"), DimensionUnit::VP);
     SetRestoreOffset(dimension.ConvertToPx());
 }
+
+Rect WaterFlowPattern::GetItemRect(int32_t index) const
+{
+    if (index < 0 || index < layoutInfo_.startIndex_ || index > layoutInfo_.endIndex_) {
+        return Rect();
+    }
+    index += layoutInfo_.footerIndex_ + 1;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Rect());
+    auto item = host->GetChildByIndex(index);
+    CHECK_NULL_RETURN(item, Rect());
+    auto itemGeometry = item->GetGeometryNode();
+    CHECK_NULL_RETURN(itemGeometry, Rect());
+    return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
+        itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
 } // namespace OHOS::Ace::NG

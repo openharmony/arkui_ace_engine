@@ -114,6 +114,7 @@ public:
     bool IsAtBottom() const override;
     bool OutBoundaryCallback() override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
+    void HandleScrollBarOutBoundary();
 
     FocusPattern GetFocusPattern() const override
     {
@@ -172,6 +173,8 @@ public:
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
+    Rect GetItemRect(int32_t index) const;
+    Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
     void OnAnimateStop() override;
     void UpdateScrollBarOffset() override;
     // chain animation
@@ -229,6 +232,16 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void DumpAdvanceInfo() override;
 
+    void SetNeedToUpdateListDirectionInCardStyle(bool isNeedToUpdateListDirection)
+    {
+        isNeedToUpdateListDirection_ = isNeedToUpdateListDirection;
+    }
+
+    bool IsNeedToUpdateListDirectionInCardStyle() const
+    {
+        return isNeedToUpdateListDirection_;
+    }
+
 private:
     void OnScrollEndCallback() override;
     void OnScrollStartCallback() override;
@@ -280,7 +293,7 @@ private:
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
-    
+    void UpdateListDirectionInCardStyle();
     void InitNotifyDragEvent();
     RefPtr<ListContentModifier> listContentModifier_;
 
@@ -338,6 +351,8 @@ private:
     bool isScrollEnd_ = false;
     std::optional<RefPtr<ListDragStatusListener>> listDragStatusListener_;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
+
+    bool isNeedToUpdateListDirection_ = false;
 };
 } // namespace OHOS::Ace::NG
 

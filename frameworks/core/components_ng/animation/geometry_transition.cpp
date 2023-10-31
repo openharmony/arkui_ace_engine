@@ -46,8 +46,9 @@ bool GeometryTransition::IsInAndOutValid() const
 
 bool GeometryTransition::IsRunning(const WeakPtr<FrameNode>& frameNode) const
 {
-    CHECK_NULL_RETURN(IsInAndOutValid(), false);
-    return (hasInAnim_ && frameNode.Upgrade() == inNode_) || (hasOutAnim_ && frameNode.Upgrade() == outNode_);
+    auto node = frameNode.Upgrade();
+    CHECK_NULL_RETURN(node && IsInAndOutValid(), false);
+    return (node == inNode_ || node == outNode_) && node->GetLayoutPriority() != 0;
 }
 
 bool GeometryTransition::IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const
@@ -120,16 +121,22 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     }
     auto node = frameNode.Upgrade();
     CHECK_NULL_VOID(node && node->GetRenderContext() && !id_.empty());
-    LOGI("GeometryTransition: build node: %{public}d, direction: %{public}d, onTree: %{public}d, removing: %{public}d",
-        node->GetId(), isNodeIn, node->IsOnMainTree(), node->IsRemoving());
+    std::string id = node->GetInspectorId().value_or("");
+    LOGI("GeometryTransition: build node: %{public}d, direction: %{public}d, onTree: %{public}d, removing: %{public}d"
+        ", compid: %{public}s .", node->GetId(), isNodeIn, node->IsOnMainTree(), node->IsRemoving(), id.c_str());
     if (!isNodeIn && (frameNode == inNode_ || frameNode == outNode_)) {
         SwapInAndOut(frameNode == inNode_);
         RecordOutNodeFrame();
         hasOutAnim_ = true;
     }
     if (isNodeIn && (frameNode != inNode_)) {
+        if (node->IsRemoving()) {
+            return;
+        }
         auto inNode = inNode_.Upgrade();
-        if (inNode != nullptr && !inNode->IsRemoving() && !inNode->IsOnMainTree()) {
+        bool replace = !inNode || (!inNode->IsRemoving() && inNode->IsOnMainTree() &&
+            (id.empty() || id != inNode->GetInspectorId().value_or(""))) ? false : true;
+        if (replace) {
             inNode_ = frameNode;
             return;
         }
@@ -145,13 +152,12 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     bool isImplicitAnimationOpen = AnimationUtils::IsImplicitAnimationOpen();
     bool follow = false;
     if (hasOutAnim_) {
-        if (isImplicitAnimationOpen) {
-            MarkLayoutDirty(outNode, -1);
-        } else {
-            hasOutAnim_ = false;
-        }
         if (!hasInAnim_) {
             follow = OnFollowWithoutTransition(false);
+        }
+        hasOutAnim_ = (!isImplicitAnimationOpen && !follow) ? false : true;
+        if (hasOutAnim_) {
+            MarkLayoutDirty(outNode, -1);
         }
     }
     if (hasInAnim_ && !follow) {
@@ -482,7 +488,7 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
     auto inNodeAbsRect = GetNodeAbsFrameRect(inNode, inNodeParentPos);
     auto inNodeAbsRectOld = outNodeTargetAbsRect_.value();
     CHECK_NULL_VOID(inNodeAbsRect != inNodeAbsRectOld);
-    static constexpr int32_t defaultDuration = 100;
+    static constexpr int32_t defaultDuration = 1;
     auto animOption = animationOption_.IsValid() ? animationOption_ : AnimationOption(Curves::LINEAR, defaultDuration);
     AnimationUtils::Animate(animOption,
         [&]() {

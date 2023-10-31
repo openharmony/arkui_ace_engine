@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <stack>
 #include <stdint.h>
 #include <string>
 #include <utility>
@@ -236,8 +237,11 @@ public:
     int32_t ConvertTouchOffsetToCaretPositionNG(const Offset& localOffset);
 
     void InsertValue(const std::string& insertValue) override;
+    void InsertValueOperation(const std::string& insertValue);
     void DeleteBackward(int32_t length) override;
+    void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
+    void DeleteForwardOperation(int32_t length);
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
@@ -939,6 +943,7 @@ public:
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     void OnHandleClosed(bool closedByGlobalEvent) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
+    void UpdateCaretInfoToController() const;
     bool OnPreShowSelectOverlay(
         SelectOverlayInfo& overlayInfo, const ClientOverlayInfo& clientInfo, bool isSelectOverlayOn) override;
     void OnObscuredChanged(bool isObscured);
@@ -1024,13 +1029,12 @@ private:
     void ShowSelectOverlay(const ShowSelectOverlayParams& params);
 
     void CursorMoveOnClick(const Offset& offset);
-    void UpdateCaretInfoToController() const;
 
     void ProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
+    void DelayProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
     SelectHandleInfo GetSelectHandleInfo(OffsetF info);
-    void UpdateFirstHandlePosition(bool needLayout = false);
-    void UpdateSecondHandlePosition(bool needLayout = false);
-    void UpdateDoubleHandlePosition(bool firstNeedLayout = false, bool secondNeedLayout = false);
+    void UpdateSelectOverlaySecondHandle(bool needLayout = false);
+    void UpdateSelectOverlayDoubleHandle(bool firstNeedLayout = false, bool secondNeedLayout = false);
 
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
@@ -1198,7 +1202,7 @@ private:
     int32_t dragTextStart_ = 0;
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
-    DragStatus dragStatus_ = DragStatus::NONE;          // The status of the dragged initiator
+    DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
     std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
@@ -1236,16 +1240,19 @@ private:
     TimeStamp lastClickTimeStamp_;
     float paragraphWidth_ = 0.0f;
 
+    std::stack<int32_t> deleteBackwardOperations_;
+    std::stack<int32_t> deleteForwardOperations_;
+    std::stack<std::string> insertValueOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool showSelect_ = false;
     bool isLongPress_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
-    CaretStatus caretStatus_ = CaretStatus::NONE;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     bool isSupportCameraInput_ = false;
+    std::function<void()> processOverlayDelayTask_;
 };
 } // namespace OHOS::Ace::NG
 

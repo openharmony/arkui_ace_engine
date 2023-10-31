@@ -48,13 +48,11 @@ void WebElement::Update()
 
 void WebElement::OnFocus()
 {
-    LOGI("web element onfocus");
     auto renderWeb = AceType::DynamicCast<RenderWeb>(renderNode_);
     if (!renderWeb) {
         return;
     }
     if (!renderWeb->GetDelegate()) {
-        LOGE("Delegate is nullptr.");
         return;
     }
     if (renderWeb->GetNeedOnFocus()) {
@@ -68,13 +66,11 @@ void WebElement::OnFocus()
 
 void WebElement::OnBlur()
 {
-    LOGI("web element onBlur");
     auto renderWeb = AceType::DynamicCast<RenderWeb>(renderNode_);
     if (!renderWeb) {
         return;
     }
     if (!renderWeb->GetDelegate()) {
-        LOGE("Delegate is nullptr.");
         return;
     }
     renderWeb->GetDelegate()->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(FocusNode::blurReason_));
@@ -93,12 +89,10 @@ bool WebElement::OnKeyEvent(const KeyEvent& keyEvent)
     }
     ret = renderWeb->HandleKeyEvent(keyEvent);
     if (ret) {
-        LOGI("web OnInterceptKeyEvent consumed");
         return ret;
     }
 
     if (!renderWeb->GetDelegate()) {
-        LOGE("Delegate is nullptr.");
         return ret;
     }
     ret = renderWeb->GetDelegate()->OnKeyEvent(

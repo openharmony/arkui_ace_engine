@@ -19,7 +19,6 @@
 #include <iomanip>
 #include <sstream>
 
-#include "base/log/log.h"
 #include "frameworks/base/json/json_util.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -43,7 +42,6 @@ void PluginManagerDelegate::UnregisterEvent()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("fail to get context when unregister event");
         return;
     }
     auto resRegister = context->GetPlatformResRegister();
@@ -56,7 +54,6 @@ void PluginManagerDelegate::RegisterEvent()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("register event error due null context, will not receive plugin manager event");
         return;
     }
     auto resRegister = context->GetPlatformResRegister();
@@ -102,7 +99,6 @@ void PluginManagerDelegate::CreatePlatformResource(
     platformTaskExecutor.PostTask([weak = WeakClaim(this), weakRes, info] {
         auto delegate = weak.Upgrade();
         if (!delegate) {
-            LOGE("delegate is null");
             return;
         }
         auto resRegister = weakRes.Upgrade();
@@ -136,14 +132,12 @@ void PluginManagerDelegate::CreatePlatformResource(
 
 void PluginManagerDelegate::AddPlugin(const WeakPtr<PipelineBase>& context, const RequestPluginInfo& info)
 {
-    LOGI("PluginManagerDelegate::AddPlugin");
     CreatePlatformResource(context, info);
 }
 
 void PluginManagerDelegate::AddPluginCompleteCallback(const OnPluginCompleteCallback& callback)
 {
     if (!callback || state_ == State::RELEASED) {
-        LOGE("callback is null or has released");
         return;
     }
     onPluginCompleteCallback_ = callback;
@@ -152,7 +146,6 @@ void PluginManagerDelegate::AddPluginCompleteCallback(const OnPluginCompleteCall
 void PluginManagerDelegate::AddPluginUpdateCallback(const OnPluginUpdateCallback& callback)
 {
     if (!callback || state_ == State::RELEASED) {
-        LOGE("callback is null or has released");
         return;
     }
     onPluginUpdateCallback_ = callback;
@@ -161,7 +154,6 @@ void PluginManagerDelegate::AddPluginUpdateCallback(const OnPluginUpdateCallback
 void PluginManagerDelegate::AddPluginErrorCallback(const OnPluginErrorCallback& callback)
 {
     if (!callback || state_ == State::RELEASED) {
-        LOGE("callback is null or has released");
         return;
     }
     onPluginErrorCallback_ = callback;
@@ -171,28 +163,23 @@ void PluginManagerDelegate::OnActionEvent(const std::string& action)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
-        LOGE("get event action failed");
         return;
     }
     auto actionType = eventAction->GetValue("action");
     if (!actionType->IsValid()) {
-        LOGE("get event key failed");
         return;
     }
 
     auto type = actionType->GetString();
     if (type != "router" && type != "message") {
-        LOGE("undefined event type");
         return;
     }
 }
 
 void PluginManagerDelegate::OnPluginComplete(const std::string& param)
 {
-    LOGI("PluginManagerDelegate::OnPluginComplete");
     auto result = ParseMapFromString(param);
     if (onPluginCompleteCallback_) {
-        LOGI("PluginManagerDelegate::OnPluginComplete");
         onPluginCompleteCallback_();
     }
 }

@@ -1398,14 +1398,6 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     pen.SetWidth(borderWidth);
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(borderColor_->Get()));
-    canvas.AttachPen(pen);
-    if (!NearZero(borderWidth)) {
-        canvas.DrawRoundRect(
-            { { offsetXBig, offsetYBig, contentSize.Width() - borderWidth + offsetXBig,
-                contentSize.Height() - borderWidth + offsetYBig },
-                radiusBig, radiusBig });
-    }
-    canvas.DetachPen();
 #ifndef USE_ROSEN_DRAWING
     RSPath path;
 #else
@@ -1415,6 +1407,14 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     canvas.DrawRoundRect(
         { { offsetX, offsetY, contentSize.Width() + offsetX, contentSize.Height() + offsetY }, radius, radius });
     canvas.DetachBrush();
+    canvas.AttachPen(pen);
+    if (!NearZero(borderWidth)) {
+        canvas.DrawRoundRect(
+            { { offsetXBig, offsetYBig, contentSize.Width() - borderWidth + offsetXBig,
+                contentSize.Height() - borderWidth + offsetYBig },
+                radiusBig, radiusBig });
+    }
+    canvas.DetachPen();
     brush.SetColor(ToRSColor((color_->Get())));
     canvas.AttachBrush(brush);
     path.AddArc(
@@ -1465,14 +1465,6 @@ void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& off
     pen.SetWidth(borderWidth);
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(borderColor_->Get()));
-    canvas.AttachPen(pen);
-    if (!NearZero(borderWidth)) {
-        canvas.DrawRoundRect(
-            { { offsetXBig, offsetYBig, contentSize.Width() - borderWidth + offsetXBig,
-                contentSize.Height() - borderWidth + offsetYBig },
-                radiusBig, radiusBig });
-    }
-    canvas.DetachPen();
     brush.SetAlpha(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
 #ifndef USE_ROSEN_DRAWING
@@ -1484,6 +1476,14 @@ void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& off
     canvas.DrawRoundRect(
         { { offsetX, offsetY, contentSize.Width() + offsetX, contentSize.Height() + offsetY }, radius, radius });
     canvas.DetachBrush();
+    canvas.AttachPen(pen);
+    if (!NearZero(borderWidth)) {
+        canvas.DrawRoundRect(
+            { { offsetXBig, offsetYBig, contentSize.Width() - borderWidth + offsetXBig,
+                contentSize.Height() - borderWidth + offsetYBig },
+                radiusBig, radiusBig });
+    }
+    canvas.DetachPen();
     brush.SetColor(ToRSColor((color_->Get())));
     canvas.AttachBrush(brush);
     path.AddArc(

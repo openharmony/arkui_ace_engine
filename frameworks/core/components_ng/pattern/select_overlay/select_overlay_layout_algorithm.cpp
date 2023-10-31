@@ -66,7 +66,7 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         offset =
             OffsetF(menuContext->GetOffset()->GetX().ConvertToPx(), menuContext->GetOffset()->GetY().ConvertToPx());
     }
-    if (!info_->menuInfo.menuIsShow) {
+    if (!info_->menuInfo.menuIsShow || info_->menuInfo.menuDisable) {
         hasExtensionMenu_ = false;
         return;
     }
@@ -189,6 +189,16 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText)) {
         menuPosition.SetY(viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText);
     }
+
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    if (safeAreaManager) {
+        // ignore status bar
+        auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+        if (menuPosition.GetY() < top) {
+            menuPosition.SetY(top);
+        }
+    }
+
     LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     if (isExtension) {

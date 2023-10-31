@@ -923,12 +923,6 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (uiExtensionManager_->OnBackPressed()) {
-        return true;
-    }
-#endif
-
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
         return true;
@@ -943,6 +937,12 @@ bool PipelineContext::OnBackPressed()
     if (textfieldManager && textfieldManager->OnBackPressed()) {
         return true;
     }
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_->OnBackPressed()) {
+        return true;
+    }
+#endif
 
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
@@ -1033,6 +1033,11 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive)
         return false;
     }
     isFocusActive_ = isFocusActive;
+    for (auto& pair : isFocusActiveUpdateEvents_) {
+        if (pair.second) {
+            pair.second(isFocusActive_);
+        }
+    }
     CHECK_NULL_RETURN(rootNode_, false);
     auto rootFocusHub = rootNode_->GetFocusHub();
     CHECK_NULL_RETURN(rootFocusHub, false);
@@ -1611,6 +1616,10 @@ void PipelineContext::OnShow()
 void PipelineContext::OnHide()
 {
     CHECK_RUN_ON(UI);
+    auto dragDropManager = GetDragDropManager();
+    if (dragDropManager && dragDropManager->IsItemDragging()) {
+        dragDropManager->CancelItemDrag();
+    }
     onShow_ = false;
     window_->OnHide();
     RequestFrame();
@@ -1644,7 +1653,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     FlushWindowFocusChangedCallback(isFocus);
 }
 
-void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         return;
@@ -1654,10 +1663,10 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    auto callback = [weakPattern = WeakClaim(RawPtr(containerPattern)), isShow, hasDeco]() {
+    auto callback = [weakPattern = WeakClaim(RawPtr(containerPattern)), isShow, hasDeco, needUpdate]() {
         auto pattern = weakPattern.Upgrade();
         if (pattern != nullptr) {
-            pattern->ShowTitle(isShow, hasDeco);
+            pattern->ShowTitle(isShow, hasDeco, needUpdate);
         }
     };
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
@@ -1984,7 +1993,7 @@ void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
 
 std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
 {
-    auto jsonNodeInfo = JsonUtil::Create(false);
+    auto jsonNodeInfo = JsonUtil::Create(true);
     auto iter = storeNode_.begin();
     while (iter != storeNode_.end()) {
         auto node = (iter->second).Upgrade();
@@ -2089,6 +2098,22 @@ void PipelineContext::HandleSubwindow(bool isShow)
     // there are sub windows that do not immediately hide, such as Toast floating window
     if (!isShow) {
         overlayManager_->ClearToastInSubwindow();
+    }
+}
+
+void PipelineContext::AddIsFocusActiveUpdateEvent(
+    const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback)
+{
+    CHECK_NULL_VOID(node);
+    isFocusActiveUpdateEvents_.insert_or_assign(node->GetId(), eventCallback);
+}
+
+void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto iter = isFocusActiveUpdateEvents_.find(node->GetId());
+    if (iter != isFocusActiveUpdateEvents_.end()) {
+        isFocusActiveUpdateEvents_.erase(iter);
     }
 }
 } // namespace OHOS::Ace::NG

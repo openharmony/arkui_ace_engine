@@ -35,8 +35,7 @@ public:
     virtual ScrollResult HandleScroll(float offset, int32_t source, NestedState state) = 0;
 
     // triggered by drag end velocity
-    // REQUIRES: scroll has reached the end
-    // RETURN true if velocity is consumed by Spring effect
+    // RETURN true if velocity is consumed
     virtual bool HandleScrollVelocity(float velocity) = 0;
 
     virtual void OnScrollStartRecursive(float position) = 0;

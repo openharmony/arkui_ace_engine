@@ -3515,6 +3515,8 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest002, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
     canvasDrawFunction(rsCanvas);
 }
@@ -3541,7 +3543,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest001, TestSize.Level1)
     KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
     focusHub->ProcessOnKeyEventInternal(keyEventUp);
     auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_NE(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 
     /**
      * @tc.cases: case1. down KeyEvent.
@@ -3549,7 +3551,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest001, TestSize.Level1)
     KeyEvent keyEventDown(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
     focusHub->ProcessOnKeyEventInternal(keyEventDown);
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_NE(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 }
 
 /**
@@ -4366,7 +4368,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewOnKeyEvent, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_ESCAPE;
     result = TextPickerDialogView::OnKeyEvent(event);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.cases: case. cover KeyCode is not KEY_ESCAPE.

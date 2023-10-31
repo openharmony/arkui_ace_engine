@@ -46,6 +46,9 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -93,6 +96,27 @@ void OverlayManagerTestNg::SetUpTestCase()
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
     MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == DragBarTheme::TypeId()) {
+            return AceType::MakeRefPtr<DragBarTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == DialogTheme::TypeId()) {
+            return AceType::MakeRefPtr<DialogTheme>();
+        } else if (type == PickerTheme::TypeId()) {
+            return AceType::MakeRefPtr<PickerTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else if (type == MenuTheme::TypeId()) {
+            return AceType::MakeRefPtr<MenuTheme>();
+        } else if (type == ToastTheme::TypeId()) {
+            return AceType::MakeRefPtr<ToastTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayManagerTestNg::TearDownTestCase()
 {
@@ -382,10 +406,6 @@ HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
@@ -481,10 +501,6 @@ HWTEST_F(OverlayManagerTestNg, RemoveAllModalInOverlay001, TestSize.Level1)
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
@@ -548,10 +564,6 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
     auto onAppear = []() {};
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, onAppear, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
@@ -635,10 +647,6 @@ HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
@@ -711,10 +719,6 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
@@ -773,10 +777,6 @@ HWTEST_F(OverlayManagerTestNg, GetSheetMask001, TestSize.Level1)
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
@@ -930,10 +930,6 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create menu node and root node.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
     auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode =
         FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(1));
@@ -1002,10 +998,6 @@ HWTEST_F(OverlayManagerTestNg, MenuTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create menu node and root node.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto targetId = rootNode->GetId();
     auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1050,6 +1042,163 @@ HWTEST_F(OverlayManagerTestNg, MenuTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuTest003
+ * @tc.desc: Test OverlayManager::PopMenuAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, MenuTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node , preview node and root node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto previewContext = previewNode->GetRenderContext();
+    ASSERT_NE(previewContext, nullptr);
+    auto menuContext = previewNode->GetRenderContext();
+    ASSERT_NE(menuContext, nullptr);
+    previewContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
+    menuContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    /**
+     * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is true
+     * @tc.expected: the render context of menu and preview will update, and menu wrapper node will remove
+     */
+    EXPECT_EQ(rootNode->GetChildren().size(), 1);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
+    overlayManager->PopMenuAnimation(menuWrapperNode, true);
+    pipeline->taskExecutor_ = nullptr;
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(rootNode->GetChildren().size(), 0);
+
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    /**
+     * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is false
+     * @tc.expected: the preview node will remove
+     */
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
+    overlayManager->PopMenuAnimation(menuWrapperNode, false);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: MenuTest004
+ * @tc.desc: Test OverlayManager::CleanMenuInSubWindowWithAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, MenuTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node, preview node and root node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    auto menuWrapperContext = menuWrapperNode->GetRenderContext();
+    ASSERT_NE(menuWrapperContext, nullptr);
+    menuWrapperContext->UpdateOpacity(1.0);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto previewContext = previewNode->GetRenderContext();
+    ASSERT_NE(previewContext, nullptr);
+    auto menuContext = previewNode->GetRenderContext();
+    ASSERT_NE(menuContext, nullptr);
+    previewContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
+    menuContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    /**
+     * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is false
+     * @tc.expected: the render context of menu and preview will update
+     */
+    overlayManager->CleanMenuInSubWindowWithAnimation();
+    pipeline->taskExecutor_ = nullptr;
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+}
+
+/**
+ * @tc.name: MenuTest005
+ * @tc.desc: Test OverlayManager::SetShowMenuAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, MenuTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node , preview node and root node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto focusHub = menuWrapperNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->parentFocusable_ = false;
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    /**
+     * @tc.steps: step2. call SetShowMenuAnimation and call StartShowAnimation of menu pattern
+     * @tc.expected: the isFirstShow_ of preview pattern true and parentFocusable_ of menuWrapper's focus hub is true
+     */
+    overlayManager->SetShowMenuAnimation(menuWrapperNode, false);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    menuWrapperPattern->StartShowAnimation();
+    pipeline->taskExecutor_ = nullptr;
+
+    EXPECT_TRUE(focusHub->parentFocusable_);
+    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    ASSERT_NE(previewPattern, nullptr);
+    EXPECT_TRUE(previewPattern->isFirstShow_);
+}
+
+/**
  * @tc.name: DeleteModal001
  * @tc.desc: Test OverlayManager::DeleteModal
  * @tc.type: FUNC
@@ -1091,10 +1240,6 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
 
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
@@ -1281,10 +1426,6 @@ HWTEST_F(OverlayManagerTestNg, ToastShowModeTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create toast node with showMode, and show it.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto toastTheme = AceType::MakeRefPtr<ToastTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toastTheme));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     MockPipelineBase::GetCurrent()->rootNode_ = rootNode;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
@@ -1366,10 +1507,6 @@ HWTEST_F(OverlayManagerTestNg, ToastTest002, TestSize.Level1)
      * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is not nullptr.
      * @tc.expected: toastMap_ is empty
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto toastTheme = AceType::MakeRefPtr<ToastTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toastTheme));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -1395,14 +1532,10 @@ HWTEST_F(OverlayManagerTestNg, DialogTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create dialog node and root node.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto dialogId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dialogNode = FrameNode::CreateFrameNode(
-        V2::DIALOG_ETS_TAG, dialogId, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+        V2::DIALOG_ETS_TAG, dialogId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
     ASSERT_NE(dialogNode, nullptr);
     dialogNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode();
@@ -1444,10 +1577,6 @@ HWTEST_F(OverlayManagerTestNg, DialogTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create root node and prepare dialogProperties.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     DialogProperties dialogParam;
     dialogParam.isShowInSubWindow = true;
@@ -1490,8 +1619,6 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. create root node and prepare dialogProperties.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     DialogProperties dialogProperties;
     dialogProperties.isShowInSubWindow = true;
@@ -1604,10 +1731,6 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern1, TestSize.Level1)
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
     auto onAppear = []() {};
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, onAppear, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
@@ -1652,14 +1775,10 @@ HWTEST_F(OverlayManagerTestNg, OnDialogCloseEvent, TestSize.Level1)
     /**
      * @tc.steps: step1. create target node and toast node.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto dialogId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dialogNode = FrameNode::CreateFrameNode(
-        V2::DIALOG_ETS_TAG, dialogId, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+        V2::DIALOG_ETS_TAG, dialogId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
     ASSERT_NE(dialogNode, nullptr);
     dialogNode->MountToParent(rootNode);
 

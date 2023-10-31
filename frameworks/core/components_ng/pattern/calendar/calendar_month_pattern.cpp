@@ -215,7 +215,7 @@ void CalendarMonthPattern::OnTouchEvent(const Offset& localLocation, bool isPres
         return;
     }
     auto index = JudgeArea(localLocation);
-    if (index < 0 || index >= obtainedMonth_.days.size()) {
+    if (index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size())) {
         return;
     }
     if (isPressed) {
@@ -237,7 +237,7 @@ void CalendarMonthPattern::OnHoverEvent(const Offset& localLocation, bool state)
         return;
     }
     int32_t index = JudgeArea(localLocation);
-    if (index < 0 || index >= obtainedMonth_.days.size()) {
+    if (index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size())) {
         return;
     }
     for (auto& day : obtainedMonth_.days) {

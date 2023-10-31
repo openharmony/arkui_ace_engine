@@ -567,8 +567,9 @@ public:
     }
     void SetParentFocusable(bool parentFocusable)
     {
-        LOGD("Set node: %{public}s/%{public}d parentFocusable from %{public}d to %{public}d", GetFrameName().c_str(),
-            GetFrameId(), parentFocusable_, parentFocusable);
+        TAG_LOGD(AceLogTag::ACE_FOCUS,
+            "Set node: %{public}s/%{public}d parentFocusable from %{public}d to %{public}d",
+             GetFrameName().c_str(), GetFrameId(), parentFocusable_, parentFocusable);
         parentFocusable_ = parentFocusable;
     }
 

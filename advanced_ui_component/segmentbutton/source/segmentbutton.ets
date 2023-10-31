@@ -344,6 +344,8 @@ struct SegmentButtonItem {
           .size(this.options.imageSize ?? { width: 24, height: 24 })
           .focusable(this.index == 0)
           .draggable(false)
+          .fillColor(this.property.isSelected ? (this.options.selectedFontColor ?? $r('sys.color.ohos_id_color_foreground_contrary')) :
+            (this.options.fontColor ?? $r('sys.color.ohos_id_color_text_secondary')))
       }
       if (this.options.showText) {
         Text(this.itemOptions.text)

@@ -378,9 +378,15 @@ public:
         userSet_ = true;
     }
 
+    void SetCustomerDraggable(bool draggable) {
+        draggable_ = draggable;
+        userSet_ = true;
+        customerSet_ = true;
+    }
+
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
     {
-        builderFunc_ = buildFunc;
+        builderFunc_ = std::move(buildFunc);
         backgroundNode_ = nullptr;
     }
 
@@ -397,6 +403,11 @@ public:
     bool IsUserSet() const
     {
         return userSet_;
+    }
+
+    bool IsCustomerSet() const
+    {
+        return customerSet_;
     }
 
     void SetAllowDrop(const std::set<std::string>& allowDrop)
@@ -554,6 +565,16 @@ public:
         return nullptr;
     }
 
+    bool IsFirstBuilding() const
+    {
+        return isFirstBuilding_;
+    }
+
+    void MarkBuildDone()
+    {
+        isFirstBuilding_ = false;
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -650,6 +671,7 @@ private:
     bool isResponseRegion_ = false;
     bool bypass_ = false;
     bool isLayoutComplete_ = false;
+    bool isFirstBuilding_ = true;
 
     double lastVisibleRatio_ = 0.0;
 
@@ -661,6 +683,7 @@ private:
 
     bool draggable_ = false;
     bool userSet_ = false;
+    bool customerSet_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
 

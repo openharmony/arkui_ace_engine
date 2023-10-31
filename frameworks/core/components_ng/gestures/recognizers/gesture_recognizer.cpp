@@ -93,7 +93,6 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             HandleTouchCancelEvent(point);
             break;
         default:
-            LOGW("unknown touch type");
             break;
     }
     return true;
@@ -111,13 +110,10 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
             HandleTouchMoveEvent(event);
             break;
         case AxisAction::END:
-            // When scroll one step. Axis events are 'BEGIN' and 'END'. So it's need to do 'UPDATE' before 'END'.
-            HandleTouchMoveEvent(event);
             HandleTouchUpEvent(event);
             break;
         default:
             HandleTouchCancelEvent(event);
-            LOGW("unknown touch type");
             break;
     }
     return true;
@@ -133,7 +129,6 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
 
     auto referee = GetCurrentGestureReferee();
     if (!referee) {
-        LOGW("the referee is nullptr");
         recognizer->OnRejected();
         return;
     }

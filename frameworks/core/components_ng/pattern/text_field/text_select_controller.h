@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include <functional>
-#include <cstdint>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -107,8 +106,9 @@ public:
         secondHandleInfo_.rect.SetHeight(height);
     }
 
-    RectF GetCaretRect() const
+    RectF GetCaretRect()
     {
+        UpdateCaretOffset();
         return caretInfo_.rect;
     }
 
@@ -163,6 +163,15 @@ public:
     HandleInfoNG GetCaretInfo() const
     {
         return caretInfo_;
+    }
+
+    bool HasReverse() {
+        return firstHandleInfo_.index > secondHandleInfo_.index;
+    }
+
+    bool CaretAtLast() const
+    {
+        return caretInfo_.index == static_cast<int32_t>(contentController_->GetWideText().length());
     }
 
     void ResetHandles();

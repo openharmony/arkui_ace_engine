@@ -47,7 +47,7 @@ void FlutterRenderWeb::OnPaintFinish()
     } else {
         delegate_->SetBoundsOrResize(drawSize_, position_);
     }
-    LOGI("FlutterRenderWeb::OnPaintFinish");
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web Flutter render painting finish.");
 }
 
 RenderLayer FlutterRenderWeb::GetRenderLayer()
@@ -70,9 +70,7 @@ void FlutterRenderWeb::Paint(RenderContext& context, const Offset& offset)
     if (!isEnhanceSurface_) {
         return;
     }
-    LOGI("FlutterRenderWeb::Paint");
     if (drawSize_.Width() == Size::INFINITE_SIZE || drawSize_.Height() == Size::INFINITE_SIZE) {
-        LOGE("Web drawSize height or width is invalid");
         return;
     }
     if (delegate_) {

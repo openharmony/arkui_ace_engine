@@ -82,9 +82,6 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
-    if (refereeNG_->CheckSourceTypeChange(touchPoint.sourceType)) {
-        refereeNG_->CleanAll(true);
-    }
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
     }
@@ -92,7 +89,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         std::vector<NG::RectF> rect;
         frameNode->CheckSecurityComponentStatus(rect);
     }
-    if (!needAppend) {
+    if (!needAppend && touchTestResults_.empty()) {
         NG::NGGestureRecognizer::ResetGlobalTransCfg();
     }
     // For root node, the parent local point is the same as global point.

@@ -38,20 +38,26 @@ constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
 } // namespace
 
-void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
+void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
     auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
     CHECK_NULL_VOID(columnNode);
     auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(titleNode);
-    auto stackNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
-    CHECK_NULL_VOID(stackNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
+    if (needUpdate) {
+        LOGI("title is need update, isFocus_: %{public}d", isFocus_);
+        ChangeTitle(titleNode, isFocus_);
+        return;
+    }
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stackNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
+    CHECK_NULL_VOID(stackNode);
     auto windowManager = pipelineContext->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     windowMode_ = windowManager->GetWindowMode();

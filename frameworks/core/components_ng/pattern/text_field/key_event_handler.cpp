@@ -33,11 +33,6 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
     LOGD("HandleKeyEvent event, caps lock %{public}d, key code %{public}d", keyEvent.enableCapsLock, keyEvent.code);
     auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!pattern->GetImeAttached()) {
-        return false;
-    }
-#endif
     if (keyEvent.action == KeyAction::DOWN) {
         std::string appendElement;
         if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
@@ -239,11 +234,7 @@ bool KeyEventHandler::HandleShiftPressedEvent(const KeyEvent& event)
 
     auto iterCode = KEYBOARD_SYMBOLS.find(event.code);
     if (event.pressedCodes.size() == 1 && iterCode != KEYBOARD_SYMBOLS.end()) {
-        if (iterCode != KEYBOARD_SYMBOLS.end()) {
-            keyChar = iterCode->second;
-        } else {
-            return false;
-        }
+        keyChar = iterCode->second;
     } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
                                                                event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
         iterCode = SHIFT_KEYBOARD_SYMBOLS.find(event.code);

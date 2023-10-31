@@ -840,4 +840,11 @@ void WebModelNG::SetOverScrollId(std::function<void(const BaseEventInfo* info)>&
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnOverScrollEvent(std::move(uiCallback));
 }
+
+void WebModelNG::SetWrapContent(bool isWrapContentEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetWrapContent(isWrapContentEnabled);
+}
 } // namespace OHOS::Ace::NG

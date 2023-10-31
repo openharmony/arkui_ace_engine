@@ -41,7 +41,6 @@ void JSRowSplit::JsClip(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (clipShape == nullptr) {
-            LOGD("clipShape is null");
             return;
         }
         ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());

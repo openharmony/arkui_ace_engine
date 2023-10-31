@@ -58,4 +58,5 @@ bool Scrollable::IsSpringStopped() const
 }
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity) {}
+void Scrollable::StartScrollAnimation(float, float) {}
 } // namespace OHOS::Ace

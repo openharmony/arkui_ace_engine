@@ -150,6 +150,7 @@ public:
     static void SetDynamicLightUp(float rate, float lightUpDegree);
     static void SetFrontBlur(const Dimension& radius);
     static void SetBackShadow(const Shadow& shadow);
+    static void SetBlendMode(BlendMode blendMode);
 
     // graphics
     static void SetBrightness(const Dimension& value);

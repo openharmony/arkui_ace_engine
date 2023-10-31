@@ -49,7 +49,6 @@ namespace OHOS::Ace::Framework {
 void JSRichText::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "richtext create error, info is non-valid");
         return;
     }
 

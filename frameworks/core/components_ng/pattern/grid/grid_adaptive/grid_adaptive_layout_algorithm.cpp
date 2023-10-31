@@ -86,9 +86,6 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto maxCrossCount = std::max(static_cast<int32_t>(std::ceil(static_cast<float>(childrenCount) / mainCount_)), 1);
     crossCount_ = std::clamp(crossCount_, 1, maxCrossCount);
     displayCount_ = std::min(childrenCount, mainCount_ * crossCount_);
-    LOGI("axis: %{public}d, main count: %{public}d, cross count: %{public}d, displayCount: %{public}d, gridCellSize: "
-         "%{public}s",
-        axis, mainCount_, crossCount_, displayCount_, gridCellSize_.ToString().c_str());
 
     // Update frame size.
     auto rowCount = axis == Axis::HORIZONTAL ? crossCount_ : mainCount_;
@@ -143,7 +140,6 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             itemIdex = crossLine.second;
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIdex);
             if (!wrapper) {
-                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIdex);
                 continue;
             }
             auto layoutProperty = wrapper->GetLayoutProperty();
@@ -192,7 +188,7 @@ OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutW
             rowIndex = mainCount_ - index % mainCount_ - 1;
             break;
         default:
-            LOGI("%{public}d is not support", layoutDirection);
+            TAG_LOGI(AceLogTag::ACE_GRID, "%{public}d is not support", layoutDirection);
             break;
     }
     gridLayoutInfo_.gridMatrix_[rowIndex][columnIndex] = index;

@@ -72,10 +72,6 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(textFieldTheme);
         json->Put("caretPosition", std::to_string(propCaretPosition_.value_or(0)).c_str());
         json->Put("showPasswordIcon", propShowPasswordIcon_.value_or(true));
         json->Put("errorText", propErrorText_.value_or("").c_str());
@@ -129,6 +125,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowUnderline, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxViewLines, uint32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsEnabled, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TypeChanged, bool, PROPERTY_UPDATE_MEASURE);
@@ -172,6 +169,7 @@ protected:
         value->propTextAlignChanged_ = CloneTextAlignChanged();
         value->propDisplayMode_ = CloneDisplayMode();
         value->propMaxViewLines_ = CloneMaxViewLines();
+        value->propIsEnabled_ = CloneIsEnabled();
         value->propSelectionMenuHidden_ = CloneSelectionMenuHidden();
     }
 

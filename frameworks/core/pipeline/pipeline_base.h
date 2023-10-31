@@ -182,7 +182,7 @@ public:
 
     virtual void WindowFocus(bool isFocus) = 0;
 
-    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
+    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) = 0;
 
     virtual void OnSurfaceChanged(int32_t width, int32_t height,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,

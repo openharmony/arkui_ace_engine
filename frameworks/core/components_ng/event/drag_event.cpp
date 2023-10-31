@@ -117,12 +117,16 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
     CHECK_NULL_VOID(userCallback_);
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
 #ifdef ENABLE_DRAG_FRAMEWORK
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsDragging()) {
+    if (dragDropManager->IsDragging() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
         LOGD("not handle because of dragging now.");
         return;
     }
@@ -302,8 +306,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE.ConvertToPx());
     actionCancel_ = actionCancel;
     panRecognizer_->SetOnActionCancel(actionCancel);
-    auto gestureHub = gestureEventHub_.Upgrade();
-    CHECK_NULL_VOID(gestureHub);
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (touchRestrict.sourceType == SourceType::MOUSE) {
         std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
@@ -391,8 +393,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     previewLongPressRecognizer_->SetOnAction(longPressUpdate);
 #endif // ENABLE_DRAG_FRAMEWORK
     previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
-    auto frameNode = gestureHub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
@@ -761,8 +761,6 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextDragBase>();
     CHECK_NULL_VOID(pattern);
-    auto pixelMap = gestureHub->GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
     auto removeColumnNode = [id = Container::CurrentId(), startDrag, weakPattern = WeakPtr<TextDragBase>(pattern),
                                 weakEvent = gestureEventHub_] {
         ContainerScope scope(id);
@@ -797,7 +795,11 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto dragFrame = dragNode->GetGeometryNode()->GetFrameRect();
     auto frameWidth = dragFrame.Width();
     auto frameHeight = dragFrame.Height();
-    float scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+    auto pixelMap = gestureHub->GetPixelMap();
+    float scale = 1.0f;
+    if (pixelMap) {
+        scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+    }
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateTransformScale(VectorF(1.0f, 1.0f));

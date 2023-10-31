@@ -77,7 +77,7 @@ void HyperlinkTestNg::SetThemeInCreate()
             return AceType::MakeRefPtr<TextTheme>();
         }
         return AceType::MakeRefPtr<HyperlinkTheme>();
-    }); 
+    });
 }
 
 /**
@@ -87,14 +87,14 @@ void HyperlinkTestNg::SetThemeInCreate()
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
 {
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::HYPERLINK_ETS_TAG);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(HYPERLINK_CONTENT);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     frameNode->SetDraggable(true);
     frameNode->MarkModifyDone();
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
@@ -118,10 +118,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
 {
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -163,40 +165,18 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HyperlinkPatternTest002
- * @tc.desc: Test HyperlinkPattern InitLongPressEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest002, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
-    ASSERT_NE(frameNode, nullptr);
-    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
-    ASSERT_NE(hyperlinkPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto inputHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-
-    hyperlinkPattern->InitLongPressEvent(inputHub);
-    auto longPressEvent = hyperlinkPattern->longPressEvent_->callback_;
-
-    auto info = GestureEvent();
-    longPressEvent(info);
-    EXPECT_EQ(hyperlinkPattern->isLinked_, 1);
-}
-
-/**
  * @tc.name: HyperlinkPatternTest003
  * @tc.desc: Test HyperlinkPattern InitTouchEvent.
  * @tc.type: FUNC
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest003, TestSize.Level1)
 {
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -214,10 +194,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest003, TestSize.Level1)
 HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest004, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(
+        V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     stack->Push(hyperlinkNode);
-
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
     KeyEvent event;
@@ -246,10 +228,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest005, TestSize.Level1)
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
      */
-    auto hyperlinkNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(hyperlinkNode, nullptr);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
 
@@ -291,10 +275,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
      */
-    auto hyperlinkNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(hyperlinkNode, nullptr);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
 
@@ -353,10 +339,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
      */
-    auto hyperlinkNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(hyperlinkNode, nullptr);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
 
@@ -393,10 +381,12 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
      */
-    auto hyperlinkNode =
-        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
     ASSERT_NE(hyperlinkNode, nullptr);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
 

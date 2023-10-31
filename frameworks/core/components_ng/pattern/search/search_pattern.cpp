@@ -18,6 +18,7 @@
 #include <cstdint>
 
 #include "base/geometry/rect.h"
+#include "base/utils/system_properties.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -36,6 +37,7 @@ constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t DOUBLE = 2;
+constexpr int32_t ERROR = -1;
 
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
@@ -183,6 +185,9 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+
+    // disable drag event
+    host->SetDraggable(false);
 }
 
 void SearchPattern::InitTextFieldValueChangeEvent()
@@ -281,11 +286,45 @@ void SearchPattern::InitSearchController()
         return search->HandleTextContentLines();
     });
 
+    searchController_->SetGetCaretIndex([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN(search, ERROR);
+        return search->HandleGetCaretIndex();
+    });
+
+    searchController_->SetGetCaretPosition([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN(search, NG::OffsetF(ERROR, ERROR));
+        return search->HandleGetCaretPosition();
+    });
+
     searchController_->SetStopEditing([weak = WeakClaim(this)]() {
         auto search = weak.Upgrade();
         CHECK_NULL_VOID(search);
         search->StopEditing();
     });
+}
+
+int32_t SearchPattern::HandleGetCaretIndex()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ERROR);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, ERROR);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, ERROR);
+    return textFieldPattern->GetCaretIndex();
+}
+
+NG::OffsetF SearchPattern::HandleGetCaretPosition()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, NG::OffsetF(ERROR, ERROR));
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, NG::OffsetF(ERROR, ERROR));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, NG::OffsetF(ERROR, ERROR));
+    return textFieldPattern->GetCaretOffset();
 }
 
 void SearchPattern::HandleCaretPosition(int32_t caretPosition)
@@ -386,8 +425,8 @@ void SearchPattern::OnClickCancelButton()
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateValue("");
-    auto eventHub = host->GetEventHub<SearchEventHub>();
-    eventHub->UpdateChangeEvent("");
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    eventHub->FireOnChange("");
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
@@ -689,8 +728,13 @@ void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
 void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
     int32_t duration, const RefPtr<Curve>& curve)
 {
+    auto colorMode = SystemProperties::GetColorMode();
     Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
     Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
+    if (colorMode == ColorMode::DARK) {
+        touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+        touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+    }
     Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
     Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
     renderContext->OnBackgroundColorUpdate(highlightStart);

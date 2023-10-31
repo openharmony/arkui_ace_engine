@@ -57,6 +57,7 @@ public:
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override {};
+    void SetEllipsisMode(EllipsisMode modal) override {}
 
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;

@@ -125,6 +125,7 @@ public:
     void SetDynamicLightUp(float rate, float lightUpDegree) override {};
     void SetFrontBlur(const Dimension& radius) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
+    void SetBlendMode(BlendMode blendMode) override;
     void SetColorBlend(const Color& value) override;
     void SetWindowBlur(float progress, WindowBlurStyle blurStyle) override;
     void SetBrightness(const Dimension& value) override;

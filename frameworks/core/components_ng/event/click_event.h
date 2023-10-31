@@ -61,7 +61,6 @@ public:
 
     void SetUserCallback(GestureEventFunc&& callback)
     {
-        LOGD("Set usercallback");
         if (userCallback_) {
             userCallback_.Reset();
         }
@@ -71,7 +70,6 @@ public:
     void ClearUserCallback()
     {
         // When the event param is undefined, it will clear the callback.
-        LOGI("Clear user callback.");
         if (userCallback_) {
             userCallback_.Reset();
         }

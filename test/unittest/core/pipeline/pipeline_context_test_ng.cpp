@@ -2629,8 +2629,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg057, TestSize.Level1)
     auto needRenderNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto needRenderNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, needRenderNodeId, nullptr);
     context_->SetNeedRenderNode(needRenderNode);
-    context_->InspectDrew();
     EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 1);
+    context_->InspectDrew();
+    EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 0);
 }
 
 /**

@@ -313,16 +313,16 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         itemPosition_.clear();
         return;
     }
-    LOGD("referencePos_ is %{public}f, startPos_: %{public}f, endPos_: %{public}f, forward:%{public}d",
-        referencePos_, startPos_, endPos_, forwardLayout_);
+    TAG_LOGD(AceLogTag::ACE_LIST, "List measure item, referencePos_ is %{public}f, startPos_: %{public}f, "
+        "endPos_: %{public}f, forward:%{public}d", referencePos_, startPos_, endPos_, forwardLayout_);
     if (forwardLayout_) {
         startIndex = GetLanesFloor(startIndex);
-        LOGD("startIndex:%{public}d, startPos:%{public}f", startIndex, startPos);
+        TAG_LOGD(AceLogTag::ACE_LIST, "ListItem startIndex:%{public}d, startPos:%{public}f", startIndex, startPos);
         MeasureForward(layoutWrapper, layoutConstraint, startIndex, startPos);
     } else {
         endIndex = (lanes_ <= 1) ? endIndex : (endIndex - endIndex % lanes_ + lanes_ - 1);
         endIndex = endIndex >= totalItemCount_ ? totalItemCount_ - 1 : endIndex;
-        LOGD("endIndex:%{public}d, endPos:%{public}f", endIndex, endPos);
+        TAG_LOGD(AceLogTag::ACE_LIST, "ListItem endIndex:%{public}d, endPos:%{public}f", endIndex, endPos);
         MeasureBackward(layoutWrapper, layoutConstraint, endIndex, endPos);
     }
 }
@@ -402,8 +402,6 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
         if (currentIndex < (totalItemCount_ - 1)) {
             currentEndPos += spaceWidth_;
         }
-        LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
-            currentStartPos, currentEndPos);
         if (targetIndex_ && GreatOrEqual(startIndex, targetIndex_.value())) {
             startPos_ = prevStartPos_;
             endPos_ = prevEndPos_;
@@ -442,8 +440,6 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
         if (currentIndex > 0) {
             currentStartPos = currentStartPos - spaceWidth_;
         }
-        LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
-            currentStartPos, currentEndPos);
         if (targetIndex_ && LessOrEqual(endIndex, targetIndex_.value())) {
             startPos_ = prevStartPos_;
             endPos_ = prevEndPos_;
@@ -481,7 +477,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             if (GreatOrEqual(pos->second.second, startPos - referencePos)) {
                 break;
             }
-            LOGI("recycle item:%{public}d", pos->first);
+            TAG_LOGD(AceLogTag::ACE_LIST, "recycle item:%{public}d", pos->first);
             layoutWrapper->RemoveChildInRenderTree(pos->first);
             itemPosition_.erase(pos++);
         }
@@ -507,7 +503,6 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
     for (auto& pos : itemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first);
         if (!wrapper) {
-            LOGI("wrapper is out of boundary");
             continue;
         }
 
@@ -602,7 +597,6 @@ float ListItemGroupLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, fl
         case OHOS::Ace::V2::ListItemAlign::END:
             return delta;
         default:
-            LOGW("Invalid ListItemAlign: %{public}d", itemAlign_);
             return 0.0f;
     }
 }

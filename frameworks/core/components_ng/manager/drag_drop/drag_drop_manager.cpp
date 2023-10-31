@@ -996,9 +996,13 @@ void DragDropManager::RestoreClipboardData()
             auto json = JsonUtil::ParseJsonString(data);
             if (json->Contains("preData")) {
                 auto preData = json->GetString("preData");
+#ifdef ENABLE_DRAG_FRAMEWORK
                 if (!preData.empty()) {
                     dragDropManager->clipboard_->SetData(preData);
                 }
+#else
+                dragDropManager->clipboard_->SetData(json->GetString("preData"));
+#endif // ENABLE_DRAG_FRAMEWORK
             }
         };
         deleteDataCallback_ = callback;
@@ -1030,6 +1034,22 @@ void DragDropManager::DestroyDragWindow()
     previewRect_ = Rect(-1, -1, -1, -1);
     isMouseDragged_ = false;
     currentId_ = -1;
+}
+
+void DragDropManager::CancelItemDrag()
+{
+    if (draggedGridFrameNode_) {
+        auto listEventHub = draggedGridFrameNode_->GetEventHub<ListEventHub>();
+        if (listEventHub) {
+            listEventHub->HandleOnItemDragCancel();
+            return;
+        }
+        auto gridEventHub = draggedGridFrameNode_->GetEventHub<GridEventHub>();
+        if (gridEventHub) {
+            gridEventHub->HandleOnItemDragCancel();
+            return;
+        }
+    }
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
