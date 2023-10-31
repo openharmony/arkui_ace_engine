@@ -46,14 +46,15 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
 }
 
-bool ImageSource::IsAstc(const uint8_t* data)
+bool ImageSource::IsAstc(const uint8_t* data, size_t size)
 {
-    return Media::ImageSource::IsASTC(data);
+    return Media::ImageSource::IsASTC(data, size);
 }
 
-ImageSource::Size ImageSource::GetASTCInfo(const uint8_t* data)
+ImageSource::Size ImageSource::GetASTCInfo(const uint8_t* data, size_t size)
 {
-    Media::ASTCInfo astcInfo = Media::ImageSource::GetASTCInfo(data);
+    Media::ASTCInfo astcInfo;
+    Media::ImageSource::GetASTCInfo(data, size, astcInfo);
     return { astcInfo.size.width, astcInfo.size.height };
 }
 
