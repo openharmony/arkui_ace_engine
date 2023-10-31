@@ -11811,7 +11811,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest012, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->SetNodeId(1);
+    clickRecognizerPtr->AssignNodeId(1);
     AncestorNodeInfo info1;
     AncestorNodeInfo info2;
     AncestorNodeInfo info3;
@@ -11843,7 +11843,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest013, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->SetNodeId(1);
+    clickRecognizerPtr->AssignNodeId(1);
     AncestorNodeInfo info1;
     AncestorNodeInfo info2;
     AncestorNodeInfo info3;
@@ -11921,7 +11921,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest014, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->SetNodeId(1);
+    clickRecognizerPtr->AssignNodeId(1);
     AncestorNodeInfo info1;
     AncestorNodeInfo info2;
     AncestorNodeInfo info3;

@@ -511,7 +511,7 @@ public:
         return nodeName_;
     }
 
-    void SetNodeId(int id)
+    virtual void AssignNodeId(int id)
     {
         if (nodeId_ != -1) {
             return;
