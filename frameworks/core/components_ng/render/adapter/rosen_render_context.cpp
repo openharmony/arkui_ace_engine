@@ -2014,20 +2014,20 @@ RectF RosenRenderContext::AdjustPaintRect()
 float RosenRenderContext::RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor)
 {
     float scaledValue = value;
-    float fractials = fmod(scaledValue, 1.0);
-    if (fractials < 0) {
+    float fractials = fmod(scaledValue, 1.0f);
+    if (fractials < 0.0f) {
         ++fractials;
     }
-    if (NearEqual(fractials, 0)) {
+    if (NearEqual(fractials, 0.0f)) {
         scaledValue = scaledValue - fractials;
-    } else if (NearEqual(fractials, 1.0)) {
-        scaledValue = scaledValue - fractials + 1.0;
+    } else if (NearEqual(fractials, 1.0f)) {
+        scaledValue = scaledValue - fractials + 1.0f;
     } else if (forceCeil) {
-        scaledValue = scaledValue - fractials + 1.0;
+        scaledValue = scaledValue - fractials + 1.0f;
     } else if (forceFloor) {
         scaledValue = scaledValue - fractials;
     } else {
-        scaledValue = scaledValue - fractials + (!std::isnan(fractials) && (GreatOrEqual(fractials, 0.5)) ? 1.0 : 0.0);
+        scaledValue = scaledValue - fractials + (!std::isnan(fractials) && (GreatOrEqual(fractials, 0.5f)) ? 1.0f : 0.0f);
     }
     return scaledValue;
 }
@@ -2057,9 +2057,9 @@ void RosenRenderContext::RoundToPixelGrid(float absoluteLeft, float absoluteTop)
         RoundValueToPixelGrid(nodeRelativedTop, false, textRounding)));
 
     bool hasFractionalWidth =
-        !NearEqual(fmod(nodeWidth, 1.0), 0) && !NearEqual(fmod(nodeWidth, 1.0), 1.0);
+        !NearEqual(fmod(nodeWidth, 1.0f), 0.0f) && !NearEqual(fmod(nodeWidth, 1.0f), 1.0f);
     bool hasFractionalHeight =
-        !NearEqual(fmod(nodeHeight, 1.0), 0) && !NearEqual(fmod(nodeHeight, 1.0), 1.0);
+        !NearEqual(fmod(nodeHeight, 1.0f), 0.0f) && !NearEqual(fmod(nodeHeight, 1.0f), 1.0f);
 
     geometryNode->SetPixelGridRoundSize(SizeF(
         RoundValueToPixelGrid(absoluteNodeRight, (textRounding && hasFractionalWidth),
