@@ -1937,6 +1937,7 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
                     contentRect.GetOffset().GetY() + parentGlobalOffset.GetY());
         }
         overlayInfo.singleLineHeight = PreferredLineHeight();
+        overlayInfo.handleReverse = selectController_->HasReverse();
     }
     auto hasTextContent = !contentController_->IsEmpty();
     overlayInfo.menuInfo.showCopy = hasTextContent && AllowCopy() && IsSelected();
@@ -2124,6 +2125,7 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
     CHECK_NULL_VOID(proxy);
     if (!isSingleHandle_) {
         if (selectController_->GetFirstHandleIndex() == selectController_->GetSecondHandleIndex()) {
+            UpdateSelectMenuVisibility(false);
             CloseSelectOverlay(true);
             StartTwinkling();
             selectController_->UpdateCaretOffset();
