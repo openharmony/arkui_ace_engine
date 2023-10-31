@@ -17,7 +17,6 @@
 
 #include "base/geometry/matrix3.h"
 #include "base/geometry/matrix4.h"
-#include "base/log/log.h"
 
 namespace OHOS::Ace {
 bool LeastSquareImpl::GetLeastSquareParams(std::vector<double>& params)

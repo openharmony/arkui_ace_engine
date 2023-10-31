@@ -49,7 +49,6 @@ void JSPiece::Create(const JSCallbackInfo& info)
     component->SetIcon(icon);
     auto theme = GetTheme<PieceTheme>();
     if (!theme) {
-        LOGE("piece theme is null");
         return;
     }
     component->InitializeStyle(theme);
@@ -96,14 +95,9 @@ void JSPiece::JSBind(BindingTarget globalObj)
 void JSPiece::SetShowDelete(const JSCallbackInfo& info)
 {
     bool showDelete = false;
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<PieceComponent>(stack->GetMainComponent());
     if (!component) {
-        LOGE("component is not valid");
         return;
     }
     if (info[0]->IsBoolean()) {
@@ -141,10 +135,6 @@ void JSPiece::JsOnClose(const JSCallbackInfo& info)
 
 void JSPiece::SetTextColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         return;
@@ -152,7 +142,6 @@ void JSPiece::SetTextColor(const JSCallbackInfo& info)
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<PieceComponent>(stack->GetMainComponent());
     if (!component) {
-        LOGE("component is not valid");
         return;
     }
     auto textStyle = component->GetTextStyle();
@@ -162,10 +151,6 @@ void JSPiece::SetTextColor(const JSCallbackInfo& info)
 
 void JSPiece::SetFontSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
@@ -173,7 +158,6 @@ void JSPiece::SetFontSize(const JSCallbackInfo& info)
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<PieceComponent>(stack->GetMainComponent());
     if (!component) {
-        LOGE("component is not valid");
         return;
     }
     auto textStyle = component->GetTextStyle();
@@ -186,15 +170,12 @@ void JSPiece::SetFontStyle(int32_t value)
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<PieceComponent>(stack->GetMainComponent());
     if (!component) {
-        LOGE("component is not valid");
         return;
     }
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
         auto textStyle = component->GetTextStyle();
         textStyle.SetFontStyle(FONT_STYLES[value]);
         component->SetTextStyle(std::move(textStyle));
-    } else {
-        LOGE("Text fontStyle(%d) illegal value", value);
     }
 }
 
@@ -203,7 +184,6 @@ void JSPiece::SetFontWeight(const std::string& value)
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<PieceComponent>(stack->GetMainComponent());
     if (!component) {
-        LOGE("component is not valid");
         return;
     }
 
@@ -214,19 +194,13 @@ void JSPiece::SetFontWeight(const std::string& value)
 
 void JSPiece::SetFontFamily(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<PieceComponent>(stack->GetMainComponent());
     if (!component) {
-        LOGE("component is not valid");
         return;
     }
     auto textStyle = component->GetTextStyle();
@@ -236,19 +210,13 @@ void JSPiece::SetFontFamily(const JSCallbackInfo& info)
 
 void JSPiece::SetIconPosition(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
     if (!info[0]->IsNumber()) {
-        LOGE("arg is not number.");
         return;
     }
 
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<PieceComponent>(stack->GetMainComponent());
     if (!component) {
-        LOGE("pieceComponent is null");
         return;
     }
 

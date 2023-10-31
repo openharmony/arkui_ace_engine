@@ -70,7 +70,7 @@ namespace {
 #define CHECK_RETURN(status, ret)                                      \
     do {                                                               \
         if ((status) > U_ZERO_ERROR) {                                 \
-            LOGE("status = %{public}d", static_cast<int32_t>(status)); \
+            LOGW("status = %{public}d", static_cast<int32_t>(status)); \
             return (ret);                                              \
         }                                                              \
     } while (0)
@@ -78,7 +78,7 @@ namespace {
 #define CHECK_NO_RETURN(status)                                        \
     do {                                                               \
         if ((status) > U_ZERO_ERROR) {                                 \
-            LOGE("status = %{public}d", static_cast<int32_t>(status)); \
+            LOGW("status = %{public}d", static_cast<int32_t>(status)); \
         }                                                              \
     } while (0)
 
@@ -775,7 +775,6 @@ std::string Localization::GetEntryLetters(const std::string& lettersIndex)
         if (localJsonEntry && localJsonEntry->Contains(letter)) {
             localJsonEntry = localJsonEntry->GetValue(letter);
         } else {
-            LOGW("read entry json failed.");
             return "";
         }
     }
@@ -965,7 +964,6 @@ void Localization::ParseLocaleTag(
         locale.addLikelySubtags(status);
     }
     if (status != U_ZERO_ERROR) {
-        LOGW("This localeTag is not valid.");
         return;
     }
     language = locale.getLanguage();

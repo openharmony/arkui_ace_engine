@@ -219,7 +219,6 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
     taskExecutor->PostTask(
         [weak = WeakClaim(this), nodeWk, id = Container::CurrentId()]() {
             ContainerScope scope(id);
-            LOGD("Execute dialog OnDialogCloseEvent");
             auto overlayManager = weak.Upgrade();
             auto node = nodeWk.Upgrade();
             CHECK_NULL_VOID(overlayManager && node);
@@ -258,7 +257,6 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     if (lastChild) {
         auto pattern = lastChild->GetPattern();
         if (!AceType::InstanceOf<StagePattern>(pattern)) {
-            LOGI("root has other overlay children.");
             return;
         }
     }
@@ -513,7 +511,6 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 void OverlayManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
     bool isRightToLeft, const ToastShowMode& showMode)
 {
-    LOGI("OverlayManager::ShowToast");
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
@@ -678,7 +675,6 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     if (iter != rootChildren.end()) {
         // Pop popup
         CHECK_NULL_VOID(popupInfo.isCurrentOnShow);
-        LOGI("OverlayManager: Popup begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
         AccessibilityEvent event;
@@ -695,7 +691,6 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     } else {
         // Push popup
         CHECK_NULL_VOID(!popupInfo.isCurrentOnShow);
-        LOGI("OverlayManager: Popup begin push");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         auto hub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
         if (!popupInfo.isBlockEvent && hub) {
@@ -755,7 +750,6 @@ void OverlayManager::RemoveIndexerPopup()
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 {
-    LOGI("OverlayManager:: Hide Popup");
     popupMap_[targetId] = popupInfo;
     CHECK_NULL_VOID(popupInfo.markNeedUpdate);
     popupMap_[targetId].markNeedUpdate = false;
@@ -777,7 +771,6 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 void OverlayManager::HideCustomPopups()
 {
     if (popupMap_.empty()) {
-        LOGD("OverlayManager: popupMap is empty");
         return;
     }
     for (const auto& popup : popupMap_) {
@@ -812,9 +805,7 @@ void OverlayManager::HideCustomPopups()
 
 void OverlayManager::HideAllPopups()
 {
-    LOGD("OverlayManager::HideAllPopups");
     if (popupMap_.empty()) {
-        LOGD("OverlayManager: popupMap is empty");
         return;
     }
     for (const auto& popup : popupMap_) {
@@ -855,13 +846,11 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
         auto it = menuMap_.find(targetId);
         if (it != menuMap_.end()) {
             menu = it->second;
-        } else {
-            LOGW("menuNode doesn't exists %{public}d", targetId);
         }
     } else {
         // creating new menu
         menuMap_[targetId] = menu;
-        LOGI("menuNode %{public}d added to map", targetId);
+        LOGD("menuNode %{public}d added to map", targetId);
     }
     CHECK_NULL_RETURN(menu, false);
 
@@ -882,7 +871,6 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
 void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
     if (!ShowMenuHelper(menu, targetId, offset)) {
-        LOGW("show menu failed");
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -900,9 +888,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), menu);
     // menuNode already showing
-    if (iter != rootChildren.end()) {
-        LOGW("menuNode already appended");
-    } else {
+    if (iter == rootChildren.end()) {
         menu->MountToParent(rootNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -922,7 +908,6 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
         menuOffset -= subwindowRect.GetOffset();
     }
     if (!ShowMenuHelper(menu, targetId, menuOffset)) {
-        LOGW("show menu failed");
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -942,7 +927,6 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
 
 void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId)
 {
-    LOGI("OverlayManager::HideMenuInSubWindow");
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
     }
@@ -952,9 +936,8 @@ void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t 
 
 void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDrag)
 {
-    LOGI("OverlayManager::HideMenuInSubWindow from close");
+    LOGI("OverlayManager HideMenu in subWindow from close");
     if (menuMap_.empty()) {
-        LOGW("OverlayManager: menuMap is empty");
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -976,8 +959,7 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
 
 void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
-    // menu is menuWrapper
-    LOGI("OverlayManager::HideMenuNode menu targetId is %{public}d", targetId);
+    LOGI("OverlayManager HideMenuNode menu targetId is %{public}d", targetId);
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
     }
@@ -996,7 +978,6 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
 
 void OverlayManager::HideAllMenus()
 {
-    LOGD("OverlayManager::HideAllMenus");
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         for (const auto& windowScene : windowSceneSet_) {
@@ -1025,7 +1006,6 @@ void OverlayManager::HideAllMenus()
 
 void OverlayManager::DeleteMenu(int32_t targetId)
 {
-    LOGI("OverlayManager::DeleteMenuNode");
     auto it = menuMap_.find(targetId);
     if (it == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d doesn't exist", targetId);
@@ -1087,7 +1067,6 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
 
 void OverlayManager::CleanPreviewInSubWindow()
 {
-    LOGD("OverlayManager::CleanPreviewInSubWindow");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     for (const auto& child : rootNode->GetChildren()) {
@@ -1108,7 +1087,6 @@ void OverlayManager::CleanPreviewInSubWindow()
 
 void OverlayManager::CleanMenuInSubWindow()
 {
-    LOGI("OverlayManager::CleanMenuInSubWindow");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     for (const auto& child : rootNode->GetChildren()) {
@@ -1151,7 +1129,6 @@ void OverlayManager::BeforeShowDialog(const RefPtr<FrameNode>& node)
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
 {
-    LOGI("OverlayManager::ShowDialog");
     RefPtr<UINode> customNode;
     // create custom builder content
     if (buildFunc) {
@@ -1172,7 +1149,6 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 
 void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 {
-    LOGI("OverlayManager::ShowCustomDialog");
     BeforeShowDialog(customNode);
     OpenDialogAnimation(customNode);
 }
@@ -1180,7 +1156,6 @@ void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
-    LOGI("OverlayManager::ShowDateDialogPicker");
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(settingData), std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
@@ -1191,7 +1166,6 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
     std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
-    LOGI("OverlayManager::ShowTimeDialogPicker");
     auto dialogNode = TimePickerDialogView::Show(
         dialogProps, settingData, std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
@@ -1202,7 +1176,6 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
     std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
-    LOGI("OverlayManager::ShowTextDialogPicker");
     auto dialogNode =
         TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
@@ -1246,7 +1219,6 @@ bool OverlayManager::DialogInMapHoldingFocus()
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
-    LOGI("OverlayManager::CloseDialog");
     RemoveDialogFromMap(dialogNode);
     if (dialogNode->IsRemoving()) {
         // already in close animation
@@ -1457,7 +1429,6 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
 
 bool OverlayManager::RemoveOverlayInSubwindow()
 {
-    LOGI("OverlayManager::RemoveOverlayInSubwindow");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, false);
     if (rootNode->GetChildren().empty()) {
@@ -1507,7 +1478,6 @@ bool OverlayManager::RemoveOverlayInSubwindow()
 
 void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow)
 {
-    LOGI("OverlayManager::FocusOverlayNode when overlay node show");
     CHECK_NULL_VOID(overlayNode);
     auto focusHub = overlayNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1517,7 +1487,6 @@ void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool
 
 void OverlayManager::BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bool isInSubWindow)
 {
-    LOGI("OverlayManager::BlurOverlayNode");
     auto currentFocusHub = currentOverlay->GetOrCreateFocusHub();
     CHECK_NULL_VOID(currentFocusHub);
     currentFocusHub->SetParentFocusable(false);
@@ -2152,7 +2121,6 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
 
 void OverlayManager::DeleteModal(int32_t targetId)
 {
-    LOGI("OverlayManager::DeleteModal");
     bool isDelete = false;
     bool isModal = true;
     for (auto modal = modalList_.begin(); modal != modalList_.end(); modal++) {
@@ -2168,7 +2136,6 @@ void OverlayManager::DeleteModal(int32_t targetId)
             isModal = false;
             currentTargetId = modalNode->GetPattern<SheetPresentationPattern>()->GetTargetId();
         } else {
-            LOGW("OverlayManager: modalNode %{public}d doesn't exist", targetId);
             return;
         }
         if (currentTargetId == targetId) {
@@ -2321,13 +2288,11 @@ RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
         return rootNodeWeak_.Upgrade();
     }
     CHECK_NULL_RETURN(targetNode, nullptr);
-    LOGI("FindWindowScene start");
     auto parent = targetNode->GetParent();
     while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
         parent = parent->GetParent();
     }
     CHECK_NULL_RETURN(parent, nullptr);
-    LOGI("FindWindowScene success");
     windowSceneSet_.insert(parent);
     return parent;
 }
