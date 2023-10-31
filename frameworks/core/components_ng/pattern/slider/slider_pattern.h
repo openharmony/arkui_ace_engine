@@ -186,6 +186,10 @@ private:
     void UpdateImagePositionY(float centerY);
     OffsetF GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
     void SetAccessibilityAction();
+    void UpdateTipState();
+    void OnIsFocusActiveUpdate(bool isFocusActive);
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
@@ -228,6 +232,8 @@ private:
     RefPtr<SliderTipModifier> sliderTipModifier_;
 
     RefPtr<FrameNode> imageFrameNode_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+    bool isFocusActive_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
