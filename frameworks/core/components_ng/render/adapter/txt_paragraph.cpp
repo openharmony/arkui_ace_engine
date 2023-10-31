@@ -56,6 +56,7 @@ void TxtParagraph::CreateBuilder()
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.maxLines = paraStyle_.maxLines;
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
+    style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
 #endif
     style.locale = paraStyle_.fontLocale;

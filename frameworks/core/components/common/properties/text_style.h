@@ -69,6 +69,12 @@ enum class TextCase {
     UPPERCASE,
 };
 
+enum class EllipsisMode {
+    HEAD,
+    MIDDLE,
+    TAIL,
+};
+
 enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD };
 
 /// Where to vertically align the placeholder relative to the surrounding text.
@@ -468,6 +474,16 @@ public:
         halfLeading_ = halfLeading;
     }
 
+    void SetEllipsisMode(EllipsisMode modal)
+    {
+        ellipsisMode_ = modal;
+    }
+
+    EllipsisMode GetEllipsisMode() const
+    {
+        return ellipsisMode_;
+    }
+
 private:
     std::vector<std::string> fontFamilies_;
     std::unordered_map<std::string, int32_t> fontFeatures_;
@@ -503,6 +519,7 @@ private:
     bool halfLeading_ = false;
     WordBreak wordBreak_ { WordBreak::BREAK_WORD };
     TextCase textCase_ { TextCase::NORMAL };
+    EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
 };
 
 namespace StringUtils {
