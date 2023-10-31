@@ -37,7 +37,7 @@ namespace OHOS::Ace::Napi {
 
 namespace {
 constexpr size_t INTERPOLATING_SPRING_PARAMS_SIZE = 4;
-const char INTERPOLATING_SPRING[] = "interpolating-spring";
+constexpr char INTERPOLATING_SPRING[] = "interpolating-spring";
 } // namespace
 
 static void ParseString(napi_env env, napi_value propertyNapi, std::string& property)
@@ -134,7 +134,7 @@ static RefPtr<Motion> ParseOptionToMotion(const std::shared_ptr<AnimatorOption>&
         return nullptr;
     }
     auto aniTimFuncName = curveStr.substr(0, leftEmbracePosition);
-    if (aniTimFuncName != INTERPOLATING_SPRING) {
+    if (aniTimFuncName.compare(INTERPOLATING_SPRING)) {
         return nullptr;
     }
     auto params = curveStr.substr(leftEmbracePosition + 1, curveStr.length() - leftEmbracePosition - 2);
@@ -318,22 +318,23 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
     }
     auto animatorResult = GetAnimatorResult(env, info);
     if (!animatorResult) {
-        LOGW("JsAnimator: cannot find animator result when call play");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: cannot find animator result when call play");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGW("JsAnimator: no animator is created when call play");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: no animator is created when call play");
         return nullptr;
     }
-    LOGI("JsAnimator: JSPlay, id:%{public}d", animator->GetId());
     if (!animator->HasScheduler()) {
         auto result = animator->AttachSchedulerOnContainer();
         if (!result) {
-            LOGW("JsAnimator: play failed, animator is not bound to specific context");
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                "JsAnimator: play failed, animator is not bound to specific context, id:%{public}d", animator->GetId());
             return nullptr;
         }
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSPlay, id:%{public}d", animator->GetId());
     if (animatorResult->GetMotion()) {
         animator->PlayMotion(animatorResult->GetMotion());
     } else {
@@ -387,23 +388,23 @@ static napi_value JSReverse(napi_env env, napi_callback_info info)
 {
     auto animatorResult = GetAnimatorResult(env, info);
     if (!animatorResult) {
-        LOGW("JsAnimator: cannot find animator result when call reverse");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: cannot find animator result when call reverse");
         return nullptr;
     }
     if (animatorResult->GetMotion()) {
-        LOGW("JsAnimator: interpolatingSpringCurve, cannot reverse");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: interpolatingSpringCurve, cannot reverse");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGW("JsAnimator: no animator is created when call reverse");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: no animator is created when call reverse");
         return nullptr;
     }
-    LOGI("JsAnimator: JSReverse, id:%{public}d", animator->GetId());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReverse, id:%{public}d", animator->GetId());
     if (!animator->HasScheduler()) {
         auto result = animator->AttachSchedulerOnContainer();
         if (!result) {
-            LOGW("JsAnimator: reverse failed, animator is not bound to specific context");
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: reverse failed, animator is not bound to specific context");
             return nullptr;
         }
     }

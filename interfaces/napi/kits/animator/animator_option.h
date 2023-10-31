@@ -107,7 +107,7 @@ public:
         onrepeat_ = onrepeat;
     }
 
-    RefPtr<Motion> GetMotion()
+    const RefPtr<Motion>& GetMotion() const
     {
         return motion_;
     }
