@@ -2027,7 +2027,8 @@ float RosenRenderContext::RoundValueToPixelGrid(float value, bool forceCeil, boo
     } else if (forceFloor) {
         scaledValue = scaledValue - fractials;
     } else {
-        scaledValue = scaledValue - fractials + (!std::isnan(fractials) && (GreatOrEqual(fractials, 0.5f)) ? 1.0f : 0.0f);
+        scaledValue = (!std::isnan(fractials) && (GreatOrEqual(fractials, 0.5f)) ? 1.0f : 0.0f)
+                        + scaledValue - fractials;
     }
     return scaledValue;
 }
