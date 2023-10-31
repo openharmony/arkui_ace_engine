@@ -4366,6 +4366,8 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     layoutProperty->UpdatePadding(
         { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
     ProcessInnerPadding();
+    textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
+    textRect_.SetTop(GetPaddingTop() + GetBorderTop());
     MarginProperty margin;
     margin.bottom =
         CalcLength(inlineState_.padding.bottom->GetDimension() + inlineState_.margin.bottom->GetDimension());
