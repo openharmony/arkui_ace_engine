@@ -1033,6 +1033,11 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive)
         return false;
     }
     isFocusActive_ = isFocusActive;
+    for (auto& pair : isFocusActiveUpdateEvents_) {
+        if (pair.second) {
+            pair.second(isFocusActive_);
+        }
+    }
     CHECK_NULL_RETURN(rootNode_, false);
     auto rootFocusHub = rootNode_->GetFocusHub();
     CHECK_NULL_RETURN(rootFocusHub, false);
@@ -2099,6 +2104,22 @@ void PipelineContext::HandleSubwindow(bool isShow)
     // there are sub windows that do not immediately hide, such as Toast floating window
     if (!isShow) {
         overlayManager_->ClearToastInSubwindow();
+    }
+}
+
+void PipelineContext::AddIsFocusActiveUpdateEvent(
+    const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback)
+{
+    CHECK_NULL_VOID(node);
+    isFocusActiveUpdateEvents_.insert_or_assign(node->GetId(), eventCallback);
+}
+
+void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto iter = isFocusActiveUpdateEvents_.find(node->GetId());
+    if (iter != isFocusActiveUpdateEvents_.end()) {
+        isFocusActiveUpdateEvents_.erase(iter);
     }
 }
 } // namespace OHOS::Ace::NG
