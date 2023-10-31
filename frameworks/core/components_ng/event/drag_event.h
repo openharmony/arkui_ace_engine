@@ -129,6 +129,7 @@ public:
     void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode);
     void SetTextAnimation(const RefPtr<GestureEventHub>& gestureHub, const Offset& globalLocation);
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
+    void HideMenu(const RefPtr<FrameNode>& MenuNode);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);

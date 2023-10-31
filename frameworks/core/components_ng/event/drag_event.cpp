@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/render_context.h"
@@ -160,7 +161,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     HideEventColumn();
                     HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                     HideFilter();
-                    SubwindowManager::GetInstance()->HideMenuNG(false, true);
+                    HideMenu(frameNode);
                     AnimationOption option;
                     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
                     option.SetCurve(Curves::SHARP);
@@ -168,6 +169,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                         option, [renderContext]() { renderContext->UpdateOpacity(SCALE_NUMBER); },
                         option.GetOnFinishEvent());
                 }
+            } else {
+                HideMenu(frameNode);
             }
         }
 
@@ -838,6 +841,18 @@ bool DragEventActuator::IsAllowedDrag()
     CHECK_NULL_RETURN(eventHub, false);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     return isAllowedDrag;
+}
+
+void DragEventActuator::HideMenu(const RefPtr<FrameNode>& menuNode)
+{
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    if (menuPattern) {
+        if (menuPattern->IsContextMenu()) {
+            SubwindowManager::GetInstance()->HideMenuNG(false, true);
+        } else {
+            menuPattern->HideMenu(true);
+        }
+    }
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG
