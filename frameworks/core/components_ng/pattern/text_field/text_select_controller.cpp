@@ -424,6 +424,7 @@ void TextSelectController::UpdateRecordCaretIndex(int32_t index) const
     auto textFiled = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFiled);
     textFiled->UpdateRecordCaretIndex(index);
+    textFiled->UpdateCaretInfoToController();
 }
 
 void TextSelectController::ResetHandles()
