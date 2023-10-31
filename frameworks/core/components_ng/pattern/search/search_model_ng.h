@@ -60,6 +60,8 @@ public:
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override;
     void SetMaxLength(uint32_t value) override;
     void ResetMaxLength() override;
+    void SetType(TextInputType value) override;
+
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);

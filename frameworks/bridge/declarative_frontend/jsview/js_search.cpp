@@ -101,6 +101,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
     JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
+    JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -673,6 +674,20 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
     if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
         SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
     }
+}
+
+void JSSearch::SetType(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("SetType create error, info is non-valid");
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        LOGI("The inputType is not number");
+        return;
+    }
+    TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());
+    SearchModel::GetInstance()->SetType(textInputType);
 }
 
 void JSSearchController::JSBind(BindingTarget globalObj)
