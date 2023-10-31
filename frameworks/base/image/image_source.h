@@ -29,8 +29,8 @@ public:
 
     static RefPtr<ImageSource> Create(int32_t fd);
     static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size);
-    static bool IsAstc(const uint8_t* data);
-    static Size GetASTCInfo(const uint8_t* data);
+    static bool IsAstc(const uint8_t* data, size_t size);
+    static Size GetASTCInfo(const uint8_t* data, size_t size);
 
     virtual std::string GetProperty(const std::string& key) = 0;
 

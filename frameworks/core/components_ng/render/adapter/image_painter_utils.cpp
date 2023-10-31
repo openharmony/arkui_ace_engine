@@ -147,9 +147,11 @@ void ImagePainterUtils::AddFilter(RSBrush& brush, RSSamplingOptions& options, co
 void ImagePainterUtils::ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     std::vector<RSPoint> radius(ImagePainterUtils::RADIUS_POINTS_SIZE);
-    for (size_t i = 0; i < radius.size(); ++i) {
-        radius[i] = RSPoint(radiusXY[i].GetX(), radiusXY[i].GetY());
-    }
+    // Adapt to the graphical interface and adjust the position of the last two parameters
+    radius[0] = RSPoint(radiusXY[0].GetX(), radiusXY[0].GetY());
+    radius[1] = RSPoint(radiusXY[1].GetX(), radiusXY[1].GetY());
+    radius[2] = RSPoint(radiusXY[3].GetX(), radiusXY[3].GetY());
+    radius[3] = RSPoint(radiusXY[2].GetX(), radiusXY[2].GetY());
     RSRoundRect rRect(dstRect, radius);
     canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
 }

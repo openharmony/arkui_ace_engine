@@ -169,8 +169,13 @@ void JsiPaEngine::RegisterUncaughtExceptionHandler()
     JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
     uncaughtExceptionInfo.uncaughtTask = [](std::string summary, const JsEnv::ErrorObject errorObj) {
         std::string packageName = AceApplicationInfo::GetInstance().GetPackageName();
+        JsErrorObject errorInfo = {
+            .name = errorObj.name,
+            .message = errorObj.message,
+            .stack = errorObj.stack,
+        };
         EventReport::JsErrReport(packageName, "", summary);
-        ExceptionHandler::HandleJsException(summary);
+        ExceptionHandler::HandleJsException(summary, errorInfo);
     };
 
     jsAbilityRuntime_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);

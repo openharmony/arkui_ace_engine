@@ -54,4 +54,9 @@ void ImagePattern::OnVisibleChange(bool isVisible) {}
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void ImagePattern::DumpAdvanceInfo() {}
 void ImagePattern::OnLanguageConfigurationUpdate() {}
+void ImagePattern::OnColorConfigurationUpdate() {}
+void ImagePattern::LoadImage(const ImageSourceInfo& src) {}
+void ImagePattern::LoadAltImage(const RefPtr<ImageLayoutProperty>& imageLayoutProperty) {}
+void ImagePattern::OnRecycle() {}
+void ImagePattern::OnReuse() {}
 } // namespace OHOS::Ace::NG

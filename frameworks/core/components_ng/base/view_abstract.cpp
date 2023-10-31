@@ -1264,6 +1264,15 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
     ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
 }
 
+void ViewAbstract::SetBlendMode(BlendMode blendMode)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackBlendMode, blendMode);
+}
+
 void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

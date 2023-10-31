@@ -95,7 +95,9 @@ void ImageAnimatorPattern::SetShowingIndex(int32_t index)
         host->AddChild(cacheImageNode, DEFAULT_NODE_SLOT, true);
         host->RebuildRenderContextTree();
         cacheImages_.erase(cacheImageIter);
-        cacheImages_.emplace_back(CacheImageStruct(imageFrameNode));
+        CacheImageStruct newCacheImageStruct(imageFrameNode);
+        newCacheImageStruct.isLoaded = true;
+        cacheImages_.emplace_back(newCacheImageStruct);
         UpdateShowingImageInfo(cacheImageNode, index);
     } else {
         // wait for cache image loading

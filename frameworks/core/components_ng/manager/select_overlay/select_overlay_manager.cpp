@@ -114,7 +114,6 @@ RefPtr<UINode> SelectOverlayManager::FindWindowScene(RefPtr<FrameNode> targetNod
         parent = parent->GetParent();
     }
     CHECK_NULL_RETURN(parent, nullptr);
-    LOGI("FindWindowScene success");
     return parent;
 }
 
@@ -129,8 +128,6 @@ void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId, bool animatio
     auto current = selectOverlayItem_.Upgrade();
     if (current && (current->GetId() == overlayId)) {
         DestroyHelper(current, animation);
-    } else {
-        LOGD("current overlay id %{public}d is already destroyed.", overlayId);
     }
 }
 
@@ -341,7 +338,7 @@ void SelectOverlayManager::MarkDirty(PropertyChangeFlag flag)
 
 void SelectOverlayManager::NotifyOnScrollCallback(int32_t id, Axis axis, float offset, int32_t source)
 {
-    LOGI("NotifyOnScrollCallback scroll id %{public}d", id);
+    LOGD("Selected scroll id %{public}d", id);
     if (parentScrollCallbacks_.empty()) {
         return;
     }
@@ -362,7 +359,7 @@ void SelectOverlayManager::NotifyOnScrollCallback(int32_t id, Axis axis, float o
 void SelectOverlayManager::RegisterScrollCallback(
     int32_t scrollableParentId, int32_t callbackId, ScrollableParentCallback&& callback)
 {
-    LOGI("RegisterScrollCallback scroll parent id %{public}d, callbackId %{public}d", scrollableParentId, callbackId);
+    LOGD("RegisterScrollCallback scroll parent id %{public}d, callbackId %{public}d", scrollableParentId, callbackId);
     auto it = parentScrollCallbacks_.find(scrollableParentId);
     if (it == parentScrollCallbacks_.end()) {
         std::map<int32_t, ScrollableParentCallback> callbackMap = { { callbackId, std::move(callback) } };
@@ -374,7 +371,7 @@ void SelectOverlayManager::RegisterScrollCallback(
 
 void SelectOverlayManager::RemoveScrollCallback(int32_t callbackId)
 {
-    LOGI("RemoveScrollCallback callbackId %{public}d", callbackId);
+    LOGD("RemoveScrollCallback callbackId %{public}d", callbackId);
     if (parentScrollCallbacks_.empty()) {
         return;
     }

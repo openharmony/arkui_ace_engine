@@ -62,9 +62,6 @@ bool JSButton::isLabelButton_ = false;
 
 void JSButton::SetFontSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     auto buttonTheme = GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     CalcDimension fontSize = buttonTheme->GetTextStyle().GetFontSize();
@@ -94,9 +91,6 @@ void JSButton::SetFontStyle(int32_t value)
 
 void JSButton::SetFontFamily(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
         return;
@@ -107,9 +101,6 @@ void JSButton::SetFontFamily(const JSCallbackInfo& info)
 
 void JSButton::SetTextColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
@@ -121,9 +112,6 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
 
 void JSButton::SetType(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     int32_t value = 1;
     if (info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
@@ -136,9 +124,6 @@ void JSButton::SetType(const JSCallbackInfo& info)
 
 void JSButton::SetStateEffect(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     bool value = info[0]->IsBoolean() ? info[0]->ToBoolean() : true;
     ButtonModel::GetInstance()->SetStateEffect(value);
 }
@@ -545,9 +530,6 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     Color backgroundColor;
     bool colorFlag = ParseJsColor(info[0], backgroundColor);
     if (!colorFlag) {
@@ -586,9 +568,6 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
 void JSButton::JsAspectRatio(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsAspectRatio(info);
-    if (info.Length() < 1) {
-        return;
-    }
     double value = 0.0;
     if (!ParseJsDouble(info[0], value)) {
         return;
@@ -599,10 +578,6 @@ void JSButton::JsAspectRatio(const JSCallbackInfo& info)
 
 void JSButton::JsSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 0) {
-        return;
-    }
-
     if (!info[0]->IsObject()) {
         return;
     }
@@ -624,9 +599,6 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 
 void JSButton::JsRadius(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     CalcDimension radius;
     ParseJsDimensionVp(info[0], radius);
     ButtonModel::GetInstance()->SetBorderRadius(radius);
@@ -649,9 +621,6 @@ void JSButton::JsBorder(const JSCallbackInfo& info)
 
 CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return { -1.0 };
-    }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return { -1.0 };

@@ -68,6 +68,7 @@ public:
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetEllipsisMode(EllipsisMode modal) = 0;
 
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;

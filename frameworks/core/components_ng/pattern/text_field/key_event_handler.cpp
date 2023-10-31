@@ -33,11 +33,6 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
     LOGD("HandleKeyEvent event, caps lock %{public}d, key code %{public}d", keyEvent.enableCapsLock, keyEvent.code);
     auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!pattern->GetImeAttached()) {
-        return false;
-    }
-#endif
     if (keyEvent.action == KeyAction::DOWN) {
         std::string appendElement;
         if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||

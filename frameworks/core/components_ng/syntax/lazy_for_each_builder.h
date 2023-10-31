@@ -265,7 +265,7 @@ public:
         ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
         itemInfo.second->Build();
         auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false));
-        if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+        if (frameNode && frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
             frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
         }
         ViewStackProcessor::GetInstance()->ResetPredict();

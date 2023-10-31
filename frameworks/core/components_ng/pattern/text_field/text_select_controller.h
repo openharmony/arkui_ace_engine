@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include <functional>
-#include <cstdint>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -168,6 +167,11 @@ public:
 
     bool HasReverse() {
         return firstHandleInfo_.index > secondHandleInfo_.index;
+    }
+
+    bool CaretAtLast() const
+    {
+        return caretInfo_.index == static_cast<int32_t>(contentController_->GetWideText().length());
     }
 
     void ResetHandles();

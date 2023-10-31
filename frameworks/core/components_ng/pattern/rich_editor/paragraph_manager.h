@@ -33,7 +33,7 @@ public:
 
         std::string ToString() const;
     };
-    std::optional<double> minParagraphFontSize;
+    std::optional<double> minParagraphFontSize = std::nullopt;
 
     int32_t GetIndex(Offset offset) const;
     float GetHeight() const;
@@ -46,7 +46,8 @@ public:
 
     std::vector<RectF> GetRects(int32_t start, int32_t end) const;
     std::vector<RectF> GetPlaceholderRects() const;
-    OffsetF ComputeCursorOffset(int32_t index, float& selectLineHeight) const;
+    OffsetF ComputeCursorOffset(int32_t index, float& selectLineHeight, bool downStreamFirst = false) const;
+    OffsetF ComputeCursorInfoByClick(int32_t index, float& selectLineHeight, const OffsetF& lastTouchOffset) const;
 
     void AddParagraph(ParagraphInfo&& info)
     {

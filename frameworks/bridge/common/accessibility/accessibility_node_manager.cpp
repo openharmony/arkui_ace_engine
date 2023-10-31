@@ -674,11 +674,11 @@ void AccessibilityNodeManager::DumpProperty(const std::vector<std::string>& para
 std::unique_ptr<JsonValue> AccessibilityNodeManager::DumpComposedElementsToJson() const
 {
     auto json = JsonUtil::Create(true);
-    auto infos = JsonUtil::CreateArray(false);
+    auto infos = JsonUtil::CreateArray(true);
     for (auto& [id, element] : composedElementIdMap_) {
         auto inspector = element.Upgrade();
         if (inspector) {
-            auto info = JsonUtil::Create(false);
+            auto info = JsonUtil::Create(true);
             info->Put("id", id.c_str());
             info->Put("type", TypeInfoHelper::TypeName(*inspector));
             infos->Put(info);

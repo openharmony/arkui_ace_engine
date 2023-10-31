@@ -215,6 +215,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         centerIndex_ = listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty));
     }
     ProcessEvent(indexChanged, relativeOffset, isJump, prevStartOffset, prevEndOffset);
+    HandleScrollBarOutBoundary();
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
@@ -709,7 +710,6 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
             overScroll = endPos - itemHeight / 2.0f - contentMainSize_ / 2.0f;
         }
     }
-    HandleScrollBarOutBoundary(overScroll);
 
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
         // adjust offset.
@@ -1294,6 +1294,36 @@ Offset ListPattern::GetCurrentOffset() const
         return { GetTotalOffset(), 0.0 };
     }
     return { 0.0, GetTotalOffset() };
+}
+
+void ListPattern::HandleScrollBarOutBoundary()
+{
+    if (itemPosition_.empty()) {
+        return;
+    }
+    if (!GetScrollBar() && !GetScrollBarProxy()) {
+        return;
+    }
+    if (!IsOutOfBoundary(false) || !scrollable_) {
+        return;
+    }
+    float overScroll = 0.0f;
+    if (!IsScrollSnapAlignCenter()) {
+        if ((itemPosition_.begin()->first == 0) && Positive(startMainPos_)) {
+            overScroll = startMainPos_;
+        } else {
+            overScroll = contentMainSize_ - endMainPos_;
+        }
+    } else {
+        float itemHeight = itemPosition_[centerIndex_].endPos - itemPosition_[centerIndex_].startPos;
+        if (startIndex_ == 0 && Positive(startMainPos_ + itemHeight / 2.0f - contentMainSize_ / 2.0f)) {
+            overScroll = startMainPos_ + itemHeight / 2.0f - contentMainSize_ / 2.0f;
+        } else if ((endIndex_ == maxListItemIndex_) &&
+                LessNotEqual(endMainPos_ - itemHeight / 2.0f, contentMainSize_ / 2.0f)) {
+            overScroll = endMainPos_ - itemHeight / 2.0f - contentMainSize_ / 2.0f;
+        }
+    }
+    ScrollablePattern::HandleScrollBarOutBoundary(overScroll);
 }
 
 Rect ListPattern::GetItemRect(int32_t index) const

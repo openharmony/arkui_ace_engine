@@ -454,8 +454,7 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
 {
     if (!textStyle.GetAdaptTextSize()) {
         if (!CreateParagraphAndLayout(
-                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper))
-        {
+                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
             return false;
         }
     } else {
@@ -483,8 +482,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle
     const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper)
 {
     if (!AdaptMaxTextSize(
-            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper))
-    {
+            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
         return false;
     }
 
@@ -720,8 +718,7 @@ void TextLayoutAlgorithm::ApplyIndent(const TextStyle& textStyle, double width)
     double indent = 0.0;
     if (textStyle.GetTextIndent().Unit() != DimensionUnit::PERCENT) {
         if (!textStyle.GetTextIndent().NormalizeToPx(
-                pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), width, indent))
-        {
+                pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), width, indent)) {
             return;
         }
     } else {
@@ -906,12 +903,14 @@ void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects)
 
 ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
 {
-    return { .direction = GetTextDirection(content),
+    return {
+        .direction = GetTextDirection(content),
         .align = textStyle.GetTextAlign(),
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
-        .textOverflow = textStyle.GetTextOverflow()
+        .ellipsisMode = textStyle.GetEllipsisMode(),
+        .textOverflow = textStyle.GetTextOverflow(),
     };
 }
 } // namespace OHOS::Ace::NG

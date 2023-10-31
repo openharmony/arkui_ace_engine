@@ -260,7 +260,12 @@ const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
-void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
+void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
+{
+    if (task) {
+        task();
+    }
+}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
 

@@ -943,6 +943,7 @@ public:
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     void OnHandleClosed(bool closedByGlobalEvent) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
+    void UpdateCaretInfoToController() const;
     bool OnPreShowSelectOverlay(
         SelectOverlayInfo& overlayInfo, const ClientOverlayInfo& clientInfo, bool isSelectOverlayOn) override;
     void OnObscuredChanged(bool isObscured);
@@ -1028,7 +1029,6 @@ private:
     void ShowSelectOverlay(const ShowSelectOverlayParams& params);
 
     void CursorMoveOnClick(const Offset& offset);
-    void UpdateCaretInfoToController() const;
 
     void ProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
     void DelayProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);

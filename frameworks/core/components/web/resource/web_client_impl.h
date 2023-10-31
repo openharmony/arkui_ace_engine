@@ -191,6 +191,7 @@ public:
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling) override;
     void OnOverScrollFlingEnd() override;
     void OnScrollState(bool scrollState) override;
+    void OnRootLayerChanged(int width, int height) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

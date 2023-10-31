@@ -877,16 +877,16 @@ void RosenRenderImage::ApplyInterpolation(SkPaint& paint)
 #else
 void RosenRenderImage::ApplyInterpolation(RSBrush& brush)
 {
-    auto filterQuality = RSFilter::FilterQuality::NONE;
+    options_ = RSSamplingOptions();
     switch (imageInterpolation_) {
         case ImageInterpolation::LOW:
-            filterQuality = RSFilter::FilterQuality::LOW;
+            options_ = RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::NONE);
             break;
         case ImageInterpolation::MEDIUM:
-            filterQuality = RSFilter::FilterQuality::MEDIUM;
+            options_ = RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::LINEAR);
             break;
         case ImageInterpolation::HIGH:
-            filterQuality = RSFilter::FilterQuality::HIGH;
+            options_ = RSSamplingOptions(RSCubicResampler::Mitchell());
             break;
         case ImageInterpolation::NONE:
         default:
@@ -935,14 +935,14 @@ void RosenRenderImage::CanvasDrawImageRect(
         skImage->SetCompressData(nullptr, 0, 0);
         return;
 #else
-    auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
+    auto recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->Translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
         Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { fitNum, repeatNum,
             { radii_[0], radii_[1], radii_[2], radii_[3] }, scale_, 0, rsImage->GetCompressWidth(),
             rsImage->GetCompressHeight() };
         recordingCanvas->AttachBrush(brush);
-        recordingCanvas->DrawImage(rsImage->GetImage(), rsImage->GetCompressData(), rsImageInfo, RSSamplingOptions());
+        recordingCanvas->DrawImageWithParm(rsImage->GetImage(), rsImage->GetCompressData(), rsImageInfo, options_);
         recordingCanvas->DetachBrush();
         rsImage->SetCompressData(nullptr, 0, 0);
         return;
@@ -987,9 +987,8 @@ void RosenRenderImage::CanvasDrawImageRect(
     auto dstRect =
         RSRect(realDstRect.Left() - imageRenderPosition_.GetX(), realDstRect.Top() - imageRenderPosition_.GetY(),
             realDstRect.Right() - imageRenderPosition_.GetX(), realDstRect.Bottom() - imageRenderPosition_.GetY());
-    RSSamplingOptions sampling;
     canvas->AttachBrush(brush);
-    canvas->DrawImageRect(*rsImage->GetImage(), srcRect, dstRect, sampling);
+    canvas->DrawImageRect(*rsImage->GetImage(), srcRect, dstRect, options_);
     canvas->DetachBrush();
 #endif
     LOGD("dstRect params: %{public}s", realDstRect.ToString().c_str());
@@ -1063,7 +1062,6 @@ void RosenRenderImage::DrawImageOnCanvas(
     RSScalar pers2 = 1;
     RSMatrix sampleMatrix;
     sampleMatrix.SetMatrix(scaleX, skewX, transX, skewY, scaleY, transY, pers0, pers1, pers2);
-    RSSamplingOptions sampling;
 
     recordingCanvas->Save();
     recordingCanvas->ConcatMatrix(sampleMatrix);
@@ -1072,7 +1070,7 @@ void RosenRenderImage::DrawImageOnCanvas(
     if (rsImage && rsImage->GetImage()) {
         recordingCanvas->AttachBrush(brush);
         recordingCanvas->DrawImageRect(
-            *rsImage->GetImage(), drSrcRect, drDstRect, sampling, RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+            *rsImage->GetImage(), drSrcRect, drDstRect, options_, RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
         recordingCanvas->DetachBrush();
     }
     recordingCanvas->Restore();

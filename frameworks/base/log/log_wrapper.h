@@ -80,6 +80,7 @@ enum class AceLogTag : uint8_t {
     ACE_FORM,
     ACE_DRAG,
     ACE_VIDEO,
+    ACE_COMPONENT_SNAPSHOT,
     ACE_CANVAS,
     ACE_REFRESH,
     ACE_SCROLL,
@@ -102,6 +103,7 @@ enum class AceLogTag : uint8_t {
     ACE_RATING,
     ACE_LIST,
     ACE_NAVIGATION,
+    ACE_WATERFLOW,
     ACE_LOADINGPROGRESS,
     ACE_PATTERNLOCK,
     ACE_PROGRESS,
@@ -109,9 +111,15 @@ enum class AceLogTag : uint8_t {
     ACE_ACCESSIBILITY,
     ACE_ROUTER,
     ACE_THEME,
+    ACE_BORDER,
+    ACE_BORDER_IMAGE,
+    ACE_LINEAR_SPLIT,
     ACE_GRID,
     ACE_PLUGINCOMPONENT,
     ACE_UIEXTENSIONCOMPONENT,
+    ACE_IF,
+    ACE_FOREACH,
+    ACE_LAZYFOREACH,
 };
 
 enum class LogDomain : uint32_t {

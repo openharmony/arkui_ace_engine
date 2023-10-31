@@ -643,7 +643,9 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         }
         AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
-        jsView->jsViewFunction_->ExecuteAboutToRecycle();
+        if (!recycleNode->HasRecycleRenderFunc()) {
+            jsView->jsViewFunction_->ExecuteAboutToRecycle();
+        }
         jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
     };
 
