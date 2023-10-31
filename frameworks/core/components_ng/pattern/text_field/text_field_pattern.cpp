@@ -1417,6 +1417,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
     }
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         ProcessOverlay(true, true);
+        UpdateSelectMenuVisibility(true);
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1833,6 +1834,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         DelayProcessOverlay(true, true);
     } else {
         ProcessOverlay(true, true);
+        UpdateSelectMenuVisibility(true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
