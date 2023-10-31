@@ -43,7 +43,6 @@ public:
             return;
         }
         if (!pixelMap) {
-            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Snapshot creation failed");
             callback_(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, [node = node_]() {
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
@@ -82,7 +81,6 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
     }
     auto rsNode = GetRsNode(node);
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Begin to take surfaceCapture for ui");
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr));
 }
 

@@ -350,8 +350,7 @@ void JSAnimator::OnFinish(const JSCallbackInfo& info)
 
 void JSAnimator::OnFrame(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("OnFrame info.Length < 0 or info[0] is not function");
+    if (!info[0]->IsFunction()) {
         return;
     }
     RefPtr<JsAnimatorFunction> function = AceType::MakeRefPtr<JsAnimatorFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -362,7 +361,6 @@ void JSAnimator::OnFrame(const JSCallbackInfo& info)
     };
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
-        LOGE("animatorInfo is nullptr");
         return;
     }
     animatorInfo->SetFrameEvent(OnFrameEvent);
@@ -371,7 +369,6 @@ void JSAnimator::OnFrame(const JSCallbackInfo& info)
 void JSSpringProp::ConstructorCallback(const JSCallbackInfo& info)
 {
     if (info.Length() != 3 || !info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber()) {
-        LOGE("The arg is wrong, it is supposed to have 3 arguments of number");
         return;
     }
     auto obj = AceType::MakeRefPtr<JSSpringProp>();
@@ -395,13 +392,11 @@ void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
 {
     int32_t len = info.Length();
     if (len != FRICTION_MOTION_LENGTH && len != SPRING_MOTION_LENGTH && len != SCROLL_MOTION_LENGTH) {
-        LOGE("The arg is wrong, it is supposed to have 3 or 4 or 5 arguments");
         return;
     }
     auto obj = AceType::MakeRefPtr<JSMotion>();
     if (len == FRICTION_MOTION_LENGTH) {
         if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber()) {
-            LOGE("The friction args is wrong");
             return;
         }
         double friction = info[0]->ToNumber<double>();
@@ -411,7 +406,6 @@ void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
         obj->SetMotion(frictionMotion);
     } else if (len == SPRING_MOTION_LENGTH) {
         if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber() || !info[3]->IsObject()) {
-            LOGE("The spring args is wrong");
             return;
         }
         double start = info[0]->ToNumber<double>();
@@ -419,7 +413,6 @@ void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
         double velocity = info[2]->ToNumber<double>();
         JSSpringProp* prop = JSRef<JSObject>::Cast(info[3])->Unwrap<JSSpringProp>();
         if (!prop) {
-            LOGE("SpringProp is nullptr");
             return;
         }
         RefPtr<SpringProperty> springProperty = prop->GetSpringProp();
@@ -428,7 +421,6 @@ void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
     } else {
         if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber() || !info[3]->IsNumber() ||
             !info[4]->IsObject()) {
-            LOGE("The scroll args is wrong");
             return;
         }
         double position = info[0]->ToNumber<double>();
@@ -437,7 +429,6 @@ void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
         double max = info[3]->ToNumber<double>();
         JSSpringProp* prop = JSRef<JSObject>::Cast(info[4])->Unwrap<JSSpringProp>();
         if (!prop) {
-            LOGE("SpringProp is nullptr");
             return;
         }
         RefPtr<SpringProperty> springProperty = prop->GetSpringProp();

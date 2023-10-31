@@ -258,13 +258,8 @@ void PageUrlCheckerOhos::CheckPreload(const std::string& url)
 
 void PageUrlCheckerOhos::NotifyPageShow(const std::string& pageName)
 {
-    std::string moduleName;
     std::string targetBundleName;
     std::string targetModuleName;
-    moduleName = moduleNameCallback_(pageName);
-    if (moduleName.empty()) {
-        moduleName = abilityInfo_->moduleName;
-    }
     if (pageName.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         size_t bundleEndPos = pageName.find('/');
         targetBundleName = pageName.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
@@ -273,11 +268,11 @@ void PageUrlCheckerOhos::NotifyPageShow(const std::string& pageName)
         targetModuleName = pageName.substr(moduleStartPos, moduleEndPos - moduleStartPos);
     } else {
         targetBundleName = abilityInfo_->bundleName;
-        targetModuleName = moduleName;
+        targetModuleName = moduleNameCallback_(pageName);
     }
     AppExecFwk::PageStateData pageStateData;
     pageStateData.bundleName = abilityInfo_->bundleName;
-    pageStateData.moduleName = moduleName;
+    pageStateData.moduleName = abilityInfo_->moduleName;
     pageStateData.abilityName = abilityInfo_->name;
     pageStateData.pageName = pageName;
     pageStateData.targetBundleName = targetBundleName;
@@ -288,13 +283,8 @@ void PageUrlCheckerOhos::NotifyPageShow(const std::string& pageName)
 
 void PageUrlCheckerOhos::NotifyPageHide(const std::string& pageName)
 {
-    std::string moduleName;
     std::string targetBundleName;
     std::string targetModuleName;
-    moduleName = moduleNameCallback_(pageName);
-    if (moduleName.empty()) {
-        moduleName = abilityInfo_->moduleName;
-    }
     if (pageName.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         size_t bundleEndPos = pageName.find('/');
         targetBundleName = pageName.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
@@ -303,11 +293,11 @@ void PageUrlCheckerOhos::NotifyPageHide(const std::string& pageName)
         targetModuleName = pageName.substr(moduleStartPos, moduleEndPos - moduleStartPos);
     } else {
         targetBundleName = abilityInfo_->bundleName;
-        targetModuleName = moduleName;
+        targetModuleName = moduleNameCallback_(pageName);
     }
     AppExecFwk::PageStateData pageStateData;
     pageStateData.bundleName = abilityInfo_->bundleName;
-    pageStateData.moduleName = moduleName;
+    pageStateData.moduleName = abilityInfo_->moduleName;
     pageStateData.abilityName = abilityInfo_->name;
     pageStateData.pageName = pageName;
     pageStateData.targetBundleName = targetBundleName;

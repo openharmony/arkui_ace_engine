@@ -21,9 +21,15 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
+    struct JsErrorObject {
+    std::string name;
+    std::string message;
+    std::string stack;
+};
 class ACE_FORCE_EXPORT ExceptionHandler {
 public:
-    static void HandleJsException(const std::string& exceptionMsg);
+    static void HandleJsException(
+        const std::string& exceptionMsg, const JsErrorObject& errorInfo);
 };
 } // namespace OHOS::Ace
 

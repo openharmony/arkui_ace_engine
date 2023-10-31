@@ -184,6 +184,7 @@ private:
     DialogProperties dialogProperties_;
     WeakPtr<FrameNode> menuNode_;
     bool isFirstDefaultFocus_ = true;
+    RefPtr<FrameNode> buttonContainer_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 };
