@@ -172,28 +172,26 @@ public:
 
     void ClearUserOnAreaChanged()
     {
-        if (onAreaChanged_) {
-            onAreaChanged_ = nullptr;
-        }
+        onAreaChangedCallbacks_.clear();
     }
 
     void SetOnAreaChanged(OnAreaChangedFunc&& onAreaChanged)
     {
-        onAreaChanged_ = std::move(onAreaChanged);
+        onAreaChangedCallbacks_.emplace_back(std::move(onAreaChanged));
     }
 
     void FireOnAreaChanged(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
     {
-        if (onAreaChanged_) {
-            // callback may be overwritten in its invoke so we copy it first
-            auto onAreaChanged = onAreaChanged_;
-            onAreaChanged(oldRect, oldOrigin, rect, origin);
+        if (onAreaChangedCallbacks_.size() > 0) {
+            for (auto onAreaChanged : onAreaChangedCallbacks_) {
+                onAreaChanged(oldRect, oldOrigin, rect, origin);
+            }
         }
     }
 
     bool HasOnAreaChanged() const
     {
-        return static_cast<bool>(onAreaChanged_);
+        return onAreaChangedCallbacks_.size() > 0;
     }
 
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -446,7 +444,7 @@ private:
 
     std::function<void()> onAppear_;
     std::function<void()> onDisappear_;
-    OnAreaChangedFunc onAreaChanged_;
+    std::list<OnAreaChangedFunc> onAreaChangedCallbacks_;
 
     OnDragStartFunc onDragStart_;
     OnDragFunc onDragEnter_;
