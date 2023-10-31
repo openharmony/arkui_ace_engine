@@ -218,6 +218,12 @@ void MenuItemPattern::ShowSubMenu()
     // Hide SubMenu of parent Menu node
     auto parentMenu = GetMenu();
     CHECK_NULL_VOID(parentMenu);
+    // parentMenu no need focus
+    auto focusMenu = GetMenu(true);
+    CHECK_NULL_VOID(focusMenu);
+    auto focusHub = focusMenu->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetParentFocusable(false);
     auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(parentMenuPattern);
     auto showedSubMenu = parentMenuPattern->GetShowedSubMenu();
