@@ -150,6 +150,18 @@ void TxtParagraph::Build()
     }
 }
 
+uint32_t TxtParagraph::destructCount = 0;
+
+TxtParagraph::~TxtParagraph()
+{
+    if (destructCount % 100 == 0) {
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+        "destroy TxtParagraph with placeHolderIndex_ %{public}d, textAlign_ %{public}d, count %{public}u",
+        placeHolderIndex_, static_cast<int>(textAlign_), destructCount);
+    }
+    destructCount++;
+}
+
 void TxtParagraph::Reset()
 {
     paragraph_.reset();
