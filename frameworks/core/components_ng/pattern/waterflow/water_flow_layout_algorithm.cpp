@@ -20,6 +20,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
@@ -234,6 +235,7 @@ LayoutConstraintF WaterFlowLayoutAlgorithm::CreateChildConstraint(int32_t crossI
 
     OptionalSizeF childMinSize;
     OptionalSizeF childMaxSize;
+    // Waterflow ItemLayoutConstraint
     auto itemMinSize = layoutProperty->GetItemMinSize();
     if (itemMinSize.has_value()) {
         childMinSize = ConvertToOptionalSize(
@@ -252,17 +254,18 @@ LayoutConstraintF WaterFlowLayoutAlgorithm::CreateChildConstraint(int32_t crossI
         itemConstraint.minSize.UpdateSizeWhenLarger(childMinSize.ConvertToSizeT());
     }
 
+    // FlowItem layoutConstraint
     CHECK_NULL_RETURN(childLayoutWrapper, itemConstraint);
-    auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
+    auto childLayoutProperty =
+        AceType::DynamicCast<WaterFlowItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(childLayoutProperty, itemConstraint);
-    auto&& childCalcLayoutConstraint = childLayoutProperty->GetCalcLayoutConstraint();
-    if (childCalcLayoutConstraint) {
-        if (childCalcLayoutConstraint->maxSize.has_value()) {
-            itemConstraint.UpdateMaxSizeWithCheck(ConvertToSize(childCalcLayoutConstraint->maxSize.value(),
+    if (childLayoutProperty->HasLayoutConstraint()) {
+        if (childLayoutProperty->GetMaxSize().has_value()) {
+            itemConstraint.UpdateMaxSizeWithCheck(ConvertToSize(childLayoutProperty->GetMinSize().value(),
                 itemConstraint.scaleProperty, itemConstraint.percentReference));
         }
-        if (childCalcLayoutConstraint->minSize.has_value()) {
-            itemConstraint.UpdateMinSizeWithCheck(ConvertToSize(childCalcLayoutConstraint->minSize.value(),
+        if (childLayoutProperty->GetMinSize().has_value()) {
+            itemConstraint.UpdateMinSizeWithCheck(ConvertToSize(childLayoutProperty->GetMinSize().value(),
                 itemConstraint.scaleProperty, itemConstraint.percentReference));
         }
     }
