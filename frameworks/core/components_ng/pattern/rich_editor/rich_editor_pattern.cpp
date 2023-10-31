@@ -194,6 +194,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         auto height = static_cast<float>(paragraphs_.GetHeight() + std::fabs(baselineOffset_));
         if (!context->GetClipEdge().value() && LessNotEqual(frameSize.Height(), height)) {
             RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
+            CHECK_NULL_RETURN(overlayMod_, ret);
             overlayMod_->SetBoundsRect(boundsRect);
         }
     }
@@ -1094,7 +1095,9 @@ void RichEditorPattern::StartTwinkling()
 {
     caretTwinklingTask_.Cancel();
     caretVisible_ = true;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     ScheduleCaretTwinkling();
 }
 
