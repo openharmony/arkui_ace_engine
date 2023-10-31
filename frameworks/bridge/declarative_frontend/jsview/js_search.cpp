@@ -139,6 +139,8 @@ void JSSearch::Create(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 key = text;
             }
+        } else if (param->HasProperty("value") && textValue->IsUndefined()) {
+            key = "";
         } else {
             if (ParseJsString(textValue, text)) {
                 key = text;
