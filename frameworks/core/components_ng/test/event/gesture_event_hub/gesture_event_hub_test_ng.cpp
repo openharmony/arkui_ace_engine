@@ -157,6 +157,9 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest002, TestSize.Level1)
     // reconstruct a gestureEventHub
     eventHub = AceType::MakeRefPtr<EventHub>();
     EXPECT_TRUE(eventHub);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
     gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
     // set touchEventActuator_
