@@ -3502,6 +3502,20 @@ int32_t RichEditorPattern::GetHandleIndex(const Offset& offset) const
     return paragraphs_.GetIndex(offset);
 }
 
+std::vector<RectF> RichEditorPattern::GetTextBoxes()
+{
+    auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    std::vector<RectF> res;
+    res.reserve(selectedRects.size());
+    for (auto&& rect : selectedRects) {
+        if (NearZero(rect.Width())) {
+            continue;
+        }
+        res.emplace_back(rect);
+    }
+    return res;
+}
+
 float RichEditorPattern::GetLineHeight() const
 {
     auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());

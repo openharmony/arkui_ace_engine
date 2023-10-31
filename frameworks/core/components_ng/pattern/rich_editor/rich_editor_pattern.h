@@ -262,6 +262,7 @@ public:
     void OnColorConfigurationUpdate() override {}
     bool IsDisabled() const;
     float GetLineHeight() const override;
+    std::vector<RectF> GetTextBoxes() override;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
