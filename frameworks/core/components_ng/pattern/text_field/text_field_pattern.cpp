@@ -552,9 +552,9 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showH
         CloseSelectOverlay();
     }
     UpdateCaretInfoToController();
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::HandleExtendAction(int32_t action)
@@ -1450,7 +1450,6 @@ void TextFieldPattern::StartTwinkling()
 
     // Show cursor right now.
     cursorVisible_ = true;
-    caretStatus_ = CaretStatus::SHOW;
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     ScheduleCursorTwinkling();
 }
@@ -1487,7 +1486,6 @@ void TextFieldPattern::StopTwinkling()
     if (ResetObscureTickCountDown()) {
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    caretStatus_ = CaretStatus::HIDE;
 }
 
 void TextFieldPattern::CheckIfNeedToResetKeyboard()
@@ -1708,6 +1706,7 @@ void TextFieldPattern::FilterInitializeText()
     if (!contentController_->IsEmpty()) {
         contentController_->FilterValue();
     }
+    selectController_->UpdateCaretIndex(static_cast<int32_t>(contentController_->GetWideText().length()));
 }
 
 bool TextFieldPattern::IsDisabled()
@@ -2157,7 +2156,6 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
 void TextFieldPattern::InitEditingValueText(std::string content)
 {
     contentController_->SetTextValue(std::move(content));
-    selectController_->UpdateCaretIndex(static_cast<int32_t>(StringUtils::ToWstring(content).length()));
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
