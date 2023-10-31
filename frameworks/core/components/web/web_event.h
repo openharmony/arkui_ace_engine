@@ -852,10 +852,7 @@ class ACE_EXPORT ReceivedErrorEvent : public BaseEventInfo {
 
 public:
     ReceivedErrorEvent(const RefPtr<WebRequest>& request, const RefPtr<WebError>& error)
-        : BaseEventInfo("ReceivedErrorEvent"), request_(request), error_(error)
-    {
-        LOGI("ReceivedErrorEvent constructor");
-    }
+        : BaseEventInfo("ReceivedErrorEvent"), request_(request), error_(error) {}
     ~ReceivedErrorEvent() = default;
 
     const RefPtr<WebRequest>& GetRequest() const
@@ -878,10 +875,7 @@ class ACE_EXPORT ReceivedHttpErrorEvent : public BaseEventInfo {
 
 public:
     ReceivedHttpErrorEvent(const RefPtr<WebRequest>& request, const RefPtr<WebResponse>& response)
-        : BaseEventInfo("ReceivedHttpErrorEvent"), request_(request), response_(response)
-    {
-        LOGI("ReceivedHttpErrorEvent constructor");
-    }
+        : BaseEventInfo("ReceivedHttpErrorEvent"), request_(request), response_(response) {}
     ~ReceivedHttpErrorEvent() = default;
 
     const RefPtr<WebRequest>& GetRequest() const
@@ -904,10 +898,7 @@ class ACE_EXPORT OnInterceptRequestEvent : public BaseEventInfo {
 
 public:
     OnInterceptRequestEvent(const RefPtr<WebRequest>& request)
-        : BaseEventInfo("OnInterceptRequestEvent"), request_(request)
-    {
-        LOGI("OnInterceptRequestEvent constructor");
-    }
+        : BaseEventInfo("OnInterceptRequestEvent"), request_(request) {}
     ~OnInterceptRequestEvent() = default;
 
     const RefPtr<WebRequest>& GetRequest() const
@@ -1016,10 +1007,7 @@ class ACE_EXPORT FileSelectorEvent : public BaseEventInfo {
 
 public:
     FileSelectorEvent(const RefPtr<WebFileSelectorParam>& param, const RefPtr<FileSelectorResult>& result)
-        : BaseEventInfo("FileSelectorEvent"), param_(param), result_(result)
-    {
-        LOGI("FileSelectorEvent constructor");
-    }
+        : BaseEventInfo("FileSelectorEvent"), param_(param), result_(result) {}
     ~FileSelectorEvent() = default;
 
     const RefPtr<WebFileSelectorParam>& GetParam() const
@@ -1142,10 +1130,7 @@ class ACE_EXPORT ContextMenuEvent : public BaseEventInfo {
 
 public:
     ContextMenuEvent(const RefPtr<WebContextMenuParam>& param, const RefPtr<ContextMenuResult>& result)
-        : BaseEventInfo("ContextShowEvent"), param_(param), result_(result)
-    {
-        LOGI("ContextShowEvent constructor");
-    }
+        : BaseEventInfo("ContextShowEvent"), param_(param), result_(result) {}
     ~ContextMenuEvent() = default;
 
     const RefPtr<WebContextMenuParam>& GetParam() const

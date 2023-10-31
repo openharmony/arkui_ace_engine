@@ -39,13 +39,11 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
 
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("fail to release resource due to context is null");
         return;
     }
 
     auto resRegister = context->GetPlatformResRegister();
     if (resRegister == nullptr) {
-        LOGE("fail to release resource due to resRegister is null");
         return;
     }
 
@@ -139,7 +137,6 @@ void WebResource::CallResRegisterMethod(
 
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("fail to get context to call res register method");
         return;
     }
 
@@ -149,7 +146,6 @@ void WebResource::CallResRegisterMethod(
     platformTaskExecutor.PostTask([method, param, weakRes, callback] {
         auto resRegister = weakRes.Upgrade();
         if (resRegister == nullptr) {
-            LOGE("resRegister is null!");
             return;
         }
         std::string result;

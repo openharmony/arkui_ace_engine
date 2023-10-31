@@ -40,7 +40,6 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
     // TODO: add support for ng.
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("fail to release resource due to context is null");
         return;
     }
 
@@ -55,7 +54,6 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
         auto webResource = weakWeb.Upgrade();
         auto resRegister = weakRes.Upgrade();
         if (webResource == nullptr || resRegister == nullptr) {
-            LOGE("webDelegate or resRegister is null!");
             return;
         }
         bool ret = resRegister->ReleaseResource(webResource->hash_);
@@ -155,7 +153,6 @@ void WebResource::CallResRegisterMethod(
 
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("fail to get context to call res register method");
         return;
     }
 
@@ -166,7 +163,6 @@ void WebResource::CallResRegisterMethod(
     platformTaskExecutor.PostTask([method, param, weakRes, callback] {
         auto resRegister = weakRes.Upgrade();
         if (resRegister == nullptr) {
-            LOGE("resRegister is null!");
             return;
         }
         std::string result;

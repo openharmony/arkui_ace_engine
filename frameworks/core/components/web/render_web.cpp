@@ -97,10 +97,8 @@ void RenderWeb::InitEnhanceSurfaceFlag()
 
 void RenderWeb::OnAttachContext()
 {
-    LOGI("OnAttachContext");
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("OnAttachContext context null");
         return;
     }
     if (delegate_) {
@@ -142,7 +140,6 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 {
     const RefPtr<WebComponent> web = AceType::DynamicCast<WebComponent>(component);
     if (!web) {
-        LOGE("WebComponent is null");
         return;
     }
 
@@ -196,7 +193,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 
 bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
 {
-    LOGI("Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f",
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web process virtual keyBoard, width=%{public}d height=%{public}d keyboard=%{public}f",
         width, height, keyboard);
     if (delegate_) {
         offsetFix_ = 0;
@@ -248,7 +245,6 @@ void RenderWeb::SetRootView(int32_t width, int32_t height, int32_t offset)
 void RenderWeb::SendDoubleClickEvent(const MouseClickInfo& info)
 {
     if (!delegate_) {
-        LOGE("Touch cancel delegate_ is nullptr");
         return;
     }
     delegate_->OnMouseEvent(info.x,
@@ -288,18 +284,17 @@ bool RenderWeb::HandleDoubleClickEvent(const MouseEvent& event)
 void RenderWeb::OnMouseEvent(const MouseEvent& event)
 {
     if (!delegate_) {
-        LOGE("Delegate_ is nullptr");
         return;
     }
 
     if (web_ && event.action == MouseAction::RELEASE) {
-        LOGI("mouse event request focus");
         web_->RequestFocus();
     }
 
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
     if (!HandleDoubleClickEvent(event)) {
-        delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
+        delegate_->OnMouseEvent(localLocation.GetX(),
+            localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
     }
 
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
@@ -313,7 +308,6 @@ bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
 {
     OnMouseEvent(event);
     if (!onMouse_) {
-        LOGW("RenderWeb::HandleMouseEvent, Mouse Event is null");
         return false;
     }
 
@@ -326,7 +320,8 @@ bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
     info.SetSourceDevice(event.sourceType);
-    LOGD("RenderWeb::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
+    TAG_LOGD(AceLogTag::ACE_WEB,
+         "web do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
          "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
          "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
         info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),
@@ -352,7 +347,6 @@ bool RenderWeb::HandleKeyEvent(const KeyEvent& keyEvent)
 void RenderWeb::PerformLayout()
 {
     if (!NeedLayout()) {
-        LOGI("RenderWeb::PerformLayout No Need to Layout");
         return;
     }
 
@@ -400,19 +394,17 @@ void RenderWeb::OnSizeChanged()
 {
     if (drawSize_.IsWidthInfinite() || drawSize_.IsHeightInfinite() ||
         drawSize_.Width() == 0 || drawSize_.Height() == 0) {
-        LOGE("size is invalid");
         return;
     }
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("context is nullptr");
         return;
     }
     UpdateGlobalPos();
     if (delegate_ && !isUrlLoaded_) {
         delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
         if (!delegate_->LoadDataWithRichText()) {
-            LOGI("RenderWeb::Paint start LoadUrl");
+            TAG_LOGD(AceLogTag::ACE_WEB, "Paint renderWeb start LoadUrl");
             delegate_->LoadUrl();
         }
         isUrlLoaded_ = true;
@@ -470,7 +462,6 @@ void RenderWeb::HandleDragMove(const GestureEvent& event)
 {
     if (event.GetInputEventType() == InputEventType::AXIS) {
         if (!delegate_) {
-            LOGE("HandleDragMove delegate_ is nullptr");
             return;
         }
         auto localLocation = event.GetLocalLocation();
@@ -484,13 +475,12 @@ void RenderWeb::HandleDragMove(const GestureEvent& event)
 void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
     if (!delegate_) {
-        LOGE("Touch down delegate_ is nullptr");
         return;
     }
     Offset touchOffset = Offset(0, 0);
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos, TouchType::DOWN)) {
-        LOGE("Touch down error");
+        TAG_LOGW(AceLogTag::ACE_WEB, "Parse touch event down failed, This event will not be handled.");
         return;
     }
     for (auto& touchPoint : touchInfos) {
@@ -511,12 +501,11 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 void RenderWeb::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     if (!delegate_) {
-        LOGE("Touch up delegate_ is nullptr");
         return;
     }
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos, TouchType::UP)) {
-        LOGE("Touch up error");
+        TAG_LOGW(AceLogTag::ACE_WEB, "Parse touch event up failed, This event will not be handled.");
         return;
     }
     for (auto& touchPoint : touchInfos) {
@@ -538,12 +527,10 @@ void RenderWeb::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     }
 
     if (!delegate_) {
-        LOGE("Touch move delegate_ is nullptr");
         return;
     }
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos, TouchType::MOVE)) {
-        LOGE("Touch move error");
         return;
     }
     for (auto& touchPoint : touchInfos) {
@@ -558,7 +545,6 @@ void RenderWeb::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 void RenderWeb::HandleTouchCancel(const TouchEventInfo& info)
 {
     if (!delegate_) {
-        LOGE("Touch cancel delegate_ is nullptr");
         return;
     }
     delegate_->HandleTouchCancel();
@@ -635,12 +621,10 @@ void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestri
     }
 
     if (!touchRecognizer_) {
-        LOGE("TouchTestHit touchRecognizer_ is nullptr");
         return;
     }
 
     if (touchRestrict.sourceType != SourceType::TOUCH) {
-        LOGI("TouchTestHit got invalid source type: %{public}d", touchRestrict.sourceType);
         return;
     }
     touchRecognizer_->SetCoordinateOffset(coordinateOffset);
@@ -660,18 +644,15 @@ WeakPtr<RenderNode> RenderWeb::CheckAxisNode()
 void RenderWeb::PushTextOverlayToStack()
 {
     if (!textOverlay_) {
-        LOGE("TextOverlay is null");
         return;
     }
 
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("Context is nullptr");
         return;
     }
     auto lastStack = context->GetLastStack();
     if (!lastStack) {
-        LOGE("LastStack is null");
         return;
     }
     lastStack->PushComponent(textOverlay_, false);
@@ -746,7 +727,6 @@ void RenderWeb::PopTextOverlay()
     }
 
     if (!textOverlay_) {
-        LOGE("no need to hide web overlay");
         return;
     }
 
@@ -860,7 +840,6 @@ RefPtr<TextOverlayComponent> RenderWeb::CreateTextOverlay(
     RefPtr<TextOverlayComponent> textOverlay =
         AceType::MakeRefPtr<TextOverlayComponent>(context->GetThemeManager(), context->GetAccessibilityManager());
     if (!textOverlay) {
-        LOGE("textOverlay_ not null or is showing");
         return nullptr;
     }
 
@@ -1010,7 +989,6 @@ bool RenderWeb::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::N
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     int32_t curPointerStyle = 0;
     if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) == -1) {
-        LOGE("OnCursorChange GetPointerStyle failed");
         return false;
     }
     MouseFormat pointStyle = MouseFormat::DEFAULT;
@@ -1032,13 +1010,12 @@ DragItemInfo RenderWeb::GenerateDragItemInfo(const RefPtr<PipelineContext>& cont
     }
 
     if (itemInfo.pixelMap) {
-        LOGI("get w3c drag info");
         isW3cDragEvent_ = true;
         return itemInfo;
     }
 
     if (onDragStart_) {
-        LOGI("user has set onDragStart");
+        TAG_LOGD(AceLogTag::ACE_WEB, "user has set onDragStart");
         isW3cDragEvent_ = false;
         RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
         event->SetX(context->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
@@ -1054,7 +1031,7 @@ DragItemInfo RenderWeb::GenerateDragItemInfo(const RefPtr<PipelineContext>& cont
 void RenderWeb::OnDragWindowStartEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info,
     const DragItemInfo& dragItemInfo)
 {
-    LOGI("create drag window");
+    TAG_LOGD(AceLogTag::ACE_WEB, "Drag window is created now");
     auto rect = pipelineContext->GetCurrentWindowRect();
     int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
@@ -1063,7 +1040,6 @@ void RenderWeb::OnDragWindowStartEvent(RefPtr<PipelineContext> pipelineContext, 
     dragWindow_->SetOffset(rect.Left(), rect.Top());
     dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
     if (isW3cDragEvent_ && delegate_) {
-        LOGI("w3c drag start");
         auto viewScale = pipelineContext->GetViewScale();
         int32_t localX = static_cast<int32_t>(globalX - GetCoordinatePoint().GetX());
         int32_t localY = static_cast<int32_t>(globalY - GetCoordinatePoint().GetY());
@@ -1073,10 +1049,9 @@ void RenderWeb::OnDragWindowStartEvent(RefPtr<PipelineContext> pipelineContext, 
 
 void RenderWeb::PanOnActionStart(const GestureEvent& info)
 {
-    LOGI("web drag action start");
+    TAG_LOGD(AceLogTag::ACE_WEB, "web drag action start");
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("Context is null.");
         return;
     }
 
@@ -1097,7 +1072,6 @@ void RenderWeb::PanOnActionStart(const GestureEvent& info)
     }
 #endif
     if (!dragItemInfo.customComponent) {
-        LOGW("the drag custom component is null");
         isDragging_ = false;
         return;
     }
@@ -1125,7 +1099,6 @@ void RenderWeb::OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, c
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
     dragWindow_->MoveTo(globalX, globalY);
     if (isW3cDragEvent_ && delegate_) {
-        LOGD("w3c drag update");
         auto viewScale = pipelineContext->GetViewScale();
         int32_t localX = static_cast<int32_t>(globalX - GetCoordinatePoint().GetX());
         int32_t localY = static_cast<int32_t>(globalY - GetCoordinatePoint().GetY());
@@ -1135,10 +1108,8 @@ void RenderWeb::OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, c
 
 void RenderWeb::PanOnActionUpdate(const GestureEvent& info)
 {
-    LOGD("web drag action update");
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("Context is null.");
         return;
     }
 
@@ -1191,7 +1162,7 @@ void RenderWeb::OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, c
     }
 
     if (isW3cDragEvent_ && delegate_) {
-        LOGI("w3c drag end");
+        TAG_LOGD(AceLogTag::ACE_WEB, "web w3c drag end");
         auto viewScale = pipelineContext->GetViewScale();
         int32_t localX = static_cast<int32_t>(info.GetGlobalPoint().GetX() - GetCoordinatePoint().GetX());
         int32_t localY = static_cast<int32_t>(info.GetGlobalPoint().GetY() - GetCoordinatePoint().GetY());
@@ -1202,11 +1173,10 @@ void RenderWeb::OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, c
 
 void RenderWeb::PanOnActionEnd(const GestureEvent& info)
 {
-    LOGI("web drag action end");
+    TAG_LOGD(AceLogTag::ACE_WEB, "web drag action end");
     isDragging_ = false;
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("Context is null.");
         return;
     }
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
@@ -1253,11 +1223,9 @@ void RenderWeb::PanOnActionEnd(const GestureEvent& info)
 
 void RenderWeb::PanOnActionCancel()
 {
-    LOGI("drag cancel");
     isDragging_ = false;
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("Context is null.");
         return;
     }
 
@@ -1266,7 +1234,7 @@ void RenderWeb::PanOnActionCancel()
         RestoreCilpboardData(pipelineContext);
         isDragDropNode_ = false;
         if (isW3cDragEvent_ && delegate_) {
-            LOGI("w3c drag cancel");
+            TAG_LOGD(AceLogTag::ACE_WEB, "web w3c drag cancel");
             delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
         }
     }
