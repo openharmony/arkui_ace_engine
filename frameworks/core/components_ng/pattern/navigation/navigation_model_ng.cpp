@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 
+#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -263,6 +264,13 @@ RefPtr<FrameNode> CreateToolbarItemTextNode(const std::string& text)
     textLayoutProperty->UpdateTextColor(theme->GetToolBarItemFontColor());
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textLayoutProperty->UpdateAdaptMinFontSize(theme->GetToolBarItemMinFontSize());
+    textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetToolBarItemFontSize());
+    textLayoutProperty->UpdateMaxLines(theme->GetToolbarItemTextMaxLines());
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+
+    textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), std::nullopt));
     return textNode;
 }
 
@@ -428,7 +436,6 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
     barItemNode->MountToParent(toolBarItemNode);
-    barItemNode->MarkModifyDone();
     toolBarItemNode->MarkModifyDone();
 
     return toolBarItemNode;
