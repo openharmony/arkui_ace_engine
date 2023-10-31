@@ -105,7 +105,6 @@ RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValu
         InheritGridContainerSize(gridContainerSize, containerSizeArray, defaultVal);
         return gridContainerSize;
     } else {
-        LOGI("parse grid col property null or undefined");
         return AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
     }
 }
@@ -132,7 +131,6 @@ void JSGridCol::Create(const JSCallbackInfo& info)
 void JSGridCol::Span(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto span = ParserGridContainerSize(info[0], 1);
@@ -142,7 +140,6 @@ void JSGridCol::Span(const JSCallbackInfo& info)
 void JSGridCol::Offset(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -163,7 +160,6 @@ void JSGridCol::Offset(const JSCallbackInfo& info)
 void JSGridCol::Order(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto order = ParserGridContainerSize(info[0], 0);
