@@ -279,11 +279,15 @@ private:
     std::shared_ptr<SelectionMenuParams> GetMenuParams(bool usingMouse, RichEditorType type);
     void HandleOnPaste();
     void HandleOnCut();
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
     void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
+    bool HandleUserClickEvent(GestureEvent& info);
+    bool HandleUserLongPressEvent(GestureEvent& info);
+    bool HandleUserGestureEvent(
+        GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
     void CalcCaretInfoByClick(GestureEvent& info);
     void HandleEnabled();
     void InitMouseEvent();

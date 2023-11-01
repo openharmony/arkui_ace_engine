@@ -155,6 +155,7 @@ public:
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
     std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
     GestureEventFunc onClick;
+    GestureEventFunc onLongPress;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     int32_t placeHolderIndex = -1;
     // when paragraph ends with a \n, it causes the paragraph height to gain an extra line
@@ -187,6 +188,14 @@ public:
     void MarkNeedRemoveNewLine(bool value)
     {
         needRemoveNewLine = value;
+    }
+    void SetOnClickEvent(GestureEventFunc&& onClick_)
+    {
+        onClick = std::move(onClick_);
+    }
+    void SetLongPressEvent(GestureEventFunc&& onLongPress_)
+    {
+        onLongPress = std::move(onLongPress_);
     }
     std::string GetSpanContent();
 private:
