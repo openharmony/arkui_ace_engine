@@ -255,7 +255,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
 
     if (hitFrameNodes.empty()) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGE(AceLogTag::ACE_DRAG, "Cannot find targetNodes.");
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Cannot find targetNodes.");
         }
         return nullptr;
     }
@@ -382,7 +382,7 @@ void DragDropManager::NotifyDragRegisterFrameNode(std::unordered_map<int32_t, We
         CHECK_NULL_VOID(pattern);
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGI(AceLogTag::ACE_DRAG,
-                "DragDropManager NotifyDragRegisterFrameNode. Dragged frameNode is %{public}s, depth is %{public}d, "
+                "Drag notify is regist. Dragged frameNode is %{public}s, depth is %{public}d, "
                 "DragEventType is %{public}d.",
                 frameNode->GetTag().c_str(), frameNode->GetDepth(), static_cast<int32_t>(dragEventType));
         }
@@ -406,17 +406,17 @@ void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameN
     CHECK_NULL_VOID(dragFrameNode);
     if (SystemProperties::GetDebugEnabled()) {
         if (preTargetFrameNode_) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "Position is %{public}f and %{public}f.",
-                static_cast<float>(point.GetX()), static_cast<float>(point.GetY()));
-            TAG_LOGI(AceLogTag::ACE_DRAG, "PreTargetFrameNode is %{public}s, depth is %{public}d.",
-                preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth());
-            TAG_LOGI(AceLogTag::ACE_DRAG, "New find targetNode is %{public}s, depth is %{public}d.",
+            TAG_LOGI(AceLogTag::ACE_DRAG,"Drag Position is %{public}f and %{public}f, "
+                "PreTargetFrameNode is %{public}s, depth is %{public}d, "
+                "New find targetNode is %{public}s, depth is %{public}d.",
+                static_cast<float>(point.GetX()), static_cast<float>(point.GetY()),
+                preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth(),
                 dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth());
         } else {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "Position is %{public}f and %{public}f.",
-                static_cast<float>(point.GetX()), static_cast<float>(point.GetY()));
-            TAG_LOGI(AceLogTag::ACE_DRAG, "PreTargetFrameNode is nullptr.");
-            TAG_LOGI(AceLogTag::ACE_DRAG, "New find targetNode is %{public}s, depth is %{public}d.",
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag Position is %{public}f and %{public}f, "
+                "PreTargetFrameNode is nullptr, "
+                "New find targetNode is %{public}s, depth is %{public}d.",
+                static_cast<float>(point.GetX()), static_cast<float>(point.GetY()),
                 dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth());
         }
     }
@@ -440,7 +440,6 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON, false);
     if (!dragFrameNode) {
         if (preTargetFrameNode_) {
-            PrintDragFrameNode(point, dragFrameNode);
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
             preTargetFrameNode_ = nullptr;
         }
