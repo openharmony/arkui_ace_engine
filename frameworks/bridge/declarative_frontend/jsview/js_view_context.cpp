@@ -17,8 +17,8 @@
 
 #include <functional>
 
-#include "base/utils/system_properties.h"
 #include "base/log/jank_frame_report.h"
+#include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -79,11 +79,6 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
             return;
         }
-        auto frontendType = context->GetFrontendType();
-        if (frontendType != FrontendType::DECLARATIVE_JS && frontendType != FrontendType::JS_PLUGIN) {
-            LOGW("Not compatible frontType(%{public}d) for declarative. containerId: %{public}d", frontendType,
-                container->GetInstanceId());
-        }
         ContainerScope scope(container->GetInstanceId());
         context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
@@ -106,11 +101,6 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
             return;
-        }
-        auto frontendType = context->GetFrontendType();
-        if (frontendType != FrontendType::DECLARATIVE_JS && frontendType != FrontendType::JS_PLUGIN) {
-            LOGW("Not compatible frontType(%{public}d) for declarative. containerId: %{public}d", frontendType,
-                container->GetInstanceId());
         }
         ContainerScope scope(container->GetInstanceId());
         context->FlushBuild();
@@ -149,7 +139,6 @@ const AnimationOption JSViewContext::CreateAnimation(
 {
     AnimationOption option = AnimationOption();
     if (!animationArgs) {
-        LOGW("CreateAnimation: animationArgs is null");
         return option;
     }
     // If the attribute does not exist, the default value is used.
@@ -159,7 +148,6 @@ const AnimationOption JSViewContext::CreateAnimation(
     auto tempo = animationArgs->GetDouble("tempo", 1.0);
     if (SystemProperties::GetRosenBackendEnabled() && NearZero(tempo)) {
         // set duration to 0 to disable animation.
-        LOGI("tempo near 0, set duration to 0.");
         duration = 0;
     }
     auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
@@ -188,19 +176,15 @@ const AnimationOption JSViewContext::CreateAnimation(
     // limit animation for ArkTS Form
     if (isForm) {
         if (duration > static_cast<int32_t>(DEFAULT_DURATION)) {
-            LOGW("Form delay is not allowed to be set to a value greater than 1000ms, set it to 1000ms");
             duration = static_cast<int32_t>(DEFAULT_DURATION);
         }
         if (delay != 0) {
-            LOGW("Form delay is not allowed to be set to a value other than 0, set it to 0");
             delay = 0;
         }
         if (SystemProperties::IsFormAnimationLimited() && iterations != 1) {
-            LOGW("Form iterations is not allowed to be set to a value other than 1, set it to 1.");
             iterations = 1;
         }
         if (!NearEqual(tempo, 1.0)) {
-            LOGW("Form tempo is not allowed to be set to a value other than 1.0, set it to 1.0.");
             tempo = 1.0;
         }
     }
@@ -229,11 +213,7 @@ std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& obj)
                 JSRef<JSVal> params[1];
                 params[0] = JSRef<JSVal>::Make(ToJSValue(time));
                 auto result = func->ExecuteJS(1, params);
-                auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
-                if (resultValue < 0 || resultValue > 1) {
-                    LOGI("The interpolate return  value error = %{public}f ", resultValue);
-                }
-                return resultValue;
+                return result->IsNumber() ? result->ToNumber<float>() : 1.0f;
             };
         }
     }
@@ -246,11 +226,6 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
-        return;
-    }
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 object argument.");
         return;
     }
     if (ViewStackModel::GetInstance()->CheckTopNodeFirstBuilding()) {
@@ -286,7 +261,6 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     }
     auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
     if (animationArgs->IsNull()) {
-        LOGE("Js Parse failed. animationArgs is null.");
         ViewContextModel::GetInstance()->closeAnimation(option, false);
         return;
     }
@@ -313,20 +287,16 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
         return;
     }
     if (info.Length() < 2) {
-        LOGE("The arg is wrong, it is supposed to have two arguments.");
         return;
     }
     if (!info[0]->IsObject()) {
-        LOGE("1st argument is not object.");
         return;
     }
     // 2nd argument should be a closure passed to the animateTo function.
     if (!info[1]->IsFunction()) {
-        LOGE("2nd argument is not a function.");
         return;
     }
 
@@ -356,7 +326,6 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 
     auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
     if (animationArgs->IsNull()) {
-        LOGE("Js Parse failed. animationArgs is null.");
         return;
     }
 
@@ -370,10 +339,10 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     }
     if (SystemProperties::GetRosenBackendEnabled()) {
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
-        LOGD("RSAnimationInfo: Begin JSAnimateTo, usingSharedRuntime: %{public}d", usingSharedRuntime);
         if (usingSharedRuntime) {
             if (pipelineContext->IsLayouting()) {
-                LOGW("pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
+                TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                    "pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
                     option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
                 pipelineContext->GetTaskExecutor()->PostTask(
                     [id = Container::CurrentId(), option, func = JSRef<JSFunc>::Cast(info[1]),
@@ -392,7 +361,6 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         } else {
             AnimateToForFaMode(pipelineContext, option, info, onFinishEvent);
         }
-        LOGD("RSAnimationInfo: End JSAnimateTo");
     } else {
         pipelineContext->FlushBuild();
         pipelineContext->SaveExplicitAnimationOption(option);
