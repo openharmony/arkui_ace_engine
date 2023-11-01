@@ -45,7 +45,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t NAVIMODE_CHANGE_ANIMATION_DURATION = 250;
 constexpr int32_t OPACITY_ANIMATION_DURATION_APPEAR = 150;
 constexpr int32_t OPACITY_ANIMATION_DURATION_DISAPPEAR = 250;
-constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
+constexpr Dimension DEFAULT_DRAG_REGION = 12.0_vp;
 constexpr float DEFAULT_HALF = 2.0f;
 
 namespace {

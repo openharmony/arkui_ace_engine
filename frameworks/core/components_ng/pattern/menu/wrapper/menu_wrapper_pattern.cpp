@@ -98,6 +98,18 @@ void MenuWrapperPattern::HideSubMenu()
         return;
     }
     auto subMenu = host->GetChildren().back();
+    auto iter = host->GetChildren().begin();
+    int32_t focusNodeId = 2;
+    std::advance(iter, host->GetChildren().size() - focusNodeId);
+    auto focusMenu = *iter;
+    if (focusMenu) {
+        auto menuHub = DynamicCast<FrameNode>(focusMenu);
+        CHECK_NULL_VOID(menuHub);
+        auto focusHub = menuHub->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetParentFocusable(true);
+        focusHub->RequestFocusImmediately();
+    }
     host->RemoveChild(subMenu);
     auto menuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
     if (menuPattern) {

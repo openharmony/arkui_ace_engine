@@ -328,7 +328,11 @@ float ListItemPattern::CalculateFriction(float gamma)
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
     }
-    return ratio * std::pow(1.0 - gamma, SQUARE);
+    float result = ratio * std::pow(1.0 - gamma, SQUARE);
+    if (!std::isnan(result) && LessNotEqual(result, 1.0f)) {
+        return result;
+    }
+    return 1.0f;
 }
 
 float ListItemPattern::GetFriction()

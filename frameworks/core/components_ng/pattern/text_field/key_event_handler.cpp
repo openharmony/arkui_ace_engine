@@ -235,11 +235,7 @@ bool KeyEventHandler::HandleShiftPressedEvent(const KeyEvent& event)
 
     auto iterCode = KEYBOARD_SYMBOLS.find(event.code);
     if (event.pressedCodes.size() == 1 && iterCode != KEYBOARD_SYMBOLS.end()) {
-        if (iterCode != KEYBOARD_SYMBOLS.end()) {
-            keyChar = iterCode->second;
-        } else {
-            return false;
-        }
+        keyChar = iterCode->second;
     } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
                                                                event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
         iterCode = SHIFT_KEYBOARD_SYMBOLS.find(event.code);

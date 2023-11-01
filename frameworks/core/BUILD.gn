@@ -902,7 +902,6 @@ template("ace_core_ng_source_set") {
           "ability_runtime:app_manager",
           "ability_runtime:appkit_native",
           "c_utils:utils",
-          "graphic_2d:surface",
           "init:libbegetutil",
           "ipc:ipc_core",
           "napi:ace_napi",

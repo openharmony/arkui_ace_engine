@@ -50,7 +50,7 @@ public:
 
     void RegisterObjectEvent(const std::string& eventId, const EventObJectCallback&& eventCallback)
     {
-        LOGI("RegisterObjectEvent  %{public}s", eventId.c_str());
+        TAG_LOGD(AceLogTag::ACE_WEB, "Web Register Object Event, %{public}s", eventId.c_str());
         eventObjectMap_[eventId] = std::move(eventCallback);
     }
 
@@ -61,12 +61,11 @@ public:
 
     void OnObjectEvent(const std::string& eventId, const std::string& param, void *jObject)
     {
-        LOGI("OnObjectEvent  %{public}s", eventId.c_str());
         auto event = eventObjectMap_.find(eventId);
         if (event != eventObjectMap_.end() && event->second) {
             event->second(param, jObject);
         } else {
-            LOGW("failed to find object eventId = %{public}s", eventId.c_str());
+            TAG_LOGW(AceLogTag::ACE_WEB, "failed to find object eventId = %{public}s", eventId.c_str());
         }
     }
 

@@ -1057,7 +1057,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         // [LeadingMarginPlaceholder]
         JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(lm);
         style.leadingMargin = std::make_optional<NG::LeadingMargin>();
-        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("pixelMap");
+        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("placeholder");
         if (IsPixelMap(placeholder)) {
 #if defined(PIXEL_MAP_SUPPORTED)
             auto pixelMap = CreatePixelMapFromNapiValue(placeholder);

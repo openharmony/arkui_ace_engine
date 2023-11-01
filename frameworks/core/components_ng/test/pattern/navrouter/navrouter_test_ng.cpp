@@ -2460,7 +2460,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0040, TestSize.Level1)
     temp.maxSize = SizeF(300, 300);
     barItemLayoutProperty->contentConstraint_ = temp;
     barItemLayoutProperty->layoutConstraint_ = temp;
-    algorithm->barItemMaxWidth_ = 300.0f;
     textLayoutWrapper->GetGeometryNode()->SetContentSize(SizeF(500, 500));
     ASSERT_EQ(barItemLayoutProperty->CreateChildConstraint().maxSize.Width(), 300);
 
@@ -2471,7 +2470,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0040, TestSize.Level1)
     temp.maxSize = SizeF(300, 300);
     barItemLayoutProperty->contentConstraint_ = temp;
     barItemLayoutProperty->layoutConstraint_ = temp;
-    algorithm->barItemMaxWidth_ = 800.0f;
     textLayoutWrapper->GetGeometryNode()->SetContentSize(SizeF(500, 500));
     ASSERT_EQ(barItemLayoutProperty->CreateChildConstraint().maxSize.Width(), 300);
 

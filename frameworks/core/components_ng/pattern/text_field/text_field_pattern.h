@@ -1202,7 +1202,7 @@ private:
     int32_t dragTextStart_ = 0;
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
-    DragStatus dragStatus_ = DragStatus::NONE;          // The status of the dragged initiator
+    DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
     std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
@@ -1249,7 +1249,6 @@ private:
     bool isLongPress_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
-    CaretStatus caretStatus_ = CaretStatus::NONE;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     bool isSupportCameraInput_ = false;

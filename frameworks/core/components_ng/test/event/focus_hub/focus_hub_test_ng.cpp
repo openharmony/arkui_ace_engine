@@ -699,7 +699,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0017, TestSize.Level1)
      */
     keyEvent.action = KeyAction::UNKNOWN;
     keyEvent.code = KeyCode::KEY_UNKNOWN;
-    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, nullptr));
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent));
 
     /**
      * @tc.steps3: call the function HandleFocusByTabIndex with code != KeyCode::KEY_TAB and action == KeyAction::DOWN.
@@ -707,7 +707,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0017, TestSize.Level1)
      */
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_UNKNOWN;
-    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, nullptr));
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent));
 
     /**
      * @tc.steps4: call the function HandleFocusByTabIndex with code == KeyCode::KEY_TAB and action != KeyAction::DOWN.
@@ -715,7 +715,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0017, TestSize.Level1)
      */
     keyEvent.action = KeyAction::UNKNOWN;
     keyEvent.code = KeyCode::KEY_TAB;
-    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, nullptr));
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent));
 
     /**
      * @tc.steps5: call the function HandleFocusByTabIndex with code == KeyCode::KEY_TAB and action == KeyAction::DOWN
@@ -724,7 +724,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0017, TestSize.Level1)
      */
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
-    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, nullptr));
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent));
 
     /**
      * @tc.steps6: call the function HandleFocusByTabIndex with code == KeyCode::KEY_TAB and action == KeyAction::DOWN
@@ -733,7 +733,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0017, TestSize.Level1)
      */
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
-    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, focusHub));
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent));
 }
 
 /**
@@ -762,15 +762,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0018, TestSize.Level1)
      * @tc.expected: The return value of the function is DEFAULT_TAB_FOCUSED_INDEX.
      */
     tabIndexNodes.emplace_back(focusHub->GetTabIndex(), focusHub);
-    focusHub->isFirstFocusInPage_ = true;
     EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), DEFAULT_TAB_FOCUSED_INDEX);
-    EXPECT_FALSE(focusHub->isFirstFocusInPage_);
 
     /**
      * @tc.steps4: call the function GetFocusingTabNodeIdx with the unempty TabIndexNodeList.
      * @tc.expected: The return value of the function is 0.
      */
-    focusHub->isFirstFocusInPage_ = false;
     focusHub->currentFocus_ = true;
     EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), 0);
 
@@ -778,7 +775,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0018, TestSize.Level1)
      * @tc.steps5: call the function GetFocusingTabNodeIdx with the unempty TabIndexNodeList.
      * @tc.expected: The return value of the function is NONE_TAB_FOCUSED_INDEX.
      */
-    focusHub->isFirstFocusInPage_ = false;
     focusHub->currentFocus_ = false;
     EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), NONE_TAB_FOCUSED_INDEX);
 }
@@ -2386,9 +2382,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0058, TestSize.Level1)
     TabIndexNodeList tabIndexNodes;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
-    focusHub->isFirstFocusInPage_ = false;
     focusHub->currentFocus_ = true;
-    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, focusHub));
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent));
 }
 
 /**
@@ -2495,7 +2490,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0060, TestSize.Level1)
 
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
-    focusHub->isFirstFocusInPage_ = false;
     focusHub->focusType_ = FocusType::SCOPE;
     frameNode->children_.push_back(frameNode1);
     frameNode->children_.push_back(frameNode2);
@@ -2503,15 +2497,13 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0060, TestSize.Level1)
 
     KeyEvent event(KeyCode::KEY_TAB, KeyAction::DOWN);
 
-    auto res = focusHub->HandleFocusByTabIndex(event, focusHub);
+    auto res = focusHub->HandleFocusByTabIndex(event);
     ASSERT_TRUE(res);
     event.pressedCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB };
-    res = focusHub->HandleFocusByTabIndex(event, focusHub);
+    res = focusHub->HandleFocusByTabIndex(event);
     ASSERT_TRUE(res);
 
-    focusHub->isFirstFocusInPage_ = true;
-    focusHub->HandleFocusByTabIndex(event, focusHub);
-    ASSERT_FALSE(focusHub->isFirstFocusInPage_);
+    focusHub->HandleFocusByTabIndex(event);
 }
 
 /**
@@ -2542,8 +2534,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0061, TestSize.Level1)
     frameNode->children_.push_back(frameNode1);
     focusHub->focusType_ = FocusType::SCOPE;
     focusHub1->parentFocusable_ = false;
-
-    focusHub->isFirstFocusInPage_ = false;
 
     TabIndexNodeList list;
     list.push_back({1, AceType::WeakClaim<FocusHub>(nullptr)});
@@ -2623,7 +2613,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0063, TestSize.Level1)
 
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
-    focusHub->isFirstFocusInPage_ = false;
     focusHub->focusType_ = FocusType::SCOPE;
     frameNode->children_.push_back(frameNode1);
     frameNode->children_.push_back(frameNode2);
@@ -2631,10 +2620,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0063, TestSize.Level1)
 
     KeyEvent event(KeyCode::KEY_TAB, KeyAction::DOWN);
 
-    auto res = focusHub->HandleFocusByTabIndex(KeyEvent(KeyCode::KEY_TAB, KeyAction::DOWN), focusHub);
+    auto res = focusHub->HandleFocusByTabIndex(KeyEvent(KeyCode::KEY_TAB, KeyAction::DOWN));
     ASSERT_TRUE(res);
     event.pressedCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB };
-    res = focusHub->HandleFocusByTabIndex(event, focusHub);
+    res = focusHub->HandleFocusByTabIndex(event);
     ASSERT_TRUE(res);
 }
 
@@ -2660,14 +2649,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0064, TestSize.Level1)
     frameNode->children_.push_back(frameNode1);
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
-    focusHub->isFirstFocusInPage_ = false;
     focusHub->focusType_ = FocusType::SCOPE;
 
     focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     focusHub1->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     focusHub1->focusable_ = true;
     focusHub1->parentFocusable_ = true;
-    focusHub1->isFirstFocusInPage_ = false;
     focusHub1->focusType_ = FocusType::NODE;
     focusHub1->focusCallbackEvents_->tabIndex_ = 1;
 
@@ -2717,7 +2704,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0065, TestSize.Level1)
 
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
-    focusHub->isFirstFocusInPage_ = false;
     focusHub->focusType_ = FocusType::SCOPE;
     frameNode->children_.push_back(frameNode1);
     frameNode->children_.push_back(frameNode2);
@@ -2767,7 +2753,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0066, TestSize.Level1)
 
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
-    focusHub->isFirstFocusInPage_ = false;
     focusHub->focusType_ = FocusType::SCOPE;
     frameNode->children_.push_back(frameNode1);
     frameNode->children_.push_back(frameNode2);

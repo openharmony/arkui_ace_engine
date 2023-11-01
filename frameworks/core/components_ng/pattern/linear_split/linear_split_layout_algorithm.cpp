@@ -308,6 +308,9 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(
 
     splitLength_ = parentHeight;
     for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
+            return;
+        }
         if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
@@ -319,15 +322,9 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(
         } else {
             childOffsetMain = childrenDragPos_[index];
         }
-        auto& constraint = item->GetLayoutProperty()->GetCalcLayoutConstraint();
         auto childMargin = item->GetLayoutProperty()->CreateMargin();
         float marginWidth = childMargin.left.value_or(0.f) + childMargin.right.value_or(0.f);
-        if (constraint && constraint->minSize.has_value()) {
-            childrenConstrains_[index] =
-                item->GetLayoutProperty()->GetLayoutConstraint()->minSize.Width() + marginWidth;
-        } else {
-            childrenConstrains_[index] = GetLinearSplitChildMinSize(layoutWrapper) + marginWidth;
-        }
+        childrenConstrains_[index] = GetItemMinSize(item, layoutWrapper) + marginWidth;
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
         childOffsetMain += item->GetGeometryNode()->GetMarginFrameSize().Width();
         if (index < visibleChildCount_ - 1) {
@@ -341,6 +338,9 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(
         childOffsetMain += static_cast<float>(DEFAULT_SPLIT_HEIGHT);
         index++;
         item->Layout();
+    }
+    if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
+        return;
     }
     if (isFirstSetPos) {
         childrenDragPos_[index] = childOffsetMain - static_cast<float>(DEFAULT_SPLIT_HEIGHT);
@@ -361,6 +361,9 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(
     splitLength_ = parentWidth;
     int32_t index = 0;
     for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
+            return;
+        }
         if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
@@ -394,6 +397,9 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(
         index++;
         item->Layout();
     }
+    if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
+        return;
+    }
     if (isFirstSetPos) {
         childrenDragPos_[index] = childOffsetCross - static_cast<float>(DEFAULT_SPLIT_HEIGHT) - endMargin;
     }
@@ -406,14 +412,9 @@ void LinearSplitLayoutAlgorithm::ColumnSplitChildConstrain(
         return;
     }
     const auto [startMargin, endMargin] = GetDividerMargin(layoutWrapper);
-    auto& constraint = item->GetLayoutProperty()->GetCalcLayoutConstraint();
     auto childMargin = item->GetLayoutProperty()->CreateMargin();
     float marginHeight = childMargin.top.value_or(0.f) + childMargin.bottom.value_or(0.f);
-    if (constraint && constraint->minSize.has_value()) {
-        childrenConstrains_[index] = item->GetLayoutProperty()->GetLayoutConstraint()->minSize.Height() + marginHeight;
-    } else {
-        childrenConstrains_[index] = GetLinearSplitChildMinSize(layoutWrapper) + marginHeight;
-    }
+    childrenConstrains_[index] = GetItemMinSize(item, layoutWrapper) + marginHeight;
     if (index == 0) {
         childrenConstrains_[index] += startMargin;
     } else if (index == visibleChildCount_) {
@@ -568,5 +569,26 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplitBeforeAPI10(
         index++;
         item->Layout();
     }
+}
+
+float LinearSplitLayoutAlgorithm::GetItemMinSize(const RefPtr<LayoutWrapper>& item, LayoutWrapper* layoutWrapper) const
+{
+    const auto& calcConstraint = item->GetLayoutProperty()->GetCalcLayoutConstraint();
+    const auto& layoutProperty = item->GetLayoutProperty();
+    const auto& minSizeTheme = GetLinearSplitChildMinSize(layoutWrapper);
+    CHECK_NULL_RETURN(layoutProperty, minSizeTheme);
+
+    float minSizeF = 0.0f;
+    if (calcConstraint && calcConstraint->minSize.has_value()) {
+        auto minSize = layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF {}).minSize;
+        minSizeF = splitType_ == SplitType::ROW_SPLIT ? minSize.Width() : minSize.Height();
+    } else {
+        minSizeF = minSizeTheme;
+    }
+
+    // According to general measure rules, the size of a component can't be less than the sum of border and padding.
+    auto paddingWithBorder = layoutProperty->CreatePaddingAndBorder();
+    return splitType_ == SplitType::ROW_SPLIT ? std::max(minSizeF, paddingWithBorder.Width())
+                                              : std::max(minSizeF, paddingWithBorder.Height());
 }
 } // namespace OHOS::Ace::NG

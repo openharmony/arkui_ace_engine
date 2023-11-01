@@ -48,10 +48,7 @@ build_component("web") {
 
   if (is_ohos_standard_system) {
     configs = [ ":ohos_web_config" ]
-    deps = [
-      "//third_party/EGL:libEGL",
-      "//third_party/openGLES:libGLES",
-    ]
+    deps = [ "//third_party/openGLES:libGLES" ]
     external_deps = [
       "ability_base:base",
       "ability_base:configuration",
@@ -60,7 +57,6 @@ build_component("web") {
       "ability_runtime:appkit_native",
       "c_utils:utils",
       "graphic_2d:librender_service_client",
-      "graphic_2d:surface",
       "init:libbegetutil",
       "ipc:ipc_core",
       "napi:ace_napi",
