@@ -41,6 +41,7 @@ void HyperlinkModelNG::SetColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value);
     ACE_UPDATE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, ForegroundColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
 }
 
