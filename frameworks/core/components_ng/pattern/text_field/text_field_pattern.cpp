@@ -773,7 +773,9 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
         SetIsSingleHandle(false);
     }
     ResetObscureTickCountDown();
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
     if (isKeyEvent || inlineSelectAllFlag_) {
@@ -863,7 +865,7 @@ void TextFieldPattern::HandleOnPaste()
         textfield->CloseSelectOverlay(true);
         auto host = textfield->GetHost();
         CHECK_NULL_VOID(host);
-        auto eventHub = textfield->GetHost()->GetEventHub<TextFieldEventHub>();
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnPaste(StringUtils::ToString(pasteData));
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -1459,7 +1461,9 @@ void TextFieldPattern::StartTwinkling()
 
     // Show cursor right now.
     cursorVisible_ = true;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     ScheduleCursorTwinkling();
 }
 
@@ -2076,7 +2080,9 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
         }
         proxy->SetHandleReverse(selectController_->HasReverse());
     }
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 int32_t TextFieldPattern::UpdateCaretPositionOnHandleMove(const OffsetF& localOffset)
@@ -2148,8 +2154,9 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
         auto handleInfo = GetSelectHandleInfo(selectController_->GetCaretRect().GetOffset());
         proxy->UpdateSecondSelectHandleInfo(handleInfo);
     }
-
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
@@ -2351,7 +2358,9 @@ void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
     }
     selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
     StartTwinkling();
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
@@ -2362,22 +2371,26 @@ void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
     mouseStatus_ = MouseStatus::MOVE;
     selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
     showSelect_ = true;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
 {
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
     if (blockPress_ && mouseStatus_ == MouseStatus::PRESSED) {
         selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
         StartTwinkling();
-        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     mouseStatus_ = MouseStatus::NONE;
     blockPress_ = false;
     leftMouseCanMove_ = false;
     if (HasFocus() && RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
-        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -2645,9 +2658,9 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithm
     TextStyle textStyle;
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, 0.0f);
-    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
-    auto pipeline = GetHost()->GetContext();
+    auto pipeline = tmpHost->GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, 0.0f);
@@ -2687,12 +2700,14 @@ float TextFieldPattern::PreferredLineHeight(bool isAlgorithmMeasure)
 
 void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity)
 {
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
     CloseSelectOverlay();
     selectController_->MoveCaretToContentRect(GetCaretIndex(), textAffinity);
     if (ResetObscureTickCountDown()) {
-        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
-        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -3032,7 +3047,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::ClearEditingValue()
@@ -3208,7 +3223,9 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
     if (HasFocus() && IsSingleHandle()) {
         StartTwinkling();
     }
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     UpdateCaretInfoToController();
 }
 
@@ -3361,7 +3378,7 @@ void TextFieldPattern::AfterSelection()
     ResetObscureTickCountDown();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                     : PROPERTY_UPDATE_MEASURE);
