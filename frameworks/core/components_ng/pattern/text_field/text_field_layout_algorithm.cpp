@@ -94,7 +94,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
         auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
         paragraph_->Layout(
             contentConstraint.maxSize.Width() - static_cast<float>(safeBoundary) - PARAGRAPH_SAVE_BOUNDARY);
-        paragraph_->Layout(std::ceil(paragraph_->GetLongestLine()));
+        auto longestLine = std::ceil(paragraph_->GetLongestLine());
+        paragraph_->Layout(std::min(static_cast<float>(longestLine), paragraph_->GetMaxWidth()));
         contentWidth = ConstraintWithMinWidth(
             contentConstraint, layoutWrapper, static_cast<float>(safeBoundary) + PARAGRAPH_SAVE_BOUNDARY);
     } else {

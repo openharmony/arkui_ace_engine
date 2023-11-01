@@ -4362,9 +4362,7 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     BorderColorProperty inlineBorderColor;
     inlineBorderColor.SetColor(theme->GetInlineBorderColor());
     renderContext->UpdateBorderColor(inlineBorderColor);
-    auto padding = theme->GetInlineBorderWidth();
-    layoutProperty->UpdatePadding(
-        { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
+    layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) });
     ProcessInnerPadding();
     textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
     textRect_.SetTop(GetPaddingTop() + GetBorderTop());
