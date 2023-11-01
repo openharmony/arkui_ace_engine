@@ -64,6 +64,10 @@ void ImageModelNG::Create(
     frameNode->SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(
         ImageLayoutProperty, ImageSourceInfo, CreateSourceInfo(src, pixMap, bundleName, moduleName));
+    auto renderProps = frameNode->GetPaintProperty<ImageRenderProperty>();
+    if (renderProps) {
+        renderProps->ResetNeedBorderRadius();
+    }
 }
 
 void ImageModelNG::SetAlt(const std::string& src)

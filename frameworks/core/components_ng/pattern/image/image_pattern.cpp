@@ -235,6 +235,21 @@ void ImagePattern::SetImagePaintConfig(
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = isSvg;
 
+    auto host = GetHost();
+    if (!host) {
+        canvasImage->SetPaintConfig(config);
+        return;
+    }
+    auto renderContext = host->GetRenderContext();
+    if (!renderContext || !renderContext->HasBorderRadius()) {
+        canvasImage->SetPaintConfig(config);
+        return;
+    }
+
+    auto renderProps = host->GetPaintProperty<ImageRenderProperty>();
+    if (renderProps) {
+        renderProps->UpdateNeedBorderRadius(true);
+    }
     canvasImage->SetPaintConfig(config);
 }
 
