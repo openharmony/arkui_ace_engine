@@ -1573,6 +1573,11 @@ void JsiDeclarativeEngine::FireExternalEvent(
             return;
         }
 
+        napi_handle_scope handleScope;
+        napi_status status = napi_open_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), &handleScope);
+        if (status != napi_ok) {
+            return;
+        }
         std::string arguments;
         auto soPath = xcPattern->GetSoPath().value_or("");
         auto runtime = engineInstance_->GetJsRuntime();
@@ -1584,13 +1589,10 @@ void JsiDeclarativeEngine::FireExternalEvent(
             return;
         }
 
-        renderContext_ = runtime->NewObject();
-        auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
-        renderContext->SetValue(pandaRuntime, objXComp);
-
         auto objContext = JsiObject(objXComp);
         JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
         OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
+        napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
         auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
             auto pattern = weakPattern.Upgrade();
@@ -1654,6 +1656,11 @@ void JsiDeclarativeEngine::FireExternalEvent(
         return;
     }
 
+    napi_handle_scope handleScope;
+    napi_status status = napi_open_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), &handleScope);
+    if (status != napi_ok) {
+        return;
+    }
     std::string arguments;
     auto soPath = xcomponent->GetSoPath().value_or("");
     auto runtime = engineInstance_->GetJsRuntime();
@@ -1665,13 +1672,10 @@ void JsiDeclarativeEngine::FireExternalEvent(
         return;
     }
 
-    renderContext_ = runtime->NewObject();
-    auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
-    renderContext->SetValue(pandaRuntime, objXComp);
-
     auto objContext = JsiObject(objXComp);
     JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
     XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
+    napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
     auto task = [weak = WeakClaim(this), xcomponent]() {
         auto pool = xcomponent->GetTaskPool();
