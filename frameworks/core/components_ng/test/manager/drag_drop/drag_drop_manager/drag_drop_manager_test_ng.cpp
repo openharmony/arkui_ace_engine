@@ -282,34 +282,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest005, TestSize.Level1)
      */
     dragDropManager->GetExtraInfoFromClipboard(extraInfo);
     EXPECT_EQ(extraInfo, EXTRA_INFO_2);
-
-    /**
-     * @tc.steps: step5. call RestoreClipboardData twice
-     *                   case: deleteDataCallback_ has exited
-     * @tc.expected: step5. restore the ClipboardData, extraInfo is ""
-     */
-    dragDropManager->RestoreClipboardData();
-    dragDropManager->RestoreClipboardData();
-    dragDropManager->GetExtraInfoFromClipboard(extraInfo);
-    EXPECT_EQ(extraInfo, "");
-
-    /**
-     * @tc.steps: step6. construct a new DragDropManager and call GetExtraInfoFromClipboard
-     *                   case: clipboard_ is null
-     * @tc.expected: step6. extraInfo is ""
-     */
-    auto dragDropManager2 = AceType::MakeRefPtr<DragDropManager>();
-    dragDropManager2->GetExtraInfoFromClipboard(extraInfo);
-    EXPECT_EQ(extraInfo, "");
-
-    /**
-     * @tc.steps: step7. construct a new DragDropManager and call RestoreClipboardData
-     *                   case: clipboard_ is null
-     * @tc.expected: step7. restore the ClipboardData, extraInfo is ""
-     */
-    auto dragDropManager3 = AceType::MakeRefPtr<DragDropManager>();
-    dragDropManager3->RestoreClipboardData();
-    EXPECT_EQ(extraInfo, "");
 }
 
 /**

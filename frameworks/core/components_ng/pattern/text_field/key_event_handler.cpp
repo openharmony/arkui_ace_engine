@@ -30,7 +30,8 @@ namespace {
 } // namespace
 bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
 {
-    LOGD("HandleKeyEvent event, caps lock %{public}d, key code %{public}d", keyEvent.enableCapsLock, keyEvent.code);
+    TAG_LOGD(AceLogTag::ACE_TEXTFIELD, "HandleKeyEvent event, caps lock %{public}d, key code %{public}d",
+        keyEvent.enableCapsLock, keyEvent.code);
     auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
     if (keyEvent.action == KeyAction::DOWN) {
@@ -94,8 +95,8 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
         }
         if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
 #if defined(PREVIEW)
-            pattern->DeleteBackward(TextFieldPattern::GetGraphemeClusterLength(
-                pattern->GetWideText(), pattern->GetCaretIndex(), true));
+            pattern->DeleteBackward(
+                TextFieldPattern::GetGraphemeClusterLength(pattern->GetWideText(), pattern->GetCaretIndex(), true));
 #else
             pattern->DeleteForward(
                 TextFieldPattern::GetGraphemeClusterLength(pattern->GetWideText(), pattern->GetCaretIndex()));
@@ -234,11 +235,7 @@ bool KeyEventHandler::HandleShiftPressedEvent(const KeyEvent& event)
 
     auto iterCode = KEYBOARD_SYMBOLS.find(event.code);
     if (event.pressedCodes.size() == 1 && iterCode != KEYBOARD_SYMBOLS.end()) {
-        if (iterCode != KEYBOARD_SYMBOLS.end()) {
-            keyChar = iterCode->second;
-        } else {
-            return false;
-        }
+        keyChar = iterCode->second;
     } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
                                                                event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
         iterCode = SHIFT_KEYBOARD_SYMBOLS.find(event.code);

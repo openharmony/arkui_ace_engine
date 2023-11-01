@@ -1036,6 +1036,22 @@ void DragDropManager::DestroyDragWindow()
     currentId_ = -1;
 }
 
+void DragDropManager::CancelItemDrag()
+{
+    if (draggedGridFrameNode_) {
+        auto listEventHub = draggedGridFrameNode_->GetEventHub<ListEventHub>();
+        if (listEventHub) {
+            listEventHub->HandleOnItemDragCancel();
+            return;
+        }
+        auto gridEventHub = draggedGridFrameNode_->GetEventHub<GridEventHub>();
+        if (gridEventHub) {
+            gridEventHub->HandleOnItemDragCancel();
+            return;
+        }
+    }
+}
+
 #ifdef ENABLE_DRAG_FRAMEWORK
 RefPtr<DragDropProxy> DragDropManager::CreateFrameworkDragDropProxy()
 {

@@ -56,12 +56,10 @@ RefPtr<RenderNode> WebComponent::CreateRenderNode()
         weakCom = AceType::WeakClaim(this)]() {
         auto renderWeb = weakRenderWeb.Upgrade();
         if (!renderWeb) {
-            LOGE("renderWeb is null");
             return;
         }
         auto pipelineContext = renderWeb->GetContext().Upgrade();
         if (!pipelineContext) {
-            LOGE("fail to create Update due to context is null");
             return;
         }
         auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(),
@@ -92,7 +90,7 @@ void WebComponent::RequestFocus()
         focus->RequestFocusImmediately();
     }
 #else
-    LOGE("not support focus node in new pipeline");
+    TAG_LOGW(AceLogTag::ACE_WEB, "not support focus node in new pipeline");
 #endif
 }
 

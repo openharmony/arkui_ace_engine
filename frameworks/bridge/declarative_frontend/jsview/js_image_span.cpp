@@ -31,7 +31,6 @@ void JSImageSpan::Create(const JSCallbackInfo& info)
         return;
     }
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
     JSImage::Create(info);
@@ -40,14 +39,12 @@ void JSImageSpan::Create(const JSCallbackInfo& info)
 void JSImageSpan::SetObjectFit(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
 
     if (info[0]->IsNumber()) {
         auto fit = static_cast<ImageFit>(info[0]->ToNumber<int32_t>());
         if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
-            LOGW("The value of objectFit is out of range %{public}d", fit);
             fit = ImageFit::COVER;
         }
         ImageModel::GetInstance()->SetImageFit(fit);
@@ -60,7 +57,6 @@ void JSImageSpan::SetVerticalAlign(int32_t verticalAlign)
 {
     auto align = static_cast<VerticalAlign>(verticalAlign);
     if (align < VerticalAlign::TOP || align > VerticalAlign::NONE) {
-        LOGW("The value of verticalAlign is out of range %{public}d", verticalAlign);
         align = VerticalAlign::BOTTOM;
     }
     NG::ImageSpanView::SetVerticalAlign(align);

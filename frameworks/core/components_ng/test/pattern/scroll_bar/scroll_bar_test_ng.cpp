@@ -746,7 +746,13 @@ HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
      * @tc.steps: step3. DisplayMode::ON
      * @tc.expected: opacity_ is UINT8_MAX.
      */
-    pattern->displayMode_ = DisplayMode::ON;
+    auto scrollBarProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    EXPECT_NE(scrollBarProxy, nullptr);
+    pattern->SetScrollBarProxy(scrollBarProxy);
+    EXPECT_NE(pattern->scrollBarProxy_, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollBarLayoutProperty>();
+    layoutProperty->UpdateDisplayMode(DisplayMode::ON);
+    pattern->controlDistance_ = 10.f;
     pattern->OnModifyDone();
     callback();
     EXPECT_EQ(pattern->disappearAnimation_, nullptr);
@@ -757,6 +763,7 @@ HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
      * @tc.expected: disappearAnimation_ is nullptr.
      */
     pattern->displayMode_ = DisplayMode::AUTO;
+    pattern->controlDistance_ = 0.f;
     callback();
     EXPECT_EQ(pattern->disappearAnimation_, nullptr);
 

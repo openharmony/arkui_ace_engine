@@ -195,9 +195,7 @@ void TextModelNG::ClearOnClick()
     textPattern->SetOnClickEvent(nullptr);
 }
 
-void TextModelNG::SetRemoteMessage(std::function<void()>&& event)
-{
-}
+void TextModelNG::SetRemoteMessage(std::function<void()>&& event) {}
 
 void TextModelNG::SetCopyOption(CopyOptions copyOption)
 {

@@ -140,7 +140,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 key = text;
             }
-        } else if (textValue->IsUndefined()) {
+        } else if (param->HasProperty("value") && textValue->IsUndefined()) {
             key = "";
         } else {
             if (ParseJsString(textValue, text)) {
@@ -169,12 +169,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
 
 void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("EnableKeyboardOnFocus should have at least 1 param");
-        return;
-    }
     if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
-        LOGI("The info of SetEnableKeyboardOnFocus is not correct, using default");
         SearchModel::GetInstance()->RequestKeyboardOnFocus(true);
         return;
     }
@@ -267,7 +262,6 @@ static CancelButtonStyle ConvertStrToCancelButtonStyle(const std::string& value)
 void JSSearch::SetCancelButton(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
-        LOGI("ivalid argvs");
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
@@ -287,7 +281,6 @@ void JSSearch::SetCancelButton(const JSCallbackInfo& info)
 
     auto iconProp = param->GetProperty("icon");
     if (iconProp->IsUndefined() || iconProp->IsNull()) {
-        LOGI("icon is null");
         SearchModel::GetInstance()->SetCancelIconSize(theme->GetIconHeight());
         SearchModel::GetInstance()->SetCancelIconColor(theme->GetSearchIconColor());
         SearchModel::GetInstance()->SetRightIconSrcPath("");
@@ -482,8 +475,6 @@ void JSSearch::SetTextAlign(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
         SearchModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
-    } else {
-        LOGE("the value is error");
     }
 }
 
@@ -491,7 +482,6 @@ void JSSearch::JsBorder(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorder(info);
     if (!info[0]->IsObject()) {
-        LOGE("args is not a object. %s", info[0]->ToString().c_str());
         return;
     }
     RefPtr<Decoration> decoration = nullptr;
@@ -520,7 +510,6 @@ void JSSearch::JsBorderWidth(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderWidth(info);
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
-        LOGE("args need a string or number or object");
         return;
     }
     SearchModel::GetInstance()->SetBackBorder();
@@ -530,7 +519,6 @@ void JSSearch::JsBorderColor(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderColor(info);
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
-        LOGE("args need a string or number or object");
         return;
     }
     SearchModel::GetInstance()->SetBackBorder();
@@ -540,7 +528,6 @@ void JSSearch::JsBorderStyle(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderStyle(info);
     if (!info[0]->IsObject() && !info[0]->IsNumber()) {
-        LOGE("args need a string or number or object");
         return;
     }
     SearchModel::GetInstance()->SetBackBorder();
@@ -550,7 +537,6 @@ void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderRadius(info);
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
-        LOGE("args need a string or number or object");
         return;
     }
     SearchModel::GetInstance()->SetBackBorder();
@@ -590,7 +576,6 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
     CalcDimension value;
     auto versionTenOrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (versionTenOrLarger ? !ParseJsDimensionVpNG(info[0], value) : !ParseJsDimensionVp(info[0], value)) {
-        LOGE("The arg is wrong, it is supposed to be a number arguments");
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -648,12 +633,7 @@ void JSSearch::JsMenuOptionsExtension(const JSCallbackInfo& info)
 
 void JSSearch::SetSelectionMenuHidden(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("SelectionMenuHidden should have at least 1 param");
-        return;
-    }
     if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
-        LOGI("The info of SetSelectionMenuHidden is not correct, using default");
         SearchModel::GetInstance()->SetSelectionMenuHidden(false);
         return;
     }
@@ -739,8 +719,6 @@ void JSSearchController::GetTextContentRect(const JSCallbackInfo& info)
         auto rectObj = CreateRectangle(controller->GetTextContentRect());
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         info.SetReturnValue(rect);
-    } else {
-        LOGE("GetTextContentRect: The JSSearchController is NULL");
     }
 }
 
@@ -752,8 +730,6 @@ void JSSearchController::GetTextContentLinesNum(const JSCallbackInfo& info)
         auto linesNum = JSVal(ToJSValue(lines));
         auto textLines = JSRef<JSVal>::Make(linesNum);
         info.SetReturnValue(textLines);
-    } else {
-        LOGE("GetTextContentRect: The JSSearchController is NULL");
     }
 }
 
@@ -766,10 +742,6 @@ void JSSearchController::StopEditing()
 }
 void JSSearch::SetMaxLength(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The arg(SetMaxLength) is wrong, it is supposed to have atleast 1 argument");
-        return;
-    }
     int32_t maxLength = 0;
     if (info[0]->IsUndefined()) {
         SearchModel::GetInstance()->ResetMaxLength();

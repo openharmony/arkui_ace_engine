@@ -68,7 +68,6 @@ public:
         JSRef<JSVal> argv[1] = { rhs->jsObject_ };
         auto retVal = addFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsObject()) {
-            LOGE("add: result is not an object!");
             return {};
         }
 
@@ -85,7 +84,6 @@ public:
         JSRef<JSVal> argv[1] = { rhs->jsObject_ };
         auto retVal = minusFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsObject()) {
-            LOGE("minus: result is not an object!");
             return {};
         }
 
@@ -98,7 +96,6 @@ public:
         JSRef<JSVal> argv[1] = { JSRef<JSVal>::Make(ToJSValue(scale)) };
         auto retVal = multiplyFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsObject()) {
-            LOGE("multiply: result is not an object!");
             return {};
         }
 
@@ -116,7 +113,6 @@ public:
         JSRef<JSVal> argv[1] = { rhs->jsObject_ };
         auto retVal = equalsFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsBoolean()) {
-            LOGE("equals: result is not an boolean!");
             return false;
         }
 

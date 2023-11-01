@@ -61,7 +61,7 @@ void TextLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    if (!contentConstraint.maxSize.IsPositive()) {
+    if (!contentConstraint.maxSize.IsNonNegative()) {
         return std::nullopt;
     }
 

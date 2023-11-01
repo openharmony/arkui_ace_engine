@@ -100,14 +100,16 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
     float globalX = leftHandleX + hostGlobalOffset.GetX() - TEXT_DRAG_OFFSET.ConvertToPx();
     float globalY = leftHandleY + hostGlobalOffset.GetY() - TEXT_DRAG_OFFSET.ConvertToPx();
     if (oneLineSelected) {
+        float delta = 0.0f;
         if (rightHandleX - leftHandleX + bothOffset < minWidth) {
-            float delta = minWidth - (rightHandleX - leftHandleX + bothOffset);
+            delta = minWidth - (rightHandleX - leftHandleX + bothOffset);
             width += delta;
             globalX -= delta / 2; // 2 : half
         }
 
-        dragPattern->SetContentOffset(OffsetF(boxes.front().Left() - TEXT_DRAG_OFFSET.ConvertToPx(),
-            boxes.front().Top() - TEXT_DRAG_OFFSET.ConvertToPx()));
+        dragPattern->SetContentOffset(
+            OffsetF(boxes.front().Left() - TEXT_DRAG_OFFSET.ConvertToPx() - delta / 2, // 2 : half
+                boxes.front().Top() - TEXT_DRAG_OFFSET.ConvertToPx()));
     } else {
         globalX = contentRect.Left() + hostGlobalOffset.GetX() - TEXT_DRAG_OFFSET.ConvertToPx();
         width = contentRect.Width();

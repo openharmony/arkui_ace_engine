@@ -62,10 +62,12 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_TEXTINPUT, "AceTextInput" },
     { AceLogTag::ACE_TEXT, "AceText" },
     { AceLogTag::ACE_TEXTAREA, "AceTextArea" },
+    { AceLogTag::ACE_TEXT_FIELD, "AceTextField" },
     { AceLogTag::ACE_TEXT_CLOCK, "AceTextClock" },
     { AceLogTag::ACE_TEXT_TIMER, "AceTextTimer" },
     { AceLogTag::ACE_SWIPER, "AceSwiper" },
     { AceLogTag::ACE_TABS, "AceTabs" },
+    { AceLogTag::ACE_GRIDROW, "AceGridRow"},
     { AceLogTag::ACE_RICH_TEXT, "AceRichText" },
     { AceLogTag::ACE_WEB, "AceWeb" },
     { AceLogTag::ACE_FOCUS, "AceFocus" },
@@ -89,6 +91,9 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_IF, "AceIf" },
     { AceLogTag::ACE_FOREACH, "AceForEach" },
     { AceLogTag::ACE_LAZYFOREACH, "AceLazyForEach" },
+    { AceLogTag::ACE_GAUGE, "AceGauge" },
+    { AceLogTag::ACE_HYPERLINK, "AceHyperLink" },
+    { AceLogTag::ACE_ANIMATION, "AceAnimation" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";

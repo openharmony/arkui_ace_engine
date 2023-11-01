@@ -73,7 +73,6 @@ void RichEditorController::UpdateSpanStyle(
         std::swap(start, end);
     }
     if (start > length || end < 0 || start == end) {
-        LOGI("params error , return");
         return;
     }
     richEditorPattern->SetUpdateSpanStyle(updateSpanStyle_);

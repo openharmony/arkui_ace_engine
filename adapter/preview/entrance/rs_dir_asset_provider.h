@@ -32,11 +32,11 @@
 
 #include "flutter/assets/directory_asset_bundle.h"
 
-#include "core/common/flutter/flutter_asset_manager.h"
-#include "core/common/rosen/rosen_asset_manager.h"
 #include "base/resource/asset_manager.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/rosen/rosen_asset_manager.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT RSDirAssetProvider : public RSAssetProvider {
@@ -58,52 +58,53 @@ public:
     RefPtr<Asset> GetAsset(const std::string& assetName) const override
     {
         errno = 0;
-        LOGI("GetAsset: %{private}s, %{private}s", assetName.c_str(), basePath_.c_str());
+        LOGI("GetAsset: %{public}s, %{private}s", assetName.c_str(), basePath_.c_str());
         std::string fileName = basePath_ + assetName;
         char realPath[PATH_MAX] = { 0x00 };
         if (!RealPath(fileName, realPath)) {
+            LOGD("[%{private}s] RealPath error %{public}s", fileName.c_str(), strerror(errno));
             return nullptr;
         }
         auto fp = std::fopen(realPath, "rb");
         if (!fp) {
-            LOGW("[%{private}s] open file error %{public}s", fileName.c_str(), strerror(errno));
+            LOGD("[%{private}s] open file error %{public}s", fileName.c_str(), strerror(errno));
             return nullptr;
         }
 
         if (std::fseek(fp, 0, SEEK_END) != 0) {
-            LOGW("[%{private}s] seek file tail error %{public}s", fileName.c_str(), strerror(errno));
+            LOGD("[%{private}s] seek file tail error %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
 
         size_t size = std::ftell(fp);
         if (size < 0) {
-            LOGW("[%{private}s] tell file error %{public}s", fileName.c_str(), strerror(errno));
+            LOGD("[%{private}s] tell file error %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
 
         auto data = std::make_unique<char[]>(size);
         if (data == nullptr) {
-            LOGW("[%{private}s] new uint8_t array failed", fileName.c_str());
+            LOGD("[%{private}s] new uint8_t array failed", fileName.c_str());
             std::fclose(fp);
             return nullptr;
         }
 
         if (std::fseek(fp, 0, SEEK_SET) != 0) {
-            LOGW("[%{private}s] seek file begin error %{public}s", fileName.c_str(), strerror(errno));
+            LOGD("[%{private}s] seek file begin error %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
 
         auto rsize = std::fread(data.get(), 1, size, fp);
         if (rsize <= 0) {
-            LOGW("[%{private}s] read file failed, %{public}s", fileName.c_str(), strerror(errno));
+            LOGD("[%{private}s] read file failed, %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
         std::fclose(fp);
-        LOGD("[%{private}s] length: %{public}zu/%{public}zu success", fileName.c_str(), rsize, size);
+        LOGI("[%{public}s] length: %{public}zu/%{public}zu success", assetName.c_str(), rsize, size);
         return AceType::MakeRefPtr<RSAsset>(std::move(data), rsize);
     }
 

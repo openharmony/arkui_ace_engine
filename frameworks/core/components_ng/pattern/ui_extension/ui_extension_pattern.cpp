@@ -32,11 +32,12 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
-#include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -494,8 +495,17 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
+    CHECK_NULL_VOID(window);
+    auto rsWindow = window->GetRSWindow();
     auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
-    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
+    if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
+        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
+    } else {
+        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
+    }
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();

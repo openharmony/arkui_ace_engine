@@ -233,7 +233,6 @@ public:
 
     void Backward()
     {
-        LOGI("Start backward.");
         if (backwardImpl_) {
             backwardImpl_();
         }
@@ -241,7 +240,6 @@ public:
 
     void Forward()
     {
-        LOGI("Start forward.");
         if (forwardimpl_) {
             forwardimpl_();
         }
@@ -249,7 +247,6 @@ public:
 
     void ClearHistory()
     {
-        LOGI("Start clear navigation history");
         if (clearHistoryImpl_) {
             clearHistoryImpl_();
         }
@@ -257,7 +254,6 @@ public:
 
     void ClearSslCache()
     {
-        LOGI("Start clear ssl cache");
         if (clearSslCacheImpl_) {
             clearSslCacheImpl_();
         }

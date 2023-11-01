@@ -18,6 +18,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
@@ -27,7 +28,6 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/pipeline_context.h"
-#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -302,9 +302,6 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     // ImageSpan should ignore decoration styles
     textStyle.SetTextDecoration(TextDecoration::NONE);
     builder->PushStyle(textStyle);
-    TAG_LOGD(AceLogTag::ACE_TEXT, "Span item paragraph updated, imageWidth = %{public}f, "
-         "imageHeight = %{public}f verticalAlign = %{public}d, ImageSpan fontsize = %{public}f",
-        width, height, verticalAlign, textStyle.GetFontSize().Value());
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;

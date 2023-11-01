@@ -100,11 +100,12 @@ void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
     scheduler_ = SchedulerBuilder::Build(callback, context);
 }
 
-void Animator::AttachSchedulerOnContainer()
+bool Animator::AttachSchedulerOnContainer()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     AttachScheduler(pipeline);
+    return true;
 }
 
 bool Animator::HasScheduler() const
@@ -542,7 +543,8 @@ void Animator::Finish()
     }
     LOGD("animation finish. id: %{public}d", controllerId_);
     if (motion_) {
-        LOGD("end action not supports for motion. just stop it. id: %{public}d", controllerId_);
+        // Notify motion with big time to let motion end in final state.
+        motion_->OnTimestampChanged(INT_MAX, 0.0f, false);
         Stop();
         return;
     }
@@ -571,6 +573,10 @@ void Animator::Cancel()
     float normalizedTime = GetNormalizedTime(0.0f, true);
     for (auto& interpolator : interpolators_) {
         interpolator->OnInitNotify(normalizedTime, isReverse_);
+    }
+    if (motion_) {
+        // Notify motion with big time to let motion end in final state.
+        motion_->OnTimestampChanged(INT_MAX, 0.0f, false);
     }
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();

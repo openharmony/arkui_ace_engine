@@ -190,8 +190,15 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     touchPoints_[event.id].sourceTool = event.sourceTool;
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
-    lastAxisEvent_ = event;
     inputEventType_ = InputEventType::AXIS;
+
+    auto pesudoTouchEvent = TouchEvent();
+    pesudoTouchEvent.time = event.time;
+    velocityTracker_.Reset();
+    pesudoTouchEvent.x = lastAxisEvent_.horizontalAxis + event.horizontalAxis;
+    pesudoTouchEvent.y = lastAxisEvent_.verticalAxis + event.verticalAxis;
+    velocityTracker_.UpdateTouchPoint(pesudoTouchEvent, false);
+    lastAxisEvent_ = event;
     refereeState_ = RefereeState::DETECTING;
 }
 
@@ -234,6 +241,13 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives axis end event");
     globalPoint_ = Point(event.x, event.y);
+
+    auto pesudoTouchEvent = TouchEvent();
+    pesudoTouchEvent.time = event.time;
+    pesudoTouchEvent.x = lastAxisEvent_.horizontalAxis + event.horizontalAxis;
+    pesudoTouchEvent.y = lastAxisEvent_.verticalAxis + event.verticalAxis;
+    velocityTracker_.UpdateTouchPoint(pesudoTouchEvent, true);
+
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -326,6 +340,13 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
     mainDelta_ = GetMainAxisDelta();
     averageDistance_ += delta_;
+    
+    auto pesudoTouchEvent = TouchEvent();
+    pesudoTouchEvent.time = event.time;
+    pesudoTouchEvent.x = lastAxisEvent_.horizontalAxis + event.horizontalAxis;
+    pesudoTouchEvent.y = lastAxisEvent_.verticalAxis + event.verticalAxis;
+    velocityTracker_.UpdateTouchPoint(pesudoTouchEvent, false);
+
     lastAxisEvent_ = event;
     time_ = event.time;
 
@@ -478,15 +499,13 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetTargetDisplayId(touchPoint.targetDisplayId);
         info.SetDelta(delta_);
         info.SetMainDelta(mainDelta_);
+        info.SetVelocity(velocityTracker_.GetVelocity());
+        info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
         if (inputEventType_ == InputEventType::AXIS) {
             info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
-            info.SetVelocity(Velocity());
-            info.SetMainVelocity(0.0);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
         } else {
             info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
-            info.SetVelocity(velocityTracker_.GetVelocity());
-            info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
             info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));

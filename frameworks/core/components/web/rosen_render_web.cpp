@@ -41,10 +41,8 @@ void RosenRenderWeb::DumpTree(int32_t depth) {}
 #ifdef OHOS_STANDARD_SYSTEM
 void RosenRenderWeb::OnAttachContext()
 {
-    LOGI("OnAttachContext");
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("OnAttachContext context null");
         return;
     }
     if (delegate_) {
@@ -67,11 +65,11 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
     drawSizeCache_ = drawSize_;
     if (drawSize_.Width() == Size::INFINITE_SIZE || drawSize_.Height() == Size::INFINITE_SIZE ||
         drawSize_.Width() == 0 || drawSize_.Height() == 0) {
-        LOGE("Web drawSize height or width is invalid");
         return;
     }
     if (delegate_) {
-        LOGI("Web paint drawSize width = %{public}f, height = %{public}f", drawSize_.Width(), drawSize_.Height());
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "Web paint drawSize width = %{public}f, height = %{public}f", drawSize_.Width(), drawSize_.Height());
         delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
         if (!isUrlLoaded_) {
             if (!delegate_->LoadDataWithRichText()) {

@@ -92,10 +92,12 @@ enum class AceLogTag : uint8_t {
     ACE_TEXTINPUT,
     ACE_TEXT,
     ACE_TEXTAREA,
+    ACE_TEXT_FIELD,
     ACE_TEXT_CLOCK,
     ACE_TEXT_TIMER,
     ACE_SWIPER,
     ACE_TABS,
+    ACE_GRIDROW,
     ACE_INPUTTRACKING,
     ACE_RICH_TEXT,
     ACE_WEB,
@@ -120,6 +122,9 @@ enum class AceLogTag : uint8_t {
     ACE_IF,
     ACE_FOREACH,
     ACE_LAZYFOREACH,
+    ACE_GAUGE,
+    ACE_HYPERLINK,
+    ACE_ANIMATION,
 };
 
 enum class LogDomain : uint32_t {
