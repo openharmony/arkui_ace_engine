@@ -37,6 +37,36 @@ public:
     virtual bool IsRedirect(void* object) = 0;
 };
 
+class WebScrollObject : public Referenced {
+public:
+    virtual float GetX(void* object) = 0;
+    virtual float GetY(void* object) = 0;
+};
+
+class WebScaleChangeObject : public Referenced {
+public:
+    virtual float GetNewScale(void* object) = 0;
+    virtual float GetOldScale(void* object) = 0;
+};
+
+class WebResourceResponseObject : public Referenced {
+public:
+    virtual std::map<std::string, std::string> GetResponseHeader(void* object) = 0;
+    virtual std::string GetResponseData(void* object) = 0;
+    virtual std::string GetEncoding(void* object) = 0;
+    virtual std::string GetMimeType(void* object) = 0;
+    virtual std::string GetReason(void* object) = 0;
+    virtual int GetStatusCode(void* object) = 0;
+};
+
+class WebConsoleMessageObject : public Referenced {
+public:
+    virtual std::string GetMessage(void* object) = 0;
+    virtual int GetMessageLevel(void* object) = 0;
+    virtual std::string GetSourceId(void* object) = 0;
+    virtual int GetLineNumber(void* object) = 0;
+};
+
 class WebResourceErrorObject : public Referenced {
 public:
     virtual std::string GetErrorInfo(void* object) = 0;
@@ -47,6 +77,7 @@ class WebObjectEventManager : public Singleton<WebObjectEventManager> {
     DECLARE_SINGLETON(WebObjectEventManager)
 public:
     using EventObJectCallback = std::function<void(const std::string&, void *object)>;
+    using EventObjectWithBoolReturnCallback = std::function<bool(const std::string&, void *object)>;
 
     void RegisterObjectEvent(const std::string& eventId, const EventObJectCallback&& eventCallback)
     {
@@ -54,9 +85,21 @@ public:
         eventObjectMap_[eventId] = std::move(eventCallback);
     }
 
+    void RegisterObjectEventWithBoolReturn(
+		const std::string& eventId, const EventObjectWithBoolReturnCallback&& eventCallback)
+    {
+        LOGI("RegisterObjectEventWithBoolReturn %{public}s", eventId.c_str());
+        eventObjectWithBoolReturnMap_[eventId] = std::move(eventCallback);
+    }
+
     void UnRegisterObjectEvent(const std::string& eventId)
     {
         eventObjectMap_.erase(eventId);
+    }
+
+    void UnRegisterObjectEventWithBoolReturn(const std::string& eventId)
+    {
+        eventObjectWithBoolReturnMap_.erase(eventId);
     }
 
     void OnObjectEvent(const std::string& eventId, const std::string& param, void *jObject)
@@ -68,6 +111,18 @@ public:
         } else {
             LOGW("failed to find object eventId = %{public}s", eventId.c_str());
         }
+    }
+
+    bool OnObjectEventWithBoolReturn(const std::string& eventId, const std::string& param, void *jObject)
+    {
+        LOGI("OnObjectEventWithBoolReturn %{public}s", eventId.c_str());
+        auto event = eventObjectWithBoolReturnMap_.find(eventId);
+        if (event != eventObjectWithBoolReturnMap_.end() && event->second) {
+            return event->second(param, jObject);
+        } else {
+            LOGW("failed to find object eventIdWithBoolReturn = %{public}s", eventId.c_str());
+        }
+        return false;
     }
 
     const RefPtr<WebResourceRequestObject>& GetResourceRequestObject()
@@ -90,10 +145,55 @@ public:
         resourceErrorObject_ = object;
     }
 
+    const RefPtr<WebScrollObject>& GetScrollObject()
+    {
+        return scrollObject_;
+    }
+
+    void SetScrollObject(const RefPtr<WebScrollObject>& object)
+    {
+        scrollObject_ = object;
+    }
+
+    const RefPtr<WebScaleChangeObject>& GetScaleChangeObject()
+    {
+        return scaleChangeObject_;
+    }
+
+    void SetScaleChangeObject(const RefPtr<WebScaleChangeObject>& object)
+    {
+        scaleChangeObject_ = object;
+    }
+
+    const RefPtr<WebResourceResponseObject>& GetResourceResponseObject()
+    {
+        return resourceResponseObject_;
+    }
+
+    void SetResourceResponseObject(const RefPtr<WebResourceResponseObject>& object)
+    {
+        resourceResponseObject_ = object;
+    }
+
+    const RefPtr<WebConsoleMessageObject>& GetConsoleMessageObject()
+    {
+        return consoleMessageObject_;
+    }
+
+    void SetConsoleMessageObject(const RefPtr<WebConsoleMessageObject>& object)
+    {
+        consoleMessageObject_ = object;
+    }
+
 private:
     RefPtr<WebResourceRequestObject> resourceRequestObject_;
+    RefPtr<WebScrollObject> scrollObject_;
+    RefPtr<WebScaleChangeObject> scaleChangeObject_;
     RefPtr<WebResourceErrorObject> resourceErrorObject_;
+    RefPtr<WebResourceResponseObject> resourceResponseObject_;
+    RefPtr<WebConsoleMessageObject> consoleMessageObject_;
     std::unordered_map<std::string, EventObJectCallback> eventObjectMap_;
+    std::unordered_map<std::string, EventObjectWithBoolReturnCallback> eventObjectWithBoolReturnMap_;
 };
 inline WebObjectEventManager::WebObjectEventManager() = default;
 inline WebObjectEventManager::~WebObjectEventManager() = default;
