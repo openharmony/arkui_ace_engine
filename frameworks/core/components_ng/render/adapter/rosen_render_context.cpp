@@ -798,7 +798,8 @@ bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optio
             auto imageSize = imageParameter.GetSize();
             auto imageWidth = Dimension(ConvertDimensionToPx(imageSize.first, rect.Width()), DimensionUnit::PX);
             auto imageHeight = Dimension(ConvertDimensionToPx(imageSize.second, rect.Height()), DimensionUnit::PX);
-            if (particleImageMap_.find(imageParameter.GetImageSource()) == particleImageMap_.end()) {
+            auto canvasImageIter = particleImageMap_.find(imageParameter.GetImageSource());
+            if (canvasImageIter == particleImageMap_.end() || !canvasImageIter->second->GetPixelMap()) {
                 LoadParticleImage(imageParameter.GetImageSource(), imageWidth, imageHeight);
                 flag = true;
             }
