@@ -164,7 +164,8 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
                          MULTIPLE_2 * searchTheme->GetDividerSideSpace().ConvertToPx();
     }
 
-    if (cancelButtonEvent->IsEnabled()) {
+    auto style = layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
+    if (style != CancelButtonStyle::INVISIBLE) {
         textFieldWidth = textFieldWidth - cancelButtonWidth;
     }
     auto themeHeight = searchTheme->GetHeight().ConvertToPx();
