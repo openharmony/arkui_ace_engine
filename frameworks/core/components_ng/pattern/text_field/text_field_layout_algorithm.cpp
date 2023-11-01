@@ -122,14 +122,16 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
 float TextFieldLayoutAlgorithm::ConstraintWithMinWidth(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float removeValue)
 {
-    const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
-    if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
-        calcLayoutConstraint->minSize->Width().has_value()) {
-        auto width = std::max(contentConstraint.minSize.Width() - removeValue, paragraph_->GetLongestLine());
-        if (width != paragraph_->GetLongestLine()) {
-            paragraph_->Layout(width);
-        } else {
-            return std::max(paragraph_->GetLongestLine(), 0.0f);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+        if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
+            calcLayoutConstraint->minSize->Width().has_value()) {
+            auto width = std::max(contentConstraint.minSize.Width() - removeValue, paragraph_->GetLongestLine());
+            if (width != paragraph_->GetLongestLine()) {
+                paragraph_->Layout(width);
+            } else {
+                return std::max(paragraph_->GetLongestLine(), 0.0f);
+            }
         }
     }
     return std::max(paragraph_->GetMaxWidth(), 0.0f);
@@ -192,11 +194,14 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(
     if (autoWidth_) {
         contentWidth = std::min(contentWidth, paragraph_->GetLongestLine());
     }
-    const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
-    if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
-        calcLayoutConstraint->minSize->Width().has_value()) {
-        contentWidth = std::min(contentConstraint.maxSize.Width() - imageWidth,
-            std::max(paragraph_->GetLongestLine(), contentConstraint.minSize.Width() - imageWidth));
+
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+        if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
+            calcLayoutConstraint->minSize->Width().has_value()) {
+            contentWidth = std::min(contentConstraint.maxSize.Width() - imageWidth,
+                std::max(paragraph_->GetLongestLine(), contentConstraint.minSize.Width() - imageWidth));
+        }
     }
 
     auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
