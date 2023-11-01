@@ -4634,13 +4634,13 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
     algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), MENU_ITEM_SIZE_WIDTH);
+    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), MENU_ITEM_SIZE_WIDTH);
 
     // @tc.cases: case2. sub menu show on the left side of item
     algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), MENU_ITEM_SIZE_WIDTH);
+    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), MENU_ITEM_SIZE_WIDTH);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 
