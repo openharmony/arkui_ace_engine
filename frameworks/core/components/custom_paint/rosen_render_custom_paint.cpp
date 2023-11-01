@@ -623,8 +623,9 @@ double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
         txtStyle.fontSize = context.fontSize.value().ConvertToPx();
 #endif
     } else {
-        auto context = PipelineBase::GetCurrentContext();
-        auto textTheme = context->GetTheme<TextTheme>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, 0.0);
+        auto textTheme = pipelineContext->GetTheme<TextTheme>();
 #ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
 #else
@@ -715,8 +716,9 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         txtStyle.fontSize = context.fontSize.value().ConvertToPx();
 #endif
     } else {
-        auto context = PipelineBase::GetCurrentContext();
-        auto textTheme = context->GetTheme<TextTheme>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, Size(0.0, 0.0));
+        auto textTheme = pipelineContext->GetTheme<TextTheme>();
 #ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
 #else
