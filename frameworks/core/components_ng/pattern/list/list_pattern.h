@@ -114,6 +114,7 @@ public:
     bool IsAtBottom() const override;
     bool OutBoundaryCallback() override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
+    void HandleScrollBarOutBoundary();
 
     FocusPattern GetFocusPattern() const override
     {
@@ -172,6 +173,8 @@ public:
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
+    Rect GetItemRect(int32_t index) const;
+    Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
     void OnAnimateStop() override;
     void UpdateScrollBarOffset() override;
     // chain animation
@@ -188,13 +191,25 @@ public:
         multiSelectable_ = multiSelectable;
     }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     // dragStatusCallback
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-#endif // ENABLE_DRAG_FRAMEWORK
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
+    void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem)
+    {
+        if (swiperItem == swiperItem_) {
+            canReplaceSwiperItem_ = true;
+        }
+    }
+    bool IsCurrentSwiperItem(WeakPtr<ListItemPattern> swiperItem)
+    {
+        return swiperItem == swiperItem_;
+    }
+    bool CanReplaceSwiperItem()
+    {
+        return canReplaceSwiperItem_;
+    }
 
     void SetPredictSnapOffset(float predictSnapOffset)
     {
@@ -216,6 +231,16 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void DumpAdvanceInfo() override;
+
+    void SetNeedToUpdateListDirectionInCardStyle(bool isNeedToUpdateListDirection)
+    {
+        isNeedToUpdateListDirection_ = isNeedToUpdateListDirection;
+    }
+
+    bool IsNeedToUpdateListDirectionInCardStyle() const
+    {
+        return isNeedToUpdateListDirection_;
+    }
 
 private:
     void OnScrollEndCallback() override;
@@ -268,10 +293,8 @@ private:
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
-    
-#ifdef ENABLE_DRAG_FRAMEWORK
+    void UpdateListDirectionInCardStyle();
     void InitNotifyDragEvent();
-#endif // ENABLE_DRAG_FRAMEWORK
     RefPtr<ListContentModifier> listContentModifier_;
 
     RefPtr<ListPositionController> positionController_;
@@ -319,15 +342,17 @@ private:
 
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;
+    bool canReplaceSwiperItem_ = true;
+
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
     RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
-#ifdef ENABLE_DRAG_FRAMEWORK
     std::optional<RefPtr<ListDragStatusListener>> listDragStatusListener_;
-#endif // ENABLE_DRAG_FRAMEWORK
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
+
+    bool isNeedToUpdateListDirection_ = false;
 };
 } // namespace OHOS::Ace::NG
 

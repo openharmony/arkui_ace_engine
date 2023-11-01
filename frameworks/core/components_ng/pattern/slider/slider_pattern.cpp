@@ -65,6 +65,7 @@ void SliderPattern::OnModifyDone()
     stepRatio_ = step / (max - min);
     UpdateCircleCenterOffset();
     UpdateBlock();
+    InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
     InitPanEvent(gestureHub);
     InitMouseEvent(inputEventHub);
@@ -143,6 +144,16 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     borderBlank_ = (length - sliderLength_) * HALF;
 
     return true;
+}
+
+void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (clickListener_) {
+        return;
+    }
+    auto clickCallback = [](const GestureEvent& info) {};
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickEvent(clickListener_);
 }
 
 void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -228,6 +239,10 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchInfo = touchList.front();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
+        if (fingerId_ != -1) {
+            return;
+        }
+        fingerId_ = touchInfo.GetFingerId();
         axisFlag_ = false;
         // when Touch Down area is at Pan Area, value is unchanged.
         if (!AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
@@ -240,8 +255,12 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         mousePressedFlag_ = true;
         FireChangeEvent(SliderChangeMode::Begin);
         OpenTranslateAnimation();
-    } else if (touchType == TouchType::UP) {
-        if (bubbleFlag_) {
+    } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        if (fingerId_ != touchInfo.GetFingerId()) {
+            return;
+        }
+        fingerId_ = -1;
+        if (bubbleFlag_ && !isFocusActive_) {
             bubbleFlag_ = false;
         }
         mousePressedFlag_ = false;
@@ -302,8 +321,18 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
             InitializeBubble();
         }
     } else {
-        UpdateValueByLocalLocation(info.GetLocalLocation());
-        UpdateBubble();
+        auto fingerList = info.GetFingerList();
+        if (fingerList.size() > 0) {
+            for (auto fingerInfo : fingerList) {
+                if (fingerInfo.fingerId_ == fingerId_) {
+                    UpdateValueByLocalLocation(fingerInfo.localLocation_);
+                    UpdateBubble();
+                }
+            }
+        } else {
+            UpdateValueByLocalLocation(info.GetLocalLocation());
+            UpdateBubble();
+        }
     }
     panMoveFlag_ = true;
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -446,12 +475,23 @@ void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 
+    auto onFocus = [wp = WeakClaim(this)]() {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->focusFlag_ = true;
+        pattern->UpdateTipState();
+        pattern->UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        pattern->AddIsFocusActiveUpdateEvent();
+    };
+    focusHub->SetOnFocusInternal(std::move(onFocus));
+
     auto onBlur = [wp = WeakClaim(this)]() {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->bubbleFlag_ = false;
         pattern->focusFlag_ = false;
+        pattern->UpdateTipState();
         pattern->UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        pattern->RemoveIsFocusActiveUpdateEvent();
     };
     focusHub->SetOnBlurInternal(std::move(onBlur));
 }
@@ -554,7 +594,6 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SliderPattern::PaintFocusState()
 {
-    focusFlag_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RoundRect focusRect;
@@ -591,18 +630,6 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
             PaintFocusState();
             return true;
         }
-    } else if (event.action == KeyAction::UP) {
-        if ((direction_ == Axis::HORIZONTAL &&
-                (event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT)) ||
-            (direction_ == Axis::VERTICAL &&
-                (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN))) {
-            if (showTips_) {
-                bubbleFlag_ = true;
-                InitializeBubble();
-            }
-            PaintFocusState();
-            return true;
-        }
     }
     return false;
 }
@@ -625,8 +652,8 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     if (NearEqual(nextValue, -1.0)) {
         return false;
     }
+    nextValue = std::floor(nextValue / step) * step;
     nextValue = std::clamp(nextValue, min, max);
-    nextValue = std::round(nextValue / step) * step;
     if (NearEqual(nextValue, value_)) {
         return false;
     }
@@ -669,7 +696,9 @@ void SliderPattern::HandleHoverEvent(bool isHover)
     hotFlag_ = isHover;
     mouseHoverFlag_ = mouseHoverFlag_ && isHover;
     if (!mouseHoverFlag_) {
-        bubbleFlag_ = false;
+        if (!isFocusActive_) {
+            bubbleFlag_ = false;
+        }
         axisFlag_ = false;
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -687,7 +716,7 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
         }
     }
     // when mouse hovers over slider, distinguish between hover block and Wheel operation.
-    if (!mouseHoverFlag_ && !axisFlag_) {
+    if (!mouseHoverFlag_ && !axisFlag_ && !isFocusActive_) {
         bubbleFlag_ = false;
     }
 
@@ -1036,7 +1065,7 @@ void SliderPattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isVisibleArea_  = visible;
+        pattern->isVisibleArea_ = visible;
         visible ? pattern->StartAnimation() : pattern->StopAnimation();
     };
     auto host = GetHost();
@@ -1063,5 +1092,60 @@ void SliderPattern::OnWindowShow()
 bool SliderPattern::IsSliderVisible()
 {
     return isVisibleArea_ && isVisible_ && isShow_;
+}
+
+void SliderPattern::UpdateTipState()
+{
+    if (focusFlag_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        isFocusActive_ = context->GetIsFocusActive();
+    } else {
+        isFocusActive_ = false;
+    }
+
+    bool showBubble = false;
+    if (showTips_ && focusFlag_) {
+        showBubble = isFocusActive_ || mousePressedFlag_;
+    }
+    if (showBubble != bubbleFlag_) {
+        bubbleFlag_ = showBubble;
+        UpdateBubble();
+    }
+}
+
+void SliderPattern::OnIsFocusActiveUpdate(bool isFocusActive)
+{
+    if (!focusFlag_) {
+        return;
+    }
+    isFocusActive_ = isFocusActive;
+    bool showBubble = false;
+    if (showTips_) {
+        showBubble = isFocusActive_ || mousePressedFlag_;
+    }
+    if (showBubble != bubbleFlag_) {
+        bubbleFlag_ = showBubble;
+        UpdateBubble();
+        UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void SliderPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = std::bind(&SliderPattern::OnIsFocusActiveUpdate, this, std::placeholders::_1);
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void SliderPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
 } // namespace OHOS::Ace::NG

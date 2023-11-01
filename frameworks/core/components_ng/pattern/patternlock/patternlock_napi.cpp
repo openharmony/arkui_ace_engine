@@ -261,7 +261,6 @@ napi_value Reset(napi_env env, napi_callback_info info)
     PatternLockController* wrapper = nullptr;
     napi_unwrap(env, thisVar, (void**)&wrapper);
     if (wrapper == nullptr) {
-        LOGE("unwrap PatternLockController error");
         return CommonNapiUtils::CreateNull(env);
     }
     wrapper->Reset();
@@ -274,7 +273,6 @@ napi_value PatternLockControllerConstructor(napi_env env, napi_callback_info inf
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
     auto wrapper = new (std::nothrow) PatternLockController();
     if (wrapper == nullptr) {
-        LOGE("create PatternLockController error");
         return CommonNapiUtils::CreateNull(env);
     }
     napi_wrap(

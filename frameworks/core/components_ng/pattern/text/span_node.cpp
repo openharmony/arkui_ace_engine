@@ -18,6 +18,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
@@ -27,7 +28,6 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/pipeline_context.h"
-#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -107,7 +107,6 @@ void SpanNode::MountToParagraph()
         }
         parent = parent->GetParent();
     }
-    LOGE("fail to find Text or Parent Span");
 }
 
 void SpanNode::RequestTextFlushDirty()
@@ -125,7 +124,6 @@ void SpanNode::RequestTextFlushDirty()
         }
         parent = parent->GetParent();
     }
-    LOGD("fail to find Text or Parent Span");
 }
 
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
@@ -280,9 +278,6 @@ bool SpanItem::IsDragging()
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign)
 {
-    LOGD("ImageSpanItem::UpdateParagraph imageWidth = %{public}f, imageHeight = %{public}f verticalAlign = "
-         "%{public}d",
-        width, height, verticalAlign);
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;
     run.width = width;
@@ -307,7 +302,6 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     // ImageSpan should ignore decoration styles
     textStyle.SetTextDecoration(TextDecoration::NONE);
     builder->PushStyle(textStyle);
-    LOGD("ImageSpan fontsize = %{public}f", textStyle.GetFontSize().Value());
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;

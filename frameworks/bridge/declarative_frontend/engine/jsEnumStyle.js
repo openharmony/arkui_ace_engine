@@ -78,7 +78,14 @@ var WordBreak;
   WordBreak[WordBreak["NORMAL"] = 0] = "normal";
   WordBreak[WordBreak["BREAK_ALL"] = 1] = "break-all";
   WordBreak[WordBreak["BREAK_WORD"] = 2] = "break-word";
-})(WordBreak || (WordBreak = {}))
+})(WordBreak || (WordBreak = {}));
+
+var EllipsisMode;
+(function (EllipsisMode) {
+  EllipsisMode[EllipsisMode["START"] = 0] = "start";
+  EllipsisMode[EllipsisMode["CENTER"] = 1] = "center";
+  EllipsisMode[EllipsisMode["END"] = 2] = "end";
+})(EllipsisMode || (EllipsisMode = {}));
 
 var Curve;
 (function (Curve) {
@@ -249,6 +256,13 @@ var Alignment;
   Alignment[Alignment["Bottom"] = 7] = "Bottom";
   Alignment[Alignment["BottomEnd"] = 8] = "BottomEnd";
 })(Alignment || (Alignment = {}));
+
+var BlendMode;
+(function (BlendMode) {
+  BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
+  BlendMode[BlendMode["DESTINATION_IN"] = 1] = "DESTINATION_IN";
+  BlendMode[BlendMode["SOURCE_IN"] = 2] = "SOURCE_IN";
+})(BlendMode || (BlendMode = {}));
 
 var TextOverflow;
 (function (TextOverflow) {

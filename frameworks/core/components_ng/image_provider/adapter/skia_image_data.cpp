@@ -90,8 +90,8 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
 std::pair<SizeF, int32_t> SkiaImageData::Parse() const
 {
     SizeF imageSize;
-    if (ImageSource::IsAstc(GetSkData()->bytes())) {
-        ImageSource::Size astcSize = ImageSource::GetASTCInfo(GetSkData()->bytes());
+    if (ImageSource::IsAstc(GetSkData()->bytes(), GetSkData()->size())) {
+        ImageSource::Size astcSize = ImageSource::GetASTCInfo(GetSkData()->bytes(), GetSkData()->size());
         imageSize.SetSizeT(SizeF(astcSize.first, astcSize.second));
         return { imageSize, ASTC_FRAME_COUNT };
     }

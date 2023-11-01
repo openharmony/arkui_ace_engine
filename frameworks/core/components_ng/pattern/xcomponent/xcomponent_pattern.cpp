@@ -204,6 +204,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestroyEvent();
+        eventHub->FireDetachEvent(id_);
     }
 }
 

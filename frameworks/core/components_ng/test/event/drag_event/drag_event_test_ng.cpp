@@ -197,6 +197,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
      * @tc.steps: step1. Create DragEventActuator.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);

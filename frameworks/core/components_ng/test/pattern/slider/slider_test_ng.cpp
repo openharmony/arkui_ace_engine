@@ -451,7 +451,7 @@ HWTEST_F(SliderTestNg, SliderTestNg005, TestSize.Level1)
     sliderPattern->HandleTouchEvent(info);
     sliderPattern->showTips_ = true;
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_EQ(sliderPattern->bubbleFlag_, true);
+    EXPECT_EQ(sliderPattern->bubbleFlag_, false);
     /**
      * @tc.cases: case2. when TouchType is DOWN and direction is VERTICAL.
      */
@@ -756,23 +756,23 @@ HWTEST_F(SliderTestNg, SliderTestNg011, TestSize.Level1)
     sliderPattern->circleCenter_.Reset();
     info.changedTouches_.front().localLocation_ = Offset(MIN_LABEL, -MAX_LABEL);
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_NE(sliderPattern->value_, .0f);
+    EXPECT_EQ(sliderPattern->value_, .0f);
     sliderPattern->value_ = .0f;
     sliderPattern->circleCenter_.Reset();
     info.changedTouches_.front().localLocation_ = Offset(MAX_LABEL, MIN_LABEL);
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_NE(sliderPattern->value_, .0f);
+    EXPECT_EQ(sliderPattern->value_, .0f);
     sliderPattern->value_ = VALUE;
     sliderPattern->circleCenter_.Reset();
     info.changedTouches_.front().localLocation_ = Offset(-MAX_LABEL, MIN_LABEL);
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_EQ(sliderPattern->value_, .0f); // Exceeding the leftmost end, take 0
+    EXPECT_NE(sliderPattern->value_, .0f); // Exceeding the leftmost end, take 0
     /**
      * @tc.cases: case2. touch down position is inside the blockHotSize, not UpdateValueByLocalLocation
      */
     info.changedTouches_.front().localLocation_ = Offset();
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_EQ(sliderPattern->value_, .0f);
+    EXPECT_NE(sliderPattern->value_, .0f);
     EXPECT_FALSE(sliderPattern->valueChangeFlag_);
 }
 
@@ -1887,7 +1887,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest003, TestSize.Level1)
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
     sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
-    EXPECT_CALL(*themeManager, GetTheme(SliderTheme::TypeId())).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
     sliderLayoutAlgorithm->trackThickness_ = 40.0f;
 
     auto imageId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -2410,6 +2410,9 @@ HWTEST_F(SliderTestNg, SliderPatternTest013, TestSize.Level1)
      */
     auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     sliderPattern->AttachToFrameNode(frameNode);
     ASSERT_NE(frameNode, nullptr);

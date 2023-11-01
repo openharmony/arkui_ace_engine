@@ -85,5 +85,6 @@ void SheetDragBarPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper
     path.LineTo(barRightPoint.GetX().ConvertToPx() + totalOffset.GetX(),
         barRightPoint.GetY().ConvertToPx() + totalOffset.GetY());
     canvas.DrawPath(path);
+    canvas.DetachPen();
 }
 } // namespace OHOS::Ace::NG

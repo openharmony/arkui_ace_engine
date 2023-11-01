@@ -82,9 +82,6 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
-    if (refereeNG_->CheckSourceTypeChange(touchPoint.sourceType)) {
-        refereeNG_->CleanAll(true);
-    }
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
     }
@@ -92,7 +89,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         std::vector<NG::RectF> rect;
         frameNode->CheckSecurityComponentStatus(rect);
     }
-    if (!needAppend) {
+    if (!needAppend && touchTestResults_.empty()) {
         NG::NGGestureRecognizer::ResetGlobalTransCfg();
     }
     // For root node, the parent local point is the same as global point.
@@ -395,18 +392,14 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
     return false;
 }
 
-bool EventManager::DispatchTabIndexEventNG(
-    const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& mainNode)
+bool EventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView)
 {
     LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
         event.action, event.repeatTime);
-    CHECK_NULL_RETURN(focusNode, false);
-    CHECK_NULL_RETURN(mainNode, false);
-    auto focusNodeHub = focusNode->GetFocusHub();
-    CHECK_NULL_RETURN(focusNodeHub, false);
-    auto mainNodeHub = mainNode->GetFocusHub();
-    CHECK_NULL_RETURN(mainNodeHub, false);
-    if (focusNodeHub->HandleFocusByTabIndex(event, mainNodeHub)) {
+    CHECK_NULL_RETURN(mainView, false);
+    auto mainViewFocusHub = mainView->GetFocusHub();
+    CHECK_NULL_RETURN(mainViewFocusHub, false);
+    if (mainViewFocusHub->HandleFocusByTabIndex(event)) {
         LOGI("Tab index focus system handled this event");
         return true;
     }

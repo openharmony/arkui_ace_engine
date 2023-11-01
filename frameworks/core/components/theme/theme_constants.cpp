@@ -51,11 +51,9 @@ DeviceType g_deviceType = DeviceType::PHONE;
 bool ValueTypeMatch(const ResValueWrapper& valueWrapper, uint32_t key, const ThemeConstantsType& expectType)
 {
     if (valueWrapper.type == ThemeConstantsType::ERROR) {
-        LOGE("ThemeConstants value not found: %{public}u", key);
         return false;
     }
     if (valueWrapper.type != expectType) {
-        LOGE("ThemeConstants value type error: %{public}u, expectType: %{public}u", key, expectType);
         return false;
     }
     return true;
@@ -71,7 +69,6 @@ bool IsGlobalResource(uint32_t resId)
 void ThemeConstants::InitDeviceType()
 {
     g_deviceType = SystemProperties::GetDeviceType();
-    LOGD("InitDeviceType deviceType=%{public}d.", g_deviceType);
 }
 
 const ResValueWrapper* ThemeConstants::GetPlatformConstants(uint32_t key)
@@ -107,7 +104,7 @@ Color ThemeConstants::GetColor(uint32_t key) const
     }
     auto colorPair = valueWrapper.GetValue<Color>(ERROR_VALUE_COLOR);
     if (!colorPair.first) {
-        LOGE("GetColor error: %{public}u, type: %{public}u", key, valueWrapper.type);
+        TAG_LOGW(AceLogTag::ACE_THEME, "Get theme color error: %{public}u, type: %{public}u", key, valueWrapper.type);
     }
     return colorPair.second;
 }
@@ -138,7 +135,8 @@ Dimension ThemeConstants::GetDimension(uint32_t key) const
     }
     auto dimensionPair = valueWrapper.GetValue<Dimension>(ERROR_VALUE_DIMENSION);
     if (!dimensionPair.first) {
-        LOGE("GetDimension error: %{public}u, type: %{public}u", key, valueWrapper.type);
+        TAG_LOGW(
+            AceLogTag::ACE_THEME, "Get theme dimension error: %{public}u, type: %{public}u", key, valueWrapper.type);
     }
     return dimensionPair.second;
 }
@@ -169,7 +167,7 @@ int32_t ThemeConstants::GetInt(uint32_t key) const
     }
     auto intPair = valueWrapper.GetValue<int32_t>(ERROR_VALUE_INT);
     if (!intPair.first) {
-        LOGE("GetInt error: %{public}u, type: %{public}u", key, valueWrapper.type);
+        TAG_LOGW(AceLogTag::ACE_THEME, "Get theme int error: %{public}u, type: %{public}u", key, valueWrapper.type);
     }
     return intPair.second;
 }
@@ -196,7 +194,7 @@ double ThemeConstants::GetDouble(uint32_t key) const
     }
     auto doublePair = valueWrapper.GetValue<double>(ERROR_VALUE_DOUBLE);
     if (!doublePair.first) {
-        LOGE("GetDouble error: %{public}u, type: %{public}u", key, valueWrapper.type);
+        TAG_LOGW(AceLogTag::ACE_THEME, "Get theme double error: %{public}u, type: %{public}u", key, valueWrapper.type);
     }
     return doublePair.second;
 }
@@ -223,7 +221,7 @@ std::string ThemeConstants::GetString(uint32_t key) const
     }
     auto stringPair = valueWrapper.GetValue<std::string>("");
     if (!stringPair.first) {
-        LOGE("GetString error: %{public}u, type: %{public}u", key, valueWrapper.type);
+        TAG_LOGW(AceLogTag::ACE_THEME, "Get theme string error: %{public}u, type: %{public}u", key, valueWrapper.type);
     }
     return stringPair.second;
 }
@@ -250,7 +248,8 @@ std::string ThemeConstants::GetPluralString(uint32_t key, int count) const
     }
     auto stringPair = valueWrapper.GetValue<std::string>("");
     if (!stringPair.first) {
-        LOGE("GetPluralString error: %{public}u, type: %{public}u", key, valueWrapper.type);
+        TAG_LOGW(AceLogTag::ACE_THEME, "Get theme pluralString error: %{public}u, type: %{public}u", key,
+            valueWrapper.type);
     }
     return stringPair.second;
 }
@@ -379,7 +378,8 @@ InternalResource::ResourceId ThemeConstants::GetResourceId(uint32_t key) const
     }
     auto resPair = valueWrapper.GetValue<InternalResource::ResourceId>(ERROR_VALUE_RESOURCE_ID);
     if (!resPair.first) {
-        LOGE("GetResourceId error: %{public}u, type: %{public}u", key, valueWrapper.type);
+        TAG_LOGW(
+            AceLogTag::ACE_THEME, "Get theme resourceId error: %{public}u, type: %{public}u", key, valueWrapper.type);
     }
     return resPair.second;
 }
@@ -446,7 +446,6 @@ double ThemeConstants::GetBlendAlpha(const BlendAlpha& blendAlpha) const
 void ThemeConstants::LoadTheme(int32_t themeId)
 {
     if (!resAdapter_) {
-        LOGE("resAdapter_ is null, load theme resource failed!");
         return;
     }
     currentThemeStyle_ = resAdapter_->GetTheme(themeId);
@@ -465,7 +464,6 @@ void ThemeConstants::ParseTheme()
 void ThemeConstants::LoadCustomStyle(const RefPtr<AssetManager>& assetManager)
 {
     if (!assetManager) {
-        LOGE("AssetManager is null, load custom style failed!");
         return;
     }
 
@@ -494,7 +492,6 @@ void ThemeConstants::ParseCustomStyle(const std::string& content)
     auto rootJson = JsonUtil::ParseJsonString(content);
     auto rootNode = rootJson->GetObject(CUSTOM_STYLE_ROOT_NAME);
     if (rootNode->IsNull()) {
-        LOGE("Load custom style, root node 'style' not found.");
         return;
     }
     auto child = rootNode->GetChild();
@@ -527,18 +524,15 @@ void ThemeConstants::ParseCustomStyle(const std::string& content)
 void ThemeConstants::LoadFile(const RefPtr<Asset>& asset)
 {
     if (!asset) {
-        LOGD("No custom style found.");
         return;
     }
 
     auto fileSize = asset->GetSize();
     if (fileSize <= 0) {
-        LOGD("Load custom style, file is empty.");
         return;
     }
     const auto& fileData = asset->GetData();
     if (!fileData) {
-        LOGD("Load custom style, file data is null.");
         return;
     }
     std::string styleContent;

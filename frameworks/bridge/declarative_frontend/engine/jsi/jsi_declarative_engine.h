@@ -25,7 +25,6 @@
 #include "ecmascript/napi/include/jsnapi.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 
-#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/noncopyable.h"
@@ -166,7 +165,6 @@ public:
             dispatcher->CallCurlFunction(requestData, callbackId);
             return true;
         } else {
-            LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
             return false;
         }
     }
@@ -174,11 +172,10 @@ public:
     bool InitAceModule(const uint8_t* start, size_t length)
     {
         if (!runtime_) {
-            LOGE("jsi runtime is nullptr");
+            return false;
         }
         bool result = runtime_->EvaluateJsCode(start, length);
         if (!result) {
-            LOGE("jsi runtime InitAceModule Evaluate JsCode failed");
             return false;
         }
         return true;
@@ -362,11 +359,6 @@ public:
         }
     }
 
-    const shared_ptr<JsValue>& GetRenderContext() const
-    {
-        return renderContext_;
-    }
-
     void SetPluginBundleName(const std::string& pluginBundleName) override
     {
         pluginBundleName_ = pluginBundleName;
@@ -436,7 +428,6 @@ private:
 
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
-    shared_ptr<JsValue> renderContext_;
 #if defined(PREVIEW)
     std::string assetPath_;
     std::string bundleName_;

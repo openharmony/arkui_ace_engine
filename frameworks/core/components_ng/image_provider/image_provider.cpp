@@ -38,16 +38,15 @@
 #else
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
-#include "core/image/sk_image_cache.h"
 #include "core/image/image_loader.h"
+#include "core/image/sk_image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-namespace {
-
-void CacheImageObject(const RefPtr<ImageObject>& obj)
+void ImageProvider::CacheImageObject(const RefPtr<ImageObject>& obj)
 {
+    CHECK_NULL_VOID(obj);
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineCtx);
     auto cache = pipelineCtx->GetImageCache();
@@ -56,7 +55,6 @@ void CacheImageObject(const RefPtr<ImageObject>& obj)
         cache->CacheImgObjNG(obj->GetSourceInfo().GetKey(), obj);
     }
 }
-} // namespace
 
 std::mutex ImageProvider::taskMtx_;
 std::unordered_map<std::string, ImageProvider::Task> ImageProvider::tasks_;
@@ -293,8 +291,11 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     CHECK_NULL_RETURN(rosenImageData, nullptr);
     auto [size, frameCount] = rosenImageData->Parse();
 #endif
-    CHECK_NULL_RETURN(size.IsPositive(), nullptr);
-
+    if (!size.IsPositive()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Image of src: %{public}s decode failed, size is invalid %{public}s",
+            src.ToString().c_str(), size.ToString().c_str());
+        return nullptr;
+    }
     if (frameCount > 1) {
         return MakeRefPtr<AnimatedImageObject>(src, size, data);
     }

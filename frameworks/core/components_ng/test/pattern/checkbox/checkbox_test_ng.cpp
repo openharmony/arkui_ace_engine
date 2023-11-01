@@ -1064,15 +1064,14 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest001, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(3);
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(6);
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
     /**
      * @tc.case: case. CheckBoxPaintMethod's PaintCheckBox code when !enabled_->Get()
      */
     checkBoxPaintMethod.checkboxModifier_->enabled_->Set(false);
-    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(3);
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
 }
 
@@ -1172,6 +1171,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest004, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(3);
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1405,6 +1406,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest006, TestSize.Level1)
     CheckBoxPaintMethod checkBoxPaintMethod(checkBoxModifier);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
     RSPen pen;
     RSPen shadowPen = RSPen(pen);

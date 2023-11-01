@@ -29,7 +29,8 @@ public:
     virtual RefPtr<AceType> Create() = 0;
     virtual RefPtr<AceType> GetTaskPool(RefPtr<AceType>& pattern) = 0;
     virtual void PushCanvasPattern(RefPtr<AceType>& canvasPattern) {};
-    virtual void SetOnReady(std::function<void(uint32_t)>&& onReady) = 0;
+    virtual void SetOnReady(std::function<void(uint32_t)>&& onReady) {};
+    virtual void SetOnReady(std::function<void()>&& onReady) {};
 
 private:
     static std::unique_ptr<CanvasModel> instance_;

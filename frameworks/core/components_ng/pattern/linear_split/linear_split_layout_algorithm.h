@@ -90,6 +90,7 @@ private:
                                       float childTotalOffsetCross);
     void ColumnSplitChildConstrain(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& item,
         int32_t index);
+    float GetItemMinSize(const RefPtr<LayoutWrapper>& item, LayoutWrapper* layoutWrapper) const;
     static std::pair<float, float> GetDividerMargin(LayoutWrapper* layoutWrapper);
     static float GetLinearSplitChildMinSize(LayoutWrapper* layoutWrapper);
     static int32_t GetVisibleChildCount(LayoutWrapper* layoutWrapper);

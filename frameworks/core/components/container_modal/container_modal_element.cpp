@@ -118,7 +118,7 @@ RefPtr<StageElement> ContainerModalElement::GetStageElement() const
     return {};
 }
 
-void ContainerModalElement::ShowTitle(bool isShow, bool hasDeco)
+void ContainerModalElement::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
     if (!containerBox) {

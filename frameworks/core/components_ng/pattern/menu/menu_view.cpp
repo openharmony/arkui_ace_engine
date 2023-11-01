@@ -74,19 +74,6 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
         previewNode->AddChild(previewCustomNode);
         previewNode->MountToParent(wrapperNode);
         previewNode->MarkModifyDone();
-#ifdef ENABLE_DRAG_FRAMEWORK
-        auto eventHub = previewNode->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, std::make_pair(wrapperNode, menuNode));
-        auto gestureHub = eventHub->GetGestureEventHub();
-        CHECK_NULL_RETURN(gestureHub, std::make_pair(wrapperNode, menuNode));
-        gestureHub->SetPreviewMode(MenuPreviewMode::CUSTOM);
-        gestureHub->InitDragDropEvent();
-        auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
-            DragDropInfo info;
-            return info;
-        };
-        eventHub->SetOnDragStart(std::move(dragStart));
-#endif
     }
 
     return { wrapperNode, menuNode };
@@ -291,29 +278,47 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub, menuNode);
-    gestureHub->SetPreviewMode(MenuPreviewMode::IMAGE);
-    auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
-        DragDropInfo info;
-        return info;
-    };
-    gestureHub->InitDragDropEvent();
-    hub->SetOnDragStart(std::move(dragStart));
-    imageNode->SetDraggable(true);
 
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offsetX), Dimension(offsetY)));
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    ClickEffectInfo clickEffectInfo;
-    clickEffectInfo.level = ClickEffectLevel::LIGHT;
-    clickEffectInfo.scaleNumber = menuTheme->GetPreviewMenuScaleNumber();
-    imageContext->UpdateClickEffectLevel(clickEffectInfo);
     imageNode->MarkModifyDone();
     imageNode->MountToParent(menuNode);
     ShowPixelMapAnimation(imageNode);
+}
+
+void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
+{
+    CHECK_NULL_VOID(columnNode);
+
+    auto filterRenderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(filterRenderContext);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+
+    auto maskColor = menuTheme->GetPreviewMenuMaskColor();
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
+    styleOption.colorMode = ThemeColorMode::SYSTEM;
+
+    AnimationOption option;
+    option.SetDuration(menuTheme->GetFilterAnimationDuration());
+    option.SetCurve(Curves::SHARP);
+    filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
+    AnimationUtils::Animate(
+        option,
+        [filterRenderContext, styleOption, maskColor]() {
+            CHECK_NULL_VOID(filterRenderContext);
+            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+                filterRenderContext->UpdateBackBlurStyle(styleOption);
+            } else {
+                filterRenderContext->UpdateBackgroundColor(maskColor);
+            }
+        },
+        option.GetOnFinishEvent());
 }
 
 void SetFilter(const RefPtr<FrameNode>& targetNode)
@@ -330,7 +335,8 @@ void SetFilter(const RefPtr<FrameNode>& targetNode)
     CHECK_NULL_VOID(manager);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        CHECK_NULL_VOID(isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE);
+        CHECK_NULL_VOID(isBindOverlayValue && (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+            SystemProperties::GetDeviceType() == DeviceType::TABLET));
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -347,27 +353,7 @@ void SetFilter(const RefPtr<FrameNode>& targetNode)
             manager->SetFilterColumnNode(columnNode);
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
-        auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_VOID(menuTheme);
-
-        auto filterRenderContext = columnNode->GetRenderContext();
-        CHECK_NULL_VOID(filterRenderContext);
-
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
-        styleOption.colorMode = ThemeColorMode::SYSTEM;
-
-        AnimationOption option;
-        option.SetDuration(menuTheme->GetFilterAnimationDuration());
-        option.SetCurve(Curves::SHARP);
-        filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
-        AnimationUtils::Animate(
-            option,
-            [filterRenderContext, styleOption]() {
-                CHECK_NULL_VOID(filterRenderContext);
-                filterRenderContext->UpdateBackBlurStyle(styleOption);
-            },
-            option.GetOnFinishEvent());
+        ShowFilterAnimation(columnNode);
     }
 }
 #endif
@@ -445,6 +431,17 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
 
+    auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
+    if (customMenuNode) {
+        auto menuLayoutProperty = customMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+        auto renderContext = scroll->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, nullptr);
+        if (menuLayoutProperty && menuLayoutProperty->HasBorderRadius()) {
+            BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
+            renderContext->UpdateBorderRadius(borderRadius);
+        }
+    }
+    
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
     if (menuParam.backgroundEffectOption.has_value()) {

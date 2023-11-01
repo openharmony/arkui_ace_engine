@@ -108,21 +108,19 @@ public:
 
     void OnFinish() const override
     {
-        LOGI("UIContent OnFinish");
         CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
     void OnStartAbility(const std::string& address) override
     {
-        LOGI("UIContent OnStartAbility");
         CHECK_NULL_VOID(onStartAbility_);
         onStartAbility_(address);
     }
 
     void OnStatusBarBgColorChanged(uint32_t color) override
     {
-        LOGI("UIContent OnStatusBarBgColorChanged");
+        LOGI("StartsBar background color changed.");
     }
 
 private:
@@ -222,7 +220,6 @@ public:
     ~DragWindowListener() = default;
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragWindowListener::OnDrag called.");
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         int32_t instanceId = instanceId_;
@@ -286,7 +283,6 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 {
     CHECK_NULL_VOID(context);
     context_ = context->weak_from_this();
-    LOGI("Create UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -301,14 +297,12 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     SetConfiguration(context->GetConfiguration());
     context_ = context->weak_from_this();
-    TAG_LOGI(AceLogTag::ACE_FORM, "Create form UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
     context_ = ability->GetAbilityContext();
-    LOGI("Create UIContentImpl successfully.");
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -1579,6 +1573,26 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
+{
+    LOGI("UIContentImpl: UpdateMaximizeMode, maximize mode is %{public}d", mode);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, mode]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto windowManager = pipelineContext->GetWindowManager();
+            CHECK_NULL_VOID(windowManager);
+            windowManager->SetCurrentWindowMaximizeMode(static_cast<OHOS::Ace::MaximizeMode>(mode));
+            pipelineContext->ShowContainerTitle(true, true, true);
         },
         TaskExecutor::TaskType::UI);
 }

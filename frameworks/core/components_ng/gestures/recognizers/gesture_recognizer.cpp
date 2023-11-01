@@ -38,23 +38,39 @@ RefPtr<GestureReferee> GetCurrentGestureReferee()
 
 } // namespace
 
-std::unordered_map<int, TransformConfig> globalTransFormConfig;
-std::unordered_map<int, AncestorNodeInfo> globalTransFormIds;
+struct TransformInstance {
+    std::unordered_map<int, TransformConfig> transFormConfig;
+    std::unordered_map<int, AncestorNodeInfo> transFormIds;
+};
+
+TransformInstance g_emptyInstance;
+std::unordered_map<int, TransformInstance> globalTransFormInstance;
 
 std::unordered_map<int, TransformConfig>& NGGestureRecognizer::GetGlobalTransCfg()
 {
-    return globalTransFormConfig;
+    auto id = Container::CurrentId();
+    auto iter = globalTransFormInstance.find(id);
+    if (iter == globalTransFormInstance.end()) {
+        return g_emptyInstance.transFormConfig;
+    }
+    return iter->second.transFormConfig;
 }
 
 std::unordered_map<int, AncestorNodeInfo>& NGGestureRecognizer::GetGlobalTransIds()
 {
-    return globalTransFormIds;
+    auto id = Container::CurrentId();
+    auto iter = globalTransFormInstance.find(id);
+    if (iter == globalTransFormInstance.end()) {
+        return g_emptyInstance.transFormIds;
+    }
+    return iter->second.transFormIds;
 }
 
 void NGGestureRecognizer::ResetGlobalTransCfg()
 {
-    globalTransFormConfig.clear();
-    globalTransFormIds.clear();
+    auto id = Container::CurrentId();
+    globalTransFormInstance[id].transFormConfig.clear();
+    globalTransFormInstance[id].transFormIds.clear();
 }
 
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
@@ -77,7 +93,6 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             HandleTouchCancelEvent(point);
             break;
         default:
-            LOGW("unknown touch type");
             break;
     }
     return true;
@@ -95,13 +110,10 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
             HandleTouchMoveEvent(event);
             break;
         case AxisAction::END:
-            // When scroll one step. Axis events are 'BEGIN' and 'END'. So it's need to do 'UPDATE' before 'END'.
-            HandleTouchMoveEvent(event);
             HandleTouchUpEvent(event);
             break;
         default:
             HandleTouchCancelEvent(event);
-            LOGW("unknown touch type");
             break;
     }
     return true;
@@ -117,7 +129,6 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
 
     auto referee = GetCurrentGestureReferee();
     if (!referee) {
-        LOGW("the referee is nullptr");
         recognizer->OnRejected();
         return;
     }

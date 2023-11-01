@@ -5088,6 +5088,7 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier001, TestSize.Level1)
     Testing::MockCanvas canvas;
     DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     dotIndicatorModifier.indicatorMask_ = true;
     dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
     dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
@@ -5158,6 +5159,7 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier002, TestSize.Level1)
     Testing::MockCanvas canvas;
     DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     dotIndicatorModifier.indicatorMask_ = true;
     dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
     dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
@@ -5206,6 +5208,7 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier003, TestSize.Level1)
     Testing::MockCanvas canvas;
     DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     dotIndicatorModifier.indicatorMask_ = true;
     dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
     dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
@@ -5267,6 +5270,7 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier004, TestSize.Level1)
     Testing::MockCanvas canvas;
     DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     dotIndicatorModifier.indicatorMask_ = true;
     dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
     dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
@@ -5300,6 +5304,7 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier005, TestSize.Level1)
     Testing::MockCanvas canvas;
     DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     dotIndicatorModifier.indicatorMask_ = true;
     dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
     dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
@@ -10732,14 +10737,14 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset002, TestSize.Level1)
     swiperPattern->UpdateCurrentOffset(offset);
     EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 1.0f);
     EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.0f);
-    swiperPattern->currentOffset_ = 0;
+    swiperPattern->currentIndexOffset_ = 0;
     swiperPattern->isDragging_ = true;
     swiperPattern->UpdateCurrentOffset(offset);
     EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.712f);
-    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 0.288f);
     swiperPattern->isDragging_ = false;
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.388f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 0.388f);
 }
 
 /**
@@ -12767,8 +12772,8 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish002, TestSize.Level1)
     auto host = swiperPattern->GetHost();
     EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 2);
-    auto indicatorNode = AceType::DynamicCast<FrameNode>(
-        host->GetChildAtIndex(host->GetChildIndexById(indicatorNode1->GetId())));
+    auto indicatorNode =
+        AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(indicatorNode1->GetId())));
     EXPECT_NE(indicatorNode, nullptr);
 
     /**

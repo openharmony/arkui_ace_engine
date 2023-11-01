@@ -19,6 +19,7 @@
 #include <list>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
@@ -84,7 +85,7 @@ protected:
         return 0;
     }
 
-    virtual void GetPlaceholderRects(std::vector<Rect>& rects);
+    virtual void GetPlaceholderRects(std::vector<RectF>& rects);
 
     virtual ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
 
@@ -126,12 +127,12 @@ private:
     bool IncludeImageSpan(LayoutWrapper* layoutWrapper);
     void SetImageSpanTextStyle(const TextStyle& textStyle);
     void GetSpanAndImageSpanList(std::list<RefPtr<SpanItem>>& spanList,
-        std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList);
+        std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>>& imageSpanList);
     void SplitSpanContentByLines(const TextStyle& textStyle, const std::list<RefPtr<SpanItem>>& spanList,
-        std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines);
+        std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
     void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
-        std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList,
-        std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines);
+        std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>>& imageSpanList,
+        std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     RefPtr<Paragraph> paragraph_;

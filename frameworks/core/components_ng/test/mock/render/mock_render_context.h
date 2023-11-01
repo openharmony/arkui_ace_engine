@@ -18,6 +18,8 @@
 
 #include "gmock/gmock.h"
 
+#include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -27,7 +29,6 @@ public:
     ~MockRenderContext() override = default;
 
     MOCK_METHOD4(SetBounds, void(float, float, float, float));
-    MOCK_METHOD0(GetPaintRectWithTransform, RectF());
     MOCK_METHOD1(GetPointWithTransform, void(PointF&));
     MOCK_METHOD2(AddChild, void(const RefPtr<RenderContext>& renderContext, int index));
     MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
@@ -48,6 +49,12 @@ public:
         return transInfo_;
     }
 
+    RectF GetPaintRectWithTransform() override
+    {
+        return rect_;
+    }
+
+    RectF rect_;
     Color blendColor_ = Color::TRANSPARENT;
     std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 };

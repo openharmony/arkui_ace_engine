@@ -18,12 +18,17 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 CustomNodeBase::~CustomNodeBase()
 {
+    // appearFunc_ & destroyFunc_ should be executed in pairs
+    if (!executeFireOnAppear_ && appearFunc_) {
+        appearFunc_();
+    }
     if (destroyFunc_) {
         destroyFunc_();
     }
@@ -63,6 +68,11 @@ void CustomNodeBase::FireRecycleSelf()
             auto layoutProperty = frameNode->GetLayoutProperty();
             if (layoutProperty && layoutProperty->GetGeometryTransition()) {
                 layoutProperty->UpdateGeometryTransition("");
+            }
+            auto pattern = frameNode->GetPattern();
+            if (pattern) {
+                pattern->OnRecycle();
+                recyclePatterns_.emplace_back(WeakClaim(RawPtr(pattern)));
             }
         }
         const auto& children = node->GetChildren();

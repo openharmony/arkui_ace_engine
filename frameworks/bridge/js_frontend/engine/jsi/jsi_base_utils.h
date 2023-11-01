@@ -18,6 +18,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "base/log/exception_handler.h"
 #include "bridge/js_frontend/engine/common/runtime_constants.h"
 #include "bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
@@ -81,6 +82,8 @@ private:
     static std::string GenerateErrorMsg(
         const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime);
     static std::string GenerateSummaryBody(
+        const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime);
+    static JsErrorObject GenerateJsErrorObject(
         const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime);
     static ErrorPos GetErrorPos(const std::string& rawStack);
     static std::string GetSourceCodeInfo(

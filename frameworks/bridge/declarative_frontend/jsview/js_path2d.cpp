@@ -58,8 +58,6 @@ void JSPath2D::JSBind(BindingTarget globalObj)
 void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
-            "and the first argument must be a object.");
         return;
     }
     auto* jsPath2d = JSRef<JSObject>::Cast(args[0])->Unwrap<JSPath2D>();

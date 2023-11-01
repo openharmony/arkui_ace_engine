@@ -48,7 +48,7 @@ void TextOverlayModifier::onDraw(DrawingContext& drawingContext)
         auto rect = selectedRect;
         if (contentRect_.has_value()) {
             if (rect.Right() > contentRect_.value().Right()) {
-                rect.SetWidth(std::max(contentRect_.value().Right() - rect.Left(), 0.0));
+                rect.SetWidth(std::max(contentRect_.value().Right() - rect.Left(), 0.0f));
             }
         }
         drawingContext.canvas.DrawRect(RSRect(paintOffset.GetX() + rect.Left(), paintOffset.GetY() + rect.Top(),
@@ -70,7 +70,7 @@ void TextOverlayModifier::SetSelectedColor(uint32_t selectedColor)
     selectedColor_->Set(static_cast<int32_t>(selectedColor));
 }
 
-void TextOverlayModifier::SetSelectedRects(const std::vector<Rect>& selectedRects)
+void TextOverlayModifier::SetSelectedRects(const std::vector<RectF>& selectedRects)
 {
     if (changeSelectedRects_ && IsSelectedRectsChanged(selectedRects)) {
         changeSelectedRects_->Set(!changeSelectedRects_->Get());
@@ -78,7 +78,7 @@ void TextOverlayModifier::SetSelectedRects(const std::vector<Rect>& selectedRect
     selectedRects_ = selectedRects;
 }
 
-bool TextOverlayModifier::IsSelectedRectsChanged(const std::vector<Rect>& selectedRects)
+bool TextOverlayModifier::IsSelectedRectsChanged(const std::vector<RectF>& selectedRects)
 {
     bool result = false;
     if (selectedRects.size() == selectedRects_.size()) {

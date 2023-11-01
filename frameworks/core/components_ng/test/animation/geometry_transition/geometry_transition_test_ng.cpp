@@ -105,7 +105,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition001, TestSize.Level1)
     gt_->Build(weakNode2, true);
     gt_->WillLayout(node2);
     gt_->DidLayout(node2);
-    EXPECT_TRUE(gt_->hasInAnim_);
+    EXPECT_FALSE(gt_->hasInAnim_);
     EXPECT_TRUE(gt_->hasOutAnim_);
 
     Create(weakNode1, true);
@@ -178,6 +178,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition003, TestSize.Level1)
      * @tc.steps: step1. create GeometryTransition with weakNode1.
      */
     Create(weakNode1, true);
+    weakNode1.Upgrade()->isRemoving_ = false;
     /**
      * @tc.steps: step2. try build with some condition.
      * @tc.expected: weakNode1 in the GeometryTransition swap to weakNode2.
@@ -186,6 +187,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition003, TestSize.Level1)
     gt_->Build(weakNode1, false);
     gt_->Build(weakNode2, false);
     EXPECT_EQ(weakNode1, gt_->outNode_);
+    gt_->inNode_ = weakNode2;
     /**
      * @tc.steps: step3. try change node status.
      * @tc.expected: the location of weakNode1 and weakNode2 meetings expectations.
@@ -204,7 +206,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition003, TestSize.Level1)
     gt_->Build(weakNode2, true);
     EXPECT_EQ(weakNode2, gt_->inNode_);
     gt_->outNode_.Upgrade()->onMainTree_ = false;
-    gt_->Build(weakNode1, true);
+    weakNode1.Upgrade()->isRemoving_ = false;
     gt_->Build(weakNode1, true);
     EXPECT_EQ(weakNode1, gt_->inNode_);
 }
@@ -239,7 +241,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
      */
     gt_->outNodeTargetAbsRect_ = RectF(1.0f, 1.0f, 1.0f, 1.0f);
     gt_->OnReSync();
-    EXPECT_TRUE(gt_->hasOutAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
 
     /**
      * @tc.steps: step4. during outNode animation is running target inNode's frame is changed
@@ -252,7 +254,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
      * @tc.expected: the result meetings expectations.
      */
     EXPECT_FALSE(gt_->OnAdditionalLayout(weakNode1));
-    EXPECT_TRUE(gt_->OnAdditionalLayout(weakNode2));
+    EXPECT_FALSE(gt_->OnAdditionalLayout(weakNode2));
     gt_->hasInAnim_ = true;
     gt_->state_ = GeometryTransition::State::ACTIVE;
     EXPECT_TRUE(gt_->OnAdditionalLayout(weakNode1));

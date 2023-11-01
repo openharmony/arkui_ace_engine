@@ -236,6 +236,7 @@ void CalendarPaintMethod::DrawTodayArea(RSCanvas& canvas, const Offset& offset, 
     Offset bgCircleStart = offset + circleCenter;
     canvas.DrawCircle(RSPoint(static_cast<float>(bgCircleStart.GetX()), static_cast<float>(bgCircleStart.GetY())),
         static_cast<float>(focusedAreaRadius_));
+    canvas.DetachBrush();
 }
 
 void CalendarPaintMethod::DrawFocusedArea(RSCanvas& canvas, const Offset& offset, double x, double y) const
@@ -251,6 +252,7 @@ void CalendarPaintMethod::DrawFocusedArea(RSCanvas& canvas, const Offset& offset
     Offset bgCircleStart = offset + circleCenter;
     canvas.DrawCircle(RSPoint(static_cast<float>(bgCircleStart.GetX()), static_cast<float>(bgCircleStart.GetY())),
         static_cast<float>(focusedAreaRadius_));
+    canvas.DetachPen();
 }
 
 void CalendarPaintMethod::DrawCalendarPickerBackgroundArea(

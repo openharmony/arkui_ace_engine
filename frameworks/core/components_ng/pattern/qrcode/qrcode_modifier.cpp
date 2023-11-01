@@ -54,8 +54,6 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     auto qrCode = qrcodegen::QrCode::encodeText(value.c_str(), qrcodegen::QrCode::Ecc::LOW);
     if (!qrCode.getFlag() || qrCode.getSize() == 0 || qrCodeSize <= 0 ||
         qrCodeSize < static_cast<float>(qrCode.getSize())) {
-        LOGE("QRCodePaintMethod:: qrcode create error. Width is %{public}f, qrcode size is %{public}d.", qrCodeSize,
-            qrCode.getSize());
         return;
     }
     color = color.BlendOpacity(opacity);
@@ -68,7 +66,6 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     int32_t blockCounts = static_cast<int32_t>(qrCodeSize) / qrCode.getSize();
     int32_t sizeInPixel = blockCounts * qrCode.getSize();
     if (sizeInPixel == 0) {
-        LOGE("QRCode value is invalid, can't paint.");
         return;
     }
     canvas.Save();

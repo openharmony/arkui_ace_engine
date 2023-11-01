@@ -22,6 +22,9 @@
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
+const std::string NAME = "name";
+const std::string MESSAGE = "message";
+const std::string STACK = "stack";
 static void KillApplicationByUid()
 {
     auto appMgrClient = std::make_unique<AppExecFwk::AppMgrClient>();
@@ -38,10 +41,17 @@ static void KillApplicationByUid()
     }
 }
 
-void ExceptionHandler::HandleJsException(const std::string& exceptionMsg)
+void ExceptionHandler::HandleJsException(
+    const std::string& exceptionMsg, const JsErrorObject& errorInfo)
 {
+    AppExecFwk::ErrorObject errorObject = {
+        .name = errorInfo.name,
+        .message = errorInfo.message,
+        .stack = errorInfo.stack
+    };
     auto hasErrorObserver = AppExecFwk::ApplicationDataManager::GetInstance().NotifyUnhandledException(exceptionMsg);
-    if (!hasErrorObserver) {
+    auto isNotifySuccess = AppExecFwk::ApplicationDataManager::GetInstance().NotifyExceptionObject(errorObject);
+    if (!hasErrorObserver && !isNotifySuccess) {
         KillApplicationByUid();
     }
 }

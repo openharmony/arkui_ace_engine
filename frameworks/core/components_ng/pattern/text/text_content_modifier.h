@@ -74,7 +74,7 @@ public:
         ifHaveSpanItemChildren_ = value;
     }
 
-    void SetDrawObscuredRects(const std::vector<Rect>& drawObscuredRects)
+    void SetDrawObscuredRects(const std::vector<RectF>& drawObscuredRects)
     {
         drawObscuredRects_ = drawObscuredRects;
     }
@@ -165,7 +165,7 @@ private:
 
     std::vector<ObscuredReasons> obscuredReasons_;
     bool ifHaveSpanItemChildren_ = false;
-    std::vector<Rect> drawObscuredRects_;
+    std::vector<RectF> drawObscuredRects_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextContentModifier);
 };

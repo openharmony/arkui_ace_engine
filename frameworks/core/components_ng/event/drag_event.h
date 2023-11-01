@@ -129,9 +129,10 @@ public:
     void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode);
     void SetTextAnimation(const RefPtr<GestureEventHub>& gestureHub, const Offset& globalLocation);
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
+    void HideMenu(const RefPtr<FrameNode>& MenuNode);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
-    void GetTextPixelMap(bool startDrag);
+    void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
     OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode);
 #endif // ENABLE_DRAG_FRAMEWORK
     PanDirection GetDirection() const
@@ -158,11 +159,6 @@ public:
         return isNotInPreviewState_;
     }
 
-    void ResetTextReceivedLongPress()
-    {
-        isTextReceivedLongPress_ = false;
-    }
-
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;
@@ -179,7 +175,6 @@ private:
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
-    bool isTextReceivedLongPress_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

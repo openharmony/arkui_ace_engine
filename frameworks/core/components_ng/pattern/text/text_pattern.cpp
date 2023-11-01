@@ -62,9 +62,6 @@ void TextPattern::OnAttachToFrameNode()
     }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
-    auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    host->SetDraggable(theme->GetDraggable());
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateTextAlign(TextAlign::START);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
@@ -76,12 +73,9 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
-        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
     }
     if (HasSurfacePositionChangedCallback()) {
-        LOGD("Unregister surface position change callback with id %{public}d",
-            surfacePositionChangedCallbackId_.value_or(-1));
         pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionChangedCallbackId_.value_or(-1));
     }
     auto frameNode = WeakClaim(node);
@@ -115,46 +109,30 @@ void TextPattern::ResetSelection()
     }
 }
 
-int32_t TextPattern::GetGraphemeClusterLength(int32_t extend) const
-{
-    auto text = textForDisplay_;
-    char16_t aroundChar = 0;
-
-    if (static_cast<size_t>(extend) < (text.length())) {
-        aroundChar = text[std::min(static_cast<int32_t>(text.length() - 1), extend)];
-    }
-    return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
-}
-
 void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
-    int32_t extend = paragraph_->GetHandlePositionForClick(pos);
+    int32_t extend = paragraph_->GetGlyphIndexByCoordinate(pos);
     int32_t start = 0;
     int32_t end = 0;
     if (!paragraph_->GetWordBoundary(extend, start, end)) {
         start = extend;
-        end = std::min(
-            static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
+        end = std::min(static_cast<int32_t>(GetWideText().length()) + imageCount_,
+            extend + GetGraphemeClusterLength(GetWideText(), extend));
     }
     textSelector_.Update(start, end);
 }
 
-OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)
+void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
+    CHECK_NULL_VOID(host);
     auto rect = host->GetGeometryNode()->GetFrameRect();
-    CHECK_NULL_RETURN(paragraph_, OffsetF(0.0f, 0.0f));
-    CaretMetrics metrics;
-    auto computeSuccess = paragraph_->ComputeOffsetForCaretDownstream(position, metrics) ||
-                          paragraph_->ComputeOffsetForCaretUpstream(position, metrics);
+    CHECK_NULL_VOID(paragraph_);
+    auto computeSuccess = paragraph_->CalcCaretMetricsByPosition(extent, caretCaretMetric, textAffinity);
     if (!computeSuccess) {
-        LOGW("Get caret offset failed, set it to text tail");
-        return { rect.Width(), 0.0f };
+        caretCaretMetric = CaretMetricsF(OffsetF(0.0f, rect.Width()), 0.0f);
     }
-    selectLineHeight = metrics.height;
-    return { static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY()) };
 }
 
 void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
@@ -168,26 +146,38 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     auto textPaintOffset = offset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
 
     // calculate firstHandleOffset, secondHandleOffset and handlePaintSize
-    float startSelectHeight = 0.0f;
-    float endSelectHeight = 0.0f;
-    auto startOffset = CalcCursorOffsetByPosition(textSelector_.baseOffset, startSelectHeight);
-    auto endOffset = CalcCursorOffsetByPosition(textSelector_.destinationOffset, endSelectHeight);
-    OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
-    OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
+    CaretMetricsF firstHandleMetrics;
+    CaretMetricsF secondHandleMetrics;
+    CalcCaretMetricsByPosition(textSelector_.baseOffset, firstHandleMetrics, TextAffinity::DOWNSTREAM);
+    CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
+    OffsetF firstHandleOffset = firstHandleMetrics.offset + textPaintOffset - rootOffset;
+    OffsetF secondHandleOffset = secondHandleMetrics.offset + textPaintOffset - rootOffset;
 
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
 
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
-    firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight });
+    firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), firstHandleMetrics.height });
     textSelector_.firstHandle = firstHandle;
 
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleOffset);
-    secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight });
-    secondHandle.SetHeight(endSelectHeight);
+    secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), secondHandleMetrics.height });
+    secondHandle.SetHeight(secondHandleMetrics.height);
     textSelector_.secondHandle = secondHandle;
+}
+
+OffsetF TextPattern::GetTextPaintOffset() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset();
+    auto textPaintOffset = offset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    return textPaintOffset - rootOffset;
 }
 
 void TextPattern::HandleLongPress(GestureEvent& info)
@@ -316,13 +306,11 @@ void TextPattern::HandleOnCopy()
     CHECK_NULL_VOID(clipboard_);
     if (textSelector_.IsValid() && textSelector_.GetTextStart() == textSelector_.GetTextEnd()) {
         textSelector_.Update(-1, -1);
-        LOGW("Nothing to select");
         return;
     }
     auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     if (value.empty()) {
         textSelector_.Update(-1, -1);
-        LOGW("Copy value is empty");
         return;
     }
     if (copyOption_ != CopyOptions::None) {
@@ -394,7 +382,11 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         pattern->OnHandleMoveDone(handleRect, isFirst);
     };
-    selectInfo.menuInfo.menuIsShow = true;
+    if (!selectInfo.firstHandle.isShow && !selectInfo.secondHandle.isShow) {
+        selectInfo.menuInfo.menuIsShow = false;
+    } else {
+        selectInfo.menuInfo.menuIsShow = true;
+    }
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuCallback.onCopy = [weak = WeakClaim(this)]() {
@@ -521,21 +513,32 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     bool isClickOnSpan = false;
     if (textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY())) &&
         !spans_.empty() && paragraph_) {
-        Offset textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
+        PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
             info.GetLocalLocation().GetY() - textContentRect.GetY() };
-        auto position = paragraph_->GetHandlePositionForClick(textOffset);
+        int32_t start = 0;
         for (const auto& item : spans_) {
-            if (item && position < item->position) {
-                if (!item->onClick) {
+            if (!item) {
+                continue;
+            }
+            std::vector<RectF> selectedRects;
+            paragraph_->GetRectsForRange(start, item->position, selectedRects);
+            start =  item->position;
+            for (auto&& rect : selectedRects) {
+                if (rect.IsInRegion(textOffset)) {
+                    if (!item->onClick) {
+                        break;
+                    }
+                    GestureEvent spanClickinfo = info;
+                    EventTarget target = info.GetTarget();
+                    target.area.SetWidth(Dimension(0.0f));
+                    target.area.SetHeight(Dimension(0.0f));
+                    spanClickinfo.SetTarget(target);
+                    item->onClick(spanClickinfo);
+                    isClickOnSpan = true;
                     break;
                 }
-                GestureEvent spanClickinfo = info;
-                EventTarget target = info.GetTarget();
-                target.area.SetWidth(Dimension(0.0f));
-                target.area.SetHeight(Dimension(0.0f));
-                spanClickinfo.SetTarget(target);
-                item->onClick(spanClickinfo);
-                isClickOnSpan = true;
+            }
+            if (isClickOnSpan) {
                 break;
             }
         }
@@ -631,7 +634,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
             Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
                 info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
             CHECK_NULL_VOID(paragraph_);
-            auto start = paragraph_->GetHandlePositionForClick(textOffset);
+            auto start = paragraph_->GetGlyphIndexByCoordinate(textOffset);
             textSelector_.Update(start, start);
         }
 
@@ -644,7 +647,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
             Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
                 info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
             CHECK_NULL_VOID(paragraph_);
-            auto end = paragraph_->GetHandlePositionForClick(textOffset);
+            auto end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
             textSelector_.Update(textSelector_.baseOffset, end);
         }
 
@@ -656,11 +659,11 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
             if (isDoubleClick_) {
                 isDoubleClick_ = false;
             } else {
-                auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+                auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
                 Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
                     info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
                 CHECK_NULL_VOID(paragraph_);
-                auto end = paragraph_->GetHandlePositionForClick(textOffset);
+                auto end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
                 textSelector_.Update(textSelector_.baseOffset, end);
             }
             isMousePressed_ = false;
@@ -769,12 +772,12 @@ bool TextPattern::IsDraggable(const Offset& offset)
     if (copyOption_ != CopyOptions::None && draggable &&
         GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
-        std::vector<Rect> selectedRects;
+        std::vector<RectF> selectedRects;
         paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
         auto panOffset = OffsetF(offset.GetX(), offset.GetY()) - contentRect_.GetOffset() +
                          OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         for (const auto& selectedRect : selectedRects) {
-            if (selectedRect.IsInRegion(Point(panOffset.GetX(), panOffset.GetY()))) {
+            if (selectedRect.IsInRegion(PointF(panOffset.GetX(), panOffset.GetY()))) {
                 return true;
             }
         }
@@ -829,7 +832,6 @@ void TextPattern::InitDragEvent()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->HasOnDragStart()) {
-        LOGD("drag event has already been initialized");
         return;
     }
 
@@ -865,39 +867,17 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
 // TextDragBase implementations
 float TextPattern::GetLineHeight() const
 {
-    std::vector<Rect> selectedRects;
+    std::vector<RectF> selectedRects;
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
     CHECK_NULL_RETURN(selectedRects.size(), {});
     return selectedRects.front().Height();
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-RSTypographyProperties::TextBox TextPattern::ConvertRect(const Rect& rect)
-#else
-RSTextRect TextPattern::ConvertRect(const Rect& rect)
-#endif
+std::vector<RectF> TextPattern::GetTextBoxes()
 {
-    return { RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()), RSTextDirection::LTR };
-}
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
-#else
-std::vector<RSTextRect> TextPattern::GetTextBoxes()
-#endif
-{
-    std::vector<Rect> selectedRects;
+    std::vector<RectF> selectedRects;
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> res;
-#else
-    std::vector<RSTextRect> res;
-#endif
-    res.reserve(selectedRects.size());
-    for (auto&& rect : selectedRects) {
-        res.emplace_back(ConvertRect(rect));
-    }
-    return res;
+    return selectedRects;
 }
 
 OffsetF TextPattern::GetParentGlobalOffset() const
@@ -935,7 +915,6 @@ void TextPattern::OnModifyDone()
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag())) {
         // measure flag changed, reset paragraph.
-        LOGD("reset on modify done!");
         paragraph_.Reset();
     }
 
@@ -1047,7 +1026,6 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(textLayoutAlgorithm, false);
     auto&& paragraph = textLayoutAlgorithm->GetParagraph();
     if (!paragraph) {
-        LOGD("on layout process, just return");
         return false;
     }
     paragraph_ = paragraph;
@@ -1076,7 +1054,6 @@ void TextPattern::BeforeCreateLayoutWrapper()
 
     if (paragraph_) {
         // because ParagraphStyle can't be set directly yet, paragraph always needs to be rebuilt
-        LOGD("reset before create layoutwrapper");
         paragraph_.Reset();
     }
     spans_.clear();
@@ -1169,15 +1146,15 @@ void TextPattern::InitSurfaceChangedCallback()
                     pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
                 }
             });
-        LOGD("Add surface changed callback id %{public}d", callbackId);
         UpdateSurfaceChangedCallbackId(callbackId);
     }
 }
 
 void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
-    LOGD("TextPattern handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
-         "height %{public}d",
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD,
+        "TextPattern handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
+        "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
@@ -1198,7 +1175,6 @@ void TextPattern::InitSurfacePositionChangedCallback()
                     pattern->HandleSurfacePositionChanged(posX, posY);
                 }
             });
-        LOGI("Add position changed callback id %{public}d", callbackId);
         UpdateSurfacePositionChangedCallbackId(callbackId);
     }
 }
@@ -1220,6 +1196,7 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         auto imageNode = DynamicCast<FrameNode>(child);
         if (imageNode) {
             spans_.emplace_back(MakeRefPtr<ImageSpanItem>());
+            spans_.back()->imageNodeId = imageNode->GetId();
         }
     }
 }
@@ -1307,7 +1284,6 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                 }
                 break;
             default:
-                LOGW("Inherited properties are not supported.");
                 break;
         }
     }
@@ -1369,17 +1345,10 @@ OffsetF TextPattern::GetDragUpperLeftCoordinates()
     if (dragBoxes_.empty()) {
         return { 0.0f, 0.0f };
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    auto startY = dragBoxes_.front().rect_.GetTop();
-    auto startX = dragBoxes_.front().rect_.GetLeft();
+    auto startY = dragBoxes_.front().Top();
+    auto startX = dragBoxes_.front().Left();
 
-    auto endY = dragBoxes_.back().rect_.GetTop();
-#else
-    auto startY = dragBoxes_.front().rect.GetTop();
-    auto startX = dragBoxes_.front().rect.GetLeft();
-
-    auto endY = dragBoxes_.back().rect.GetTop();
-#endif
+    auto endY = dragBoxes_.back().Top();
     OffsetF offset;
     if (NearEqual(startY, endY)) {
         offset = { contentRect_.GetX() + startX, startY + contentRect_.GetY() };
@@ -1402,7 +1371,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         contentMod_->SetIsCustomFont(true);
     }
     auto paintMethod =
-        MakeRefPtr<TextPaintMethod>(WeakClaim(this), paragraph_, baselineOffset_, contentMod_, overlayMod_);
+        MakeRefPtr<TextPaintMethod>(WeakClaim(this), baselineOffset_, contentMod_, overlayMod_);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, paintMethod);
     auto context = host->GetRenderContext();
@@ -1423,7 +1392,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 
 int32_t TextPattern::GetHandleIndex(const Offset& offset) const
 {
-    return paragraph_->GetHandlePositionForClick(offset);
+    return paragraph_->GetGlyphIndexByCoordinate(offset);
 }
 
 } // namespace OHOS::Ace::NG

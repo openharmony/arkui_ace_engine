@@ -243,8 +243,9 @@ CounterConstant.AUSPICIOUS_HUNDRED = 100;
 CounterConstant.AUSPICIOUS_FOUR_HUNDRED = 400;
 
 export class CounterComponent extends ViewPU {
-    constructor(t, e, o, s = -1) {
+    constructor(t, e, o, s = -1, n = void 0) {
         super(t, o, s);
+        "function" == typeof n && (this.paramsGenerator_ = n);
         this.__options = new SynchedPropertyObjectOneWayPU(e.options, this, "options");
         this.__type = new ObservedPropertySimplePU(-1, this, "type");
         this.__choverEffect = new ObservedPropertySimplePU(HoverEffect.Auto, this, "choverEffect");
@@ -764,35 +765,34 @@ export class CounterComponent extends ViewPU {
     }
 
     updateNumberStyleOptions() {
+        var t, e, o;
         void 0 === this.numberStyleOptions.label && (this.numberStyleOptions.label = "");
         if (void 0 !== this.numberStyleOptions.value) {
             this.value = this.numberStyleOptions.value;
+            null === (t = this.onChange) || void 0 === t || t.call(this, this.value);
             this.inputValue = this.value.toString()
         }
-        void 0 !== this.numberStyleOptions.min && this.numberStyleOptions.min < this.max &&
-            this.numberStyleOptions.min >= this.min && (this.min = this.numberStyleOptions.min);
-        void 0 !== this.numberStyleOptions.max && this.numberStyleOptions.max > this.min &&
-            this.numberStyleOptions.max <= this.max && (this.max = this.numberStyleOptions.max);
+        void 0 !== this.numberStyleOptions.min && (this.min = this.numberStyleOptions.min);
+        void 0 !== this.numberStyleOptions.max && (this.max = this.numberStyleOptions.max);
+        this.min > this.max && (this.min = this.max);
         if (void 0 !== this.numberStyleOptions.textWidth) {
             this.textWidth = this.numberStyleOptions.textWidth;
             this.textWidth < 0 && (this.textWidth = 0);
             this.hasTextWidth = !0
         }
         if (this.value <= this.min) {
-            this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-            this.subBtnStateEffect = !1;
-            this.subBtnEnabled = !1;
             this.value = this.min;
+            null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
             this.inputValue = this.value.toString()
         }
         if (this.value >= this.max) {
-            this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-            this.addBtnStateEffect = !1;
-            this.addBtnEnabled = !1;
             this.value = this.max;
+            null === (o = this.onChange) || void 0 === o || o.call(this, this.value);
             this.inputValue = this.value.toString()
         }
-        void 0 !== this.numberStyleOptions.step && (this.step = this.numberStyleOptions.step);
+        void 0 !== this.numberStyleOptions.step &&
+            (this.numberStyleOptions.step < 1 ? this.step = 1 : this.step = this.numberStyleOptions.step);
+        this.updateButtonStatus();
         this.updateNumberStyleOptionsEvent()
     }
 
@@ -814,8 +814,10 @@ export class CounterComponent extends ViewPU {
     }
 
     updateInlineStyleOptions() {
+        var t, e, o;
         if (void 0 !== this.inlineStyleOptions.value) {
             this.value = this.inlineStyleOptions.value;
+            null === (t = this.onChange) || void 0 === t || t.call(this, this.value);
             this.inputValue = this.value.toString()
         }
         void 0 !== this.inlineStyleOptions.min && (this.min = this.inlineStyleOptions.min);
@@ -827,20 +829,18 @@ export class CounterComponent extends ViewPU {
             this.hasTextWidth = !0
         }
         if (this.value <= this.min) {
-            this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-            this.subBtnStateEffect = !1;
-            this.subBtnEnabled = !1;
             this.value = this.min;
+            null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
             this.inputValue = this.value.toString()
         }
         if (this.value >= this.max) {
-            this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-            this.addBtnStateEffect = !1;
-            this.addBtnEnabled = !1;
             this.value = this.max;
+            null === (o = this.onChange) || void 0 === o || o.call(this, this.value);
             this.inputValue = this.value.toString()
         }
-        void 0 !== this.inlineStyleOptions.step && (this.step = this.inlineStyleOptions.step);
+        void 0 !== this.inlineStyleOptions.step &&
+            (this.inlineStyleOptions.step < 1 ? this.step = 1 : this.step = this.inlineStyleOptions.step);
+        this.updateButtonStatus();
         this.updateInlineStyleOptionsEvent()
     }
 
@@ -854,18 +854,32 @@ export class CounterComponent extends ViewPU {
     }
 
     updateDateStyleOptions() {
-        void 0 !== this.dateStyleOptions.step && (this.step = this.dateStyleOptions.step);
+        var t, e, o;
+        void 0 !== this.dateStyleOptions.step &&
+            (this.dateStyleOptions.step < 1 ? this.step = 1 : this.step = this.dateStyleOptions.step);
         void 0 !== this.dateStyleOptions.onHoverIncrease &&
             (this.onHoverIncrease = this.dateStyleOptions.onHoverIncrease);
         void 0 !== this.dateStyleOptions.onHoverDecrease &&
             (this.onHoverDecrease = this.dateStyleOptions.onHoverDecrease);
-        void 0 !== this.dateStyleOptions.year && this.dateStyleOptions.year >= this.minYear &&
-            this.dateStyleOptions.year <= this.maxYear && (this.year = this.dateStyleOptions.year);
-        void 0 !== this.dateStyleOptions.month && this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
-            this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH &&
-            (this.month = this.dateStyleOptions.month);
-        void 0 !== this.dateStyleOptions.day && this.dateStyleOptions.day <= this.getDayNumber() &&
-            this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY && (this.day = this.dateStyleOptions.day);
+        if (void 0 !== this.dateStyleOptions.year && this.dateStyleOptions.year >= this.minYear &&
+            this.dateStyleOptions.year <= this.maxYear) {
+            this.year = this.dateStyleOptions.year;
+            let e = new DateData(this.year, this.month, this.day);
+            null === (t = this.onDateChange) || void 0 === t || t.call(this, e)
+        }
+        if (void 0 !== this.dateStyleOptions.month &&
+            this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
+            this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
+            this.month = this.dateStyleOptions.month;
+            let t = new DateData(this.year, this.month, this.day);
+            null === (e = this.onDateChange) || void 0 === e || e.call(this, t)
+        }
+        if (void 0 !== this.dateStyleOptions.day && this.dateStyleOptions.day <= this.getDayNumber() &&
+            this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
+            this.day = this.dateStyleOptions.day;
+            let t = new DateData(this.year, this.month, this.day);
+            null === (o = this.onDateChange) || void 0 === o || o.call(this, t)
+        }
         void 0 !== this.dateStyleOptions.onDateChange && (this.onDateChange = this.dateStyleOptions.onDateChange);
         void 0 !== this.dateStyleOptions.focusable && (this.focusEnable = this.dateStyleOptions.focusable);
         this.updateDay()
@@ -1134,7 +1148,7 @@ export class CounterComponent extends ViewPU {
 
     updateButtonStatus() {
         if (this.value <= this.min) {
-            if (!this.addBtnStateEffect) {
+            if (!this.addBtnStateEffect && this.max != this.min) {
                 this.addBtnStateEffect = !0;
                 this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
                 this.addBtnEnabled = !0
@@ -1144,7 +1158,7 @@ export class CounterComponent extends ViewPU {
             this.subBtnEnabled = !1
         }
         if (this.value >= this.max) {
-            if (!this.subBtnStateEffect) {
+            if (!this.subBtnStateEffect && this.max != this.min) {
                 this.subBtnStateEffect = !0;
                 this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
                 this.subBtnEnabled = !0
@@ -1156,6 +1170,7 @@ export class CounterComponent extends ViewPU {
     }
 
     getValue() {
+        null == this.inputValue && (this.inputValue = "");
         return this.hasInputText1 ? this.inputValue : this.value.toString()
     }
 
@@ -1296,17 +1311,19 @@ export class CounterComponent extends ViewPU {
                         }
                     }));
                     Button.onClick((t => {
+                        var e;
                         this.subValue();
-                        this.onChange && this.onChange(this.value);
+                        null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
                         t.source !== SourceType.Mouse && t.source !== SourceType.TouchScreen ||
                             (this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH)
                     }));
                     Gesture.create(GesturePriority.Low);
                     LongPressGesture.create({ repeat: !0 });
                     LongPressGesture.onAction((t => {
+                        var e;
                         if (t.repeat) {
                             this.subValue();
-                            this.onChange && this.onChange(this.value)
+                            null === (e = this.onChange) || void 0 === e || e.call(this, this.value)
                         }
                         this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
                     }));
@@ -1430,17 +1447,19 @@ export class CounterComponent extends ViewPU {
                         }
                     }));
                     Button.onClick((t => {
+                        var e;
                         this.addValue();
-                        this.onChange && this.onChange(this.value);
+                        null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
                         t.source !== SourceType.Mouse && t.source !== SourceType.TouchScreen ||
                             (this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH)
                     }));
                     Gesture.create(GesturePriority.Low);
                     LongPressGesture.create({ repeat: !0 });
                     LongPressGesture.onAction((t => {
+                        var e;
                         if (t.repeat) {
                             this.addValue();
-                            this.onChange && this.onChange(this.value)
+                            null === (e = this.onChange) || void 0 === e || e.call(this, this.value)
                         }
                         this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
                     }));
@@ -1541,17 +1560,19 @@ export class CounterComponent extends ViewPU {
                         }
                     }));
                     Button.onClick((t => {
+                        var e;
                         this.subValue();
-                        this.onChange && this.onChange(this.value);
+                        null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
                         t.source !== SourceType.Mouse && t.source !== SourceType.TouchScreen ||
                             (this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH)
                     }));
                     Gesture.create(GesturePriority.Low);
                     LongPressGesture.create({ repeat: !0 });
                     LongPressGesture.onAction((t => {
+                        var e;
                         if (t.repeat) {
                             this.subValue();
-                            this.onChange && this.onChange(this.value)
+                            null === (e = this.onChange) || void 0 === e || e.call(this, this.value)
                         }
                         t.source !== SourceType.Mouse && t.source !== SourceType.TouchScreen ||
                             (this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH)
@@ -1672,17 +1693,19 @@ export class CounterComponent extends ViewPU {
                         }
                     }));
                     Button.onClick((t => {
+                        var e;
                         this.addValue();
-                        this.onChange && this.onChange(this.value);
+                        null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
                         t.source !== SourceType.Mouse && t.source !== SourceType.TouchScreen ||
                             (this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH)
                     }));
                     Gesture.create(GesturePriority.Low);
                     LongPressGesture.create({ repeat: !0 });
                     LongPressGesture.onAction((t => {
+                        var e;
                         if (t.repeat) {
                             this.addValue();
-                            this.onChange && this.onChange(this.value)
+                            null === (e = this.onChange) || void 0 === e || e.call(this, this.value)
                         }
                         t.source !== SourceType.Mouse && t.source !== SourceType.TouchScreen ||
                             (this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH)
@@ -1803,6 +1826,7 @@ export class CounterComponent extends ViewPU {
                                 }
                             }));
                             TextInput.onChange((t => {
+                                var e;
                                 this.inputValue = t;
                                 for (let e = 0;e < t.length; e++) {
                                     let o = t[e];
@@ -1818,8 +1842,8 @@ export class CounterComponent extends ViewPU {
                                     }
                                 }
                                 this.hasInputText1 = !0;
-                                let e = t[t.length-1];
-                                t.length === this.getMaxLength() && (this.inputValue = e);
+                                let o = t[t.length-1];
+                                t.length === this.getMaxLength() && (this.inputValue = o);
                                 if (-1 !== this.timeoutID1) {
                                     clearTimeout(this.timeoutID1);
                                     this.timeoutID1 = -1
@@ -1827,14 +1851,18 @@ export class CounterComponent extends ViewPU {
                                 if ("" !== this.inputValue && Number(this.inputValue) <= this.max &&
                                     Number(this.inputValue) >= this.min) {
                                     this.value = Number(this.inputValue);
+                                    null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
                                     this.hasInputText1 = !1
                                 } else {
                                     (Number(this.inputValue) > this.max || Number(this.inputValue) < this.min &&
-                                        this.inputValue.length <= this.min.toString().length) && (this.inputValue = e);
+                                        this.inputValue.length <= this.min.toString().length) && (this.inputValue = o);
                                     t.length < this.getMaxLength() && (this.timeoutID1 = setTimeout((() => {
-                                        "" !== this.inputValue && Number(this.inputValue) <= this.max &&
-                                            Number(this.inputValue) >= this.min &&
-                                            (this.value = Number(this.inputValue));
+                                        var t;
+                                        if ("" !== this.inputValue && Number(this.inputValue) <= this.max &&
+                                            Number(this.inputValue) >= this.min) {
+                                            this.value = Number(this.inputValue);
+                                            null === (t = this.onChange) || void 0 === t || t.call(this, this.value)
+                                        }
                                         this.inputValue = this.value.toString();
                                         this.hasInputText1 = !1;
                                         this.updateInlineEnableSate()
@@ -1843,6 +1871,7 @@ export class CounterComponent extends ViewPU {
                                 this.updateInlineEnableSate()
                             }));
                             TextInput.onSubmit((t => {
+                                var e;
                                 if (-1 != this.timeoutID1) {
                                     clearTimeout(this.timeoutID1);
                                     this.timeoutID1 = -1
@@ -1851,6 +1880,7 @@ export class CounterComponent extends ViewPU {
                                 this.value -= 1;
                                 if (Number(this.inputValue) >= this.min && Number(this.inputValue) <= this.max) {
                                     this.value = Number(this.inputValue);
+                                    null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
                                     this.updateInlineEnableSate()
                                 } else {
                                     this.value += 1;
@@ -1931,6 +1961,7 @@ export class CounterComponent extends ViewPU {
                                 }
                             }));
                             TextInput.onChange((t => {
+                                var e;
                                 this.inputValue = t;
                                 for (let e = 0;e < t.length; e++) {
                                     let o = t[e];
@@ -1946,8 +1977,8 @@ export class CounterComponent extends ViewPU {
                                     }
                                 }
                                 this.hasInputText1 = !0;
-                                let e = t[t.length-1];
-                                t.length === this.getMaxLength() && (this.inputValue = e);
+                                let o = t[t.length-1];
+                                t.length === this.getMaxLength() && (this.inputValue = o);
                                 if (-1 !== this.timeoutID1) {
                                     clearTimeout(this.timeoutID1);
                                     this.timeoutID1 = -1
@@ -1955,14 +1986,18 @@ export class CounterComponent extends ViewPU {
                                 if ("" !== this.inputValue && Number(this.inputValue) <= this.max &&
                                     Number(this.inputValue) >= this.min) {
                                     this.value = Number(this.inputValue);
+                                    null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
                                     this.hasInputText1 = !1
                                 } else {
                                     (Number(this.inputValue) > this.max || Number(this.inputValue) < this.min &&
-                                        this.inputValue.length <= this.min.toString().length) && (this.inputValue = e);
+                                        this.inputValue.length <= this.min.toString().length) &&(this.inputValue = o);
                                     t.length < this.getMaxLength() && (this.timeoutID1 = setTimeout((() => {
-                                        "" !== this.inputValue && Number(this.inputValue) <= this.max &&
-                                            Number(this.inputValue) >= this.min &&
-                                            (this.value = Number(this.inputValue));
+                                        var t;
+                                        if ("" !== this.inputValue && Number(this.inputValue) <= this.max &&
+                                            Number(this.inputValue) >= this.min) {
+                                            this.value = Number(this.inputValue);
+                                            null === (t = this.onChange) || void 0 === t || t.call(this, this.value)
+                                        }
                                         this.inputValue = this.value.toString();
                                         this.hasInputText1 = !1;
                                         this.updateInlineEnableSate()
@@ -1971,6 +2006,7 @@ export class CounterComponent extends ViewPU {
                                 this.updateInlineEnableSate()
                             }));
                             TextInput.onSubmit((t => {
+                                var e;
                                 if (-1 !== this.timeoutID1) {
                                     clearTimeout(this.timeoutID1);
                                     this.timeoutID1 = -1
@@ -1979,6 +2015,7 @@ export class CounterComponent extends ViewPU {
                                 this.value -= 1;
                                 if (Number(this.inputValue) >= this.min && Number(this.inputValue) <= this.max) {
                                     this.value = Number(this.inputValue);
+                                    null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
                                     this.updateInlineEnableSate()
                                 } else {
                                     this.value += 1;
@@ -2066,17 +2103,19 @@ export class CounterComponent extends ViewPU {
                     Button.opacity(this.addOpacity);
                     Button.enabled(this.addBtnEnabled);
                     Button.onClick((t => {
+                        var e;
                         this.addValue();
-                        this.onChange && this.onChange(this.value);
+                        null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
                         t.source !== SourceType.Mouse && t.source !== SourceType.TouchScreen ||
                             (this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH)
                     }));
                     Gesture.create(GesturePriority.Low);
                     LongPressGesture.create({ repeat: !0 });
                     LongPressGesture.onAction((t => {
+                        var e;
                         if (t.repeat) {
                             this.addValue();
-                            this.onChange && this.onChange(this.value)
+                            null === (e = this.onChange) || void 0 === e || e.call(this, this.value)
                         }
                         this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
                     }));
@@ -2142,17 +2181,19 @@ export class CounterComponent extends ViewPU {
                     Button.opacity(this.subOpacity);
                     Button.enabled(this.subBtnEnabled);
                     Button.onClick((t => {
+                        var e;
                         this.subValue();
-                        this.onChange && this.onChange(this.value);
+                        null === (e = this.onChange) || void 0 === e || e.call(this, this.value);
                         t.source !== SourceType.Mouse && t.source !== SourceType.TouchScreen ||
                             (this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH)
                     }));
                     Gesture.create(GesturePriority.Low);
                     LongPressGesture.create({ repeat: !0 });
                     LongPressGesture.onAction((t => {
+                        var e;
                         if (t.repeat) {
                             this.subValue();
-                            this.onChange && this.onChange(this.value)
+                            null === (e = this.onChange) || void 0 === e || e.call(this, this.value)
                         }
                         this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
                     }));
@@ -2253,6 +2294,7 @@ export class CounterComponent extends ViewPU {
                             this.focusWithTarget("DateTextInput2" + this.timeStamp.toString())
                     }));
                     TextInput.onChange((t => {
+                        var e;
                         4 !== t.length && (this.hasInputText1 = !0);
                         this.inputYear = Number(t);
                         5 === t.length && (this.inputYear = this.inputYear % 10);
@@ -2268,20 +2310,25 @@ export class CounterComponent extends ViewPU {
                         }), 1500);
                         if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
                             this.year = this.inputYear;
+                            let t = new DateData(this.year, this.month, this.day);
+                            null === (e = this.onDateChange) || void 0 === e || e.call(this, t);
                             this.updateDateEnableSate();
                             this.updateDay()
                         }
                     }));
                     TextInput.onSubmit((t => {
+                        var e;
                         if (-1 !== this.timeoutID1) {
                             clearTimeout(this.timeoutID1);
                             this.timeoutID1 = -1
                         }
                         this.hasInputText1 = !1;
                         this.year -= 1;
-                        if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear)
+                        if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
                             this.year = this.inputYear;
-                        else {
+                            let t = new DateData(this.year, this.month, this.day);
+                            null === (e = this.onDateChange) || void 0 === e || e.call(this, t)
+                        } else {
                             this.year += 1;
                             this.inputYear = this.year
                         }
@@ -2376,6 +2423,7 @@ export class CounterComponent extends ViewPU {
                         }
                     }));
                     TextInput.onChange((t => {
+                        var e;
                         this.inputMoon = Number(t);
                         2 !== t.length && (this.hasInputText2 = !0);
                         3 === t.length && (this.inputMoon = this.inputMoon % 10);
@@ -2384,11 +2432,14 @@ export class CounterComponent extends ViewPU {
                             this.timeoutID2 = -1
                         }
                         this.timeoutID2 = setTimeout((() => {
+                            var t;
                             this.hasInputText2 = !1;
                             this.month -= 1;
-                            if (this.inputMoon >= 1 && this.inputMoon <= 12)
+                            if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                                 this.month = this.inputMoon;
-                            else {
+                                let e = new DateData(this.year, this.month, this.day);
+                                null === (t = this.onDateChange) || void 0 === t || t.call(this, e)
+                            } else {
                                 this.month += 1;
                                 this.inputMoon = this.month
                             }
@@ -2397,9 +2448,11 @@ export class CounterComponent extends ViewPU {
                         if (2 === t.length) {
                             this.hasInputText2 = !1;
                             this.month -= 1;
-                            if (this.inputMoon >= 1 && this.inputMoon <= 12)
+                            if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                                 this.month = this.inputMoon;
-                            else {
+                                let t = new DateData(this.year, this.month, this.day);
+                                null === (e = this.onDateChange) || void 0 === e || e.call(this, t)
+                            } else {
                                 this.month += 1;
                                 this.inputMoon = this.month
                             }
@@ -2407,6 +2460,7 @@ export class CounterComponent extends ViewPU {
                         }
                     }));
                     TextInput.onSubmit((t => {
+                        var e;
                         if (-1 !== this.timeoutID2) {
                             clearTimeout(this.timeoutID2);
                             this.timeoutID2 = -1
@@ -2415,6 +2469,8 @@ export class CounterComponent extends ViewPU {
                         this.month -= 1;
                         if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                             this.month = this.inputMoon;
+                            let t = new DateData(this.year, this.month, this.day);
+                            null === (e = this.onDateChange) || void 0 === e || e.call(this, t);
                             this.updateDay()
                         } else this.month += 1
                     }));
@@ -2503,6 +2559,7 @@ export class CounterComponent extends ViewPU {
                         }
                     }));
                     TextInput.onChange((t => {
+                        var e;
                         this.inputDay = Number(t);
                         2 !== t.length && (this.hasInputText3 = !0);
                         3 === t.length && (this.inputDay = this.inputDay % 10);
@@ -2511,11 +2568,14 @@ export class CounterComponent extends ViewPU {
                             this.timeoutID3 = -1
                         }
                         this.timeoutID3 = setTimeout((() => {
+                            var t;
                             this.hasInputText3 = !1;
                             this.day -= 1;
-                            if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber())
+                            if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
                                 this.day = this.inputDay;
-                            else {
+                                let e = new DateData(this.year, this.month, this.day);
+                                null === (t = this.onDateChange) || void 0 === t || t.call(this, e)
+                            } else {
                                 this.day += 1;
                                 this.inputDay = this.day
                             }
@@ -2523,23 +2583,29 @@ export class CounterComponent extends ViewPU {
                         if (2 === t.length) {
                             this.hasInputText3 = !1;
                             this.day -= 1;
-                            if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber())
+                            if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
                                 this.day = this.inputDay;
-                            else {
+                                let t = new DateData(this.year, this.month, this.day);
+                                null === (e = this.onDateChange) || void 0 === e || e.call(this, t)
+                            } else {
                                 this.day += 1;
                                 this.inputDay = this.day
                             }
                         }
                     }));
                     TextInput.onSubmit((t => {
+                        var e;
                         if (-1 !== this.timeoutID3) {
                             clearTimeout(this.timeoutID3);
                             this.timeoutID3 = -1
                         }
                         this.hasInputText3 = !1;
                         this.day -= 1;
-                        this.inputDay >= 1 && this.inputDay <= this.getDayNumber() ?
-                            this.day = this.inputDay : this.day += 1
+                        if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
+                            this.day = this.inputDay;
+                            let t = new DateData(this.year, this.month, this.day);
+                            null === (e = this.onDateChange) || void 0 === e || e.call(this, t)
+                        } else this.day += 1
                     }));
                     TextInput.tabIndex(-2);
                     TextInput.focusOnTouch(!0);
@@ -2617,19 +2683,21 @@ export class CounterComponent extends ViewPU {
                     Button.opacity(this.addOpacity);
                     Button.enabled(this.addBtnEnabled);
                     Button.onClick((t => {
+                        var e;
                         this.addDate();
-                        let e = new DateData(this.year, this.month, this.day);
-                        this.onDateChange && this.onDateChange(e);
+                        let o = new DateData(this.year, this.month, this.day);
+                        null === (e = this.onDateChange) || void 0 === e || e.call(this, o);
                         t.source !== SourceType.Mouse && t.source !== SourceType.TouchScreen ||
                             (this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH)
                     }));
                     Gesture.create(GesturePriority.Low);
                     LongPressGesture.create({ repeat: !0 });
                     LongPressGesture.onAction((t => {
+                        var e;
                         if (t.repeat) {
                             this.addDate();
                             let t = new DateData(this.year, this.month, this.day);
-                            this.onDateChange && this.onDateChange(t)
+                            null === (e = this.onDateChange) || void 0 === e || e.call(this, t)
                         }
                         this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
                     }));
@@ -2695,19 +2763,21 @@ export class CounterComponent extends ViewPU {
                     Button.opacity(this.subOpacity);
                     Button.enabled(this.subBtnEnabled);
                     Button.onClick((t => {
+                        var e;
                         this.subDate();
-                        let e = new DateData(this.year, this.month, this.day);
-                        this.onDateChange && this.onDateChange(e);
+                        let o = new DateData(this.year, this.month, this.day);
+                        null === (e = this.onDateChange) || void 0 === e || e.call(this, o);
                         t.source !== SourceType.Mouse && t.source !== SourceType.TouchScreen ||
                             (this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH)
                     }));
                     Gesture.create(GesturePriority.Low);
                     LongPressGesture.create({ repeat: !0 });
                     LongPressGesture.onAction((t => {
+                        var e;
                         if (t.repeat) {
                             this.subDate();
                             let t = new DateData(this.year, this.month, this.day);
-                            this.onDateChange && this.onDateChange(t)
+                            null === (e = this.onDateChange) || void 0 === e || e.call(this, t)
                         }
                         this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
                     }));

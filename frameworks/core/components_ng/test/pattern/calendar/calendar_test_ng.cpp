@@ -1137,8 +1137,7 @@ HWTEST_F(CalendarTestNg, CalendarMonthPatternTest002, TestSize.Level1)
     GestureEvent gestureEvent;
     FingerInfo fingerInfo;
     fingerInfo.localLocation_ = Offset(OFFSET_X, OFFSET_Y);
-    gestureEvent.fingerList_.emplace_back(fingerInfo);
-    clickCallback(gestureEvent);
+    calendarMonthPattern->OnClick(fingerInfo.localLocation_, calendarMonthPattern->obtainedMonth_);
     EXPECT_TRUE(obtainedMonth.days.empty());
 
     for (int i = 0; i < 3; i++) {
@@ -1152,7 +1151,7 @@ HWTEST_F(CalendarTestNg, CalendarMonthPatternTest002, TestSize.Level1)
     frameNode->geometryNode_->SetFrameSize(SizeF(VALID_LENGTH, VALID_LENGTH));
     paintProperty->UpdateDayHeight(Dimension(VALID_LENGTH));
     paintProperty->UpdateDayWidth(Dimension(VALID_LENGTH));
-    clickCallback(gestureEvent);
+    calendarMonthPattern->OnClick(fingerInfo.localLocation_, calendarMonthPattern->obtainedMonth_);
     EXPECT_TRUE(calendarMonthPattern->obtainedMonth_.days[0].focused);
     EXPECT_FALSE(calendarMonthPattern->obtainedMonth_.days[1].focused);
     EXPECT_FALSE(calendarMonthPattern->obtainedMonth_.days[2].focused);

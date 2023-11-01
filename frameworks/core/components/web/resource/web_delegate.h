@@ -595,6 +595,9 @@ public:
     void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs);
     void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
     void OnOverScroll(float xOffset, float yOffset);
+    void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
+    void OnScrollState(bool scrollState);
+    void OnRootLayerChanged(int width, int height);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -630,6 +633,8 @@ public:
     }
 #endif
     void SetToken();
+    void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
+    bool ShouldVirtualKeyboardOverlay();
 private:
     void InitWebEvent();
     void RegisterWebEvent();

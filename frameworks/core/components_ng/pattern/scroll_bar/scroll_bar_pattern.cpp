@@ -20,7 +20,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr double FRICTION_VELOCITY_THRESHOLD = 100.0;
 constexpr int32_t BAR_DISAPPEAR_DELAY_DURATION = 2000; // 2000ms
 constexpr int32_t BAR_DISAPPEAR_DURATION = 400;        // 400ms
 } // namespace
@@ -128,14 +127,16 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         CHECK_NULL_RETURN(host, false);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
-        if (Positive(controlDistance_) && opacity_ == 0) {
+        if (controlDistanceChanged_) {
+            controlDistanceChanged_ = false;
+            if (!Positive(controlDistance_)) {
+                SetOpacity(0);
+                return true;
+            }
             SetOpacity(UINT8_MAX);
             if (displayMode_ == DisplayMode::AUTO) {
                 StartDisappearAnimator();
             }
-            return true;
-        } else if (!Positive(controlDistance_) && opacity_ == UINT8_MAX) {
-            SetOpacity(0);
             return true;
         }
     }
@@ -193,6 +194,7 @@ void ScrollBarPattern::StartDisappearAnimator()
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    SetOpacity(UINT8_MAX);
     disapplearDelayTask_.Reset([weak = WeakClaim(this)] {
         auto scrollBar = weak.Upgrade();
         CHECK_NULL_VOID(scrollBar);
@@ -306,6 +308,7 @@ void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
     if (scrollPositionCallback_) {
         if (scrollBarProxy_) {
             scrollBarProxy_->NotifyScrollStart();
+            scrollBarProxy_->SetScrollSnapTrigger_(true);
         }
         scrollPositionCallback_(0, SCROLL_FROM_START);
     }
@@ -333,9 +336,9 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     }
     frictionPosition_ = 0.0;
     if (frictionMotion_) {
-        frictionMotion_->Reset(friction_, 0, velocity, FRICTION_VELOCITY_THRESHOLD);
+        frictionMotion_->Reset(friction_, 0, velocity);
     } else {
-        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity, FRICTION_VELOCITY_THRESHOLD);
+        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity);
         frictionMotion_->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
             auto scrollBar = weakBar.Upgrade();
             CHECK_NULL_VOID(scrollBar);
@@ -344,7 +347,7 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     }
     CHECK_NULL_VOID(!scrollBarProxy_ || !scrollBarProxy_->NotifySnapScroll(-(frictionMotion_->GetFinalPosition()),
         velocity, GetScrollableDistance()));
-    
+    scrollBarProxy_->SetScrollSnapTrigger_(false);
     if (!frictionController_) {
         frictionController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
         frictionController_->AddStopListener([weakBar = AceType::WeakClaim(this)]() {

@@ -16,7 +16,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_matrix4_module.h"
 
 #include "base/geometry/matrix4.h"
-#include "base/log/log.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 
 namespace OHOS::Ace::Framework {
@@ -29,7 +28,6 @@ Matrix4 ConvertToMatrix(const shared_ptr<JsRuntime>& runtime, const shared_ptr<J
 {
     Matrix4 result = Matrix4::CreateIdentity();
     if (value->GetArrayLength(runtime) != MATRIX_LENGTH) {
-        LOGE("ConvertToMatrix failed, JSValueConst length != %d", MATRIX_LENGTH);
         return result;
     }
     // in column order
@@ -38,7 +36,6 @@ Matrix4 ConvertToMatrix(const shared_ptr<JsRuntime>& runtime, const shared_ptr<J
             auto index = i * Matrix4::DIMENSION + j;
             auto itemJSValue = value->GetProperty(runtime, index);
             if (!itemJSValue->IsNumber(runtime)) {
-                LOGE("ConvertToMatrix failed, %s is not number", itemJSValue->ToString(runtime).c_str());
                 return result;
             }
             result.Set(j, i, static_cast<float>(itemJSValue->ToDouble(runtime)));
@@ -73,11 +70,9 @@ shared_ptr<JsValue> Combine(const shared_ptr<JsRuntime>& runtime, const shared_p
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("Combine failed, argc != 1");
         return runtime->NewNull();
     }
     if (!argv[0]->IsObject(runtime)) {
-        LOGE("Combine failed, argv[0] is not object");
         return runtime->NewNull();
     }
 
@@ -105,11 +100,9 @@ shared_ptr<JsValue> Translate(const shared_ptr<JsRuntime>& runtime, const shared
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("Translate failed, argc != 1");
         return runtime->NewNull();
     }
     if (!argv[0]->IsObject(runtime)) {
-        LOGE("Translate failed, argv[0] is not object");
         return runtime->NewNull();
     }
 
@@ -131,11 +124,9 @@ shared_ptr<JsValue> Scale(const shared_ptr<JsRuntime>& runtime, const shared_ptr
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("Scale failed, argc != 1");
         return runtime->NewNull();
     }
     if (!argv[0]->IsObject(runtime)) {
-        LOGE("Scale failed, argv[0] is not object");
         return runtime->NewNull();
     }
 
@@ -168,11 +159,9 @@ shared_ptr<JsValue> Rotate(const shared_ptr<JsRuntime>& runtime, const shared_pt
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("Rotate failed, argc != 1");
         return runtime->NewNull();
     }
     if (!argv[0]->IsObject(runtime)) {
-        LOGE("Rotate failed, argv[0] is not object");
         return runtime->NewNull();
     }
 
@@ -208,11 +197,9 @@ shared_ptr<JsValue> TransformPoint(const shared_ptr<JsRuntime>& runtime, const s
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("TransformPoint failed, argc != 1");
         return runtime->NewNull();
     }
     if (!argv[0]->IsArray(runtime) || argv[0]->GetArrayLength(runtime) != 2) {
-        LOGE("TransformPoint failed, argv[0] is not array or length != 2");
         return runtime->NewNull();
     }
     auto matrix = ConvertToMatrix(runtime, thisObj->GetProperty(runtime, MATRIX_4X4));
@@ -263,7 +250,6 @@ shared_ptr<JsValue> Init(const shared_ptr<JsRuntime>& runtime, const shared_ptr<
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("PagePush args count is invalid");
         return runtime->NewNull();
     }
 

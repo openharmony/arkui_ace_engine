@@ -19,8 +19,6 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-std::shared_ptr<PluginUtils> PluginManager::pluginUtils_ = nullptr;
-std::map<int64_t, RefPtr<PluginSubContainer>> PluginManager::pluginSubContainerMap_;
 PluginManager::PluginManager() {}
 
 PluginManager::~PluginManager()
@@ -62,6 +60,9 @@ void PluginManager::UpdateConfigurationInPlugin(
     for (const auto& pluginSubContainerMap : pluginSubContainerMap_) {
         auto pluginSubContainer = pluginSubContainerMap.second;
         auto pluginPipeline = pluginSubContainer->GetPipelineContext();
+        if (!pluginPipeline) {
+            continue;
+        }
         auto pluginThemeManager = pluginPipeline->GetThemeManager();
         pluginThemeManager->UpdateConfig(resConfig);
         pluginThemeManager->LoadResourceThemes();

@@ -43,4 +43,11 @@ bool WaterFlowPositionController::IsAtEnd() const
     CHECK_NULL_RETURN(waterFlowPattern, false);
     return waterFlowPattern->IsAtBottom();
 }
+
+Rect WaterFlowPositionController::GetItemRect(int32_t index) const
+{
+    auto waterFlowPattern = AceType::DynamicCast<WaterFlowPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN(waterFlowPattern, Rect());
+    return waterFlowPattern->GetItemRect(index);
+}
 } // namespace OHOS::Ace::NG

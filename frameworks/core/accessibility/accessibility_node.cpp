@@ -291,7 +291,6 @@ void AccessibilityNode::AddNode(const RefPtr<AccessibilityNode>& node, int32_t s
     auto isExist = std::find_if(children_.begin(), children_.end(),
         [node](const RefPtr<AccessibilityNode>& child) { return child->GetNodeId() == node->GetNodeId(); });
     if (isExist != children_.end()) {
-        LOGD("the accessibility node[%{public}d] has already in the children", node->GetNodeId());
         return;
     }
     auto pos = children_.begin();
@@ -403,7 +402,6 @@ void AccessibilityNode::SetOperableInfo()
             AddSupportAction(AceAction::ACTION_FOCUS);
         }
     } else {
-        LOGW("node type %{public}s not support", tag_.c_str());
         isCheckable_ = false;
         isClickable_ = false;
         isScrollable_ = false;
@@ -416,8 +414,6 @@ void AccessibilityNode::SetOperableInfo()
             isCheckable_ = true;
         } else if (inputType_ == INPUT_TYPE_PASSWORD) {
             isPassword_ = true;
-        } else {
-            LOGD("node type %{public}s not support input event", tag_.c_str());
         }
     }
 }

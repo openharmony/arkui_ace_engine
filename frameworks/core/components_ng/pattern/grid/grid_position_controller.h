@@ -32,6 +32,7 @@ public:
     void ScrollPage(bool reverse, bool smooth) override;
     void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;
     bool IsAtEnd() const override;
+    Rect GetItemRect(int32_t index) const override;
 };
 
 } // namespace OHOS::Ace::NG

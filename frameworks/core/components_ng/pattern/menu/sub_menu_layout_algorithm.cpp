@@ -73,6 +73,21 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
 {
     auto parentFrameSize = parentMenuItem->GetGeometryNode()->GetMarginFrameSize();
     auto position = parentMenuItem->GetPaintRectOffset() + OffsetF(parentFrameSize.Width(), 0.0);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto windowManager = pipelineContext->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, OffsetF());
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
+        auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
+                              static_cast<float>(CONTENT_PADDING.ConvertToPx());
+        auto newOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
+                            static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+        position -= OffsetF(newOffsetX, newOffsetY);
+    }
+
     auto parentMenu = AceType::DynamicCast<FrameNode>(parentMenuItem->GetParent());
     CHECK_NULL_RETURN(parentMenu, position);
     auto scroll = AceType::DynamicCast<FrameNode>(parentMenu->GetParent());

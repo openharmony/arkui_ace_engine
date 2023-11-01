@@ -28,6 +28,7 @@ public:
     void SetOnLoad(LoadEvent&& onLoad) override;
     void SetOnDestroy(DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
+    void SetDetachCallback(DetachCallback&& onDetach) override;
 };
 
 } // namespace OHOS::Ace::NG

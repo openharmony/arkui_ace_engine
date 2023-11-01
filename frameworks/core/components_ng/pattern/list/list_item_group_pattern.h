@@ -120,9 +120,9 @@ public:
         return itemDisplayEndIndex_;
     }
 
-    int32_t GetDiasplayStartIndexInGroup() const
+    int32_t GetDisplayStartIndexInGroup() const
     {
-        return itemDiasplayStartIndex_;
+        return itemDisplayStartIndex_;
     }
 
     int32_t GetEndIndexInGroup() const
@@ -144,6 +144,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
+    void CheckListDirectionInCardStyle();
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemGroupStyle listItemGroupStyle_ = V2::ListItemGroupStyle::NONE;
 
@@ -154,7 +155,7 @@ private:
     int32_t itemStartIndex_ = 0;
     int32_t itemTotalCount_ = -1;
     int32_t itemDisplayEndIndex_ = -1;
-    int32_t itemDiasplayStartIndex_ = -1;
+    int32_t itemDisplayStartIndex_ = -1;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;

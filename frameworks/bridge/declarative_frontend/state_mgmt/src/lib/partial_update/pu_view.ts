@@ -787,6 +787,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const _componentName : string =  (classObject && ("name" in classObject)) ? Reflect.get(classObject, "name") as string : "unspecified UINode";
     const _popFunc : () => void = (classObject && "pop" in classObject) ? classObject.pop! : () => {};
     const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+      this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} start ....`);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
@@ -795,6 +796,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       }
       ViewStackProcessor.StopGetAccessRecording();
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} - DONE ....`);
+      this.restoreInstanceId();
     };
 
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();

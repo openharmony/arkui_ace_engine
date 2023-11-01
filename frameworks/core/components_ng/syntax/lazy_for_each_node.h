@@ -82,6 +82,9 @@ public:
     void SetIsLoop(bool isLoop)
     {
         isLoop_ = isLoop;
+        if (builder_) {
+            builder_->SetIsLoop(isLoop);
+        }
     }
 
     bool GetIsLoop() const
@@ -120,6 +123,7 @@ private:
     {
         CHECK_NULL_VOID(builder_);
         builder_->UnregisterDataChangeListener(Claim(this));
+        isRegisterListener_ = false;
     }
 
     void OnOffscreenProcess(bool recursive) override

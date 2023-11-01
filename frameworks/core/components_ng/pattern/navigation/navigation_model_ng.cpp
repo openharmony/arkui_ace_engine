@@ -15,11 +15,15 @@
 
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 
+#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -260,6 +264,13 @@ RefPtr<FrameNode> CreateToolbarItemTextNode(const std::string& text)
     textLayoutProperty->UpdateTextColor(theme->GetToolBarItemFontColor());
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textLayoutProperty->UpdateAdaptMinFontSize(theme->GetToolBarItemMinFontSize());
+    textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetToolBarItemFontSize());
+    textLayoutProperty->UpdateMaxLines(theme->GetToolbarItemTextMaxLines());
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+
+    textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), std::nullopt));
     return textNode;
 }
 
@@ -425,7 +436,6 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
     barItemNode->MountToParent(toolBarItemNode);
-    barItemNode->MarkModifyDone();
     toolBarItemNode->MarkModifyDone();
 
     return toolBarItemNode;
@@ -563,6 +573,7 @@ void NavigationModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     // navigation node
     int32_t nodeId = stack->ClaimNodeId();
+    auto theme = NavigationGetTheme();
     auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     // navBar node
@@ -612,18 +623,6 @@ void NavigationModelNG::Create()
         navBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
     }
 
-    // content node
-    if (!navigationGroupNode->GetContentNode()) {
-        int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
-            []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
-        contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-        contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
-            HitTestMode::HTMTRANSPARENT_SELF);
-        navigationGroupNode->AddChild(contentNode);
-        navigationGroupNode->SetContentNode(contentNode);
-    }
-
     // divider node
     if (!navigationGroupNode->GetDividerNode()) {
         int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -639,6 +638,26 @@ void NavigationModelNG::Create()
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_VOID(dividerRenderProperty);
         dividerRenderProperty->UpdateDividerColor(DIVIDER_COLOR);
+        if (theme && theme->GetDividerShadowEnable()) {
+            auto renderContext = dividerNode->GetRenderContext();
+            renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowXS);
+        }
+    }
+
+    // content node
+    if (!navigationGroupNode->GetContentNode()) {
+        int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
+            []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
+        contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+            HitTestMode::HTMTRANSPARENT_SELF);
+        auto renderContext = contentNode->GetRenderContext();
+        if (theme) {
+            renderContext->UpdateBackgroundColor(theme->GetNavigationGroupColor());
+        }
+        navigationGroupNode->AddChild(contentNode);
+        navigationGroupNode->SetContentNode(contentNode);
     }
 
     stack->Push(navigationGroupNode);
@@ -972,7 +991,9 @@ void NavigationModelNG::SetHideNavBar(bool hideNavBar)
     } else {
         pattern->SetNavBarVisibilityChange(true);
     }
-
+    if (pattern->GetNavBarVisibilityChange()) {
+        navigationGroupNode->GetNavBarNode()->MarkDirtyNode();
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar);
 }
 

@@ -215,10 +215,10 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
         static RefPtr<NG::UINode> parent = nullptr;
         static int32_t preSlot = -1;
         auto newChild = GetNewFrameNodeWithJsCode(root);
-        CHECK_NULL_RETURN(newChild, false);
+        CHECK_NULL_RETURN(newChild, false); // newChild should not be nullptr
         NG::Inspector::HideAllMenus();
         if (!root->Contains("id")) {
-            LOGD("Failed to get the nodeId!");
+            LOGD("Component Preview: parentNode is rootNode");
             parent = (parentID <= 0) ? GetRootUINode() : ElementRegister::GetInstance()->GetUINodeById(parentID);
             return OperateGeneralUINode(parent, slot, newChild);
         }
@@ -228,7 +228,7 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
             return OperateGeneralUINode(parent, preSlot, newChild);
         }
         parent = oldChild->GetParent();
-        CHECK_NULL_RETURN(parent, false);
+        CHECK_NULL_RETURN(parent, false); // Parent should not be nullptr
         slot = parent->GetChildIndex(oldChild);
         preSlot = slot;
         return OperateGeneralUINode(parent, slot, newChild);

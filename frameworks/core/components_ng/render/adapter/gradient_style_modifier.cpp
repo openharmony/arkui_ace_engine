@@ -74,9 +74,7 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
     if (Negative(frameSize.Height()) || Negative(frameSize.Width())) {
         return;
     }
-    auto recordingShader = std::static_pointer_cast<RSRecordingShaderEffect>(
-        DrawingDecorationPainter::CreateGradientShader(GetGradient(), frameSize));
-    auto shader = recordingShader->GetCmdList()->Playback();
+    auto shader = DrawingDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetShaderEffect(shader);

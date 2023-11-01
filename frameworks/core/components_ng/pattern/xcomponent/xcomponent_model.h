@@ -24,6 +24,7 @@
 namespace OHOS::Ace {
 using LoadEvent = std::function<void(const std::string&)>;
 using DestroyEvent = std::function<void()>;
+using DetachCallback = std::function<void(const std::string&)>;
 class XComponentModel {
 public:
     static XComponentModel* GetInstance();
@@ -38,6 +39,7 @@ public:
     {
         return false;
     }
+    virtual void SetDetachCallback(DetachCallback&& onDetach) {}
 
 private:
     static std::unique_ptr<XComponentModel> instance_;

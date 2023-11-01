@@ -153,7 +153,7 @@ public:
 
     void WindowFocus(bool isFocus) override;
 
-    void ShowContainerTitle(bool isShow, bool hasDeco = true) override;
+    void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
 
     void SetAppBgColor(const Color& color) override;
 
@@ -279,6 +279,9 @@ public:
     }
 
     bool SetIsFocusActive(bool isFocusActive);
+
+    void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
+    void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
 
     bool IsTabJustTriggerOnKeyEvent() const
     {
@@ -513,7 +516,6 @@ private:
     bool isFocusActive_ = false;
     bool isTabJustTriggerOnKeyEvent_ = false;
     bool onShow_ = false;
-    bool onFocus_ = true;
     bool isNeedFlushMouseEvent_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
@@ -526,6 +528,8 @@ private:
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
     std::function<void()> dragCleanTask_;
+
+    std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

@@ -80,6 +80,7 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -112,16 +113,15 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     CalcDimension size;
     if (!JSContainerBase::ParseJsDimensionFp(fontSize, size) || fontSize->IsNull()) {
         font.fontSize = std::nullopt;
+    }
+    if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        font.fontSize = theme->GetTextStyle().GetFontSize();
     } else {
-        if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<TextTheme>();
-            CHECK_NULL_VOID(theme);
-            font.fontSize = theme->GetTextStyle().GetFontSize();
-        } else {
-            font.fontSize = size;
-        }
+        font.fontSize = size;
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");
@@ -228,11 +228,13 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
         JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
-        if (!overflowValue->IsNumber()) {
+        if (!overflowValue->IsNumber() && !overflowValue->IsUndefined()) {
             break;
         }
         auto overflow = overflowValue->ToNumber<int32_t>();
-        if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        if(overflowValue->IsUndefined()) {
+            overflow = 0;
+        } else if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
             break;
         }
         TextModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
@@ -254,6 +256,21 @@ void JSText::SetWordBreak(const JSCallbackInfo& info)
         return;
     }
     TextModel::GetInstance()->SetWordBreak(WORD_BREAK_TYPES[index]);
+}
+
+void JSText::SetEllipsisMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(ELLIPSIS_MODALS.size())) {
+        return;
+    }
+    TextModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
 }
 
 void JSText::SetTextSelection(const JSCallbackInfo& info)
@@ -682,6 +699,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
     JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
     JSClass<JSText>::StaticMethod("wordBreak", &JSText::SetWordBreak, opt);
+    JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
     JSClass<JSText>::StaticMethod("selection", &JSText::SetTextSelection, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
     JSClass<JSText>::StaticMethod("textIndent", &JSText::SetTextIndent);

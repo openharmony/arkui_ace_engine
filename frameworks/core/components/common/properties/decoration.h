@@ -33,6 +33,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/components/theme/theme_utils.h"
 
@@ -1160,6 +1161,16 @@ public:
         shadows_.assign(shadows.begin(), shadows.end());
     }
 
+    BlendMode GetBlendMode() const
+    {
+        return blendMode_;
+    }
+
+    void SetBlendMode(BlendMode blendMode)
+    {
+        blendMode_ = blendMode;
+    }
+
     const Dimension& GetGrayScale(void) const
     {
         return grayScale_;
@@ -1289,6 +1300,8 @@ private:
     Border border_;
     // shadow vector is empty
     std::vector<Shadow> shadows_;
+    // blendMode
+    BlendMode blendMode_ = BlendMode::NORMAL;
     Dimension grayScale_;
     // Brightness (1.0 as default), range = (0, 2)
     Dimension brightness_ = 1.0_px;

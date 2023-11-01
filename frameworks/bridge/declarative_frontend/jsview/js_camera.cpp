@@ -62,7 +62,6 @@ void JSCamera::JsDevicePosition(int32_t value)
     auto stack = ViewStackProcessor::GetInstance();
     auto cameraComponent = AceType::DynamicCast<CameraComponent>(stack->GetMainComponent());
     if (!cameraComponent) {
-        LOGE("JSCamera: MainComponent is null.");
         return;
     }
     cameraComponent->SetDevicePosition(static_cast<DevicePosition>(value));

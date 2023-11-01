@@ -77,7 +77,6 @@ void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<Re
     for (size_t i = 0; i < length; i++) {
         auto item = jsArray->GetValueAt(i);
         if (!item->IsObject()) {
-            LOGE("tool bar item is not object");
             continue;
         }
 
@@ -90,9 +89,7 @@ void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<Re
 
         auto itemIconObject = itemObject->GetProperty("icon");
         std::string icon;
-        if (!ParseJsMedia(itemIconObject, icon)) {
-            LOGE("iconValue is null");
-        }
+        ParseJsMedia(itemIconObject, icon);
         toolBarItem->icon = icon;
 
         auto itemActionValue = itemObject->GetProperty("action");
@@ -120,7 +117,6 @@ void JSNavigation::ParseBarItems(
     for (size_t i = 0; i < length; i++) {
         auto item = jsArray->GetValueAt(i);
         if (!item->IsObject()) {
-            LOGE("tool bar item is not object");
             continue;
         }
         auto itemObject = JSRef<JSObject>::Cast(item);
@@ -274,7 +270,6 @@ void JSNavigation::JSBind(BindingTarget globalObj)
 void JSNavigation::SetTitle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (info[0]->IsString() || info[0]->IsUndefined()) {
@@ -319,8 +314,6 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
                 NavigationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
             } else if (heightValue == NG::TITLE_MAIN) {
                 NavigationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
-            } else {
-                LOGW("title height value is invalid string");
             }
         } else {
             CalcDimension titleHeight;
@@ -329,8 +322,6 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
             }
             NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
         }
-    } else {
-        LOGE("arg is not [String|Function].");
     }
 }
 
@@ -338,8 +329,6 @@ void JSNavigation::SetTitleMode(int32_t value)
 {
     if (value >= 0 && value <= TITLE_MODE_RANGE) {
         NavigationModel::GetInstance()->SetTitleMode(static_cast<NG::NavigationTitleMode>(value));
-    } else {
-        LOGE("invalid value for titleMode");
     }
 }
 
@@ -361,7 +350,6 @@ void JSNavigation::SetHideNavBar(bool hide)
 void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     std::string src;
@@ -389,11 +377,9 @@ void JSNavigation::SetHideToolBar(bool hide)
 void JSNavigation::SetToolBar(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
     if (!info[0]->IsObject() && !info[0]->IsUndefined()) {
-        LOGE("arg is not a object or is not undefined.");
         return;
     }
     if (info[0]->IsUndefined()) {
@@ -411,7 +397,6 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
 
     auto itemsValue = JSRef<JSObject>::Cast(info[0])->GetProperty("items");
     if (!itemsValue->IsObject() || !itemsValue->IsArray()) {
-        LOGE("arg format error: not find items");
         return;
     }
     if (NavigationModel::GetInstance()->NeedSetItems()) {
@@ -456,7 +441,6 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
 void JSNavigation::SetMenus(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
 
@@ -484,8 +468,6 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
             auto customNode = ViewStackModel::GetInstance()->Finish();
             NavigationModel::GetInstance()->SetCustomMenu(customNode);
         }
-    } else {
-        LOGE("arg is not [String|Function].");
     }
 }
 
@@ -497,7 +479,6 @@ void JSNavigation::SetMenuCount(int32_t menuCount)
 void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
     if (info[0]->IsFunction()) {
@@ -517,7 +498,6 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
             auto eventInfo = TypeInfoHelper::DynamicCast<NavigationTitleModeChangeEvent>(baseInfo);
             if (!eventInfo) {
-                LOGE("HandleChangeEvent eventInfo == nullptr");
                 return;
             }
             ACE_SCORING_EVENT("Navigation.onTitleModeChanged");
@@ -528,12 +508,15 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-void JSNavigation::SetUsrNavigationMode(int32_t value)
+void JSNavigation::SetUsrNavigationMode(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsNumber()) {
+        NavigationModel::GetInstance()->SetUsrNavigationMode(NG::NavigationMode::AUTO);
+        return;
+    }
+    int32_t value = info[0]->ToNumber<int32_t>();
     if (value >= 0 && value <= NAVIGATION_MODE_RANGE) {
         NavigationModel::GetInstance()->SetUsrNavigationMode(static_cast<NG::NavigationMode>(value));
-    } else {
-        LOGE("invalid value for navigationMode");
     }
 }
 
@@ -541,15 +524,12 @@ void JSNavigation::SetNavBarPosition(int32_t value)
 {
     if (value >= 0 && value <= NAV_BAR_POSITION_RANGE) {
         NavigationModel::GetInstance()->SetNavBarPosition(static_cast<NG::NavBarPosition>(value));
-    } else {
-        LOGE("invalid value for navBarPosition");
     }
 }
 
 void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -568,7 +548,6 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
 void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -589,7 +568,6 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
 {
 
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (!info[0]->IsArray()) {
@@ -620,7 +598,6 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
 void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
 
@@ -642,14 +619,12 @@ void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
 void JSNavigation::SetNavDestination(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto builder = obj->GetProperty("builder");
     if (!builder->IsFunction()) {
-        LOGE("JSNavigation::SetNavDestination builder param is not a function.");
         return;
     }
 

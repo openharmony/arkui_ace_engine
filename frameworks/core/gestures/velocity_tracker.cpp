@@ -76,6 +76,9 @@ void VelocityTracker::UpdateVelocity()
     if (isVelocityDone_) {
         return;
     }
+    if (xAxis_.GetXVals().empty() || yAxis_.GetXVals().empty()) {
+        return;
+    }
     // the least square method three params curve is 0 * x^3 + a2 * x^2 + a1 * x + a0
     // the velocity is 2 * a2 * x + a1;
     static const int32_t linearParam = 2;

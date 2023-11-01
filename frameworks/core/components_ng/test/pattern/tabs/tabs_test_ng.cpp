@@ -2474,6 +2474,7 @@ HWTEST_F(TabsTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     drawFunction(rsCanvas);
     EXPECT_TRUE(paintMethod->gradientRegions_[0]);
 
@@ -10252,7 +10253,7 @@ HWTEST_F(TabsTestNg, TabBarPatternOnDirtyLayoutWrapperSwap002, TestSize.Level1)
     EXPECT_EQ(tabBarPattern->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
     tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(tabBarPattern->indicator_, 0);
-    
+
     /**
      * @tc.steps: step2. creat different conditions and invoke OnDirtyLayoutWrapperSwap.
      * @tc.expected: step2. expect The function is run ok.

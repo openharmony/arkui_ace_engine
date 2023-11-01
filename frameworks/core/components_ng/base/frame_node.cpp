@@ -19,6 +19,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
@@ -27,6 +28,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
@@ -60,6 +62,27 @@ public:
         uint32_t startIndex = 0;
         uint32_t count = 0;
     };
+
+    struct RecursionGuard {
+        FramePorxy* proxy_;
+        bool inUse_;
+        explicit RecursionGuard(FramePorxy* proxy) : proxy_(proxy), inUse_(proxy->inUse_)
+        {
+            proxy_->inUse_ = true;
+        }
+        ~RecursionGuard()
+        {
+            proxy_->inUse_ = inUse_;
+            if (!proxy_->inUse_ && proxy_->delayReset_) {
+                proxy_->ResetChildren(proxy_->needResetChild_);
+            }
+        }
+    };
+
+    RecursionGuard GetGuard()
+    {
+        return RecursionGuard{this};
+    }
 
     explicit FramePorxy(FrameNode* frameNode) : hostNode_(frameNode) {}
 
@@ -110,15 +133,18 @@ public:
         }
     }
 
-    std::list<RefPtr<LayoutWrapper>>& GetAllFrameChildren()
+    const std::list<RefPtr<LayoutWrapper>>& GetAllFrameChildren()
     {
         if (!allFrameNodeChildren_.empty()) {
             return allFrameNodeChildren_;
         }
         Build();
-        uint32_t count = 0;
-        for (const auto& child : children_) {
-            AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_, count);
+        {
+            uint32_t count = 0;
+            auto guard = GetGuard();
+            for (const auto& child : children_) {
+                AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_, count);
+            }
         }
         return allFrameNodeChildren_;
     }
@@ -162,6 +188,12 @@ public:
 
     void ResetChildren(bool needResetChild = false)
     {
+        if (inUse_) {
+            delayReset_ = true;
+            needResetChild_ = needResetChild;
+            return;
+        }
+        delayReset_ = false;
         allFrameNodeChildren_.clear();
         partFrameNodeChildren_.clear();
         totalCount_ = 0;
@@ -201,6 +233,7 @@ public:
         SetAllChildrenInActive();
         ResetChildren();
         Build();
+        auto guard = GetGuard();
         for (const auto& child : children_) {
             child.node->DoRemoveChildInRenderTree(0, true);
         }
@@ -213,6 +246,7 @@ public:
 
     void SetAllChildrenInActive()
     {
+        auto guard = GetGuard();
         for (const auto& child : partFrameNodeChildren_) {
             child.second->SetActive(false);
         }
@@ -220,7 +254,11 @@ public:
 
     std::string Dump()
     {
+        if (totalCount_ == 0) {
+            return "totalCount is 0";
+        }
         std::string info = "FrameChildNode:[";
+        auto guard = GetGuard();
         for (const auto& child : children_) {
             info += std::to_string(child.node->GetId());
             info += "-";
@@ -241,6 +279,7 @@ public:
 
     void SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
     {
+        auto guard = GetGuard();
         for (const auto& child : children_) {
             child.node->OnSetCacheCount(cacheCount, itemConstraint);
         }
@@ -253,6 +292,9 @@ private:
     std::map<uint32_t, RefPtr<LayoutWrapper>> partFrameNodeChildren_;
     uint32_t totalCount_ = 0;
     FrameNode* hostNode_ { nullptr };
+    bool inUse_ = false;
+    bool delayReset_ = false;
+    bool needResetChild_ = false;
 }; // namespace OHOS::Ace::NG
 
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
@@ -390,20 +432,31 @@ void FrameNode::InitializePatternAndContext()
 void FrameNode::DumpCommonInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
+    if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
+    }
+
     DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
                                                    : "NA"));
-    DumpLog::GetInstance().AddDesc(std::string("top: ")
-                                       .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
-                                       .append(" left: ")
-                                       .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
-    DumpLog::GetInstance().AddDesc(std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
-    DumpLog::GetInstance().AddDesc(std::string("Visible: ")
-                                       .append(std::to_string(static_cast<int32_t>(
-                                           layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
+    if (NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX())) {
+        DumpLog::GetInstance().AddDesc(std::string("top: ")
+                                           .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
+                                           .append(" left: ")
+                                           .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+    }
+    if (static_cast<int32_t>(IsActive()) != 1) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
+    }
+
+    if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
+        DumpLog::GetInstance().AddDesc(std::string("Visible: ")
+                                           .append(std::to_string(static_cast<int32_t>(
+                                               layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
+    }
     if (layoutProperty_->GetPaddingProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
@@ -420,7 +473,9 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(std::string("User defined constraint: ")
                                            .append(layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()));
     }
-    DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
+    if (!propInspectorId_->empty()) {
+        DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
+    }
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
                                                    ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
@@ -428,7 +483,9 @@ void FrameNode::DumpCommonInfo()
     DumpOverlayInfo();
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
+    if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
+        DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
+    }
 }
 
 void FrameNode::DumpOverlayInfo()
@@ -580,7 +637,13 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     FocusToJsonValue(json);
     MouseToJsonValue(json);
     TouchToJsonValue(json);
-    GeometryNodeToJsonValue(json);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+#if defined(PREVIEW)
+        GeometryNodeToJsonValue(json);
+#endif
+    } else {
+        GeometryNodeToJsonValue(json);
+    }
     json->Put("id", propInspectorId_.value_or("").c_str());
 }
 
@@ -684,6 +747,9 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this))) {
         geometryTransition->DidLayout(dirty);
+        if (geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
+            isLayoutDirtyMarked_ = true;
+        }
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
@@ -975,7 +1041,6 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
         Layout();
     }
     SetRootMeasureNode(false);
-    return;
 }
 
 std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
@@ -2409,6 +2474,9 @@ void FrameNode::SyncGeometryNode()
 
     if (hasTransition) {
         geometryTransition->DidLayout(Claim(this));
+        if (geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
+            isLayoutDirtyMarked_ = true;
+        }
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         isLayoutComplete_ = true;
@@ -2516,11 +2584,14 @@ RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index)
 const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
 {
     const auto& children = frameProxy_->GetAllFrameChildren();
-    for (const auto& child : children) {
-        if (addToRenderTree) {
-            child->SetActive(true);
+    {
+        auto guard = frameProxy_->GetGuard();
+        for (const auto& child : children) {
+            if (addToRenderTree) {
+                child->SetActive(true);
+            }
+            child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         }
-        child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
     }
 
     return children;
@@ -2549,14 +2620,17 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 
 float FrameNode::GetBaselineDistance() const
 {
-    auto children = frameProxy_->GetAllFrameChildren();
+    const auto& children = frameProxy_->GetAllFrameChildren();
     if (children.empty()) {
         return geometryNode_->GetBaselineDistance();
     }
     float distance = 0.0;
-    for (const auto& child : children) {
-        float childBaseline = child->GetBaselineDistance();
-        distance = NearZero(distance) ? childBaseline : std::min(distance, childBaseline);
+    {
+        auto guard = frameProxy_->GetGuard();
+        for (const auto& child : children) {
+            float childBaseline = child->GetBaselineDistance();
+            distance = NearZero(distance) ? childBaseline : std::min(distance, childBaseline);
+        }
     }
     return distance;
 }

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_BASE_H
 
 #include <functional>
+#include <list>
 #include <string>
 
 #include "base/memory/ace_type.h"
@@ -34,11 +35,12 @@ public:
     CustomNodeBase() = default;
     ~CustomNodeBase() override;
 
-    void FireOnAppear() const
+    void FireOnAppear()
     {
         if (appearFunc_) {
             appearFunc_();
         }
+        executeFireOnAppear_ = true;
     }
 
     virtual void SetRenderFunction(const RenderFunction& renderFunction) {}
@@ -115,6 +117,12 @@ public:
         if (recycleRenderFunc_) {
             ACE_SCOPED_TRACE("CustomNode:BuildRecycle %s", GetJSViewName().c_str());
             recycleRenderFunc_();
+            for (const auto& weak : recyclePatterns_) {
+                auto pattern = weak.Upgrade();
+                if (pattern) {
+                    pattern->OnReuse();
+                }
+            }
             recycleRenderFunc_ = nullptr;
         }
     }
@@ -189,6 +197,8 @@ private:
     std::function<void(bool)> setActiveFunc_;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
     bool needRebuild_ = false;
+    bool executeFireOnAppear_ = false;
+    std::list<WeakPtr<Pattern>> recyclePatterns_;
 };
 } // namespace OHOS::Ace::NG
 

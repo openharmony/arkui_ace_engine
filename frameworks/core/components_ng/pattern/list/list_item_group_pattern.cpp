@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 #include "core/components/list/list_item_theme.h"
 
@@ -91,8 +92,9 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     axis_ = layoutAlgorithm->GetAxis();
     laneGutter_ = layoutAlgorithm->GetLaneGutter();
     itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
-    itemDiasplayStartIndex_ = layoutAlgorithm->GetStartIndex();
+    itemDisplayStartIndex_ = layoutAlgorithm->GetStartIndex();
     itemTotalCount_ = layoutAlgorithm->GetTotalItemCount();
+    CheckListDirectionInCardStyle();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto accessibilityProperty = host->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
@@ -101,5 +103,18 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
+}
+
+void ListItemGroupPattern::CheckListDirectionInCardStyle()
+{
+    if (axis_ == Axis::HORIZONTAL && listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        RefPtr<FrameNode> listNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_VOID(listNode);
+        auto listPattern = listNode->GetPattern<ListPattern>();
+        CHECK_NULL_VOID(listPattern);
+        listPattern->SetNeedToUpdateListDirectionInCardStyle(true);
+    }
 }
 } // namespace OHOS::Ace::NG

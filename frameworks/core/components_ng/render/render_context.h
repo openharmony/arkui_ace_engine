@@ -343,6 +343,7 @@ public:
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void OnSuggestedRenderGroupUpdate(bool isRenderGroup) {}
     virtual void OnRenderFitUpdate(RenderFit renderFit) {}
     virtual void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionArray) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
@@ -389,6 +390,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SuggestedRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
@@ -412,6 +414,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpRate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
 
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
@@ -538,6 +541,7 @@ protected:
     virtual void OnDynamicLightUpRateUpdate(const float rate) {}
     virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
+    virtual void OnBackBlendModeUpdate(BlendMode blendMode) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}

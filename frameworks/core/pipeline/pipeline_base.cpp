@@ -251,8 +251,6 @@ void PipelineBase::HyperlinkStartAbility(const std::string& address) const
     CHECK_RUN_ON(UI);
     if (startAbilityHandler_) {
         startAbilityHandler_(address);
-    } else {
-        LOGE("Hyperlink fail to start ability due to handler is nullptr");
     }
 }
 
@@ -262,8 +260,6 @@ void PipelineBase::NotifyStatusBarBgColor(const Color& color) const
     LOGD("Notify StatusBar BgColor, color: %{public}x", color.GetValue());
     if (statusBarBgColorEventHandler_) {
         statusBarBgColorEventHandler_(color);
-    } else {
-        LOGE("fail to finish current context due to handler is nullptr");
     }
 }
 
@@ -344,8 +340,6 @@ void PipelineBase::OnActionEvent(const std::string& action)
     CHECK_RUN_ON(UI);
     if (actionEventHandler_) {
         actionEventHandler_(action);
-    } else {
-        LOGE("the action event handler is null");
     }
 }
 
@@ -370,8 +364,6 @@ void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskT
 {
     if (taskExecutor_) {
         taskExecutor_->PostTask(std::move(task), type);
-    } else {
-        LOGE("the task executor is nullptr");
     }
 }
 
@@ -379,8 +371,6 @@ void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::
 {
     if (taskExecutor_) {
         taskExecutor_->PostTask(task, type);
-    } else {
-        LOGE("the task executor is nullptr");
     }
 }
 
@@ -388,8 +378,6 @@ void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::T
 {
     if (taskExecutor_) {
         taskExecutor_->PostSyncTask(task, type);
-    } else {
-        LOGE("the task executor is nullptr");
     }
 }
 
@@ -400,7 +388,6 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
     auto lock = frontend->GetLock();
     auto& windowConfig = frontend->GetWindowConfig();
     if (windowConfig.designWidth <= 0) {
-        LOGE("the frontend design width <= 0");
         return;
     }
     if (GetIsDeclarative()) {
@@ -411,7 +398,6 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
     }
     if (NearZero(viewScale_)) {
-        LOGW("the view scale is zero");
         return;
     }
     dipScale_ = density_ / viewScale_;
@@ -430,7 +416,6 @@ void PipelineBase::DumpFrontend() const
 bool PipelineBase::Dump(const std::vector<std::string>& params) const
 {
     if (params.empty()) {
-        LOGW("the params is empty");
         return false;
     }
     // the first param is the key word of dump.
@@ -476,7 +461,6 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
 {
     if (!propertyCallback) {
-        LOGE("failed to create animation, property callback is null!");
         return false;
     }
 
@@ -503,7 +487,6 @@ void PipelineBase::PrepareCloseImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (pendingImplicitLayout_.empty() && pendingImplicitRender_.empty()) {
-        LOGE("close implicit animation failed, need to open implicit animation first!");
         return;
     }
 
@@ -542,13 +525,13 @@ void PipelineBase::OpenImplicitAnimation(
                 CHECK_NULL_VOID(context);
                 if (!finishCallback) {
                     if (context->IsFormRender()) {
-                        LOGW("[Form animation]  Form animation is finish.");
+                        TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
                         context->SetIsFormAnimation(false);
                     }
                     return;
                 }
                 if (context->IsFormRender()) {
-                    LOGW("[Form animation]  Form animation is finish.");
+                    TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation]  Form animation is finish.");
                     context->SetFormAnimationFinishCallback(true);
                     finishCallback();
                     context->FlushBuild();
@@ -677,7 +660,6 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     auto frontend = weakFrontend_.Upgrade();
     if (!frontend) {
-        LOGE("frontend is nullptr");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
         return nullptr;
     }
@@ -772,7 +754,6 @@ bool PipelineBase::MaybeRelease()
 void PipelineBase::Destroy()
 {
     CHECK_RUN_ON(UI);
-    LOGI("PipelineBase::Destroy begin.");
     ClearImageCache();
     platformResRegister_.Reset();
     drawDelegate_.reset();
@@ -791,6 +772,5 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
-    LOGI("PipelineBase::Destroy end.");
 }
 } // namespace OHOS::Ace

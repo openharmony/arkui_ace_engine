@@ -73,7 +73,7 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
 }
 
 bool EventManager::DispatchTabIndexEventNG(
-    const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& curPage)
+    const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView)
 {
     return !instanceId_;
 }

@@ -286,7 +286,6 @@ void NavigationGroupNode::SetBackButtonEvent(
             result = eventHub->FireOnBackPressedEvent();
         }
         if (result) {
-            LOGI("this onBackButtonPressed event returns true");
             return true;
         }
         auto navigation = navigationWeak.Upgrade();
@@ -382,7 +381,7 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
             // animation finish event should be posted to UI thread
             taskExecutor->PostTask(
                 [weakNode, weakTitle, weakNavigation, nodeWidth, nodeHeight]() {
-                    LOGI("navigation animation end");
+                    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                     auto navigation = weakNavigation.Upgrade();
                     if (navigation) {
@@ -431,7 +430,7 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
         option,
         [node, titleNode, nodeWidth, nodeHeight]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-            LOGI("navigation animation start");
+            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
             // content
             node->GetRenderContext()->ClipWithRRect(
                 RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
@@ -484,7 +483,7 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
         taskExecutor->PostTask(
             [weakNode, weakTitle, weakNavigation, isNavBar]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
-                LOGI("navigation animation end");
+                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 if (navigation) {
                     navigation->isOnAnimation_ = false;
@@ -521,7 +520,7 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
         option,
         [node, titleNode, nodeWidth]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-            LOGI("navigation animation start");
+            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
             node->GetRenderContext()->UpdateTranslateInXY({ -nodeWidth * PARENT_PAGE_OFFSET, 0.0f });
             titleNode->GetRenderContext()->UpdateTranslateInXY({ nodeWidth * PARENT_TITLE_OFFSET, 0.0f });
         },
@@ -563,7 +562,7 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
         taskExecutor->PostTask(
             [weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
-                LOGI("navigation animation end");
+                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
@@ -582,7 +581,7 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
         option,
         [node, titleNode, nodeWidth, nodeHeight]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-            LOGI("navigation animation start");
+            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
             // content
             node->GetRenderContext()->ClipWithRRect(
                 RectF(0.0f, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
@@ -638,16 +637,12 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
-            [weakNavigation, isNavBar]() {
+            [weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
-                LOGI("navigation animation end");
+                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
-                // clear this flag for navBar layout only
-                if (isNavBar) {
-                    navigation->SetNeedSetInvisible(false);
-                }
                 navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             },
             TaskExecutor::TaskType::UI);
@@ -661,7 +656,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         option,
         [node, titleNode]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-            LOGI("navigation animation start");
+            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
             node->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
             titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         },
@@ -675,6 +670,10 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
     AnimationUtils::Animate(
         maskOption, [node]() { node->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR); });
     isOnAnimation_ = true;
+    // clear this flag for navBar layout only
+    if (isNavBar) {
+        SetNeedSetInvisible(false);
+    }
 }
 
 void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn)

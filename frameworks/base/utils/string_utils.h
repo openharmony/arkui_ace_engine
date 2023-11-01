@@ -176,6 +176,7 @@ inline uint32_t StringToUint(const std::string& value, uint32_t defaultErr = 0)
 inline double StringToDouble(const std::string& value)
 {
     char* pEnd = nullptr;
+    errno = 0;
     double result = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
         return 0.0;

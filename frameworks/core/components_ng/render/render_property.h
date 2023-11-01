@@ -22,6 +22,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/overlay_property.h"
@@ -166,6 +167,7 @@ struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicLightUpRate, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackBlendMode, BlendMode);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 

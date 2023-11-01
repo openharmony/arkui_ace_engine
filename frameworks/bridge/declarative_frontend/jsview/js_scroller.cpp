@@ -75,6 +75,7 @@ void JSScroller::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::CustomMethod("scrollToIndex", &JSScroller::ScrollToIndex);
     JSClass<JSScroller>::CustomMethod("scrollBy", &JSScroller::ScrollBy);
     JSClass<JSScroller>::CustomMethod("isAtEnd", &JSScroller::IsAtEnd);
+    JSClass<JSScroller>::CustomMethod("getItemRect", &JSScroller::GetItemRect);
     JSClass<JSScroller>::Bind(globalObj, JSScroller::Constructor, JSScroller::Destructor);
 }
 
@@ -90,6 +91,16 @@ void JSScroller::Destructor(JSScroller* scroller)
     if (scroller != nullptr) {
         scroller->DecRefCount();
     }
+}
+
+JSRef<JSObject> JSScroller::CreateRectangle(const Rect& info)
+{
+    JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+    rectObj->SetProperty<double>("x", info.Left());
+    rectObj->SetProperty<double>("y", info.Top());
+    rectObj->SetProperty<double>("width", info.Width());
+    rectObj->SetProperty<double>("height", info.Height());
+    return rectObj;
 }
 
 void JSScroller::ScrollTo(const JSCallbackInfo& args)
@@ -272,5 +283,22 @@ void JSScroller::IsAtEnd(const JSCallbackInfo& args)
     bool isAtEnd = scrollController->IsAtEnd();
     auto retVal = JSRef<JSVal>::Make(ToJSValue(isAtEnd));
     args.SetReturnValue(retVal);
+}
+
+void JSScroller::GetItemRect(const JSCallbackInfo& args)
+{
+    int32_t index = -1;
+    if (args.Length() != 1 || !ConvertFromJSValue(args[0], index)) {
+        LOGW("Invalid params");
+        return;
+    }
+    auto scrollController = controllerWeak_.Upgrade();
+    if (scrollController) {
+        auto rectObj = CreateRectangle(scrollController->GetItemRect(index));
+        JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
+        args.SetReturnValue(rect);
+    } else {
+        LOGE("controller_ is nullptr");
+    }
 }
 } // namespace OHOS::Ace::Framework

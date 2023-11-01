@@ -107,10 +107,8 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         // mouse event
         if (pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
-            LOGD("ProcessAxisEvent");
             view->ProcessAxisEvent(pointerEvent);
         } else {
-            LOGD("ProcessMouseEvent");
 #ifdef ENABLE_DRAG_FRAMEWORK
             view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -118,7 +116,6 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         }
     } else {
         // touch event
-        LOGD("ProcessTouchEvent");
 #ifdef ENABLE_DRAG_FRAMEWORK
         view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -163,14 +160,17 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
     }
     int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN
-        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN) {
         inputType = LAST_DOWN;
         isFirstMove = true;
     } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP
-        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
         inputType = LAST_UP;
         isFirstMove = false;
-    } else if (isFirstMove && pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) {
+    } else if (isFirstMove && (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE)) {
         inputType = FIRST_MOVE;
         isFirstMove = false;
     }
@@ -253,7 +253,6 @@ void AceViewOhos::RegisterRotationEventCallback(RotationEventCallBack&& callback
 
 void AceViewOhos::Launch()
 {
-    LOGD("Launch shell holder.");
 }
 
 void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -282,8 +281,6 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         if (touchEventCallback_) {
             touchEventCallback_(touchPoint, markProcess);
         }
-    } else {
-        LOGW("Unknown event.");
     }
 }
 
@@ -319,7 +316,6 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
             break;
         }
         default:
-            LOGD("unknown type %{public}d", orgAction);
             break;
     }
 }
@@ -327,7 +323,7 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
 
 void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
 {
-    TAG_LOGD(AceLogTag::ACE_DRAG, "ProcessDragEvent");
+    TAG_LOGD(AceLogTag::ACE_DRAG, "Process drag event");
     CHECK_NULL_VOID(dragEventCallback_);
     dragEventCallback_(x, y, action);
 }
@@ -363,6 +359,16 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     };
 
     CHECK_NULL_VOID(axisEventCallback_);
+    if (event.action == AxisAction::BEGIN) {
+        /* The first step of axis event is equivalent to touch event START + UPDATE.
+         * Create a fake UPDATE event here to adapt to axis event.
+         * As the event would pass through sceneboard process. A simple MMI axis event(e.g START-END) would
+         * be added a fake UPDATE in sceneboard(START-UPDATE-END), then be added another UPDATE in
+         * application(START-UPDATE-UPDATE-END). The second UPDATE provides no additional movement.
+         */
+        axisEventCallback_(event, nullptr);
+        event.action = AxisAction::UPDATE;
+    }
     axisEventCallback_(event, markProcess);
 }
 
@@ -389,7 +395,6 @@ bool AceViewOhos::ProcessRotationEvent(float rotationValue)
 bool AceViewOhos::Dump(const std::vector<std::string>& params)
 {
     if (params.empty() || params[0] != "-drawcmd") {
-        LOGE("Unsupported parameters.");
         return false;
     }
     if (DumpLog::GetInstance().GetDumpFile()) {

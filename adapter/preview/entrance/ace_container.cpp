@@ -597,7 +597,7 @@ void AceContainer::NativeOnConfigurationUpdated(int32_t instanceId)
         return;
     }
 
-    std::unique_ptr<JsonValue> localeValue = JsonUtil::Create(false);
+    std::unique_ptr<JsonValue> localeValue = JsonUtil::Create(true);
     localeValue->Put(LANGUAGE_TAG, AceApplicationInfo::GetInstance().GetLanguage().c_str());
     localeValue->Put(COUNTRY_TAG, AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
     localeValue->Put(
@@ -1073,14 +1073,17 @@ void AceContainer::LoadDocument(const std::string& url, const std::string& compo
 {
     ContainerScope scope(instanceId_);
     if (type_ != FrontendType::DECLARATIVE_JS) {
+        LOGE("Component Preview failed: 1.0 not support");
         return;
     }
     auto frontend = AceType::DynamicCast<OHOS::Ace::DeclarativeFrontend>(frontend_);
     if (!frontend) {
+        LOGE("Component Preview failed: the frontend is nullptr");
         return;
     }
     auto jsEngine = frontend->GetJsEngine();
     if (!jsEngine) {
+        LOGE("Component Preview failed: the jsEngine is nullptr");
         return;
     }
     taskExecutor_->PostTask(

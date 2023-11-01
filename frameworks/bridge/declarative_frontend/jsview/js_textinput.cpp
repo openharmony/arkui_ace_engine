@@ -110,6 +110,7 @@ void JSTextInputController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextInputController>::Declare("TextInputController");
     JSClass<JSTextInputController>::Method("caretPosition", &JSTextInputController::CaretPosition);
+    JSClass<JSTextInputController>::CustomMethod("getCaretOffset", &JSTextInputController::GetCaretOffset);
     JSClass<JSTextInputController>::Method("setTextSelection", &JSTextInputController::SetTextSelection);
     JSClass<JSTextInputController>::CustomMethod("getTextContentRect", &JSTextInputController::GetTextContentRect);
     JSClass<JSTextInputController>::CustomMethod("getTextContentLineCount",
@@ -141,6 +142,20 @@ void JSTextInputController::CaretPosition(int32_t caretPosition)
     }
 }
 
+void JSTextInputController::GetCaretOffset(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        JSRef<JSObject> caretObj = JSRef<JSObject>::New();
+        NG::OffsetF caretOffset = controller->GetCaretPosition();
+        caretObj->SetProperty<int32_t>("index", controller->GetCaretIndex());
+        caretObj->SetProperty<float>("x", caretOffset.GetX());
+        caretObj->SetProperty<float>("y", caretOffset.GetY());
+        JSRef<JSVal> ret = JSRef<JSObject>::Cast(caretObj);
+        info.SetReturnValue(ret);
+    }
+}
+
 void JSTextInputController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
 {
     auto controller = controllerWeak_.Upgrade();
@@ -166,8 +181,6 @@ void JSTextInputController::GetTextContentRect(const JSCallbackInfo& info)
         auto rectObj = CreateRectangle(controller->GetTextContentRect());
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         info.SetReturnValue(rect);
-    } else {
-        TAG_LOGW(AceLogTag::ACE_TEXTINPUT, "GetTextContentRect: The JSTextInputController is NULL");
     }
 }
 
@@ -179,8 +192,6 @@ void JSTextInputController::GetTextContentLinesNum(const JSCallbackInfo& info)
         auto linesNum = JSVal(ToJSValue(lines));
         auto textLines = JSRef<JSVal>::Make(linesNum);
         info.SetReturnValue(textLines);
-    } else {
-        TAG_LOGW(AceLogTag::ACE_TEXTINPUT, "GetTextContentRect: The JSTextInputController is NULL");
     }
 }
 

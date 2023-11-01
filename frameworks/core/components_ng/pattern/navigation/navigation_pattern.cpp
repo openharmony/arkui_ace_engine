@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
@@ -35,7 +36,6 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/property/property.h"
-#include "core/common/container.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -45,7 +45,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t NAVIMODE_CHANGE_ANIMATION_DURATION = 250;
 constexpr int32_t OPACITY_ANIMATION_DURATION_APPEAR = 150;
 constexpr int32_t OPACITY_ANIMATION_DURATION_DISAPPEAR = 250;
-constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
+constexpr Dimension DEFAULT_DRAG_REGION = 12.0_vp;
 constexpr float DEFAULT_HALF = 2.0f;
 
 namespace {
@@ -216,6 +216,8 @@ void NavigationPattern::CheckTopNavPathChange(
                 NotifyPageHide(preTopNavPath->first);
                 eventHub->FireOnHiddenEvent();
                 navDestinationPattern->SetIsOnShow(false);
+                // The navigations in NavDestination should be fired the hidden event
+                NavigationPattern::FireNavigationStateChange(preTopNavDestination, false);
             }
             auto focusHub = preTopNavDestination->GetOrCreateFocusHub();
             focusHub->SetParentFocusable(false);
@@ -237,8 +239,6 @@ void NavigationPattern::CheckTopNavPathChange(
                     parent->RemoveChild(preTopNavDestination);
                 }
             }
-        } else {
-            LOGW("prev page is illegal");
         }
     } else {
         // navBar to new top page case
@@ -264,14 +264,14 @@ void NavigationPattern::CheckTopNavPathChange(
                 NotifyPageShow(newTopNavPath->first);
                 eventHub->FireOnShownEvent();
                 navDestinationPattern->SetIsOnShow(true);
+                // The navigations in NavDestination should be fired the shown event
+                NavigationPattern::FireNavigationStateChange(newTopNavDestination, true);
             }
             auto focusHub = newTopNavDestination->GetOrCreateFocusHub();
             context->AddAfterLayoutTask([focusHub]() {
                 focusHub->SetParentFocusable(true);
                 focusHub->RequestFocus();
             });
-        } else {
-            LOGW("new page is illegal");
         }
     } else {
         // back to navBar case
@@ -299,6 +299,73 @@ void NavigationPattern::CheckTopNavPathChange(
         });
     }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<UINode> NavigationPattern::FireNavDestinationStateChange(bool show)
+{
+    // Only need to check top NavDestination every time.
+    auto topNavPath = navigationStack_->GetTopNavPath();
+    if (!topNavPath.has_value()) {
+        return nullptr;
+    }
+
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(topNavPath->second));
+    CHECK_NULL_RETURN(navDestinationGroupNode, nullptr);
+
+    auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestinationGroupNode->GetPattern());
+    CHECK_NULL_RETURN(navDestinationPattern, nullptr);
+
+    // Same state, no need to fire event
+    if (navDestinationPattern->GetIsOnShow() == show) {
+        return navDestinationGroupNode;
+    }
+
+    auto eventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+
+    auto id = GetHost()->GetId();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_RETURN(pipeline, nullptr);
+
+    if (show) {
+        NotifyPageShow(topNavPath->first);
+        eventHub->FireOnShownEvent();
+        navDestinationPattern->SetIsOnShow(true);
+        // The change from hiding to showing of top page means the navigation return to screen,
+        // so add window state callback again.
+        pipeline->AddWindowStateChangedCallback(id);
+    } else {
+        NotifyPageHide(topNavPath->first);
+        eventHub->FireOnHiddenEvent();
+        navDestinationPattern->SetIsOnShow(false);
+        // The change from showing to hiding of top page means the navigation leaves from screen,
+        // so remove window state callback.
+        pipeline->RemoveWindowStateChangedCallback(id);
+    }
+
+    return navDestinationGroupNode;
+}
+
+void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bool show)
+{
+    const auto& children = node->GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+
+        auto navigation = AceType::DynamicCast<NavigationGroupNode>(child);
+        if (navigation) {
+            auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
+            CHECK_NULL_VOID(navigationPattern);
+            auto changedNode = navigationPattern->FireNavDestinationStateChange(show);
+            if (changedNode) {
+                // Ignore node from navigation to navdestination in node tree, start from navdestination node directly.
+                NavigationPattern::FireNavigationStateChange(changedNode, show);
+                continue;
+            }
+        }
+        NavigationPattern::FireNavigationStateChange(child, show);
+    }
 }
 
 void NavigationPattern::NotifyPageHide(const std::string& pageName)
@@ -418,7 +485,7 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
 void NavigationPattern::OnNavigationModeChange(bool modeChange)
 {
     if (!modeChange) {
-        LOGD("navigation mode doesn't change");
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation mode doesn't change");
         return;
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -444,41 +511,51 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     navigationMode_ = navigationLayoutAlgorithm->GetNavigationMode();
     OnNavBarStateChange(oldMode != navigationMode_);
     OnNavigationModeChange(oldMode != navigationMode_);
-    auto curTopNavPath = navigationStack_->GetTopNavPath();
-    if (curTopNavPath.has_value()) {
-        auto context = PipelineContext::GetCurrentContext();
-        if (context) {
-            context->GetTaskExecutor()->PostTask(
-                [weak = WeakClaim(this), curTopNavPath, hostNode] {
-                    auto pattern = weak.Upgrade();
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this), navigationStackWeak = WeakPtr<NavigationStack>(navigationStack_),
+                navigationWeak = WeakPtr<NavigationGroupNode>(hostNode)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto navigationGroupNode = navigationWeak.Upgrade();
+                CHECK_NULL_VOID(navigationGroupNode);
+                auto navigationLayoutProperty =
+                    AceType::DynamicCast<NavigationLayoutProperty>(navigationGroupNode->GetLayoutProperty());
+                CHECK_NULL_VOID(navigationLayoutProperty);
+                auto navigationStack = navigationStackWeak.Upgrade();
+                CHECK_NULL_VOID(navigationStack);
+                auto curTopNavPath = navigationStack->GetTopNavPath();
+                if (curTopNavPath.has_value()) {
+                    // considering backButton visibility
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
-                    auto navigationLayoutProperty =
-                        AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
-                    if (pattern->navigationStack_->Size() == 1 &&
+                    if (navigationStack->Size() == 1 &&
                         (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
                             navigationLayoutProperty->GetHideNavBar().value_or(false))) {
                         // cases that backButton of navDestination is gone when there's only one child and
                         // 1. In SPLIT mode, it's the first level page
                         // 2. In STACK mode, the navBar is hidden
-                        hostNode->SetBackButtonVisible(curTopNavDestination, false);
+                        navigationGroupNode->SetBackButtonVisible(curTopNavDestination, false);
                     } else {
-                        hostNode->SetBackButtonVisible(curTopNavDestination, true);
+                        navigationGroupNode->SetBackButtonVisible(curTopNavDestination, true);
                     }
-                    pattern->UpdateContextRect(curTopNavDestination, hostNode);
-                    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-                    CHECK_NULL_VOID(navBarNode);
-                    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-                    CHECK_NULL_VOID(navBarLayoutProperty);
-                    if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
-                        (pattern->GetNavigationMode() == NavigationMode::STACK && hostNode->GetNeedSetInvisible())) {
-                        navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-                    } else {
-                        navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                    }
-                },
-                TaskExecutor::TaskType::UI);
-        }
+                    pattern->UpdateContextRect(curTopNavDestination, navigationGroupNode);
+                }
+                // considering navBar visibility
+                auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+                CHECK_NULL_VOID(navBarNode);
+                auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+                CHECK_NULL_VOID(navBarLayoutProperty);
+                if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
+                    (pattern->GetNavigationMode() == NavigationMode::STACK &&
+                        navigationGroupNode->GetNeedSetInvisible())) {
+                    navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+                } else {
+                    navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);

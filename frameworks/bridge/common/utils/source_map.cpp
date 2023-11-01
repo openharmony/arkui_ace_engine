@@ -45,7 +45,6 @@ constexpr int32_t SPACE_LEN = 26;
 MappingInfo RevSourceMap::Find(int32_t row, int32_t col, bool isColPrecise)
 {
     if (row < 1 || col < 1 || afterPos_.empty()) {
-        LOGE("the input pos is wrong");
         return MappingInfo {};
     }
     row--;
@@ -83,7 +82,6 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col, bool isColPrecise)
 
     int32_t sourcesSize = static_cast<int32_t>(sources_.size());
     if (afterPos_[res].sourcesVal < 0 || afterPos_[res].sourcesVal >= sourcesSize) {
-        LOGE("sourcesVal invalid");
         return MappingInfo {};
     }
     std::string sources = sources_[afterPos_[res].sourcesVal];
@@ -102,11 +100,9 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col, bool isColPrecise)
 std::string RevSourceMap::GetOriginalNames(const std::string& sourceCode, uint32_t& errorPos) const
 {
     if (sourceCode.empty() || sourceCode.find("SourceCode:\n") == std::string::npos) {
-        LOGE("SourceCode in stack is wrong.");
         return sourceCode;
     }
     if (nameMap_.size() % 2 != 0) {
-        LOGE("NameMap in sourcemap is wrong.");
         return sourceCode;
     }
     std::string jsCode = sourceCode;
@@ -127,7 +123,6 @@ std::string RevSourceMap::GetOriginalNames(const std::string& sourceCode, uint32
     }
     auto lineBreakPos = jsCode.rfind('\n', jsCode.length() - 2);
     if (lineBreakPos == std::string::npos) {
-        LOGW("There is something wrong in source code of summaryBody.");
         return jsCode;
     }
     // adjust position of ^ in dump file
@@ -205,7 +200,7 @@ void RevSourceMap::Init(const std::string& sourceMap)
     }
 
     if (mappings_.empty()) {
-        LOGE("decode sourcemap fail, mapping: %{public}s", sourceMap.c_str());
+        LOGW("Decode sourcemap fail, mapping: %{public}s is empty", sourceMap.c_str());
         return;
     }
 
@@ -226,11 +221,10 @@ void RevSourceMap::Init(const std::string& sourceMap)
         // decode each mapping ";QAABC"
         std::vector<int32_t> ans;
         if (!VlqRevCode(mapping, ans)) {
-            LOGE("decode code fail");
             return;
         }
         if (ans.size() == 0) {
-            LOGE("decode sourcemap fail, mapping: %{public}s", mapping.c_str());
+            LOGW("Decode sourcemap fail, mapping: %{public}s is empty", mapping.c_str());
             break;
         }
         if (ans.size() == 1) {
@@ -279,7 +273,7 @@ void RevSourceMap::MergeInit(const std::string& sourceMap,
     }
 
     if (curMapData->mappings_.empty()) {
-        LOGE("MergeInit decode sourcemap fail, mapping: %{public}s", sourceMap.c_str());
+        LOGW("MergeInit decode sourcemap fail, mapping: %{public}s", sourceMap.c_str());
         return;
     }
 
@@ -301,11 +295,10 @@ void RevSourceMap::MergeInit(const std::string& sourceMap,
         std::vector<int32_t> ans;
 
         if (!VlqRevCode(mapping, ans)) {
-            LOGE("decode code fail");
             return;
         }
         if (ans.size() == 0) {
-            LOGE("decode sourcemap fail, mapping: %{public}s", mapping.c_str());
+            LOGD("Decode sourcemap fail, mapping: %{public}s is empty", mapping.c_str());
             break;
         }
         if (ans.size() == 1) {
@@ -384,7 +377,6 @@ uint32_t RevSourceMap::Base64CharToInt(char charCode)
 bool RevSourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans)
 {
     if (vStr.size() == 0) {
-        LOGE("VlqRevCode fail with empty string.");
         return false;
     }
     const int32_t VLQ_BASE_SHIFT = 5;
@@ -400,7 +392,6 @@ bool RevSourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans
     for (uint32_t i = 0; i < vStr.size(); i++) {
         uint32_t digit = Base64CharToInt(vStr[i]);
         if (digit == 64) {
-            LOGE("the arg is error");
             return false;
         }
         continuation = digit & VLQ_CONTINUATION_BIT;
@@ -417,7 +408,6 @@ bool RevSourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans
         }
     }
     if (continuation) {
-        LOGE("the arg is error");
         return false;
     }
     return true;

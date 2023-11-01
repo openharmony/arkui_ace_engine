@@ -545,20 +545,21 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuLessThan(const RefPtr<
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
 
-    OffsetF targetCenterOffset(
-        targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
-    targetCenterOffset_ = targetCenterOffset;
+    OffsetF center(targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
     if (GreatNotEqual(previewSize.Width(), widthLeftSpace)) {
-        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, previewSize.Height() / previewScale_));
+        auto unitSpace = widthLeftSpace / previewSize.Width();
+        previewGeometryNode->SetFrameSize(
+            SizeF(widthLeftSpace / previewScale_, unitSpace * previewSize.Height() / previewScale_));
+        totalSize = totalSize - SizeF((1 - unitSpace) * previewSize.Width(), (1 - unitSpace) * previewSize.Height());
     }
     previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
 
-    OffsetF offset(targetCenterOffset.GetX() - previewSize.Width() / 2,
-        std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
-            param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom - totalSize.Height() -
-                param.previewMenuGap));
+    OffsetF offset(center.GetX() - previewSize.Width() / 2,
+        std::min<float>(center.GetY() - previewSize.Height() / 2, param.windowGlobalSizeF.Height() -
+            param.bottomSecurity - param.bottom - totalSize.Height() - param.previewMenuGap));
 
     auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
         param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
@@ -576,9 +577,8 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuGreateThan(const RefPt
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
 
-    OffsetF targetCenterOffset(
-        targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
-    targetCenterOffset_ = targetCenterOffset;
+    OffsetF center(targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     auto menuHeight = totalSize.Height() - previewSize.Height();
     auto previewHalfHeight = previewSize.Height() / 2;
@@ -614,11 +614,12 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuGreateThan(const RefPt
 
     auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
     if (GreatNotEqual(previewSize.Width(), widthLeftSpace)) {
-        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, previewSize.Height() / previewScale_));
+        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_,
+            widthLeftSpace / previewSize.Width() * previewSize.Height() / previewScale_));
     }
     previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
 
-    OffsetF offset(targetCenterOffset.GetX() - previewSize.Width() / 2, 0.0f);
+    OffsetF offset(center.GetX() - previewSize.Width() / 2, 0.0f);
     auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
         param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
     auto y = std::clamp(offset.GetY(), param.windowsOffsetY + param.top + param.topSecurity, param.windowsOffsetY +
@@ -682,18 +683,20 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuLessThan(const RefPtr<
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
 
-    OffsetF targetCenterOffset(
-        targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
-    targetCenterOffset_ = targetCenterOffset;
+    OffsetF center(targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
     if (GreatNotEqual(previewSize.Width(), widthLeftSpace)) {
-        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, previewSize.Height() / previewScale_));
+        auto unitSpace = widthLeftSpace / previewSize.Width();
+        previewGeometryNode->SetFrameSize(
+            SizeF(widthLeftSpace / previewScale_, unitSpace * previewSize.Height() / previewScale_));
+        totalSize = totalSize - SizeF((1 - unitSpace) * previewSize.Width(), (1 - unitSpace) * previewSize.Height());
     }
     previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
 
-    OffsetF offset(targetCenterOffset.GetX() - previewSize.Width() / 2,
-        std::max<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
+    OffsetF offset(center.GetX() - previewSize.Width() / 2,
+        std::max<float>(center.GetY() - previewSize.Height() / 2,
             param.top + param.topSecurity + totalSize.Height() - previewSize.Height() + param.previewMenuGap));
 
     auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
@@ -712,9 +715,8 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuGreateThan(const RefPt
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
 
-    OffsetF targetCenterOffset(
-        targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
-    targetCenterOffset_ = targetCenterOffset;
+    OffsetF center(targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     auto menuHeight = totalSize.Height() - previewSize.Height();
     auto previewHalfHeight = previewSize.Height() / 2;
@@ -750,11 +752,12 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuGreateThan(const RefPt
 
     auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
     if (GreatNotEqual(previewSize.Width(), widthLeftSpace)) {
-        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, previewSize.Height() / previewScale_));
+        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_,
+            widthLeftSpace / previewSize.Width() * previewSize.Height() / previewScale_));
     }
     previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
 
-    OffsetF offset(targetCenterOffset.GetX() - previewSize.Width() / 2,
+    OffsetF offset(center.GetX() - previewSize.Width() / 2,
         param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom - previewSize.Height());
 
     auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
@@ -1472,7 +1475,8 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    auto maxSpaceHeight = std::max(topSpace_, bottomSpace_);
+    float factor = 0.8;
+    float maxSpaceHeight = wrapperSize_.Height() * factor;
     constraint.maxSize.SetHeight(maxSpaceHeight);
 }
 

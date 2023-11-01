@@ -52,12 +52,10 @@ static const std::unordered_set<std::string> OBJECT_VERTICAL_SET = {
 RefPtr<Curve> StepsCurveCreator(const std::vector<std::string>& params)
 {
     if (params.empty() || params.size() > STEPS_PARAMS_SIZE) {
-        LOGE("steps curve accept 1 or 2 parameter(s), current size is %zu.", params.size());
         return nullptr;
     }
     auto step = StringUtils::StringToInt(params.front());
     if (step <= 0) {
-        LOGE("step number is illegal: %{public}d", step);
         return nullptr;
     }
     StepsCurvePosition position = StepsCurvePosition::END;
@@ -67,7 +65,6 @@ RefPtr<Curve> StepsCurveCreator(const std::vector<std::string>& params)
         } else if (params.back() == "end") {
             position = StepsCurvePosition::END;
         } else {
-            LOGE("step position is illegal: %{public}s", params.back().c_str());
             return nullptr;
         }
     }
@@ -77,7 +74,6 @@ RefPtr<Curve> StepsCurveCreator(const std::vector<std::string>& params)
 RefPtr<Curve> CubicCurveCreator(const std::vector<std::string>& params)
 {
     if (params.size() != CUBIC_PARAMS_SIZE) {
-        LOGE("cubic curve accept 4 parameters");
         return nullptr;
     }
     double x1 = StringToDouble(params.at(0));
@@ -90,7 +86,6 @@ RefPtr<Curve> CubicCurveCreator(const std::vector<std::string>& params)
 RefPtr<Curve> SpringCurveCreator(const std::vector<std::string>& params)
 {
     if (params.size() != SPRING_PARAMS_SIZE) {
-        LOGE("spring curve accept 4 parameters");
         return nullptr;
     }
     double velocity = StringToDouble(params.at(0));
@@ -103,7 +98,6 @@ RefPtr<Curve> SpringCurveCreator(const std::vector<std::string>& params)
 RefPtr<Curve> InterpolatingSpringCreator(const std::vector<std::string>& params)
 {
     if (params.size() != INTERPOLATING_SPRING_PARAMS_SIZE) {
-        LOGE("interpolating spring accept 4 parameters");
         return nullptr;
     }
     double velocity = StringToDouble(params.at(0));
@@ -116,7 +110,6 @@ RefPtr<Curve> InterpolatingSpringCreator(const std::vector<std::string>& params)
 RefPtr<Curve> SpringMotionCreator(const std::vector<std::string>& params)
 {
     if (params.size() > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) {
-        LOGW("spring motion accept at most 3 params");
         return nullptr;
     }
     size_t paramSize = params.size();
@@ -132,7 +125,6 @@ RefPtr<Curve> SpringMotionCreator(const std::vector<std::string>& params)
 RefPtr<Curve> ResponsiveSpringMotionCreator(const std::vector<std::string>& params)
 {
     if (params.size() > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) {
-        LOGW("responsive spring motion accept at most 3 params");
         return nullptr;
     }
     size_t paramSize = params.size();
@@ -277,18 +269,15 @@ RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc)
 RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
 {
     if (aniTimFunc.back() != ')') {
-        LOGE("last character must be right embrace.");
         return nullptr;
     }
     std::string::size_type leftEmbracePosition = aniTimFunc.find_last_of('(');
     if (leftEmbracePosition == std::string::npos) {
-        LOGE("left embrace not found.");
         return nullptr;
     }
     auto aniTimFuncName = aniTimFunc.substr(0, leftEmbracePosition);
     auto params = aniTimFunc.substr(leftEmbracePosition + 1, aniTimFunc.length() - leftEmbracePosition - 2);
     if (aniTimFuncName.empty() || params.empty()) {
-        LOGE("no easing function name, or no parameters.");
         return nullptr;
     }
     std::vector<std::string> paramsVector;
@@ -306,7 +295,6 @@ RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
     };
     int64_t index = BinarySearchFindIndex(customCurveMap, ArraySize(customCurveMap), aniTimFuncName.c_str());
     if (index < 0) {
-        LOGE("no valid creator found for easing function: %{public}s", aniTimFuncName.c_str());
         return nullptr;
     }
     return customCurveMap[index].value(paramsVector);

@@ -49,9 +49,6 @@ void JSBlank::Create(const JSCallbackInfo& info)
 {
     CalcDimension blankMin;
     BlankModel::GetInstance()->Create();
-    if (info.Length() < 1) {
-        return;
-    }
     if (info[0]->IsUndefined()) {
         BlankModel::GetInstance()->SetBlankMin(blankMin);
         return;

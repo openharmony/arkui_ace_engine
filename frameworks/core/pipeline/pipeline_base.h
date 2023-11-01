@@ -182,7 +182,7 @@ public:
 
     virtual void WindowFocus(bool isFocus) = 0;
 
-    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
+    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) = 0;
 
     virtual void OnSurfaceChanged(int32_t width, int32_t height,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
@@ -501,6 +501,17 @@ public:
             return themeManager_->GetTheme<T>();
         }
         return {};
+    }
+
+    template<typename T>
+    bool GetDraggable()
+    {
+        if (IsJsCard()) {
+            return false;
+        }
+        auto theme = GetTheme<T>();
+        CHECK_NULL_RETURN(theme, false);
+        return theme->GetDraggable();
     }
 
     const RefPtr<ManagerInterface>& GetTextFieldManager()
@@ -951,6 +962,11 @@ public:
         return halfLeading_;
     }
 
+    bool GetOnFoucs() const
+    {
+        return onFocus_;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1059,6 +1075,7 @@ protected:
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
+    std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
 

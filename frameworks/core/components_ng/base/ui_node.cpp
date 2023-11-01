@@ -448,7 +448,10 @@ void UINode::DumpTree(int32_t depth)
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
-        DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+        DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
+        if (IsDisappearing()) {
+            DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+        }
         DumpInfo();
         DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(GetChildren().size()));
     }

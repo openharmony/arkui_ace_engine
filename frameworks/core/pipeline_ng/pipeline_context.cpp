@@ -293,7 +293,8 @@ void PipelineContext::InspectDrew()
 {
     CHECK_RUN_ON(UI);
     if (!needRenderNode_.empty()) {
-        for (auto node : needRenderNode_) {
+        auto needRenderNode = std::move(needRenderNode_);
+        for (auto&& node : needRenderNode) {
             if (node) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
@@ -711,7 +712,12 @@ void PipelineContext::StartWindowMaximizeAnimation(
     }
 #endif
     AnimationOption option;
-    constexpr int32_t duration = 400;
+    int32_t duration = 400;
+    MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL
+        || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        duration = 0;
+    }
     option.SetDuration(duration);
     auto curve = Curves::EASE_OUT;
     option.SetCurve(curve);
@@ -917,12 +923,6 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (uiExtensionManager_->OnBackPressed()) {
-        return true;
-    }
-#endif
-
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
         return true;
@@ -937,6 +937,12 @@ bool PipelineContext::OnBackPressed()
     if (textfieldManager && textfieldManager->OnBackPressed()) {
         return true;
     }
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_->OnBackPressed()) {
+        return true;
+    }
+#endif
 
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
@@ -1027,6 +1033,11 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive)
         return false;
     }
     isFocusActive_ = isFocusActive;
+    for (auto& pair : isFocusActiveUpdateEvents_) {
+        if (pair.second) {
+            pair.second(isFocusActive_);
+        }
+    }
     CHECK_NULL_RETURN(rootNode_, false);
     auto rootFocusHub = rootNode_->GetFocusHub();
     CHECK_NULL_RETURN(rootFocusHub, false);
@@ -1371,30 +1382,24 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
             manager->OnDragEnd({ 0.0f, 0.0f }, "");
         }
     }
+
     auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
     auto curMainView = FocusHub::GetCurrentMainView();
     auto isViewRootScopeFocused = curMainView ? curMainView->GetIsViewRootScopeFocused() : true;
     isTabJustTriggerOnKeyEvent_ = false;
-    if (isKeyTabDown && isViewRootScopeFocused) {
-        if (curMainView) {
-            auto viewRootScope = curMainView->GetMainViewRootScope();
-            if (viewRootScope && viewRootScope->GetFocusDependence() == FocusDependence::SELF &&
-                viewRootScope->IsCurrentFocus()) {
-                curMainView->SetIsDefaultHasFocused(true);
-                curMainView->SetIsViewRootScopeFocused(viewRootScope, false);
-                viewRootScope->InheritFocus();
-                isTabJustTriggerOnKeyEvent_ = true;
-            }
-        }
+    if (isKeyTabDown && isViewRootScopeFocused && curMainView) {
+        // Current focused on the view root scope. Tab key used to extend focus.
+        // If return true. This tab key will just trigger onKeyEvent process.
+        isTabJustTriggerOnKeyEvent_ = curMainView->HandleFocusOnMainView();
     }
-    // TAB key set focus state from inactive to active.
-    // If return success. This tab key will just trigger onKeyEvent process.
+
+    // Tab key set focus state from inactive to active.
+    // If return true. This tab key will just trigger onKeyEvent process.
     bool isHandleFocusActive = isKeyTabDown && SetIsFocusActive(true);
     isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent_ || isHandleFocusActive;
-    auto lastPage = stageManager_ ? stageManager_->GetLastPage() : nullptr;
-    auto mainNode = lastPage ? lastPage : rootNode_;
-    CHECK_NULL_RETURN(mainNode, false);
-    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
+
+    auto curMainViewFrameNode = curMainView ? curMainView->GetFrameNode() : nullptr;
+    if (!eventManager_->DispatchTabIndexEventNG(event, curMainViewFrameNode)) {
         auto result = eventManager_->DispatchKeyEventNG(event, rootNode_);
         if (!result && event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
             CHECK_NULL_RETURN(overlayManager_, false);
@@ -1611,6 +1616,10 @@ void PipelineContext::OnShow()
 void PipelineContext::OnHide()
 {
     CHECK_RUN_ON(UI);
+    auto dragDropManager = GetDragDropManager();
+    if (dragDropManager && dragDropManager->IsItemDragging()) {
+        dragDropManager->CancelItemDrag();
+    }
     onShow_ = false;
     window_->OnHide();
     RequestFrame();
@@ -1644,7 +1653,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     FlushWindowFocusChangedCallback(isFocus);
 }
 
-void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         return;
@@ -1654,7 +1663,20 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    containerPattern->ShowTitle(isShow, hasDeco);
+    auto callback = [weakPattern = WeakClaim(RawPtr(containerPattern)), isShow, hasDeco, needUpdate]() {
+        auto pattern = weakPattern.Upgrade();
+        if (pattern != nullptr) {
+            pattern->ShowTitle(isShow, hasDeco, needUpdate);
+        }
+    };
+    MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL
+        || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        constexpr int32_t delayedTime = 50;
+        taskExecutor_->PostDelayedTask(callback, TaskExecutor::TaskType::UI, delayedTime);
+    } else {
+        callback();
+    }
 }
 
 void PipelineContext::SetContainerWindow(bool isShow)
@@ -1971,7 +1993,7 @@ void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
 
 std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
 {
-    auto jsonNodeInfo = JsonUtil::Create(false);
+    auto jsonNodeInfo = JsonUtil::Create(true);
     auto iter = storeNode_.begin();
     while (iter != storeNode_.end()) {
         auto node = (iter->second).Upgrade();
@@ -2076,6 +2098,22 @@ void PipelineContext::HandleSubwindow(bool isShow)
     // there are sub windows that do not immediately hide, such as Toast floating window
     if (!isShow) {
         overlayManager_->ClearToastInSubwindow();
+    }
+}
+
+void PipelineContext::AddIsFocusActiveUpdateEvent(
+    const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback)
+{
+    CHECK_NULL_VOID(node);
+    isFocusActiveUpdateEvents_.insert_or_assign(node->GetId(), eventCallback);
+}
+
+void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto iter = isFocusActiveUpdateEvents_.find(node->GetId());
+    if (iter != isFocusActiveUpdateEvents_.end()) {
+        isFocusActiveUpdateEvents_.erase(iter);
     }
 }
 } // namespace OHOS::Ace::NG

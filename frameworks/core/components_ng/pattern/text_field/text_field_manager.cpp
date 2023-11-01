@@ -70,6 +70,9 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bot
     CHECK_NULL_VOID(scrollableNode);
     auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
+    if (scrollPattern->GetAxis() == Axis::HORIZONTAL) {
+        return;
+    }
 
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     CHECK_NULL_VOID(scrollableRect.Top() < bottomInset.start);

@@ -332,7 +332,6 @@ HWTEST_F(CustomTestNg, CustomTest005, TestSize.Level1)
     };
     customNode->SetRenderFunction(std::move(renderFunction));
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
-    layoutAlgorithm->Measure(AceType::RawPtr(parentLayoutWrapper));
 
     auto textFrameNode = CreateNode(V2::TEXT_ETS_TAG);
     textFrameNode->MountToParent(customNode);
@@ -374,6 +373,8 @@ HWTEST_F(CustomTestNg, CustomTest006, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
+    customNode = nullptr;
+    customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
     auto parentLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
@@ -388,6 +389,8 @@ HWTEST_F(CustomTestNg, CustomTest006, TestSize.Level1)
     };
     customNode->SetRenderFunction(std::move(renderFunction));
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
+    auto textFrameNode = CreateNode(V2::TEXT_ETS_TAG);
+    textFrameNode->MountToParent(customNode);
     layoutAlgorithm->Measure(AceType::RawPtr(parentLayoutWrapper));
     EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_1);
 }
@@ -432,6 +435,8 @@ HWTEST_F(CustomTestNg, CustomTest007, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
+    customNode = nullptr;
+    customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
     auto parentLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
@@ -446,6 +451,8 @@ HWTEST_F(CustomTestNg, CustomTest007, TestSize.Level1)
     };
     customNode->SetRenderFunction(std::move(renderFunction));
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
+    auto textFrameNode = CreateNode(V2::TEXT_ETS_TAG);
+    textFrameNode->MountToParent(customNode);
     layoutAlgorithm->Measure(AceType::RawPtr(parentLayoutWrapper));
     EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_1);
 }

@@ -340,7 +340,6 @@ void JsiClass<C>::InheritAndBind(
     panda::Local<panda::JSValueRef> hasExistRef = t->Get(vm,
         panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())));
     if (hasExistRef.IsEmpty()) {
-        LOGE("InheritAndBind JSClass(%{public}s) has existed", ThisJSClass::JSName());
         return;
     }
 
@@ -354,8 +353,6 @@ void JsiClass<C>::InheritAndBind(
     panda::Local<panda::JSValueRef> getResult = t->Get(vm,
         panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, JSClassImpl<Base, JsiClass>::JSName())));
     if (getResult.IsEmpty()) {
-        LOGE("InheritAndBind: Base class(%{public}s) not exist %{public}s",
-            JSClassImpl<Base, JsiClass>::JSName(), ThisJSClass::JSName());
         return;
     }
 
@@ -411,7 +408,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(pand
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
     if (binding == nullptr) {
-        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     auto fnPtr = static_cast<FunctionBinding<T, panda::Local<panda::JSValueRef>, Args...>*>(binding)->Get();
@@ -430,7 +426,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
     if (binding == nullptr) {
-        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
 
@@ -457,7 +452,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
     if (binding == nullptr) {
-        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
 
@@ -497,7 +491,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSMethodCallback(panda::JsiRuntimeC
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
     if (binding == nullptr) {
-        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     JsiCallbackInfo info(runtimeCallInfo);
@@ -513,7 +506,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
     if (binding == nullptr) {
-        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
 
@@ -550,7 +542,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRu
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
     if (binding == nullptr) {
-        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     auto fnPtr = static_cast<StaticFunctionBinding<void, const JSCallbackInfo&>*>(binding)->Get();
@@ -608,7 +599,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::Jsi
         jsConstructor_(info);
         auto retVal = info.GetReturnValue();
         if (retVal.valueless_by_exception()) {
-            LOGE("Constructor of %{public}s must return a value!", ThisJSClass::JSName());
             return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
         }
         auto instance = std::get_if<void*>(&retVal);

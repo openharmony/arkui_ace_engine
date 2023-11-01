@@ -25,6 +25,9 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+
 #include "core/animation/animator.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/scroll/scroll_bar_theme.h"
@@ -54,6 +57,10 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t VIEW_NUMBER = 10;
 constexpr int32_t TOTAL_NUMBER = 12;
+constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
+constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
+constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
+constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
 constexpr float HORIZONTAL_LENGTH = DEVICE_WIDTH / VIEW_NUMBER;
 constexpr float VERTICAL_LENGTH = DEVICE_HEIGHT / VIEW_NUMBER;
 constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_NUMBER - VIEW_NUMBER) * VERTICAL_LENGTH;
@@ -98,16 +105,20 @@ public:
 
 void ScrollTestNg::SetUpTestSuite()
 {
+    MockContainer::SetUp();
     MockPipelineBase::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto scrollBarTheme = AceType::MakeRefPtr<ScrollBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
+    MockPipelineBase::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void ScrollTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+    MockContainer::TearDown();
 }
 
 void ScrollTestNg::SetUp() {}
@@ -858,19 +869,23 @@ HWTEST_F(ScrollTestNg, ScrollPositionControlle003, TestSize.Level1)
 }
 
 /**
- * @tc.name: PaintMethod001
- * @tc.desc: Test PaintMethod
+ * @tc.name: ScrollBarAnimation001
+ * @tc.desc: Test ScrollBar Hover Animation
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollTestNg, PaintMethod001, TestSize.Level1)
+HWTEST_F(ScrollTestNg, ScrollBarAnimation001, TestSize.Level1)
 {
     RSCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 
+    const Offset downInBar = Offset(DEVICE_WIDTH - 1.f, 0.f);
+    const Offset moveInBar = Offset(DEVICE_WIDTH - 1.f, 10.f);
+    const Offset upInBar = moveInBar;
+
     /**
      * @tc.steps: step1. Axis::NONE
-     * @tc.expected: scrollBar->NeedPaint() is false
+     * @tc.expected: scrollBar->NeedPaint() is false and scrollBarOverlayModifier is nullptr.
      */
     CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::NONE); });
     auto paint = pattern_->CreateNodePaintMethod();
@@ -882,31 +897,130 @@ HWTEST_F(ScrollTestNg, PaintMethod001, TestSize.Level1)
     EXPECT_EQ(scrollBarOverlayModifier, nullptr);
 
     /**
-     * @tc.steps: step2. Axis::Vertical
-     * @tc.expected: scrollBar->NeedPaint() is true
+     * @tc.steps: step2. Axis::Vertical, test grow animation.
+     * @tc.expected: scrollBarOverlayModifier->hoverAnimatingType_ is HoverAnimationType::GROW and the width of.
+     * scrollBar is DEFAULT_ACTIVE_WIDTH
      */
     CreateWithContent();
     paint = pattern_->CreateNodePaintMethod();
     scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
     scrollBar = scrollPaint->scrollBar_.Upgrade();
+    scrollBar->SetTouchWidth(Dimension(DEFAULT_TOUCH_WIDTH, DimensionUnit::VP));
+    scrollBar->SetActiveWidth(Dimension(DEFAULT_ACTIVE_WIDTH, DimensionUnit::VP));
+    scrollBar->SetInactiveWidth(Dimension(DEFAULT_INACTIVE_WIDTH, DimensionUnit::VP));
+    scrollBar->SetNormalWidth(Dimension(DEFAULT_NORMAL_WIDTH, DimensionUnit::VP));
     EXPECT_TRUE(scrollBar->NeedPaint());
     modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
     scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
-    scrollPaint->UpdateOverlayModifier(&paintWrapper);
-    DrawingContext drawingContext = { canvas, DEVICE_WIDTH, DEVICE_HEIGHT};
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    DrawingContext drawingContext = { canvas, DEVICE_WIDTH, DEVICE_HEIGHT };
     scrollBarOverlayModifier->onDraw(drawingContext);
+    Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBarOverlayModifier->hoverAnimatingType_, HoverAnimationType::NONE);
+    EXPECT_EQ(scrollBar->GetActiveRect().Width(), DEFAULT_ACTIVE_WIDTH);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
 
-    Create([](ScrollModelNG model) { CreateContent(VIEW_NUMBER); });
+    /**
+     * @tc.steps: step3. Axis::Vertical, test shrink animation.
+     * @tc.expected: scrollBarOverlayModifier->hoverAnimatingType_ is HoverAnimationType::SHRINK and the width of
+     * scrollBar is DEFAULT_INACTIVE_WIDTH.
+     */
+    Touch(TouchType::UP, upInBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
-    scrollBarOverlayModifier->onDraw(drawingContext);
-    scrollBarOverlayModifier->StartOpacityAnimation(OpacityAnimationType::NONE);
-    scrollBarOverlayModifier->StartOpacityAnimation(OpacityAnimationType::DISAPPEAR);
-    scrollBarOverlayModifier->StartOpacityAnimation(OpacityAnimationType::APPEAR);
-    scrollBar = scrollPaint->scrollBar_.Upgrade();
-    scrollBar->SetHoverAnimationType(HoverAnimationType::GROW);
+    EXPECT_EQ(scrollBarOverlayModifier->hoverAnimatingType_, HoverAnimationType::NONE);
+    EXPECT_EQ(scrollBar->GetActiveRect().Width(), DEFAULT_INACTIVE_WIDTH);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+}
+
+/**
+ * @tc.name: ScrollBarAnimation002
+ * @tc.desc: Test ScrollBar Opacity Animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBarAnimation002, TestSize.Level1)
+{
+    RSCanvas canvas;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+
+    /**
+     * @tc.steps: step1. DisplayMode::ON
+     * @tc.expected: the opacity of scrollBarOverlayModifier is UINT8_MAX and opacityAnimatingType_ is
+     * OpacityAnimationType::NONE.
+     */
+    CreateWithContent();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    pattern_->SetScrollBar(DisplayMode::ON);
+    EXPECT_EQ(scrollBar->displayMode_, DisplayMode::ON);
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), UINT8_MAX);
+    EXPECT_EQ(scrollBarOverlayModifier->opacityAnimation_, nullptr);
+    EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
+
+    /**
+     * @tc.steps: step2. DisplayMode::AUTO
+     * @tc.expected: opacityAnimatingType_ is OpacityAnimationType::NONE.
+     */
+    pattern_->SetScrollBar(DisplayMode::AUTO);
+    EXPECT_EQ(scrollBar->displayMode_, DisplayMode::AUTO);
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
-    scrollBar->SetHoverAnimationType(HoverAnimationType::SHRINK);
+    EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
+
+    /**
+     * @tc.steps: step3. play appear animation.
+     * @tc.expected: opacityAnimatingType_ is OpacityAnimationType::NONE.
+     */
+    scrollBar->PlayScrollBarAppearAnimation();
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
+
+    /**
+     * @tc.steps: step4. DisplayMode::OFF
+     * @tc.expected: scrollBar->NeedPaint() is false.
+     */
+    pattern_->SetScrollBar(DisplayMode::OFF);
+    EXPECT_EQ(pattern_->scrollBar_, nullptr);
+}
+
+/**
+ * @tc.name: ScrollBarAnimation003
+ * @tc.desc: Test ScrollBar Adapt Animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBarAnimation003, TestSize.Level1)
+{
+    RSCanvas canvas;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+
+    CreateWithContent();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    pattern_->SetScrollBar(DisplayMode::ON);
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    EXPECT_TRUE(NearEqual(scrollBar->GetActiveRect().Height(), 666.667f));
+
+    /**
+     * @tc.steps: step1. change scrollBar height.
+     * @tc.expected: scrollBar->needAdaptAnimation_ is true.
+     */
+    scrollBar->UpdateScrollBarRegion(Offset::Zero(), Size(480.0, 800.0), Offset::Zero(), 1080.0f);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_TRUE(NearEqual(scrollBar->GetActiveRect().Height(), 592.592f));
+    EXPECT_TRUE(scrollBar->needAdaptAnimation_);
 }
 
 /**
@@ -1331,10 +1445,10 @@ HWTEST_F(ScrollTestNg, FadeController001, TestSize.Level1)
      */
     fadeController->ProcessPull(1.0, 1.0, 1.0);
     EXPECT_EQ(fadeController->opacityFloor_, 0.3);
-    EXPECT_EQ(fadeController->opacityCeil_, 0.5);
+    EXPECT_EQ(fadeController->opacityCeil_, 0.0);
     EXPECT_EQ(fadeController->scaleSizeFloor_, 3.25);
-    EXPECT_EQ(fadeController->scaleSizeCeil_, 3.25);
-    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+    EXPECT_EQ(fadeController->scaleSizeCeil_, 0.0);
+    EXPECT_EQ(fadeController->state_, OverScrollState::RECEDE);
 
     /**
      * @tc.steps: step5. When OverScrollState is PULL, call the ProcessAbsorb function and callback function in
@@ -1343,15 +1457,15 @@ HWTEST_F(ScrollTestNg, FadeController001, TestSize.Level1)
      */
     fadeController->ProcessAbsorb(-10.0);
     fadeController->decele_->NotifyListener(100.0);
-    EXPECT_EQ(fadeController->opacity_, 20.3);
-    EXPECT_EQ(fadeController->scaleSize_, 3.25);
+    EXPECT_EQ(fadeController->opacity_, -29.7);
+    EXPECT_EQ(fadeController->scaleSize_, -321.75);
     fadeController->controller_->NotifyStopListener();
-    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+    EXPECT_EQ(fadeController->state_, OverScrollState::IDLE);
     fadeController->ProcessAbsorb(100.0);
     fadeController->ProcessPull(1.0, 1.0, 1.0);
     fadeController->decele_->NotifyListener(100.0);
-    EXPECT_EQ(param1, 20.3);
-    EXPECT_EQ(param2, 3.25);
+    EXPECT_EQ(param1, 2940.3);
+    EXPECT_EQ(param2, 31853.25);
 }
 
 /**
@@ -1629,7 +1743,7 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
         barWidth,
         DEVICE_HEIGHT * ratio
     );
-    EXPECT_TRUE(IsEqualRect(rect, expectRect));
+    EXPECT_TRUE(IsEqual(rect, expectRect));
 
     UpdateCurrentOffset(-VERTICAL_LENGTH);
     rect = scrollBar->touchRegion_;
@@ -1639,7 +1753,7 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
         barWidth,
         DEVICE_HEIGHT * ratio
     );
-    EXPECT_TRUE(IsEqualRect(rect, expectRect));
+    EXPECT_TRUE(IsEqual(rect, expectRect));
 
     /**
      * @tc.steps: step2. Test Bar in HORIZONTAL
@@ -1658,7 +1772,7 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
         DEVICE_WIDTH * ratio,
         barWidth
     );
-    EXPECT_TRUE(IsEqualRect(rect, expectRect));
+    EXPECT_TRUE(IsEqual(rect, expectRect));
 
     UpdateCurrentOffset(-HORIZONTAL_LENGTH);
     rect = scrollBar->touchRegion_;
@@ -1668,7 +1782,7 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
         DEVICE_WIDTH * ratio,
         barWidth
     );
-    EXPECT_TRUE(IsEqualRect(rect, expectRect));
+    EXPECT_TRUE(IsEqual(rect, expectRect));
 }
 
 /**
@@ -1880,61 +1994,75 @@ HWTEST_F(ScrollTestNg, OnScrollCallback003, TestSize.Level1)
      * @tc.steps: step2. scroll to above of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(VERTICAL_LENGTH));
+    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(1.f));
 
     /**
      * @tc.steps: step3. Continue scroll up
+     * @tc.expected: friction is effected, but is 1
+     */
+    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(2.f));
+
+    /**
+     * @tc.steps: step4. Continue scroll up
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
+    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
     double currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_LT(currentOffset, VERTICAL_LENGTH * 2);
+    EXPECT_LT(currentOffset, 3.f);
 
     /**
-     * @tc.steps: step4. Scroll down
+     * @tc.steps: step5. Scroll down
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset - VERTICAL_LENGTH));
+    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset - 1.f));
 
     /**
-     * @tc.steps: step5. Scroll to bottom for test other condition
+     * @tc.steps: step6. Scroll to bottom for test other condition
      */
+    float scrollableDistance = VERTICAL_LENGTH * 2;
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH * 2));
+    EXPECT_TRUE(IsEqualCurrentPosition(-scrollableDistance));
 
     /**
-     * @tc.steps: step6. scroll to below of content
+     * @tc.steps: step7. scroll to below of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH * 3));
+    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(-(scrollableDistance + 1.f)));
 
     /**
-     * @tc.steps: step7. Continue scroll down
+     * @tc.steps: step8. Continue scroll down
+     * @tc.expected: friction is effected, but is 1
+     */
+    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(-(scrollableDistance + 2.f)));
+
+    /**
+     * @tc.steps: step9. Continue scroll down
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
+    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
     currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_LT(currentOffset, -VERTICAL_LENGTH * 3);
-    EXPECT_GT(currentOffset, -VERTICAL_LENGTH * 4);
+    EXPECT_GT(currentOffset, -(scrollableDistance + 3.f));
 
     /**
-     * @tc.steps: step8. Scroll up
+     * @tc.steps: step10. Scroll up
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset + VERTICAL_LENGTH));
+    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset + 1.f));
 
     /**
-     * @tc.steps: step9. scroll to middle of content
+     * @tc.steps: step11. scroll to middle of content
      * @tc.expected: friction is not effected
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH));
+    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(-1.f));
 }
 
 /**
@@ -1958,52 +2086,65 @@ HWTEST_F(ScrollTestNg, OnScrollCallback004, TestSize.Level1)
      * @tc.steps: step2. scroll to above of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(VERTICAL_LENGTH));
+    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(1.f));
 
     /**
      * @tc.steps: step3. Continue scroll up
+     * @tc.expected: friction is effected, but is 1
+     */
+    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(2.f));
+
+    /**
+     * @tc.steps: step4. Continue scroll up
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
+    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
     double currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_LT(currentOffset, VERTICAL_LENGTH * 2);
+    EXPECT_LT(currentOffset, 3.f);
 
     /**
-     * @tc.steps: step4. Scroll down
+     * @tc.steps: step5. Scroll down
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset - VERTICAL_LENGTH));
+    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset - 1.f));
 
     /**
-     * @tc.steps: step5. Scroll to bottom for test other condition
+     * @tc.steps: step6. Scroll to bottom for test other condition
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
     EXPECT_TRUE(IsEqualCurrentPosition(0));
 
     /**
-     * @tc.steps: step6. scroll to below of content
+     * @tc.steps: step7. scroll to below of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH));
+    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(-1.f));
 
     /**
-     * @tc.steps: step7. Continue scroll down
+     * @tc.steps: step8. Continue scroll down
+     * @tc.expected: friction is effected, but is 1
+     */
+    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(-2.f));
+
+    /**
+     * @tc.steps: step9. Continue scroll down
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
+    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
     currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_LT(currentOffset, -VERTICAL_LENGTH * 1);
-    EXPECT_GT(currentOffset, -VERTICAL_LENGTH * 2);
+    EXPECT_GT(currentOffset, -3.f);
 
     /**
-     * @tc.steps: step8. Scroll up
+     * @tc.steps: step10. Scroll up
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset + VERTICAL_LENGTH));
+    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset + 1.f));
 }
 
 /**
@@ -2571,5 +2712,32 @@ HWTEST_F(ScrollTestNg, Distributed001, TestSize.Level1)
      */
     pattern_->OnRestoreInfo(ret);
     EXPECT_DOUBLE_EQ(pattern_->currentOffset_, 1.0f);
+}
+
+/**
+ * @tc.name: ScrollGetItemRect001
+ * @tc.desc: Test Scroll GetItemRect function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Scroll.
+     */
+    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::HORIZONTAL); });
+
+    /**
+     * @tc.steps: step2. Get invalid ScrollItem Rect.
+     * @tc.expected: Return 0 when input invalid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(-1), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect()));
+
+    /**
+     * @tc.steps: step3. Get valid ScrollItem Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0),
+        Rect(0, 0, TOTAL_NUMBER * HORIZONTAL_LENGTH, FILL_LENGTH.Value() * DEVICE_HEIGHT)));
 }
 } // namespace OHOS::Ace::NG
