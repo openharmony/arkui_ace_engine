@@ -89,7 +89,7 @@ enum class AceLogTag : uint8_t {
     ACE_OUTER_SCROLL_BAR,
     ACE_FONT,
     ACE_PROMPT_ACTION_TOAST,
-    ACE_TEXTINPUT,
+    ACE_TEXT_FIELD,
     ACE_TEXT_CLOCK,
     ACE_TEXT_TIMER,
     ACE_SWIPER,
@@ -119,6 +119,8 @@ enum class AceLogTag : uint8_t {
     ACE_IF,
     ACE_FOREACH,
     ACE_LAZYFOREACH,
+    ACE_GAUGE,
+    ACE_HYPERLINK,
     ACE_ANIMATION,
 };
 

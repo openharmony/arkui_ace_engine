@@ -126,7 +126,6 @@ void JSImage::SetBorder(const Border& border)
 
 void JSImage::OnComplete(const JSCallbackInfo& args)
 {
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "JSImage OnComplete");
     if (args[0]->IsFunction()) {
         auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
@@ -143,7 +142,6 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
 
 void JSImage::OnError(const JSCallbackInfo& args)
 {
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "JSImage OnError");
     if (args[0]->IsFunction()) {
         auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageFailEventToJSValue);
@@ -210,8 +208,6 @@ void JSImage::Create(const JSCallbackInfo& info)
                 pixmap = CreatePixelMapFromNapiValue(info[0]);
             }
         }
-#else
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Pixmap not supported under this environment.");
 #endif
     }
 
@@ -356,7 +352,6 @@ void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
     }
     auto jscolorfilter = Referenced::MakeRefPtr<JSColorFilter>();
     if (jscolorfilter == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "make jscolorfilter object failed");
         return;
     }
     std::vector<float> colorfilter;

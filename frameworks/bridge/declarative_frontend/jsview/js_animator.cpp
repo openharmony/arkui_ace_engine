@@ -57,7 +57,6 @@ constexpr int32_t SCROLL_MOTION_LENGTH = 5;
 void AddFrameListener(const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<KeyframeAnimation<double>>& animation)
 {
     if (!animatorInfo || !animation) {
-        LOGE("animatorInfo or animation is nullptr");
         return;
     }
     auto frameEvent = animatorInfo->GetFrameEvent();
@@ -69,7 +68,6 @@ void AddFrameListener(const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<Key
 void HandleAnimatorInfo(const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<Animator>& animator)
 {
     if (!animatorInfo || !animator) {
-        LOGE("animatorInfo or animator is nullptr");
         return;
     }
     int32_t duration = animatorInfo->GetDuration();
@@ -88,7 +86,6 @@ bool CreateAnimation(
     const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<Animator>& animator, AnimationStatus operation)
 {
     if (!animatorInfo || !animator) {
-        LOGE("animatorInfo or animator is nullptr");
         return false;
     }
     auto motion = animatorInfo->GetAnimatorMotion();
@@ -104,8 +101,6 @@ bool CreateAnimation(
             animator->PlayMotion(motion);
         } else if (operation == AnimationStatus::STOPPED) {
             animator->Finish();
-        } else {
-            LOGD("animator don't need to do motion");
         }
         return false;
     } else {
@@ -128,7 +123,6 @@ bool CreateAnimation(
 std::function<void()> GetEventCallback(const JSCallbackInfo& info, const std::string& name)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
         return nullptr;
     }
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -183,12 +177,10 @@ void JSAnimator::JSBind(BindingTarget globalObj)
 void JSAnimator::Create(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsString()) {
-        LOGE("arg is not a string.");
         return;
     }
     animatorId_ = info[0]->ToString();
@@ -230,7 +222,6 @@ void JSAnimator::SetDuration(int32_t duration)
 {
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
-        LOGE("animatorInfo is nullptr");
         return;
     }
     animatorInfo->SetDuration(duration);
@@ -239,18 +230,15 @@ void JSAnimator::SetDuration(int32_t duration)
 void JSAnimator::SetCurve(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 arguments");
         return;
     }
 
     if (!info[0]->IsString()) {
-        LOGE("arg is not a string.");
         return;
     }
     auto value = info[0]->ToString();
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
-        LOGE("animatorInfo is nullptr");
         return;
     }
     auto curve = CreateCurve(value);
@@ -261,7 +249,6 @@ void JSAnimator::SetDelay(int32_t delay)
 {
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
-        LOGE("animatorInfo is nullptr");
         return;
     }
     animatorInfo->SetDelay(delay);
@@ -271,7 +258,6 @@ void JSAnimator::SetFillMode(int32_t fillMode)
 {
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
-        LOGE("animatorInfo is nullptr");
         return;
     }
     animatorInfo->SetFillMode(static_cast<FillMode>(fillMode));
@@ -281,7 +267,6 @@ void JSAnimator::SetIteration(int32_t iteration)
 {
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
-        LOGE("animatorInfo is nullptr");
         return;
     }
     animatorInfo->SetIteration(iteration);
@@ -291,7 +276,6 @@ void JSAnimator::SetPlayMode(int32_t playMode)
 {
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
-        LOGE("animatorInfo is nullptr");
         return;
     }
     animatorInfo->SetPlayMode(static_cast<AnimationDirection>(playMode));
@@ -300,19 +284,16 @@ void JSAnimator::SetPlayMode(int32_t playMode)
 void JSAnimator::SetMotion(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have 1 arguments");
         return;
     }
     JSMotion* rawMotion = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMotion>();
     if (!rawMotion) {
-        LOGE("motion is nullptr");
         return;
     }
 
     RefPtr<Motion> motion = rawMotion->GetMotion();
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
-        LOGE("animatorInfo is nullptr");
         return;
     }
     animatorInfo->SetAnimatorMotion(motion);

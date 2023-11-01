@@ -80,8 +80,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
 
 void JSGauge::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsObject()) {
-        LOGE("gauge create error, info is non-valid");
+    if (!info[0]->IsObject()) {
         return;
     }
 
@@ -103,8 +102,7 @@ void JSGauge::Create(const JSCallbackInfo& info)
 
 void JSGauge::SetValue(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsNumber()) {
-        LOGE("JSGauge::SetValue::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (!info[0]->IsNumber()) {
         return;
     }
     GaugeModel::GetInstance()->SetValue(info[0]->ToNumber<float>());
@@ -112,8 +110,7 @@ void JSGauge::SetValue(const JSCallbackInfo& info)
 
 void JSGauge::SetStartAngle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsNumber()) {
-        LOGE("JSGauge::SetStartAngle::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (!info[0]->IsNumber()) {
         return;
     }
     GaugeModel::GetInstance()->SetStartAngle(info[0]->ToNumber<float>());
@@ -121,8 +118,7 @@ void JSGauge::SetStartAngle(const JSCallbackInfo& info)
 
 void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsNumber()) {
-        LOGE("JSGauge::SetEndAngle::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (!info[0]->IsNumber()) {
         return;
     }
     GaugeModel::GetInstance()->SetEndAngle(info[0]->ToNumber<float>());
@@ -135,8 +131,7 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
         return;
     }
 
-    if (info.Length() < 1 || !info[0]->IsArray()) {
-        LOGE("The number of argument is less than 1, or the argument is not array.");
+    if (!info[0]->IsArray()) {
         return;
     }
     std::vector<Color> colors;
@@ -169,11 +164,6 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
 
 void JSGauge::SetGradientColors(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The number of argument is less than 1, or the argument is not array.");
-        return;
-    }
-
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
         GaugeModel::GetInstance()->ResetGradientColors();
         return;
@@ -269,10 +259,6 @@ void JSGauge::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, std::vecto
 
 void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE(" JSGauge::SetStrokeWidth::The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     CalcDimension strokeWidth;
     if (!ParseJsDimensionVpNG(info[0], strokeWidth) || strokeWidth.Unit() == DimensionUnit::PERCENT) {
         strokeWidth = CalcDimension(0);
@@ -282,8 +268,7 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
 
 void JSGauge::SetLabelConfig(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsObject()) {
-        LOGE("JSGauge::SetLabelTextConfig::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (!info[0]->IsObject()) {
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);

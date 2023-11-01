@@ -91,13 +91,11 @@ public:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<GaugeTheme>& theme) const
         {
             if (!themeStyle) {
-                LOGE("themeStyle is null");
                 return;
             }
 
             auto gaugePattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_GAUGE, nullptr);
             if (!gaugePattern) {
-                LOGE("gaugePattern is null");
                 return;
             }
 

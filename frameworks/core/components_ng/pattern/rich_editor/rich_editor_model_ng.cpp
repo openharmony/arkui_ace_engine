@@ -57,11 +57,7 @@ RefPtr<RichEditorControllerBase> RichEditorModelNG::GetRichEditorController()
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_RETURN(richEditorPattern, nullptr);
-    RefPtr<RichEditorControllerBase> controller = richEditorPattern->GetRichEditorController();
-    if (!controller) {
-        LOGE("RichEditorModelNG::GetRichEditorController: RichEditorControllerBase is null");
-    }
-    return controller;
+    return richEditorPattern->GetRichEditorController();
 }
 
 void RichEditorModelNG::SetOnReady(std::function<void()>&& func)
