@@ -187,6 +187,11 @@ private:
 
     Method updateZoomAccess_;
     Method updateJavaScriptEnabled_;
+    Method updateMinFontSize_;
+    Method updateHorizontalScrollBarAccess_;
+    Method updateVerticalScrollBarAccess_;
+    Method updateBackgroundColor_;
+    Method updateMediaPlayGestureAccess_;
 
     EventCallbackV2 onPageFinishedV2_;
     EventCallbackV2 onPageStartedV2_;

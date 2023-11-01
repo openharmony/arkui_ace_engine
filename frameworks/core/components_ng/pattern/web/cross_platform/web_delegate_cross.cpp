@@ -115,6 +115,16 @@ constexpr char WEB_ATTRIBUTE_ZOOM_ACCESS[] = "zoomAccess";
 constexpr char NTC_ZOOM_ACCESS[] = "zoomAccess";
 constexpr char WEB_ATTRIBUTE_JAVASCRIPT_ACCESS[] = "javascriptAccess";
 constexpr char NTC_JAVASCRIPT_ACCESS[] = "javascriptAccess";
+constexpr char WEB_ATTRIBUTE_MIN_FONT_SIZE[] = "minFontSize";
+constexpr char NTC_MIN_FONT_SIZE[] = "minFontSize";
+constexpr char WEB_ATTRIBUTE_HORIZONTAL_SCROLLBAR_ACCESS[] = "horizontalScrollBarAccess";
+constexpr char NTC_HORIZONTAL_SCROLLBAR_ACCESS[] = "horizontalScrollBarAccess";
+constexpr char WEB_ATTRIBUTE_VERTICAL_SCROLLBAR_ACCESS[] = "verticalScrollBarAccess";
+constexpr char NTC_VERTICAL_SCROLLBAR_ACCESS[] = "verticalScrollBarAccess";
+constexpr char WEB_ATTRIBUTE_BACKGROUND_COLOR[] = "backgroundColor";
+constexpr char NTC_BACKGROUND_COLOR[] = "backgroundColor";
+constexpr char WEB_ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS[] = "mediaPlayGestureAccess";
+constexpr char NTC_MEDIA_PLAY_GESTURE_ACCESS[] = "mediaPlayGestureAccess";
 
 const char WEB_PARAM_NONE[] = "";
 const char WEB_PARAM_AND[] = "#HWJS-&-#";
@@ -447,7 +457,17 @@ void WebDelegateCross::OnErrorReceive(void* object)
 }
 
 void WebDelegateCross::UpdateUserAgent(const std::string& userAgent) {}
-void WebDelegateCross::UpdateBackgroundColor(const int backgroundColor) {}
+
+void WebDelegateCross::UpdateBackgroundColor(const int backgroundColor)
+{
+    hash_ = MakeResourceHash();
+    updateBackgroundColor_ = MakeMethodHash(WEB_ATTRIBUTE_BACKGROUND_COLOR);
+    std::stringstream paramStream;
+    paramStream << NTC_BACKGROUND_COLOR << WEB_PARAM_EQUALS << backgroundColor;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateBackgroundColor_, param, nullptr);
+}
+
 void WebDelegateCross::UpdateInitialScale(float scale) {}
 void WebDelegateCross::UpdateJavaScriptEnabled(const bool& isJsEnabled)
 {
@@ -514,7 +534,14 @@ void WebDelegateCross::UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnable
 {}
 
 void WebDelegateCross::UpdateMediaPlayGestureAccess(bool isNeedGestureAccess)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateMediaPlayGestureAccess_ = MakeMethodHash(WEB_ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_MEDIA_PLAY_GESTURE_ACCESS << WEB_PARAM_EQUALS << isNeedGestureAccess;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateMediaPlayGestureAccess_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled)
 {}
@@ -547,7 +574,14 @@ void WebDelegateCross::UpdateDefaultFontSize(int32_t defaultFontSize)
 {}
 
 void WebDelegateCross::UpdateMinFontSize(int32_t minFontSize)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateMinFontSize_ = MakeMethodHash(WEB_ATTRIBUTE_MIN_FONT_SIZE);
+    std::stringstream paramStream;
+    paramStream << NTC_MIN_FONT_SIZE << WEB_PARAM_EQUALS << std::clamp(minFontSize, FONT_MIN_SIZE, FONT_MAX_SIZE);
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateMinFontSize_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateMinLogicalFontSize(int32_t minLogicalFontSize)
 {}
@@ -556,10 +590,24 @@ void WebDelegateCross::UpdateBlockNetwork(bool isNetworkBlocked)
 {}
 
 void WebDelegateCross::UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateHorizontalScrollBarAccess_ = MakeMethodHash(WEB_ATTRIBUTE_HORIZONTAL_SCROLLBAR_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_HORIZONTAL_SCROLLBAR_ACCESS << WEB_PARAM_EQUALS << isHorizontalScrollBarAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateHorizontalScrollBarAccess_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateVerticalScrollBarAccess_ = MakeMethodHash(WEB_ATTRIBUTE_VERTICAL_SCROLLBAR_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_VERTICAL_SCROLLBAR_ACCESS << WEB_PARAM_EQUALS << isVerticalScrollBarAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateVerticalScrollBarAccess_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateScrollBarColor(const std::string& colorValue)
 {}
