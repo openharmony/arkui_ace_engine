@@ -323,7 +323,7 @@ protected:
     void HandleSingleClickEvent(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     bool IsDraggable(const Offset& localOffset);
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
