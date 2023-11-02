@@ -2446,18 +2446,24 @@ void WebPattern::OnScrollEndRecursive()
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
 {
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    if (nestedScrollMode_ != NestedScrollMode::SELF_FIRST) {
+        return;
+    }
     if (isFling) {
-        if (isFirstFlingScrollVelocity_) {
+        if (velocity != 0 && isFirstFlingScrollVelocity_) {
             HandleScrollVelocity(velocity);
             isFirstFlingScrollVelocity_ = false;
         }
     } else {
-        HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        if (scrollState_) {
+            HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        }
     }
 }
 
 void WebPattern::OnScrollState(bool scrollState)
 {
+    scrollState_ = scrollState;
     if (!scrollState) {
         OnScrollEndRecursive();
     }
@@ -2468,7 +2474,8 @@ Axis WebPattern::GetParentAxis()
     auto parent = WebSearchParent();
     parent_ = parent;
     CHECK_NULL_RETURN(parent, Axis::HORIZONTAL);
-    return parent->GetAxis();
+    axis_ = parent->GetAxis();
+    return axis_;
 }
 
 RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
@@ -2496,5 +2503,49 @@ void WebPattern::OnRootLayerChanged(int width, int height)
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    if (nestedOpt.forward == NestedScrollMode::SELF_ONLY &&
+        nestedOpt.backward == NestedScrollMode::SELF_ONLY) {
+        nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
+    } else if (nestedOpt.forward == NestedScrollMode::SELF_FIRST &&
+               nestedOpt.backward == NestedScrollMode::SELF_FIRST) {
+        nestedScrollMode_ = NestedScrollMode::SELF_FIRST;
+    } else if (nestedOpt.forward == NestedScrollMode::PARENT_FIRST &&
+               nestedOpt.backward == NestedScrollMode::PARENT_FIRST) {
+        nestedScrollMode_ = NestedScrollMode::PARENT_FIRST;
+    } else if (nestedOpt.forward == NestedScrollMode::PARALLEL &&
+               nestedOpt.backward == NestedScrollMode::PARALLEL) {
+        nestedScrollMode_ = NestedScrollMode::PARALLEL;
+    }
+    TAG_LOGD(AceLogTag::ACE_WEB, "SetNestedScroll %{public}d", nestedScrollMode_);
+}
+
+bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
+{
+    float offset = GetAxis() == Axis::HORIZONTAL ? x : y;
+    float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    if (nestedScrollMode_ == NestedScrollMode::PARENT_FIRST) {
+        if (offset != 0) {
+            auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+            float remainOffset = result.remain;
+            CHECK_NULL_RETURN(delegate_, true);
+            TAG_LOGD(AceLogTag::ACE_WEB, "FilterScrollEvent ScrollBy remainOffset = %{public}f", remainOffset);
+            GetAxis() == Axis::HORIZONTAL ? delegate_->ScrollBy(-remainOffset, 0)
+                                          : delegate_->ScrollBy(0, -remainOffset);
+        } else {
+            HandleScrollVelocity(velocity);
+        }
+        return true;
+    } else if (nestedScrollMode_ == NestedScrollMode::PARALLEL) {
+        if (offset != 0) {
+            HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        } else {
+            HandleScrollVelocity(velocity);
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

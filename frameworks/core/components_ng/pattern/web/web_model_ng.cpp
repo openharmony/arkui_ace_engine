@@ -847,4 +847,11 @@ void WebModelNG::SetWrapContent(bool isWrapContentEnabled)
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWrapContent(isWrapContentEnabled);
 }
+
+void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetNestedScroll(nestedOpt);
+}
 } // namespace OHOS::Ace::NG
