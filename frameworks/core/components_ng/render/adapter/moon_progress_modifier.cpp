@@ -188,8 +188,6 @@ void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas, const SizeF& frameS
             RSPathDirection::CW_DIRECTION);
         canvas.DrawPath(path);
     }
-#ifdef USE_ROSEN_DRAWING
     canvas.DetachBrush();
-#endif
 }
 } // namespace OHOS::Ace::NG
