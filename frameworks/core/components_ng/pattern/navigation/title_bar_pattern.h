@@ -155,6 +155,17 @@ public:
         return LessNotEqual(tempTitleBarHeight_, maxTitleBarHeight_);
     }
 
+    bool GetCurrentNavBarStatus() const
+    {
+        if (NearZero(tempTitleBarHeight_)) {
+            return true;
+        }
+        GetMaxTitleBarHeight();
+        auto titleMiddleValue =
+            (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / 2;
+        return LessNotEqual(tempTitleBarHeight_, titleMiddleValue);
+    }
+    
     NavigationTitleMode GetNavigationTitleMode() const
     {
         return titleMode_;
