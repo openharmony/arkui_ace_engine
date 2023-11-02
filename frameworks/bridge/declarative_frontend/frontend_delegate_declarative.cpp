@@ -1518,7 +1518,6 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
         dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
             taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },

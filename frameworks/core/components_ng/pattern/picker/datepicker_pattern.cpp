@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_base_component.h"
@@ -156,9 +157,9 @@ void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool is
     }
     for (const auto& tag : tags) {
         auto iter = std::find_if(datePickerColumns_.begin(), datePickerColumns_.end(), [&tag](const auto& c) {
-                auto column = c.Upgrade();
-                return column && column->GetId() == tag->GetId();
-            });
+            auto column = c.Upgrade();
+            return column && column->GetId() == tag->GetId();
+        });
         if (iter != datePickerColumns_.end()) {
             auto datePickerColumn = (*iter).Upgrade();
             CHECK_NULL_VOID(datePickerColumn);
@@ -383,8 +384,8 @@ bool DatePickerPattern::HandleDirectionKey(KeyCode code)
         if (!ShowMonthDays()) {
             childSize = static_cast<float>(host->GetChildren().size());
         }
-        if (focusKeyID_ > childSize -1) {
-            focusKeyID_ = childSize -1;
+        if (focusKeyID_ > childSize - 1) {
+            focusKeyID_ = childSize - 1;
             return false;
         }
         PaintFocusState();
@@ -557,7 +558,6 @@ void DatePickerPattern::OnDataLinking(
         HandleDayChange(isAdd, index, resultTags);
         return;
     }
-    LOGE("unknown tag[%{private}d] of column.", tag->GetId());
 }
 
 void DatePickerPattern::HandleMonthDaysChange(
@@ -577,7 +577,6 @@ void DatePickerPattern::HandleMonthDaysChange(
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
     auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
     if (tag != monthDaysNode) {
-        LOGE("unknown tag[%{private}d] of column.", tag->GetId());
         return;
     }
 
@@ -599,8 +598,8 @@ std::string DatePickerPattern::GetSelectedObject(bool isColumnChange, int status
     // W3C's month is between 0 to 11, need to reduce one.
     date.SetMonth(date.GetMonth() - 1);
 
-    auto dateTimeString = std::string("{\"year\":") + std::to_string(date.GetYear()) + ",\"month\":" +
-        std::to_string(date.GetMonth()) + ",\"day\":" + std::to_string(date.GetDay());
+    auto dateTimeString = std::string("{\"year\":") + std::to_string(date.GetYear()) +
+                          ",\"month\":" + std::to_string(date.GetMonth()) + ",\"day\":" + std::to_string(date.GetDay());
     auto pickTime = PickerTime::Current();
     if (showTime_) {
         auto host = GetHost();
@@ -625,8 +624,9 @@ std::string DatePickerPattern::GetSelectedObject(bool isColumnChange, int status
             pickTime = timePickerPattern->GetCurrentTime();
         }
     }
-    dateTimeString += std::string(",\"hour\":") + std::to_string(pickTime.GetHour()) + ",\"minute\":" +
-        std::to_string(pickTime.GetMinute()) + ",\"status\":" + std::to_string(status) + "}";
+    dateTimeString += std::string(",\"hour\":") + std::to_string(pickTime.GetHour()) +
+                      ",\"minute\":" + std::to_string(pickTime.GetMinute()) + ",\"status\":" + std::to_string(status) +
+                      "}";
     return dateTimeString;
 }
 
@@ -663,7 +663,6 @@ void DatePickerPattern::HandleSolarDayChange(bool isAdd, uint32_t index)
     auto monthDatePickerColumnPattern = monthNode->GetPattern<DatePickerColumnPattern>();
     auto dayDatePickerColumnPattern = dayNode->GetPattern<DatePickerColumnPattern>();
     if (!yearDatePickerColumnPattern || !monthDatePickerColumnPattern || !dayDatePickerColumnPattern) {
-        LOGE("year or month or day column pattern is null.");
         return;
     }
 
@@ -932,7 +931,7 @@ void DatePickerPattern::HandleReduceLunarMonthDaysChange(uint32_t index)
         if (lunarDate.year < startDateLunar_.year) {
             lunarDate.year = endDateLunar_.year;
         }
-        lunarDate.month = MAX_MONTH;                                    // set to be previous year's max month
+        lunarDate.month = MAX_MONTH; // set to be previous year's max month
         lunarDate.isLeapMonth = false;
         if (LunarCalculator::GetLunarLeapMonth(lunarDate.year) == 12) { // leap 12th month
             lunarDate.isLeapMonth = true;
@@ -1058,7 +1057,7 @@ void DatePickerPattern::HandleLunarYearChange(bool isAdd, uint32_t index)
     auto optionCount = GetOptionCount(yearColumn);
     if (isAdd) { // need reduce one index
         lastYearIndex = optionCount != 0 ? (GetOptionCount(yearColumn) + lastYearIndex - 1) % optionCount : 0;
-    } else {     // need add one index
+    } else { // need add one index
         lastYearIndex = optionCount != 0 ? (GetOptionCount(yearColumn) + lastYearIndex + 1) % optionCount : 0;
     }
     uint32_t lastLunarYear = startDateLunar_.year + lastYearIndex;
@@ -1108,7 +1107,6 @@ LunarDate DatePickerPattern::GetCurrentLunarDate(uint32_t lunarYear) const
     auto dayDatePickerColumnPattern = dayColumn->GetPattern<DatePickerColumnPattern>();
 
     if (!yearDatePickerColumnPattern || !monthDatePickerColumnPattern || !dayDatePickerColumnPattern) {
-        LOGE("year or month or day pattern is null.");
         return lunarResult;
     }
 
@@ -1189,7 +1187,6 @@ PickerDate DatePickerPattern::GetCurrentDateByYearMonthDayColumn() const
     auto dayDatePickerColumnPattern = dayColumn->GetPattern<DatePickerColumnPattern>();
 
     if (!yearDatePickerColumnPattern || !monthDatePickerColumnPattern || !dayDatePickerColumnPattern) {
-        LOGE("year or month or day pattern is null.");
         return currentDate;
     }
     if (!IsShowLunar()) {
@@ -1230,7 +1227,6 @@ PickerDate DatePickerPattern::GetCurrentDateByMonthDaysColumn() const
     auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
     auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
     if (!yearDatePickerColumnPattern || !monthDaysDatePickerColumnPattern) {
-        LOGE("year or monthDays pattern is null.");
         return currentDate;
     }
 
@@ -1282,7 +1278,6 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
     auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
     auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
     if (!yearDatePickerColumnPattern || !monthDaysDatePickerColumnPattern) {
-        LOGE("year or month or day pattern is null.");
         return lunarResult;
     }
 

@@ -50,7 +50,6 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
-        LOGE("fail to measure slidingPanel due to layoutConstraint is nullptr");
         return;
     }
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();

@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
@@ -209,7 +210,7 @@ void MenuItemPattern::ShowSubMenu()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    LOGI("MenuItemPattern::ShowSubMenu menu item id is %{public}d", host->GetId());
+    TAG_LOGD(AceLogTag::ACE_MENU, fmt, "MenuItemPattern::ShowSubMenu menu item id is %{public}d", host->GetId());
     auto buildFunc = GetSubBuilder();
     if (!buildFunc || isSubMenuShowed_) {
         return;

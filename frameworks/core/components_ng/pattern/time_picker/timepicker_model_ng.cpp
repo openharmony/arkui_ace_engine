@@ -242,7 +242,6 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     if (!theme) {
-        LOGE("DialogTheme is null");
         return;
     }
     ButtonInfo buttonInfo;

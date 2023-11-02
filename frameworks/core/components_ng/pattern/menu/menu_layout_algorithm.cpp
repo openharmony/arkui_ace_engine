@@ -341,7 +341,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     auto targetSize = props->GetTargetSizeValue(SizeF());
     position_ = props->GetMenuOffset().value_or(OffsetF());
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
-    LOGD("menu position_ = %{public}s, targetSize = %{public}s", position_.ToString().c_str(),
+    TAG_LOGD(AceLogTag::ACE_MENU, "menu position_ = %{public}s, targetSize = %{public}s", position_.ToString().c_str(),
         targetSize.ToString().c_str());
     InitializePadding(layoutWrapper);
     auto constraint = props->GetLayoutConstraint();
@@ -458,7 +458,6 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuLayoutProperty);
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
     if (!constraint) {
-        LOGE("fail to measure menu due to layoutConstraint is nullptr");
         return;
     }
     auto idealSize = CreateIdealSize(
@@ -473,8 +472,8 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        LOGD("child finish measure, child %{public}s size = %{public}s", child->GetHostTag().c_str(),
-            child->GetGeometryNode()->GetMarginFrameSize().ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_MENU, "child finish measure, child %{public}s size = %{public}s",
+            child->GetHostTag().c_str(), child->GetGeometryNode()->GetMarginFrameSize().ToString().c_str());
         idealHeight += childSize.Height();
         idealWidth = std::max(idealWidth, childSize.Width());
     }
@@ -484,7 +483,6 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    LOGD("finish measure, menu size = %{public}f x %{public}f", idealSize.Width(), idealSize.Height());
     geometryNode->SetFrameSize(idealSize);
 }
 
@@ -1219,7 +1217,6 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
             LayoutArrow(layoutWrapper);
         }
-        LOGD("Menu layout, offset = %{public}s", menuPosition.ToString().c_str());
         geometryNode->SetFrameOffset(menuPosition);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -1498,7 +1495,6 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
     CHECK_NULL_VOID(menuPattern);
     auto options = menuPattern->GetOptions();
     if (options.empty()) {
-        LOGD("options is empty, no need to update constraint.");
         return;
     }
     auto optionConstraint = constraint;
@@ -1604,13 +1600,8 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacement(
         auto placementFunc = func->second;
         if (placementFunc != nullptr) {
             childPosition = (this->*placementFunc)(childSize, topPosition, bottomPosition);
-        } else {
-            LOGE("Invalid Placement of menu layout.");
         }
-    } else {
-        LOGE("Invalid Placement of menu layout.");
     }
-
     return childPosition;
 }
 

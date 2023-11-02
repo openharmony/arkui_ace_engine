@@ -551,8 +551,6 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
         hourColumnPattern->SetOptions(GetOptionsCount());
         amPmColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
         hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
-    } else {
-        LOGE("AM PM column is null.");
     }
 }
 

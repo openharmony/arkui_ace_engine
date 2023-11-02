@@ -494,7 +494,6 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     if (!theme) {
-        LOGE("DialogTheme is null");
         return;
     }
 

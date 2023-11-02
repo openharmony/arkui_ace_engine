@@ -298,7 +298,6 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     if (!theme) {
-        LOGE("DialogTheme is null");
         return;
     }
     std::map<std::string, NG::DialogEvent> dialogEvent;
