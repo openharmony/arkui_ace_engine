@@ -587,7 +587,7 @@ std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEve
         }
         CHECK_NULL_VOID(pixelMap);
         float scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
-        pixelMap->scale(scale, scale);
+        pixelMap->scale(scale, scale, Media::AntiAliasingOption::NONE);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
@@ -759,8 +759,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             pixelMap = pixelMap_->GetPixelMapSharedPtr();
         }
     }
-    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) * DEFALUT_DRAG_PPIXELMAP_SCALE;
-    pixelMap->scale(scale, scale);
+    float defaultPixelMapScale =
+        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
+    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) * defaultPixelMapScale;
+    pixelMap->scale(scale, scale, Media::AntiAliasingOption::HIGH);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     if (!overlayManager->GetIsOnAnimation()) {
@@ -768,8 +770,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
-    auto pixelMapOffset =
-        GetPixelMapOffset(info, SizeF(width, height), scale, !NearEqual(scale, DEFALUT_DRAG_PPIXELMAP_SCALE));
+    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, !NearEqual(scale, defaultPixelMapScale));
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
