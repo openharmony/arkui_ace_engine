@@ -397,10 +397,18 @@ void TextFieldModelNG::SetPasswordIcon(const PasswordIcon& passwordIcon)
     if (passwordIcon.showResult != "") {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
             ImageSourceInfo(passwordIcon.showResult, passwordIcon.showBundleName, passwordIcon.showModuleName));
+    } else {
+        ImageSourceInfo showSystemSourceInfo;
+        showSystemSourceInfo.SetResourceId(InternalResource::ResourceId::SHOW_PASSWORD_SVG);
+        ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo, showSystemSourceInfo);
     }
     if (passwordIcon.hideResult != "") {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo,
             ImageSourceInfo(passwordIcon.hideResult, passwordIcon.hideBundleName, passwordIcon.hideModuleName));
+    } else {
+        ImageSourceInfo hideSystemSourceInfo;
+        hideSystemSourceInfo.SetResourceId(InternalResource::ResourceId::HIDE_PASSWORD_SVG);
+        ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo, hideSystemSourceInfo);
     }
 }
 
