@@ -348,6 +348,15 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
                 [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
+            if (textLayoutProperty->GetCalcLayoutConstraint() &&
+                textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value()) {
+                auto selfIdealSize = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+                if ((selfIdealSize->Width().has_value() && selfIdealSize->Width()->GetDimension().ConvertToPx() <= 0) ||
+                    (selfIdealSize->Height().has_value() &&
+                        selfIdealSize->Height()->GetDimension().ConvertToPx() <= 0)) {
+                    return;
+                }
+            }
             if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
                 textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
                 return;
