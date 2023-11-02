@@ -852,6 +852,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
         ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str());
     auto maxLength = GetMaxLength();
     json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
+    json->Put("type", textFieldPattern->TextInputTypeToString().c_str());
     textFieldLayoutProperty->HasCopyOptions();
 }
 

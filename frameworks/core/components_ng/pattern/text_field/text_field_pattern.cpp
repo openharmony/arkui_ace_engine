@@ -897,6 +897,7 @@ void TextFieldPattern::HandleOnCameraInput()
         LOGI("HandleOnCameraInput set calling window id is : %{public}u", textConfig.windowId);
         inputMethod->Attach(textChangeListener_, false, textConfig);
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
+        inputMethod->ShowTextInput();
         imeAttached_ = true;
     }
 #endif

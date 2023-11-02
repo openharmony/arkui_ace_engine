@@ -64,6 +64,8 @@ public:
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override {};
     void SetMaxLength(uint32_t value) override {};
     void ResetMaxLength() override {};
+    void SetType(TextInputType type) override {};
+
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
         const RefPtr<TextFieldTheme>& theme);
