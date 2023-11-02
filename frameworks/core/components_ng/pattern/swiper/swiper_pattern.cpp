@@ -3181,12 +3181,10 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
 {
     auto parent = parent_.Upgrade();
     if (!parent || !enableNestedScroll_) {
-        // SELF_ONLY
-        UpdateCurrentOffset(offset);
-
-        if (GetEdgeEffect() == EdgeEffect::NONE && IsOutOfBoundary(offset)) {
+        if (IsOutOfBoundary(offset) && ChildFirst(state)) {
             return { offset, true };
         }
+        UpdateCurrentOffset(offset);
         return { 0.0f, !IsLoop() && GetDistanceToEdge() <= 0.0f };
     }
     return HandleScrollSelfFirst(offset, source, state);
@@ -3197,19 +3195,24 @@ ScrollResult SwiperPattern::HandleScrollSelfFirst(float offset, int32_t source, 
     if (IsOutOfBoundary(offset)) {
         // parent handle overScroll first
         auto res = parent_.Upgrade()->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
+        if (ChildFirst(state)) {
+            return { res.remain, true };
+        }
         if (res.remain != 0.0f) {
             UpdateCurrentOffset(res.remain);
-        }
-        auto effect = GetEdgeEffect();
-        // NONE doesn't consume the offset
-        if (effect == EdgeEffect::NONE) {
-            return { res.remain, true };
         }
     } else {
         // regular scroll
         UpdateCurrentOffset(offset);
     }
     return { 0.0f, !IsLoop() && GetDistanceToEdge() <= 0.0f };
+}
+
+inline bool SwiperPattern::ChildFirst(NestedState state)
+{
+    // priority: self scroll > child scroll > self overScroll > child overScroll
+    return state == NestedState::CHILD_SCROLL // child hasn't reach edge
+           || GetEdgeEffect() == EdgeEffect::NONE;
 }
 
 void SwiperPattern::DumpAdvanceInfo()
