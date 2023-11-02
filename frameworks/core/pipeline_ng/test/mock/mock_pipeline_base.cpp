@@ -64,6 +64,11 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return MockPipelineBase::GetCurrent();
 }
 
+RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
+{
+    return MockPipelineBase::GetCurrent();
+}
+
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
 
 void PipelineContext::SetupRootElement() {}

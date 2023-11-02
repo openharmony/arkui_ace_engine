@@ -106,6 +106,13 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
+RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
+{
+    auto pipeline = PipelineBase::GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return DynamicCast<PipelineContext>(pipeline);
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     auto context = GetCurrentContext();
