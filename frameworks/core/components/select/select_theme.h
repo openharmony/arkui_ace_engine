@@ -196,8 +196,6 @@ public:
             theme->endIconWidth_ = MENU_END_ICON_WIDTH;
             theme->endIconHeight_ = MENU_END_ICON_HEIGHT;
             theme->contentMargin_ = pattern->GetAttr<Dimension>("content_margin", theme->contentMargin_);
-            theme->menuBackgroundColorAlpha_ =
-                pattern->GetAttr<double>("menu_bg_color_alpha", theme->menuBackgroundColorAlpha_);
         }
     };
 
@@ -288,7 +286,6 @@ public:
         theme->endIconWidth_ = endIconWidth_;
         theme->endIconHeight_ = endIconHeight_;
         theme->contentMargin_ = contentMargin_;
-        theme->menuBackgroundColorAlpha_ = menuBackgroundColorAlpha_;
         return theme;
     }
 
@@ -816,11 +813,6 @@ public:
         return contentMargin_;
     }
 
-    double GetMenuBackgroundColorAlpha() const
-    {
-        return menuBackgroundColorAlpha_;
-    }
-
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -916,7 +908,6 @@ private:
     int32_t pressAnimationDuration_ = 0;
 
     Edge optionPadding_;
-    double menuBackgroundColorAlpha_ = 0.85;
 };
 
 } // namespace OHOS::Ace
