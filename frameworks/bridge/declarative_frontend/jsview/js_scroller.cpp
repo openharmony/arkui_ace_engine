@@ -62,7 +62,6 @@ constexpr ScrollAlign ALIGN_TABLE[] = {
 };
 
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
-
 } // namespace
 
 void JSScroller::JSBind(BindingTarget globalObj)
@@ -289,7 +288,7 @@ void JSScroller::GetItemRect(const JSCallbackInfo& args)
 {
     int32_t index = -1;
     if (args.Length() != 1 || !ConvertFromJSValue(args[0], index)) {
-        LOGW("Invalid params");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto scrollController = controllerWeak_.Upgrade();
@@ -298,7 +297,7 @@ void JSScroller::GetItemRect(const JSCallbackInfo& args)
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         args.SetReturnValue(rect);
     } else {
-        LOGE("controller_ is nullptr");
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
     }
 }
 } // namespace OHOS::Ace::Framework
