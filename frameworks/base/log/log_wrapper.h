@@ -94,6 +94,8 @@ enum class AceLogTag : uint8_t {
     ACE_TEXT_TIMER,
     ACE_SWIPER,
     ACE_TABS,
+    ACE_DIVIDER,
+    ACE_BLANK,
     ACE_GRIDROW,
     ACE_INPUTTRACKING,
     ACE_RICH_TEXT,
