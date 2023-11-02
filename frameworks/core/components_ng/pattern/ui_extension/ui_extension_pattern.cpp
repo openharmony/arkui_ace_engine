@@ -20,6 +20,7 @@
 
 #include "key_event.h"
 #include "pointer_event.h"
+#include "configuration.h"
 #include "session/host/include/extension_session.h"
 #include "session/host/include/session.h"
 #include "session_manager/include/extension_session_manager.h"
@@ -818,5 +819,21 @@ void UIExtensionPattern::ProcessUIExtensionSessionDestructionResult(OHOS::Rosen:
             onErrorCallback_(code, name, message);
         }
     }
+}
+
+void UIExtensionPattern::onConfigurationUpdate()
+{
+    CHECK_NULL_VOID(session_);
+    session_->UpdateConfiguration();
+}
+
+void UIExtensionPattern::OnLanguageConfigurationUpdate()
+{
+    onConfigurationUpdate();
+}
+
+void UIExtensionPattern::OnColorConfigurationUpdate()
+{
+    onConfigurationUpdate();
 }
 } // namespace OHOS::Ace::NG
