@@ -48,6 +48,7 @@ constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
 constexpr size_t ALIGNMENT_STEP_OFFSET = 2;
+constexpr float HEIGHT_CONSTRAINT_FACTOR = 0.8;
 
 const std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
     { Placement::BOTTOM_LEFT,
@@ -1442,8 +1443,8 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    float factor = 0.8;
-    float maxSpaceHeight = wrapperSize_.Height() * factor;
+    float wrapperHeight = wrapperSize_.Height();
+    float maxSpaceHeight = wrapperHeight * HEIGHT_CONSTRAINT_FACTOR;
     constraint.maxSize.SetHeight(maxSpaceHeight);
 }
 
