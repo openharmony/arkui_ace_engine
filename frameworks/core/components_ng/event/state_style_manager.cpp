@@ -41,7 +41,6 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
         CHECK_NULL_VOID(stateStyleMgr);
         const auto& touches = info.GetTouches();
         if (touches.empty()) {
-            LOGW("the touch info is illegal");
             return;
         }
         const auto& type = touches.front().GetTouchType();
@@ -77,7 +76,6 @@ void StateStyleManager::FireStateFunc()
         }
     }
     if (!customNode) {
-        LOGE("fail to find custom node to fire update func of %{public}d", nodeId);
         return;
     }
     ScopedViewStackProcessor processor;

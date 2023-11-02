@@ -933,7 +933,6 @@ void LayoutProperty::UpdateVisibility(const VisibleType& value, bool allowTransi
 {
     if (propVisibility_.has_value()) {
         if (NearEqual(propVisibility_.value(), value)) {
-            LOGD("the Visibility is same, just ignore");
             return;
         }
     }

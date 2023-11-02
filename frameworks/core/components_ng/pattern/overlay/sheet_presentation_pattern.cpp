@@ -119,14 +119,12 @@ void SheetPresentationPattern::InitPanEvent()
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleDragEnd(info.GetMainVelocity());
         }
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleDragEnd({});
@@ -150,7 +148,6 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
                         ? static_cast<float>(SHEET_BLANK_MINI_HEIGHT.ConvertToPx())
                         : currentOffset_;
     if (NearEqual(currentOffset_, tempOffset)) {
-        LOGI("Offset is not changed, needn't measure.");
         return;
     }
     auto offset = pageHeight_ - height_ + currentOffset_;

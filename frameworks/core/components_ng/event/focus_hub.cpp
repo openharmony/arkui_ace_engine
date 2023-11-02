@@ -284,11 +284,11 @@ bool FocusHub::HandleFocusOnMainView()
     auto viewRootScope = GetMainViewRootScope();
     CHECK_NULL_RETURN(viewRootScope, false);
     if (!viewRootScope->IsCurrentFocus()) {
-        LOGE("Current view root scope is not on focused. Cannot handle focus.");
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Current view root scope is not on focused. Cannot handle focus.");
         return false;
     }
     if (viewRootScope->GetFocusDependence() != FocusDependence::SELF) {
-        LOGE("Current view root scope is not focus depend self. Do not need handle focus.");
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Current view root scope is not focus depend self. Do not need handle focus.");
         return false;
     }
 

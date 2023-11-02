@@ -39,14 +39,11 @@ namespace OHOS::Ace::Framework {
 
 void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
 {
-    LOGD("JSInteractableView JsOnTouch");
     if (args[0]->IsUndefined() && IsDisableEventVersion()) {
-        LOGD("JsOnTouch callback is undefined");
         ViewAbstractModel::GetInstance()->DisableOnTouch();
         return;
     }
     if (!args[0]->IsFunction()) {
-        LOGW("the info is not touch function");
         return;
     }
     RefPtr<JsTouchFunction> jsOnTouchFunc = AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSFunc>::Cast(args[0]));
@@ -60,14 +57,11 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
 
 void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
 {
-    LOGD("JSInteractableView JsOnKey");
     if (args[0]->IsUndefined() && IsDisableEventVersion()) {
-        LOGD("JsOnKey callback is undefined");
         ViewAbstractModel::GetInstance()->DisableOnKeyEvent();
         return;
     }
     if (!args[0]->IsFunction()) {
-        LOGE("OnKeyEvent args need a function.");
         return;
     }
     RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
@@ -81,14 +75,11 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
 
 void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
 {
-    LOGD("JSInteractableView JsOnHover");
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {
-        LOGD("JsOnHover callback is undefined");
         ViewAbstractModel::GetInstance()->DisableOnHover();
         return;
     }
     if (!info[0]->IsFunction()) {
-        LOGE("the param is not a function");
         return;
     }
     RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -103,7 +94,6 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
 
 void JSInteractableView::JsOnPan(const JSCallbackInfo& args)
 {
-    LOGD("JSInteractableView JsOnPan");
     if (args[0]->IsObject()) {
         // TODO: JSPanHandler should support ng build
 #ifndef NG_BUILD
@@ -118,12 +108,10 @@ void JSInteractableView::JsOnPan(const JSCallbackInfo& args)
 
 void JSInteractableView::JsOnDelete(const JSCallbackInfo& info)
 {
-    LOGD("JSInteractableView JsOnDelete");
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsOnDeleteFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onDelete = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDeleteFunc)]() {
-            LOGD("onDelete callback");
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onDelete");
             func->Execute();
@@ -141,14 +129,11 @@ void JSInteractableView::JsTouchable(const JSCallbackInfo& info)
 
 void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
 {
-    LOGD("JSInteractableView JsOnClick");
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {
-        LOGD("JsOnClick callback is undefined");
         ViewAbstractModel::GetInstance()->DisableOnClick();
         return;
     }
     if (!info[0]->IsFunction()) {
-        LOGW("the info is not click function");
         return;
     }
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -179,9 +164,7 @@ void JSInteractableView::SetFocusNode(bool isFocusNode)
 
 void JSInteractableView::JsOnAppear(const JSCallbackInfo& info)
 {
-    LOGD("JSInteractableView JsOnAppear");
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {
-        LOGD("JsOnAppear callback is undefined");
         ViewAbstractModel::GetInstance()->DisableOnAppear();
         return;
     }
@@ -190,7 +173,6 @@ void JSInteractableView::JsOnAppear(const JSCallbackInfo& info)
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGI("About to call JsOnAppear method on js");
             ACE_SCORING_EVENT("onAppear");
             func->Execute();
         };
@@ -200,9 +182,7 @@ void JSInteractableView::JsOnAppear(const JSCallbackInfo& info)
 
 void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
 {
-    LOGD("JSInteractableView JsOnDisAppear");
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {
-        LOGD("JsOnDisAppear callback is undefined");
         ViewAbstractModel::GetInstance()->DisableOnDisAppear();
         return;
     }
@@ -211,7 +191,6 @@ void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGD("Start to call JsOnDisAppear method on js");
             ACE_SCORING_EVENT("onDisAppear");
             func->Execute();
         };
@@ -222,7 +201,6 @@ void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
 void JSInteractableView::JsOnAccessibility(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
         return;
     }
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -245,8 +223,7 @@ void JSInteractableView::JsCommonRemoteMessage(const JSCallbackInfo& info)
 
 void JSInteractableView::JsRemoteMessage(const JSCallbackInfo& info, RemoteCallback& remoteCallback)
 {
-    if (info.Length() == 0 || !info[0]->IsObject()) {
-        LOGE("RemoteMessage JSCallbackInfo param is empty or type is not Object.");
+    if (!info[0]->IsObject()) {
         return;
     }
 
@@ -278,7 +255,6 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
         params = paramsObj->ToString();
     }
     auto eventCallback = [action, ability, params]() {
-        LOGE("JSInteractableView::JsRemoteMessage. eventMarker");
         if (action.compare("message") == 0) {
             // onCall
         } else if (action.compare("route") == 0) {
@@ -287,18 +263,15 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
             std::vector<std::string> strList;
             SplitString(ability, '/', strList);
             if (strList.size() <= 1) {
-                LOGE("App bundleName or abilityName is empty.");
                 return;
             }
             int32_t result = PluginManager::GetInstance().StartAbility(strList[0], strList[1], params);
             if (result != 0) {
-                LOGE("JSInteractableView::JsRemoteMessage: Failed to start the APP %{public}s.", ability.c_str());
+                LOGW("Failed to start the APP %{public}s.", ability.c_str());
             }
 #else
-            LOGE("JSInteractableView::JsRemoteMessage: Unsupported Windows and Mac platforms to start APP.");
+            LOGW("Unsupported Windows and Mac platforms to start APP.");
 #endif
-        } else {
-            LOGE("action's name is not message or route.");
         }
     };
 

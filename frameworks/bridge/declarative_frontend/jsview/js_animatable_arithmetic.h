@@ -35,26 +35,18 @@ public:
         auto addVal = jsObject_->GetProperty("plus");
         if (addVal->IsFunction()) {
             addFunc_ = JSRef<JSFunc>::Cast(addVal);
-        } else {
-            LOGD("'plus' function does not exist on AnimatableArithmetic object");
         }
         auto minusVal = jsObject_->GetProperty("subtract");
         if (minusVal->IsFunction()) {
             minusFunc_ = JSRef<JSFunc>::Cast(minusVal);
-        } else {
-            LOGD("'minus' function does not exist on AnimatableArithmetic object");
         }
         auto multiplyVal = jsObject_->GetProperty("multiply");
         if (multiplyVal->IsFunction()) {
             multiplyFunc_ = JSRef<JSFunc>::Cast(multiplyVal);
-        } else {
-            LOGD("'multiply' function does not exist on AnimatableArithmetic object");
         }
         auto equalsVal = jsObject_->GetProperty("equals");
         if (equalsVal->IsFunction()) {
             equalsFunc_ = JSRef<JSFunc>::Cast(equalsVal);
-        } else {
-            LOGD("'equals' function does not exist on AnimatableArithmetic object");
         }
     }
 
