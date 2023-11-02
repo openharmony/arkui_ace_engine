@@ -38,11 +38,25 @@ public:
     // RETURN true if velocity is consumed
     virtual bool HandleScrollVelocity(float velocity) = 0;
 
+    /**
+     * @brief Called when the scroll starts, recursively pass upwards.
+     *
+     * @param position The global position of the first touch point.
+     */
     virtual void OnScrollStartRecursive(float position) = 0;
+
+    /**
+     * @brief This function is called when the scrolling ends, recursively pass upwards.
+     * 
+     */
     virtual void OnScrollEndRecursive() = 0;
 
 protected:
-    // helpers
+    /**
+     * @brief Helper function. Searches for the parent NestableScrollContainer of the current instance.
+     * 
+     * @return RefPtr<NestableScrollContainer> A reference to the parent NestableScrollContainer.
+     */
     RefPtr<NestableScrollContainer> SearchParent();
 
     ACE_DISALLOW_COPY_AND_MOVE(NestableScrollContainer);
