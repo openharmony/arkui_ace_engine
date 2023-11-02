@@ -4484,8 +4484,6 @@ const uiNodeRegisterCleanUpFunction = UINodeRegisterProxy.uiNodeRegisterCleanUpF
 // denotes a missing elemntId, this is the case during initial render
 const UndefinedElmtId = -1;
 
-//stores ViewPU processing
-var thisViewPu = [];
 // NativeView
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
@@ -4558,9 +4556,6 @@ class ViewPU extends NativeViewPartialUpdate {
         this.providedVars_ = parent ? new Map(parent.providedVars_)
             : new Map();
         this.localStoragebackStore_ = undefined;
-
-        //stores ArkComponent with elmtId
-        this.arkComponentByElmtId = new Map();
         
         if (parent) {
             // this View is not a top-level View
@@ -4788,13 +4783,7 @@ class ViewPU extends NativeViewPartialUpdate {
         else {
             
             this.isRenderInProgress = true;
-
-            thisViewPu.push(this);
             updateFunc(elmtId, /* isFirstRender */ false);
-            if (thisViewPu.length !== 0) {
-                thisViewPu.pop(this);
-            }
-                    
             this.finishUpdateFunc(elmtId);
             
             this.isRenderInProgress = false;
@@ -5127,13 +5116,7 @@ class ViewPU extends NativeViewPartialUpdate {
             
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-
-        thisViewPu.push(this);
         updateFunc(elmtId, /* is first render */ true);
-        if (thisViewPu.length !== 0) {
-            thisViewPu.pop(this);
-        }
-
         this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, componentName: _componentName });
     }
     getOrCreateRecycleManager() {
@@ -5374,15 +5357,6 @@ class ViewPU extends NativeViewPartialUpdate {
                 : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
         this.ownStorageLinksProps_.add(localStorageProp);
         return localStorageProp;
-    }
-    getOrCreateArkComponent(elmtId, constructor, nativePtr) {
-        if (this.arkComponentByElmtId.has(elmtId)) {
-            return this.arkComponentByElmtId.get(elmtId);
-        } else {
-            const instance = constructor(nativePtr);
-            this.arkComponentByElmtId.set(elmtId, instance);
-            return instance;
-        }
     }
     /**
      * onDumpInfo is used to process commands delivered by the hidumper process
