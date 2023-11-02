@@ -32,7 +32,7 @@ public:
 
     ~MultiFingersRecognizer() override = default;
 
-    void UpdateFingerListInfo(const Offset& coordinateOffset);
+    void UpdateFingerListInfo();
 
     bool CheckTouchId(int32_t touchId) override
     {

@@ -73,15 +73,17 @@ void ClickRecognizer::OnAccepted()
     }
     refereeState_ = RefereeState::SUCCEED;
     ResSchedReport::GetInstance().ResSchedDataReport("click");
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
+    NGGestureRecognizer::Transform(localPoint, GetNodeId());
+    Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
-        TouchEvent touchPoint = {};
-        if (!touchPoints_.empty()) {
-            touchPoint = touchPoints_.begin()->second;
-        }
-
         ClickInfo info(touchPoint.id);
         info.SetTimeStamp(touchPoint.time);
-        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
+        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
@@ -97,17 +99,12 @@ void ClickRecognizer::OnAccepted()
     }
 
     if (remoteMessage_) {
-        TouchEvent touchPoint = {};
-        if (!touchPoints_.empty()) {
-            touchPoint = touchPoints_.begin()->second;
-        }
-
         ClickInfo info(touchPoint.id);
         info.SetTimeStamp(touchPoint.time);
-        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
+        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
         remoteMessage_(info);
     }
-    UpdateFingerListInfo(coordinateOffset_);
+    UpdateFingerListInfo();
     SendCallbackMsg(onAction_);
 }
 
@@ -281,8 +278,10 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }
+        PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
+        NGGestureRecognizer::Transform(localPoint, GetNodeId());
         info.SetScreenLocation(touchPoint.GetScreenOffset());
-        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
+        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));

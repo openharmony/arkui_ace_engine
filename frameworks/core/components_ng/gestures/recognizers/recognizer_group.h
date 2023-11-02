@@ -61,6 +61,16 @@ public:
     {
         remainChildOnResetStatus_ = true;
     }
+
+    void AssignNodeId(int id) override
+    {
+        TouchEventTarget::AssignNodeId(id);
+        auto recognizers = GetGroupRecognizer();
+        for (const auto& recognizer : recognizers) {
+            recognizer->AssignNodeId(id);
+        }
+    }
+
     const std::list<RefPtr<NGGestureRecognizer>>& GetGroupRecognizer();
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;

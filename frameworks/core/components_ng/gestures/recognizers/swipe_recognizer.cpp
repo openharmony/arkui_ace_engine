@@ -126,7 +126,12 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if ((refereeState_ == RefereeState::DETECTING) || (refereeState_ == RefereeState::PENDING)) {
-        auto offset = event.GetOffset() - downEvents_[event.id].GetOffset();
+        PointF curPoint(event.x, event.y);
+        PointF downPoint(downEvents_[event.id].x, downEvents_[event.id].y);
+        NGGestureRecognizer::Transform(curPoint, GetNodeId());
+        NGGestureRecognizer::Transform(downPoint, GetNodeId());
+
+        Offset offset(curPoint.GetX() - downPoint.GetX(), curPoint.GetY() - downPoint.GetY());
         // nanoseconds duration to seconds.
         std::chrono::duration<double> duration = event.time - touchDownTime_;
         auto seconds = duration.count();
@@ -186,7 +191,11 @@ void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
     lastTouchEvent_ = event;
-    Offset moveDistance = event.GetOffset() - touchPoints_[event.id].GetOffset();
+    PointF curLocalPoint(event.x, event.y);
+    PointF lastLocalPoint(touchPoints_[event.id].x, touchPoints_[event.id].y);
+    NGGestureRecognizer::Transform(curLocalPoint, GetNodeId());
+    NGGestureRecognizer::Transform(lastLocalPoint, GetNodeId());
+    Offset moveDistance(curLocalPoint.GetX() - lastLocalPoint.GetX(), curLocalPoint.GetY() - lastLocalPoint.GetY());
     touchPoints_[event.id] = event;
     if (NearZero(moveDistance.GetX()) && NearZero(moveDistance.GetY())) {
         return;
@@ -273,7 +282,7 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
-        UpdateFingerListInfo(coordinateOffset_);
+        UpdateFingerListInfo();
         info.SetFingerList(fingerList_);
         info.SetGlobalPoint(globalPoint_);
         if (deviceType_ == SourceType::MOUSE) {

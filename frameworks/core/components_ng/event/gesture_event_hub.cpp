@@ -125,12 +125,12 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         if (recognizer) {
             auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
             if (!recognizerGroup && newIdx >= idx) {
-                recognizer->SetNodeId(host->GetId());
+                recognizer->AssignNodeId(host->GetId());
             }
             recognizer->BeginReferee(touchId);
             innerRecognizers.push_back(std::move(recognizer));
         } else {
-            eventTarget->SetNodeId(host->GetId());
+            eventTarget->AssignNodeId(host->GetId());
             finalResult.push_back(eventTarget);
         }
         newIdx++; // not process previous recognizers
@@ -193,11 +193,9 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 if (groupRecognizer) {
                     groupRecognizer->SetCoordinateOffset(offset);
                 }
-                groupRecognizer->SetNodeId(host->GetId());
             }
-        } else {
-            recognizer->SetNodeId(host->GetId());
         }
+        recognizer->AssignNodeId(host->GetId());
         recognizer->SetSize(size.Height(), size.Width());
         recognizer->SetCoordinateOffset(offset);
         recognizer->BeginReferee(touchId, true);
@@ -222,6 +220,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 }
                 externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
                 externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
+                externalParallelRecognizer_[parallelIndex]->AssignNodeId(host->GetId());
                 current = externalParallelRecognizer_[parallelIndex];
                 parallelIndex++;
             } else if (recognizers.size() == 1) {
@@ -245,6 +244,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 }
                 externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
                 externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
+                externalExclusiveRecognizer_[exclusiveIndex]->AssignNodeId(host->GetId());
                 current = externalExclusiveRecognizer_[exclusiveIndex];
                 exclusiveIndex++;
             } else if (recognizers.size() == 1) {

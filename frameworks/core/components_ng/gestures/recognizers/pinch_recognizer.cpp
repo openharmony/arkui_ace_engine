@@ -281,7 +281,9 @@ Offset PinchRecognizer::ComputePinchCenter()
     double focalX = sumOfX / touchPoints_.size();
     double focalY = sumOfY / touchPoints_.size();
 
-    Offset pinchCenter = Offset(focalX, focalY);
+    PointF localPoint(focalX, focalY);
+    NGGestureRecognizer::Transform(localPoint, GetNodeId());
+    Offset pinchCenter = Offset(localPoint.GetX(), localPoint.GetY());
 
     return pinchCenter;
 }
@@ -297,7 +299,7 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
-        UpdateFingerListInfo(coordinateOffset_);
+        UpdateFingerListInfo();
         info.SetFingerList(fingerList_);
         info.SetScale(scale_);
         info.SetPinchCenter(pinchCenter_);
