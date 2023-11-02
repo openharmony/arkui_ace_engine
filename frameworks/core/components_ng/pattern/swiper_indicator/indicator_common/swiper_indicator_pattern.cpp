@@ -283,7 +283,6 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
     }
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
-    gestureHub->SetHitTestMode(HitTestMode::HTMBLOCK);
 }
 
 void SwiperIndicatorPattern::HandleTouchEvent(const TouchEventInfo& info)
