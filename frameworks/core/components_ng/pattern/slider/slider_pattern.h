@@ -213,6 +213,7 @@ private:
     float sliderLength_ = 0.0f;
     float borderBlank_ = 0.0f;
     float hotBlockShadowWidth_ = 0.0f;
+    double axisOffset_ = 0.0;
     OffsetF circleCenter_ = { 0.0f, 0.0f }; // Relative to the content area
 
     float trackThickness_ = 0.0f;
