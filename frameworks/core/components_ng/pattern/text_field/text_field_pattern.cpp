@@ -1667,9 +1667,7 @@ void TextFieldPattern::OnModifyDone()
     if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         ApplyUnderlineStates();
     }
-    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT &&
-        (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
-            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT)) {
+    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
         if (IsTextArea() && isTextInput_) {
             layoutProperty->UpdateMaxLines(1);
         }
