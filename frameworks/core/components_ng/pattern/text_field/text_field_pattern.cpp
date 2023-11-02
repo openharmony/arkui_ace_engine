@@ -1174,8 +1174,7 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
 
 std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> TextFieldPattern::OnDragDrop()
 {
-    return [weakPtr = WeakClaim(this)](
-                      const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+    return [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -1755,23 +1754,18 @@ void TextFieldPattern::ProcessInnerPadding()
         currentBorderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
     }
     auto& paddingProperty = layoutProperty->GetPaddingProperty();
-    auto left = !paddingProperty
-                    ? CalcLength(themePadding.Left()).GetDimension().ConvertToPx()
-                    : paddingProperty->left.value_or(CalcLength(themePadding.Left())).GetDimension().ConvertToPx();
-    utilPadding_.left = left;
-    auto top = !paddingProperty
-                   ? CalcLength(themePadding.Top()).GetDimension().ConvertToPx()
-                   : paddingProperty->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
-    utilPadding_.top = top;
-    auto bottom =
-        !paddingProperty
-            ? CalcLength(themePadding.Bottom()).GetDimension().ConvertToPx()
-            : paddingProperty->bottom.value_or(CalcLength(themePadding.Bottom())).GetDimension().ConvertToPx();
-    utilPadding_.bottom = bottom;
-    auto right = !paddingProperty
-                     ? CalcLength(themePadding.Right()).GetDimension().ConvertToPx()
-                     : paddingProperty->right.value_or(CalcLength(themePadding.Right())).GetDimension().ConvertToPx();
-    utilPadding_.right = right;
+    auto left = !paddingProperty ? CalcLength(themePadding.Left()).GetDimension()
+                                 : paddingProperty->left.value_or(CalcLength(themePadding.Left())).GetDimension();
+    utilPadding_.left = left.ConvertToPx();
+    auto top = !paddingProperty ? CalcLength(themePadding.Top()).GetDimension()
+                                : paddingProperty->top.value_or(CalcLength(themePadding.Top())).GetDimension();
+    utilPadding_.top = top.ConvertToPx();
+    auto bottom = !paddingProperty ? CalcLength(themePadding.Bottom()).GetDimension()
+                                   : paddingProperty->bottom.value_or(CalcLength(themePadding.Bottom())).GetDimension();
+    utilPadding_.bottom = bottom.ConvertToPx();
+    auto right = !paddingProperty ? CalcLength(themePadding.Right()).GetDimension()
+                                  : paddingProperty->right.value_or(CalcLength(themePadding.Right())).GetDimension();
+    utilPadding_.right = right.ConvertToPx();
     lastBorderWidth_ = currentBorderWidth;
 
     PaddingProperty paddings;
