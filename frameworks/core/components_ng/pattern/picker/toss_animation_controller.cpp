@@ -68,7 +68,6 @@ bool TossAnimationController::Play()
     CHECK_NULL_RETURN(column, false);
     auto timeDiff = timeEnd_ - timeStart_;
     if (timeDiff < MIN_TIME) {
-        LOGW("toss time[%{public}lf] too small.", timeDiff);
         return false;
     }
     speed_ = column->GetMainVelocity() / VELOCTY_TRANS;
@@ -158,7 +157,6 @@ double TossAnimationController::GetCurrentTime() const
     struct timeval tv = { 0 };
     int result = gettimeofday(&tv, nullptr);
     if (result != 0) {
-        LOGE("toss gettimeofday failed.");
         return 0.0;
     }
 

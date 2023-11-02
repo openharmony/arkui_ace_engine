@@ -591,7 +591,6 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
     const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index, uint32_t showCount, bool isDown, double scale)
 {
     if (index >= animationProperties_.size()) {
-        LOGE("Animation Properties vactor is break.");
         return;
     }
     Dimension startFontSize = animationProperties_[index].fontSize;
@@ -691,7 +690,6 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 {
     CHECK_NULL_VOID(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
-        LOGI("Pan event start");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
@@ -706,7 +704,6 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
@@ -716,7 +713,6 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
@@ -955,7 +951,6 @@ float DatePickerColumnPattern::GetShiftDistance(uint32_t index, DatePickerScroll
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
     uint32_t optionCounts = theme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
-    LOGD("DatePickerColumnPattern::GetShiftDistance start showCount %{public}d", optionCounts);
     uint32_t nextIndex = 0;
     float distance = 0.0f;
     float val = 0.0f;
