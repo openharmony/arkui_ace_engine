@@ -522,7 +522,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
-    if (!targetNode->IsOnMainTree() || !targetNode->IsVisible()) {
+    if (!targetNode->IsOnMainTree() && !targetNode->IsVisible()) {
         return;
     }
     auto geometryNode = targetNode->GetGeometryNode();
