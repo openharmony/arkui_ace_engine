@@ -61,6 +61,8 @@ private:
     std::string ConvertStrToPropertyType(std::string& typeValue);
     std::string ConvertPseudoClassStyle(const std::string pseudoClassValue);
     Rect deviceRect_;
+    std::unordered_map<int32_t, int32_t> slots_;
+    std::unordered_map<int32_t, WeakPtr<NG::UINode>> parents_;
 };
 
 } // namespace OHOS::Ace::Framework
