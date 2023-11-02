@@ -33,6 +33,8 @@ constexpr float DIRECTION180 = 180;
 constexpr float DIRECTION270 = 270;
 constexpr uint32_t DOT_PER_INCH = 160;
 
+std::vector<MMI::DisplayInfo> displayInfoVector;
+
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
     if (NearEqual(degree, DIRECTION0)) {
@@ -64,7 +66,10 @@ void ScreenPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     context->SetRSNode(displayNode);
 
-    UpdateDisplayInfo();
+    if (screenSession_->GetScreenProperty().GetScreenType() == Rosen::ScreenType::VIRTUAL) {
+        LOGW("Virtual screen, not update return");
+        return;
+    }
 
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -123,14 +128,28 @@ void ScreenPattern::UpdateDisplayInfo()
         .direction = ConvertDegreeToMMIRotation(DIRECTION0)
     };
 
+    DeduplicateDisplayInfo();
+    displayInfoVector.insert(displayInfoVector.begin(), displayInfo);
+
     MMI::DisplayGroupInfo displayGroupInfo = {
         .width = paintRect.Width(),
         .height = paintRect.Height(),
         .focusWindowId = 0, // root scene id 0
         .windowsInfo = { windowInfo },
-        .displaysInfo = { displayInfo }
+        .displaysInfo = displayInfoVector
     };
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
+}
+
+void ScreenPattern::DeduplicateDisplayInfo()
+{
+    auto screenId = screenSession_->GetScreenId();
+    for (int i = 0; i < displayInfoVector.size(); i++) {
+        if (displayInfoVector[i].id == screenId) {
+            displayInfoVector.erase(displayInfoVector.begin() + i);
+            break;
+        }
+    }
 }
 
 bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)

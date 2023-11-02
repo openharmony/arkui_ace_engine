@@ -66,6 +66,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -83,6 +84,26 @@ constexpr int32_t USED_ID_FIND_FLAG = 3; // if args >3 , it means use id to find
 } // namespace
 
 namespace OHOS::Ace::NG {
+
+void PipelineContext::TraverseRootNode(const std::list<RefPtr<UINode>>& list, const uint64_t& targetId,
+    RefPtr<FrameNode>& screenNode)
+{
+    if (list.empty()) {
+        LOGW("uinode list is empty");
+        return;
+    }
+    for (auto node : list) {
+        if (node->GetTag() == V2::SCREEN_ETS_TAG) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(node);
+            if (frameNode->GetPattern<ScreenPattern>()->GetScreenSession()->screenId_ == targetId) {
+                screenNode = frameNode;
+            }
+            LOGI("screen node, but not find target");
+            return;
+        }
+        TraverseRootNode(node->GetChildren(), targetId, screenNode);
+    }
+}
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -1077,7 +1098,18 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
-        eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
+
+        auto container = Container::Current();
+        if (container && container->IsScenceBoardWindow()) {
+            RefPtr<FrameNode> screenNode = nullptr;
+            TraverseRootNode(rootNode_->GetChildren(), scalePoint.targetDisplayId, screenNode);
+            LOGI("touched display id is %{public}d", scalePoint.targetDisplayId);
+            eventManager_->TouchTest(scalePoint, screenNode, touchRestrict, GetPluginEventOffset(),
+                viewScale_, isSubPipe);
+        } else {
+            eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(),
+                viewScale_, isSubPipe);
+        }
         for (const auto& weakContext : touchPluginPipelineContext_) {
             auto pipelineContext = DynamicCast<OHOS::Ace::PipelineBase>(weakContext.Upgrade());
             if (!pipelineContext) {
