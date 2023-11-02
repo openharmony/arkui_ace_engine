@@ -1152,10 +1152,6 @@ void TextPattern::InitSurfaceChangedCallback()
 
 void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
-    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD,
-        "TextPattern handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
-        "height %{public}d",
-        newWidth, newHeight, prevWidth, prevHeight);
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
     }

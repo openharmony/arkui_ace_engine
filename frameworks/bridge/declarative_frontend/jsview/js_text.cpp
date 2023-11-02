@@ -149,7 +149,6 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
 void JSText::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -197,7 +196,7 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
     if (!tmpInfo->IsArray()) {
         Shadow shadow;
         if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
-            LOGI("Parse shadow object failed.");
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Parse shadow object failed.");
             return;
         }
         std::vector<Shadow> shadows { shadow };
@@ -211,7 +210,7 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
         auto shadowJsVal = params->GetValueAt(i);
         Shadow shadow;
         if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
-            LOGI("Parse shadow object failed.");
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Parse shadow object failed.");
             continue;
         }
         shadows[i] = shadow;
@@ -301,7 +300,6 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
 void JSText::SetTextIndent(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -315,7 +313,6 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
 void JSText::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        LOGI("Text fontStyle(%{public}d) illegal value", value);
         return;
     }
     TextModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
@@ -324,7 +321,6 @@ void JSText::SetFontStyle(int32_t value)
 void JSText::SetTextAlign(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        LOGI("Text: TextAlign(%d) expected positive number", value);
         return;
     }
     TextModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
@@ -342,7 +338,6 @@ void JSText::SetAlign(const JSCallbackInfo& info)
 void JSText::SetLineHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -356,12 +351,11 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
 void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGI("Parse FontFamilies failed");
+        TAG_LOGI(AceLogTag::ACE_TEXT, "Parse FontFamilies failed");
         return;
     }
     TextModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -370,7 +364,6 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 void JSText::SetMinFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension fontSize;
@@ -381,7 +374,6 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
 void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension fontSize;
@@ -392,7 +384,6 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (info[0]->IsString()) {
@@ -417,7 +408,6 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 void JSText::SetTextCase(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
-        LOGI("Text textCase(%{public}d) illegal value", value);
         return;
     }
     TextModel::GetInstance()->SetTextCase(TEXT_CASES[value]);
@@ -426,7 +416,6 @@ void JSText::SetTextCase(int32_t value)
 void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -474,7 +463,6 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
 void JSText::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        LOGW("Text: HeightAdaptivePolicy(%d) expected positive number", value);
         return;
     }
     TextModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
@@ -484,18 +472,15 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         if (info[0]->IsUndefined() && IsDisableEventVersion()) {
-            LOGD("JsOnClick callback is undefined");
             TextModel::GetInstance()->ClearOnClick();
             return;
         }
         if (!info[0]->IsFunction()) {
-            LOGW("the info is not click function");
             return;
         }
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
         auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGD("About to call onclick method on js");
             const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
             func->Execute(*clickInfo);
@@ -510,7 +495,6 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
                                  const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                LOGD("About to call onclick method on js");
                 const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
                 auto newInfo = *clickInfo;
                 if (impl) {
@@ -574,12 +558,10 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
 
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
-            LOGI("builder param is not an object.");
             return itemInfo;
         }
         auto node = ParseDragNode(ret);
         if (node) {
-            LOGI("use custom builder param.");
             itemInfo.node = node;
             return itemInfo;
         }
@@ -655,7 +637,6 @@ void JSText::JsFocusable(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
     if (!tmpInfo->IsBoolean()) {
-        LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
     JSInteractableView::SetFocusable(tmpInfo->ToBoolean());
@@ -666,7 +647,6 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
     if (!tmpInfo->IsBoolean()) {
-        LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
     TextModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
@@ -681,8 +661,6 @@ void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
             JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(tmpInfo), menuOptionsItems);
             TextModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
         }
-    } else {
-        LOGI("only newPipeline supply");
     }
 }
 
