@@ -68,9 +68,10 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     if (sizeInPixel == 0) {
         return;
     }
+    auto scale = qrCodeSize / sizeInPixel;
     canvas.Save();
-    canvas.Scale(qrCodeSize / sizeInPixel, qrCodeSize / sizeInPixel);
-    canvas.DrawBitmap(bitMap, paintOffset.GetX(), paintOffset.GetY());
+    canvas.Scale(scale, scale);
+    canvas.DrawBitmap(bitMap, paintOffset.GetX() / scale, paintOffset.GetY() / scale);
     canvas.Restore();
 }
 
