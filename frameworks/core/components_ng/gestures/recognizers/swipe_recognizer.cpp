@@ -32,32 +32,29 @@ namespace {
 constexpr int32_t MAX_SWIPE_FINGERS = 10;
 constexpr int32_t RATIO_MS_TO_S = 1000;
 constexpr int32_t RATIO_US_TO_MS = 1000;
-constexpr double ANGLE_SUM_OF_TRIANGLE = 180.0;
+constexpr double STRAIGHT_ANGLE = 180.0;
+constexpr double RIGHT_ANGLE = 90.0;
 
-double ChangeValueRange(double value)
+double Atan2ToAtan(double angle)
 {
-    double result = 0.0;
-    if (LessOrEqual(value, -180.0)) {
-        result = value + 360.0;
-    } else if (GreatNotEqual(value, 180.0)) {
-        result = value - 360.0;
-    } else {
-        result = value;
+    if (GreatNotEqual(angle, RIGHT_ANGLE)) {
+        angle -= STRAIGHT_ANGLE;
+    } else if (LessOrEqual(angle, -RIGHT_ANGLE)) {
+        angle += STRAIGHT_ANGLE;
     }
-
-    return result;
+    return angle;
 }
 
 double ComputeAngle(double x, double y)
 {
     if (NearZero(x)) {
-        const double verticalAngle = 90.0;
+        const double verticalAngle = RIGHT_ANGLE;
         if (Negative(y)) {
             return -verticalAngle;
         }
         return verticalAngle;
     }
-    return ChangeValueRange(atan(y / x) * ANGLE_SUM_OF_TRIANGLE / M_PI);
+    return atan2(y, x) * STRAIGHT_ANGLE / M_PI;
 }
 } // namespace
 
@@ -233,9 +230,10 @@ void SwipeRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 
 bool SwipeRecognizer::CheckAngle(double angle)
 {
-    const double axisDiffDuration = 45;
+    const double axisDiffDuration = RIGHT_ANGLE / 2;
+    angle = Atan2ToAtan(angle);
     if (prevAngle_.has_value()) {
-        auto diffValue = std::abs(prevAngle_.value()) - std::abs(angle);
+        auto diffValue = std::abs(Atan2ToAtan(prevAngle_.value())) - std::abs(angle);
         if (diffValue > axisDiffDuration) {
             return false;
         }
@@ -246,7 +244,7 @@ bool SwipeRecognizer::CheckAngle(double angle)
         }
     }
     if (direction_.type == SwipeDirection::VERTICAL) {
-        const double axisVertical = 90;
+        const double axisVertical = RIGHT_ANGLE;
         auto diffValue = std::abs(angle) - axisVertical;
         if (std::abs(diffValue) > axisDiffDuration) {
             return false;
