@@ -274,7 +274,14 @@ void TabsModelNG::SetScrollable(bool scrollable)
 void TabsModelNG::SetAnimationDuration(float duration)
 {
     if (duration < 0) {
-        return;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            return;
+        }
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(tabTheme);
+        duration = tabTheme->GetTabContentAnimationDuration();
     }
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);

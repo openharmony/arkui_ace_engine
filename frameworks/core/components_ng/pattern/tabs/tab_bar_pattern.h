@@ -386,6 +386,7 @@ private:
     void InitTurnPageRateEvent();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle);
     float GetLeftPadding() const;
+    void SetDefaultAnimationDuration();
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
