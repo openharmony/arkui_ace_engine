@@ -232,7 +232,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     float paragraphWidth = 0.0f;
     if (paragraph) {
         paragraph_ = paragraph;
-        paragraphWidth = paragraph->GetLongestLine();
+        paragraphWidth = std::max(paragraph->GetLongestLine(), 0.0f);
     }
     auto errorParagraph = textFieldLayoutAlgorithm->GetErrorParagraph();
     if (errorParagraph) {
@@ -243,8 +243,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
     if (!(needToRefreshSelectOverlay_ &&
-            (!NearEqual(paragraphWidth, paragraphWidth_) || !NearEqual(textRect, textRect_))) ||
-        (LessOrEqual(paragraphWidth, -Infinity<float>()) && LessOrEqual(paragraphWidth_, -Infinity<float>()))) {
+            (!NearEqual(paragraphWidth, paragraphWidth_) || !NearEqual(textRect.GetSize(), textRect_.GetSize())))) {
         needToRefreshSelectOverlay_ = false;
     }
     paragraphWidth_ = paragraphWidth;
