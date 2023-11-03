@@ -259,7 +259,7 @@ public:
      */
     Axis GetAxis() const override
     {
-        return Axis::FREE;
+        return axis_;
     }
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
     bool HandleScrollVelocity(float velocity) override;
@@ -267,6 +267,7 @@ public:
     void OnScrollEndRecursive() override;
     Axis GetParentAxis();
     RefPtr<NestableScrollContainer> WebSearchParent();
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
     /**
      *  End of NestableScrollContainer implementations
      */
@@ -325,6 +326,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    void UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type);
+    std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMapFromString(const std::string& filePath);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
     void OnDateTimeChooserPopup(
@@ -381,6 +384,7 @@ public:
     {
         return rootLayerHeight_;
     }
+    bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -588,6 +592,9 @@ private:
     bool isMemoryLevelEnable_ = true;
     bool isFirstFlingScrollVelocity_ = true;
     bool isWrapContentEnabled_ = false;
+    bool scrollState_ = false;
+    NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
+    Axis axis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     WeakPtr<NestableScrollContainer> parent_;

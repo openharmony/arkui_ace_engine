@@ -32,7 +32,6 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    LOGI("MenuWrapperPattern closing menu %{public}d", targetId_);
     menuPattern->HideMenu();
 }
 

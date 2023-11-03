@@ -144,8 +144,6 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto searchWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     auto searchButtonNode = searchWrapper->GetHostNode();
     auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
-    auto cancelButtonNode = cancelButtonWrapper->GetHostNode();
-    auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     float leftPadding = padding.left.value_or(0.0f);
     float rightPadding = padding.right.value_or(0.0f);
@@ -160,7 +158,8 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
                          MULTIPLE_2 * searchTheme->GetDividerSideSpace().ConvertToPx();
     }
 
-    if (cancelButtonEvent->IsEnabled()) {
+    auto style = layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
+    if (style != CancelButtonStyle::INVISIBLE) {
         textFieldWidth = textFieldWidth - cancelButtonWidth;
     }
     auto themeHeight = searchTheme->GetHeight().ConvertToPx();

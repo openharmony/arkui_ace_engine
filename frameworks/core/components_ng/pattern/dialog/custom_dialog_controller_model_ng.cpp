@@ -99,11 +99,9 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             dialogs.pop_back();
         }
         if (dialogs.empty()) {
-            LOGW("dialogs are empty");
             return;
         }
         if (!dialog) {
-            LOGW("dialog is null");
             return;
         }
         overlayManager->CloseDialog(dialog);

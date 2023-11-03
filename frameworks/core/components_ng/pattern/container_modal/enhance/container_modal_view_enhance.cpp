@@ -20,6 +20,7 @@
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
@@ -88,7 +89,7 @@ const Color MENU_ITEM_HOVER_COLOR = Color(0x0c000000);
 const Color MENU_ITEM_PRESS_COLOR = Color(0x1a000000);
 const Color MENU_ITEM_COLOR = Color(0xffffff);
 } // namespace
-bool ContainerModalViewEnhance::sIsLeftMouse_ = false;
+bool ContainerModalViewEnhance::sIsForbidMenuEvent_ = false;
 bool ContainerModalViewEnhance::sIsMenuPending_ = false;
 bool ContainerModalViewEnhance::enableSplit_ = true;
 OffsetF ContainerModalViewEnhance::menuOffset_ = {};
@@ -256,7 +257,8 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
     auto hoverMoveFuc = [](MouseInfo& info) {
         LOGD("container window on hover event action_ = %{public}d sIsMenuPending_ %{public}d", info.GetAction(),
             sIsMenuPending_);
-        sIsLeftMouse_ = info.GetButton() == MouseButton::LEFT_BUTTON;
+        sIsForbidMenuEvent_ = info.GetButton() == MouseButton::LEFT_BUTTON
+            || info.GetAction() == MouseAction::WINDOW_ENTER;
         if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE) {
             auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() -
                 MENU_FLOAT_X.ConvertToPx();
@@ -279,7 +281,7 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
         }
         auto pattern = weakContainerPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (sIsMenuPending_ || sIsLeftMouse_ || !pattern->GetIsFocus()) {
+        if (sIsMenuPending_ || sIsForbidMenuEvent_ || !pattern->GetIsFocus()) {
             return;
         }
         auto maximizeBtn = weakMaximizeBtn.Upgrade();
@@ -587,8 +589,8 @@ void ContainerModalViewEnhance::ResetHoverTimer()
 
 void ContainerModalViewEnhance::CalculateMenuOffset(OffsetF currentOffset)
 {
-    auto screenWidth = SystemProperties::GetDeviceWidth();
-    auto screenHeight = SystemProperties::GetDeviceHeight();
+    auto screenWidth = SystemProperties::GetDevicePhysicalWidth();
+    auto screenHeight = SystemProperties::GetDevicePhysicalHeight();
     auto offsetX = currentOffset.GetX();
     auto offsetY = currentOffset.GetY();
     auto menuWidth = MENU_CONTAINER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx() * 2;

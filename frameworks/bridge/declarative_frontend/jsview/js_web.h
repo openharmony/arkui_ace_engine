@@ -129,6 +129,7 @@ public:
     static void OnControllerAttached(const JSCallbackInfo& args);
     static void OnOverScroll(const JSCallbackInfo& args);
     static void WrapContent(bool isWrapContentEnabled);
+    static void SetNestedScroll(const JSCallbackInfo& info);
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;

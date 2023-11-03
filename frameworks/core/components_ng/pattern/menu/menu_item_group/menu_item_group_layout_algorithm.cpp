@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_layout_algorithm.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
@@ -107,8 +108,8 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     totalHeight += footerPadding;
     menuItemGroupSize.SetHeight(totalHeight);
 
-    LOGD("finish measure, menuItemGroup size = %{public}f x %{public}f", menuItemGroupSize.Width(),
-        menuItemGroupSize.Height());
+    TAG_LOGD(AceLogTag::ACE_MENU, "finish measure, menuItemGroup size = %{public}f x %{public}f",
+        menuItemGroupSize.Width(), menuItemGroupSize.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(menuItemGroupSize);
 }
 
@@ -131,7 +132,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper)
     for (auto& pos : itemPosition_) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
         if (!wrapper) {
-            LOGI("wrapper is out of boundary");
+            TAG_LOGW(AceLogTag::ACE_MENU, "wrapper is out of boundary");
             continue;
         }
         LayoutIndex(wrapper, OffsetF(0.0, pos.second.first));

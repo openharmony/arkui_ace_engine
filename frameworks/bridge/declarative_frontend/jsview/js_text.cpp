@@ -634,8 +634,6 @@ void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
             JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(tmpInfo), menuOptionsItems);
             TextModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
         }
-    } else {
-        LOGI("Menu option isn't support to this version");
     }
 }
 

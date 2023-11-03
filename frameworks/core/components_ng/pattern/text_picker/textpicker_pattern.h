@@ -106,7 +106,6 @@ public:
     void SetRange(const std::vector<NG::RangeContent>& value)
     {
         if (value.empty()) {
-            LOGE("input value of range is empty.");
             return;
         }
         range_.clear();
@@ -148,7 +147,6 @@ public:
     std::string GetOption(uint32_t index) const
     {
         if (index >= GetOptionCount()) {
-            LOGE("index out of range.");
             return "";
         }
         return options_[index].text_;

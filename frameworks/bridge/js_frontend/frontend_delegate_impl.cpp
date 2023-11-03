@@ -1018,7 +1018,6 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     if (!taskExecutor_) {
-        LOGE("task executor is null.");
         return;
     }
 
@@ -1087,7 +1086,6 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
                 [weak, callback, successType]() {
                     callback(successType);
                     if (!successType) {
-                        LOGI("dialog choose cancel button, can not back");
                         return;
                     }
                     auto delegate = weak.Upgrade();
@@ -1102,7 +1100,6 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
 
     std::lock_guard<std::mutex> lock(mutex_);
     if (pageRouteStack_.empty()) {
-        LOGE("page stack is null.");
         return;
     }
 

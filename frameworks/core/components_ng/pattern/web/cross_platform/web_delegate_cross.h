@@ -196,9 +196,9 @@ private:
     void OnErrorReceive(void* object);
     void OnScroll(void* object);
     void OnScaleChange(void* object);
-    void OnHttpErrorReceive(void* object) override;
-    bool OnConsoleMessage(void* object) override;
-    bool OnLoadIntercept(void* object) override;
+    void OnHttpErrorReceive(void* object);
+    bool OnConsoleMessage(void* object);
+    bool OnLoadIntercept(void* object);
 
     WeakPtr<NG::WebPattern> webPattern_;
     WeakPtr<PipelineBase> context_;

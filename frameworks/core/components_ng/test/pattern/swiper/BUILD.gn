@@ -17,5 +17,8 @@ ace_unittest("swiper_test_ng") {
   flutter_skia = true
   render = true
   type = "new"
-  sources = [ "swiper_test_ng.cpp" ]
+  sources = [
+    "$ace_root/frameworks/core/components_ng/test/pattern/test_ng.cpp",
+    "swiper_test_ng.cpp",
+  ]
 }

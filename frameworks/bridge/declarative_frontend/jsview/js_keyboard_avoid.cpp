@@ -25,18 +25,19 @@ const std::vector<KeyBoardAvoidMode> KEYBOARD_AVOID_MODES = { KeyBoardAvoidMode:
 
 void JSKeyboardAvoid::SetKeyboardAvoidMode(const JSCallbackInfo& info)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     if (info.Length() < 1) {
         return;
     }
     if (!info[0]->IsNumber()) {
+        pipeline->SetEnableKeyBoardAvoidMode(false);
         return;
     }
     auto index = info[0]->ToNumber<int32_t>();
     if (index < 0 || index >= static_cast<int32_t>(KEYBOARD_AVOID_MODES.size())) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     if (KEYBOARD_AVOID_MODES[index] == KeyBoardAvoidMode::RESIZE) {
         pipeline->SetEnableKeyBoardAvoidMode(true);
     } else {
@@ -44,15 +45,17 @@ void JSKeyboardAvoid::SetKeyboardAvoidMode(const JSCallbackInfo& info)
     }
 }
 
-KeyBoardAvoidMode JSKeyboardAvoid::GetKeyboardAvoidMode()
+void JSKeyboardAvoid::GetKeyboardAvoidMode(const JSCallbackInfo& info)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, KeyBoardAvoidMode::OFFSET);
+    CHECK_NULL_VOID(pipeline);
+    auto obj = "KeyBoardAvoidMode.OFFSET";
     if (pipeline->IsEnableKeyBoardAvoidMode()) {
-        return KeyBoardAvoidMode::RESIZE;
-    } else {
-        return KeyBoardAvoidMode::OFFSET;
+        obj =  "KeyBoardAvoidMode.RESIZE";
     }
+    auto returnValue = JSVal(ToJSValue(obj));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    info.SetReturnValue(returnPtr);
 }
 
 void JSKeyboardAvoid::JSBind(BindingTarget globalObj)

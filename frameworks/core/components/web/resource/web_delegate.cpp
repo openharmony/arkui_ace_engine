@@ -5431,4 +5431,17 @@ bool WebDelegate::ShouldVirtualKeyboardOverlay()
     }
     return false;
 }
+
+bool WebDelegate::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->FilterScrollEvent(x, y, xVelocity, yVelocity);
+}
+
+void WebDelegate::ScrollBy(float deltaX, float deltaY)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->ScrollBy(deltaX, deltaY);
+}
 } // namespace OHOS::Ace

@@ -39,6 +39,7 @@
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -246,17 +247,8 @@ void OffscreenCanvasPaintMethod::DrawImage(
 void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
 #ifndef USE_ROSEN_DRAWING
-    // get skImage form pixelMap
-    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
-
-    // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> image;
-
-    image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    CHECK_NULL_VOID(image);
-
     const auto skCanvas = skCanvas_.get();
+    CHECK_NULL_VOID(skCanvas);
     SkPaint compositeOperationpPaint;
     InitPaintBlend(compositeOperationpPaint);
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
@@ -276,22 +268,25 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
         path.addRect(skRect);
         RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas, &imagePaint_);
     }
+
+    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
+    CHECK_NULL_VOID(recordingCanvas);
+    const std::shared_ptr<Media::PixelMap> tempPixelMap = pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(tempPixelMap);
     switch (canvasImage.flag) {
         case 0:
-            skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
+            recordingCanvas->DrawPixelMap(tempPixelMap, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-
-            skCanvas->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
+            recordingCanvas->DrawPixelMapRect(tempPixelMap, rect, sampleOptions_, &imagePaint_);
             break;
         }
         case 2: {
             SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-
-            skCanvas->drawImageRect(
-                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+            recordingCanvas->DrawPixelMapRect(
+                tempPixelMap, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
             break;
         }
         default:

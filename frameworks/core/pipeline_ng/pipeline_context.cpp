@@ -106,6 +106,13 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
+RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
+{
+    auto pipeline = PipelineBase::GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return DynamicCast<PipelineContext>(pipeline);
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     auto context = GetCurrentContext();
@@ -880,6 +887,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         float offsetFix = (rootSize.Height() - positionYWithOffset) > 100.0f
                               ? keyboardHeight - (rootSize.Height() - positionYWithOffset) / 2.0f
                               : keyboardHeight;
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+        if (offsetFix > 0.0f && positionYWithOffset < offsetFix) {
+            offsetFix = keyboardHeight - (rootSize.Height() - positionYWithOffset - height);
+        }
+#endif
         if (NearZero(keyboardHeight)) {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&

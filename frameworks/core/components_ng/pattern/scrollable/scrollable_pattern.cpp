@@ -225,10 +225,16 @@ bool ScrollablePattern::CoordinateWithNavigation(bool isAtTop, bool isDraggedDow
         isReactInParentMovement_ = false;
         ProcessNavBarReactOnEnd();
     }
-    if (isReactInParentMovement_) {
+
+    if (isReactInParentMovement_ && navBarPattern_) {
         auto needMove = ProcessNavBarReactOnUpdate(offset);
+        auto minTitle = navBarPattern_->GetCurrentNavBarStatus();
         if (navBarPattern_ && navBarPattern_->IsTitleModeFree()) {
-            reactiveIn = !needMove;
+            if (minTitle && LessNotEqual(offset, 0.0)) {
+                reactiveIn = needMove;
+            } else {
+                reactiveIn = !needMove;
+            }
         }
     }
     return reactiveIn;

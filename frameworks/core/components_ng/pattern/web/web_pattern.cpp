@@ -39,6 +39,7 @@
 #include "file_uri.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "parameters.h"
+#include "image_source.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
@@ -53,10 +54,13 @@ namespace OHOS::Ace::NG {
 using namespace Msdp::DeviceStatus;
 #endif // ENABLE_DRAG_FRAMEWORK
 namespace {
+const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
+const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
     { OHOS::NWeb::CursorType::CT_IBEAM, MouseFormat::TEXT_CURSOR },
+    { OHOS::NWeb::CursorType::CT_WAIT, MouseFormat::LOADING },
     { OHOS::NWeb::CursorType::CT_HELP, MouseFormat::HELP },
     { OHOS::NWeb::CursorType::CT_EASTRESIZE, MouseFormat::WEST_EAST },
     { OHOS::NWeb::CursorType::CT_NORTHRESIZE, MouseFormat::NORTH_SOUTH },
@@ -82,8 +86,12 @@ const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] =
     { OHOS::NWeb::CursorType::CT_SOUTHWESTPANNING, MouseFormat::MIDDLE_BTN_SOUTH_WEST },
     { OHOS::NWeb::CursorType::CT_WESTPANNING, MouseFormat::MIDDLE_BTN_WEST },
     { OHOS::NWeb::CursorType::CT_MOVE, MouseFormat::CURSOR_MOVE },
+    { OHOS::NWeb::CursorType::CT_VERTICALTEXT, MouseFormat::HORIZONTAL_TEXT_CURSOR },
+    { OHOS::NWeb::CursorType::CT_CELL, MouseFormat::CURSOR_CROSS },
+    { OHOS::NWeb::CursorType::CT_PROGRESS, MouseFormat::RUNNING },
     { OHOS::NWeb::CursorType::CT_NODROP, MouseFormat::CURSOR_FORBID },
     { OHOS::NWeb::CursorType::CT_COPY, MouseFormat::CURSOR_COPY },
+    { OHOS::NWeb::CursorType::CT_NONE, MouseFormat::CURSOR_NONE },
     { OHOS::NWeb::CursorType::CT_NOTALLOWED, MouseFormat::CURSOR_FORBID },
     { OHOS::NWeb::CursorType::CT_ZOOMIN, MouseFormat::ZOOM_IN },
     { OHOS::NWeb::CursorType::CT_ZOOMOUT, MouseFormat::ZOOM_OUT },
@@ -1957,15 +1965,50 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::
     if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) == -1) {
         return false;
     }
-    MouseFormat pointStyle = MouseFormat::DEFAULT;
-    int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
-    if (idx >= 0) {
-        pointStyle = g_cursorTypeMap[idx].value;
-    }
-    if ((int32_t)pointStyle != curPointerStyle) {
-        mouseStyle->SetPointerStyle(windowId, pointStyle);
+    if ((type == OHOS::NWeb::CursorType::CT_CONTEXTMENU) || (type == OHOS::NWeb::CursorType::CT_ALIAS)) {
+        UpdateLocalCursorStyle(windowId, type);
+    } else {
+        MouseFormat pointStyle = MouseFormat::DEFAULT;
+        int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
+        if (idx >= 0) {
+            pointStyle = g_cursorTypeMap[idx].value;
+        }
+        if (static_cast<int32_t>(pointStyle) != curPointerStyle) {
+            mouseStyle->SetPointerStyle(windowId, pointStyle);
+        }
     }
     return true;
+}
+
+void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    if (type == NWeb::CursorType::CT_CONTEXTMENU) {
+        MouseFormat pointStyle = MouseFormat::CONTEXT_MENU;
+        pixelMap = CreatePixelMapFromString(IMAGE_POINTER_CONTEXT_MENU_PATH);
+        mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
+    } else if (type == NWeb::CursorType::CT_ALIAS) {
+        MouseFormat pointStyle = MouseFormat::ALIAS;
+        pixelMap = CreatePixelMapFromString(IMAGE_POINTER_ALIAS_PATH);
+        mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
+    }
+}
+
+std::shared_ptr<OHOS::Media::PixelMap> WebPattern::CreatePixelMapFromString(const std::string& filePath)
+{
+    OHOS::Media::SourceOptions opts;
+    opts.formatHint = "image/svg+xml";
+    uint32_t errCode = 0;
+    auto imageSource = OHOS::Media::ImageSource::CreateImageSource(filePath, opts, errCode);
+    CHECK_NULL_RETURN(imageSource, nullptr);
+    std::set<std::string> formats;
+    errCode = imageSource->GetSupportedFormats(formats);
+    Media::DecodeOptions decodeOpts;
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errCode);
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+
+    return pixelMap;
 }
 
 void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
@@ -2446,18 +2489,24 @@ void WebPattern::OnScrollEndRecursive()
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
 {
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    if (nestedScrollMode_ != NestedScrollMode::SELF_FIRST) {
+        return;
+    }
     if (isFling) {
-        if (isFirstFlingScrollVelocity_) {
+        if (velocity != 0 && isFirstFlingScrollVelocity_) {
             HandleScrollVelocity(velocity);
             isFirstFlingScrollVelocity_ = false;
         }
     } else {
-        HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        if (scrollState_) {
+            HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        }
     }
 }
 
 void WebPattern::OnScrollState(bool scrollState)
 {
+    scrollState_ = scrollState;
     if (!scrollState) {
         OnScrollEndRecursive();
     }
@@ -2468,7 +2517,8 @@ Axis WebPattern::GetParentAxis()
     auto parent = WebSearchParent();
     parent_ = parent;
     CHECK_NULL_RETURN(parent, Axis::HORIZONTAL);
-    return parent->GetAxis();
+    axis_ = parent->GetAxis();
+    return axis_;
 }
 
 RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
@@ -2496,5 +2546,49 @@ void WebPattern::OnRootLayerChanged(int width, int height)
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    if (nestedOpt.forward == NestedScrollMode::SELF_ONLY &&
+        nestedOpt.backward == NestedScrollMode::SELF_ONLY) {
+        nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
+    } else if (nestedOpt.forward == NestedScrollMode::SELF_FIRST &&
+               nestedOpt.backward == NestedScrollMode::SELF_FIRST) {
+        nestedScrollMode_ = NestedScrollMode::SELF_FIRST;
+    } else if (nestedOpt.forward == NestedScrollMode::PARENT_FIRST &&
+               nestedOpt.backward == NestedScrollMode::PARENT_FIRST) {
+        nestedScrollMode_ = NestedScrollMode::PARENT_FIRST;
+    } else if (nestedOpt.forward == NestedScrollMode::PARALLEL &&
+               nestedOpt.backward == NestedScrollMode::PARALLEL) {
+        nestedScrollMode_ = NestedScrollMode::PARALLEL;
+    }
+    TAG_LOGD(AceLogTag::ACE_WEB, "SetNestedScroll %{public}d", nestedScrollMode_);
+}
+
+bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
+{
+    float offset = GetAxis() == Axis::HORIZONTAL ? x : y;
+    float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    if (nestedScrollMode_ == NestedScrollMode::PARENT_FIRST) {
+        if (offset != 0) {
+            auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+            float remainOffset = result.remain;
+            CHECK_NULL_RETURN(delegate_, true);
+            TAG_LOGD(AceLogTag::ACE_WEB, "FilterScrollEvent ScrollBy remainOffset = %{public}f", remainOffset);
+            GetAxis() == Axis::HORIZONTAL ? delegate_->ScrollBy(-remainOffset, 0)
+                                          : delegate_->ScrollBy(0, -remainOffset);
+        } else {
+            HandleScrollVelocity(velocity);
+        }
+        return true;
+    } else if (nestedScrollMode_ == NestedScrollMode::PARALLEL) {
+        if (offset != 0) {
+            HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        } else {
+            HandleScrollVelocity(velocity);
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

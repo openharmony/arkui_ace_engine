@@ -1208,7 +1208,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     }
     auto edgeEffect = GetEdgeEffect();
     auto isOutOfBoundary = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
-    if (!IsLoop() && isOutOfBoundary && edgeEffect == EdgeEffect::SPRING && isDragging_) {
+    if (!IsLoop() && isOutOfBoundary && edgeEffect == EdgeEffect::SPRING && (isDragging_ || childScrolling_)) {
         targetIndex_.reset();
 
         auto visibleSize = CalculateVisibleSize();
@@ -1226,7 +1226,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
         FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
     } else if (!IsLoop() && IsOutOfBoundary(offset) &&
-               (edgeEffect == EdgeEffect::FADE || edgeEffect == EdgeEffect::NONE) && isDragging_) {
+               (edgeEffect == EdgeEffect::FADE || edgeEffect == EdgeEffect::NONE) && (isDragging_ || childScrolling_)) {
         currentDelta_ = currentDelta_ - offset;
         if (edgeEffect == EdgeEffect::FADE) {
             auto host = GetHost();
@@ -1324,7 +1324,7 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
-        HandleTouchDown();
+        HandleTouchDown(info);
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
     } else if (touchType == TouchType::CANCEL) {
@@ -1332,8 +1332,25 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 }
 
-void SwiperPattern::HandleTouchDown()
+void SwiperPattern::HandleTouchDown(const TouchEventInfo& info)
 {
+    if (HasIndicatorNode()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+        CHECK_NULL_VOID(indicatorNode);
+        if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+            auto geometryNode = indicatorNode->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto hotRegion = geometryNode->GetFrameRect();
+            auto locationInfo = info.GetTouches().front();
+            auto touchPoint = PointF(static_cast<float>(locationInfo.GetLocalLocation().GetX()),
+                static_cast<float>(locationInfo.GetLocalLocation().GetY()));
+            if (hotRegion.IsInRegion(touchPoint)) {
+                return;
+            }
+        }
+    }
     if (indicatorController_) {
         indicatorController_->Stop();
     }
@@ -3181,12 +3198,10 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
 {
     auto parent = parent_.Upgrade();
     if (!parent || !enableNestedScroll_) {
-        // SELF_ONLY
-        UpdateCurrentOffset(offset);
-
-        if (GetEdgeEffect() == EdgeEffect::NONE && IsOutOfBoundary(offset)) {
+        if (IsOutOfBoundary(offset) && ChildFirst(state)) {
             return { offset, true };
         }
+        UpdateCurrentOffset(offset);
         return { 0.0f, !IsLoop() && GetDistanceToEdge() <= 0.0f };
     }
     return HandleScrollSelfFirst(offset, source, state);
@@ -3197,19 +3212,24 @@ ScrollResult SwiperPattern::HandleScrollSelfFirst(float offset, int32_t source, 
     if (IsOutOfBoundary(offset)) {
         // parent handle overScroll first
         auto res = parent_.Upgrade()->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
+        if (ChildFirst(state)) {
+            return { res.remain, true };
+        }
         if (res.remain != 0.0f) {
             UpdateCurrentOffset(res.remain);
-        }
-        auto effect = GetEdgeEffect();
-        // NONE doesn't consume the offset
-        if (effect == EdgeEffect::NONE) {
-            return { res.remain, true };
         }
     } else {
         // regular scroll
         UpdateCurrentOffset(offset);
     }
     return { 0.0f, !IsLoop() && GetDistanceToEdge() <= 0.0f };
+}
+
+inline bool SwiperPattern::ChildFirst(NestedState state)
+{
+    // priority: self scroll > child scroll > self overScroll > child overScroll
+    return state == NestedState::CHILD_SCROLL // child hasn't reach edge
+           || GetEdgeEffect() == EdgeEffect::NONE;
 }
 
 void SwiperPattern::DumpAdvanceInfo()

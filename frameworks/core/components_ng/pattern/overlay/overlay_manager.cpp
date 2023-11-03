@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -470,6 +471,10 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                 CHECK_NULL_VOID(root);
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
                 menuWrapperPattern->CallMenuDisappearCallback();
+                auto mainPipeline = PipelineContext::GetMainPipelineContext();
+                if (mainPipeline) {
+                    mainPipeline->FlushPipelineImmediately();
+                }
                 // clear contextMenu then return
                 if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
@@ -996,7 +1001,6 @@ void OverlayManager::DeleteMenu(int32_t targetId)
 {
     auto it = menuMap_.find(targetId);
     if (it == menuMap_.end()) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Delete menu failed, menuNode %{public}d doesn't exist", targetId);
         return;
     }
     menuMap_.erase(it);

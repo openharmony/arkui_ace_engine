@@ -115,12 +115,10 @@ void JSTextPicker::PickerBackgroundColor(const JSCallbackInfo& info)
     JSViewAbstract::JsBackgroundColor(info);
 
     if (info.Length() < 1) {
-        LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        LOGI("the info[0] is null");
         return;
     }
     TextPickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
@@ -224,16 +222,12 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
             }
         }
         if (!isSingleRange && optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
-            LOGE("parse range all type error.");
             param.result.clear();
             param.options.clear();
             return;
         }
         auto theme = GetTheme<PickerTheme>();
-        if (!theme) {
-            LOGE("PickerText Theme is null");
-            return;
-        }
+        CHECK_NULL_VOID(theme);
         if (!param.result.empty()) {
             TextPickerModel::GetInstance()->Create(theme, param.kind);
             TextPickerModel::GetInstance()->SetRange(param.result);
@@ -266,7 +260,6 @@ bool JSTextPicker::ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec, Pa
     }
     if (!JSTextPickerParser::ParseTextArray(paramObjec, param)) {
         if (!JSTextPickerParser::ParseIconTextArray(paramObjec, param.result, param.kind, param.selected)) {
-            LOGI("parse range error.");
             param.result.clear();
             ret = false;
         }
@@ -281,11 +274,9 @@ bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject,
     auto getRange = paramObject->GetProperty("range");
     if (getRange->IsNull() || getRange->IsUndefined()) {
         options.clear();
-        LOGE("parse cascade Options error.");
         return false;
     }
     if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, selectedValues, values, attr)) {
-        LOGE("parse cascade text error.");
         options.clear();
         return false;
     } else {
@@ -363,7 +354,6 @@ bool JSTextPickerParser::ParseMultiTextArrayRangeInternal(
     if (value->IsArray()) {
         NG::TextCascadePickerOptions option;
         if (!ParseJsStrArray(value, option.rangeResult)) {
-            LOGI("parse str array error.");
             return false;
         } else {
             options.emplace_back(option);
@@ -419,7 +409,6 @@ void JSTextPickerParser::ParseMultiTextArraySelectArrayInternal(
             selectedValues.emplace_back(0);
         } else {
             if (selectedValues[i] >= options[i].rangeResult.size()) {
-                LOGW("selectedValue is out of range");
                 selectedValues[i] = 0;
             }
         }
@@ -430,7 +419,6 @@ bool JSTextPickerParser::ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSel
 {
     if (jsSelectedValue->IsArray()) {
         if (!ParseJsIntegerArray(jsSelectedValue, param.selecteds)) {
-            LOGE("parse selectedValues array error.");
             return false;
         }
         ParseMultiTextArraySelectArrayInternal(param.options, param.selecteds);
@@ -438,7 +426,6 @@ bool JSTextPickerParser::ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSel
         uint32_t selectedValue = 0;
         if (ParseJsInteger(jsSelectedValue, selectedValue)) {
             if (param.options.size() < 1 || selectedValue >= param.options[0].rangeResult.size()) {
-                LOGW("selectedValue is out of range");
                 selectedValue = 0;
             }
             param.selecteds.emplace_back(selectedValue);
@@ -496,7 +483,6 @@ bool JSTextPickerParser::ParseMultiTextArrayValue(const JsiRef<JsiValue>& jsValu
 {
     if (jsValue->IsArray()) {
         if (!ParseJsStrArray(jsValue, param.values)) {
-            LOGE("parse value array error.");
             return false;
         }
         ParseMultiTextArrayValueInternal(param.options, param.values);
@@ -587,7 +573,6 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
         selectedValues.emplace_back(0);
     } else {
         if (selectedValues[index] >= resultStr.size()) {
-            LOGW("selectedValue is out of range");
             selectedValues[index] = 0;
         }
     }
@@ -614,7 +599,6 @@ bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObjec
     auto getValue = paramObject->GetProperty("value");
     if (getValue->IsArray()) {
         if (!ParseJsStrArray(getValue, values)) {
-            LOGE("parse value array error.");
             return false;
         }
     } else {
@@ -626,7 +610,6 @@ bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObjec
     }
     if (getSelected->IsArray()) {
         if (!ParseJsIntegerArray(getSelected, selectedValues)) {
-            LOGE("parse selectedValues array error.");
             attr.isHasSelectAttr = false;
             return false;
         } else {
@@ -653,7 +636,6 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
     std::vector<std::string> getRangeVector;
     if (getRange->Length() > 0) {
         if (!ParseJsStrArray(getRange, getRangeVector)) {
-            LOGE("parse str array error.");
             return false;
         }
 
@@ -689,7 +671,6 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
             }
         }
         if (param.selected >= getRangeVector.size()) {
-            LOGW("selectedValue is out of range");
             param.selected = 0;
         }
     }
@@ -703,7 +684,6 @@ bool JSTextPickerParser::ParseIconTextArray(
     auto getSelected = paramObject->GetProperty("selected");
     auto getRange = paramObject->GetProperty("range");
     if (!getRange->IsArray()) {
-        LOGE("arg is not array.");
         return false;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(getRange);
@@ -732,7 +712,6 @@ bool JSTextPickerParser::ParseIconTextArray(
     }
 
     if (kind != NG::ICON && kind != (NG::ICON | NG::TEXT)) {
-        LOGE("kind is wrong.");
         return false;
     }
 
@@ -753,7 +732,6 @@ void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Pic
     }
 
     if (!fontOptions->IsObject()) {
-        LOGE("fontStyle is not obj.");
         return;
     }
     JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontOptions);
@@ -767,7 +745,6 @@ void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Pic
         CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             textStyle.fontSize = Dimension(-1);
-            LOGW("Parse to dimension FP failed.");
         } else {
             textStyle.fontSize = size;
         }
@@ -793,7 +770,6 @@ void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Pic
     if (fontStyle->IsNumber()) {
         auto style = fontStyle->ToNumber<int32_t>();
         if (style < 0 || style > 1) {
-            LOGE("Text fontStyle(%d) is invalid value", style);
             return;
         }
         textStyle.fontStyle = static_cast<FontStyle>(style);
@@ -803,7 +779,6 @@ void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Pic
 void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
     CalcDimension height;
@@ -817,26 +792,18 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
 void JSTextPicker::SetCanLoop(const JSCallbackInfo& info)
 {
     bool value = true;
-    if (info.Length() != 1 || !info[0]->IsBoolean()) {
-        LOGE("parse canLoop error.");
-    } else {
+    if (info[0]->IsBoolean()) {
         value = info[0]->ToBoolean();
     }
-
     TextPickerModel::GetInstance()->SetCanLoop(value);
 }
 
 void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("PickerText Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-    } else {
+    if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
     TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
@@ -845,14 +812,9 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("PickerText Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-    } else {
+    if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
@@ -861,14 +823,9 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
 void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("PickerText Theme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-    } else {
+    if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
@@ -886,7 +843,6 @@ void JSTextPicker::ProcessCascadeSelected(
         selectedValues.emplace_back(0);
     }
     if (selectedValues[index] >= rangeResultValue.size()) {
-        LOGW("selectedValue is out of range");
         selectedValues[index] = 0;
     }
     if (selectedValues[index] <= options.size() - 1 && options[selectedValues[index]].children.size() > 0) {
@@ -902,7 +858,6 @@ void JSTextPicker::SetSelectedInternal(
             selectedValues.emplace_back(0);
         } else {
             if (selectedValues[i] >= options[i].rangeResult.size()) {
-                LOGW("selectedValue is out of range");
                 selectedValues[i] = 0;
             }
         }
@@ -932,7 +887,6 @@ void JSTextPicker::SetSelectedIndexSingleInternal(const std::vector<NG::TextCasc
 {
     if (options.size() > 0) {
         if (selectedValue >= options[0].rangeResult.size()) {
-            LOGW("selectedValue is out of range");
             selectedValue = 0;
         }
         selectedValues.emplace_back(selectedValue);
@@ -955,7 +909,6 @@ void JSTextPicker::SetSelectedIndexMulti(const JsiRef<JsiValue>& jsSelectedValue
         TextPickerModel::GetInstance()->IsCascade() ? TextPickerModel::GetInstance()->GetMaxCount() : options.size();
     if (jsSelectedValue->IsArray()) {
         if (!ParseJsIntegerArray(jsSelectedValue, selectedValues)) {
-            LOGE("parse selectedValues array error.");
             selectedValues.clear();
             for (uint32_t i = 0; i < count; i++) {
                 selectedValues.emplace_back(0);
@@ -989,14 +942,12 @@ void JSTextPicker::SetSelectedIndexSingle(const JsiRef<JsiValue>& jsSelectedValu
     if (jsSelectedValue->IsArray()) {
         std::vector<uint32_t> selectedValues;
         if (!ParseJsIntegerArray(jsSelectedValue, selectedValues)) {
-            LOGE("SetselectedIndex parse selectedValues array error.");
             uint32_t selectedValue = 0;
             TextPickerModel::GetInstance()->SetSelected(selectedValue);
             return;
         }
         if (selectedValues.size() > 0) {
             if (selectedValues[0] >= rangeResult.size()) {
-                LOGW("selectedValue is out of range");
                 selectedValues[0] = 0;
             }
         } else {
@@ -1008,7 +959,6 @@ void JSTextPicker::SetSelectedIndexSingle(const JsiRef<JsiValue>& jsSelectedValu
         uint32_t selectedValue = 0;
         if (ParseJsInteger(jsSelectedValue, selectedValue)) {
             if (selectedValue >= rangeResult.size()) {
-                LOGW("selectedValue is out of range");
                 selectedValue = 0;
             }
         }
@@ -1080,13 +1030,8 @@ void JSTextPickerDialog::JSBind(BindingTarget globalObj)
 void JSTextPickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
-    if (!scopedDelegate) {
-        // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
-        return;
-    }
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("TextPicker create error, info is non-valid");
+    CHECK_NULL_VOID(scopedDelegate);
+    if (!info[0]->IsObject()) {
         return;
     }
 
@@ -1139,7 +1084,6 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         JSRef<JSArray> getRange = paramObject->GetProperty("range");
         std::vector<std::string> getRangeVector;
         if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {
-            LOGE("parse range failed");
             return;
         }
         std::string value = "";
@@ -1153,7 +1097,6 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
             }
         }
         if (selectedValue >= getRangeVector.size()) {
-            LOGW("selectedValue is out of range");
             selectedValue = 0;
         }
         CalcDimension height;
@@ -1227,10 +1170,7 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
     }
 
     auto theme = JSTextPicker::GetTheme<DialogTheme>();
-    if (!theme) {
-        LOGE("DialogTheme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
 
     NG::TextPickerSettingData settingData;
     if (!ParseShowData(paramObj, settingData)) {
@@ -1264,14 +1204,12 @@ bool JSTextPickerDialog::ParseShowDataOptions(
     bool optionsMultiContentCheckErr = false;
     bool optionsCascadeContentCheckErr = false;
     if (!JSTextPickerParser::ParseMultiTextArray(paramObject, param)) {
-        LOGI("parse multi text error.");
         param.options.clear();
         optionsMultiContentCheckErr = true;
     }
 
     if (optionsMultiContentCheckErr) {
         if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, param.selecteds, param.values, attr)) {
-            LOGI("parse cascade text error.");
             param.options.clear();
             optionsCascadeContentCheckErr = true;
         } else {
@@ -1281,7 +1219,6 @@ bool JSTextPickerDialog::ParseShowDataOptions(
         }
     }
     if (optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
-        LOGI("parse option error.");
         param.options.clear();
         return false;
     }
@@ -1347,7 +1284,6 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
     }
     if (!JSTextPickerParser::ParseTextArray(paramObject, param)) {
         if (!JSTextPickerParser::ParseIconTextArray(paramObject, param.result, param.kind, param.selected)) {
-            LOGI("parse range error.");
             rangeContentCheckErr = true;
             param.result.clear();
         }
@@ -1356,19 +1292,15 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
         optionsCascadeContentCheckErr = !ParseShowDataOptions(paramObject, param, attr);
     }
     if (rangeContentCheckErr && optionsCascadeContentCheckErr) {
-        LOGE("parse option all type error.");
         return false;
     }
     if (memset_s(&settingData, sizeof(NG::TextPickerSettingData), 0, sizeof(NG::TextPickerSettingData)) != EOK) {
-        LOGE("memset settingData error.");
         return false;
     }
     if (!ParseShowDataAttribute(paramObject, settingData)) {
         return false;
     }
-    if (!ParseCanLoop(paramObject, settingData.canLoop)) {
-        LOGW("don't find property(canLoop), set default true");
-    }
+    ParseCanLoop(paramObject, settingData.canLoop);
     if (param.result.size() > 0) {
         settingData.selected = param.selected;
         settingData.columnKind = param.kind;
@@ -1406,8 +1338,7 @@ void JSTextPickerDialog::ParseTextProperties(const JSRef<JSObject>& paramObj, NG
 std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const JSCallbackInfo& info)
 {
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("TextPicker AddEvent error, info is non-valid");
+    if (!info[0]->IsObject()) {
         return dialogEvent;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -1439,8 +1370,7 @@ std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const
 std::map<std::string, NG::DialogGestureEvent> JSTextPickerDialog::DialogCancelEvent(const JSCallbackInfo& info)
 {
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("TextPicker AddEvent error, info is non-valid");
+    if (!info[0]->IsObject()) {
         return dialogCancelEvent;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -1460,8 +1390,7 @@ std::map<std::string, NG::DialogGestureEvent> JSTextPickerDialog::DialogCancelEv
 
 void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("TextPicker AddEvent error, info is non-valid");
+    if (!info[0]->IsObject()) {
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -1509,7 +1438,6 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
     JSRef<JSArray> getRange = paramObj->GetProperty("range");
     std::vector<std::string> getRangeVector;
     if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {
-        LOGE("parse range failed");
         return;
     }
 
@@ -1524,7 +1452,6 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
     }
 
     if (selectedValue >= getRangeVector.size()) {
-        LOGW("selectedValue is out of range");
         selectedValue = 0;
     }
 

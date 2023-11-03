@@ -43,7 +43,7 @@ public:
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
 #endif
-    ~TxtParagraph() override = default;
+    ~TxtParagraph() override;
 
     // whether the paragraph has been build
     bool IsValid() override;
@@ -110,6 +110,7 @@ private:
     std::u16string text_;
     int32_t placeHolderIndex_ = -1;
     TextAlign textAlign_;
+    static uint32_t destructCount;
 
     ACE_DISALLOW_COPY_AND_MOVE(TxtParagraph);
 };

@@ -532,7 +532,7 @@ private:
     [[deprecated]] std::function<OverScrollOffset(double)> overScrollOffsetCallback_;
     // ScrollablePattern::HandleScroll
     NestableScrollCallback handleScrollCallback_;
-    // ScrollablePattern::HandleScrollVelocity
+    // ScrollablePattern::HandleOverScroll
     std::function<bool(float)> overScrollCallback_;
     // ScrollablePattern::onScrollStartRecursive
     std::function<void(float)> onScrollStartRec_;

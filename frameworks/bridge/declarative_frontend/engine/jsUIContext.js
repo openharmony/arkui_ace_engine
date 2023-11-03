@@ -13,11 +13,6 @@
  * limitations under the License.
  */
 
-var KeyboardAvoidMode;
-(function (KeyboardAvoidMode) {
-  KeyboardAvoidMode[KeyboardAvoidMode["OFFSET"] = 0] = "OFFSET";
-  KeyboardAvoidMode[KeyboardAvoidMode["RESIZE"] = 1] = "RESIZE";
-})(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
 class Font {
     /**
      * Construct new instance of Font.
@@ -73,6 +68,7 @@ class UIInspector {
         return componentObserver;
     }
 }
+
 
 class UIContext {
     /**
