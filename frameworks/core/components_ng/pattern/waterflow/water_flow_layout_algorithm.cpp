@@ -163,6 +163,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
     layoutInfo_.lastMainSize_ = mainSize_;
+
+    layoutWrapper->SetCacheCount(layoutProperty->GetCachedCountValue(1));
 }
 
 void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
