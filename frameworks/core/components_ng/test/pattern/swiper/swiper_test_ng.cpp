@@ -10577,5 +10577,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
     pattern_->parent_ = mockScroll;
     pattern_->OnScrollEndRecursive();
     EXPECT_FALSE(pattern_->childScrolling_);
+
+    pattern_->NotifyParentScrollEnd();
 }
 } // namespace OHOS::Ace::NG

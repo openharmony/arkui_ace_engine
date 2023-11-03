@@ -1456,7 +1456,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
-    TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiepr drag end.");
+    TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag end.");
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         UpdateItemRenderGroup(false);
         return;
@@ -1534,7 +1534,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         parent->HandleScrollVelocity(dragVelocity);
     } else {
         UpdateAnimationProperty(static_cast<float>(dragVelocity));
-        OnScrollEndRecursive();
+        NotifyParentScrollEnd();
     }
     if (pipeline) {
         pipeline->FlushUITasks();
@@ -1946,7 +1946,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
     currentIndexOffset_ = firstIndexStartPos;
     UpdateItemRenderGroup(false);
-    OnScrollEndRecursive();
+    NotifyParentScrollEnd();
     StartAutoPlay();
 }
 
@@ -3167,11 +3167,26 @@ void SwiperPattern::OnScrollStartRecursive(float position)
 
 void SwiperPattern::OnScrollEndRecursive()
 {
+    // in case child didn't call swiper's HandleScrollVelocity
+    if (!AnimationRunning()) {
+        HandleDragEnd(0.0f);
+    }
+
     childScrolling_ = false;
+}
+
+void SwiperPattern::NotifyParentScrollEnd()
+{
     auto parent = parent_.Upgrade();
     if (parent && enableNestedScroll_) {
         parent->OnScrollEndRecursive();
     }
+}
+
+inline bool SwiperPattern::AnimationRunning() const
+{
+    return (controller_ && controller_->IsRunning()) || (springController_ && springController_->IsRunning()) ||
+           (fadeController_ && fadeController_->IsRunning()) || usePropertyAnimation_;
 }
 
 bool SwiperPattern::HandleScrollVelocity(float velocity)
