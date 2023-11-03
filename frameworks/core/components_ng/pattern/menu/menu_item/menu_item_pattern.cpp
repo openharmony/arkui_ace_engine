@@ -18,7 +18,7 @@
 #include <memory>
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/log/log_wrapper.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
