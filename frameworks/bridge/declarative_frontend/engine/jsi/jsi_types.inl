@@ -182,6 +182,22 @@ void JsiException::Throw(const char* format, Args... args)
 }
 
 template<typename... Args>
+void JsiException::Throw(int32_t code, const char* format, Args... args)
+{
+    const std::string str = StringUtils::FormatString(format, args...);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    auto vm = runtime->GetEcmaVm();
+    LocalScope scope(vm);
+    Local<JSValueRef> error(JSValueRef::Undefined(vm));
+    error = panda::Exception::Error(vm, StringRef::NewFromUtf8(vm, str.c_str()));
+    Local<JSValueRef> codeKey = StringRef::NewFromUtf8(vm, "code");
+    Local<JSValueRef> codeValue = StringRef::NewFromUtf8(vm, std::to_string(code).c_str());
+    Local<ObjectRef> errorObj(error);
+    errorObj->Set(vm, codeKey, codeValue);
+    panda::JSNApi::ThrowException(vm, error);
+}
+
+template<typename... Args>
 void JsiException::ThrowRangeError(const char* format, Args... args)
 {
     const std::string str = StringUtils::FormatString(format, args...);
