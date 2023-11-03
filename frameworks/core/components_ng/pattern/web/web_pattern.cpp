@@ -2545,7 +2545,7 @@ void WebPattern::OnRootLayerChanged(int width, int height)
     rootLayerHeight_ = height;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
