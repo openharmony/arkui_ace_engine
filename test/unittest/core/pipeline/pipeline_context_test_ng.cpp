@@ -1547,7 +1547,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     // the first arg is manager->height_, the second arg is manager->position_.deltaY_
     // the third arg is rootHeight_, the forth arg is context_->rootNode_->geometryNode_->frame_.rect_.y_
     // the fifth arg is the parameter of function, the sixth arg is the expectation returns
-    params = { { 10, 100, 300, 0, 50, 0 }, { -1000, 290, 400, 100, 200, 100 } };
+    params = { { 10, 100, 300, 0, 50, 0 }, { 10, 100, 300, 100, 100, 0 }, { 30, 100, 300, 100, 50, 0 },
+        { 50, 290, 400, 100, 200, -95 }, { -1000, 290, 400, 100, 200, 100 } };
     for (int turn = 0; turn < params.size(); turn++) {
         manager->height_ = params[turn][0];
         manager->position_.deltaY_ = params[turn][1];
