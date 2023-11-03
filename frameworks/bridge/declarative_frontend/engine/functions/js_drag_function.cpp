@@ -257,6 +257,7 @@ void JsDragEvent::SetResult(const JSCallbackInfo& args)
 
 void JsDragEvent::GetResult(const JSCallbackInfo& args)
 {
+    CHECK_NULL_VOID(dragEvent_);
     auto dragRet = JSVal(ToJSValue(static_cast<int32_t>(dragEvent_->GetResult())));
     auto dragRetRef = JSRef<JSVal>::Make(dragRet);
     args.SetReturnValue(dragRetRef);
