@@ -39,7 +39,7 @@ public:
     virtual void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) = 0;
     virtual void SetListDirection(Axis axis) = 0;
     virtual void SetScrollBar(Ace::DisplayMode scrollBar) = 0;
-    virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;
+    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
     virtual void SetEditMode(bool editMode) = 0;
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
     virtual void SetChainAnimation(bool enableChainAnimation) = 0;

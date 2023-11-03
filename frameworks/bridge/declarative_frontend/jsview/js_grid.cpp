@@ -507,7 +507,17 @@ void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
         edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
         edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
     }
-    GridModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+    GridModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), false);
+    if (info.Length() == 2) { // 2 is parameter count
+        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+        if (info[1]->IsNull() || info[1]->IsUndefined()) {
+            return;
+        } else {
+            JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
+            bool alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : false;
+            GridModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+        }
+    }
 }
 
 void JSGrid::SetLayoutDirection(int32_t value)

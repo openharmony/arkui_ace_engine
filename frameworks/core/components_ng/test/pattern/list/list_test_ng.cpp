@@ -631,7 +631,7 @@ HWTEST_F(ListTestNg, ListLayoutProperty001, TestSize.Level1)
         model.SetScrollBar(Ace::DisplayMode::ON);
         model.SetEditMode(true);
         model.SetChainAnimation(true);
-        model.SetEdgeEffect(EdgeEffect::NONE);
+        model.SetEdgeEffect(EdgeEffect::NONE, false);
         model.SetLanes(3);
         model.SetLaneMinLength(Dimension(40));
         model.SetLaneMaxLength(Dimension(60));
@@ -1510,7 +1510,7 @@ HWTEST_F(ListTestNg, AttrSLECM001, TestSize.Level1)
 {
     CreateWithItem([](ListModelNG model) {
         model.SetListDirection(Axis::HORIZONTAL);
-        model.SetEdgeEffect(EdgeEffect::SPRING);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
         model.SetChainAnimation(true);
         model.SetMultiSelectable(true);
     });
@@ -5251,7 +5251,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
  */
 HWTEST_F(ListTestNg, SetEdgeEffectCallback001, TestSize.Level1)
 {
-    CreateWithItem([](ListModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING); });
+    CreateWithItem([](ListModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, false); });
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 0);
     EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), 0);
@@ -5261,7 +5261,7 @@ HWTEST_F(ListTestNg, SetEdgeEffectCallback001, TestSize.Level1)
 
     CreateWithItem([](ListModelNG model) {
         model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-        model.SetEdgeEffect(EdgeEffect::SPRING);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
     });
     scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 350.0);
@@ -5272,7 +5272,7 @@ HWTEST_F(ListTestNg, SetEdgeEffectCallback001, TestSize.Level1)
 
     Create([](ListModelNG model) {
         model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-        model.SetEdgeEffect(EdgeEffect::SPRING);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
     });
     scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 0);
@@ -5751,5 +5751,65 @@ HWTEST_F(ListTestNg, ListPattern_GetItemRectInGroup001, TestSize.Level1)
      */
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2),
         Rect(0, ITEM_HEIGHT * 2, FILL_LENGTH.Value() * DEVICE_WIDTH, ITEM_HEIGHT * GROUP_LINE_NUMBER)));
+}
+
+/**
+ * @tc.name: EdgeEffectOption001
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, EdgeEffectOption001, TestSize.Level1)
+{
+    Create([](ListModelNG model) {
+        CreateItem(TOTAL_LINE_NUMBER);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption002
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, EdgeEffectOption002, TestSize.Level1)
+{
+    Create([](ListModelNG model) {
+        CreateItem(TOTAL_LINE_NUMBER);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption003
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, EdgeEffectOption003, TestSize.Level1)
+{
+    Create([](ListModelNG model) {
+        CreateItem(1); // 1 is item count.
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_FALSE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption004
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, EdgeEffectOption004, TestSize.Level1)
+{
+    Create([](ListModelNG model) {
+        CreateItem(1); // 1 is item count.
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
 }
 } // namespace OHOS::Ace::NG
