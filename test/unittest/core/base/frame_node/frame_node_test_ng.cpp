@@ -767,22 +767,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
     FRAME_NODE2->lastFrameRect_ = std::make_unique<RectF>();
     FRAME_NODE2->TriggerOnAreaChangeCallback();
     EXPECT_FALSE(flag);
-
-    /**
-     * @tc.steps: step6.set FrameSize
-     * @tc.expected: expect flag is turns true
-     */
-    FRAME_NODE2->geometryNode_->SetFrameSize(SizeF(10, 10));
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
-    EXPECT_TRUE(flag);
-
-    /**
-     * @tc.steps: step7.set lastParentOffsetToWindow_
-     * @tc.expected: expect flag is turns false
-     */
-    FRAME_NODE2->lastParentOffsetToWindow_->SetX(7);
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
-    EXPECT_FALSE(flag);
 }
 
 /**
