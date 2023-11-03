@@ -39,6 +39,7 @@
 #include "file_uri.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "parameters.h"
+#include "image_source.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
@@ -53,10 +54,13 @@ namespace OHOS::Ace::NG {
 using namespace Msdp::DeviceStatus;
 #endif // ENABLE_DRAG_FRAMEWORK
 namespace {
+const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
+const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
     { OHOS::NWeb::CursorType::CT_IBEAM, MouseFormat::TEXT_CURSOR },
+    { OHOS::NWeb::CursorType::CT_WAIT, MouseFormat::LOADING },
     { OHOS::NWeb::CursorType::CT_HELP, MouseFormat::HELP },
     { OHOS::NWeb::CursorType::CT_EASTRESIZE, MouseFormat::WEST_EAST },
     { OHOS::NWeb::CursorType::CT_NORTHRESIZE, MouseFormat::NORTH_SOUTH },
@@ -82,8 +86,12 @@ const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] =
     { OHOS::NWeb::CursorType::CT_SOUTHWESTPANNING, MouseFormat::MIDDLE_BTN_SOUTH_WEST },
     { OHOS::NWeb::CursorType::CT_WESTPANNING, MouseFormat::MIDDLE_BTN_WEST },
     { OHOS::NWeb::CursorType::CT_MOVE, MouseFormat::CURSOR_MOVE },
+    { OHOS::NWeb::CursorType::CT_VERTICALTEXT, MouseFormat::HORIZONTAL_TEXT_CURSOR },
+    { OHOS::NWeb::CursorType::CT_CELL, MouseFormat::CURSOR_CROSS },
+    { OHOS::NWeb::CursorType::CT_PROGRESS, MouseFormat::RUNNING },
     { OHOS::NWeb::CursorType::CT_NODROP, MouseFormat::CURSOR_FORBID },
     { OHOS::NWeb::CursorType::CT_COPY, MouseFormat::CURSOR_COPY },
+    { OHOS::NWeb::CursorType::CT_NONE, MouseFormat::CURSOR_NONE },
     { OHOS::NWeb::CursorType::CT_NOTALLOWED, MouseFormat::CURSOR_FORBID },
     { OHOS::NWeb::CursorType::CT_ZOOMIN, MouseFormat::ZOOM_IN },
     { OHOS::NWeb::CursorType::CT_ZOOMOUT, MouseFormat::ZOOM_OUT },
@@ -1957,15 +1965,50 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::
     if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) == -1) {
         return false;
     }
-    MouseFormat pointStyle = MouseFormat::DEFAULT;
-    int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
-    if (idx >= 0) {
-        pointStyle = g_cursorTypeMap[idx].value;
-    }
-    if ((int32_t)pointStyle != curPointerStyle) {
-        mouseStyle->SetPointerStyle(windowId, pointStyle);
+    if ((type == OHOS::NWeb::CursorType::CT_CONTEXTMENU) || (type == OHOS::NWeb::CursorType::CT_ALIAS)) {
+        UpdateLocalCursorStyle(windowId, type);
+    } else {
+        MouseFormat pointStyle = MouseFormat::DEFAULT;
+        int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
+        if (idx >= 0) {
+            pointStyle = g_cursorTypeMap[idx].value;
+        }
+        if (static_cast<int32_t>(pointStyle) != curPointerStyle) {
+            mouseStyle->SetPointerStyle(windowId, pointStyle);
+        }
     }
     return true;
+}
+
+void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    if (type == NWeb::CursorType::CT_CONTEXTMENU) {
+        MouseFormat pointStyle = MouseFormat::CONTEXT_MENU;
+        pixelMap = CreatePixelMapFromString(IMAGE_POINTER_CONTEXT_MENU_PATH);
+        mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
+    } else if (type == NWeb::CursorType::CT_ALIAS) {
+        MouseFormat pointStyle = MouseFormat::ALIAS;
+        pixelMap = CreatePixelMapFromString(IMAGE_POINTER_ALIAS_PATH);
+        mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
+    }
+}
+
+std::shared_ptr<OHOS::Media::PixelMap> WebPattern::CreatePixelMapFromString(const std::string& filePath)
+{
+    OHOS::Media::SourceOptions opts;
+    opts.formatHint = "image/svg+xml";
+    uint32_t errCode = 0;
+    auto imageSource = OHOS::Media::ImageSource::CreateImageSource(filePath, opts, errCode);
+    CHECK_NULL_RETURN(imageSource, nullptr);
+    std::set<std::string> formats;
+    errCode = imageSource->GetSupportedFormats(formats);
+    Media::DecodeOptions decodeOpts;
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errCode);
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+
+    return pixelMap;
 }
 
 void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,

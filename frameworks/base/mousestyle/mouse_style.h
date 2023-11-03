@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MOUSESTYLE_MOUSE_STYLE_MANAGER_H
 
 #include "base/memory/ace_type.h"
+#include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
 
@@ -53,6 +54,13 @@ enum class MouseFormat : int32_t {
     MIDDLE_BTN_SOUTH_EAST = 36,
     MIDDLE_BTN_SOUTH_WEST = 37,
     MIDDLE_BTN_NORTH_SOUTH_WEST_EAST = 38,
+    HORIZONTAL_TEXT_CURSOR = 39,
+    CURSOR_CROSS = 40,
+    LOADING = 42,
+    RUNNING = 43,
+    CURSOR_NONE = 46,
+    CONTEXT_MENU = 47,
+    ALIAS = 48,
 };
 
 class ACE_EXPORT MouseStyle : public AceType {
@@ -64,6 +72,8 @@ public:
     virtual bool SetPointerStyle(int32_t windowId, MouseFormat pointerStyle) const = 0;
     virtual int32_t GetPointerStyle(int32_t windowId, int32_t& pointerStyle) const = 0;
     virtual bool ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const = 0;
+    virtual void SetMouseIcon(
+        int32_t windowId, MouseFormat pointerStyle, std::shared_ptr<Media::PixelMap> pixelMap) const {};
 };
 
 } // namespace OHOS::Ace
