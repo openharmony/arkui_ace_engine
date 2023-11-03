@@ -263,7 +263,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
         auto tmpFuncPtr = AceType::MakeRefPtr<LongPressEvent>(std::move(tmpFunc));
         gesture->SetLongPressEvent(tmpFuncPtr);
     }
-    
+
     int32_t spanIndex = 0;
     int32_t offset = -1;
     if (options.offset.has_value()) {
@@ -3002,21 +3002,6 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             CHECK_NULL_VOID(pattern);
             pattern->isMousePressed_ = usingMouse;
             pattern->HandleOnSelectAll();
-        };
-        selectInfo.onClose = [weak](bool closedByGlobalEvent) {
-            if (closedByGlobalEvent) {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                auto host = pattern->GetHost();
-                CHECK_NULL_VOID(host);
-                auto textSelector = pattern->GetTextSelector();
-                auto end = textSelector.GetEnd();
-                pattern->StartTwinkling();
-                pattern->ResetSelection();
-                pattern->CloseSelectOverlay();
-                textSelector.Update(end);
-                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            }
         };
 
         selectInfo.callerFrameNode = host;
