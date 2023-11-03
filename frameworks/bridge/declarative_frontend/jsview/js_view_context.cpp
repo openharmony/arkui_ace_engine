@@ -161,6 +161,7 @@ const AnimationOption JSViewContext::CreateAnimation(
         duration = 0;
     }
     auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
+    auto finishCallbackType = static_cast<FinishCallbackType>(animationArgs->GetInt("finishCallbackType", 0));
     RefPtr<Curve> curve;
     auto curveArgs = animationArgs->GetValue("curve");
     if (curveArgs->IsString()) {
@@ -205,6 +206,7 @@ const AnimationOption JSViewContext::CreateAnimation(
     option.SetTempo(tempo);
     option.SetAnimationDirection(direction);
     option.SetCurve(curve);
+    option.SetFinishCallbackType(finishCallbackType);
     return option;
 }
 

@@ -88,6 +88,11 @@ enum class TransitionType {
     DISAPPEARING
 };
 
+enum class FinishCallbackType {
+    REMOVED = 0,
+    LOGICALLY = 1
+};
+
 using ShareId = std::string;
 
 } // namespace OHOS::Ace

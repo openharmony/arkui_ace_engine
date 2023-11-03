@@ -136,6 +136,16 @@ public:
         return allowRunningAsynchronously_;
     }
 
+    void SetFinishCallbackType(FinishCallbackType finishCallbackType)
+    {
+        finishCallbackType_ = finishCallbackType;
+    }
+
+    FinishCallbackType GetFinishCallbackType() const
+    {
+        return finishCallbackType_;
+    }
+
 private:
     int32_t duration_ = 0;
     int32_t delay_ = 0;
@@ -146,6 +156,7 @@ private:
     RefPtr<Curve> curve_;
     std::function<void()> onFinishEvent_;
     AnimationDirection direction_ = AnimationDirection::NORMAL;
+    FinishCallbackType finishCallbackType_ = FinishCallbackType::REMOVED;
 };
 
 } // namespace OHOS::Ace

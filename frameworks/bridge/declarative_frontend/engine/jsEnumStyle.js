@@ -1927,3 +1927,8 @@ var CheckBoxShape;
   CheckBoxShape["ROUNDED_SQUARE"] = 1;
 })(CheckBoxShape || (CheckBoxShape = {}));
 
+var FinishCallbackType;
+(function (FinishCallbackType) {
+  FinishCallbackType["REMOVED"] = 0;
+  FinishCallbackType["LOGICALLY"] = 1;
+})(FinishCallbackType || (FinishCallbackType = {}));
