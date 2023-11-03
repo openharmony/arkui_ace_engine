@@ -97,6 +97,9 @@ enum class AceLogTag : uint8_t {
     ACE_DIALOG,
     ACE_PANEL,
     ACE_MENU,
+    ACE_TEXTINPUT,
+    ACE_TEXT,
+    ACE_TEXTAREA,
     ACE_TEXT_FIELD,
     ACE_TEXT_CLOCK,
     ACE_TEXT_TIMER,
@@ -134,6 +137,8 @@ enum class AceLogTag : uint8_t {
     ACE_GAUGE,
     ACE_HYPERLINK,
     ACE_ANIMATION,
+    ACE_DATE_PICKER,
+    ACE_TEXT_PICKER,
 };
 
 enum class LogDomain : uint32_t {

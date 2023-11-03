@@ -219,9 +219,19 @@ void RosenRenderSurface::ConsumeBuffer()
 #endif
         });
     rosenRenderContext->StopRecordingIfNeeded();
-    auto host = rosenRenderContext->GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = renderContext_]() {
+            auto renderContext = weak.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            auto host = renderContext->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkNeedRenderOnly();
+        },
+        TaskExecutor::TaskType::UI);
 
     surfaceErr = consumerSurface_->ReleaseBuffer(surfaceBuffer, fence);
     if (surfaceErr != SURFACE_ERROR_OK) {

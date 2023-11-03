@@ -63,6 +63,8 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContext();
 
+    static RefPtr<PipelineContext> GetMainPipelineContext();
+
     static float GetCurrentRootWidth();
 
     static float GetCurrentRootHeight();

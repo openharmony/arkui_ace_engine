@@ -662,9 +662,9 @@ void DatePickerPattern::HandleSolarDayChange(bool isAdd, uint32_t index)
     auto yearDatePickerColumnPattern = yearNode->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthNode->GetPattern<DatePickerColumnPattern>();
     auto dayDatePickerColumnPattern = dayNode->GetPattern<DatePickerColumnPattern>();
-    if (!yearDatePickerColumnPattern || !monthDatePickerColumnPattern || !dayDatePickerColumnPattern) {
-        return;
-    }
+    CHECK_NULL_VOID(yearDatePickerColumnPattern);
+    CHECK_NULL_VOID(monthDatePickerColumnPattern);
+    CHECK_NULL_VOID(dayDatePickerColumnPattern);
 
     auto date = GetCurrentDate();
     if (isAdd && index == 0) {
@@ -1105,10 +1105,9 @@ LunarDate DatePickerPattern::GetCurrentLunarDate(uint32_t lunarYear) const
     auto yearDatePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
     auto dayDatePickerColumnPattern = dayColumn->GetPattern<DatePickerColumnPattern>();
-
-    if (!yearDatePickerColumnPattern || !monthDatePickerColumnPattern || !dayDatePickerColumnPattern) {
-        return lunarResult;
-    }
+    CHECK_NULL_RETURN(yearDatePickerColumnPattern, lunarResult);
+    CHECK_NULL_RETURN(monthDatePickerColumnPattern, lunarResult);
+    CHECK_NULL_RETURN(dayDatePickerColumnPattern, lunarResult);
 
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(lunarYear, lunarLeapMonth);
@@ -1185,10 +1184,9 @@ PickerDate DatePickerPattern::GetCurrentDateByYearMonthDayColumn() const
     auto yearDatePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
     auto dayDatePickerColumnPattern = dayColumn->GetPattern<DatePickerColumnPattern>();
-
-    if (!yearDatePickerColumnPattern || !monthDatePickerColumnPattern || !dayDatePickerColumnPattern) {
-        return currentDate;
-    }
+    CHECK_NULL_RETURN(yearDatePickerColumnPattern, currentDate);
+    CHECK_NULL_RETURN(monthDatePickerColumnPattern, currentDate);
+    CHECK_NULL_RETURN(dayDatePickerColumnPattern, currentDate);
     if (!IsShowLunar()) {
         currentDate.SetYear(startDateSolar_.GetYear() + yearDatePickerColumnPattern->GetCurrentIndex());
         currentDate.SetMonth(
@@ -1226,9 +1224,8 @@ PickerDate DatePickerPattern::GetCurrentDateByMonthDaysColumn() const
 
     auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
     auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
-    if (!yearDatePickerColumnPattern || !monthDaysDatePickerColumnPattern) {
-        return currentDate;
-    }
+    CHECK_NULL_RETURN(yearDatePickerColumnPattern, currentDate);
+    CHECK_NULL_RETURN(monthDaysDatePickerColumnPattern, currentDate);
 
     if (!IsShowLunar()) {
         currentDate.SetYear(startDateSolar_.GetYear() + yearDatePickerColumnPattern->GetCurrentIndex());
@@ -1277,9 +1274,9 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
 
     auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
     auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
-    if (!yearDatePickerColumnPattern || !monthDaysDatePickerColumnPattern) {
-        return lunarResult;
-    }
+    CHECK_NULL_RETURN(monthDaysDatePickerColumnPattern, lunarResult);
+    CHECK_NULL_RETURN(yearDatePickerColumnPattern, lunarResult);
+    
 
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(lunarYear, lunarLeapMonth);

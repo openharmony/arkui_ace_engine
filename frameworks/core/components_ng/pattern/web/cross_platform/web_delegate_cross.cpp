@@ -92,7 +92,6 @@ constexpr char WEB_EVENT_GEOPERMISSION[] = "onGeoPermission";
 constexpr char WEB_EVENT_COMMONDIALOG[] = "onCommonDialog";
 constexpr char WEB_EVENT_CONSOLEMESSAGE[] = "onConsoleMessage";
 constexpr char WEB_EVENT_ERRORRECEIVE[] = "onErrorReceive";
-constexpr char WEB_EVENT_HTTPERRORRECEIVE[] = "onHttpErrorReceive";
 constexpr char WEB_EVENT_ONSHOWFILECHOOSER[] = "onShowFileChooser";
 constexpr char WEB_EVENT_ONHTTPERRORRECEIVE[] = "onHttpErrorReceive";
 
@@ -138,6 +137,9 @@ const char WEB_PARAM_BEGIN[] = "#HWJS-?-#";
 const char WEB_METHOD[] = "method";
 const char WEB_EVENT[] = "event";
 const char WEB_RESULT_FAIL[] = "fail";
+
+constexpr int FONT_MIN_SIZE = 1;
+constexpr int FONT_MAX_SIZE = 72;
 }
 
 std::map<std::string, std::string> WebResourceRequsetImpl::GetRequestHeader() const
@@ -232,7 +234,7 @@ int WebResourceErrorImpl::GetErrorCode() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetResourceErrorObject();
     if (!obj) {
-        return std::string();
+        return 0;
     }
     return obj->GetErrorCode(object_); 
 }

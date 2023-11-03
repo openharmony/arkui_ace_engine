@@ -101,6 +101,8 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContext();
 
+    static RefPtr<PipelineBase> GetMainPipelineContext();
+
     static RefPtr<ThemeManager> CurrentThemeManager();
 
     virtual void SetupRootElement() = 0;

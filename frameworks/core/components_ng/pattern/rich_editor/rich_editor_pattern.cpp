@@ -16,10 +16,14 @@
 
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include <iterator>
+#include <utility>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/dump_log.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/common/clipboard/paste_data.h"
@@ -29,6 +33,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
@@ -37,6 +42,7 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/element_register.h"
 
 #if not defined(ACE_UNITTEST)
@@ -246,8 +252,18 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     imageNode->SetDraggable(false);
     auto gesture = imageNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gesture, -1);
-    gesture->SetHitTestMode(HitTestMode::HTMNONE);
-
+    // Masked the default drag behavior of node image
+    gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
+    if (options.onClick) {
+        auto tmpFunc = options.onClick;
+        gesture->SetUserOnClick(std::move(tmpFunc));
+    }
+    if (options.onLongPress) {
+        auto tmpFunc = options.onLongPress;
+        auto tmpFuncPtr = AceType::MakeRefPtr<LongPressEvent>(std::move(tmpFunc));
+        gesture->SetLongPressEvent(tmpFuncPtr);
+    }
+    
     int32_t spanIndex = 0;
     int32_t offset = -1;
     if (options.offset.has_value()) {
@@ -298,7 +314,6 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
     auto spanItem = MakeRefPtr<ImageSpanItem>();
-
     // The length of the imageSpan defaults to the length of a character to calculate the position
     spanItem->content = " ";
     AddSpanItem(spanItem, offset);
@@ -379,13 +394,19 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
     spanItem->content = options.value;
     spanItem->SetTextStyle(options.style);
     AddSpanItem(spanItem, offset);
-
     if (options.paraStyle) {
         int32_t start, end;
         spanItem->GetIndex(start, end);
         UpdateParagraphStyle(start, end, *options.paraStyle);
     }
-
+    if (options.onClick) {
+        auto tmpFunc = options.onClick;
+        spanItem->SetOnClickEvent(std::move(tmpFunc));
+    }
+    if (options.onLongPress) {
+        auto tmpFunc = options.onLongPress;
+        spanItem->SetLongPressEvent(std::move(tmpFunc));
+    }
     if (!isPaste && textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
@@ -1117,6 +1138,7 @@ void RichEditorPattern::StopTwinkling()
 
 void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 {
+    HandleUserClickEvent(info);
     if (textSelector_.IsValid() && !isMouseSelect_) {
         CloseSelectOverlay();
         ResetSelection();
@@ -1143,6 +1165,47 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
         }
     }
     CalcCaretInfoByClick(info);
+}
+
+bool RichEditorPattern::HandleUserGestureEvent(
+    GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc)
+{
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
+    if (!textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY())) ||
+        spans_.empty()) {
+        return false;
+    }
+    PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
+                          info.GetLocalLocation().GetY() - textContentRect.GetY() };
+    int32_t start = 0;
+    for (const auto& item : spans_) {
+        if (!item) {
+            continue;
+        }
+        std::vector<RectF> selectedRects = paragraphs_.GetRects(start, item->position);
+        start = item->position;
+        for (auto&& rect : selectedRects) {
+            if (!rect.IsInRegion(textOffset)) {
+                continue;
+            }
+            return gestureFunc(item, info);
+        }
+    }
+    return false;
+}
+
+bool RichEditorPattern::HandleUserClickEvent(GestureEvent& info)
+{
+    auto clickFunc = [] (RefPtr<SpanItem> item, GestureEvent& info) -> bool {
+        if (item && item->onClick) {
+            item->onClick(info);
+            return true;
+        }
+        return false;
+    };
+    return HandleUserGestureEvent(info, std::move(clickFunc));
 }
 
 void RichEditorPattern::CalcCaretInfoByClick(GestureEvent& info)
@@ -1273,6 +1336,7 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
 
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
 {
+    HandleUserLongPressEvent(info);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -1322,6 +1386,18 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
         RequestKeyboard(false, true, true);
     }
     StopTwinkling();
+}
+
+bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
+{
+    auto longPressFunc = [] (RefPtr<SpanItem> item, GestureEvent& info) -> bool {
+        if (item && item->onLongPress) {
+            item->onLongPress(info);
+            return true;
+        }
+        return false;
+    };
+    return HandleUserGestureEvent(info, std::move(longPressFunc));
 }
 
 void RichEditorPattern::HandleOnSelectAll()

@@ -596,6 +596,8 @@ private:
     void OnScrollStartRecursive(float position) override;
     void OnScrollEndRecursive() override;
 
+    inline bool ChildFirst(NestedState state);
+
     WeakPtr<NestableScrollContainer> parent_;
     /**
      *  End of NestableScrollContainer implementations

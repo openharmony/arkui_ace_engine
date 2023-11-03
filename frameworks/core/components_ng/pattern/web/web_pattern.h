@@ -259,7 +259,7 @@ public:
      */
     Axis GetAxis() const override
     {
-        return Axis::FREE;
+        return axis_;
     }
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
     bool HandleScrollVelocity(float velocity) override;
@@ -267,6 +267,7 @@ public:
     void OnScrollEndRecursive() override;
     Axis GetParentAxis();
     RefPtr<NestableScrollContainer> WebSearchParent();
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
     /**
      *  End of NestableScrollContainer implementations
      */
@@ -381,6 +382,7 @@ public:
     {
         return rootLayerHeight_;
     }
+    bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -588,6 +590,9 @@ private:
     bool isMemoryLevelEnable_ = true;
     bool isFirstFlingScrollVelocity_ = true;
     bool isWrapContentEnabled_ = false;
+    bool scrollState_ = false;
+    NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
+    Axis axis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     WeakPtr<NestableScrollContainer> parent_;

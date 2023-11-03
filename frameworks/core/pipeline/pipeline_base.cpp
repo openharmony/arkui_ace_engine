@@ -25,6 +25,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
@@ -104,6 +105,21 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     auto currentContainer = Container::Current();
     CHECK_NULL_RETURN(currentContainer, nullptr);
     return currentContainer->GetPipelineContext();
+}
+
+RefPtr<PipelineBase> PipelineBase::GetMainPipelineContext()
+{
+    auto containerId = Container::CurrentId();
+    RefPtr<PipelineBase> context;
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        context = parentContainer->GetPipelineContext();
+    } else {
+        context = PipelineBase::GetCurrentContext();
+    }
+    return context;
 }
 
 RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()

@@ -604,6 +604,17 @@ void NavBarPattern::HandleOnDragEnd()
     titlePattern->ProcessTitleDragEnd();
 }
 
+bool NavBarPattern::GetCurrentNavBarStatus() const
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, false);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, false);
+    return titlePattern->GetCurrentNavBarStatus();
+}
+
 void NavBarPattern::OnCoordScrollStart()
 {
     offset_ = 0.0f;

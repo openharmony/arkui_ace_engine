@@ -48,6 +48,7 @@ constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
 constexpr size_t ALIGNMENT_STEP_OFFSET = 2;
+constexpr float HEIGHT_CONSTRAINT_FACTOR = 0.8;
 
 const std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
     { Placement::BOTTOM_LEFT,
@@ -522,14 +523,17 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
             } else {
                 geometryNode->SetFrameSize(frameSize);
             }
+            frameSize = geometryNode->GetMarginFrameSize() * previewScale_;
+            auto widthLeftSpace = windowGlobalRect.Width() - paddingStart_ - paddingEnd_;
+            if (GreatNotEqual(frameSize.Width(), widthLeftSpace)) {
+                auto unitSpace = widthLeftSpace / frameSize.Width() / previewScale_;
+                geometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, unitSpace * frameSize.Height()));
+            }
             previewLayoutWrapper = child;
             size += geometryNode->GetMarginFrameSize() * previewScale_;
         }
         auto menuPattern = hostNode->GetPattern<MenuPattern>();
-        if (!menuPattern) {
-            continue;
-        }
-        if (hostNode->GetTag() == V2::MENU_ETS_TAG && !menuPattern->IsSubMenu()) {
+        if (hostNode->GetTag() == V2::MENU_ETS_TAG && menuPattern && !menuPattern->IsSubMenu()) {
             menuLayoutWrapper = child;
             size += geometryNode->GetMarginFrameSize();
         }
@@ -546,19 +550,9 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuLessThan(const RefPtr<
     OffsetF center(targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
     targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-    auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
-    if (GreatNotEqual(previewSize.Width(), widthLeftSpace)) {
-        auto unitSpace = widthLeftSpace / previewSize.Width();
-        previewGeometryNode->SetFrameSize(
-            SizeF(widthLeftSpace / previewScale_, unitSpace * previewSize.Height() / previewScale_));
-        totalSize = totalSize - SizeF((1 - unitSpace) * previewSize.Width(), (1 - unitSpace) * previewSize.Height());
-    }
-    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-
     OffsetF offset(center.GetX() - previewSize.Width() / 2,
         std::min<float>(center.GetY() - previewSize.Height() / 2, param.windowGlobalSizeF.Height() -
             param.bottomSecurity - param.bottom - totalSize.Height() - param.previewMenuGap));
-
     auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
         param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
     auto y = std::clamp(offset.GetY(), param.windowsOffsetY + param.top + param.topSecurity,
@@ -609,14 +603,6 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuGreateThan(const RefPt
         totalSize = totalSize - SizeF(0.0f, delta);
     }
     previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-
-    auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
-    if (GreatNotEqual(previewSize.Width(), widthLeftSpace)) {
-        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_,
-            widthLeftSpace / previewSize.Width() * previewSize.Height() / previewScale_));
-    }
-    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-
     OffsetF offset(center.GetX() - previewSize.Width() / 2, 0.0f);
     auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
         param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
@@ -684,19 +670,9 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuLessThan(const RefPtr<
     OffsetF center(targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
     targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-    auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
-    if (GreatNotEqual(previewSize.Width(), widthLeftSpace)) {
-        auto unitSpace = widthLeftSpace / previewSize.Width();
-        previewGeometryNode->SetFrameSize(
-            SizeF(widthLeftSpace / previewScale_, unitSpace * previewSize.Height() / previewScale_));
-        totalSize = totalSize - SizeF((1 - unitSpace) * previewSize.Width(), (1 - unitSpace) * previewSize.Height());
-    }
-    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-
     OffsetF offset(center.GetX() - previewSize.Width() / 2,
         std::max<float>(center.GetY() - previewSize.Height() / 2,
             param.top + param.topSecurity + totalSize.Height() - previewSize.Height() + param.previewMenuGap));
-
     auto x = std::clamp(offset.GetX(), param.windowsOffsetX + paddingStart_,
         param.windowsOffsetX + param.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_);
     auto y = std::clamp(offset.GetY(), param.windowsOffsetY + param.top + param.topSecurity,
@@ -747,14 +723,6 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuGreateThan(const RefPt
         totalSize = totalSize - SizeF(0.0f, delta);
     }
     previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-
-    auto widthLeftSpace = param.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_;
-    if (GreatNotEqual(previewSize.Width(), widthLeftSpace)) {
-        previewGeometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_,
-            widthLeftSpace / previewSize.Width() * previewSize.Height() / previewScale_));
-    }
-    previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-
     OffsetF offset(center.GetX() - previewSize.Width() / 2,
         param.windowGlobalSizeF.Height() - param.bottomSecurity - param.bottom - previewSize.Height());
 
@@ -1472,8 +1440,8 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    float factor = 0.8;
-    float maxSpaceHeight = wrapperSize_.Height() * factor;
+    float wrapperHeight = wrapperSize_.Height();
+    float maxSpaceHeight = wrapperHeight * HEIGHT_CONSTRAINT_FACTOR;
     constraint.maxSize.SetHeight(maxSpaceHeight);
 }
 

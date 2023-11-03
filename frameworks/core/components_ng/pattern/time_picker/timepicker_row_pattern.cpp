@@ -296,8 +296,6 @@ PickerTime TimePickerRowPattern::GetCurrentTime()
         CHECK_NULL_RETURN(amPmPickerColumnPattern, time);
         time.SetHour(GetHourFromAmPm(
             amPmPickerColumnPattern->GetCurrentIndex() == 0, hourPickerColumnPattern->GetCurrentIndex() + 1));
-    } else {
-        LOGE("AM PM column is null.");
     }
 
     time.SetMinute(minutePickerColumnPattern->GetCurrentIndex()); // minute from 0 to 59, index from 0 to 59

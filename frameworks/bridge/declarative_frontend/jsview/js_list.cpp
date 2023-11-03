@@ -19,6 +19,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -26,6 +27,7 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
 namespace OHOS::Ace {
 
@@ -638,6 +640,23 @@ void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
     }
 }
 
+void JSList::JsClip(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetClipEdge(true);
+        return;
+    }
+    if (info[0]->IsObject()) {
+        JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            return;
+        }
+        ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
+    } else if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
+    }
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -645,6 +664,7 @@ void JSList::JSBind(BindingTarget globalObj)
 
     JSClass<JSList>::StaticMethod("width", &JSList::JsWidth);
     JSClass<JSList>::StaticMethod("height", &JSList::JsHeight);
+    JSClass<JSList>::StaticMethod("clip", &JSList::JsClip);
     JSClass<JSList>::StaticMethod("listDirection", &JSList::SetDirection);
     JSClass<JSList>::StaticMethod("scrollBar", &JSList::SetScrollBar);
     JSClass<JSList>::StaticMethod("edgeEffect", &JSList::SetEdgeEffect);
@@ -721,7 +741,7 @@ void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
     int32_t indexInGroup = -1;
     // Parameter passed into function must be 2.
     if (args.Length() != 2 || !ConvertFromJSValue(args[0], index) || !ConvertFromJSValue(args[1], indexInGroup)) {
-        LOGW("Invalid object params.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto scrollController = GetController().Upgrade();
@@ -730,7 +750,7 @@ void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         args.SetReturnValue(rect);
     } else {
-        LOGE("controller_ is nullptr");
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
     }
 }
 } // namespace OHOS::Ace::Framework

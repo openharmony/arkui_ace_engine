@@ -342,6 +342,15 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
                 [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
+            if (textLayoutProperty->GetCalcLayoutConstraint() &&
+                textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value()) {
+                auto selfIdealSize = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+                if ((selfIdealSize->Width().has_value() && selfIdealSize->Width()->GetDimension().ConvertToPx() <= 0) ||
+                    (selfIdealSize->Height().has_value() &&
+                        selfIdealSize->Height()->GetDimension().ConvertToPx() <= 0)) {
+                    return;
+                }
+            }
             if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
                 textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
                 return;
@@ -1152,10 +1161,6 @@ void TextPattern::InitSurfaceChangedCallback()
 
 void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
-    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD,
-        "TextPattern handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
-        "height %{public}d",
-        newWidth, newHeight, prevWidth, prevHeight);
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
     }

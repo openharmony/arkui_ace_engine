@@ -241,9 +241,7 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
-    if (!theme) {
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     ButtonInfo buttonInfo;
     std::map<std::string, NG::DialogEvent> dialogEvent;
     dialogEvent["changeId"] = onChange;

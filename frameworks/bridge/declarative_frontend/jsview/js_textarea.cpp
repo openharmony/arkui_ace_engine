@@ -162,8 +162,6 @@ void JSTextAreaController::GetTextContentRect(const JSCallbackInfo& info)
         auto rectObj = CreateRectangle(controller->GetTextContentRect());
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         info.SetReturnValue(rect);
-    } else {
-        LOGE("GetTextContentRect: The JSTextAreaController is NULL");
     }
 }
 
@@ -175,8 +173,6 @@ void JSTextAreaController::GetTextContentLinesNum(const JSCallbackInfo& info)
         auto linesNum = JSVal(ToJSValue(lines));
         auto textLines = JSRef<JSVal>::Make(linesNum);
         info.SetReturnValue(textLines);
-    } else {
-        LOGE("GetTextContentRect: The JSTextAreaController is NULL");
     }
 }
 

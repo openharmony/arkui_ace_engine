@@ -884,7 +884,6 @@ void TextPickerColumnPattern::CreateAnimation()
         auto column = weak.Upgrade();
         if (column) {
             column->HandleCurveStopped();
-        } else {
         }
     });
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
