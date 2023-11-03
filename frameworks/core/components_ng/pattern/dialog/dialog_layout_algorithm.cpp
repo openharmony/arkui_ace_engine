@@ -239,7 +239,6 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
         } else if (type == GridSizeType::LG) {
             deviceColumns = 5;
         } else {
-            LOGD("GetMaxWidthBasedOnGridType is undefined");
             deviceColumns = 5;
         }
     } else if (deviceType == DeviceType::PHONE) {
@@ -250,7 +249,6 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
         } else if (type == GridSizeType::LG) {
             deviceColumns = 6;
         } else {
-            LOGD("GetMaxWidthBasedOnGridType is undefined");
             deviceColumns = 6;
         }
     } else if (deviceType == DeviceType::CAR) {
@@ -261,7 +259,6 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
         } else if (type == GridSizeType::LG) {
             deviceColumns = 8;
         } else {
-            LOGD("GetMaxWidthBasedOnGridType is undefined");
             deviceColumns = 8;
         }
     } else {
@@ -272,7 +269,6 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
         } else if (type == GridSizeType::LG) {
             deviceColumns = 4;
         } else {
-            LOGD("GetMaxWidthBasedOnGridType is undefined");
             deviceColumns = 4;
         }
     }

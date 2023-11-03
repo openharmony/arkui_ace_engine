@@ -20,6 +20,7 @@
 #include <list>
 #include <stdint.h>
 
+#include "base/log/log.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"

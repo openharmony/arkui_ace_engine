@@ -588,8 +588,8 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetColor().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
+    textLayoutProperty->UpdateTextColor(
+        textPickerLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (textPickerLayoutProperty->HasFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetFontSize().value());
     } else {
@@ -597,12 +597,12 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         textLayoutProperty->UpdateAdaptMinFontSize(
             pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
     }
-    textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetWeight().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontWeight(
+        textPickerLayoutProperty->GetWeight().value_or(pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
     textLayoutProperty->UpdateFontFamily(textPickerLayoutProperty->GetFontFamily().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
-    textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetFontStyle().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    textLayoutProperty->UpdateItalicFontStyle(
+        textPickerLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
 }
 
 void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -610,8 +610,8 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetSelectedColor().value_or(
-        pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+    textLayoutProperty->UpdateTextColor(
+        textPickerLayoutProperty->GetSelectedColor().value_or(pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     if (textPickerLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetSelectedFontSize().value());
     } else {
@@ -800,7 +800,6 @@ RefPtr<TextPickerLayoutProperty> TextPickerColumnPattern::GetParentLayout() cons
     auto property = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
     return property;
 }
-
 
 void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
@@ -1000,9 +999,9 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
             if (dir == ScrollDirection::UP) {
                 distance = -optionProperties_[nextIndex].height;
             } else {
-                distance = optionProperties_[index].height +
-                           (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
-                           HALF_NUMBER;
+                distance =
+                    optionProperties_[index].height +
+                    (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
             }
             break;
 
@@ -1051,9 +1050,9 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
             if (dir == ScrollDirection::UP) {
                 distance = 0.0 - optionProperties_[index].height;
             } else {
-                distance = optionProperties_[index].height +
-                           (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
-                           HALF_NUMBER;
+                distance =
+                    optionProperties_[index].height +
+                    (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
             }
             break;
 
@@ -1194,9 +1193,8 @@ bool TextPickerColumnPattern::InnerHandleScroll(int32_t step, bool isUpateProper
     if (!canLoop) {
         // scroll down
         if (step > 0) {
-            currentIndex = (currentIndex + step) > (totalOptionCount - 1) ?
-                totalOptionCount - 1 : currentIndex + step;
-        // scroll up
+            currentIndex = (currentIndex + step) > (totalOptionCount - 1) ? totalOptionCount - 1 : currentIndex + step;
+            // scroll up
         } else if (step < 0) {
             currentIndex = currentIndex + step < 0 ? 0 : currentIndex + step;
         }

@@ -68,6 +68,7 @@ bool TextPickerTossAnimationController::Play()
         return false;
     }
 
+    TAG_LOGW(AceLogTag::ACE_DIALOG_TEXTPICKER, "toss play speed: %{public}lf, time: %{public}lf", speed, time);
     speed_ = speed;
     int nTime = static_cast<int>(time);
     auto weak = AceType::WeakClaim(this);

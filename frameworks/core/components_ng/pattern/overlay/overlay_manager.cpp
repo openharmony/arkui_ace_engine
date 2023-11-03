@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -834,7 +835,6 @@ void OverlayManager::HideAllPopups()
 void OverlayManager::ErasePopup(int32_t targetId)
 {
     if (popupMap_.find(targetId) != popupMap_.end()) {
-        LOGI("Erase popup id %{public}d when destroyed.", targetId);
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_VOID(rootNode);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
@@ -854,7 +854,6 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
     } else {
         // creating new menu
         menuMap_[targetId] = menu;
-        LOGD("menuNode %{public}d added to map", targetId);
     }
     CHECK_NULL_RETURN(menu, false);
 
@@ -926,21 +925,17 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     auto menuPattern = menu->GetPattern<PopupBasePattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetContainerId(Container::CurrentId());
-    LOGI("menuNode mounted in subwindow");
 }
 
 void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId)
 {
-    if (menuMap_.find(targetId) == menuMap_.end()) {
-        LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
-    }
+    
     CHECK_NULL_VOID(menu);
     PopMenuAnimation(menu);
 }
 
 void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDrag)
 {
-    LOGI("OverlayManager HideMenu in subWindow from close");
     if (menuMap_.empty()) {
         return;
     }
@@ -957,16 +952,11 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
     if (it != menuMap_.end()) {
         return it->second;
     }
-    LOGW("menuNode doesn't exists %{public}d", targetId);
     return nullptr;
 }
 
 void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
-    LOGI("OverlayManager HideMenuNode menu targetId is %{public}d", targetId);
-    if (menuMap_.find(targetId) == menuMap_.end()) {
-        LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
-    }
     PopMenuAnimation(menu);
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -1012,7 +1002,6 @@ void OverlayManager::DeleteMenu(int32_t targetId)
 {
     auto it = menuMap_.find(targetId);
     if (it == menuMap_.end()) {
-        LOGW("OverlayManager: menuNode %{public}d doesn't exist", targetId);
         return;
     }
     menuMap_.erase(it);
@@ -1124,7 +1113,6 @@ void OverlayManager::BeforeShowDialog(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
     if (dialogMap_.find(node->GetId()) != dialogMap_.end()) {
-        LOGW("dialog #%{public}d exists", node->GetId());
         return;
     }
     dialogMap_[node->GetId()] = node;
@@ -1199,7 +1187,6 @@ void OverlayManager::RemoveDialogFromMap(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
     if (dialogMap_.find(node->GetId()) == dialogMap_.end()) {
-        LOGW("dialog #%{public}d node in map", node->GetId());
         return;
     }
     dialogMap_.erase(node->GetId());
