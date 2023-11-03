@@ -7782,7 +7782,13 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchDown001, TestSize.Level1)
      * @tc.steps: step2. call HandleTouchDown.
      * @tc.expected: Related function runs ok.
      */
-    pattern_->HandleTouchDown();
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    std::list<TouchLocationInfo> infoList;
+    infoList.emplace_back(touchLocationInfo);
+    TouchEventInfo touchEventInfo("down");
+    touchEventInfo.touches_ = infoList;
+    pattern_->HandleTouchDown(touchEventInfo);
 }
 
 /**

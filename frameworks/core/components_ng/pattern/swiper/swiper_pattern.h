@@ -486,7 +486,7 @@ private:
     void HandleDragEnd(double dragVelocity);
 
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown();
+    void HandleTouchDown(const TouchEventInfo& info);
     void HandleTouchUp();
 
     void HandleMouseEvent(const MouseInfo& info);
