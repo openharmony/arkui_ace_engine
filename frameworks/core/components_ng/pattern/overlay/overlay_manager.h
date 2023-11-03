@@ -67,7 +67,6 @@ public:
     explicit OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
     ~OverlayManager() override
     {
-        LOGI("OverlayManager Destructor.");
         popupMap_.clear();
     }
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);

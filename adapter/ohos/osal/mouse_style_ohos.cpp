@@ -86,7 +86,7 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
     style.id = MMIPointStyle;
     int32_t setResult = inputManager->SetPointerStyle(windowId, style);
     if (setResult == -1) {
-        LOGE("SetPointerStyle result is false");
+        LOGW("SetPointerStyle result is false");
         return false;
     }
     return true;
@@ -99,7 +99,7 @@ int32_t MouseStyleOhos::GetPointerStyle(int32_t windowId, int32_t& pointerStyle)
     MMI::PointerStyle style;
     int32_t getResult = inputManager->GetPointerStyle(windowId, style);
     if (getResult == -1) {
-        LOGE("GetPointerStyle result is false");
+        LOGW("GetPointerStyle result is false");
         return -1;
     }
     pointerStyle = style.id;
@@ -110,7 +110,7 @@ bool MouseStyleOhos::ChangePointerStyle(int32_t windowId, MouseFormat mouseForma
 {
     int32_t curPointerStyle = -1;
     if (GetPointerStyle(windowId, curPointerStyle) == -1) {
-        LOGE("ChangePointerStyle: GetPointerStyle return failed");
+        LOGW("ChangePointerStyle: GetPointerStyle return failed");
         return false;
     }
     if (curPointerStyle == static_cast<int32_t>(mouseFormat)) {

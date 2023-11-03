@@ -843,7 +843,7 @@ void FrontendDelegateDeclarativeNG::ShowToast(
                     const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
-        TAG_LOGD(AceLogTag::ACE_PROMPT_ACTION_TOAST, "Begin to show toast message %{public}s, duration is %{public}d",
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Begin to show toast message %{public}s, duration is %{public}d",
             message.c_str(), durationTime);
         overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
     };
