@@ -111,4 +111,27 @@ void NavDestinationGroupNode::UpdateTitleFontSize(bool showBackButton)
     titleNode->MarkModifyDone();
     titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
+
+RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
+{
+    auto pattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto navDestinationNode = pattern->GetNavDestinationNode();
+    CHECK_NULL_RETURN(navDestinationNode, nullptr);
+
+    auto child = navDestinationNode->GetFirstChild();
+    while (child) {
+        if (AceType::InstanceOf<NavDestinationGroupNode>(child)) {
+            break;
+        }
+
+        if (AceType::InstanceOf<CustomNodeBase>(child)) {
+            auto customNode = DynamicCast<CustomNodeBase>(child);
+            return customNode;
+        }
+        child = child->GetFirstChild();
+    }
+    return nullptr;
+}
+
 } // namespace OHOS::Ace::NG
