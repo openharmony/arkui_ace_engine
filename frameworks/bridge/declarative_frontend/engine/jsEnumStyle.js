@@ -783,6 +783,22 @@ var InputType;
   InputType[InputType["Password"] = 7] = "Password";
 })(InputType || (InputType = {}));
 
+var SearchType;
+(function (SearchType) {
+  SearchType[SearchType["NORMAL"] = 0] = "NORMAL";
+  SearchType[SearchType["NUMBER"] = 2] = "NUMBER";
+  SearchType[SearchType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
+  SearchType[SearchType["EMAIL"] = 5] = "EmaEMAILil";
+})(SearchType || (SearchType = {}));
+
+var TextAreaType;
+(function (TextAreaType) {
+  TextAreaType[TextAreaType["NORMAL"] = 0] = "NORMAL";
+  TextAreaType[TextAreaType["NUMBER"] = 2] = "NUMBER";
+  TextAreaType[TextAreaType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
+  TextAreaType[TextAreaType["EMAIL"] = 5] = "EMAIL";
+})(TextAreaType || (TextAreaType = {}));
+
 var EnterKeyType;
 (function (EnterKeyType) {
   EnterKeyType[EnterKeyType["Go"] = 2] = "Go";
