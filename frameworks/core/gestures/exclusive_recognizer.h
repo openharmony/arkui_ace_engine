@@ -19,7 +19,6 @@
 #include <functional>
 #include <set>
 
-#include "core/gestures/gesture_info.h"
 #include "core/gestures/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace {

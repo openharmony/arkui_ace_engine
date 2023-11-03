@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {

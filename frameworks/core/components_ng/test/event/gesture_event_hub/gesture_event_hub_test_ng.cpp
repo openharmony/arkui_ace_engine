@@ -35,7 +35,6 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;

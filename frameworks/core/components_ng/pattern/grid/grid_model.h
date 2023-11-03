@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_v2/grid/grid_position_controller.h"
 #include "core/event/ace_events.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 
