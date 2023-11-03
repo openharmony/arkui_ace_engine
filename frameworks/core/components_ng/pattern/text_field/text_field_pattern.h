@@ -18,8 +18,8 @@
 
 #include <cstdint>
 #include <optional>
-#include <stack>
-#include <stdint.h>
+#include <queue>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
@@ -1071,6 +1071,7 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
 
     void Delete(int32_t start, int32_t end);
+    void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
@@ -1111,6 +1112,7 @@ private:
     void NotifyOnEditChanged(bool isChanged);
     void StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste = false);
     void ProcessResponseArea();
+    bool HasInputOperation();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1240,9 +1242,9 @@ private:
     TimeStamp lastClickTimeStamp_;
     float paragraphWidth_ = 0.0f;
 
-    std::stack<int32_t> deleteBackwardOperations_;
-    std::stack<int32_t> deleteForwardOperations_;
-    std::stack<std::string> insertValueOperations_;
+    std::queue<int32_t> deleteBackwardOperations_;
+    std::queue<int32_t> deleteForwardOperations_;
+    std::queue<std::string> insertValueOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool showSelect_ = false;
