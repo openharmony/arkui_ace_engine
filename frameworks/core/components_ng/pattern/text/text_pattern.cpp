@@ -1064,7 +1064,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     return true;
 }
 
-void TextPattern::BeforeCreateLayoutWrapper()
+void TextPattern::PreCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1110,6 +1110,22 @@ void TextPattern::BeforeCreateLayoutWrapper()
         auto gestureEventHub = host->GetOrCreateGestureEventHub();
         InitClickEvent(gestureEventHub);
     }
+}
+
+void TextPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    const auto& layoutProperty = host->GetLayoutProperty();
+    auto flag = layoutProperty ? layoutProperty->GetPropertyChangeFlag() : PROPERTY_UPDATE_NORMAL;
+    // when updating the scenario, needs to determine whether the SpanNode is refreshed.
+    if (paragraph_ && (flag & PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST) != PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST) {
+        LOGD("no need to refresh span node");
+        return;
+    }
+
+    PreCreateLayoutWrapper();
 }
 
 void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick)
