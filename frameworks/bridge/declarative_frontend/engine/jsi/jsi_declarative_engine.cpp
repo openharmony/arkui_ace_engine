@@ -2030,6 +2030,7 @@ bool JsiDeclarativeEngine::OnRestoreData(const std::string& data)
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     void* runtime, const std::unordered_set<std::string>& formModuleList)
 {
+    LOGI("PreloadAceModuleCard start.");
     isUnique_ = true;
     if (isModulePreloaded_ && !IsPlugin() && !isUnique_) {
         return;
@@ -2037,6 +2038,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
 
     if (!sharedRuntime) {
+        LOGI("sharedRuntime is nullptr.");
         return;
     }
     std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
@@ -2044,9 +2046,11 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
     EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
     if (vm == nullptr) {
+        LOGI("vm is nullptr.");
         return;
     }
     if (!arkRuntime->InitializeFromExistVM(vm)) {
+        LOGI("InitializeFromExistVM failed.");
         return;
     }
     LocalScope scope(vm);
@@ -2077,6 +2081,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
     if (!jsEnumStyleResult) {
+        LOGI("preload js enums failed.");
         globalRuntime_ = nullptr;
         return;
     }
@@ -2085,6 +2090,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     bool arkComponentResult = arkRuntime->EvaluateJsCode(
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
     if (!arkComponentResult) {
+        LOGI("preload ark component failed.");
         globalRuntime_ = nullptr;
         return;
     }
@@ -2099,25 +2105,30 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     globalRuntime_ = nullptr;
     cardRuntime_ = runtime;
     JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    LOGI("PreloadAceModuleCard end.");
 }
 
 void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
     void* runtime, const std::unordered_set<std::string>& formModuleList)
 {
+    LOGI("ReloadAceModuleCard start.");
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
 
     if (!sharedRuntime) {
+        LOGI("sharedRuntime is nullptr.");
         return;
     }
     auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
     EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
     if (vm == nullptr) {
+        LOGI("vm is nullptr.");
         return;
     }
     LocalScope scope(vm);
     // reload js views
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, true);
     JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    LOGI("ReloadAceModuleCard end.");
 }
 #endif
 // ArkTsCard end
