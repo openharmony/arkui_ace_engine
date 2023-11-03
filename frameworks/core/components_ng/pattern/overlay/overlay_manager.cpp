@@ -19,7 +19,7 @@
 #include <utility>
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/log/log_wrapper.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
