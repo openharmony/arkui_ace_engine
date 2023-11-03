@@ -454,6 +454,7 @@ public:
     void StopSpringAnimation();
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
+    int32_t GetDuration() const;
 
 private:
     void OnModifyDone() override;
@@ -526,7 +527,6 @@ private:
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
         float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
-    int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
     EdgeEffect GetEdgeEffect() const;

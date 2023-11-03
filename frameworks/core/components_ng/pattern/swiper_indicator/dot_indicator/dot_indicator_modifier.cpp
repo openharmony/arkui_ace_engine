@@ -30,7 +30,6 @@ constexpr int32_t POINT_HOVER_ANIMATION_DURATION = 100;
 constexpr int32_t COMPONENT_DILATE_ANIMATION_DURATION = 250;
 constexpr int32_t COMPONENT_SHRINK_ANIMATION_DURATION = 300;
 constexpr int32_t MOUSE_PRESS_ANIMATION_DURATION = 250;
-constexpr int32_t POINT_ANIMATION_DURATION = 400;
 
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.4f;
 constexpr float LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
@@ -458,7 +457,7 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
     bool isForward, const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption blackPointOption;
-    blackPointOption.SetDuration(POINT_ANIMATION_DURATION);
+    blackPointOption.SetDuration(animationDuration_);
     blackPointOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
     AnimationUtils::Animate(blackPointOption, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
@@ -466,7 +465,7 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
     if (longPointLeftAnimEnd_) {
         AnimationOption longPointLeftOption;
         longPointLeftAnimEnd_ = false;
-        longPointLeftOption.SetDuration(POINT_ANIMATION_DURATION);
+        longPointLeftOption.SetDuration(animationDuration_);
         longPointLeftOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
             isForward ? LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY,
             CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
@@ -478,7 +477,7 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
     if (longPointRightAnimEnd_) {
         AnimationOption longPointRightOption;
         longPointRightAnimEnd_ = false;
-        longPointRightOption.SetDuration(POINT_ANIMATION_DURATION);
+        longPointRightOption.SetDuration(animationDuration_);
         longPointRightOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
             isForward ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
             CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));

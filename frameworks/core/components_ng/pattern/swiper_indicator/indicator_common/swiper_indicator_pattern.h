@@ -80,6 +80,7 @@ public:
             }
             auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
             CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+            dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
             auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
             paintMethod->SetAxis(swiperPattern->GetDirection());
             paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
