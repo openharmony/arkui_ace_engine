@@ -1576,6 +1576,11 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
 {
     if (NearZero(translate)) {
         ResetAndUpdateIndexOnAnimationEnd(nextIndex);
+        auto delayTime = GetInterval() - GetDuration();
+        delayTime = std::clamp(delayTime, 0, delayTime);
+        if (NeedAutoPlay() && isUserFinish_) {
+            PostTranslateTask(delayTime);
+        }
         return;
     }
 
