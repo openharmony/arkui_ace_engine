@@ -834,12 +834,20 @@ void ListItemPattern::InitDisableEvent()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(theme);
+    auto UserDefineOpacity = renderContext->GetOpacityValue(1.0);
 
-    if (!eventHub->IsEnabled()) {
+    if (!eventHub->IsDeveloperEnabled()) {
         if (selectable_) {
             selectable_ = false;
         }
+        enableOpacity_ = renderContext->GetOpacityValue(1.0);
         renderContext->UpdateOpacity(theme->GetItemDisabledAlpha());
+    } else {
+        if (enableOpacity_.has_value()) {
+            renderContext->UpdateOpacity(enableOpacity_.value());
+        } else {
+            renderContext->UpdateOpacity(UserDefineOpacity);
+        }
     }
 }
 } // namespace OHOS::Ace::NG
