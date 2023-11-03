@@ -1257,6 +1257,10 @@ void WebPattern::OnModifyDone()
         if (setHapPathCallback_) {
             setHapPathCallback_(container->GetHapPath());
         }
+        if (onControllerAttachedCallback_) {
+            onControllerAttachedCallback_();
+        }
+
 #else
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
         CHECK_NULL_VOID(delegate_);
