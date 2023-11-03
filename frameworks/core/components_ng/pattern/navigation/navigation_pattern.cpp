@@ -139,6 +139,7 @@ void NavigationPattern::OnModifyDone()
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
+    CHECK_NULL_VOID(navigationStack_);
     auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
     auto preSize = navigationStack_->PreSize();
