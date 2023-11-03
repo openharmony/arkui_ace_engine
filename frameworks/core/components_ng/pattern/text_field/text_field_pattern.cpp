@@ -3581,11 +3581,21 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 
 void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd)
 {
-    if (!HasFocus() || selectionStart == selectionEnd) {
+    if (!HasFocus()) {
         return;
+    }
+    if (selectionStart == selectionEnd) {
+        selectController_->UpdateCaretIndex(selectionEnd);
+        StartTwinkling();
+    } else {
+        cursorVisible_ = false;
+        HandleSetSelection(selectionStart, selectionEnd, false);
     }
     cursorVisible_ = false;
     HandleSetSelection(selectionStart, selectionEnd, false);
+    if (RequestKeyboard(false, true, true)) {
+        NotifyOnEditChanged(true);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
