@@ -485,6 +485,16 @@ public:
         cacheMode_ = mode;
     }
 
+    OverScrollMode GetOverScrollMode() const
+    {
+        return OverScrollMode_;
+    }
+
+    void SetOverScrollMode(OverScrollMode mode)
+    {
+        OverScrollMode_ = mode;
+    }
+
     bool GetOverviewModeAccessEnabled() const
     {
         return isOverviewModeAccessEnabled_;
@@ -1012,6 +1022,7 @@ private:
     PreKeyEventCallback onPreKeyEvent_;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
+    OverScrollMode OverScrollMode_ = OverScrollMode::NEVER;
 };
 
 } // namespace OHOS::Ace

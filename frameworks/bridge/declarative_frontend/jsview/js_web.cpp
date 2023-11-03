@@ -1631,6 +1631,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onTouchIconUrlReceived", &JSWeb::OnTouchIconUrlReceived);
     JSClass<JSWeb>::StaticMethod("darkMode", &JSWeb::DarkMode);
     JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
+    JSClass<JSWeb>::StaticMethod("overScrollMode", &JSWeb::OverScrollMode);
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
@@ -2701,6 +2702,23 @@ void JSWeb::CacheMode(int32_t cacheMode)
             break;
     }
     WebModel::GetInstance()->SetCacheMode(mode);
+}
+
+void JSWeb::OverScrollMode(int overScrollMode)
+{
+    auto mode = OverScrollMode::NEVER;
+    switch (overScrollMode) {
+        case 0:
+            mode = OverScrollMode::NEVER;
+            break;
+        case 1:
+            mode = OverScrollMode::ALWAYS;
+            break;
+        default:
+            mode = OverScrollMode::NEVER;
+            break;
+    }
+    WebModel::GetInstance()->SetOverScrollMode(mode);
 }
 
 void JSWeb::OverviewModeAccess(bool isOverviewModeAccessEnabled)
