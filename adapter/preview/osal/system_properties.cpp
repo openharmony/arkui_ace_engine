@@ -45,6 +45,8 @@ bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;
+int32_t SystemProperties::devicePhysicalWidth_ = 0;
+int32_t SystemProperties::devicePhysicalHeight_ = 0;
 double SystemProperties::resolution_ = 1.0;
 DeviceType SystemProperties::deviceType_ { DeviceType::PHONE };
 DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
