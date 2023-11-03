@@ -85,6 +85,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
         fontManager->UnRegisterCallbackNG(frameNode);
         fontManager->RemoveVariationNodeNG(frameNode);
     }
+    pipeline->RemoveOnAreaChangeNode(node->GetId());
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -442,12 +443,11 @@ void TextPattern::CheckHandles(SelectHandleInfo& handleInfo)
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset();
+    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset() - pipeline->GetRootRect().GetOffset();
     RectF contentGlobalRect(offset, contentRect_.GetSize());
+    contentGlobalRect = GetVisibleContentRect(host->GetAncestorNodeOfFrame(), contentGlobalRect);
     auto handleOffset = handleInfo.paintRect.GetOffset();
-    if (!contentGlobalRect.IsInRegion(PointF(handleOffset.GetX(), handleOffset.GetY() + BOX_EPSILON))) {
-        handleInfo.isShow = false;
-    }
+    handleInfo.isShow = contentGlobalRect.IsInRegion(PointF(handleOffset.GetX(), handleOffset.GetY() + BOX_EPSILON));
 }
 
 void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -912,6 +912,9 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddOnAreaChangeNode(host->GetId());
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag())) {
         // measure flag changed, reset paragraph.
@@ -988,13 +991,25 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
 {
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         SelectHandleInfo firstHandleInfo;
-        SelectHandleInfo secondHandleInfo;
         firstHandleInfo.paintRect = textSelector_.firstHandle;
+        if (firstHandleInfo.paintRect != selectInfo.firstHandle.paintRect) {
+            CheckHandles(firstHandleInfo);
+        } else {
+            firstHandleInfo.isShow = selectInfo.firstHandle.isShow;
+        }
+
+        SelectHandleInfo secondHandleInfo;
         secondHandleInfo.paintRect = textSelector_.secondHandle;
+        if (secondHandleInfo.paintRect != selectInfo.secondHandle.paintRect) {
+            CheckHandles(secondHandleInfo);
+        } else {
+            secondHandleInfo.isShow = selectInfo.secondHandle.isShow;
+        }
         auto start = textSelector_.GetTextStart();
         auto end = textSelector_.GetTextEnd();
         selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+        selectOverlayProxy_->ShowOrHiddenMenu(!firstHandleInfo.isShow && !secondHandleInfo.isShow);
     } else {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -1019,6 +1034,11 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
 
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    parentGlobalOffset_ = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
 
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -1393,6 +1413,22 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 int32_t TextPattern::GetHandleIndex(const Offset& offset) const
 {
     return paragraph_->GetGlyphIndexByCoordinate(offset);
+}
+
+void TextPattern::OnAreaChangedInner()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    if (parentGlobalOffset != parentGlobalOffset_) {
+        parentGlobalOffset_ = parentGlobalOffset;
+        if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+            CalculateHandleOffsetAndShowOverlay();
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

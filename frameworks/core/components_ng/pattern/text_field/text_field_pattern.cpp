@@ -2042,6 +2042,7 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
         fontManager->UnRegisterCallbackNG(frameNode);
         fontManager->RemoveVariationNodeNG(frameNode);
     }
+    pipeline->RemoveOnAreaChangeNode(node->GetId());
 }
 
 void TextFieldPattern::CloseSelectOverlay()
@@ -4680,13 +4681,22 @@ void TextFieldPattern::StopEditing()
 
 bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
 {
-    OffsetF offset(paintRect.GetX() - parentGlobalOffset_.GetX(), paintRect.GetY() - parentGlobalOffset_.GetY());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    // use global offset.
+    RectF visibleContentRect(contentRect_.GetOffset() + parentGlobalOffset_, contentRect_.GetSize());
+    auto parent = host->GetAncestorNodeOfFrame();
+    visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
     if (!IsTextArea()) {
-        return LessOrEqual(offset.GetX(), contentRect_.GetX() + contentRect_.Width()) &&
-               GreatOrEqual(offset.GetX() + paintRect.Width(), contentRect_.GetX());
+        auto verticalEpsilon = std::max(0.0f, paintRect.Height() - contentRect_.Height());
+        return GreatOrEqual(paintRect.Top() + verticalEpsilon, visibleContentRect.Top()) &&
+               LessOrEqual(paintRect.Bottom() - verticalEpsilon, visibleContentRect.Bottom()) &&
+               LessOrEqual(paintRect.Left(), visibleContentRect.Right()) &&
+               GreatOrEqual(paintRect.Right(), visibleContentRect.Left());
     }
-    return contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) &&
-           contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON });
+    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 
 void TextFieldPattern::DumpAdvanceInfo()

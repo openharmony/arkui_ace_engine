@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
@@ -64,6 +65,25 @@ public:
     MouseStatus GetMouseStatus() const
     {
         return mouseStatus_;
+    }
+
+    RectF GetVisibleContentRect(WeakPtr<FrameNode> parent, RectF visibleRect)
+    {
+        auto parentNode = parent.Upgrade();
+        CHECK_NULL_RETURN(parentNode, visibleRect);
+        if (parentNode->GetTag() == V2::PAGE_ETS_TAG) {
+            return visibleRect;
+        }
+        auto intersectRect = visibleRect;
+        auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(parentNode->GetPattern());
+        auto geometryNode = parentNode->GetGeometryNode();
+        if (scrollablePattern && geometryNode) {
+            auto parentViewPort =
+                RectF(parentNode->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
+            intersectRect = parentViewPort.IntersectRectT(visibleRect);
+        }
+        parentNode = parentNode->GetAncestorNodeOfFrame();
+        return GetVisibleContentRect(parentNode, intersectRect);
     }
 
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false)
