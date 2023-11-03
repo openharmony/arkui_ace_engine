@@ -276,6 +276,15 @@ void CanvasPaintMethod::DrawImage(
 void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
 #ifndef USE_ROSEN_DRAWING
+    // get skImage form pixelMap
+    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
+
+    // Step2: Create SkImage and draw it, using gpu or cpu
+    sk_sp<SkImage> image =
+        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
+    CHECK_NULL_VOID(image);
+
     InitImagePaint(imagePaint_, sampleOptions_);
 
     SkPaint compositeOperationpPaint;
@@ -290,7 +299,6 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     }
 
     const auto skCanvas = skCanvas_.get();
-    CHECK_NULL_VOID(skCanvas);
     if (HasShadow()) {
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
@@ -298,24 +306,23 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
         PaintShadow(path, shadow_, skCanvas, &imagePaint_);
     }
 
-    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    CHECK_NULL_VOID(recordingCanvas);
-    const std::shared_ptr<Media::PixelMap> tempPixelMap = pixelMap->GetPixelMapSharedPtr();
-    CHECK_NULL_VOID(tempPixelMap);
     switch (canvasImage.flag) {
         case 0:
-            recordingCanvas->DrawPixelMap(tempPixelMap, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
+
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            recordingCanvas->DrawPixelMapRect(tempPixelMap, rect, sampleOptions_, &imagePaint_);
+
+            skCanvas_->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
             break;
         }
         case 2: {
             SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-            recordingCanvas->DrawPixelMapRect(
-                tempPixelMap, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
+
+            skCanvas_->drawImageRect(
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
             break;
         }
         default:
@@ -332,28 +339,34 @@ void CanvasPaintMethod::DrawPixelMapWithoutGlobalState(
     const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& canvasImage)
 {
 #ifndef USE_ROSEN_DRAWING
+    // get skImage form pixelMap
+    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
+
+    // Step2: Create SkImage and draw it, using gpu or cpu
+    sk_sp<SkImage> image =
+        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
+    CHECK_NULL_VOID(image);
+
     InitImagePaint(imagePaint_, sampleOptions_);
 
-    const auto skCanvas = skCanvas_.get();
-    CHECK_NULL_VOID(skCanvas);
-    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    CHECK_NULL_VOID(recordingCanvas);
-    const std::shared_ptr<Media::PixelMap> tempPixelMap = pixelMap->GetPixelMapSharedPtr();
-    CHECK_NULL_VOID(tempPixelMap);
     switch (canvasImage.flag) {
         case 0:
-            recordingCanvas->DrawPixelMap(tempPixelMap, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
+
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            recordingCanvas->DrawPixelMapRect(tempPixelMap, rect, sampleOptions_, &imagePaint_);
+
+            skCanvas_->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
             break;
         }
         case 2: {
             SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-            recordingCanvas->DrawPixelMapRect(
-                tempPixelMap, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
+
+            skCanvas_->drawImageRect(
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
             break;
         }
         default:

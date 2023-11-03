@@ -18,7 +18,6 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
-#include "pipeline/rs_paint_filter_canvas.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -48,10 +47,7 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     }
     recordingCanvas->GetDrawCmdList()->SetWidth(drawCmdList->GetWidth());
     recordingCanvas->GetDrawCmdList()->SetHeight(drawCmdList->GetHeight());
-    auto canvas = std::make_shared<OHOS::Rosen::RSPaintFilterCanvas>(recordingCanvas);
-    CHECK_NULL_VOID(canvas);
-    canvas->SetRecordingState(true);
-    drawCmdList->Playback(*canvas);
+    drawCmdList->Playback(*skCanvas);
     rsRecordingCanvas_->Clear();
 #else
     if (!rsRecordingCanvas_) {
