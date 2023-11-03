@@ -598,6 +598,7 @@ public:
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
     void OnRootLayerChanged(int width, int height);
+    bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -635,6 +636,7 @@ public:
     void SetToken();
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
+    void ScrollBy(float deltaX, float deltaY);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
