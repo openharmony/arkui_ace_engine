@@ -63,7 +63,10 @@ public:
     void StopPlayingEffect() const
     {
         if (controller_->IsRunning()) {
-            LOGI("stop playing effect, shareId:%{public}s", shareId_.c_str());
+            if (SystemProperties::GetDebugEnabled()) {
+                TAG_LOGI(
+                    AceLogTag::ACE_ANIMATION, "Stop playing transition effect, shareId:%{public}s", shareId_.c_str());
+            }
             controller_->Finish();
         }
     }
