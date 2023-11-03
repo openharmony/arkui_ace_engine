@@ -54,13 +54,13 @@ RefPtr<NodePaintMethod> DataPanelPattern::CreateNodePaintMethod()
     float y = std::min<float>(shadowOption.offsetY - shadowOption.radius, oldBoundsRect->GetY());
     float width = std::max<float>(
         { oldBoundsRect->Width(), oldBoundsRect->GetX() + oldBoundsRect->Width() - x,
-        shadowOption.offsetX - x + frameSize.Width() + shadowOption.radius * 2.0,
-        std::abs(shadowOption.offsetX) + frameSize.Width() + shadowOption.radius * 2.0 }
+        shadowOption.offsetX - x + frameSize.Width() + shadowOption.radius * 2.0f,
+        std::abs(shadowOption.offsetX) + frameSize.Width() + shadowOption.radius * 2.0f }
     );
     float height = std::max<float>(
         { oldBoundsRect->Height(), oldBoundsRect->GetY() + oldBoundsRect->Height() - y,
-        shadowOption.offsetY - y + frameSize.Height() + shadowOption.radius * 2.0,
-        std::abs(shadowOption.offsetY) + frameSize.Height() + shadowOption.radius * 2.0 }
+        shadowOption.offsetY - y + frameSize.Height() + shadowOption.radius * 2.0f,
+        std::abs(shadowOption.offsetY) + frameSize.Height() + shadowOption.radius * 2.0f }
     );
     RectF boundsRect(x, y, width, height);
     dataPanelModifier_->SetBoundsRect(boundsRect);
