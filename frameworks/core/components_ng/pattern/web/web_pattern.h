@@ -359,6 +359,7 @@ public:
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
     bool IsImageDrag();
+    void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
 #ifdef ENABLE_DRAG_FRAMEWORK
     DragRet GetDragAcceptableStatus();
 #endif
@@ -599,6 +600,7 @@ private:
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
+    std::optional<ScriptItems> scriptItems_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

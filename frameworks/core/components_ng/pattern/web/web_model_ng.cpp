@@ -854,4 +854,11 @@ void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     CHECK_NULL_VOID(webPattern);
     webPattern->SetNestedScroll(nestedOpt);
 }
+
+void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnDocumentStart(scriptItems);
+}
 } // namespace OHOS::Ace::NG
