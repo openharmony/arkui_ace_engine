@@ -2852,12 +2852,12 @@ HWTEST_F(ListTestNg, Event002, TestSize.Level1)
     CreateListWithItem([event](ListModelNG listModelNG) { listModelNG.SetOnScrollIndex(event); });
 
     ScrollDown();
-    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(startIndex, 1);
     EXPECT_EQ(endIndex, 8);
     EXPECT_EQ(centerIndex, 4);
 
     ScrollDown();
-    EXPECT_EQ(startIndex, 1);
+    EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 9);
     EXPECT_EQ(centerIndex, 5);
 }
@@ -2886,17 +2886,22 @@ HWTEST_F(ListTestNg, Event003, TestSize.Level1)
     EXPECT_FALSE(isTrigger);
 
     /**
-     * @tc.steps: step3. Scroll up to start
+     * @tc.steps: step3. Scroll up half item.
+     */
+    UpdateCurrentOffset(ITEM_HEIGHT / 2.0f);
+
+    /**
+     * @tc.steps: step4. Scroll up to start
      */
     isTrigger = false;
     ScrollUp(2);
     EXPECT_TRUE(isTrigger);
 
     /**
-     * @tc.steps: step4. Scroll down to start
+     * @tc.steps: step5. Scroll down to start
      */
     isTrigger = false;
-    ScrollDown();
+    ScrollDown(1.5);
     EXPECT_TRUE(isTrigger);
 }
 
@@ -3199,7 +3204,7 @@ HWTEST_F(ListTestNg, AccessibilityProperty001, TestSize.Level1)
      * @tc.steps: step2. scroll to second item
      */
     ScrollDown();
-    EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 1);
     EXPECT_EQ(accessibilityProperty_->GetEndIndex(), VIEWPORT_NUMBER);
 
     /**
@@ -3793,7 +3798,7 @@ HWTEST_F(ListTestNg, FocusStep005, TestSize.Level1)
     CreateList([](ListModelNG listModelNG) { CreateListItem(TOTAL_NUMBER, Axis::VERTICAL); });
     ScrollDown();
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 8, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 8, 9));
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * 2));
 
     /**
@@ -4625,8 +4630,8 @@ HWTEST_F(ListTestNg, ScrollToIndex001, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 0));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, -350.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, -700.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, 0));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, -350.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, -350.f));
 
     /**
      * @tc.steps: step6. the item above viewport
@@ -4717,10 +4722,10 @@ HWTEST_F(ListTestNg, ScrollToIndex002, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 200.f));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 100.f));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 100.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 0));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, 450.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, 450.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, 450.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 800.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, 800.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, 800.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, 800.f));
 
     /**
      * @tc.steps: step4. last item below viewport
@@ -4745,8 +4750,8 @@ HWTEST_F(ListTestNg, ScrollToIndex002, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 0));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, 0));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, 0));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, -350.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, -700.f));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, 0));
 
     /**
@@ -4756,24 +4761,24 @@ HWTEST_F(ListTestNg, ScrollToIndex002, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 100.f));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 100.f));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 100.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, 0));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, 0));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, 0));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, -250.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, -600.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, -600.f));
 
     /**
      * @tc.steps: step7. last item in viewport
      */
     index = ListLayoutAlgorithm::LAST_ITEM;
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 200.f));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 200.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 900.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 550.f));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 200.f));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 200.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 900.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, 900.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, 900.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, 900.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 200.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, 200.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, 200.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, 200.f));
 }
 
 /**
@@ -4821,10 +4826,10 @@ HWTEST_F(ListTestNg, ScrollToIndex003, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 600.f));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 400.f));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 400.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 0));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 800.f));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, 600.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, 600.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, 600.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, 400.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, 400.f));
 
     /**
      * @tc.steps: step4. last group below viewport
@@ -4850,8 +4855,8 @@ HWTEST_F(ListTestNg, ScrollToIndex003, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 0));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, -200.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, -400.f));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, 0));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, -200.f));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, -200.f));
 
     /**
      * @tc.steps: step6. the group above viewport
@@ -4986,7 +4991,7 @@ HWTEST_F(ListTestNg, ScrollToIndex005, TestSize.Level1)
      */
     index = ListLayoutAlgorithm::LAST_ITEM;
     indexInGroup = 3;
-    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::START, 400.f));
+    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::START, 600.f + 100.f / 3));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::CENTER, 700.f));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::END, 1200.f));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::AUTO, 1200.f));

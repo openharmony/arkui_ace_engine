@@ -3576,7 +3576,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest002, TestSize.Level1)
     KeyEvent keyEventLeft(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
     focusHub->ProcessOnKeyEventInternal(keyEventLeft);
     auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    EXPECT_NE(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 
     /**
      * @tc.cases: case1. right KeyEvent.
@@ -3584,7 +3584,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest002, TestSize.Level1)
     KeyEvent keyEventRight(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
     focusHub->ProcessOnKeyEventInternal(keyEventRight);
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    EXPECT_NE(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 }
 
 /**

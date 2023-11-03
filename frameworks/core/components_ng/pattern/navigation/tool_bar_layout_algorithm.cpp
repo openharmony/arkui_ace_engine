@@ -86,20 +86,6 @@ float CalcToolbarItemWidth(const float& toolbarWidth, size_t toolbarItemNum)
     return (containerWidth - totalItemsInterval) / toolbarItemNum;
 }
 
-float CalcBarItemMaxWidth(const float& toolbarWidth, size_t toolbarItemNum)
-{
-    if (toolbarItemNum == 0) {
-        return 0.0f;
-    }
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, 0.0f);
-    auto toolbarItemInterval = theme->GetToolbarItemSafeInterval().ConvertToPx();
-    auto toolbarItemPadding = theme->GetToolbarItemHorizontalPadding().ConvertToPx();
-
-    return (toolbarWidth - (toolbarItemNum - 1) * toolbarItemInterval - toolbarItemNum * toolbarItemPadding) /
-           toolbarItemNum;
-}
-
 float CalcToolbarItemMaxWidthIfNeedToExpand(const float& toolbarWidth, size_t toolbarItemNum)
 {
     if (toolbarItemNum == 0) {
@@ -112,29 +98,16 @@ float CalcToolbarItemMaxWidthIfNeedToExpand(const float& toolbarWidth, size_t to
     return (toolbarWidth - (toolbarItemNum - 1) * toolbarItemInterval) / toolbarItemNum;
 }
 
-void SetBarItemMaxWidth(const RefPtr<LayoutWrapper>& toolbarItemWrapper, const float& barItemWidth)
-{
-    auto barItemWrapper = toolbarItemWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(barItemWrapper);
-    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(barItemWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_VOID(layoutAlgorithmWrapper);
-    auto barItemLayoutAlgorithm =
-        AceType::DynamicCast<BarItemLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_VOID(barItemLayoutAlgorithm);
-    barItemLayoutAlgorithm->SetBarItemMaxWidth(barItemWidth);
-}
 
 float UpdateToolBarItemsContainer(LayoutWrapper* layoutWrapper, size_t toolbarItemNum, const float& toolbarWidth)
 {
     auto containerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(containerWrapper, 0.0f);
     float toolbarItemWidth = CalcToolbarItemWidth(toolbarWidth, toolbarItemNum);
-    float barItemMaxWidth = CalcBarItemMaxWidth(toolbarWidth, toolbarItemNum);
 
     for (const auto& toolbarItemWrapper : containerWrapper->GetAllChildrenWithBuild()) {
         auto layoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(toolbarItemWrapper->GetLayoutProperty());
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(toolbarItemWidth), std::nullopt));
-        SetBarItemMaxWidth(toolbarItemWrapper, barItemMaxWidth);
     }
 
     return toolbarItemWidth;

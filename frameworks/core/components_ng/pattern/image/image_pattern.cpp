@@ -235,6 +235,21 @@ void ImagePattern::SetImagePaintConfig(
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = isSvg;
 
+    auto host = GetHost();
+    if (!host) {
+        canvasImage->SetPaintConfig(config);
+        return;
+    }
+    auto renderContext = host->GetRenderContext();
+    if (!renderContext || !renderContext->HasBorderRadius()) {
+        canvasImage->SetPaintConfig(config);
+        return;
+    }
+
+    auto renderProps = host->GetPaintProperty<ImageRenderProperty>();
+    if (renderProps) {
+        renderProps->UpdateNeedBorderRadius(true);
+    }
     canvasImage->SetPaintConfig(config);
 }
 
@@ -279,6 +294,26 @@ void ImagePattern::CreateObscuredImage()
     }
 }
 
+void ImagePattern::LoadImage(const ImageSourceInfo& src)
+{
+    LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
+
+    loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
+    loadingCtx_->LoadImageData();
+}
+
+void ImagePattern::LoadAltImage(const RefPtr<ImageLayoutProperty>& imageLayoutProperty)
+{
+    auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+    LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
+    if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
+        (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
+        altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(altImageSourceInfo, std::move(altLoadNotifier));
+        altLoadingCtx_->LoadImageData();
+    }
+}
+
 void ImagePattern::LoadImageDataIfNeed()
 {
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
@@ -289,20 +324,10 @@ void ImagePattern::LoadImageDataIfNeed()
     UpdateInternalResource(src);
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src) {
-        LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
-
-        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
-        loadingCtx_->LoadImageData();
+        LoadImage(src);
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
-        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
-        if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
-            (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
-            altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(altImageSourceInfo, std::move(altLoadNotifier));
-            altLoadingCtx_->LoadImageData();
-        }
+        LoadAltImage(imageLayoutProperty);
     }
 }
 
@@ -450,6 +475,26 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
+}
+
+// when recycle image component, release the pixelmap resource
+void ImagePattern::OnRecycle()
+{
+    loadingCtx_ = nullptr;
+    image_ = nullptr;
+    altLoadingCtx_ = nullptr;
+    altImage_ = nullptr;
+
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->ClearDrawCommands();
+}
+
+void ImagePattern::OnReuse()
+{
+    LoadImageDataIfNeed();
 }
 
 void ImagePattern::OnWindowHide()
@@ -624,7 +669,6 @@ void ImagePattern::OpenSelectOverlay()
     CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "Opening select overlay");
     selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info, WeakClaim(this));
 
     // paint selected mask effect
@@ -637,7 +681,6 @@ void ImagePattern::CloseSelectOverlay()
         return;
     }
     if (!selectOverlay_->IsClosed()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "closing select overlay");
         selectOverlay_->Close();
     }
     selectOverlay_ = nullptr;
@@ -738,6 +781,21 @@ void ImagePattern::OnLanguageConfigurationUpdate()
     // Resource image needs to reload when Language changes
     if (src.GetSrcType() == SrcType::RESOURCE) {
         loadingCtx_.Reset();
+    }
+}
+
+void ImagePattern::OnColorConfigurationUpdate()
+{
+    CHECK_NULL_VOID(loadingCtx_);
+
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    UpdateInternalResource(src);
+
+    LoadImage(src);
+    if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
+        LoadAltImage(imageLayoutProperty);
     }
 }
 } // namespace OHOS::Ace::NG

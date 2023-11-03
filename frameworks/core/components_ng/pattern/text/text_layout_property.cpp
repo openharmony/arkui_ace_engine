@@ -76,8 +76,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("content", GetContent().value_or("").c_str());
     json->Put("font", GetFont().c_str());
     json->Put("fontSize", GetFontSizeInJson(GetFontSize()).c_str());
-    json->Put("fontColor",
-        GetForegroundColor().value_or(GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
+    json->Put(
+        "fontColor", GetForegroundColor().value_or(GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
     json->Put("fontStyle", GetFontStyleInJson(GetItalicFontStyle()).c_str());
     json->Put("fontWeight", GetFontWeightInJson(GetFontWeight()).c_str());
     json->Put("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str());
@@ -114,6 +114,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
     json->Put("copyOption", GetCopyOptionString().c_str());
     json->Put("wordBreak", V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str());
+    json->Put("ellipsisMode", V2::ConvertEllipsisModeToString(GetEllipsisMode().value_or(EllipsisMode::TAIL)).c_str());
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

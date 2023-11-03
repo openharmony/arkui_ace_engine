@@ -126,7 +126,7 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     float value = paintProperty->GetValueValue();
 
     if (colors.size() == 0 || colors.size() != weights.size()) {
-        LOGE("color size is 0 or is not equal to weight size");
+        TAG_LOGW(AceLogTag::ACE_GAUGE, "Gauge get the color size is 0 or is not equal to weight size");
         return;
     }
     float totalWeight = 0.0f;
@@ -134,7 +134,6 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
         totalWeight += weight;
     }
     if (NearEqual(totalWeight, 0.0)) {
-        LOGE("total weight is 0.0");
         return;
     }
     float currentStart = 0.0f;
@@ -470,7 +469,7 @@ void GaugePaintMethod::PaintMultiSegmentGradientCircular(
     }
 
     if (colors.size() == 0 || colors.size() != weights.size()) {
-        LOGE("color size is 0 or is not equal to weight size");
+        TAG_LOGW(AceLogTag::ACE_GAUGE, "Gauge get the color size is 0 or is not equal to weight size");
         return;
     }
     float totalWeight = 0.0f;
@@ -478,7 +477,6 @@ void GaugePaintMethod::PaintMultiSegmentGradientCircular(
         totalWeight += weight;
     }
     if (NearEqual(totalWeight, 0.0)) {
-        LOGE("total weight is 0.0");
         return;
     }
 

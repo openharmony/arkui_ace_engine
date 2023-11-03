@@ -144,6 +144,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
+    void CheckListDirectionInCardStyle();
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemGroupStyle listItemGroupStyle_ = V2::ListItemGroupStyle::NONE;
 

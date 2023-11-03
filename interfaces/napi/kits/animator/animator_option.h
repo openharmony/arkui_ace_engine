@@ -107,12 +107,23 @@ public:
         onrepeat_ = onrepeat;
     }
 
+    const RefPtr<Motion>& GetMotion() const
+    {
+        return motion_;
+    }
+
+    void SetMotion(const RefPtr<Motion>& motion)
+    {
+        motion_ = motion;
+    }
+
     void ApplyOption();
 
     void Destroy(napi_env env);
 
 private:
     RefPtr<Animator> animator_;
+    RefPtr<Motion> motion_;
     std::shared_ptr<AnimatorOption> option_;
     napi_ref onframe_ = nullptr;
     napi_ref onfinish_ = nullptr;

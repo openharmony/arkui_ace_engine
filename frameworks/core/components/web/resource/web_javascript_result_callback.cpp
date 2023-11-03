@@ -57,7 +57,6 @@ std::vector<std::shared_ptr<WebJSValue>> GetWebJSValue(const std::vector<std::sh
             case NWebValue::Type::NONE:
                 break;
             default:
-                LOGI("WebJavaScriptResultCallBack: jsvalue type not support!");
                 break;
         }
     }
@@ -88,7 +87,6 @@ std::shared_ptr<NWebValue> GetWebViewValue(const std::shared_ptr<WebJSValue>& we
         case WebJSValue::Type::NONE:
             break;
         default:
-            LOGI("WebJavaScriptResultCallBack: jsvalue type not support!");
             break;
     }
     return webViewValue;
@@ -97,14 +95,12 @@ std::shared_ptr<NWebValue> GetWebViewValue(const std::shared_ptr<WebJSValue>& we
 std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
     std::vector<std::shared_ptr<NWebValue>> args, const std::string& method, const std::string& object_name)
 {
-    LOGI("GetJavaScriptResult");
     ContainerScope scope(instanceId_);
     std::shared_ptr<WebJSValue> result;
     auto jsArgs = GetWebJSValue(args);
 
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGW("can't get task executor");
         return std::make_shared<NWebValue>(NWebValue::Type::NONE);
     }
 

@@ -73,12 +73,9 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
-        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
     }
     if (HasSurfacePositionChangedCallback()) {
-        LOGD("Unregister surface position change callback with id %{public}d",
-            surfacePositionChangedCallbackId_.value_or(-1));
         pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionChangedCallbackId_.value_or(-1));
     }
     auto frameNode = WeakClaim(node);
@@ -134,7 +131,6 @@ void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& care
     CHECK_NULL_VOID(paragraph_);
     auto computeSuccess = paragraph_->CalcCaretMetricsByPosition(extent, caretCaretMetric, textAffinity);
     if (!computeSuccess) {
-        LOGW("Get caret offset failed, set it to text tail");
         caretCaretMetric = CaretMetricsF(OffsetF(0.0f, rect.Width()), 0.0f);
     }
 }
@@ -310,13 +306,11 @@ void TextPattern::HandleOnCopy()
     CHECK_NULL_VOID(clipboard_);
     if (textSelector_.IsValid() && textSelector_.GetTextStart() == textSelector_.GetTextEnd()) {
         textSelector_.Update(-1, -1);
-        LOGW("Nothing to select");
         return;
     }
     auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     if (value.empty()) {
         textSelector_.Update(-1, -1);
-        LOGW("Copy value is empty");
         return;
     }
     if (copyOption_ != CopyOptions::None) {
@@ -519,21 +513,32 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     bool isClickOnSpan = false;
     if (textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY())) &&
         !spans_.empty() && paragraph_) {
-        Offset textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
+        PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
             info.GetLocalLocation().GetY() - textContentRect.GetY() };
-        auto position = paragraph_->GetGlyphIndexByCoordinate(textOffset);
+        int32_t start = 0;
         for (const auto& item : spans_) {
-            if (item && position <= item->position) {
-                if (!item->onClick) {
+            if (!item) {
+                continue;
+            }
+            std::vector<RectF> selectedRects;
+            paragraph_->GetRectsForRange(start, item->position, selectedRects);
+            start =  item->position;
+            for (auto&& rect : selectedRects) {
+                if (rect.IsInRegion(textOffset)) {
+                    if (!item->onClick) {
+                        break;
+                    }
+                    GestureEvent spanClickinfo = info;
+                    EventTarget target = info.GetTarget();
+                    target.area.SetWidth(Dimension(0.0f));
+                    target.area.SetHeight(Dimension(0.0f));
+                    spanClickinfo.SetTarget(target);
+                    item->onClick(spanClickinfo);
+                    isClickOnSpan = true;
                     break;
                 }
-                GestureEvent spanClickinfo = info;
-                EventTarget target = info.GetTarget();
-                target.area.SetWidth(Dimension(0.0f));
-                target.area.SetHeight(Dimension(0.0f));
-                spanClickinfo.SetTarget(target);
-                item->onClick(spanClickinfo);
-                isClickOnSpan = true;
+            }
+            if (isClickOnSpan) {
                 break;
             }
         }
@@ -827,7 +832,6 @@ void TextPattern::InitDragEvent()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->HasOnDragStart()) {
-        LOGD("drag event has already been initialized");
         return;
     }
 
@@ -911,7 +915,6 @@ void TextPattern::OnModifyDone()
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag())) {
         // measure flag changed, reset paragraph.
-        LOGD("reset on modify done!");
         paragraph_.Reset();
     }
 
@@ -1023,7 +1026,6 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(textLayoutAlgorithm, false);
     auto&& paragraph = textLayoutAlgorithm->GetParagraph();
     if (!paragraph) {
-        LOGD("on layout process, just return");
         return false;
     }
     paragraph_ = paragraph;
@@ -1052,7 +1054,6 @@ void TextPattern::BeforeCreateLayoutWrapper()
 
     if (paragraph_) {
         // because ParagraphStyle can't be set directly yet, paragraph always needs to be rebuilt
-        LOGD("reset before create layoutwrapper");
         paragraph_.Reset();
     }
     spans_.clear();
@@ -1145,15 +1146,15 @@ void TextPattern::InitSurfaceChangedCallback()
                     pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
                 }
             });
-        LOGD("Add surface changed callback id %{public}d", callbackId);
         UpdateSurfaceChangedCallbackId(callbackId);
     }
 }
 
 void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
-    LOGD("TextPattern handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
-         "height %{public}d",
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD,
+        "TextPattern handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
+        "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
@@ -1174,7 +1175,6 @@ void TextPattern::InitSurfacePositionChangedCallback()
                     pattern->HandleSurfacePositionChanged(posX, posY);
                 }
             });
-        LOGI("Add position changed callback id %{public}d", callbackId);
         UpdateSurfacePositionChangedCallbackId(callbackId);
     }
 }
@@ -1284,7 +1284,6 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                 }
                 break;
             default:
-                LOGW("Inherited properties are not supported.");
                 break;
         }
     }
@@ -1372,7 +1371,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         contentMod_->SetIsCustomFont(true);
     }
     auto paintMethod =
-        MakeRefPtr<TextPaintMethod>(WeakClaim(this), paragraph_, baselineOffset_, contentMod_, overlayMod_);
+        MakeRefPtr<TextPaintMethod>(WeakClaim(this), baselineOffset_, contentMod_, overlayMod_);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, paintMethod);
     auto context = host->GetRenderContext();

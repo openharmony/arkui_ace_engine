@@ -524,6 +524,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
                 midIndex = GetLanesFloor(layoutWrapper, midIndex) + GetLanes() - 1;
                 LayoutBackward(layoutWrapper, midIndex, midItemMidPos + midItemHeight / 2.0f);
             } else {
+                endIndex = GetLanesFloor(layoutWrapper, endIndex) + GetLanes() - 1;
                 LayoutBackward(layoutWrapper, endIndex, endPos);
             }
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {

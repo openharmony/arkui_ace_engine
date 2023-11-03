@@ -65,14 +65,15 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         preferredHeight_ = pattern->PreferredLineHeight(true);
     }
 
+    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     // Paragraph layout.
     if (isInlineStyle) {
-        return InlineMeasureContent(contentConstraint, layoutWrapper);
-    } else if (showPlaceHolder_) {
-        return PlaceHolderMeasureContent(contentConstraint, layoutWrapper, 0);
-    } else {
-        return TextInputMeasureContent(contentConstraint, layoutWrapper, 0);
+        return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
     }
+    if (showPlaceHolder_) {
+        return PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper, 0);
+    }
+    return TextInputMeasureContent(textFieldContentConstraint, layoutWrapper, 0);
 }
 
 void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -100,8 +101,9 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum());
 
     auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
-    if (contentConstraint.selfIdealSize.Height().has_value()) {
-        frameSize.SetHeight(contentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
+    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
+    if (textFieldContentConstraint.selfIdealSize.Height().has_value()) {
+        frameSize.SetHeight(textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
     } else {
         auto height = contentHeight + pattern->GetVerticalPaddingAndBorderSum() < defaultHeight
                           ? defaultHeight
@@ -119,16 +121,16 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     auto responseArea = pattern->GetResponseArea();
     if (responseArea && content) {
-        auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
         auto childWidth = responseArea->Measure(layoutWrapper).Width();
-        if (LessOrEqual(contentWidth + childWidth, contentConstraint.maxSize.Width())) {
+        if (LessOrEqual(contentWidth + childWidth, textFieldContentConstraint.maxSize.Width())) {
             frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + childWidth);
         } else {
             if (showPlaceHolder_) {
-                PlaceHolderMeasureContent(contentConstraint, layoutWrapper, childWidth);
+                PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper, childWidth);
             }
-            content->SetSize(SizeF(contentConstraint.maxSize.Width() - childWidth, contentHeight));
-            frameSize.SetWidth(contentConstraint.maxSize.Width() + pattern->GetHorizontalPaddingAndBorderSum());
+            content->SetSize(SizeF(textFieldContentConstraint.maxSize.Width() - childWidth, contentHeight));
+            frameSize.SetWidth(
+                textFieldContentConstraint.maxSize.Width() + pattern->GetHorizontalPaddingAndBorderSum());
         }
         layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     }

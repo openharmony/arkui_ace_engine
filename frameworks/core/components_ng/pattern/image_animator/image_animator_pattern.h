@@ -62,9 +62,6 @@ public:
 
     void SetImages(std::vector<ImageProperties>&& images)
     {
-        if (images_.size() == images.size()) {
-            return;
-        }
         images_ = std::move(images);
         durationTotal_ = 0;
         for (const auto& childImage : images_) {

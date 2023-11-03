@@ -808,8 +808,6 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
      * @tc.steps: step2. Create frameNodes
      * @tc.expected: retFlag is false
      */
-    const int focusNodeId = 10005;
-    auto focusNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, focusNodeId, nullptr);
     const int mainNodeId = 10006;
     auto mainNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, mainNodeId, nullptr);
 
@@ -818,7 +816,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
      * @tc.expected: retFlag is false
      */
     KeyEvent event;
-    auto retFlag = eventManager->DispatchTabIndexEventNG(event, focusNode, mainNode);
+    auto retFlag = eventManager->DispatchTabIndexEventNG(event, mainNode);
     ASSERT_FALSE(retFlag);
 }
 

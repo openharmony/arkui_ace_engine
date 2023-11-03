@@ -134,7 +134,6 @@ void JSCalendar::SetCalendarData(
 
 #if defined(PREVIEW)
     if (obj->IsUndefined()) {
-        LOGE("obj is undefined");
         return;
     }
 #endif
@@ -178,7 +177,6 @@ ObtainedMonth JSCalendar::GetCalendarData(const JSRef<JSObject>& obj, MonthState
 {
 #if defined(PREVIEW)
     if (obj->IsUndefined()) {
-        LOGE("obj is undefined");
         return ObtainedMonth();
     }
 #endif
@@ -270,10 +268,6 @@ void JSCalendar::SetOffDays(int32_t offDays)
 void JSCalendar::SetShowHoliday(const JSCallbackInfo& info)
 {
     bool showHoliday = true;
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     if (info[0]->IsBoolean()) {
         showHoliday = info[0]->ToBoolean();
     }
@@ -283,10 +277,6 @@ void JSCalendar::SetShowHoliday(const JSCallbackInfo& info)
 void JSCalendar::SetShowLunar(const JSCallbackInfo& info)
 {
     bool showLunar = false;
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     if (info[0]->IsBoolean()) {
         showLunar = info[0]->ToBoolean();
     }
@@ -295,10 +285,6 @@ void JSCalendar::SetShowLunar(const JSCallbackInfo& info)
 
 void JSCalendar::SetStartOfWeek(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     if (info[0]->IsNumber()) {
         auto startOfWeek = info[0]->ToNumber<int32_t>();
         CalendarModel::GetInstance()->SetStartOfWeek(startOfWeek);
@@ -308,10 +294,6 @@ void JSCalendar::SetStartOfWeek(const JSCallbackInfo& info)
 void JSCalendar::SetNeedSlide(const JSCallbackInfo& info)
 {
     bool needSlide = false;
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     if (info[0]->IsBoolean()) {
         needSlide = info[0]->ToBoolean();
     }
@@ -341,8 +323,7 @@ RefPtr<CalendarComponentV2> JSCalendar::GetComponent()
 
 void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+    if (!info[0]->IsFunction()) {
         return;
     }
 
@@ -361,8 +342,7 @@ void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
 
 void JSCalendar::JsOnRequestData(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto requestDataFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -408,10 +388,6 @@ ObtainedMonth JSCalendar::GetNextData(const JSRef<JSObject>& obj)
 
 void JSCalendar::SetDirection(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     if (info[0]->IsNumber()) {
         auto dir = info[0]->ToNumber<int32_t>();
         CalendarModel::GetInstance()->SetDirection(dir);
@@ -420,8 +396,7 @@ void JSCalendar::SetDirection(const JSCallbackInfo& info)
 
 void JSCalendar::SetCurrentDayStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGW("Invalid params");
+    if (!info[0]->IsObject()) {
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);

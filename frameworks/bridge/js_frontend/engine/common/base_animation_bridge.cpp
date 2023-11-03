@@ -40,7 +40,6 @@ void JsParseAnimationFramesInternal(
     const std::unique_ptr<JsonValue>& argsPtrAnimation, std::unordered_map<std::string, std::string>& animationFrames)
 {
     if (!argsPtrAnimation || argsPtrAnimation->IsNull()) {
-        LOGE("args is null");
         return;
     }
 
@@ -66,7 +65,6 @@ void JsParseAnimationFramesInternal(
 int32_t JsParseIterations(const std::unique_ptr<JsonValue>& argsPtrIterations)
 {
     if (!argsPtrIterations) {
-        LOGE("Parse animation iterations failed, argsPtrIterations is null");
         return 0;
     }
     int32_t iterations = 0;
@@ -174,7 +172,6 @@ void BaseAnimationBridgeUtils::JsParseAnimationFrames(
     }
     auto argsPtrItem = argsPtr->GetArrayItem(0);
     if (!argsPtrItem) {
-        LOGE("Animation frames are null.");
         return;
     }
     // Parse the arguments to each item in the frame
@@ -201,13 +198,11 @@ void BaseAnimationBridgeUtils::JsParseAnimationOptions(const std::string& conten
 {
     auto argsPtr = JsonUtil::ParseJsonString(content);
     if (!argsPtr) {
-        LOGE("Js Parse AnimationOption failed. argsPtr is null.");
         return;
     }
 
     auto argsPtrItem = argsPtr->GetArrayItem(1);
     if (!argsPtrItem) {
-        LOGE("Js Parse AnimationOption failed. argsPtrItem is null.");
         return;
     }
 
@@ -237,7 +232,6 @@ void BaseAnimationBridgeUtils::JsParseAnimatorParams(const std::string& content,
 {
     auto argsPtr = JsonUtil::ParseJsonString(content);
     if (!argsPtr) {
-        LOGE("Js Parse animator params failed. argsPtr is null.");
         return;
     }
 

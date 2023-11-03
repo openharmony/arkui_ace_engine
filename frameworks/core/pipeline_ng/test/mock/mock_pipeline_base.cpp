@@ -334,6 +334,12 @@ void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 
 void PipelineContext::SetWindowSceneConsumed(bool isConsumed) {}
+
+void PipelineContext::AddIsFocusActiveUpdateEvent(
+    const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback)
+{}
+
+void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node) {}
 } // namespace OHOS::Ace::NG
 
 // pipeline base

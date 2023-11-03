@@ -44,6 +44,7 @@ struct ParagraphStyle {
     uint32_t maxLines = 1;
     std::string fontLocale;
     WordBreak wordBreak = WordBreak::NORMAL;
+    EllipsisMode ellipsisMode = EllipsisMode::TAIL;
     TextOverflow textOverflow = TextOverflow::CLIP;
     std::optional<LeadingMargin> leadingMargin;
     double fontSize = 14.0;

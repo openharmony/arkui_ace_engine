@@ -39,6 +39,11 @@ public:
         return compressData_;
     }
 
+    bool HasData() const override
+    {
+        return GetCompressData() || GetImage();
+    }
+
     void SetCompressData(std::shared_ptr<RSData> data, int32_t w, int32_t h)
     {
         compressData_ = data;

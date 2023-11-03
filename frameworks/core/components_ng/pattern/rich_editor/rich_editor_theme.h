@@ -53,7 +53,6 @@ public:
             }
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_RICH_EDITOR, nullptr);
             if (!pattern) {
-                LOGW("find pattern of text fail");
                 return;
             }
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");

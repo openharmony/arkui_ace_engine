@@ -3946,7 +3946,7 @@ HWTEST_F(GridTestNg, FocusStep005, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 3));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
@@ -3963,7 +3963,7 @@ HWTEST_F(GridTestNg, FocusStep005, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
@@ -3980,7 +3980,7 @@ HWTEST_F(GridTestNg, FocusStep005, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
@@ -5089,6 +5089,11 @@ HWTEST_F(GridTestNg, SearchIrregularFocusableChildInScroll002, TestSize.Level1)
     option.regularSize.rows = 1;
     option.regularSize.columns = 1;
     option.irregularIndexes = { 6, 1, 2, 3, 4, 5, 0 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) {
+        GridItemSize gridItemSize { 1, 2 };
+        return gridItemSize;
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
     CreateGrid([option](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetLayoutOptions(option);
@@ -5143,7 +5148,7 @@ HWTEST_F(GridTestNg, SearchIrregularFocusableChildInScroll002, TestSize.Level1)
     pattern_->isDownStep_ = true;
     IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
-    EXPECT_EQ(result, nullptr);
+    EXPECT_NE(result, nullptr);
     pattern_->isDownStep_ = false;
 
     /**

@@ -359,11 +359,6 @@ public:
         }
     }
 
-    const shared_ptr<JsValue>& GetRenderContext() const
-    {
-        return renderContext_;
-    }
-
     void SetPluginBundleName(const std::string& pluginBundleName) override
     {
         pluginBundleName_ = pluginBundleName;
@@ -433,7 +428,6 @@ private:
 
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
-    shared_ptr<JsValue> renderContext_;
 #if defined(PREVIEW)
     std::string assetPath_;
     std::string bundleName_;

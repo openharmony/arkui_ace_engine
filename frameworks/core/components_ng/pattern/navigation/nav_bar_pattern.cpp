@@ -386,10 +386,12 @@ void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        UpdateTitleFontSize(navBarNode, theme->GetTitleFontSize());
-    } else {
-        UpdateTitleFontSize(navBarNode, theme->GetTitleFontSizeBig());
+    if (!navBarNode->GetPrevTitleIsCustomValue(false)) {
+        if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+            UpdateTitleFontSize(navBarNode, theme->GetTitleFontSize());
+        } else {
+            UpdateTitleFontSize(navBarNode, theme->GetTitleFontSizeBig());
+        }
     }
 
     if (navBarNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {

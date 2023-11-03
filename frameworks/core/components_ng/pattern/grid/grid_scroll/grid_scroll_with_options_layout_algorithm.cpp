@@ -72,8 +72,12 @@ void GridScrollWithOptionsLayoutAlgorithm::LargeItemLineHeight(
 void GridScrollWithOptionsLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
     LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex)
 {
-    int32_t benchmarkIndex = isTargetBackward ? gridLayoutInfo_.gridMatrix_.rbegin()->second.rbegin()->second + 1 : 0;
-    int32_t mainStartIndex = isTargetBackward ? gridLayoutInfo_.gridMatrix_.rbegin()->first + 1 : 0;
+    int32_t benchmarkIndex = (isTargetBackward && !gridLayoutInfo_.gridMatrix_.empty())
+                                 ? gridLayoutInfo_.gridMatrix_.rbegin()->second.rbegin()->second + 1
+                                 : 0;
+    int32_t mainStartIndex = (isTargetBackward && !gridLayoutInfo_.gridMatrix_.empty())
+                                 ? gridLayoutInfo_.gridMatrix_.rbegin()->first + 1
+                                 : 0;
     int32_t currentIndex = benchmarkIndex;
     int32_t headOfMainStartLine = currentIndex;
 

@@ -76,7 +76,6 @@ void JSDivider::SetLineCap(int lineCap)
 void JSDivider::SetDividerColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto theme = GetTheme<DividerTheme>();
@@ -89,7 +88,6 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
 void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto theme = GetTheme<DividerTheme>();

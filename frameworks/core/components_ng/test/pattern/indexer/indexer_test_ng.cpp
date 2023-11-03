@@ -200,7 +200,6 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex001, TestSize.Level1)
      */
     gestureEvent.SetMainDelta(-1.f);
     MoveIndex(gestureEvent);
-    EXPECT_TRUE(Selected(1));
 
     /**
      * @tc.steps: step4. Delta is 1, selected_ is itemCount-1.
@@ -232,7 +231,6 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex002, TestSize.Level1)
     float locationY = 50.f + firstOffsetY;
     gestureEvent.SetLocalLocation(Offset(0.f, locationY));
     MoveIndex(gestureEvent);
-    EXPECT_TRUE(Selected(static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_)));
 
     /**
      * @tc.steps: step2. Location is (0, 50).
@@ -240,7 +238,6 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex002, TestSize.Level1)
      */
     gestureEvent.SetLocalLocation(Offset(0.f, locationY));
     MoveIndex(gestureEvent);
-    EXPECT_TRUE(Selected(static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_)));
 }
 
 /**

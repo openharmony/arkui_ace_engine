@@ -2044,8 +2044,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. create textPaintMethod and call UpdateContentModifier function.
-     * @tc.expected: textContentModifier_'s paragraph_ is equal to textPaintMethod's paragraph_.
-     *               The return value of GetOverlayModifier is not null.
+     * @tc.expected: The return value of GetOverlayModifier is not null.
      */
     auto pattern = textFrameNode->GetPattern<Pattern>();
     AceType::DynamicCast<TextPattern>(pattern)->textSelector_.Update(0, -1);
@@ -2055,7 +2054,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest001, TestSize.Level1)
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
     TextPaintMethod textPaintMethod(
-        pattern, paragraph, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+        pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
     UpdateTextLayoutProperty(textLayoutProperty);
     RefPtr<RenderContext> renderContext = RenderContext::Create();
     auto paintProperty = textPattern->CreatePaintProperty();
@@ -2065,7 +2064,6 @@ HWTEST_F(TextTestNg, TextPaintMethodTest001, TestSize.Level1)
     textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
     textPaintMethod.textContentModifier_->textDecoration_ = TextDecoration::UNDERLINE;
     textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
-    EXPECT_EQ(textPaintMethod.textContentModifier_->paragraph_, textPaintMethod.paragraph_);
     ASSERT_NE(textPaintMethod.GetOverlayModifier(AceType::RawPtr(paintWrapper)), nullptr);
 }
 
@@ -2107,7 +2105,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     RefPtr<TextContentModifier> contentModifier =
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
-    TextPaintMethod textPaintMethod(pattern, paragraph, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
+    TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
     // set pipelineContext nullptr
     MockPipelineBase::TearDown();
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
@@ -2167,7 +2165,7 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     RefPtr<TextContentModifier> contentModifier =
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
-    TextPaintMethod textPaintMethod(pattern, paragraph, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
+    TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
     // set pipelineContext nullptr
     MockPipelineBase::TearDown();
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
@@ -2416,7 +2414,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest002, TestSize.Level1)
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
     TextPaintMethod textPaintMethod(
-        pattern, paragraph, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+        pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
     textLayoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
     textLayoutProperty->UpdateFontWeight(Ace::FontWeight::W200);
     textLayoutProperty->UpdateTextColor(TEXT_COLOR_VALUE);
@@ -3979,7 +3977,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
     TextPaintMethod textPaintMethod(
-        textPattern, paragraph, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+        textPattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
     textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
     EXPECT_EQ(textContentModifier->drawObscuredRects_, std::vector<RectF>());

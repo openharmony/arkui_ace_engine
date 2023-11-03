@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager,
     float baselineOffset, const RefPtr<TextContentModifier>& contentMod,
     const RefPtr<TextOverlayModifier>& overlayMod)
-    : TextPaintMethod(pattern, pManager->GetParagraphs().begin()->paragraph, baselineOffset, contentMod, overlayMod),
+    : TextPaintMethod(pattern, baselineOffset, contentMod, overlayMod),
       pManager_(pManager)
 {}
 
@@ -43,11 +43,19 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     overlayMod->SetCaretVisible(caretVisible);
     overlayMod->SetCaretColor(Color::BLUE.GetValue());
     overlayMod->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
+    auto caretPosition = richEditorPattern->GetCaretPosition();
     if (richEditorPattern->GetTextContentLength() > 0) {
-        float caretHeight = 0;
-        OffsetF caretOffset =
-            richEditorPattern->CalcCursorOffsetByPosition(richEditorPattern->GetCaretPosition(), caretHeight);
-        overlayMod->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+        float caretHeight = 0.0f;
+        OffsetF caretOffsetDown =
+            richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight, true);
+        OffsetF lastClickOffset = richEditorPattern->GetLastClickOffset();
+        if (lastClickOffset != caretOffsetDown) {
+            caretHeight = 0.0f;
+            OffsetF caretOffsetUp =
+                richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight);
+            overlayMod->SetCaretOffsetAndHeight(caretOffsetUp, caretHeight);
+            richEditorPattern->ResetLastClickOffset();
+        }
     } else {
         auto rect = richEditorPattern->GetTextContentRect();
         overlayMod->SetCaretOffsetAndHeight(
