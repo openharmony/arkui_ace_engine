@@ -39,6 +39,52 @@ private:
     void* object_ = nullptr;
 };
 
+class WebOffsetImpl : public AceType {
+    DECLARE_ACE_TYPE(WebOffsetImpl, AceType);
+public:
+    explicit WebOffsetImpl(void* object) : object_(object) {}
+    double GetX() const;
+    double GetY() const;
+private:
+    void* object_ = nullptr;
+};
+
+class WebScaleChangeImpl : public AceType {
+    DECLARE_ACE_TYPE(WebScaleChangeImpl, AceType);
+public:
+    explicit WebScaleChangeImpl(void* object) : object_(object) {}
+    float GetNewScale() const;
+    float GetOldScale() const;
+private:
+    void* object_ = nullptr;
+};
+
+class WebResourceResponseImpl : public AceType {
+    DECLARE_ACE_TYPE(WebResourceResponseImpl, AceType);
+public:
+    explicit WebResourceResponseImpl(void* object) : object_(object) {}
+    std::map<std::string, std::string> GetResponseHeader() const;
+    std::string GetResponseData() const;
+    std::string GetEncoding() const;
+    std::string GetMimeType() const;
+    std::string GetReason() const;
+    int GetStatusCode() const;
+private:
+    void* object_ = nullptr;
+};
+
+class WebConsoleMessage : public AceType {
+    DECLARE_ACE_TYPE(WebConsoleMessage, AceType);
+public:
+    explicit WebConsoleMessage(void* object) : object_(object) {}
+    std::string GetMessage() const;
+    int GetMessageLevel() const;
+    std::string GetSourceId() const;
+    int GetLineNumber() const;
+private:
+    void* object_ = nullptr;
+};
+
 class WebResourceErrorImpl : public AceType {
     DECLARE_ACE_TYPE(WebResourceErrorImpl, AceType);
 public:
@@ -93,6 +139,8 @@ public:
     void OnPageStarted(const std::string& param) override;
     void OnPageFinished(const std::string& param) override;
     void OnPageError(const std::string& param) override;
+    void OnProgressChanged(const std::string& param) override;
+    void OnReceivedTitle(const std::string& param) override;
 
     void UpdateUserAgent(const std::string& userAgent) override;
     void UpdateBackgroundColor(const int backgroundColor) override;
@@ -146,6 +194,11 @@ private:
     void RegisterWebEvent();
     void RegisterWebObjectEvent();
     void OnErrorReceive(void* object);
+    void OnScroll(void* object);
+    void OnScaleChange(void* object);
+    void OnHttpErrorReceive(void* object);
+    bool OnConsoleMessage(void* object);
+    bool OnLoadIntercept(void* object);
 
     WeakPtr<NG::WebPattern> webPattern_;
     WeakPtr<PipelineBase> context_;
@@ -187,6 +240,11 @@ private:
 
     Method updateZoomAccess_;
     Method updateJavaScriptEnabled_;
+    Method updateMinFontSize_;
+    Method updateHorizontalScrollBarAccess_;
+    Method updateVerticalScrollBarAccess_;
+    Method updateBackgroundColor_;
+    Method updateMediaPlayGestureAccess_;
 
     EventCallbackV2 onPageFinishedV2_;
     EventCallbackV2 onPageStartedV2_;

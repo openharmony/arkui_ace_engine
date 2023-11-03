@@ -42,6 +42,40 @@ public:
     virtual std::string GetSourceId() = 0;
 };
 
+class WebConsoleMessageParam : public WebConsoleLog {
+    DECLARE_ACE_TYPE(WebConsoleMessageParam, AceType)
+public:
+    WebConsoleMessageParam(std::string message, std::string sourceId, int lineNumber, int messageLevel) :
+                        message_(message), sourceId_(sourceId), lineNumber_(lineNumber), messageLevel_(messageLevel) {}
+    ~WebConsoleMessageParam() = default;
+
+    std::string GetLog() override
+    {
+        return message_;
+    }
+
+    int GetLineNumber() override
+    {
+        return lineNumber_;
+    }
+
+    std::string GetSourceId() override
+    {
+        return sourceId_;
+    }
+
+    int GetLogLevel() override
+    {
+        return messageLevel_;
+    }
+
+private:
+    std::string message_;
+    std::string sourceId_;
+    int lineNumber_;
+    int messageLevel_;
+};
+
 class WebFileSelectorParam : public AceType {
     DECLARE_ACE_TYPE(WebFileSelectorParam, AceType)
 public:
