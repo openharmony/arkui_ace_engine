@@ -2738,4 +2738,51 @@ void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
     };
     eventMgr->GetEventTreeRecord().AddFrameNodeSnapshot(std::move(info));
 }
+int32_t FrameNode::GetUiExtensionId()
+{
+    if (pattern_) {
+        return pattern_->GetUiExtensionId();
+    }
+    return -1;
+}
+
+int32_t FrameNode::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+{
+    if (pattern_) {
+        return pattern_->WrapExtensionAbilityId(extensionOffset, abilityId);
+    }
+    return -1;
+}
+
+void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    if (pattern_) {
+        pattern_->SearchExtensionElementInfoByAccessibilityId(elementId, mode, offset, output);
+    }
+}
+
+void FrameNode::SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    if (pattern_) {
+        pattern_->SearchElementInfosByText(elementId, text, offset, output);
+    }
+}
+
+void FrameNode::FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
+    int32_t offset, Accessibility::AccessibilityElementInfo& output)
+{
+    if (pattern_) {
+        pattern_->FindFocusedElementInfo(elementId, focusType, offset, output);
+    }
+}
+
+void FrameNode::FocusMoveSearchNG(int32_t elementId, int32_t direction,
+    int32_t offset, Accessibility::AccessibilityElementInfo& output)
+{
+    if (pattern_) {
+        pattern_->FocusMoveSearch(elementId, direction, offset, output);
+    }
+}
 } // namespace OHOS::Ace::NG

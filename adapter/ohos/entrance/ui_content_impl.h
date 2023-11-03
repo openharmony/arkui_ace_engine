@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
+#include <list>
+
 #include "ability_info.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
@@ -26,6 +28,11 @@
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "iremote_object.h"
+
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+}
 
 namespace OHOS::Ace {
 
@@ -173,6 +180,22 @@ public:
 
     void SetParentToken(sptr<IRemoteObject> token) override;
     sptr<IRemoteObject> GetParentToken() override;
+
+    void SearchElementInfoByAccessibilityId(
+        int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) override;
+
+    void SearchElementInfosByText(
+        int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) override;
+
+    void FindFocusedElementInfo(
+        int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+
+    void FocusMoveSearch(
+        int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
 
 private:
     void InitializeInner(

@@ -22,6 +22,7 @@
 #include <refbase.h>
 #include <string>
 #include <vector>
+#include <list>
 
 #include "macros.h"
 #include "modal_ui_extension_config.h"
@@ -40,6 +41,9 @@ class Ability;
 class FormAshmem;
 } // namespace AppExecFwk
 
+namespace Accessibility {
+class AccessibilityElementInfo;
+}
 namespace Rosen {
 class Window;
 enum class WindowSizeChangeReason : uint32_t;
@@ -207,6 +211,23 @@ public:
      * @return return parent ability token.
      */
     virtual sptr<IRemoteObject> GetParentToken();
+#ifndef PREVIEW
+    virtual void SearchElementInfoByAccessibilityId(
+        int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) = 0;
+
+    virtual void SearchElementInfosByText(
+        int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) = 0;
+
+    virtual void FindFocusedElementInfo(
+        int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output)  = 0;
+
+    virtual void FocusMoveSearch(
+        int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output)  = 0;
+#endif
 };
 
 } // namespace OHOS::Ace
