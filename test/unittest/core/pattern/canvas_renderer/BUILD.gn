@@ -61,6 +61,7 @@ ohos_unittest("canvas_renderer_test_ng") {
 
   external_deps = [
     "ability_runtime:abilitykit_native",
+    "ability_runtime:runtime",
     "c_utils:utils",
     "input:libmmi-client",
     "ipc:ipc_single",
