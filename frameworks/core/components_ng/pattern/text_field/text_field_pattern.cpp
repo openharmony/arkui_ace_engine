@@ -1717,7 +1717,9 @@ void TextFieldPattern::FilterInitializeText()
     if (!contentController_->IsEmpty()) {
         contentController_->FilterValue();
     }
-    selectController_->UpdateCaretIndex(static_cast<int32_t>(contentController_->GetWideText().length()));
+    if (GetWideText().length() < GetCaretIndex()) {
+        selectController_->UpdateCaretIndex(GetWideText().length());
+    }
 }
 
 bool TextFieldPattern::IsDisabled()
@@ -2162,8 +2164,7 @@ void TextFieldPattern::InitEditingValueText(std::string content)
         return;
     }
     contentController_->SetTextValue(std::move(content));
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    selectController_->UpdateCaretIndex(GetWideText().length());
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -4453,6 +4454,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto maxLines = GetMaxLines();
     json->Put("maxLines", GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str());
     json->Put("barState", GetBarStateString().c_str());
+    json->Put("caretPosition", std::to_string(GetCaretIndex()).c_str());
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -4461,7 +4463,7 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
     layoutProperty->UpdatePlaceholder(json->GetString("placeholder"));
     UpdateEditingValue(json->GetString("text"), StringUtils::StringToInt(json->GetString("caretPosition")));
     FireOnTextChangeEvent();
-    UpdateSelection(selectController_->GetCaretIndex());
+    UpdateSelection(GetCaretIndex());
     auto maxLines = json->GetString("maxLines");
     if (!maxLines.empty() && maxLines != "INF") {
         layoutProperty->UpdateMaxLines(StringUtils::StringToUint(maxLines));
@@ -4555,7 +4557,6 @@ void TextFieldPattern::SetAccessibilityMoveTextAction()
         auto caretPosition = forward ? pattern->selectController_->GetCaretIndex() + range
                                      : pattern->selectController_->GetCaretIndex() - range;
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-        layoutProperty->UpdateCaretPosition(caretPosition);
         pattern->SetCaretPosition(caretPosition);
     });
 }
