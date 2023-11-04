@@ -559,7 +559,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
-    if (copyOption_ == CopyOptions::None) {
+    if (copyOption_ == CopyOptions::None || textForDisplay_.empty()) {
         return;
     }
     auto host = GetHost();
