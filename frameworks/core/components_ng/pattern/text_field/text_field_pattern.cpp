@@ -212,6 +212,24 @@ TextFieldPattern::~TextFieldPattern()
     }
 }
 
+void TextFieldPattern::BeforeCreateLayoutWrapper()
+{
+    while (!deleteBackwardOperations_.empty()) {
+        DeleteBackwardOperation(deleteBackwardOperations_.front());
+        deleteBackwardOperations_.pop();
+    }
+
+    while (!deleteForwardOperations_.empty()) {
+        DeleteForwardOperation(deleteForwardOperations_.front());
+        deleteForwardOperations_.pop();
+    }
+
+    while (!insertValueOperations_.empty()) {
+        InsertValueOperation(insertValueOperations_.front());
+        insertValueOperations_.pop();
+    }
+}
+
 bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
@@ -1081,7 +1099,7 @@ void TextFieldPattern::InitDragEvent()
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD &&
-        layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None) {
+        layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None && host->IsDraggable()) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
     } else {
@@ -1561,7 +1579,7 @@ void TextFieldPattern::OnModifyDone()
     }
     ProcessInnerPadding();
     // The textRect position can't be changed by only redraw.
-    if (CheckNeedMeasure(layoutProperty->GetPropertyChangeFlag())) {
+    if (CheckNeedMeasure(layoutProperty->GetPropertyChangeFlag()) && !HasInputOperation()) {
         textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
         textRect_.SetTop(GetPaddingTop() + GetBorderTop());
     }
@@ -1693,6 +1711,9 @@ void TextFieldPattern::FireOnTextChangeEvent()
 
 void TextFieldPattern::FilterInitializeText()
 {
+    if (HasInputOperation()) {
+        return;
+    }
     if (!contentController_->IsEmpty()) {
         contentController_->FilterValue();
     }
@@ -2137,6 +2158,9 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
 
 void TextFieldPattern::InitEditingValueText(std::string content)
 {
+    if (HasInputOperation()) {
+        return;
+    }
     contentController_->SetTextValue(std::move(content));
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -2227,6 +2251,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetMouseStyleHoldNode(frameId);
+    info.SetStopPropagation(true);
     auto responseAreaWidth = responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f;
     if (info.GetLocalLocation().GetX() > (frameRect_.Width() - responseAreaWidth)) {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
@@ -2571,7 +2596,6 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
@@ -2583,8 +2607,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     if (originLength >= GetMaxLength() && !IsSelected()) {
         return;
     }
-    InsertValueOperation(insertValue);
-    FireOnTextChangeEvent();
+    insertValueOperations_.emplace(insertValue);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3217,7 +3240,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     if (selectController_->GetCaretIndex() <= 0) {
         return;
     }
-    DeleteBackwardOperation(length);
+    deleteBackwardOperations_.emplace(length);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3228,7 +3251,6 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     auto start = std::max(selectController_->GetCaretIndex() - length, 0);
     contentController_->erase(start, length);
     selectController_->UpdateCaretIndex(start);
-    FireOnTextChangeEvent();
     CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
@@ -3239,13 +3261,11 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
 {
     contentController_->erase(selectController_->GetCaretIndex(), length);
-    FireOnTextChangeEvent();
     CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
@@ -3256,7 +3276,6 @@ void TextFieldPattern::DeleteForwardOperation(int32_t length)
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::DeleteForward(int32_t length)
@@ -3270,7 +3289,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
     if (selectController_->GetCaretIndex() >= static_cast<int32_t>(contentController_->GetWideText().length())) {
         return;
     }
-    DeleteForwardOperation(length);
+    deleteForwardOperations_.emplace(length);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -4890,5 +4909,8 @@ void TextFieldPattern::ProcessResponseArea()
         responseArea_->ClearArea();
     }
 }
-
+bool TextFieldPattern::HasInputOperation()
+{
+    return !deleteBackwardOperations_.empty() || !deleteForwardOperations_.empty() || !insertValueOperations_.empty();
+}
 } // namespace OHOS::Ace::NG
