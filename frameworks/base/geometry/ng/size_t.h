@@ -112,13 +112,13 @@ public:
     void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
         const std::optional<T>& bottom)
     {
-        T tempWidth = width_ - left.value_or(0) - right.value_or(0);
-        if (NonNegative(tempWidth)) {
-            width_ = tempWidth;
+        if (width_) {
+            T tempWidth = width_ - left.value_or(0) - right.value_or(0);
+            width_ = NonNegative(tempWidth) ? tempWidth : 0;
         }
-        T tempHeight = height_ - top.value_or(0) - bottom.value_or(0);
-        if (NonNegative(tempHeight)) {
-            height_ = tempHeight;
+        if (height_) {
+            T tempHeight = height_ - top.value_or(0) - bottom.value_or(0);
+            height_ = NonNegative(tempHeight) ? tempHeight : 0;
         }
     }
 
