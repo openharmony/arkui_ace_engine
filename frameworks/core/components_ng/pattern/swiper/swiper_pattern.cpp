@@ -1569,6 +1569,12 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity) const
         nextIndex = direction ? firstItemInfoInVisibleArea.first + 1 : firstItemInfoInVisibleArea.first;
     }
 
+    if (!IsLoop()) {
+        auto totalCount = TotalCount();
+        if (itemPosition_.rbegin()->first == totalCount - 1) {
+            nextIndex = std::clamp(nextIndex, 0, totalCount - GetDisplayCount());
+        }
+    }
     return nextIndex;
 }
 
