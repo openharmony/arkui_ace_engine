@@ -359,6 +359,7 @@ public:
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
     bool IsImageDrag();
+    void UpdateJavaScriptOnDocumentStart();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
 #ifdef ENABLE_DRAG_FRAMEWORK
     DragRet GetDragAcceptableStatus();

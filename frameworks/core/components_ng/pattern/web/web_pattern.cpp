@@ -1436,10 +1436,7 @@ void WebPattern::OnModifyDone()
             renderSurface_->InitSurface();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
         }
-        if (delegate_ && scriptItems_.has_value()) {
-            delegate_->SetJavaScriptItems(scriptItems_.value());
-            scriptItems_ = std::nullopt;
-        }
+        UpdateJavaScriptOnDocumentStart();
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
@@ -2556,5 +2553,17 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
 void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 {
     scriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    if (delegate_) {
+        UpdateJavaScriptOnDocumentStart();
+        delegate_->JavaScriptOnDocumentStart();
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentStart()
+{
+    if (delegate_ && scriptItems_.has_value()) {
+        delegate_->SetJavaScriptItems(scriptItems_.value());
+        scriptItems_ = std::nullopt;
+    }
 }
 } // namespace OHOS::Ace::NG
