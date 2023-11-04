@@ -27,7 +27,6 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/gestures/gesture_info.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
 public:                                                                      \

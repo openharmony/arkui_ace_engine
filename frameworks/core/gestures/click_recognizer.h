@@ -20,8 +20,8 @@
 
 #include "base/thread/cancelable_callback.h"
 #include "core/gestures/multi_fingers_recognizer.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline/pipeline_base.h"
+#include "frameworks/core/gestures/click_info.h"
 
 namespace OHOS::Ace {
 
