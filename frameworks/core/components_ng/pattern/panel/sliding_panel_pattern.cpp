@@ -58,7 +58,7 @@ void SlidingPanelPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
     if (layoutProperty->GetPanelType() == PanelType::CUSTOM) {
-        auto calc = layoutProperty->GetCustomHeight().value();
+        auto calc = layoutProperty->GetCustomHeight().value_or(Dimension(0.0));
         if (!calc.CalcValue().empty() && calc.CalcValue().find("wrapContent") != std::string::npos) {
             ResetLayoutWeight();
         }
@@ -162,7 +162,7 @@ void SlidingPanelPattern::Update()
                     ? PanelMode::FULL
                     : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     if (type_ == PanelType::CUSTOM) {
-            mode = PanelMode::CUSTOM;
+        mode = PanelMode::CUSTOM;
     }
     if (mode_.value() == mode) {
         if (mode == PanelMode::HALF && type_ == PanelType::MINI_BAR) {
