@@ -117,7 +117,7 @@ template("build_component_plugin") {
         configs += [ "$ace_flutter_engine_root/skia:skia_config" ]
       }
 
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [ "//plugins/libs/napi:napi_$platform" ]
       } else {
         deps += [ "//foundation/arkui/napi/:ace_napi" ]
