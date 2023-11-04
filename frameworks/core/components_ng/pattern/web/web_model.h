@@ -144,7 +144,6 @@ public:
     virtual void SetWrapContent(bool isWrapContentEnabled) {}
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
-    virtual void SetWrapContent(bool isWrapContentEnabled) {};
 
 private:
     static std::unique_ptr<WebModel> instance_;
