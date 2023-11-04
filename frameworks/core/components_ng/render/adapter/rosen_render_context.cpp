@@ -1426,6 +1426,11 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
 {
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
+    if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
+        degree = 0;
+        return Matrix4();
+    }
+
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
 
