@@ -32,7 +32,7 @@ common_napi_libs = [
   "animator",
 ]
 
-if (!is_cross_platform_build) {
+if (!is_arkui_x) {
   common_napi_libs += [ "arkui/performancemonitor" ]
 }
 
