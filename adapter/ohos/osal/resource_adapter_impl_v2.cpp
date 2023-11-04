@@ -141,6 +141,9 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     auto resourceManager = context->GetResourceManager();
     auto newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
 
+    auto resConfig = aceContainer->GetResourceConfiguration();
+    newResourceAdapter->UpdateConfig(resConfig);
+
     return newResourceAdapter;
 }
 
