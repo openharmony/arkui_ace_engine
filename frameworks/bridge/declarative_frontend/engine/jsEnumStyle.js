@@ -969,6 +969,12 @@ var WebDarkMode;
   WebDarkMode[WebDarkMode["Auto"] = 2] = "Auto";
 })(WebDarkMode || (WebDarkMode = {}));
 
+var OverScrollMode;
+(function (OverScrollMode) {
+  OverScrollMode[OverScrollMode["NEVER"] = 0] = "NEVER";
+  OverScrollMode[OverScrollMode["ALWAYS"] = 1] = "ALWAYS";
+})(OverScrollMode || (OverScrollMode = {}));
+
 var RenderExitReason;
 (function (RenderExitReason) {
   RenderExitReason[RenderExitReason["ProcessAbnormalTermination"] = 0] = "ProcessAbnormalTermination";
