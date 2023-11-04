@@ -666,13 +666,16 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest008, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Verify the scrollPositionCallback_ function of scrollBar.
-     * @tc.expected: step3. Compare return value with expected value.
+     * @tc.expected: step3. Init panRecognizer_.
      */
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(pattern_, nullptr);
     context->SetMinPlatformVersion(10);
     pattern_->InitPanRecognizer();
     EXPECT_NE(pattern_->panRecognizer_, nullptr);
+    EXPECT_NE(pattern_->panRecognizer_->onActionStart_, nullptr);
+    EXPECT_NE(pattern_->panRecognizer_->onActionEnd_, nullptr);
+    EXPECT_NE(pattern_->panRecognizer_->onActionUpdate_, nullptr);
 }
 
 /**
@@ -701,13 +704,106 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest009, TestSize.Level1)
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper_, config);
     auto distance = pattern_->scrollableDistance_;
 
-    EXPECT_EQ(pattern_->scrollPositionCallback_(distance - 100, 1), true);
-    EXPECT_EQ(pattern_->currentOffset_, distance - 100);
+    EXPECT_EQ(pattern_->scrollPositionCallback_(100, SCROLL_FROM_START), true);
+    EXPECT_FLOAT_EQ(pattern_->currentOffset_, 0.f);
 
-    EXPECT_EQ(pattern_->scrollPositionCallback_(100, 1), true);
-    EXPECT_EQ(pattern_->currentOffset_, distance);
+    EXPECT_EQ(pattern_->scrollPositionCallback_(distance / 2.0, 1), true);
+    EXPECT_FLOAT_EQ(pattern_->currentOffset_, distance / 2.0);
+
+    EXPECT_EQ(pattern_->scrollPositionCallback_(distance - distance / 2.0, 1), true);
+    EXPECT_FLOAT_EQ(pattern_->currentOffset_, distance);
 
     EXPECT_EQ(pattern_->scrollPositionCallback_(100, 1), false);
-    EXPECT_EQ(pattern_->currentOffset_, distance);
+    EXPECT_FLOAT_EQ(pattern_->currentOffset_, distance);
+}
+
+/**
+ * @tc.name: ScrollBarTest010
+ * @tc.desc: Test SetSpecificSupportAction of ScrollBarAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, true, -1, -1, layoutConstraint);
+
+    /**
+     * @tc.steps: step2. Verify the IsScrollable function of ScrollBarAccessibilityProperty.
+     * @tc.expected: step2. Compare the supportActions_ value with expected value.
+     */
+    auto supportActions = accessibilityProperty_->supportActions_;
+    accessibilityProperty_->SetSpecificSupportAction();
+    EXPECT_EQ(accessibilityProperty_->supportActions_, supportActions);
+
+    layoutProperty_->UpdateAxis(Axis::NONE);
+    pattern_->OnModifyDone();
+    accessibilityProperty_->SetSpecificSupportAction();
+    EXPECT_EQ(accessibilityProperty_->supportActions_, supportActions);
+
+    layoutProperty_->UpdateAxis(Axis::VERTICAL);
+    pattern_->OnModifyDone();
+    accessibilityProperty_->SetSpecificSupportAction();
+    EXPECT_EQ(accessibilityProperty_->supportActions_, supportActions);
+
+    pattern_->SetControlDistance(10.f);
+    accessibilityProperty_->SetSpecificSupportAction();
+    EXPECT_EQ(accessibilityProperty_->supportActions_, supportActions);
+
+    /**
+     * @tc.steps: step3. Verify the SetSpecificSupportAction function of ScrollBarAccessibilityProperty.
+     * @tc.expected: step3. Compare the supportActions_ value with expected value.
+     */
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = false;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper_, config);
+    auto distance = pattern_->scrollableDistance_;
+
+    accessibilityProperty_->SetSpecificSupportAction();
+    EXPECT_EQ(accessibilityProperty_->supportActions_,
+        supportActions | (1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD)));
+
+    pattern_->scrollPositionCallback_(distance / 2.0, 1);
+    accessibilityProperty_->ResetSupportAction();
+    EXPECT_EQ(accessibilityProperty_->supportActions_,
+        supportActions | (1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD)) |
+            (1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD)));
+
+    pattern_->scrollPositionCallback_(distance, 1);
+    accessibilityProperty_->ResetSupportAction();
+    EXPECT_EQ(accessibilityProperty_->supportActions_,
+        supportActions | (1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD)));
+}
+
+/**
+ * @tc.name: ScrollBarTest011
+ * @tc.desc: Test Create of ScrollBarModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar.
+     */
+    ScrollBarModelNG model;
+    RefPtr<ScrollProxy> scrollProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    auto proxy = model.GetScrollBarProxy(scrollProxy);
+    model.Create(proxy, false, false, -1, -1);
+    GetInstance();
+
+    /**
+     * @tc.steps: step2. Create scrollBar and initialize related properties.
+     * @tc.expected: step2. Compare value with expected value.
+     */
+    EXPECT_EQ(pattern_->scrollBarProxy_, nullptr);
+    EXPECT_EQ(pattern_->opacity_, UINT8_MAX);
+    EXPECT_EQ(layoutProperty_->HasAxis(), false);
+    EXPECT_EQ(layoutProperty_->HasDisplayMode(), false);
+    EXPECT_EQ(layoutProperty_->HasVisibility(), false);
 }
 } // namespace OHOS::Ace::NG
