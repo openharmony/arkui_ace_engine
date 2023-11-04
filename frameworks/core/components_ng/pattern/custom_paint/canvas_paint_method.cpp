@@ -243,10 +243,6 @@ void CanvasPaintMethod::DrawImage(
         PaintShadow(path, *imageShadow_, rsCanvas);
     }
 
-    if (globalState_.HasGlobalAlpha()) {
-        imageBrush_.SetAlphaF(globalState_.GetAlpha());
-    }
-
     RSRect bounds = RSRect(0, 0, lastLayoutSize_.Widht(), lastLayoutSize_.Height());
     SaveLayerOps layerOps(&bounds, &imageBrush_);
     switch (canvasImage.flag) {
@@ -287,7 +283,7 @@ void CanvasPaintMethod::DrawImage(
             RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
 
             if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
-                rsCanvas_->AttachBrush(imageBrush_);
+                rsCanvas_->AttachBrush(&imageBrush_);
                 rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
                 rsCanvas_->DetachBrush();
             } else {
