@@ -310,7 +310,7 @@ public:
         return contentController_->GetWideText();
     }
 
-    int32_t GetCaretIndex()
+    int32_t GetCaretIndex() const
     {
         return selectController_->GetCaretIndex();
     }
