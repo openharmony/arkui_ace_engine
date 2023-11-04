@@ -70,6 +70,8 @@ ACE_FORCE_EXPORT void AddPaddingToSize(const PaddingPropertyF& padding, SizeF& s
 
 ACE_FORCE_EXPORT void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size);
 
+ACE_FORCE_EXPORT void MinusPaddingToNonNegativeSize(const PaddingPropertyF& padding, SizeF& size);
+
 void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
 void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
