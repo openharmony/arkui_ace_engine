@@ -782,6 +782,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (ret != 0) {
         return;
     }
+    dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
@@ -1107,6 +1108,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
             [eventHub, dragEvent, dragDropManager, eventManager]() {
                 dragDropManager->SetIsDragged(false);
                 dragDropManager->ResetDragging();
+                dragDropManager->SetDraggingPointer(-1);
                 if (eventManager) {
                     eventManager->DoMouseActionRelease();
                 }
