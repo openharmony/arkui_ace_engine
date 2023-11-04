@@ -2163,7 +2163,7 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     if (HasInputOperation()) {
         return;
     }
-    contentController_->SetTextValue(std::move(content));
+    contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetWideText().length());
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
