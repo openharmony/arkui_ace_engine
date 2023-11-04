@@ -1286,6 +1286,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        selectOverlayProxy_->ShowOrHiddenMenu(true);
     }
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
@@ -1449,8 +1450,6 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
     }
-    CloseSelectOverlay();
-    ResetSelection();
 }
 
 void TextPattern::InitSurfacePositionChangedCallback()

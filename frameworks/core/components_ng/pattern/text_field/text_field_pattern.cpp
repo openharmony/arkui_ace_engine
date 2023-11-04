@@ -3382,7 +3382,9 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         "Textfield handleSurface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
         "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
-    CloseSelectOverlay();
+    auto proxy = GetSelectOverlayProxy();
+    CHECK_NULL_VOID(proxy);
+    proxy->ShowOrHiddenMenu(true);
     if (HasFocus() && IsSingleHandle()) {
         StartTwinkling();
     }
