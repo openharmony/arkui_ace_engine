@@ -397,7 +397,6 @@ public:
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
     bool UpdateRootComponent() override;
-    bool LoadPluginComponent(const std::string &url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
     static void SetEntryObject(const panda::Global<panda::ObjectRef>& obj)
     {
         obj_ = obj;

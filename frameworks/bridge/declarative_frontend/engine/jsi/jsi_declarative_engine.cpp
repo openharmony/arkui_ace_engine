@@ -1131,21 +1131,6 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
         // Clear the global object to avoid load this obj next time
         JsiDeclarativeEngine::obj_.FreeGlobalHandleAddr();
         JsiDeclarativeEngine::obj_.Empty();
-        return true;
-    }
-    return false;
-}
-
-bool JsiDeclarativeEngine::LoadPluginComponent(const std::string &url, const RefPtr<JsAcePage>& page, bool isMainPage)
-{
-    LoadJs(url, page, isMainPage);
-    if (!UpdateRootComponent()) {
-        auto pagePath = url;
-        if (pagePath.rfind(".js") != std::string::npos) {
-            pagePath = pagePath.substr(0, pagePath.length() - strlen(".js"));
-        }
-        std::string pluginUrlName = "@bundle:" + pluginBundleName_ + "/" + pluginModuleName_ + "/ets/" + pagePath;
-        return LoadNamedRouterSource(pluginUrlName, false);
     }
     return true;
 }
