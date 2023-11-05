@@ -271,6 +271,7 @@ public:
 #endif
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
+    void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
 
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
