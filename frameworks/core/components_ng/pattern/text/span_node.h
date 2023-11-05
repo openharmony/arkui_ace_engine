@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -328,6 +329,43 @@ private:
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
 
     ACE_DISALLOW_COPY_AND_MOVE(SpanNode);
+};
+
+class ACE_EXPORT ImageSpanNode : public FrameNode {
+    DECLARE_ACE_TYPE(ImageSpanNode, FrameNode);
+
+public:
+    static RefPtr<ImageSpanNode> GetOrCreateSpanNode(const std::string& tag,
+                                                     int32_t nodeId,
+                                                     const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    {
+        auto frameNode = GetFrameNode(tag, nodeId);
+        CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<ImageSpanNode>(frameNode));
+        auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+        auto imageSpanNode = AceType::MakeRefPtr<ImageSpanNode>(tag, nodeId, pattern);
+        imageSpanNode->InitializePatternAndContext();
+        ElementRegister::GetInstance()->AddUINode(imageSpanNode);
+        return imageSpanNode;
+    }
+
+    ImageSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<ImagePattern>())
+    {
+    }
+    ImageSpanNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : FrameNode(tag, nodeId, pattern)
+    {
+    }
+    ~ImageSpanNode() override = default;
+
+    const RefPtr<ImageSpanItem>& GetSpanItem() const
+    {
+        return imageSpanItem_;
+    }
+
+private:
+    RefPtr<ImageSpanItem> imageSpanItem_ = MakeRefPtr<ImageSpanItem>();
+
+    ACE_DISALLOW_COPY_AND_MOVE(ImageSpanNode);
 };
 
 } // namespace OHOS::Ace::NG
