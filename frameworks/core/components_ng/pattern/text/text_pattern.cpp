@@ -398,6 +398,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     }
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showPaste = false;
+    selectInfo.menuInfo.showCopyAll = !IsSelectAll();
     selectInfo.menuCallback.onCopy = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
