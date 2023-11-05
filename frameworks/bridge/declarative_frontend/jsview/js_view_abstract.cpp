@@ -3538,9 +3538,6 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         return true;
     }
     result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
-    if (result == Color(0)) {
-        return false;
-    }
     return true;
 }
 
