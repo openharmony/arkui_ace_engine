@@ -1665,16 +1665,6 @@ void PipelineContext::WindowFocus(bool isFocus)
     FlushWindowFocusChangedCallback(isFocus);
 }
 
-void PipelineContext::ContainerModalUnFocus()
-{
-    CHECK_NULL_VOID(rootNode_);
-    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
-    CHECK_NULL_VOID(containerNode);
-    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
-    CHECK_NULL_VOID(containerPattern);
-    containerPattern->OnWindowForceUnfocused();
-}
-
 void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
