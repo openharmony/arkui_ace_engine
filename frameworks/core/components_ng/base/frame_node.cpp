@@ -1546,13 +1546,6 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         translateCfg[GetId()] = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7],
             param[8], GetId(), localMat };
     }
-
-    if (GetInspectorId()->find("SCBScreen-Temp") != std::string::npos &&
-        static_cast<int>(translateCfg[GetId()].degree) > 0) {
-        translateCfg[GetId()].degree = 0.0;
-        translateCfg[GetId()].localMat = Matrix4();
-    }
-
     auto parent = GetAncestorNodeOfFrame();
     if (parent) {
         AncestorNodeInfo ancestorNodeInfo { parent->GetId() };

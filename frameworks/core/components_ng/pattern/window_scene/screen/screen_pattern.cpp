@@ -92,25 +92,12 @@ void ScreenPattern::UpdateDisplayInfo()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
-    auto renderContext = host->GetRenderContext();
-    auto paintRect = renderContext->GetPaintRectWithTransform();
-    auto displayNode = screenSession_->GetDisplayNode();
-
-    auto tempHeight = paintRect.Height();
-    auto tempWidth = paintRect.Width();
-    auto temp = 0;
-    if (static_cast<int>(displayNode->GetStagingProperties().GetRotation()) != 0) {
-        temp = tempWidth;
-        tempWidth = tempHeight;
-        tempHeight = temp;
-    }
-
+    auto paintRect = host->GetPaintRectWithTransform();
     MMI::Rect screenRect = {
         paintRect.Left(),
         paintRect.Top(),
-        tempWidth,
-        tempHeight,
+        paintRect.Width(),
+        paintRect.Height()
     };
 
     MMI::WindowInfo windowInfo = {
@@ -124,10 +111,6 @@ void ScreenPattern::UpdateDisplayInfo()
         .flags = 0  // touchable
     };
 
-    float tempRotation = 0.0f;
-    if (static_cast<int>(displayNode->GetStagingProperties().GetRotation()) > 0) {
-        tempRotation = 90.0f;
-    }
     MMI::DisplayInfo displayInfo = {
         .id = screenId,
         .x = paintRect.Left(),
@@ -137,7 +120,7 @@ void ScreenPattern::UpdateDisplayInfo()
         .dpi = dpi,
         .name = "display" + std::to_string(screenId),
         .uniq = "default" + std::to_string(screenId),
-        .direction = ConvertDegreeToMMIRotation(tempRotation)
+        .direction = ConvertDegreeToMMIRotation(DIRECTION0)
     };
 
     MMI::DisplayGroupInfo displayGroupInfo = {
