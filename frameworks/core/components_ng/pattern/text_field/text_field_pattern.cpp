@@ -2623,7 +2623,6 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     }
     UpdateEditingValueToRecord();
     cursorVisible_ = true;
-    CloseSelectOverlay(true);
     StartTwinkling();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -2643,6 +2642,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         return;
     }
     insertValueOperations_.emplace(insertValue);
+    CloseSelectOverlay(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3298,6 +3298,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         return;
     }
     deleteBackwardOperations_.emplace(length);
+    CloseSelectOverlay();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3308,7 +3309,6 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     auto start = std::max(selectController_->GetCaretIndex() - length, 0);
     contentController_->erase(start, length);
     selectController_->UpdateCaretIndex(start);
-    CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
@@ -3323,7 +3323,6 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
 {
     contentController_->erase(selectController_->GetCaretIndex(), length);
-    CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
@@ -3348,6 +3347,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
         return;
     }
     deleteForwardOperations_.emplace(length);
+    CloseSelectOverlay();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
