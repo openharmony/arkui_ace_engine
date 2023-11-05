@@ -421,17 +421,6 @@ void SubwindowOhos::HideWindow()
         sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
         CHECK_NULL_VOID(parentWindow);
         parentWindow->RequestFocus();
-    } else {
-        auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_VOID(parentContainer);
-        auto parentWindowName = parentContainer->GetWindowName();
-        sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
-        CHECK_NULL_VOID(parentWindow);
-        if (parentWindow->GetFocusable() && !parentWindow->IsFocused()) {
-            auto pipelineContext = parentContainer->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->ContainerModalUnFocus();
-        }
     }
 
     OHOS::Rosen::WMError ret = window_->Hide();

@@ -2899,8 +2899,6 @@ void PipelineContext::WindowFocus(bool isFocus)
     }
 }
 
-void PipelineContext::ContainerModalUnFocus() {}
-
 void PipelineContext::AddPageUpdateTask(std::function<void()>&& task, bool directExecute)
 {
     CHECK_RUN_ON(UI);
