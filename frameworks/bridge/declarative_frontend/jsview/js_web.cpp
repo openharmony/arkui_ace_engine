@@ -659,16 +659,13 @@ public:
         handler_ = eventInfo.GetWebWindowNewHandler();
     }
 
-    static JSRef<JSObject> PopController(int32_t id, int32_t* parentId = nullptr)
+    static JSRef<JSObject> PopController(int32_t id)
     {
         auto iter = controller_map_.find(id);
         if (iter == controller_map_.end()) {
             return JSRef<JSVal>::Make();
         }
         auto controller = iter->second.controller_;
-        if (parentId) {
-            *parentId = iter->second.parentWebId_;
-        }
         controller_map_.erase(iter);
         return controller;
     }
@@ -3091,20 +3088,13 @@ bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
     }
     auto handler = eventInfo->GetWebWindowNewHandler();
     if (handler && !handler->IsFrist()) {
-        int32_t parentId = -1;
-        auto controller = JSWebWindowNewHandler::PopController(handler->GetId(), &parentId);
+        auto controller = JSWebWindowNewHandler::PopController(handler->GetId());
         if (!controller.IsEmpty()) {
             auto getWebIdFunction = controller->GetProperty("innerGetWebId");
             if (getWebIdFunction->IsFunction()) {
                 auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
                 auto webId = func->Call(controller, 0, {});
                 handler->SetWebController(webId->ToNumber<int32_t>());
-            }
-            auto completeWindowNewFunction = controller->GetProperty("innerCompleteWindowNew");
-            if (completeWindowNewFunction->IsFunction()) {
-                auto func = JSRef<JSFunc>::Cast(completeWindowNewFunction);
-                JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(parentId)) };
-                func->Call(controller, 1, argv);
             }
         }
         return false;

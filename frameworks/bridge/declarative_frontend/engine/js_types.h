@@ -44,11 +44,6 @@ inline auto ToJSValue(T&& val)
     return JsiValueConvertor::toJsiValue(std::forward<T>(val));
 };
 
-inline const panda::ecmascript::EcmaVM* GetEcmaVm()
-{
-    return JsiValueConvertor::getEcmaVm();
-}
-
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info);
