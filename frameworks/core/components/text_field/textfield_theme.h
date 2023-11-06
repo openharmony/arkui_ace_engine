@@ -91,8 +91,7 @@ public:
 
             theme->countTextStyle_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_COUNT_TEXT_COLOR));
             theme->countTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_TEXTFIELD_COUNT_FONT_SIZE));
-            theme->countTextStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_COUNT_FONT_WEIGHT)));
+            theme->countTextStyle_.SetFontWeight(FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_COUNT_FONT_WEIGHT)));
             theme->overCountStyle_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_OVER_COUNT_TEXT_COLOR));
             theme->overCountStyle_.SetFontSize(themeConstants->GetDimension(THEME_TEXTFIELD_OVER_COUNT_FONT_SIZE));
             theme->overCountStyle_.SetFontWeight(
@@ -137,12 +136,14 @@ public:
             theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->focusBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
             // color of error border blend 60% opacity
-            theme->errorBorderColor_ = pattern->GetAttr<Color>("error_text_border_color", Color())
-                .BlendOpacity(pattern->GetAttr<double>("error_text_border_color_alpha", defaultErrorAlpha));
+            theme->errorBorderColor_ =
+                pattern->GetAttr<Color>("error_text_border_color", Color())
+                    .BlendOpacity(pattern->GetAttr<double>("error_text_border_color_alpha", defaultErrorAlpha));
             theme->errorUnderlineColor_ = pattern->GetAttr<Color>(ERROR_UNDERLINE_COLOR, Color());
             theme->underlineColor_ = pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor);
-            theme->disableUnderlineColor_ = pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor)
-                .BlendOpacity(pattern->GetAttr<double>(DISABLE_UNDERLINE_ALPHA, defaultDisableUnderlineAlpha));
+            theme->disableUnderlineColor_ =
+                pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor)
+                    .BlendOpacity(pattern->GetAttr<double>(DISABLE_UNDERLINE_ALPHA, defaultDisableUnderlineAlpha));
             theme->underlineTextColor_ = pattern->GetAttr<Color>(UNDERLINE_TEXT_COLOR, defaultUnderlineTextColor);
             theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
@@ -154,19 +155,19 @@ public:
             theme->overCountStyle_.SetFontSize(pattern->GetAttr<Dimension>("over_text_font_size", 0.0_fp));
 
             theme->countTextStyleOuter_.SetTextColor(pattern->GetAttr<Color>("count_outer_text_color", Color()));
-            theme->countTextStyleOuter_.SetFontSize(
-                pattern->GetAttr<Dimension>("count_outer_text_font_size", 0.0_fp));
+            theme->countTextStyleOuter_.SetFontSize(pattern->GetAttr<Dimension>("count_outer_text_font_size", 0.0_fp));
             theme->overCountStyleOuter_.SetTextColor(pattern->GetAttr<Color>("over_outer_text_color", Color()));
-            theme->overCountStyleOuter_.SetFontSize(
-                pattern->GetAttr<Dimension>("over_outer_text_font_size", 0.0_fp));
+            theme->overCountStyleOuter_.SetFontSize(pattern->GetAttr<Dimension>("over_outer_text_font_size", 0.0_fp));
             theme->overCountTextStyle_.SetTextColor(pattern->GetAttr<Color>(OVER_COUNT_TEXT_COLOR, Color()));
             theme->overCountTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(OVER_COUNT_TEXT_FONT_SIZE, 0.0_fp));
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color());
             theme->disableTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_DISABLED, Color());
-            theme->underlineActivedColor_ = pattern->GetAttr<Color>(PATTERN_UNDERLINE_ACTIVED_COLOR, Color())
-                .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
-            theme->underlineTypingColor_ = pattern->GetAttr<Color>(PATTERN_UNDERLINE_TYPING_COLOR, Color())
-                .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
+            theme->underlineActivedColor_ =
+                pattern->GetAttr<Color>(PATTERN_UNDERLINE_ACTIVED_COLOR, Color())
+                    .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
+            theme->underlineTypingColor_ =
+                pattern->GetAttr<Color>(PATTERN_UNDERLINE_TYPING_COLOR, Color())
+                    .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
             theme->textColorDisable_ = pattern->GetAttr<Color>(PATTERN_DISABLED_TEXT_COLOR, Color());
             theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
             theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 1.5_vp);
@@ -176,17 +177,20 @@ public:
             theme->disabledIconFillColor_ = theme->bgColor_.BlendOpacity(theme->disableOpacityRatio_);
             theme->passwordErrorTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
             theme->passwordErrorInputColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_INPUT_COLOR, Color());
-            theme->passwordErrorBorderColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_BORDER_COLOR, Color())
-                .BlendOpacity(pattern->GetAttr<double>(ERROR_PASSWORD_BORDER_ALPHA, defaultErrorAlpha));
+            theme->passwordErrorBorderColor_ =
+                pattern->GetAttr<Color>(ERROR_PASSWORD_BORDER_COLOR, Color())
+                    .BlendOpacity(pattern->GetAttr<double>(ERROR_PASSWORD_BORDER_ALPHA, defaultErrorAlpha));
             theme->passwordErrorLableColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_TEXT_COLOR, Color());
-            theme->overCountBorderColor_ = pattern->GetAttr<Color>(OVER_COUNT_BORDER_COLOR, Color())
-                .BlendOpacity(pattern->GetAttr<double>(OVER_COUNT_BORDER_COLOR_ALPHA, defaultErrorAlpha));
-            theme->inlineTextColor_ =  pattern->GetAttr<Color>(INLINE_TEXT_COLOR, Color());
+            theme->overCountBorderColor_ =
+                pattern->GetAttr<Color>(OVER_COUNT_BORDER_COLOR, Color())
+                    .BlendOpacity(pattern->GetAttr<double>(OVER_COUNT_BORDER_COLOR_ALPHA, defaultErrorAlpha));
+            theme->inlineTextColor_ = pattern->GetAttr<Color>(INLINE_TEXT_COLOR, Color());
             theme->inlineRadiusSize_ = Radius(pattern->GetAttr<Dimension>(INLINE_RADIUS_SIZE, 4.0_vp));
             theme->inlineBgColor_ = pattern->GetAttr<Color>(INLINE_BG_COLOR, Color());
             theme->inlineBorderColor_ = pattern->GetAttr<Color>(INLINE_BORDER_COLOR, Color());
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
+            theme->height_ = pattern->GetAttr<Dimension>("textinput_default_height", 48.0_vp);
         }
     };
 

@@ -583,6 +583,7 @@ bool TextFieldPattern::GetEditingBoxModel() const
 
 void TextFieldPattern::HandleFocusEvent()
 {
+    isFocusedBeforeClick_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d on focus", host->GetId());
@@ -785,7 +786,13 @@ void TextFieldPattern::HandleBlurEvent()
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
-    CloseSelectOverlay(true);
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        CloseSelectOverlay(true);
+    }
+    if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_) {
+        isFocusedBeforeClick_ = false;
+        HandleOnSelectAll(true);
+    }
     auto context = PipelineContext::GetCurrentContext();
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_RETURN(textFieldManager, false);
@@ -1428,6 +1435,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    isFocusedBeforeClick_ = false;
 }
 
 void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
@@ -1463,6 +1471,10 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     }
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+    auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
+    if (isSelectAll && !contentController_->IsEmpty() && !hasFocus) {
+        HandleOnSelectAll(true);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2109,6 +2121,7 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
         auto proxy = GetSelectOverlayProxy();
         CHECK_NULL_VOID(proxy);
         auto position = UpdateCaretPositionOnHandleMove(localOffset);
+        operationRecords_.back().caretPosition = position;
         if (isFirstHandle) {
             selectController_->MoveFirstHandleToContentRect(position);
             SelectHandleInfo handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
@@ -4978,5 +4991,20 @@ RefPtr<PixelMap> TextFieldPattern::GetPixelMap()
     auto pixelMap = context->GetThumbnailPixelMap();
     CHECK_NULL_RETURN(pixelMap, NULL);
     return pixelMap;
+}
+
+void TextFieldPattern::ShowMenu()
+{
+    auto selectOverlayProxy = GetSelectOverlayProxy();
+    if (selectOverlayProxy && selectOverlayProxy->IsMenuShow()) {
+        return;
+    }
+    CloseSelectOverlay(true);
+    if (IsSingleHandle()) {
+        SetIsSingleHandle(true);
+    } else {
+        SetIsSingleHandle(false);
+    }
+    ProcessOverlay(true, true, true);
 }
 } // namespace OHOS::Ace::NG

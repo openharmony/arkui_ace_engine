@@ -74,7 +74,6 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace::NG {
-
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
 enum class DragStatus { DRAGGING, ON_DROP, NONE };
@@ -974,6 +973,8 @@ public:
     {
         return static_cast<int32_t>(contentController_->GetWideText().length());
     }
+
+    void ShowMenu();
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 protected:

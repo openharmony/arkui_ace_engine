@@ -578,4 +578,9 @@ void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor);
 }
+
+void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
+}
 } // namespace OHOS::Ace::NG

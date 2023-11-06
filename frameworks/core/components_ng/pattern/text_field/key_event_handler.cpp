@@ -245,6 +245,9 @@ bool KeyEventHandler::HandleShiftPressedEvent(const KeyEvent& event)
             keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_A) + UPPER_CASE_A;
         } else if (KeyCode::KEY_0 <= event.code && event.code <= KeyCode::KEY_9) {
             keyChar = NUM_SYMBOLS[static_cast<int32_t>(event.code) - static_cast<int32_t>(KeyCode::KEY_0)];
+        } else if (KeyCode::KEY_F10 == event.code) {
+            pattern->ShowMenu();
+            return true;
         } else {
             return false;
         }

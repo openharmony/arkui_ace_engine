@@ -504,11 +504,10 @@ const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetErrorParagraph() const
 
 float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()
 {
-    const auto defaultHeight = 40.0_vp;
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, defaultHeight.ConvertToPx());
+    CHECK_NULL_RETURN(pipeline, 0.0f);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, defaultHeight.ConvertToPx());
+    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto height = textFieldTheme->GetHeight();
     return static_cast<float>(height.ConvertToPx());
 }
