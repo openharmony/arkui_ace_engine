@@ -4778,7 +4778,7 @@ class ViewPU extends NativeViewPartialUpdate {
         const updateFunc = ((typeof updateFunc1 == "object") ? (updateFunc1.updateFunc) : updateFunc1);
         const componentName = (typeof updateFunc1 == "object") ? updateFunc1.componentName : "unknown component type";
         if (typeof updateFunc !== "function") {
-            stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
+            stateMgmtConsole.debug(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
         }
         else {
             
