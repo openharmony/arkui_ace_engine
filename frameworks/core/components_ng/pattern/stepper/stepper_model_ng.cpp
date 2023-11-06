@@ -41,9 +41,8 @@ void StepperModelNG::Create(uint32_t index)
         auto swiperNode = AceType::DynamicCast<FrameNode>(
             stepperNode->GetChildAtIndex(stepperNode->GetChildIndexById(stepperNode->GetSwiperId())));
         CHECK_NULL_VOID(swiperNode);
-        auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-        CHECK_NULL_VOID(swiperLayoutProperty);
-        swiperLayoutProperty->UpdateIndex(index);
+        auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
+        swiperController->SwipeTo(index);
     }
 }
 
