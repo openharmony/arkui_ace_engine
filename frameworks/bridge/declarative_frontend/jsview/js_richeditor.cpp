@@ -916,6 +916,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
         if (!styleObject->IsUndefined()) {
             auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<TextTheme>();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
@@ -1175,6 +1176,7 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
 
     auto [start, end] = ParseRange(jsObject);
     auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     ImageSpanAttribute imageStyle;
@@ -1289,6 +1291,7 @@ void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
         return;
     }
     auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);
