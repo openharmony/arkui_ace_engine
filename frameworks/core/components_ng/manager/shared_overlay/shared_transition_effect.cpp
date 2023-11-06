@@ -96,8 +96,6 @@ bool SharedTransitionExchange::Allow() const
     auto dest = dest_.Upgrade();
     auto src = src_.Upgrade();
     if (!dest || !src) {
-        LOGW("Create exchange animation failed. %{public}s is null. share id: %{public}s", !src ? "src" : "dest",
-            GetShareId().c_str());
         return false;
     }
     return !GetShareId().empty();
@@ -108,8 +106,6 @@ bool SharedTransitionExchange::CreateAnimation()
     auto src = src_.Upgrade();
     auto dest = dest_.Upgrade();
     if (!dest || !src) {
-        LOGW("Create exchange animation failed. %{public}s is null. share id: %{public}s", !src ? "src" : "dest",
-            GetShareId().c_str());
         return false;
     }
     CHECK_NULL_RETURN(option_, false);
@@ -130,7 +126,8 @@ bool SharedTransitionExchange::CreateTranslateAnimation(const RefPtr<FrameNode>&
 {
     auto destOffset = dest->GetPaintRectOffsetToPage();
     auto srcOffset = src->GetPaintRectOffsetToPage();
-    LOGI("Get Offset, share id: %{public}s. src: %{public}s, dest: %{public}s", GetShareId().c_str(),
+    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        "Translate animation get Offset, share id: %{public}s. src: %{public}s, dest: %{public}s", GetShareId().c_str(),
         srcOffset.ToString().c_str(), destOffset.ToString().c_str());
     if (NearEqual(destOffset, srcOffset)) {
         return true;
@@ -181,12 +178,14 @@ bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src,
     auto destSize = dest->GetGeometryNode()->GetFrameSize();
     auto srcSize = src->GetGeometryNode()->GetFrameSize();
     if (!destSize.IsPositive()) {
-        LOGW("destSize is %{public}s, means we don't get the size correctly, so create sharedTransition failed"
-             ", sharedId:%{public}s",
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "DestSize is %{public}s, means we don't get the size correctly, so create sharedTransition failed"
+            ", sharedId:%{public}s",
             destSize.ToString().c_str(), GetShareId().c_str());
         return false;
     }
-    LOGI("Get Size, share id: %{public}s. src: %{public}s, dest: %{public}s", GetShareId().c_str(),
+    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        "Size animation get size,  share id: %{public}s. src: %{public}s, dest: %{public}s", GetShareId().c_str(),
         srcSize.ToString().c_str(), destSize.ToString().c_str());
     if (NearEqual(srcSize, destSize)) {
         return true;
@@ -260,7 +259,6 @@ bool SharedTransitionStatic::CreateAnimation()
 {
     auto node = GetPassengerNode().Upgrade();
     if (!node) {
-        LOGW("Create static animation failed. current is null. share id: %{public}s", GetShareId().c_str());
         return false;
     }
     // static transition only need opacity animation

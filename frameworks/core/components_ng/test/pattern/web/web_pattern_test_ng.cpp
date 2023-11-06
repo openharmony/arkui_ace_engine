@@ -393,4 +393,28 @@ HWTEST_F(WebPatternTestNg, GetSelectPopupPostion008, TestSize.Level1)
     webPattern->RegisterSelectPopupCallback(frameNode, callback, params);
 #endif
 }
+
+/**
+ * @tc.name: WebPatternTestNg_004.
+ * @tc.desc: Test WebPattern  OnCursorChange when CursorType = context-menu.
+ * @tc.type: FUNC.
+ * @tc.require:I5OZZ8
+ */
+HWTEST_F(WebPatternTestNg, WebPatternTestNg_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    OHOS::NWeb::NWebCursorInfo info;
+    bool rerult = webPattern->OnCursorChange(OHOS::NWeb::CursorType::CT_CONTEXTMENU, info);
+    EXPECT_FALSE(rerult);
+#endif
+}
 } // namespace OHOS::Ace::NG

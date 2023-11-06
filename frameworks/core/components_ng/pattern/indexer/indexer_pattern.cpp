@@ -46,7 +46,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/event/mouse_event.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

@@ -58,7 +58,7 @@ void SlidingPanelPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
     if (layoutProperty->GetPanelType() == PanelType::CUSTOM) {
-        auto calc = layoutProperty->GetCustomHeight().value();
+        auto calc = layoutProperty->GetCustomHeight().value_or(Dimension(0.0));
         if (!calc.CalcValue().empty() && calc.CalcValue().find("wrapContent") != std::string::npos) {
             ResetLayoutWeight();
         }
@@ -106,6 +106,9 @@ void SlidingPanelPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -127,6 +130,24 @@ bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& 
     return true;
 }
 
+void SlidingPanelPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    if (type != WindowSizeChangeReason::ROTATION) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireHeightChangeEvent();
+    });
+}
+
 void SlidingPanelPattern::Update()
 {
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -144,7 +165,7 @@ void SlidingPanelPattern::Update()
                     ? PanelMode::FULL
                     : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     if (type_ == PanelType::CUSTOM) {
-            mode = PanelMode::CUSTOM;
+        mode = PanelMode::CUSTOM;
     }
     if (mode_.value() == mode) {
         if (mode == PanelMode::HALF && type_ == PanelType::MINI_BAR) {

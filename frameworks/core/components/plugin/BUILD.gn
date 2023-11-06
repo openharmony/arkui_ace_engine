@@ -43,9 +43,7 @@ build_component("plugin") {
     external_deps = [
       "ability_base:extractortool",
       "ability_base:want",
-      "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
-      "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "input:libmmi-client",
       "ipc:ipc_core",

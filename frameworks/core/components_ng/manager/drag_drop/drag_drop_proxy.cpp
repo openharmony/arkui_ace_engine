@@ -41,9 +41,10 @@ void DragDropProxy::OnDragStart(
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
-    manager->OnDragStart(Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
-                             info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
-        frameNode);
+    auto point = Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetScreenLocation().GetX(),
+        info.GetScreenLocation().GetY());
+    manager->OnDragStart(point, frameNode);
+    manager->OnDragMove(point, extraInfo);
     manager->AddDataToClipboard(extraInfo);
 }
 

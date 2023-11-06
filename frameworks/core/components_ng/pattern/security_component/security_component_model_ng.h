@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SecurityComponentModelNG {

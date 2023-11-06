@@ -10411,7 +10411,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll003, TestSize.Level1)
     pattern_->itemPosition_.insert({ 0, SwiperItemInfo{ .startPos = -0.5 } });
 
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
-    EXPECT_CALL(*mockScroll, HandleScroll)
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL))
+        .Times(1)
+        .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
     pattern_->parent_ = mockScroll;
@@ -10435,7 +10438,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll004, TestSize.Level1)
     pattern_->itemPosition_.insert({ 0, SwiperItemInfo{ .startPos = -0.5 } });
 
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
-    EXPECT_CALL(*mockScroll, HandleScroll)
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL))
+        .Times(1)
+        .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
     pattern_->parent_ = mockScroll;
@@ -10467,7 +10473,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll005, TestSize.Level1)
 
     // three level nesting
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
-    EXPECT_CALL(*mockScroll, HandleScroll)
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL))
+        .Times(1)
+        .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
     swiperPattern->parent_ = mockScroll;
@@ -10577,5 +10586,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
     pattern_->parent_ = mockScroll;
     pattern_->OnScrollEndRecursive();
     EXPECT_FALSE(pattern_->childScrolling_);
+
+    pattern_->NotifyParentScrollEnd();
 }
 } // namespace OHOS::Ace::NG

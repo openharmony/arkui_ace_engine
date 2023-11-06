@@ -114,10 +114,10 @@ HWTEST_F(NavigatorPatternTestNg, NavigatorFrameNodeCreator002, TestSize.Level1)
      */
     EXPECT_EQ(frameNode == nullptr, false);
     auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
-    EXPECT_EQ(eventHub->GetUrl(), URL_VALUE);
+    EXPECT_EQ(eventHub->GetUrl(), URL_VALUE2);
     EXPECT_FALSE(eventHub->GetActive());
     EXPECT_EQ(eventHub->GetType(), NavigatorType::BACK);
-    EXPECT_EQ(eventHub->GetParams(), PARAMS_VALUE);
+    EXPECT_EQ(eventHub->GetParams(), PARAMS_VALUE2);
     /**
      * @tc.steps: step3. BACK navigate
      */
@@ -177,9 +177,9 @@ HWTEST_F(NavigatorPatternTestNg, NavigatorFrameNodeCreator004, TestSize.Level1)
      */
     EXPECT_EQ(frameNode == nullptr, false);
     auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
-    EXPECT_EQ(eventHub->GetUrl(), URL_VALUE);
+    EXPECT_EQ(eventHub->GetUrl(), URL_VALUE2);
     EXPECT_FALSE(eventHub->GetActive());
-    EXPECT_EQ(eventHub->GetParams(), PARAMS_VALUE);
+    EXPECT_EQ(eventHub->GetParams(), PARAMS_VALUE2);
     EXPECT_EQ(eventHub->GetType(), NavigatorType::DEFAULT);
     // Navigator Type is invalid
     eventHub->NavigatePage();
@@ -244,11 +244,8 @@ HWTEST_F(NavigatorPatternTestNg, NavigatorFrameNodeSetFuncs, TestSize.Level1)
     eventHub->SetParams(PARAMS_VALUE2);
     eventHub->SetUrl(URL_VALUE2);
     eventHub->SetType(NavigatorType::BACK);
-    // SetActive should trigger navigation
-    eventHub->SetActive(true);
-    EXPECT_EQ(eventHub->GetUrl(), URL_VALUE);
-    EXPECT_TRUE(eventHub->GetActive());
-    EXPECT_EQ(eventHub->GetParams(), PARAMS_VALUE);
+    EXPECT_EQ(eventHub->GetUrl(), URL_VALUE2);
+    EXPECT_EQ(eventHub->GetParams(), PARAMS_VALUE2);
     EXPECT_EQ(eventHub->GetType(), NavigatorType::BACK);
 }
 

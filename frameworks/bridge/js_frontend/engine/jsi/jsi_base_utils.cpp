@@ -324,21 +324,16 @@ std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const 
             pageUrl = frontEnd->GetCurrentPageUrl();
             pageMap = frontEnd->GetCurrentPageSourceMap();
             appMap = frontEnd->GetFaAppSourceMap();
-        } else {
-            LOGE("fail to find frontEnd");
         }
     } else {
         if (runningPage) {
             pageUrl = runningPage->GetUrl();
             pageMap = runningPage->GetPageMap();
             appMap = runningPage->GetAppMap();
-        } else {
-            LOGE("runningPage is nullptr");
         }
     }
 
     if (!pageMap) {
-        LOGE("fail to find page map");
         return rawStack;
     }
 
@@ -418,7 +413,6 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
         std::string column;
         GetPosInfo(temp, closeBracePos, line, column);
         if (line.empty() || column.empty()) {
-            LOGI("the stack without line info");
             break;
         }
 
@@ -472,7 +466,6 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
         std::string column;
         GetPosInfo(temp, closeBracePos, line, column);
         if (line.empty() || column.empty()) {
-            LOGI("the stack without line info");
             break;
         }
         std::string sourceInfo;
@@ -568,7 +561,6 @@ std::string JsiBaseUtils::GetRelativePath(const std::string& sources, std::strin
     if (i == pathLevel) {
         return sources.substr(splitPos);
     }
-    LOGI("The stack path error!");
     return sources;
 }
 
@@ -579,7 +571,6 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
         return;
     }
 
-    LOGI("ReportJsErrorEvent");
     auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     if (arkJSRuntime && arkJSRuntime->GetErrorEventHandler()) {
         std::string msg = GenerateErrorMsg(error, runtime);
@@ -685,7 +676,6 @@ shared_ptr<JsValue> AppLogPrint(
 {
     // Should have at least 1 parameters.
     if (argc == 0) {
-        LOGE("the arg is error");
         return runtime->NewUndefined();
     }
     std::string content = GetLogContent(runtime, argv, argc);
@@ -740,7 +730,6 @@ shared_ptr<JsValue> JsLogPrint(
 {
     // Should have 1 parameters.
     if (argc == 0) {
-        LOGE("the arg is error");
         return runtime->NewUndefined();
     }
 
@@ -848,7 +837,6 @@ std::string GetLogContent(napi_env env, napi_callback_info info)
     for (size_t i = 0; i < argc; ++i) {
         napi_typeof(env, argv[i], &valueType);
         if (valueType != napi_string) {
-            LOGE("argv is not NativeString");
             continue;
         }
         size_t buffSize = 0;

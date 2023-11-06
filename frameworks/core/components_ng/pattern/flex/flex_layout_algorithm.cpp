@@ -1046,7 +1046,9 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto contentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, contentSize);
+    Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
+        ? MinusPaddingToNonNegativeSize(padding, contentSize)
+        : MinusPaddingToSize(padding, contentSize);
     mainAxisSize_ = GetMainAxisSizeHelper(contentSize, direction_);
     crossAxisSize_ = GetCrossAxisSizeHelper(contentSize, direction_);
     auto paddingOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));

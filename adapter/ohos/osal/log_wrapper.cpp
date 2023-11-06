@@ -58,6 +58,7 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_INNER_SCROLL_BAR, "AceInnerScrollBar" },
     { AceLogTag::ACE_OUTER_SCROLL_BAR, "AceOuterScrollBar" },
     { AceLogTag::ACE_FONT, "AceFont" },
+    { AceLogTag::ACE_OVERLAY, "AceOverlay" },
     { AceLogTag::ACE_PROMPT_ACTION_TOAST, "AcePromptActionToast" },
     { AceLogTag::ACE_PROMPT_ACTION_MENU, "AcePromptActionMenu" },
     { AceLogTag::ACE_DIALOG_ALERT, "AceDialogAlert" },

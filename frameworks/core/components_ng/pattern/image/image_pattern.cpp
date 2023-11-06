@@ -68,7 +68,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Image Load Success %{public}s", sourceInfo.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Image Load Success %{public}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
 }
@@ -299,7 +299,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     loadingCtx_->LoadImageData();
 }
 

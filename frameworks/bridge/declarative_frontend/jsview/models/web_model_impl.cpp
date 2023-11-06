@@ -354,6 +354,13 @@ void WebModelImpl::SetCacheMode(WebCacheMode cacheMode)
     webComponent->SetCacheMode(cacheMode);
 }
 
+void WebModelImpl::SetOverScrollMode(OverScrollMode mode)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOverScrollMode(mode);
+}
+
 void WebModelImpl::SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

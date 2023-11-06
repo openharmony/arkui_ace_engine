@@ -83,6 +83,8 @@ public:
 
     void OnModifyDone() override;
 
+    void PreCreateLayoutWrapper();
+
     void BeforeCreateLayoutWrapper() override;
 
     void AddChildSpanItem(const RefPtr<UINode>& child);
@@ -312,6 +314,9 @@ public:
     {
         return paragraph_;
     }
+
+    void OnAreaChangedInner() override;
+
 protected:
     virtual void HandleOnCopy();
     void InitMouseEvent();
@@ -392,6 +397,7 @@ private:
     OffsetF imageOffset_;
 
     OffsetF contentOffset_;
+    OffsetF parentGlobalOffset_;
     GestureEventFunc onClick_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;

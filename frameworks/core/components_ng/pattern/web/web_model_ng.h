@@ -73,6 +73,7 @@ public:
     void SetRenderExitedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetRefreshAccessedHistoryId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetCacheMode(WebCacheMode cacheMode) override;
+    void SetOverScrollMode(OverScrollMode mode) override;
     void SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled) override;
     void SetFileFromUrlAccessEnabled(bool isFileFromUrlAccessEnabled) override;
     void SetDatabaseAccessEnabled(bool isDatabaseAccessEnabled) override;

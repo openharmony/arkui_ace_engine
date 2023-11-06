@@ -441,8 +441,7 @@ void DialogContainer::ShowToast(
     auto delegate = frontend->GetDelegate();
     CHECK_NULL_VOID(delegate);
     delegate->SetToastStopListenerCallback([instanceId = instanceId]() {
-        TAG_LOGD(
-            AceLogTag::ACE_PROMPT_ACTION_TOAST, "Begin show Toast,hide window instanceId is %{public}d", instanceId);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Begin show Toast,hide window instanceId is %{public}d", instanceId);
         if (ContainerScope::CurrentId() >= 0) {
             DialogContainer::HideWindow(instanceId);
         }

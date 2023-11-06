@@ -1679,6 +1679,20 @@ sptr<IRemoteObject> AceContainer::GetToken()
     return nullptr;
 }
 
+void AceContainer::SetParentToken(sptr<IRemoteObject>& token)
+{
+    std::lock_guard<std::mutex> lock(cardTokensMutex_);
+    if (token) {
+        parentToken_ = token;
+    }
+}
+
+sptr<IRemoteObject> AceContainer::GetParentToken()
+{
+    std::lock_guard<std::mutex> lock(cardTokensMutex_);
+    return parentToken_;
+}
+
 // ArkTsCard start
 std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t instanceId)
 {

@@ -48,6 +48,11 @@ enum WebCacheMode {
     USE_CACHE_ONLY
 };
 
+enum OverScrollMode {
+    NEVER = 0,
+    ALWAYS,
+};
+
 enum class WebDarkMode {
     Off,
     On,

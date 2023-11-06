@@ -125,6 +125,10 @@ void ImageLoadingContext::OnLoadSuccess()
     if (notifiers_.onLoadSuccess_) {
         notifiers_.onLoadSuccess_(src_);
     }
+    if (pendingMakeCanvasImageTask_) {
+        pendingMakeCanvasImageTask_();
+        pendingMakeCanvasImageTask_ = nullptr;
+    }
 }
 
 void ImageLoadingContext::OnLoadFail()
@@ -314,8 +318,14 @@ bool ImageLoadingContext::MakeCanvasImageIfNeed(
     } else if (dstSize_ == SizeF()) {
         res |= dstSize.IsPositive();
     }
-
-    if (res) {
+    CHECK_NULL_RETURN(res, res);
+    if (stateManager_->GetCurrentState() == ImageLoadingState::MAKE_CANVAS_IMAGE) {
+        pendingMakeCanvasImageTask_ = [weak = AceType::WeakClaim(this), dstSize, autoResize, imageFit, sourceSize]() {
+            auto ctx = weak.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            ctx->MakeCanvasImage(dstSize, autoResize, imageFit, sourceSize);
+        };
+    } else {
         MakeCanvasImage(dstSize, autoResize, imageFit, sourceSize);
     }
     return res;

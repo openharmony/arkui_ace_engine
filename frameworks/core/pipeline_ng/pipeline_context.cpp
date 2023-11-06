@@ -238,7 +238,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         distributedUI->ApplyOneUpdate();
     } while (false);
 #endif
-    FlushAnimation(GetTimeFromExternalTimer());
+    FlushAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
@@ -1221,7 +1221,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
         for (const auto& func : dumpListeners_) {
             func(jsParams);
-        } 
+        }
     }
 
     return true;
@@ -1369,9 +1369,6 @@ void PipelineContext::FlushMouseEvent()
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
-    if (!onFocus_) {
-        return false;
-    }
     if (mouseStyleNodeId_ != nodeId) {
         return false;
     }

@@ -222,7 +222,9 @@ void WindowScene::OnActivation()
             CHECK_NULL_VOID(host);
             host->AddChild(self->contentNode_, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            self->session_->GetSurfaceNode()->SetBufferAvailableCallback(self->callback_);
+            auto surfaceNode = self->session_->GetSurfaceNode();
+            CHECK_NULL_VOID(surfaceNode);
+            surfaceNode->SetBufferAvailableCallback(self->callback_);
         }
     };
 
@@ -271,6 +273,7 @@ void WindowScene::OnForeground()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->RemoveChild(self->snapshotNode_);
+        self->snapshotNode_.Reset();
         host->AddChild(self->contentNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -295,7 +298,7 @@ void WindowScene::OnDisconnect()
         CHECK_NULL_VOID(host);
         host->RemoveChild(self->contentNode_);
         self->contentNode_.Reset();
-        if (host->GetChildIndex(self->snapshotNode_) < 0) {
+        if (!self->snapshotNode_) {
             self->CreateSnapshotNode(snapshot);
             host->AddChild(self->snapshotNode_, 0);
         }

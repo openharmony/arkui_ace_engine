@@ -221,6 +221,11 @@ void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size)
     size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
+void MinusPaddingToNonNegativeSize(const PaddingPropertyF& padding, SizeF& size)
+{
+    size.MinusPaddingToNonNegative(padding.left, padding.right, padding.top, padding.bottom);
+}
+
 void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
 {
     size.AddPadding(padding.left, padding.right, padding.top, padding.bottom);

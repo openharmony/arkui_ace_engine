@@ -22,6 +22,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -41,7 +42,6 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
         CHECK_NULL_VOID(stateStyleMgr);
         const auto& touches = info.GetTouches();
         if (touches.empty()) {
-            LOGW("the touch info is illegal");
             return;
         }
         const auto& type = touches.front().GetTouchType();
@@ -69,6 +69,15 @@ void StateStyleManager::FireStateFunc()
     if (!customNode) {
         auto parent = node->GetParent();
         while (parent) {
+            if (AceType::InstanceOf<NavDestinationGroupNode>(parent)) {
+                auto navDestinationGroupNode = DynamicCast<NavDestinationGroupNode>(parent);
+                CHECK_NULL_VOID(navDestinationGroupNode);
+                customNode = navDestinationGroupNode->GetNavDestinationCustomNode();
+            }
+            if (customNode) {
+                break;
+            }
+
             if (AceType::InstanceOf<CustomNodeBase>(parent)) {
                 customNode = DynamicCast<CustomNodeBase>(parent);
                 break;
@@ -77,7 +86,6 @@ void StateStyleManager::FireStateFunc()
         }
     }
     if (!customNode) {
-        LOGE("fail to find custom node to fire update func of %{public}d", nodeId);
         return;
     }
     ScopedViewStackProcessor processor;

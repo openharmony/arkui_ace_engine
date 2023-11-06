@@ -53,6 +53,7 @@ protected:
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked) override
     {
         touchPoints_.erase(touchId);
+        activeFingers_.remove(touchId);
         if (touchPoints_.empty()) {
             ResetStatusOnFinish(isBlocked);
         }
@@ -62,10 +63,17 @@ protected:
     {
         touchPoints_.clear();
         fingerList_.clear();
+        activeFingers_.clear();
+    }
+
+    bool IsActiveFinger(int32_t touchId) const
+    {
+        return std::find(activeFingers_.begin(), activeFingers_.end(), touchId) != activeFingers_.end();
     }
 
     std::map<int32_t, TouchEvent> touchPoints_;
     std::list<FingerInfo> fingerList_;
+    std::list<int32_t> activeFingers_;
 
     int32_t fingers_ = 1;
 };

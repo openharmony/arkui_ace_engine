@@ -167,6 +167,12 @@ void TextAreaLayoutAlgorithm::CounterNodeMeasureContent(uint32_t textLength, uin
     textLayoutProperty->UpdateTextAlign(TextAlign::END);
     textLayoutProperty->UpdateMaxLines(COUNTER_TEXT_MAXLINE);
 
+    auto host = textNode->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateForegroundColor(countTextStyle.GetTextColor());
+
     layoutWrapper->Measure(contentConstraint);
 }
 

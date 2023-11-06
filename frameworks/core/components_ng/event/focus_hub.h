@@ -20,7 +20,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
-#include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
 

@@ -426,6 +426,13 @@ void WebModelNG::SetCacheMode(WebCacheMode cacheMode)
     webPattern->UpdateCacheMode(cacheMode);
 }
 
+void WebModelNG::SetOverScrollMode(OverScrollMode mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateOverScrollMode(mode);
+}
+
 void WebModelNG::SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

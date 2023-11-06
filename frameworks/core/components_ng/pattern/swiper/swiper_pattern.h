@@ -454,6 +454,7 @@ public:
     void StopSpringAnimation();
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
+    int32_t GetDuration() const;
 
 private:
     void OnModifyDone() override;
@@ -526,7 +527,6 @@ private:
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
         float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
-    int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
     EdgeEffect GetEdgeEffect() const;
@@ -581,7 +581,15 @@ private:
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
 
     /**
+     * @brief Checks if the animation is currently running.
+     *
+     * @return true if the animation is running, false otherwise.
+     */
+    inline bool AnimationRunning() const;
+
+    /**
      *  NestableScrollContainer implementations
+     *  ============================================================
      */
     Axis GetAxis() const override
     {
@@ -595,11 +603,16 @@ private:
 
     void OnScrollStartRecursive(float position) override;
     void OnScrollEndRecursive() override;
+    /**
+     * @brief Notifies the parent NestableScrollContainer that the scroll has ended.
+     */
+    void NotifyParentScrollEnd();
 
     inline bool ChildFirst(NestedState state);
 
     WeakPtr<NestableScrollContainer> parent_;
     /**
+     *  ============================================================
      *  End of NestableScrollContainer implementations
      */
 

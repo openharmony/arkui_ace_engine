@@ -24,7 +24,6 @@
 #include "base/json/json_util.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 namespace {
