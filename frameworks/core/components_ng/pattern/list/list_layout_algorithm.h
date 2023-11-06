@@ -257,8 +257,6 @@ public:
     void HandleJumpAuto(LayoutWrapper* layoutWrapper,
         int32_t& startIndex, int32_t& endIndex, float& startPos, float& endPos);
 
-    void HandleJumpEnd(LayoutWrapper* layoutWrapper);
-
     bool NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
         int32_t startIndex, int32_t endIndex);
 
@@ -301,6 +299,10 @@ protected:
     virtual void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) {};
     virtual int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index)
+    {
+        return index;
+    }
+    virtual int32_t GetLanesCeil(LayoutWrapper* layoutWrapper, int32_t index)
     {
         return index;
     }
