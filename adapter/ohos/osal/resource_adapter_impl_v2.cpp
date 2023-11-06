@@ -29,6 +29,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
+const Color ERROR_VALUE_COLOR = Color(0xff000000);
 
 void CheckThemeId(int32_t& themeId)
 {
@@ -230,6 +231,7 @@ Color ResourceAdapterImplV2::GetColor(uint32_t resId)
     auto state = manager->GetColorById(resId, result);
     if (state != Global::Resource::SUCCESS) {
         LOGE("GetColor error, id=%{public}u", resId);
+        return ERROR_VALUE_COLOR;
     }
     return Color(result);
 }
