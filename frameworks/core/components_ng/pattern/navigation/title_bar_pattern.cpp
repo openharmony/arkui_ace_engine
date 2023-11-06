@@ -36,10 +36,10 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
 {
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
-    CHECK_NULL_VOID(backButtonNode);
+    auto navigatorNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
+    CHECK_NULL_VOID(navigatorNode);
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) == TitleBarParentType::NAVBAR) {
-        auto buttonNode = backButtonNode->GetChildren().front();
+        auto buttonNode = navigatorNode->GetChildren().front();
         CHECK_NULL_VOID(buttonNode);
         auto backButtonImageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
         CHECK_NULL_VOID(backButtonImageNode);
@@ -53,19 +53,21 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
         CHECK_NULL_VOID(navBarLayoutProperty);
         auto hideBackButton = navBarLayoutProperty->GetHideBackButtonValue(false);
-        backButtonImageLayoutProperty->UpdateVisibility(hideBackButton ? VisibleType::GONE : VisibleType::VISIBLE);
-        backButtonImageNode->MarkModifyDone();
+        auto backButtonLayoutProperty = AceType::DynamicCast<FrameNode>(buttonNode)->GetLayoutProperty();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateVisibility(hideBackButton ? VisibleType::GONE : VisibleType::VISIBLE);
+        buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
     }
     if (!titleBarLayoutProperty->HasNoPixMap()) {
-        backButtonNode->MarkModifyDone();
+        navigatorNode->MarkModifyDone();
         return;
     }
     RefPtr<ImageLayoutProperty> backButtonImageLayoutProperty;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        backButtonImageLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+        backButtonImageLayoutProperty = navigatorNode->GetLayoutProperty<ImageLayoutProperty>();
     } else {
-        auto buttonNode = backButtonNode->GetChildren().front();
+        auto buttonNode = navigatorNode->GetChildren().front();
         CHECK_NULL_VOID(buttonNode);
         auto backButtonImageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
         CHECK_NULL_VOID(backButtonImageNode);
@@ -74,13 +76,13 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
     if (titleBarLayoutProperty->HasImageSource()) {
         backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
-        backButtonNode->MarkModifyDone();
+        navigatorNode->MarkModifyDone();
         return;
     }
 
     if (titleBarLayoutProperty->HasPixelMap()) {
         // TODO: use pixelMap
-        backButtonNode->MarkModifyDone();
+        navigatorNode->MarkModifyDone();
         return;
     }
 }
