@@ -115,22 +115,32 @@ void UpdateChildLayoutConstrainByFlexBasis(
     if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
     }
+    auto tempBasis = flexBasis->ConvertToPx();
     if (child->GetLayoutProperty()->GetCalcLayoutConstraint()) {
         auto selfIdealSize = child->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
         if (child->GetHostTag() == V2::BLANK_ETS_TAG && selfIdealSize.has_value()) {
             if (IsHorizontal(direction) && selfIdealSize->Width().has_value() &&
-                selfIdealSize->Width()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                selfIdealSize->Width()->GetDimension().ConvertToPx() > tempBasis) {
                 return;
             } else if (!IsHorizontal(direction) && selfIdealSize->Height().has_value() &&
-                       selfIdealSize->Height()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                selfIdealSize->Height()->GetDimension().ConvertToPx() > tempBasis) {
                 return;
             }
         }
     }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (flexBasis->Unit() == DimensionUnit::PERCENT || !flexBasis->IsValid()) {
+            if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
+                tempBasis = flexBasis->ConvertToPxWithSize(layoutConstraint.percentReference.Width());
+            } else {
+                tempBasis = flexBasis->ConvertToPxWithSize(layoutConstraint.percentReference.Height());
+            }
+        }
+    }
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
-        layoutConstraint.selfIdealSize.SetWidth(flexBasis->ConvertToPx());
+        layoutConstraint.selfIdealSize.SetWidth(tempBasis);
     } else {
-        layoutConstraint.selfIdealSize.SetHeight(flexBasis->ConvertToPx());
+        layoutConstraint.selfIdealSize.SetHeight(tempBasis);
     }
 }
 
