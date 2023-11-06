@@ -155,7 +155,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         .rootToken_ = callerToken,
         .want = std::make_shared<Want>(want),
     };
-    if (transferringCaller_) {
+    if (transferringCaller_ && parentToken != nullptr) {
         extensionSessionInfo.rootToken_ = parentToken;
     }
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
