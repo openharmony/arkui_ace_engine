@@ -332,6 +332,17 @@ int32_t ListLanesLayoutAlgorithm::GetLanesFloor(LayoutWrapper* layoutWrapper, in
     return index;
 }
 
+int32_t ListLanesLayoutAlgorithm::GetLanesCeil(LayoutWrapper* layoutWrapper, int32_t index)
+{
+    if (lanes_ > 1) {
+        int32_t startIndex = GetLanesFloor(layoutWrapper, index);
+        while (startIndex == GetLanesFloor(layoutWrapper, index + 1)) {
+            index++;
+        }
+    }
+    return index;
+}
+
 std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineForward(LayoutWrapper* layoutWrapper,
     int32_t& index, float& startPos, float crossSize)
 {

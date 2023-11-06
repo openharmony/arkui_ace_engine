@@ -268,7 +268,7 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper,
         if (jumpIndex >= tempEndIndex) {
             scrollAutoType_ = ScrollAutoType::END;
             if (!isSmoothJump) {
-                jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value()) + GetLanes() - 1;
+                jumpIndex_ = GetLanesCeil(layoutWrapper, jumpIndex_.value());
                 startPos = contentMainSize_;
                 BeginLayoutBackward(startPos, layoutWrapper);
             }
@@ -317,17 +317,6 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper,
             }
         }
     }
-}
-
-void ListLayoutAlgorithm::HandleJumpEnd(LayoutWrapper* layoutWrapper)
-{
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex_.value());
-    CHECK_NULL_VOID(wrapper);
-    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-    if (!isGroup) {
-        jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value()) + GetLanes() - 1;
-    }
-    BeginLayoutBackward(contentMainSize_, layoutWrapper);
 }
 
 bool ListLayoutAlgorithm::NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
@@ -473,7 +462,8 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
                 BeginLayoutForward(startPos, layoutWrapper);
                 break;
             case ScrollAlign::END:
-                HandleJumpEnd(layoutWrapper);
+                jumpIndex_ = GetLanesCeil(layoutWrapper, jumpIndex_.value());
+                BeginLayoutBackward(contentMainSize_, layoutWrapper);
                 break;
             case ScrollAlign::AUTO:
                 HandleJumpAuto(layoutWrapper, startIndex, endIndex, startPos, endPos);
@@ -521,12 +511,11 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
                 endPos += contentMainSize_ - prevContentMainSize_;
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
-                midIndex = GetLanesFloor(layoutWrapper, midIndex) + GetLanes() - 1;
-                LayoutBackward(layoutWrapper, midIndex, midItemMidPos + midItemHeight / 2.0f);
-            } else {
-                endIndex = GetLanesFloor(layoutWrapper, endIndex) + GetLanes() - 1;
-                LayoutBackward(layoutWrapper, endIndex, endPos);
+                endIndex = midIndex;
+                endPos = midItemMidPos + midItemHeight / 2.0f;
             }
+            endIndex = GetLanesCeil(layoutWrapper, endIndex);
+            LayoutBackward(layoutWrapper, endIndex, endPos);
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
             }
