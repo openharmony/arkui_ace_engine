@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
 #include <optional>
+#include <vector>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -49,6 +50,14 @@ public:
     {
         return false;
     }
+
+    bool ShouldDelayChildPressedState() const override
+    {
+        return true;
+    }
+
+    void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
+    void FireAndCleanScrollingListener() override;
 
     bool UsResRegion() override
     {
@@ -717,6 +726,7 @@ private:
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
 
     WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 };
 } // namespace OHOS::Ace::NG
 

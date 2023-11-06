@@ -279,6 +279,11 @@ public:
     bool GetEditingBoxModel() const override;
 #endif
 
+    bool ShouldDelayChildPressedState() const override
+    {
+        return false;
+    }
+
     void UpdateEditingValue(const std::string& value, int32_t caretPosition)
     {
         contentController_->SetTextValue(value);

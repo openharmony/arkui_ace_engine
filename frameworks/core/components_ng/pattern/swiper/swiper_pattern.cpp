@@ -1064,6 +1064,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
             }
+            pattern->FireAndCleanScrollingListener();
             pattern->HandleDragStart(info);
             // notify scrollStart upwards
             pattern->OnScrollStartRecursive(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
@@ -3442,4 +3443,19 @@ int32_t SwiperPattern::GetLoopIndex(int32_t index, int32_t childrenSize) const
     loopIndex %= childrenSize;
     return loopIndex;
 }
+
+void SwiperPattern::RegisterScrollingListener(const RefPtr<ScrollingListener> listener)
+{
+    CHECK_NULL_VOID(listener);
+    scrollingListener_.emplace_back(listener);
+}
+
+void SwiperPattern::FireAndCleanScrollingListener()
+{
+    for (auto listener : scrollingListener_) {
+        CHECK_NULL_VOID(listener);
+        listener->NotifyScrollingEvent();
+    }
+    scrollingListener_.clear();
 } // namespace OHOS::Ace::NG
+}

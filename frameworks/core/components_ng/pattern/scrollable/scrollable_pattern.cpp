@@ -299,6 +299,7 @@ void ScrollablePattern::AddScrollEvent()
     auto scrollStart = [weak = WeakClaim(this)](float position) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->FireAndCleanScrollingListener();
         pattern->OnScrollStartRecursive(position);
     };
     scrollable->SetOnScrollStartRec(std::move(scrollStart));
@@ -1490,5 +1491,20 @@ float ScrollablePattern::GetVelocity() const
     CHECK_NULL_RETURN(scrollable, velocity);
     velocity = scrollable->GetCurrentVelocity();
     return velocity;
+}
+
+void ScrollablePattern::RegisterScrollingListener(const RefPtr<ScrollingListener> listener)
+{
+    CHECK_NULL_VOID(listener);
+    scrollingListener_.emplace_back(listener);
+}
+
+void ScrollablePattern::FireAndCleanScrollingListener()
+{
+    for (auto listener : scrollingListener_) {
+        CHECK_NULL_VOID(listener);
+        listener->NotifyScrollingEvent();
+    }
+    scrollingListener_.clear();
 }
 } // namespace OHOS::Ace::NG
