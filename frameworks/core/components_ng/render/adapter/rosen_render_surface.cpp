@@ -75,17 +75,14 @@ void RosenRenderSurface::InitSurface()
             rsNode->SetFrameGravity(OHOS::Rosen::Gravity::RESIZE);
             consumerSurface_ = IConsumerSurface::Create();
             if (consumerSurface_ == nullptr) {
-                LOGE("Create consumer surface failed.");
                 return;
             }
             sptr<IBufferProducer> producer = consumerSurface_->GetProducer();
             if (producer == nullptr) {
-                LOGE("Get producer failed.");
                 return;
             }
             producerSurface_ = Surface::CreateSurfaceAsProducer(producer);
             if (producerSurface_ == nullptr) {
-                LOGE("Create producer surface failed.");
                 return;
             }
             if (drawBufferListener_ == nullptr) {
@@ -108,7 +105,7 @@ void RosenRenderSurface::UpdateXComponentConfig()
     CHECK_NULL_VOID(surfaceUtils);
     auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);
     if (ret != SurfaceError::SURFACE_ERROR_OK) {
-        LOGE("add surface error: %{public}d", ret);
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent add surface error: %{public}d", ret);
     }
 
     producerSurface_->SetQueueSize(SURFACE_QUEUE_SIZE);
@@ -152,7 +149,6 @@ void RosenRenderSurface::AdjustNativeWindowSize(uint32_t width, uint32_t height)
 std::string RosenRenderSurface::GetUniqueId() const
 {
     if (!producerSurface_) {
-        LOGE("producerSurface_ is nullptr");
         return "";
     }
     return std::to_string(producerSurface_->GetUniqueId());
@@ -186,7 +182,6 @@ void RosenRenderSurface::ConsumeBuffer()
     auto rosenRenderContext = DynamicCast<RosenRenderContext>(renderContext);
     CHECK_NULL_VOID(rosenRenderContext);
     auto paintRect = rosenRenderContext->GetPaintRectWithTransform();
-    LOGD("paintRect = %{public}s", paintRect.ToString().c_str());
     auto width = static_cast<int32_t>(paintRect.Width());
     auto height = static_cast<int32_t>(paintRect.Height());
     ACE_SCOPED_TRACE("RosenRenderSurface::ConsumeBuffer (%d, %d)", width, height);
@@ -197,7 +192,7 @@ void RosenRenderSurface::ConsumeBuffer()
     OHOS::Rect damage;
     SurfaceError surfaceErr = consumerSurface_->AcquireBuffer(surfaceBuffer, fence, timestamp, damage);
     if (surfaceErr != SURFACE_ERROR_OK) {
-        LOGE("cannot acquire buffer error = %{public}d", surfaceErr);
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent cannot acquire buffer error = %{public}d", surfaceErr);
         return;
     }
 
@@ -235,14 +230,13 @@ void RosenRenderSurface::ConsumeBuffer()
 
     surfaceErr = consumerSurface_->ReleaseBuffer(surfaceBuffer, fence);
     if (surfaceErr != SURFACE_ERROR_OK) {
-        LOGE("cannot release buffer error = %{public}d", surfaceErr);
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent cannot release buffer error = %{public}d", surfaceErr);
         return;
     }
 }
 
 void DrawBufferListener::OnBufferAvailable()
 {
-    LOGD("buffer is available");
     auto renderSurface = renderSurface_.Upgrade();
     CHECK_NULL_VOID(renderSurface);
     renderSurface->ConsumeBuffer();

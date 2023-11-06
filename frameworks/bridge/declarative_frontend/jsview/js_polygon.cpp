@@ -75,20 +75,17 @@ void JSPolygon::JSBind(BindingTarget globalObj)
 void JSPolygon::JsPoints(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsArray()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
     ShapePoint shapePoint;
     ShapePoints shapePoints;
     JSRef<JSArray> pointsArray = JSRef<JSArray>::Cast(info[0]);
     if (pointsArray->Length() < 2) {
-        LOGE("Less than two parameters");
         return;
     }
     for (size_t i = 0; i < pointsArray->Length(); i++) {
         JSRef<JSVal> val = pointsArray->GetValueAt(i);
         if (!val->IsArray()) {
-            LOGE("point is not array.");
             continue;
         }
         JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(val);
@@ -97,7 +94,6 @@ void JSPolygon::JsPoints(const JSCallbackInfo& info)
         } else if (pointArray->GetValueAt(0)->IsString()) {
             shapePoint.first = StringUtils::StringToDimension(pointArray->GetValueAt(0)->ToString(), true);
         } else {
-            LOGE("Polygon point should be Number or String");
             return;
         }
         if (pointArray->GetValueAt(1)->IsNumber()) {
@@ -105,7 +101,6 @@ void JSPolygon::JsPoints(const JSCallbackInfo& info)
         } else if (pointArray->GetValueAt(1)->IsString()) {
             shapePoint.second = StringUtils::StringToDimension(pointArray->GetValueAt(1)->ToString(), true);
         } else {
-            LOGE("Polygon point should be Number or String");
             return;
         }
         shapePoints.push_back(shapePoint);

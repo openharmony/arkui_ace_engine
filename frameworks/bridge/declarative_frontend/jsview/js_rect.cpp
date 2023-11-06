@@ -102,7 +102,6 @@ void JSRect::Create(const JSCallbackInfo& info)
 void JSRect::JsRadiusWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     SetRadiusWidth(info[0]);
@@ -111,7 +110,6 @@ void JSRect::JsRadiusWidth(const JSCallbackInfo& info)
 void JSRect::JsRadiusHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     SetRadiusHeight(info[0]);
@@ -121,12 +119,9 @@ void JSRect::SetRadiusWidth(const JSRef<JSVal>& jsVal)
 {
     CalcDimension value(0.0f);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVp(jsVal, value)) {
-            LOGW("value is invalid, use default value(0.0) instead.");
-        }
+        ParseJsDimensionVp(jsVal, value);
     } else {
         if (!ParseJsDimensionVpNG(jsVal, value)) {
-            LOGW("value is invalid, use default value(0.0) instead.");
             value.SetValue(0.0f);
         }
     }
@@ -137,12 +132,9 @@ void JSRect::SetRadiusHeight(const JSRef<JSVal>& jsVal)
 {
     CalcDimension value(0.0f);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVp(jsVal, value)) {
-            LOGW("value is invalid, use default value(0.0) instead.");
-        }
+        ParseJsDimensionVp(jsVal, value);
     } else {
         if (!ParseJsDimensionVpNG(jsVal, value)) {
-            LOGW("value is invalid, use default value(0.0) instead.");
             value.SetValue(0.0f);
         }
     }
@@ -152,7 +144,6 @@ void JSRect::SetRadiusHeight(const JSRef<JSVal>& jsVal)
 void JSRect::SetRadius(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (info[0]->IsArray()) {
@@ -170,12 +161,9 @@ void JSRect::SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<
 {
     CalcDimension value(0.0f);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVp(jsVal, value)) {
-            LOGW("value is invalid, use default value(0.0) instead.");
-        }
+        ParseJsDimensionVp(jsVal, value);
     } else {
         if (!ParseJsDimensionVpNG(jsVal, value)) {
-            LOGW("value is invalid, use default value(0.0) instead.");
             value.SetValue(0.0f);
         }
     }
@@ -192,13 +180,11 @@ void JSRect::SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<
 void JSRect::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal)
 {
     if (!jsVal->IsArray()) {
-        LOGE("The arg is not array.");
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsVal);
     auto length = static_cast<int32_t>(array->Length());
     if (length <= 0) {
-        LOGE("info is invalid");
         return;
     }
     length = std::min(length, 4);
@@ -216,16 +202,14 @@ void JSRect::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const J
         CalcDimension radiusXValue(0.0f);
         CalcDimension radiusYValue(0.0f);
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            if (!ParseJsDimensionVp(radiusX, radiusXValue) || !ParseJsDimensionVp(radiusY, radiusYValue)) {
-                LOGW("value is invalid, use default value(0.0) instead.");
+            if (ParseJsDimensionVp(radiusX, radiusXValue)) {
+                ParseJsDimensionVp(radiusY, radiusYValue);
             }
         } else {
             if (!ParseJsDimensionVpNG(radiusX, radiusXValue)) {
-                LOGW("radiusX is invalid, use default value(0.0) instead.");
                 radiusXValue.SetValue(0.0f);
             }
             if (!ParseJsDimensionVpNG(radiusY, radiusYValue)) {
-                LOGW("radiusY is invalid, use default value(0.0) instead.");
                 radiusYValue.SetValue(0.0f);
             }
         }
@@ -247,7 +231,6 @@ void JSRect::ObjectRadiusWidth(const JSCallbackInfo& info)
 {
     info.ReturnSelf();
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -255,7 +238,6 @@ void JSRect::ObjectRadiusWidth(const JSCallbackInfo& info)
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
-        LOGE("Value is less than zero");
         return;
     }
     auto rect = AceType::DynamicCast<ShapeRect>(basicShape_);
@@ -268,7 +250,6 @@ void JSRect::ObjectRadiusHeight(const JSCallbackInfo& info)
 {
     info.ReturnSelf();
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -276,7 +257,6 @@ void JSRect::ObjectRadiusHeight(const JSCallbackInfo& info)
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
-        LOGE("Value is less than zero");
         return;
     }
     auto rect = AceType::DynamicCast<ShapeRect>(basicShape_);
@@ -289,12 +269,10 @@ void JSRect::ObjectRadius(const JSCallbackInfo& info)
 {
     info.ReturnSelf();
     if (info.Length() < 1) {
-        LOGE("arg is invalid");
         return;
     }
     auto rect = AceType::DynamicCast<ShapeRect>(basicShape_);
     if (!rect) {
-        LOGE("rect is null");
         return;
     }
     if (info[0]->IsNumber() || info[0]->IsString()) {

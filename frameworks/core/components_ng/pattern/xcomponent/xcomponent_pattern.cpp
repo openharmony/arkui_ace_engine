@@ -182,7 +182,6 @@ void XComponentPattern::OnRebuildFrame()
         return;
     }
     if (!renderSurface_->IsSurfaceValid()) {
-        LOGE("surface not valid");
         return;
     }
     auto host = GetHost();
@@ -224,6 +223,8 @@ void XComponentPattern::SetMethodCall()
         });
 
     xcomponentController_->surfaceId_ = renderSurface_->GetUniqueId();
+    TAG_LOGD(
+        AceLogTag::ACE_XCOMPONENT, "XComponent set surfaceId = %{public}s", xcomponentController_->surfaceId_.c_str());
 }
 
 void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
@@ -360,6 +361,7 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 
 void XComponentPattern::XComponentSizeInit()
 {
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "XComponent ready to invoke OnSurfaceCreated and onLoad");
     CHECK_RUN_ON(UI);
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
@@ -527,7 +529,6 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
         auto currentTime = GetSysTimestamp();
         auto increaseCpuTime = currentTime - startIncreaseTime_;
         if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
-            LOGD("HandleTouchEvent increase cpu frequency");
             startIncreaseTime_ = currentTime;
             ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         }
