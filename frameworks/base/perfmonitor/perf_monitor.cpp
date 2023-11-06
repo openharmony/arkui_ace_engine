@@ -101,6 +101,8 @@ void ConvertToRsData(OHOS::Rosen::DataBaseRs &dataRs, DataBase& data)
     dataRs.pageUrl = data.baseInfo.pageUrl;
     dataRs.sourceType = GetSourceTypeName(data.sourceType);
     dataRs.note = data.baseInfo.note;
+    dataRs.isAnimationTrace = data.isAnimationTrace;
+    dataRs.isReportInteractionEvent = data.isReportInteractionEvent;
 }
 
 void ReportPerfEventToRS(DataBase& data)
@@ -216,6 +218,8 @@ void SceneRecord::Reset()
     totalFrames = 0;
     isSuccessive = false;
     isFirstFrame = false;
+    isAnimationTrace = false;
+    isReportInteractionEvent = true;
     sceneId = "";
     actionType = UNKNOWN_ACTION;
     sourceType = UNKNOWN_SOURCE;
@@ -230,9 +234,10 @@ PerfMonitor* PerfMonitor::GetPerfMonitor()
     return pMonitor;
 }
 
-void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
+void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note,
+    bool isReportInteractionEvent, bool isAnimationTrace)
 {
-    AceAsyncTraceBegin(0, sceneId.c_str());
+    AceAsyncTraceBegin(0, sceneId.c_str(), isAnimationTrace);
     std::lock_guard<std::mutex> Lock(mMutex);
     // inactive animator start on inputtime
     if (GetInputTime(type) <= 0) {
@@ -243,15 +248,19 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     if (record != nullptr) {
         record->Reset();
         record->InitRecord(sceneId, type, mSourceType, note, inputTime);
+        record->isReportInteractionEvent = isReportInteractionEvent;
+        record->isAnimationTrace = isAnimationTrace;
     } else {
         record = new SceneRecord();
         record->InitRecord(sceneId, type, mSourceType, note, inputTime);
+        record->isReportInteractionEvent = isReportInteractionEvent;
+        record->isAnimationTrace = isAnimationTrace;
         mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
     }
     RecordBaseInfo(record);
 }
 
-void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
+void PerfMonitor::End(const std::string& sceneId, bool isRsRender, bool isAnimationTrace)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
     SceneRecord* record = GetRecord(sceneId);
@@ -260,7 +269,7 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
         record->Report(sceneId, mVsyncTime, isRsRender);
         ReportAnimateEnd(sceneId, record, !isRsRender);
         RemoveRecord(sceneId);
-        AceAsyncTraceEnd(0, sceneId.c_str());
+        AceAsyncTraceEnd(0, sceneId.c_str(), isAnimationTrace);
     }
 }
 
@@ -422,6 +431,8 @@ void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needCo
     data.totalMissed = record->totalMissed;
     data.totalFrames = record->totalFrames;
     data.needReportToRS = needCompleteTime;
+    data.isAnimationTrace = record->isAnimationTrace;
+    data.isReportInteractionEvent = record->isReportInteractionEvent;
     data.sourceType = record->sourceType;
     data.actionType = record->actionType;
     data.baseInfo = baseInfo;
