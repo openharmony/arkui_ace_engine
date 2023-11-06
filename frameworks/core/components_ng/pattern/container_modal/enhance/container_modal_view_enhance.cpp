@@ -258,8 +258,9 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
         LOGD("container window on hover event action_ = %{public}d sIsMenuPending_ %{public}d", info.GetAction(),
             sIsMenuPending_);
         sIsForbidMenuEvent_ = info.GetButton() == MouseButton::LEFT_BUTTON
-            || info.GetAction() == MouseAction::WINDOW_ENTER;
-        if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE) {
+            || info.GetAction() == MouseAction::WINDOW_ENTER
+            || info.GetScreenLocation().IsZero();
+        if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE && !info.GetScreenLocation().IsZero()) {
             auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() -
                 MENU_FLOAT_X.ConvertToPx();
             auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() +
@@ -463,7 +464,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildRightSplitMenuItem()
     auto rightSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(rightSplitClickFunc));
     auto screenRightRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.rightSide"),
         InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N, rightSplitEvent, false);
-    screenRightRow->UpdateInspectorId("EnhanceScreenRow");
+    screenRightRow->UpdateInspectorId("EnhanceMenuScreenRightRow");
     PaddingProperty pad;
     pad.left = CalcLength(CONTENT_PADDING);
     return BuildMenuItemPadding(pad, screenRightRow);

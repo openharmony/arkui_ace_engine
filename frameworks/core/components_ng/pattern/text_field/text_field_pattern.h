@@ -62,7 +62,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
-#include "core/gestures/gesture_info.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -316,7 +315,7 @@ public:
         return contentController_->GetWideText();
     }
 
-    int32_t GetCaretIndex()
+    int32_t GetCaretIndex() const
     {
         return selectController_->GetCaretIndex();
     }

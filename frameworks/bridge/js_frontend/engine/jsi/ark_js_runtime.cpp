@@ -277,6 +277,12 @@ bool ArkJSRuntime::HasPendingException()
 void ArkJSRuntime::HandleUncaughtException(panda::TryCatch& trycatch,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
+    // Handle the uncaught exception by native engine created by ability runtime in the stage model project.
+    if (nativeEngine_) {
+        nativeEngine_->HandleUncaughtException();
+        return;
+    }
+
     if (uncaughtErrorHandler_ == nullptr) {
         LOGE("uncaughtErrorHandler is null.");
         return;

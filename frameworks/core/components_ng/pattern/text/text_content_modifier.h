@@ -135,6 +135,7 @@ private:
         RefPtr<AnimatablePropertyFloat> offsetX;
         RefPtr<AnimatablePropertyFloat> offsetY;
         RefPtr<AnimatablePropertyColor> color;
+        RefPtr<PropertyBool> isFilled;
     };
     std::vector<ShadowProp> shadows_;
 

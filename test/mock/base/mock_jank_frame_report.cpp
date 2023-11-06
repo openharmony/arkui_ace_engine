@@ -34,9 +34,10 @@ PerfMonitor* PerfMonitor::GetPerfMonitor()
     return nullptr;
 }
 
-void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note) {}
+void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note,
+    bool isReportInteractionEvent, bool isAnimationTrace) {}
 
-void PerfMonitor::End(const std::string& sceneId, bool isJsApi) {}
+void PerfMonitor::End(const std::string& sceneId, bool isJsApi, bool isAnimationTrace) {}
 
 void PerfMonitor::SetPageUrl(const std::string& pageUrl) {}
 

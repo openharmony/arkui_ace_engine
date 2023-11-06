@@ -34,7 +34,7 @@ public:
         std::function<void(int32_t, const std::string&, const std::string&)>&& onError);
     static RefPtr<FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
 
-    void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap) override;
+    void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller = false) override;
     void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;

@@ -400,7 +400,7 @@ HWTEST_F(GridTestNg, Property001, TestSize.Level1)
         model.SetMaxCount(5);
         model.SetMinCount(2);
         model.SetCellLength(100);
-        model.SetEdgeEffect(EdgeEffect::SPRING);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
         model.SetScrollEnabled(false);
         CreateColItem(10);
     });
@@ -1216,6 +1216,70 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT));
     EXPECT_TRUE(pattern_->OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT * 2));
+}
+
+/**
+ * @tc.name: EdgeEffectOption001
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption002
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption003
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(3); // 3 is item count
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_FALSE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption004
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(3); // 3 is item count
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
 }
 
 /**

@@ -170,9 +170,14 @@ void GridModelNG::SetSupportAnimation(bool value)
 
 void GridModelNG::SetSupportDragAnimation(bool value) {}
 
-void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
+void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, EdgeEffect, edgeEffect);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAlwaysEnabled(alwaysEnabled);
 }
 
 void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)

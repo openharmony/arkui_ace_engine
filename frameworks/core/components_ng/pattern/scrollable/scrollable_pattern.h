@@ -42,6 +42,9 @@ class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
+    ScrollablePattern() = default;
+    ScrollablePattern(bool alwaysEnabled) : edgeEffectAlwaysEnabled_(alwaysEnabled) {}
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -315,6 +318,15 @@ public:
         return exp(-RATIO * gamma);
     }
 
+    bool GetAlwaysEnabled()
+    {
+        return edgeEffectAlwaysEnabled_;
+    }
+
+    void SetAlwaysEnabled(bool alwaysEnabled)
+    {
+        edgeEffectAlwaysEnabled_ = alwaysEnabled;
+    }
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -484,6 +496,7 @@ private:
     RefPtr<NavBarPattern> navBarPattern_;
 
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+    bool edgeEffectAlwaysEnabled_ = false;
 };
 } // namespace OHOS::Ace::NG
 

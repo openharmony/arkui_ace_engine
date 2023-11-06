@@ -29,7 +29,7 @@ public:
     void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;
     void SetListDirection(Axis axis) override;
     void SetScrollBar(Ace::DisplayMode scrollBar) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetChainAnimation(bool enableChainAnimation) override;

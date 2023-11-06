@@ -206,9 +206,7 @@ void TextFieldModelNG::SetCaretPosition(const int32_t& value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CaretPosition, value);
     pattern->SetCaretPosition(value);
 }
 

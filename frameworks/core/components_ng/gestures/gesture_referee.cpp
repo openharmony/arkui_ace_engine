@@ -49,13 +49,20 @@ bool GestureScope::CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognize
 {
     for (const auto& weak : recognizers_) {
         auto member = weak.Upgrade();
+        if (!member || member->GetRefereeState() != RefereeState::PENDING) {
+            continue;
+        }
         if (member == recognizer) {
             return false;
         }
-
-        if (member && member->GetRefereeState() == RefereeState::PENDING) {
-            return true;
+        RefPtr<NGGestureRecognizer> group = member->GetGestureGroup().Upgrade();
+        while (group) {
+            if (group == recognizer) {
+                return false;
+            }
+            group = group->GetGestureGroup().Upgrade();
         }
+        return true;
     }
     return false;
 }
