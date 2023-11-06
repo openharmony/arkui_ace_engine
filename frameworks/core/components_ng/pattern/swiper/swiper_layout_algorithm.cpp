@@ -338,7 +338,11 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
     }
     ++currentIndex;
     {
-        ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::LayoutForwardItem:%d", currentIndex);
+        if (wrapper->GetHostNode()) {
+            ACE_SCOPED_TRACE("[MeasureSwiperForwardItem:%d][self:%d][parent:%d]", currentIndex,
+                wrapper->GetHostNode()->GetId(), wrapper->GetHostNode()->GetParent() ?
+                    wrapper->GetHostNode()->GetParent()->GetId() : 0);
+        }
         wrapper->Measure(layoutConstraint);
     }
 
@@ -382,7 +386,11 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
     }
     --currentIndex;
     {
-        ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::MeasureSwiperItem:%d", currentIndex);
+        if (wrapper->GetHostNode()) {
+            ACE_SCOPED_TRACE("[MeasureSwiperBackwardItem:%d][self:%d][parent:%d]", currentIndex,
+                wrapper->GetHostNode()->GetId(), wrapper->GetHostNode()->GetParent() ?
+                    wrapper->GetHostNode()->GetParent()->GetId() : 0);
+        }
         wrapper->Measure(layoutConstraint);
     }
     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
