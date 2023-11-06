@@ -26,11 +26,8 @@
 #include "adapter/preview/external/ability/context.h"
 #include "adapter/preview/external/ability/fa/fa_context.h"
 #include "adapter/preview/external/ability/stage/stage_context.h"
-#include "iremote_object.h"
-
 
 namespace OHOS::Ace {
-
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
@@ -159,7 +156,6 @@ private:
     // ArkTS Form
     bool isFormRender_ = false;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_UI_CONTENT_IMPL_H
