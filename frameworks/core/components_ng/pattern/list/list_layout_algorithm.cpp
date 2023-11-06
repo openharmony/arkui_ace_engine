@@ -115,6 +115,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 spaceWidth_ = std::max(spaceWidth_, static_cast<float>(Round(dividerSpace.value())));
             }
         }
+        if (overScrollFeature_ && !mainSizeIsDefined_ && GreatNotEqual(contentMainSize_, prevContentMainSize_)) {
+            contentMainSize_ = prevContentMainSize_;
+        }
         spaceWidth_ += chainInterval_;
         CalculateLanes(listLayoutProperty, layoutConstraint, contentIdealSize.CrossSize(axis_), axis_);
         listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
@@ -626,8 +629,13 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             startMainPos_ = currentOffset_;
         } else if (LessOrEqual(itemTotalSize, contentMainSize_) && (itemPosition_.begin()->first == 0)) {
             // all items size is less than list.
-            currentOffset_ = firstItemTop;
-            startMainPos_ = currentOffset_;
+            if (!canOverScroll_) {
+                currentOffset_ = firstItemTop;
+                startMainPos_ = currentOffset_;
+            } else {
+                startMainPos_ = currentEndPos - contentMainSize_;
+                endMainPos_ = currentEndPos;
+            }
             if (!mainSizeIsDefined_) {
                 // adapt child size.
                 contentMainSize_ = itemTotalSize;
@@ -697,7 +705,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
         contentStartOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
     }
     if (GreatNotEqual(currentStartPos, startMainPos_ + contentStartOffset_)) {
-        bool overBottom = LessNotEqual(GetEndPosition(), endMainPos_);
+        bool overBottom = (GreatNotEqual(GetEndPosition() - GetStartPosition(), contentMainSize_) &&
+                           LessNotEqual(GetEndPosition(), endMainPos_));
         if (((!canOverScroll_ || overBottom) && !IsScrollSnapAlignCenter(layoutWrapper)) || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos;
             if (!mainSizeIsDefined_ && GetEndIndex() == totalItemCount_ - 1) {
@@ -715,6 +724,10 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
         return;
     }
 
+    if (!mainSizeIsDefined_) {
+        auto itemTotalSize = GetEndPosition() - currentStartPos;
+        contentMainSize_ = std::min(contentMainSize_, itemTotalSize);
+    }
     // Mark inactive in wrapper.
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {

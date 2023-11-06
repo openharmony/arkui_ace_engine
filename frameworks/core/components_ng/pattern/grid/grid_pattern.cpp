@@ -449,7 +449,7 @@ void GridPattern::CheckScrollable()
         (gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap()) > GetMainContentSize())) {
         scrollable_ = true;
     } else {
-        if (gridLayoutInfo_.startMainLineIndex_ != 0) {
+        if (gridLayoutInfo_.startMainLineIndex_ != 0 || GetAlwaysEnabled()) {
             scrollable_ = true;
         } else {
             scrollable_ = false;
@@ -1615,12 +1615,22 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
         CHECK_NULL_RETURN(grid, 0.0);
+        if (grid->GetAlwaysEnabled() &&
+            GreatNotEqual(grid->GetMainContentSize(), grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()))) {
+            return grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()) -
+                   grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
+        }
         return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
         CHECK_NULL_RETURN(grid, 0.0);
+        if (grid->GetAlwaysEnabled() &&
+            GreatNotEqual(grid->GetMainContentSize(), grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()))) {
+            return grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()) -
+                   grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
+        }
         return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });

@@ -449,7 +449,7 @@ void ListPattern::CheckScrollable()
     } else {
         if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_) &&
             !IsScrollSnapAlignCenter()) {
-            scrollable_ = GreatNotEqual((endMainPos_ - startMainPos_), contentMainSize_);
+            scrollable_ = GetAlwaysEnabled() || GreatNotEqual((endMainPos_ - startMainPos_), contentMainSize_);
         } else {
             scrollable_ = true;
         }
@@ -774,6 +774,10 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
         endPos += GetChainDelta(endIndex_);
     }
     bool outOfStart = (startIndex_ == 0) && Positive(startPos) && GreatNotEqual(endPos, contentMainSize_);
+    if (GetAlwaysEnabled()) {
+        outOfStart = (startIndex_ == 0) && Positive(startPos);
+    }
+
     bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, contentMainSize_) && Negative(startPos);
     if (IsScrollSnapAlignCenter()) {
         auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
@@ -1394,6 +1398,9 @@ void ListPattern::UpdateScrollBarOffset()
     float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
     Offset scrollOffset = { currentOffset, currentOffset }; // fit for w/h switched.
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+    if (GetAlwaysEnabled()) {
+        estimatedHeight = estimatedHeight - spaceWidth_;
+    }
 
     // calculate padding offset of list
     auto host = GetHost();

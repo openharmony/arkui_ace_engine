@@ -81,6 +81,15 @@ struct GridLayoutInfo {
         return totalHeight - currentOffset_;
     }
 
+    float GetTotalLineHeight(float mainGap) const
+    {
+        float totalHeight = 0.0f;
+        for (auto iter = lineHeightMap_.begin(); iter != lineHeightMap_.end(); ++iter) {
+            totalHeight += (iter->second + mainGap);
+        }
+        return totalHeight - mainGap;
+    }
+
     void ResetPositionFlags()
     {
         reachEnd_ = false;
