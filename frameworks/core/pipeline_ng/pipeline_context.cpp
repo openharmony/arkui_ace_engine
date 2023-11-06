@@ -1156,10 +1156,20 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
+        ResetDraggingStatus(scalePoint);
     }
 
     hasIdleTasks_ = true;
     RequestFrame();
+}
+
+void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint)
+{
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
+        manager->OnDragEnd({ touchPoint.x, touchPoint.y }, "");
+    }
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
