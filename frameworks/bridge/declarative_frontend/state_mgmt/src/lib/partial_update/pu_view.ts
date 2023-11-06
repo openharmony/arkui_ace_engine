@@ -415,7 +415,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const componentName : string = (typeof updateFunc1 == "object") ? updateFunc1.componentName as string : "unknown component type";
 
     if (typeof updateFunc !== "function") {
-      stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
+      stateMgmtConsole.debug(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
     } else {
       stateMgmtConsole.debug(`${this.debugInfo()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} start ...`);
       this.isRenderInProgress = true;
