@@ -22,17 +22,29 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
 class CheckBoxPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(CheckBoxPaintProperty, PaintProperty)
+private:
+    RefPtr<FrameNode> host_;
 
 public:
     CheckBoxPaintProperty() = default;
 
     ~CheckBoxPaintProperty() override = default;
 
+    void SetHost(const RefPtr<FrameNode>& host)
+    {
+        host_ = host;
+    }
+
+    RefPtr<FrameNode> GetHost() const
+    {
+        return host_;
+    }
     RefPtr<PaintProperty> Clone() const override
     {
         auto paintProperty = MakeRefPtr<CheckBoxPaintProperty>();
@@ -43,6 +55,7 @@ public:
         paintProperty->propCheckBoxCheckMarkColor_ = CloneCheckBoxCheckMarkColor();
         paintProperty->propCheckBoxCheckMarkSize_ = CloneCheckBoxCheckMarkSize();
         paintProperty->propCheckBoxCheckMarkWidth_ = CloneCheckBoxCheckMarkWidth();
+        paintProperty->SetHost(this->GetHost());
         return paintProperty;
     }
 
@@ -65,6 +78,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxCheckMarkColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxCheckMarkSize, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxCheckMarkWidth, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxSelectedStyle, CheckBoxStyle, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

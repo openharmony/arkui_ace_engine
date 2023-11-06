@@ -80,6 +80,7 @@
 #include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
+#include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
@@ -340,9 +341,8 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
 void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_ && paintRect.IsValid());
-    RSNode::ExecuteWithoutAnimation([&]() {
-        rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-    });
+    RSNode::ExecuteWithoutAnimation(
+        [&]() { rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height()); });
 }
 
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool needRoundToPixelGrid)
@@ -354,8 +354,8 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     auto paintRect = AdjustPaintRect();
 
     if (needRoundToPixelGrid) {
-        RoundToPixelGrid(geometryNode->GetParentAbsoluteOffset().GetX(),
-            geometryNode->GetParentAbsoluteOffset().GetY());
+        RoundToPixelGrid(
+            geometryNode->GetParentAbsoluteOffset().GetX(), geometryNode->GetParentAbsoluteOffset().GetY());
         paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
     }
     SyncGeometryProperties(paintRect);
@@ -2019,8 +2019,8 @@ float RosenRenderContext::RoundValueToPixelGrid(float value, bool forceCeil, boo
     } else if (forceFloor) {
         scaledValue = scaledValue - fractials;
     } else {
-        scaledValue = (!std::isnan(fractials) && (GreatOrEqual(fractials, 0.5f)) ? 1.0f : 0.0f)
-                        + scaledValue - fractials;
+        scaledValue =
+            (!std::isnan(fractials) && (GreatOrEqual(fractials, 0.5f)) ? 1.0f : 0.0f) + scaledValue - fractials;
     }
     return scaledValue;
 }
@@ -2049,16 +2049,16 @@ void RosenRenderContext::RoundToPixelGrid(float absoluteLeft, float absoluteTop)
     geometryNode->SetPixelGridRoundOffset(OffsetF(RoundValueToPixelGrid(nodeRelativedLeft, false, textRounding),
         RoundValueToPixelGrid(nodeRelativedTop, false, textRounding)));
 
-    bool hasFractionalWidth =
-        !NearEqual(fmod(nodeWidth, 1.0f), 0.0f) && !NearEqual(fmod(nodeWidth, 1.0f), 1.0f);
-    bool hasFractionalHeight =
-        !NearEqual(fmod(nodeHeight, 1.0f), 0.0f) && !NearEqual(fmod(nodeHeight, 1.0f), 1.0f);
+    bool hasFractionalWidth = !NearEqual(fmod(nodeWidth, 1.0f), 0.0f) && !NearEqual(fmod(nodeWidth, 1.0f), 1.0f);
+    bool hasFractionalHeight = !NearEqual(fmod(nodeHeight, 1.0f), 0.0f) && !NearEqual(fmod(nodeHeight, 1.0f), 1.0f);
 
-    geometryNode->SetPixelGridRoundSize(SizeF(
-        RoundValueToPixelGrid(absoluteNodeRight, (textRounding && hasFractionalWidth),
-            (textRounding && !hasFractionalWidth)) - RoundValueToPixelGrid(absoluteNodeLeft, false, textRounding),
-        RoundValueToPixelGrid(absoluteNodeBottom, (textRounding && hasFractionalHeight),
-            (textRounding && !hasFractionalHeight)) - RoundValueToPixelGrid(absoluteNodeTop, false, textRounding)));
+    geometryNode->SetPixelGridRoundSize(
+        SizeF(RoundValueToPixelGrid(
+                  absoluteNodeRight, (textRounding && hasFractionalWidth), (textRounding && !hasFractionalWidth)) -
+                  RoundValueToPixelGrid(absoluteNodeLeft, false, textRounding),
+            RoundValueToPixelGrid(
+                absoluteNodeBottom, (textRounding && hasFractionalHeight), (textRounding && !hasFractionalHeight)) -
+                RoundValueToPixelGrid(absoluteNodeTop, false, textRounding)));
 }
 
 void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension& resultY,
@@ -2235,16 +2235,46 @@ void RosenRenderContext::PaintFocusState(
 {
     CHECK_NULL_VOID(paintRect.GetRect().IsValid());
     CHECK_NULL_VOID(rsNode_);
-
     auto borderWidthPx = static_cast<float>(paintWidth.ConvertToPx());
-
-    auto paintTask = [paintColor, borderWidthPx](const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
+    auto frameNode = GetHost();
+    auto paintTask = [paintColor, borderWidthPx, frameNode](const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
         RSPen pen;
         pen.SetAntiAlias(true);
         pen.SetColor(ToRSColor(paintColor));
         pen.SetWidth(borderWidthPx);
         rsCanvas.AttachPen(pen);
-        rsCanvas.DrawRoundRect(rrect);
+        CHECK_NULL_VOID(frameNode);
+        if (!frameNode->GetCheckboxFlag()) {
+            rsCanvas.DrawRoundRect(rrect);
+        } else {
+            auto paintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+            CHECK_NULL_VOID(paintProperty);
+            CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+            } else {
+                checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
+            }
+            if (paintProperty->HasCheckBoxSelectedStyle()) {
+                checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+            }
+            RSScalar halfDenominator = 2.0f;
+            RSScalar radius = 0.0f;
+            RSRRect rect = rrect.GetRect();
+            RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
+            RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
+            RSRPoint centerPt(x, y);
+            if (rect.GetWidth() > rect.GetHeight()) {
+                radius = rect.GetHeight() / halfDenominator;
+            } else {
+                radius = rect.GetWidth() / halfDenominator;
+            }
+            if (CheckBoxStyle::SQUARE_STYLE == checkboxStyle) {
+                rsCanvas.DrawRoundRect(rrect);
+            } else {
+                rsCanvas.DrawCircle(centerPt, radius);
+            }
+        }
         rsCanvas.DetachPen();
     };
     std::shared_ptr<Rosen::RectF> overlayRect = std::make_shared<Rosen::RectF>(
@@ -2384,9 +2414,10 @@ void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregr
             RSCanvas rsCanvas(&canvas);
             foregroundDraw(rsCanvas);
 #else
-        [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<RSCanvas> canvas) {
-            CHECK_NULL_VOID(canvas);
-            foregroundDraw(*canvas);
+            [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<RSCanvas> canvas)
+            {
+                CHECK_NULL_VOID(canvas);
+                foregroundDraw(*canvas);
 #endif
         });
 }

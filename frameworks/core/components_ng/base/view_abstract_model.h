@@ -27,9 +27,9 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
-#include "core/components/common/properties/blend_mode.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -170,7 +170,7 @@ public:
     virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;
     virtual void SetBackdropBlur(const Dimension& radius) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
-    
+
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius) = 0;
@@ -279,16 +279,17 @@ public:
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
 
     // custom animation properties
-    virtual void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent) = 0;
+    virtual void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) = 0;
     virtual void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) = 0;
 
     virtual void CreateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value,
         std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) = 0;
-    virtual void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-        RefPtr<NG::CustomAnimatableArithmetic>& value) = 0;
+    virtual void UpdateAnimatableArithmeticProperty(
+        const std::string& propertyName, RefPtr<NG::CustomAnimatableArithmetic>& value) = 0;
     virtual void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) = 0;
+
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
     static std::mutex mutex_;

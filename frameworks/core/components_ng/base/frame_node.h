@@ -85,6 +85,15 @@ public:
         return 1;
     }
 
+    void SetCheckboxFlag(const bool checkboxFlag)
+    {
+        checkboxFlag_ = checkboxFlag;
+    }
+
+    bool GetCheckboxFlag() const
+    {
+        return checkboxFlag_;
+    }
     void OnInspectorIdUpdate(const std::string& /*unused*/) override;
 
     struct ZIndexComparator {
@@ -688,6 +697,7 @@ private:
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
 
     bool isRestoreInfoUsed_ = false;
+    bool checkboxFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
