@@ -74,6 +74,7 @@ public:
     virtual bool ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const = 0;
     virtual void SetMouseIcon(
         int32_t windowId, MouseFormat pointerStyle, std::shared_ptr<Media::PixelMap> pixelMap) const {};
+    virtual void SetPointerVisible(MouseFormat pointerStyle) const {};
 };
 
 } // namespace OHOS::Ace

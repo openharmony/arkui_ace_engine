@@ -31,6 +31,7 @@ public:
     bool ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const override;
     void SetMouseIcon(
         int32_t windowId, MouseFormat pointerStyle, std::shared_ptr<Media::PixelMap> pixelMap) const override;
+    void SetPointerVisible(MouseFormat pointerStyle) const override;
 };
 
 } // namespace OHOS::Ace
