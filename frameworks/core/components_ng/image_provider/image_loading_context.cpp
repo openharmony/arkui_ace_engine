@@ -125,10 +125,7 @@ void ImageLoadingContext::OnLoadSuccess()
     if (notifiers_.onLoadSuccess_) {
         notifiers_.onLoadSuccess_(src_);
     }
-    if (pendingMakeCanvasImageTask_) {
-        pendingMakeCanvasImageTask_();
-        pendingMakeCanvasImageTask_ = nullptr;
-    }
+    ImageUtils::PostToUI(std::move(pendingMakeCanvasImageTask_));
 }
 
 void ImageLoadingContext::OnLoadFail()
@@ -323,6 +320,7 @@ bool ImageLoadingContext::MakeCanvasImageIfNeed(
         pendingMakeCanvasImageTask_ = [weak = AceType::WeakClaim(this), dstSize, autoResize, imageFit, sourceSize]() {
             auto ctx = weak.Upgrade();
             CHECK_NULL_VOID(ctx);
+            CHECK_NULL_VOID(ctx->SizeChanging(dstSize));
             ctx->MakeCanvasImage(dstSize, autoResize, imageFit, sourceSize);
         };
     } else {
