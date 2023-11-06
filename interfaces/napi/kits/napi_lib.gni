@@ -33,7 +33,7 @@ common_napi_libs = [
   "atomic_service_bar",
 ]
 
-if (!is_cross_platform_build) {
+if (!is_arkui_x) {
   common_napi_libs += [ "arkui/performancemonitor" ]
 }
 
