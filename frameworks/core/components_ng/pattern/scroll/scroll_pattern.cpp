@@ -422,9 +422,13 @@ void ScrollPattern::HandleCrashBottom() const
 
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
-    SetScrollSource(source);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    for (auto listenerItem : listenerVector_) {
+        auto frameSize = host->GetGeometryNode()->GetFrameSize();
+        listenerItem->OnScrollUpdate(frameSize);
+    }
+    SetScrollSource(source);
     // TODO: ignore handle refresh
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {
         if (IsOutOfBoundary()) {
@@ -850,5 +854,10 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(itemGeometry, Rect());
     return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
+
+void ScrollPattern::registerScrollUpdateListener(const std::shared_ptr<IScrollUpdateCallback>& listener)
+{
+    listenerVector_.emplace_back(listener);
 }
 } // namespace OHOS::Ace::NG

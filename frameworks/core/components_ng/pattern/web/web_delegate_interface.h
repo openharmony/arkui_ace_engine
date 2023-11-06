@@ -97,6 +97,7 @@ public:
     virtual void OnFocus() = 0;
     virtual void OnBlur() = 0;
     virtual void UpdateLocale() = 0;
+    virtual void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
     virtual void OnInactive() = 0;
     virtual void OnActive() = 0;
     virtual void SetBackgroundColor(int32_t backgroundColor) = 0;

@@ -2527,7 +2527,7 @@ void WebDelegate::InitWebViewWithSurface()
     CHECK_NULL_VOID(window);
     rosenWindowId_ = window->GetWindowId();
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), context = context_]() {
+        [weak = WeakClaim(this), context = context_, this]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             OHOS::NWeb::NWebInitArgs initArgs;
@@ -2614,6 +2614,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetWindowId(window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
+            delegate->nweb_->SetDrawMode(webType_);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -5056,6 +5057,14 @@ void WebDelegate::UpdateLocale()
         }
     }
 }
+
+void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetDrawRect(x, y, width, height);
+    }
+}
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const
@@ -5072,6 +5081,11 @@ std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::
         ss >> result;
     }
     return result;
+}
+
+void WebDelegate::SetWebType(WebType type)
+{
+    webType_ = static_cast<int32_t>(type);
 }
 
 void WebDelegate::BindRouterBackMethod()

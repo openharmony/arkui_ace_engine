@@ -506,6 +506,7 @@ public:
     RefPtr<PixelMap> GetDragPixelMap();
     std::string GetUrl();
     void UpdateLocale();
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void OnInactive();
     void OnActive();
     void OnWebviewHide();
@@ -634,6 +635,7 @@ public:
     }
 #endif
     void SetToken();
+    void SetWebType(WebType type);
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
@@ -764,6 +766,7 @@ private:
     EventCallbackV2 onOverScrollV2_;
     EventCallbackV2 onScreenCaptureRequestV2_;
 
+    int32_t webType_;
     std::string bundlePath_;
     std::string bundleDataPath_;
     std::string hapPath_;

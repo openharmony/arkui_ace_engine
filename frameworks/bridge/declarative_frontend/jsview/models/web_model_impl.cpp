@@ -19,7 +19,7 @@
 #include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
-void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController)
+void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController, WebType /* type */)
 {
     RefPtr<WebComponent> webComponent;
     webComponent = AceType::MakeRefPtr<WebComponent>(src);
@@ -31,7 +31,7 @@ void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& w
 }
 
 void WebModelImpl::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
-    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup)
+    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup, WebType /* type */)
 {
     RefPtr<WebComponent> webComponent;
     webComponent = AceType::MakeRefPtr<WebComponent>(src);
