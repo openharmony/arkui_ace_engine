@@ -50,7 +50,10 @@ namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
 RefPtr<PixelMap> g_pixelMap;
 bool g_getPixelMapSucc = false;
+namespace {
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
+constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
+} // namespace
 using namespace Msdp::DeviceStatus;
 const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -777,13 +780,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, !NearEqual(scale, defaultPixelMapScale));
+    auto extraInfoLimited = dragDropInfo.extraInfo.size() > EXTRA_INFO_MAX_LENGTH
+                                ? dragDropInfo.extraInfo.substr(EXTRA_INFO_MAX_LENGTH + 1)
+                                : dragDropInfo.extraInfo;
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
     ShadowInfoCore shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
-    DragDataCore dragData { shadowInfo, {}, udKey, dragDropInfo.extraInfo, arkExtraInfoJson->ToString(),
+    DragDataCore dragData { shadowInfo, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), true };
+        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), true, summary };
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         return;
@@ -815,7 +821,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         return;
     }
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnDragStart(info, dragDropInfo.extraInfo, GetFrameNode());
+    dragDropProxy_->OnDragStart(info, extraInfoLimited, GetFrameNode());
 #else
     if (dragDropInfo.customNode) {
         dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.customNode, info);

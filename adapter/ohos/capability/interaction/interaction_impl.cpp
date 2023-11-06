@@ -59,7 +59,7 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
         Msdp::DeviceStatus::ShadowInfo { dragData.shadowInfo.pixelMap, dragData.shadowInfo.x, dragData.shadowInfo.y },
         dragData.buffer, dragData.udKey, dragData.filterInfo, dragData.extraInfo,
         dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX, dragData.displayY,
-        dragData.displayId, dragData.hasCanceledAnimation };
+        dragData.displayId, dragData.hasCanceledAnimation, dragData.summary };
     return InteractionManager::GetInstance()->StartDrag(msdpDragData, callbackCore);
 }
 
@@ -87,6 +87,16 @@ int32_t InteractionImpl::GetShadowOffset(ShadowOffsetData& shadowOffsetData)
 {
     return InteractionManager::GetInstance()->GetShadowOffset(
         shadowOffsetData.offsetX, shadowOffsetData.offsetY, shadowOffsetData.width, shadowOffsetData.height);
+}
+
+int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary)
+{
+    return InteractionManager::GetInstance()->GetDragSummary(summary);
+}
+
+int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)
+{
+    return InteractionManager::GetInstance()->GetExtraInfo(extraInfo);
 }
 
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)

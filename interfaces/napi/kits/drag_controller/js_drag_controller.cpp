@@ -270,7 +270,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
 
             Msdp::DeviceStatus::DragData dragData {
                 { asyncCtx->pixmap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE }, {}, udKey, "", "",
-                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true
+                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, {}
             };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {

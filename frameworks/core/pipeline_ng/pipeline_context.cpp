@@ -2236,19 +2236,16 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->RequireSummary();
-        manager->GetExtraInfoFromClipboard(extraInfo);
-        manager->SetExtraInfo(extraInfo);
     }
+    extraInfo = manager->GetExtraInfo();
 #else
     manager->GetExtraInfoFromClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
-#ifdef ENABLE_DRAG_FRAMEWORK
-        manager->GetExtraInfoFromClipboard(extraInfo);
-        manager->SetExtraInfo(extraInfo);
-#endif // ENABLE_DRAG_FRAMEWORK
         manager->OnDragEnd(Point(x, y, x, y), extraInfo);
+#ifndef ENABLE_DRAG_FRAMEWORK
         manager->RestoreClipboardData();
+#endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
     manager->OnDragMove(Point(x, y, x, y), extraInfo);
