@@ -71,6 +71,8 @@ struct DataBase {
     int64_t beginVsyncTime {0};
     int64_t endVsyncTime {0};
     bool needReportToRS {false};
+    bool isAnimationTrace {false};
+    bool isReportInteractionEvent {true};
     PerfSourceType sourceType {UNKNOWN_SOURCE};
     PerfActionType actionType {UNKNOWN_ACTION};
     PerfEventType eventType {UNKNOWN_EVENT};
@@ -105,6 +107,8 @@ public:
     int32_t seqMissFrames {0};
     bool isSuccessive {false};
     bool isFirstFrame {false};
+    bool isAnimationTrace {false};
+    bool isReportInteractionEvent {true};
     std::string sceneId {""};
     PerfActionType actionType {UNKNOWN_ACTION};
     PerfSourceType sourceType {UNKNOWN_SOURCE};
@@ -113,8 +117,9 @@ public:
 
 class ACE_FORCE_EXPORT PerfMonitor {
 public:
-    void Start(const std::string& sceneId, PerfActionType type, const std::string& note);
-    void End(const std::string& sceneId, bool isJsApi);
+    void Start(const std::string& sceneId, PerfActionType type, const std::string& note,
+        bool isReportInteractionEvent = true, bool isAnimationTrace = false);
+    void End(const std::string& sceneId, bool isJsApi, bool isAnimationTrace = false);
     void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time);
     int64_t GetInputTime(PerfActionType type);
     void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank);
