@@ -2750,4 +2750,37 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
         EXPECT_EQ(context_->GetRootHeight(), params[turn][2]);
     }
 }
+/**
+ * @tc.name: PipelineContextTestNg061
+ * @tc.desc: Test the function WindowUnFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg061, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+
+    /**
+     * @tc.steps2: Call the function WindowUnFocus with WindowFocus(false).
+     * @tc.expected: containerPattern isFocus_ is false.
+     */
+    containerPattern->WindowFocus(false);
+    containerPattern->OnWindowForceUnfocused();
+    EXPECT_FALSE(containerPattern->isFocus_);
+
+    /**
+     * @tc.steps3: Call the function WindowUnFocus with WindowFocus(true).
+     * @tc.expected: containerPattern isFocus_ is true.
+     */
+    containerPattern->isFocus_ = true;
+    containerPattern->OnWindowForceUnfocused();
+    EXPECT_TRUE(containerPattern->isFocus_);
+}
 } // namespace OHOS::Ace::NG

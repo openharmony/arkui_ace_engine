@@ -57,6 +57,8 @@ public:
 
     void OnWindowUnfocused() override;
 
+    virtual void OnWindowForceUnfocused();
+
     void InitContainerEvent();
 
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false);

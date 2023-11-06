@@ -61,6 +61,13 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
     ContainerModalPattern::OnWindowUnfocused();
 }
 
+void ContainerModalPatternEnhance::OnWindowForceUnfocused()
+{
+    if (!GetIsFocus()) {
+        ContainerModalPattern::OnWindowUnfocused();
+    }
+}
+
 void ContainerModalPatternEnhance::ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus)
 {
     CHECK_NULL_VOID(titleNode);

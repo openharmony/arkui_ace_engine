@@ -153,6 +153,8 @@ public:
 
     void WindowFocus(bool isFocus) override;
 
+    void ContainerModalUnFocus() override;
+
     void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
 
     void SetAppBgColor(const Color& color) override;
