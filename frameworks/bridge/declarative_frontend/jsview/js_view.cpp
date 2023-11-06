@@ -915,6 +915,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
+    JSClass<JSViewPartialUpdate>::Method("invalidateLayout", &JSViewPartialUpdate::JsInvalidateLayout);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
@@ -1012,4 +1013,9 @@ void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
     return;
 }
 
+void JSViewPartialUpdate::JsInvalidateLayout()
+{
+    ACE_FUNCTION_TRACE();
+    ViewPartialUpdateModel::GetInstance()->InvalidateLayout(viewNode_);
+}
 } // namespace OHOS::Ace::Framework
