@@ -2527,7 +2527,7 @@ void WebDelegate::InitWebViewWithSurface()
     CHECK_NULL_VOID(window);
     rosenWindowId_ = window->GetWindowId();
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), context = context_, this]() {
+        [weak = WeakClaim(this), context = context_, webType = webType_]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             OHOS::NWeb::NWebInitArgs initArgs;
@@ -2614,7 +2614,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetWindowId(window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
-            delegate->nweb_->SetDrawMode(webType_);
+            delegate->nweb_->SetDrawMode(webType);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
