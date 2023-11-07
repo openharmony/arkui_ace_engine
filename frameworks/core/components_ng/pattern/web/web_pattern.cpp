@@ -1200,6 +1200,13 @@ void WebPattern::OnDarkModeUpdate(WebDarkMode mode)
     }
 }
 
+void WebPattern::OnOverScrollModeUpdate(int mode)
+{
+    if (delegate_) {
+        delegate_->UpdateOverScrollMode(mode);
+    }
+}
+
 void WebPattern::OnForceDarkAccessUpdate(bool access)
 {
     if (delegate_) {
@@ -1458,6 +1465,7 @@ void WebPattern::OnModifyDone()
             renderSurface_->UpdateXComponentConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
         }
+        UpdateJavaScriptOnDocumentStart();
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
@@ -1494,6 +1502,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
         delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
         delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
+        delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }
@@ -2601,11 +2610,8 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
     if (nestedScrollMode_ == NestedScrollMode::PARENT_FIRST) {
         if (offset != 0) {
             auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-            float remainOffset = result.remain;
-            CHECK_NULL_RETURN(delegate_, true);
-            TAG_LOGD(AceLogTag::ACE_WEB, "FilterScrollEvent ScrollBy remainOffset = %{public}f", remainOffset);
-            GetAxis() == Axis::HORIZONTAL ? delegate_->ScrollBy(-remainOffset, 0)
-                                          : delegate_->ScrollBy(0, -remainOffset);
+            TAG_LOGD(AceLogTag::ACE_WEB, "FilterScrollEvent ScrollBy remainOffset = %{public}f", result.remain);
+            return NearZero(result.remain);
         } else {
             HandleScrollVelocity(velocity);
         }
@@ -2721,5 +2727,22 @@ RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
 {
     auto paint = MakeRefPtr<WebPaintMethod>(renderSurface_);
     return paint;
+}
+
+void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
+{
+    scriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    if (delegate_) {
+        UpdateJavaScriptOnDocumentStart();
+        delegate_->JavaScriptOnDocumentStart();
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentStart()
+{
+    if (delegate_ && scriptItems_.has_value()) {
+        delegate_->SetJavaScriptItems(scriptItems_.value());
+        scriptItems_ = std::nullopt;
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -94,11 +94,6 @@ void JSNavDestination::SetHideTitleBar(bool hide)
 
 void JSNavDestination::SetTitle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
     if (info[0]->IsString()) {
         NavDestinationModel::GetInstance()->SetTitle(info[0]->ToString(), false);
     } else if (info[0]->IsObject()) {
@@ -137,17 +132,12 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
             NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
         }
     } else {
-        LOGE("arg is not [String|Function].");
         NavDestinationModel::GetInstance()->SetTitle("", false);
     }
 }
 
 void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
     if (!info[0]->IsFunction()) {
         return;
     }
@@ -166,10 +156,6 @@ void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
 
 void JSNavDestination::SetOnHidden(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
     if (!info[0]->IsFunction()) {
         return;
     }
@@ -185,10 +171,6 @@ void JSNavDestination::SetOnHidden(const JSCallbackInfo& info)
 
 void JSNavDestination::SetOnBackPressed(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
     if (!info[0]->IsFunction()) {
         return;
     }

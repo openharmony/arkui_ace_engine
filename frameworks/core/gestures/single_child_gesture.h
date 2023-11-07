@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_SINGLE_CHILD_GESTURE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_SINGLE_CHILD_GESTURE_H
 
-#include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT SingleChildGesture : public Gesture {

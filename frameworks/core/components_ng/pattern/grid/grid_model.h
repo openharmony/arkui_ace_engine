@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_v2/grid/grid_position_controller.h"
 #include "core/event/ace_events.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 
@@ -59,7 +58,7 @@ public:
     virtual void SetMultiSelectable(bool value) = 0;
     virtual void SetSupportAnimation(bool value) = 0;
     virtual void SetSupportDragAnimation(bool value) = 0;
-    virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;
+    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
     virtual void SetScrollEnabled(bool scrollEnabled) = 0;
     virtual void SetFriction(double friction) = 0;

@@ -70,6 +70,11 @@ public:
         return Claim(this);
     }
 
+    virtual bool HasData() const
+    {
+        return false;
+    }
+
     // cache this CanvasImage
     virtual void Cache(const std::string& key) {}
 

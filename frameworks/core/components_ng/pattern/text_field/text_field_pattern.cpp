@@ -1717,7 +1717,9 @@ void TextFieldPattern::FilterInitializeText()
     if (!contentController_->IsEmpty()) {
         contentController_->FilterValue();
     }
-    selectController_->UpdateCaretIndex(static_cast<int32_t>(contentController_->GetWideText().length()));
+    if (GetWideText().length() < GetCaretIndex()) {
+        selectController_->UpdateCaretIndex(GetWideText().length());
+    }
 }
 
 bool TextFieldPattern::IsDisabled()
@@ -2161,9 +2163,8 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     if (HasInputOperation()) {
         return;
     }
-    contentController_->SetTextValue(std::move(content));
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    contentController_->SetTextValueOnly(std::move(content));
+    selectController_->UpdateCaretIndex(GetWideText().length());
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -2589,7 +2590,6 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     }
     UpdateEditingValueToRecord();
     cursorVisible_ = true;
-    CloseSelectOverlay(true);
     StartTwinkling();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -2608,6 +2608,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         return;
     }
     insertValueOperations_.emplace(insertValue);
+    CloseSelectOverlay(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3241,6 +3242,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         return;
     }
     deleteBackwardOperations_.emplace(length);
+    CloseSelectOverlay();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3251,7 +3253,6 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     auto start = std::max(selectController_->GetCaretIndex() - length, 0);
     contentController_->erase(start, length);
     selectController_->UpdateCaretIndex(start);
-    CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
@@ -3266,7 +3267,6 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
 {
     contentController_->erase(selectController_->GetCaretIndex(), length);
-    CloseSelectOverlay();
     StartTwinkling();
     UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
@@ -3290,6 +3290,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
         return;
     }
     deleteForwardOperations_.emplace(length);
+    CloseSelectOverlay();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -4173,7 +4174,7 @@ std::string TextFieldPattern::GetShowResultImageSrc() const
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     auto showImageSource = layoutProperty->GetShowPasswordSourceInfo();
-    if (showImageSource) {
+    if (showImageSource && !showImageSource->GetSrc().empty()) {
         return showImageSource->GetSrc();
     }
     return SHOW_PASSWORD_SVG;
@@ -4186,7 +4187,7 @@ std::string TextFieldPattern::GetHideResultImageSrc() const
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     auto hideSourceInfo = layoutProperty->GetHidePasswordSourceInfo();
-    if (hideSourceInfo) {
+    if (hideSourceInfo && !hideSourceInfo->GetSrc().empty()) {
         return hideSourceInfo->GetSrc();
     }
     return HIDE_PASSWORD_SVG;
@@ -4453,6 +4454,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto maxLines = GetMaxLines();
     json->Put("maxLines", GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str());
     json->Put("barState", GetBarStateString().c_str());
+    json->Put("caretPosition", std::to_string(GetCaretIndex()).c_str());
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -4461,7 +4463,7 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
     layoutProperty->UpdatePlaceholder(json->GetString("placeholder"));
     UpdateEditingValue(json->GetString("text"), StringUtils::StringToInt(json->GetString("caretPosition")));
     FireOnTextChangeEvent();
-    UpdateSelection(selectController_->GetCaretIndex());
+    UpdateSelection(GetCaretIndex());
     auto maxLines = json->GetString("maxLines");
     if (!maxLines.empty() && maxLines != "INF") {
         layoutProperty->UpdateMaxLines(StringUtils::StringToUint(maxLines));
@@ -4555,7 +4557,6 @@ void TextFieldPattern::SetAccessibilityMoveTextAction()
         auto caretPosition = forward ? pattern->selectController_->GetCaretIndex() + range
                                      : pattern->selectController_->GetCaretIndex() - range;
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-        layoutProperty->UpdateCaretPosition(caretPosition);
         pattern->SetCaretPosition(caretPosition);
     });
 }

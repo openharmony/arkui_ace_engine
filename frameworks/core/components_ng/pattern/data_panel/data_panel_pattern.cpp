@@ -14,8 +14,10 @@
  */
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/data_panel/data_panel_layout_algorithm.h"
+#include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -29,6 +31,40 @@ bool DataPanelPattern::OnDirtyLayoutWrapperSwap(
         return false;
     }
     return true;
+}
+
+RefPtr<NodePaintMethod> DataPanelPattern::CreateNodePaintMethod()
+{
+    if (!dataPanelModifier_) {
+        dataPanelModifier_ = AceType::MakeRefPtr<DataPanelModifier>();
+    }
+    auto paintMethod = MakeRefPtr<DataPanelPaintMethod>(dataPanelModifier_);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, paintMethod);
+    auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, paintMethod);
+    auto geometryNode = host->GetGeometryNode();
+    auto frameSize = geometryNode->GetFrameSize();
+    DataPanelShadow shadowOption;
+    if (paintProperty->HasShadowOption()) {
+        shadowOption = paintProperty->GetShadowOptionValue();
+    }
+    auto oldBoundsRect = dataPanelModifier_->GetBoundsRect();
+    float x = std::min<float>(shadowOption.offsetX - shadowOption.radius, oldBoundsRect->GetX());
+    float y = std::min<float>(shadowOption.offsetY - shadowOption.radius, oldBoundsRect->GetY());
+    float width = std::max<float>(
+        { oldBoundsRect->Width(), oldBoundsRect->GetX() + oldBoundsRect->Width() - x,
+        shadowOption.offsetX - x + frameSize.Width() + shadowOption.radius * 2.0f,
+        std::abs(shadowOption.offsetX) + frameSize.Width() + shadowOption.radius * 2.0f }
+    );
+    float height = std::max<float>(
+        { oldBoundsRect->Height(), oldBoundsRect->GetY() + oldBoundsRect->Height() - y,
+        shadowOption.offsetY - y + frameSize.Height() + shadowOption.radius * 2.0f,
+        std::abs(shadowOption.offsetY) + frameSize.Height() + shadowOption.radius * 2.0f }
+    );
+    RectF boundsRect(x, y, width, height);
+    dataPanelModifier_->SetBoundsRect(boundsRect);
+    return paintMethod;
 }
 
 void DataPanelPattern::OnModifyDone()

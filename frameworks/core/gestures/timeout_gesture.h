@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_TIMEOUT_GESTURE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_TIMEOUT_GESTURE_H
 
-#include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_event.h"
 #include "core/gestures/single_child_gesture.h"
 
 #include <chrono>

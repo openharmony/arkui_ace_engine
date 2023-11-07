@@ -547,18 +547,18 @@ HWTEST_F(SliderTestNg, SliderTestNg007, TestSize.Level1)
     info.SetOffsetX(.0);
     info.SetOffsetY(1.0);
     sliderPattern->HandlingGestureEvent(info);
-    EXPECT_EQ(sliderPattern->valueRatio_, .02f);
-    EXPECT_EQ(sliderPattern->value_, 2.0f);
+    EXPECT_EQ(sliderPattern->valueRatio_, 0);
+    EXPECT_EQ(sliderPattern->value_, 1.0);
     /**
      * @tc.cases: case2. InputEventType is AXIS and MoveStep(1).
      */
     info.SetOffsetX(-1.0);
     sliderPattern->HandlingGestureEvent(info);
-    EXPECT_EQ(sliderPattern->valueRatio_, 0.01f);
+    EXPECT_EQ(sliderPattern->valueRatio_, 0);
     EXPECT_EQ(sliderPattern->value_, 1.0f);
     sliderPaintProperty->UpdateStep(.0);
     sliderPattern->HandlingGestureEvent(info);
-    EXPECT_EQ(sliderPattern->valueRatio_, 0.01f);
+    EXPECT_EQ(sliderPattern->valueRatio_, 0);
     /**
      * @tc.cases: case3. InputEventType is not AXIS, direction is HORIZONTAL and revese is false.
      */

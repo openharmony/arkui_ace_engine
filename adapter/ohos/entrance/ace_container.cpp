@@ -982,24 +982,14 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     ContainerScope scope(instanceId_);
     auto result = false;
-    if (!SystemProperties::GetDebugEnabled()) {
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
-        CHECK_NULL_RETURN(ss, false);
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        result = DumpInfo(params);
-        const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
-        auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
-        info.emplace_back(ostringstream->str());
-        DumpLog::GetInstance().Reset();
-    } else {
-        auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
-        CHECK_NULL_RETURN(ss, false);
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        result = DumpInfo(params);
-        info.emplace_back("dumpFilePath: " + dumpFilePath);
-        DumpLog::GetInstance().Reset();
-    }
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    CHECK_NULL_RETURN(ostream, false);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    result = DumpInfo(params);
+    const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
+    auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
+    info.emplace_back(ostringstream->str());
+    DumpLog::GetInstance().Reset();
     if (!result) {
         DumpLog::ShowDumpHelp(info);
     }
@@ -1677,6 +1667,20 @@ sptr<IRemoteObject> AceContainer::GetToken()
     }
     LOGE("fail to get Token");
     return nullptr;
+}
+
+void AceContainer::SetParentToken(sptr<IRemoteObject>& token)
+{
+    std::lock_guard<std::mutex> lock(cardTokensMutex_);
+    if (token) {
+        parentToken_ = token;
+    }
+}
+
+sptr<IRemoteObject> AceContainer::GetParentToken()
+{
+    std::lock_guard<std::mutex> lock(cardTokensMutex_);
+    return parentToken_;
 }
 
 // ArkTsCard start

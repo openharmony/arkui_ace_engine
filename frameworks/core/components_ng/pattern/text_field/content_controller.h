@@ -67,6 +67,11 @@ public:
         FilterValue();
     }
 
+    void SetTextValueOnly(std::string&& value)
+    {
+        content_ = value;
+    }
+
     void Reset()
     {
         content_ = "";

@@ -343,7 +343,18 @@ void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
         edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
         edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
     }
-    ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+    ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), true);
+
+    if (args.Length() == 2) { // 2 is parameter count
+        auto paramObject = JSRef<JSObject>::Cast(args[1]);
+        if (args[1]->IsNull() || args[1]->IsUndefined()) {
+            return;
+        } else {
+            JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
+            bool alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : true;
+            ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+        }
+    }
 }
 
 void JSScroll::JsWidth(const JSCallbackInfo& info)

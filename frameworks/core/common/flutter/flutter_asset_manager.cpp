@@ -32,7 +32,6 @@ RefPtr<Asset> FlutterAssetManager::GetAsset(const std::string& assetName)
             }
         }
     }
-    LOGW("find asset failed, name = %{public}s", assetName.c_str());
     return nullptr;
 }
 

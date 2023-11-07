@@ -791,7 +791,12 @@ bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optio
             auto imageSize = imageParameter.GetSize();
             auto imageWidth = Dimension(ConvertDimensionToPx(imageSize.first, rect.Width()), DimensionUnit::PX);
             auto imageHeight = Dimension(ConvertDimensionToPx(imageSize.second, rect.Height()), DimensionUnit::PX);
-            if (particleImageMap_.find(imageParameter.GetImageSource()) == particleImageMap_.end()) {
+            auto canvasImageIter = particleImageMap_.find(imageParameter.GetImageSource());
+            bool imageHasData = true;
+            if (canvasImageIter->second) {
+                imageHasData = canvasImageIter->second->HasData();
+            }
+            if (canvasImageIter == particleImageMap_.end() || !imageHasData) {
                 LoadParticleImage(imageParameter.GetImageSource(), imageWidth, imageHeight);
                 flag = true;
             }
@@ -1421,6 +1426,11 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
 {
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
+    if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
+        degree = 0;
+        return Matrix4();
+    }
+
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
 
@@ -2313,6 +2323,17 @@ void RosenRenderContext::ClearFocusState()
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(focusStateModifier_);
+
+    auto rect = focusStateModifier_->GetRoundRect();
+    // focus rect may have 1px deviation due to accuracy
+    rect.SetLeft(rect.GetX() - 1);
+    rect.SetTop(rect.GetY() - 1);
+    rect.SetWidth(rect.Width() + 2);
+    rect.SetHeight(rect.Height() + 2);
+    std::shared_ptr<Rosen::RectF> overlayRect =
+        std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    rsNode_->SetDrawRegion(overlayRect);
+
     rsNode_->RemoveModifier(focusStateModifier_);
     RequestNextFrame();
 }
@@ -2396,6 +2417,10 @@ void RosenRenderContext::FlushOverlayModifier(const RefPtr<Modifier>& modifier)
     auto overlayModifier = AceType::DynamicCast<OverlayModifier>(modifier);
     CHECK_NULL_VOID(overlayModifier);
     auto rect = overlayModifier->GetBoundsRect();
+    if (focusStateModifier_) {
+        auto focusRect = focusStateModifier_->GetRoundRect();
+        rect.CombineRectT(focusRect);
+    }
     std::shared_ptr<Rosen::RectF> overlayRect =
         std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     rsNode_->SetDrawRegion(overlayRect);

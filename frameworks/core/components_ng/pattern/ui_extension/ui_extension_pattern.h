@@ -74,6 +74,7 @@ public:
     void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
     void SetOnErrorCallback(
         const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
+    void SetTransferringCaller(bool value);
 
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
@@ -161,6 +162,8 @@ private:
     int32_t instanceId_ = Container::CurrentId();
     AbilityState state_ = AbilityState::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
+
+    bool transferringCaller_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H

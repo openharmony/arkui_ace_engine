@@ -72,10 +72,6 @@ bool PinchRecognizer::IsCtrlBeingPressed()
 
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    if (IsRefereeFinished()) {
-        return;
-    }
-
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
         return;
     }

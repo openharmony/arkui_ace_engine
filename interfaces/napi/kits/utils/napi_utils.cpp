@@ -42,15 +42,13 @@ const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))",
 
 } // namespace
 
-static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
-    { Framework::ERROR_CODE_PERMISSION_DENIED, "Permission denied. " },
+static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG { { Framework::ERROR_CODE_PERMISSION_DENIED,
+                                                                              "Permission denied. " },
     { Framework::ERROR_CODE_PARAM_INVALID, "Parameter error. " },
     { Framework::ERROR_CODE_SYSTEMCAP_ERROR, "Capability not supported. " },
-    { Framework::ERROR_CODE_INTERNAL_ERROR, "Internal error. " },
-    { Framework::ERROR_CODE_URI_ERROR, "Uri error. " },
+    { Framework::ERROR_CODE_INTERNAL_ERROR, "Internal error. " }, { Framework::ERROR_CODE_URI_ERROR, "Uri error. " },
     { Framework::ERROR_CODE_PAGE_STACK_FULL, "Page stack error. " },
-    { Framework::ERROR_CODE_URI_ERROR_LITE, "Uri error. " }
-};
+    { Framework::ERROR_CODE_URI_ERROR_LITE, "Uri error. " } };
 
 void NapiThrow(napi_env env, const std::string& message, int32_t errCode)
 {
@@ -177,7 +175,7 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info)
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
         if (bundleName.has_value() && moduleName.has_value()) {
-            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName.value_or(""), moduleName.value_or("")); 
+            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName.value_or(""), moduleName.value_or(""));
             resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         } else {
             resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
@@ -323,6 +321,59 @@ std::string ErrorToMessage(int32_t code)
 {
     auto iter = ERROR_CODE_TO_MSG.find(code);
     return (iter != ERROR_CODE_TO_MSG.end()) ? iter->second : "";
+}
+
+bool GetSingleParam(napi_env env, napi_callback_info info, napi_value* argv, napi_valuetype& valueType)
+{
+    size_t argc = 1;
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        return false;
+    }
+    napi_typeof(env, argv[0], &valueType);
+    return true;
+}
+
+// (Color | number | string | undifened)
+std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuetype& valueType)
+{
+    if (valueType == napi_number) {
+        uint32_t num;
+        napi_get_value_uint32(env, argv, &num);
+        Color color(num);
+        return color;
+    } else if (valueType == napi_string) {
+        std::string str;
+        bool result = GetNapiString(env, argv, str, valueType);
+        uint32_t argbLen = 9;
+        uint32_t rgbLen = 7;
+        if (!result || (str.length() != argbLen && str.length() != rgbLen) || str.find('#') != 0) {
+            return std::nullopt;
+        }
+        uint32_t offset = 4;
+        uint32_t valueOfA = 10;
+        std::string colorStr = str.substr(1, str.length() - 1);
+        uint32_t value = 0;
+        if (str.length() == rgbLen) {
+            value += 0xff;
+        }
+        for (const auto& it : colorStr) {
+            value <<= offset;
+            if (it >= '0' && it <= '9') {
+                value += it - '0';
+            } else if (it >= 'a' && it <= 'f') {
+                value += it - 'a' + valueOfA;
+            } else if (it >= 'A' && it <= 'F') {
+                value += it - 'A' + valueOfA;
+            } else {
+                return std::nullopt;
+            }
+        }
+        Color color(value);
+        return color;
+    } else {
+        return std::nullopt;
+    }
 }
 
 } // namespace OHOS::Ace::Napi

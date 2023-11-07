@@ -479,6 +479,7 @@ public:
     void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
+    void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -612,6 +613,8 @@ public:
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
+    void JavaScriptOnDocumentStart();
+    void SetJavaScriptItems(const ScriptItems& scriptItems);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -797,6 +800,7 @@ private:
     Rosen::NodeId surfaceNodeId_ = 0;
     bool surfaceOcclusion_ = true;
     uint32_t delayTime_ = 500;
+    std::optional<ScriptItems> scriptItems_;
 #endif
 };
 

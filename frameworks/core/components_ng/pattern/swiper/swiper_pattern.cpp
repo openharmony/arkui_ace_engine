@@ -1064,6 +1064,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
             }
+            pattern->FireAndCleanScrollingListener();
             pattern->HandleDragStart(info);
             // notify scrollStart upwards
             pattern->OnScrollStartRecursive(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
@@ -1569,6 +1570,12 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity) const
         nextIndex = direction ? firstItemInfoInVisibleArea.first + 1 : firstItemInfoInVisibleArea.first;
     }
 
+    if (!IsLoop()) {
+        auto totalCount = TotalCount();
+        if (itemPosition_.rbegin()->first == totalCount - 1) {
+            nextIndex = std::clamp(nextIndex, 0, totalCount - GetDisplayCount());
+        }
+    }
     return nextIndex;
 }
 
@@ -3229,13 +3236,26 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
 
 ScrollResult SwiperPattern::HandleScrollSelfFirst(float offset, int32_t source, NestedState state)
 {
+    // priority: self scroll > parent scroll > parent overScroll > self overScroll
     if (IsOutOfBoundary(offset)) {
+        // skip CHECK_NULL, already checked in HandleScroll
+        auto parent = parent_.Upgrade();
+
+        // reached edge, pass offset to parent
+        auto res = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL);
+        if (res.remain == 0.0f) {
+            return { 0.0f, true };
+        }
         // parent handle overScroll first
-        auto res = parent_.Upgrade()->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
+        if (res.reachEdge) {
+            res = parent->HandleScroll(res.remain, source, NestedState::CHILD_OVER_SCROLL);
+        }
+
         if (ChildFirst(state)) {
             return { res.remain, true };
         }
         if (res.remain != 0.0f) {
+            // self overScroll
             UpdateCurrentOffset(res.remain);
         }
     } else {
@@ -3247,7 +3267,7 @@ ScrollResult SwiperPattern::HandleScrollSelfFirst(float offset, int32_t source, 
 
 inline bool SwiperPattern::ChildFirst(NestedState state)
 {
-    // priority: self scroll > child scroll > self overScroll > child overScroll
+    // SELF/CHILD priority: self scroll > child scroll > self overScroll > child overScroll
     return state == NestedState::CHILD_SCROLL // child hasn't reach edge
            || GetEdgeEffect() == EdgeEffect::NONE;
 }
@@ -3442,4 +3462,19 @@ int32_t SwiperPattern::GetLoopIndex(int32_t index, int32_t childrenSize) const
     loopIndex %= childrenSize;
     return loopIndex;
 }
+
+void SwiperPattern::RegisterScrollingListener(const RefPtr<ScrollingListener> listener)
+{
+    CHECK_NULL_VOID(listener);
+    scrollingListener_.emplace_back(listener);
+}
+
+void SwiperPattern::FireAndCleanScrollingListener()
+{
+    for (auto listener : scrollingListener_) {
+        CHECK_NULL_VOID(listener);
+        listener->NotifyScrollingEvent();
+    }
+    scrollingListener_.clear();
 } // namespace OHOS::Ace::NG
+}

@@ -125,17 +125,11 @@ void LayoutConstraintT<T>::ApplyAspectRatioWithoutCalcSize(float ratio)
     if (!Positive(ratio)) {
         return;
     }
-    if (maxSize.Width() < maxSize.Height()) {
-        minSize.SetHeight(minSize.Width() / ratio);
-        maxSize.SetHeight(maxSize.Width() / ratio);
-        percentReference.SetHeight(percentReference.Width() / ratio);
-        ApplyAspectRatioToParentIdealSize(true, ratio);
-        return;
-    }
-    minSize.SetWidth(minSize.Height() * ratio);
-    maxSize.SetWidth(maxSize.Height() * ratio);
-    percentReference.SetWidth(percentReference.Height() / ratio);
-    ApplyAspectRatioToParentIdealSize(false, ratio);
+    minSize.SetHeight(minSize.Width() / ratio);
+    maxSize.SetHeight(maxSize.Width() / ratio);
+    percentReference.SetHeight(percentReference.Width() / ratio);
+    ApplyAspectRatioToParentIdealSize(true, ratio);
+    return;
 }
 
 template<typename T>

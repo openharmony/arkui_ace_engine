@@ -222,4 +222,9 @@ bool SystemProperties::GetResourceDecoupling()
 {
     return true;
 }
+
+int32_t SystemProperties::GetJankFrameThreshold()
+{
+    return 0;
+}
 } // namespace OHOS::Ace

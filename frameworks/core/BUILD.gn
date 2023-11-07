@@ -145,6 +145,7 @@ template("ace_core_source_set") {
 
       # gestures
       "gestures/click_recognizer.cpp",
+      "gestures/drag_event.cpp",
       "gestures/drag_recognizer.cpp",
       "gestures/exclusive_recognizer.cpp",
       "gestures/gesture_recognizer.cpp",
@@ -494,10 +495,6 @@ template("ace_core_source_set") {
       }
     }
 
-    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
-      sources += [ "gestures/gesture_info.cpp" ]
-    }
-
     if (defined(config.remote_window_support) && config.remote_window_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
         deps += [
@@ -659,6 +656,7 @@ template("ace_core_ng_source_set") {
 
       # gestures
       "gestures/click_recognizer.cpp",
+      "gestures/drag_event.cpp",
       "gestures/drag_recognizer.cpp",
       "gestures/exclusive_recognizer.cpp",
       "gestures/gesture_recognizer.cpp",
@@ -825,9 +823,6 @@ template("ace_core_ng_source_set") {
     }
 
     external_deps = []
-    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
-      sources += [ "gestures/gesture_info.cpp" ]
-    }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {

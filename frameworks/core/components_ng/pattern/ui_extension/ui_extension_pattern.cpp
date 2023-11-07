@@ -126,6 +126,11 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
     UpdateWant(want);
 }
 
+void UIExtensionPattern::SetTransferringCaller(bool value)
+{
+    transferringCaller_ = value;
+}
+
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
     // Prohibit rebuilding the session unless the Want is updated.
@@ -142,12 +147,17 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID(container);
     auto callerToken = container->GetToken();
+    auto parentToken = container->GetParentToken();
     Rosen::SessionInfo extensionSessionInfo = {
         .bundleName_ = want.GetElement().GetBundleName(),
         .abilityName_ = want.GetElement().GetAbilityName(),
         .callerToken_ = callerToken,
+        .rootToken_ = callerToken,
         .want = std::make_shared<Want>(want),
     };
+    if (transferringCaller_ && parentToken != nullptr) {
+        extensionSessionInfo.rootToken_ = parentToken;
+    }
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     RegisterLifecycleListener();

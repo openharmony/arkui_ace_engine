@@ -430,6 +430,13 @@ void WebModelNG::SetCacheMode(WebCacheMode cacheMode)
     webPattern->UpdateCacheMode(cacheMode);
 }
 
+void WebModelNG::SetOverScrollMode(OverScrollMode mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateOverScrollMode(mode);
+}
+
 void WebModelNG::SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -857,5 +864,12 @@ void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetNestedScroll(nestedOpt);
+}
+
+void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnDocumentStart(scriptItems);
 }
 } // namespace OHOS::Ace::NG

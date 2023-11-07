@@ -20,6 +20,8 @@
 #include <mutex>
 #include <unordered_map>
 
+#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
+
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
@@ -33,9 +35,9 @@
 #include "core/common/settings.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/distributed_ui.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/pipeline/pipeline_base.h"
-#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 namespace OHOS::Ace {
 
@@ -368,6 +370,16 @@ public:
                PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
     }
 
+    void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
+    {
+        appBar_ = appBar;
+    }
+
+    RefPtr<NG::AppBarView> GetAppBar() const
+    {
+        return appBar_;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
@@ -387,6 +399,7 @@ private:
     RefPtr<PageUrlChecker> pageUrlChecker_;
     bool isModule_ = false;
     std::shared_ptr<NG::DistributedUI> distributedUI_;
+    RefPtr<NG::AppBarView> appBar_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

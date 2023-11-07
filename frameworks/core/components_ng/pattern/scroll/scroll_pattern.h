@@ -39,7 +39,8 @@ class ScrollPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ScrollPattern, ScrollablePattern);
 
 public:
-    ScrollPattern() = default;
+    ScrollPattern() : ScrollablePattern(true) {}
+
     ~ScrollPattern() override
     {
         positionController_ = nullptr;

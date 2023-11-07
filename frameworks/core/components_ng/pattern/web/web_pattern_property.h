@@ -64,6 +64,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarColor, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OverScrollMode, int32_t);
 };
 
 } // namespace OHOS::Ace::NG
