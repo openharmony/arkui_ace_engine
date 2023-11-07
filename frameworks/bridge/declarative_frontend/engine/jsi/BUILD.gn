@@ -53,7 +53,7 @@ es2abc_gen_abc("gen_jsUIContext_abc") {
   out_puts = [ base_output_path + "/jsUIContext.abc" ]
 }
 
-if (!is_cross_platform_build) {
+if (!is_arkui_x) {
   es2abc_gen_abc("gen_js_mock_system_plugin_abc") {
     extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
     src_js = rebase_path(
@@ -95,7 +95,7 @@ gen_obj("abc_uicontext") {
   snapshot_dep = [ ":gen_jsUIContext_abc" ]
 }
 
-if (!is_cross_platform_build) {
+if (!is_arkui_x) {
   gen_obj("abc_mock_system_plugin") {
     input = base_output_path + "/jsMockSystemPlugin.abc"
     if (use_mac || use_mingw_win || use_linux) {
@@ -164,7 +164,7 @@ template("declarative_js_engine_ark") {
     external_deps = []
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
       public_deps = [ "//foundation/arkui/napi:ace_napi" ]
@@ -177,7 +177,7 @@ template("declarative_js_engine_ark") {
     }
 
     deps = []
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
     }
 

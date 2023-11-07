@@ -32,9 +32,6 @@ declare_args() {
   # Disable glfw window to build for PC preview scenario.
   enable_glfw_window = false
 
-  # Enable when build for cross platform
-  is_cross_platform_build = false
-
   # Enable build for new ng pipeline, also will use new flutter
   enable_ng_build = false
 
@@ -52,7 +49,7 @@ declare_args() {
 }
 
 enable_dump_drawcmd = false
-is_ohos_standard_system = is_standard_system && !build_cross_platform_version
+is_ohos_standard_system = is_standard_system && !is_arkui_x
 use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
           "${current_os}_${current_cpu}" == "mac_arm64"
@@ -111,7 +108,7 @@ objcopy_clang = "$clang_base_path/bin/llvm-objcopy"
 if (is_ohos_standard_system) {
   objcopy_default = "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
   node_js_path = "//prebuilts/build-tools/common/nodejs/current/bin/"
-} else if (is_cross_platform_build) {
+} else if (is_arkui_x) {
   if (host_os == "mac") {
     objcopy_default = objcopy_clang
   } else if (defined(aosp_objcopy)) {
@@ -128,7 +125,7 @@ if (is_ohos_standard_system) {
   hilog_deps = [ "hilog:libhilog" ]
   ark_runtime_path = "//arkcompiler/runtime_core"
 } else {
-  if (is_cross_platform_build) {
+  if (is_arkui_x) {
     ace_engine_part = "ace_engine_cross"
   } else {
     ace_engine_part = "ace_engine_full"
@@ -228,9 +225,9 @@ foreach(item, _adapters) {
 
   if (defined(import_var.platforms)) {
     foreach(platform, import_var.platforms) {
-      if (!is_cross_platform_build || (is_cross_platform_build && defined(
-                                           platform.cross_platform_support) &&
-                                       platform.cross_platform_support)) {
+      if (!is_arkui_x ||
+          (is_arkui_x && defined(platform.cross_platform_support) &&
+           platform.cross_platform_support)) {
         if (defined(platform.name)) {
           ace_platforms += [ platform ]
         }
