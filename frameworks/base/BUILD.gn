@@ -74,7 +74,7 @@ template("ace_base_source_set") {
     if (platform != "windows") {
       # add secure c API
       include_dirs = [ "//third_party/bounds_checking_function/include" ]
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [ "//third_party/bounds_checking_function:libsec_static" ]
       }
     } else {
@@ -82,7 +82,7 @@ template("ace_base_source_set") {
       libs = [ "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libshlwapi.a" ]
     }
 
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
     } else {
       external_deps += [ "graphic_2d:librender_service_client" ]
@@ -93,14 +93,14 @@ template("ace_base_source_set") {
       configs += [ "//third_party/curl:curl_config" ]
       sources += [ "$ace_root/frameworks/base/network/download_manager.cpp" ]
       deps += [ "$ace_root/frameworks/base/network:cacert.pem" ]
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [ "//third_party/curl:curl" ]
       } else {
         deps += [ "//third_party/curl:curl_shared" ]
       }
     }
 
-    if (is_cross_platform_build || platform != "ohos") {
+    if (is_arkui_x || platform != "ohos") {
       deps += [ "//third_party/cJSON:cjson_static" ]
     } else {
       deps += [ "//third_party/cJSON:cjson" ]

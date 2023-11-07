@@ -138,7 +138,7 @@ template("build_component") {
         if (enable_graphic_text_gine) {
           external_deps += [ "graphic_2d:rosen_text" ]
         }
-        if (is_cross_platform_build) {
+        if (is_arkui_x) {
           deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
         } else {
           external_deps += [ "graphic_2d:librender_service_client" ]

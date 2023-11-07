@@ -82,7 +82,7 @@ ohos_source_set("preview_entrance_source") {
       }
     }
 
-    if (!is_cross_platform_build) {
+    if (!is_arkui_x) {
       if (platform == "windows") {
         defines -= [ "UNICODE" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win" ]
