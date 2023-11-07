@@ -89,7 +89,7 @@ constexpr double BLURRADIUS_VALUE = 0.0;
 constexpr double SPREADRADIUS_VALUE = 0.0;
 constexpr double ADAPT_OFFSETY_VALUE = 5.0;
 constexpr double ADAPT_OFFSETX_VALUE = 5.0;
-constexpr bool   ADAPT_FILL_VALUE = false;
+constexpr bool   ADAPT_FILL_VALUE = true;
 const std::string TEXT_CONTENT = "text";
 constexpr int32_t TEXT_ERROR = -1;
 constexpr int32_t TEXT_SIZE_INT = 10;
@@ -3882,36 +3882,33 @@ HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 20, 20) };
-    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillOnce(SetArgReferee<2>(rects));
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
     /**
      * @tc.steps: step1. create textFrameNode and geometryNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
+    auto [host, pattern] = Init();
+    pattern->paragraph_ = paragraph;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-    auto renderContext = textFrameNode->GetRenderContext();
+    auto renderContext = host->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto paintProperty = textPattern->CreatePaintProperty();
+    auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
 
     /**
      * @tc.steps: step2. set textForDisplay_ to EMPTY_TEXT.
      */
-    textPattern->textForDisplay_ = EMPTY_TEXT;
+    pattern->textForDisplay_ = EMPTY_TEXT;
 
     /**
      * @tc.steps: step3. create textPaintMethod and call UpdateContentModifier function.
      * @tc.expected: The drawObscuredRects_ of textContentModifier is empty.
      */
-    ParagraphStyle paragraphStyle;
     RefPtr<TextContentModifier> textContentModifier =
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
     TextPaintMethod textPaintMethod(
-        textPattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+        pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
     textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
     EXPECT_EQ(textContentModifier->drawObscuredRects_, std::vector<RectF>());
@@ -3919,13 +3916,18 @@ HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
     /**
      * @tc.steps: step4. set textForDisplay_ to CREATE_VALUE.
      */
-    textPattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textForDisplay_ = CREATE_VALUE;
 
     /**
      * @tc.steps: step5. call UpdateContentModifier function.
      * @tc.expected: The drawObscuredRects_ of textContentModifier is not empty.
      */
-    textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    renderContext = host->GetRenderContext();
+    paintProperty = pattern->CreatePaintProperty();
+    paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+    TextPaintMethod textPaintMethod1(
+        pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    textPaintMethod1.UpdateContentModifier(AceType::RawPtr(paintWrapper));
     EXPECT_NE(textContentModifier->drawObscuredRects_, std::vector<RectF>());
 
     /**
@@ -3941,7 +3943,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
      * @tc.steps: step7. call OnModifyDone function.
      * @tc.expected: The obscured of renderContext is reasons.
      */
-    textPattern->OnModifyDone();
+    pattern->OnModifyDone();
     EXPECT_EQ(renderContext->GetObscured(), reasons);
 }
 
