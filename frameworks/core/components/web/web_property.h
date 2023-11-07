@@ -31,6 +31,7 @@
 namespace OHOS::Ace {
 
 class WebDelegate;
+using ScriptItems = std::map<std::string, std::vector<std::string>>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
 using OnKeyEventCallback = std::function<void(KeyEventInfo& keyEventInfo)>;
 

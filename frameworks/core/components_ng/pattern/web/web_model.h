@@ -22,6 +22,7 @@
 #include "core/components/web/web_property.h"
 
 namespace OHOS::Ace {
+using ScriptItems = std::map<std::string, std::vector<std::string>>;
 class WebModel {
 public:
     static WebModel* GetInstance();
@@ -143,6 +144,7 @@ public:
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void SetWrapContent(bool isWrapContentEnabled) {};
     virtual void SetOverScrollMode(OverScrollMode mode) {};
+    virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
 
 private:
     static std::unique_ptr<WebModel> instance_;

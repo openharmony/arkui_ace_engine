@@ -145,6 +145,7 @@ public:
     void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetWrapContent(bool isWrapContentEnabled) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
