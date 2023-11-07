@@ -1904,3 +1904,10 @@ var SwiperNestedScrollMode;
   SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_ONLY"] = 0] = "SELF_ONLY";
   SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
 })(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
+
+var CheckBoxStyle;
+(function (CheckBoxStyle) {
+  CheckBoxStyle["CIRCULAR_STYLE"] = 0;
+  CheckBoxStyle["SQUARE_STYLE"] = 1;
+})(CheckBoxStyle || (CheckBoxStyle = {}));
+

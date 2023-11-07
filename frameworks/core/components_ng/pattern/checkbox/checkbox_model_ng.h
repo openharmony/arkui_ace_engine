@@ -35,6 +35,7 @@ public:
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) override;
     void SetChangeEvent(ChangeEvent&& changeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    void SetCheckboxStyle(CheckBoxStyle checkboxStyle) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H
