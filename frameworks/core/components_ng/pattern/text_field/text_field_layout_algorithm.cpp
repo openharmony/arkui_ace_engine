@@ -38,6 +38,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
+constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder)
