@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <optional>
 #include <queue>
-#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
@@ -75,15 +74,6 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace::NG {
-
-constexpr Dimension CURSOR_WIDTH = 1.5_vp;
-constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
-constexpr Dimension UNDERLINE_WIDTH = 1.0_px;
-constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
-constexpr Dimension ACTIVED_UNDERLINE_WIDTH = 2.0_px;
-constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
-constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
-constexpr float ERROR_TEXT_BOUNDSRECT_MARGIN = 33.0f;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
@@ -148,56 +138,7 @@ public:
     TextFieldPattern();
     ~TextFieldPattern() override;
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        if (!textFieldContentModifier_) {
-            textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
-        }
-        auto textFieldOverlayModifier = AceType::DynamicCast<TextFieldOverlayModifier>(GetScrollBarOverlayModifier());
-        if (!textFieldOverlayModifier) {
-            textFieldOverlayModifier =
-                AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect());
-            SetScrollBarOverlayModifier(textFieldOverlayModifier);
-        }
-        if (isCustomFont_) {
-            textFieldContentModifier_->SetIsCustomFont(true);
-        }
-        auto paint =
-            MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier, textFieldContentModifier_);
-        auto scrollBar = GetScrollBar();
-        if (scrollBar) {
-            paint->SetScrollBar(scrollBar);
-            if (scrollBar->NeedPaint()) {
-                textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect());
-            }
-        }
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, paint);
-        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, paint);
-        auto geometryNode = host->GetGeometryNode();
-        auto frameOffset = geometryNode->GetFrameOffset();
-        auto frameSize = geometryNode->GetFrameSize();
-        if (layoutProperty->GetShowErrorTextValue(false) && errorParagraph_) {
-            auto contentOffset = geometryNode->GetContentOffset();
-            auto errorTextWidth = errorParagraph_->GetLongestLine();
-            RectF boundsRect(contentOffset.GetX(), frameOffset.GetY(), errorTextWidth,
-                frameSize.Height() + ERROR_TEXT_BOUNDSRECT_MARGIN);
-            textFieldOverlayModifier->SetBoundsRect(boundsRect);
-        } else {
-            if (NearEqual(maxFrameOffsetY_, 0.0f) && NearEqual(maxFrameHeight_, 0.0f)) {
-                maxFrameOffsetY_ = frameOffset.GetY();
-                maxFrameHeight_ = frameSize.Height();
-            }
-            maxFrameOffsetY_ = LessOrEqual(frameOffset.GetY(), maxFrameOffsetY_)
-                                   ? frameOffset.GetY()
-                                   : maxFrameOffsetY_ - frameOffset.GetY();
-            maxFrameHeight_ = LessOrEqual(frameSize.Height(), maxFrameHeight_) ? maxFrameHeight_ : frameSize.Height();
-            RectF boundsRect(frameOffset.GetX(), maxFrameOffsetY_, frameSize.Width(), maxFrameHeight_);
-            textFieldOverlayModifier->SetBoundsRect(boundsRect);
-        }
-        return paint;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -1185,7 +1126,7 @@ private:
     bool updateSelectionAfterObscure_ = false;
     float currentOffset_ = 0.0f;
     float countHeight_ = 0.0f;
-    Dimension underlineWidth_ = UNDERLINE_WIDTH;
+    Dimension underlineWidth_ = 1.0_px;
     Color underlineColor_;
     bool scrollBarVisible_ = false;
     bool isCounterIdealheight_ = false;

@@ -27,15 +27,18 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(
     const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
     : pattern_(pattern), edgeEffect_(edgeEffect)
 {
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto theme = textFieldPattern->GetTheme();
+    CHECK_NULL_VOID(theme);
     cursorColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color()));
-    cursorWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
+    cursorWidth_ =
+        AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(theme->GetCursorWidth().ConvertToPx()));
     selectedColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color()));
     cursorVisible_ = AceType::MakeRefPtr<PropertyBool>(false);
     showSelect_ = AceType::MakeRefPtr<PropertyBool>(false);
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
     cursorOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(textFieldPattern->GetCaretOffset());
     frameSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     currentOffset_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
