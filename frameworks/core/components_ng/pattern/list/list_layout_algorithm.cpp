@@ -497,7 +497,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midItemHeight = MeasureAndGetChildHeight(layoutWrapper, midIndex);
         }
-        if (NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
+        if ((!overScrollFeature_ && NonNegative(currentOffset_)) ||
             (overScrollFeature_ && overScrollTop)) {
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
                 midIndex = GetLanesFloor(layoutWrapper, midIndex);
