@@ -41,26 +41,18 @@ void AceTraceEnd()
     FinishTrace(HITRACE_TAG_ACE);
 }
 
-void AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace)
+void AceAsyncTraceBegin(int32_t taskId, const char* name)
 {
     CHECK_NULL_VOID(name);
     std::string nameStr(name);
-    if (isAnimationTrace) {
-        StartAsyncTrace(HITRACE_TAG_ANIMATION, nameStr, taskId);
-    } else {
-        StartAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
-    }
+    StartAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
 }
 
-void AceAsyncTraceEnd(int32_t taskId, const char* name, bool isAnimationTrace)
+void AceAsyncTraceEnd(int32_t taskId, const char* name)
 {
     CHECK_NULL_VOID(name);
     std::string nameStr(name);
-    if (isAnimationTrace) {
-        FinishAsyncTrace(HITRACE_TAG_ANIMATION, nameStr, taskId);
-    } else {
-        FinishAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
-    }
+    FinishAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
 }
 
 void AceCountTrace(const char *key, int32_t count)
