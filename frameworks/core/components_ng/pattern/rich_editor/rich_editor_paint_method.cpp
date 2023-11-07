@@ -15,18 +15,18 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 
+#include "core/animation/scheduler.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
 RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager,
-    float baselineOffset, const RefPtr<TextContentModifier>& contentMod,
-    const RefPtr<TextOverlayModifier>& overlayMod)
-    : TextPaintMethod(pattern, baselineOffset, contentMod, overlayMod),
-      pManager_(pManager)
+    float baselineOffset, const RefPtr<TextContentModifier>& contentMod, const RefPtr<TextOverlayModifier>& overlayMod)
+    : TextPaintMethod(pattern, baselineOffset, contentMod, overlayMod), pManager_(pManager)
 {}
 
 void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
@@ -42,24 +42,25 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto caretVisible = richEditorPattern->GetCaretVisible();
     overlayMod->SetCaretVisible(caretVisible);
     overlayMod->SetCaretColor(Color::BLUE.GetValue());
+    constexpr float CARET_WIDTH = 1.5f;
     overlayMod->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
     auto caretPosition = richEditorPattern->GetCaretPosition();
     if (richEditorPattern->GetTextContentLength() > 0) {
         float caretHeight = 0.0f;
-        OffsetF caretOffsetDown =
-            richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight, true);
+        OffsetF caretOffsetDown = richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight, true);
         OffsetF lastClickOffset = richEditorPattern->GetLastClickOffset();
         if (lastClickOffset != caretOffsetDown) {
             caretHeight = 0.0f;
-            OffsetF caretOffsetUp =
-                richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight);
+            OffsetF caretOffsetUp = richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight);
             overlayMod->SetCaretOffsetAndHeight(caretOffsetUp, caretHeight);
             richEditorPattern->ResetLastClickOffset();
         }
     } else {
         auto rect = richEditorPattern->GetTextContentRect();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        auto theme = pipeline->GetTheme<RichEditorTheme>();
         overlayMod->SetCaretOffsetAndHeight(
-            OffsetF(rect.GetX(), rect.GetY()), Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx());
+            OffsetF(rect.GetX(), rect.GetY()), theme->GetDefaultCaretHeight().ConvertToPx());
     }
     std::vector<RectF> selectedRects;
     const auto& selection = richEditorPattern->GetTextSelector();
