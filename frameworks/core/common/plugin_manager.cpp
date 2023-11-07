@@ -15,6 +15,7 @@
 
 #include "core/common/plugin_manager.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 
@@ -30,10 +31,7 @@ PluginManager::~PluginManager()
 void PluginManager::AddPluginSubContainer(int64_t pluginId, const RefPtr<PluginSubContainer>& pluginSubContainer)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    auto result = pluginSubContainerMap_.try_emplace(pluginId, pluginSubContainer);
-    if (!result.second) {
-        LOGW("already have pluginSubContainer of this instance");
-    }
+    pluginSubContainerMap_.try_emplace(pluginId, pluginSubContainer);
 }
 
 void PluginManager::RemovePluginSubContainer(int64_t pluginId)
@@ -83,10 +81,7 @@ void PluginManager::AddNonmatchedContainer(
     const std::string& pluginKey, const RefPtr<PluginSubContainer>& pluginSubContainer)
 {
     std::lock_guard<std::mutex> lock(nonmatchedContainerMutex_);
-    auto result = nonmatchedContainerMap_.try_emplace(pluginKey, pluginSubContainer);
-    if (!result.second) {
-        LOGW("already have pluginSubContainer of this key: %{public}s", pluginKey.c_str());
-    }
+    nonmatchedContainerMap_.try_emplace(pluginKey, pluginSubContainer);
 }
 
 RefPtr<PluginSubContainer> PluginManager::MatchPluginSubContainerWithPluginId(
@@ -95,7 +90,7 @@ RefPtr<PluginSubContainer> PluginManager::MatchPluginSubContainerWithPluginId(
     std::lock_guard<std::mutex> lock(nonmatchedContainerMutex_);
     auto iter = nonmatchedContainerMap_.find(pluginKey);
     if (iter == nonmatchedContainerMap_.end()) {
-        LOGW("no subcontainer of key: %{private}s", pluginKey.c_str());
+        TAG_LOGI(AceLogTag::ACE_PLUGINCOMPONENT, "no subcontainer of key: %{private}s", pluginKey.c_str());
         return nullptr;
     }
     auto pluginSubContainer = iter->second;
@@ -123,10 +118,7 @@ int32_t PluginManager::StartAbility(
 void PluginManager::AddPluginParentContainer(int64_t pluginId, int32_t pluginParentContainerId)
 {
     std::lock_guard<std::mutex> lock(parentContainerMutex_);
-    auto result = parentContainerMap_.try_emplace(pluginId, pluginParentContainerId);
-    if (!result.second) {
-        LOGW("already have pluginSubContainer of this instance, pluginId: %{public}ld", static_cast<long>(pluginId));
-    }
+    parentContainerMap_.try_emplace(pluginId, pluginParentContainerId);
 }
 
 void PluginManager::RemovePluginParentContainer(int64_t pluginId)
@@ -142,7 +134,7 @@ int64_t PluginManager::GetPluginParentContainerId(int64_t pluginId)
     if (result != parentContainerMap_.end()) {
         return result->second;
     } else {
-        LOGW("ParentContainerId is empty.");
+        TAG_LOGD(AceLogTag::ACE_PLUGINCOMPONENT, "Parent Container Id is empty.");
         return 0;
     }
 }

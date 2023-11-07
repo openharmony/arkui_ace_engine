@@ -26,7 +26,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
     return nullptr;
 }
 
-void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap) {}
+void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller) {}
 
 void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease) {}
 

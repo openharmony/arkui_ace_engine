@@ -848,4 +848,12 @@ void WebClientImpl::OnRootLayerChanged(int width, int height)
     CHECK_NULL_VOID(delegate);
     delegate->OnRootLayerChanged(width, height);
 }
+
+bool WebClientImpl::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    return delegate->FilterScrollEvent(x, y, xVelocity, yVelocity);
+}
 } // namespace OHOS::Ace

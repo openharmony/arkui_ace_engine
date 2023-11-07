@@ -76,6 +76,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
     float leftHandleY = boxFirst.Top() + textStartY;
     float rightHandleX = boxLast.Right() + textStartX;
     float rightHandleY = boxLast.Top() + textStartY;
+    float lastLineHeight = boxLast.Height();
     bool oneLineSelected = (leftHandleY == rightHandleY);
     if (oneLineSelected) {
         if (leftHandleX < contentRect.Left()) {
@@ -96,7 +97,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
     }
     auto hostGlobalOffset = hostPattern->GetParentGlobalOffset();
     float width = rightHandleX - leftHandleX;
-    float height = rightHandleY - leftHandleY + lineHeight;
+    float height = rightHandleY - leftHandleY + lastLineHeight;
     float globalX = leftHandleX + hostGlobalOffset.GetX() - TEXT_DRAG_OFFSET.ConvertToPx();
     float globalY = leftHandleY + hostGlobalOffset.GetY() - TEXT_DRAG_OFFSET.ConvertToPx();
     if (oneLineSelected) {

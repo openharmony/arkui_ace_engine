@@ -49,7 +49,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
 
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitInputEvent(const RefPtr<InputEventHub>& inputHub);
     void OnHoverEvent(bool isHovered);
     void OnMouseEvent(MouseInfo& info);

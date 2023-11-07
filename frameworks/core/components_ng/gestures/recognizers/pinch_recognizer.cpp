@@ -72,15 +72,17 @@ bool PinchRecognizer::IsCtrlBeingPressed()
 
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    if (IsRefereeFinished()) {
+    if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
         return;
     }
+
     TAG_LOGI(AceLogTag::ACE_GESTURE,
         "Pinch recognizer receives touch down event, begin to detect pinch event");
+    activeFingers_.emplace_back(event.id);
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
 
-    if (static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
+    if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
         initialDev_ = ComputeAverageDeviation();
         pinchCenter_ = ComputePinchCenter();
         refereeState_ = RefereeState::DETECTING;
@@ -103,8 +105,12 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    if (!IsActiveFinger(event.id)) {
+        return;
+    }
+
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch end event");
-    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+    if (static_cast<int32_t>(activeFingers_.size()) < fingers_) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -115,7 +121,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         SendCallbackMsg(onActionEnd_);
     }
 }
@@ -138,7 +144,11 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+    if (!IsActiveFinger(event.id)) {
+        return;
+    }
+
+    if (static_cast<int32_t>(activeFingers_.size()) < fingers_) {
         return;
     }
 
@@ -214,6 +224,9 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    if (!IsActiveFinger(event.id)) {
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch cancel event");
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -243,11 +256,9 @@ double PinchRecognizer::ComputeAverageDeviation()
     // compute the coordinate of focal point
     double sumOfX = 0.0;
     double sumOfY = 0.0;
-    for (auto& element : touchPoints_) {
-        if (element.first < fingers_) {
-            sumOfX = sumOfX + element.second.x;
-            sumOfY = sumOfY + element.second.y;
-        }
+    for (auto& id : activeFingers_) {
+        sumOfX = sumOfX + touchPoints_[id].x;
+        sumOfY = sumOfY + touchPoints_[id].y;
     }
     double focalX = sumOfX / fingers_;
     double focalY = sumOfY / fingers_;
@@ -255,11 +266,9 @@ double PinchRecognizer::ComputeAverageDeviation()
     // compute average deviation
     double devX = 0.0;
     double devY = 0.0;
-    for (auto& element : touchPoints_) {
-        if (element.first < fingers_) {
-            devX = devX + fabs(element.second.x - focalX);
-            devY = devY + fabs(element.second.y - focalY);
-        }
+    for (auto& id : activeFingers_) {
+        devX = devX + fabs(touchPoints_[id].x - focalX);
+        devY = devY + fabs(touchPoints_[id].y - focalY);
     }
     double aveDevX = devX / fingers_;
     double aveDevY = devY / fingers_;
@@ -274,14 +283,16 @@ Offset PinchRecognizer::ComputePinchCenter()
 {
     double sumOfX = 0.0;
     double sumOfY = 0.0;
-    for (auto& element : touchPoints_) {
-        sumOfX = sumOfX + element.second.x;
-        sumOfY = sumOfY + element.second.y;
+    for (auto& id : activeFingers_) {
+        sumOfX = sumOfX + touchPoints_[id].x;
+        sumOfY = sumOfY + touchPoints_[id].y;
     }
-    double focalX = sumOfX / touchPoints_.size();
-    double focalY = sumOfY / touchPoints_.size();
+    double focalX = sumOfX / fingers_;
+    double focalY = sumOfY / fingers_;
 
-    Offset pinchCenter = Offset(focalX, focalY);
+    PointF localPoint(focalX, focalY);
+    NGGestureRecognizer::Transform(localPoint, GetNodeId());
+    Offset pinchCenter = Offset(localPoint.GetX(), localPoint.GetY());
 
     return pinchCenter;
 }
@@ -297,7 +308,7 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
-        UpdateFingerListInfo(coordinateOffset_);
+        UpdateFingerListInfo();
         info.SetFingerList(fingerList_);
         info.SetScale(scale_);
         info.SetPinchCenter(pinchCenter_);

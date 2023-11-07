@@ -181,8 +181,6 @@ void JSTextInputController::GetTextContentRect(const JSCallbackInfo& info)
         auto rectObj = CreateRectangle(controller->GetTextContentRect());
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         info.SetReturnValue(rect);
-    } else {
-        TAG_LOGW(AceLogTag::ACE_TEXTINPUT, "GetTextContentRect: The JSTextInputController is NULL");
     }
 }
 
@@ -194,8 +192,6 @@ void JSTextInputController::GetTextContentLinesNum(const JSCallbackInfo& info)
         auto linesNum = JSVal(ToJSValue(lines));
         auto textLines = JSRef<JSVal>::Make(linesNum);
         info.SetReturnValue(textLines);
-    } else {
-        TAG_LOGW(AceLogTag::ACE_TEXTINPUT, "GetTextContentRect: The JSTextInputController is NULL");
     }
 }
 

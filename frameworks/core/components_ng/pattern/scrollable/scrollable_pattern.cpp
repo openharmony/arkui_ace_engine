@@ -225,10 +225,16 @@ bool ScrollablePattern::CoordinateWithNavigation(bool isAtTop, bool isDraggedDow
         isReactInParentMovement_ = false;
         ProcessNavBarReactOnEnd();
     }
-    if (isReactInParentMovement_) {
+
+    if (isReactInParentMovement_ && navBarPattern_) {
         auto needMove = ProcessNavBarReactOnUpdate(offset);
+        auto minTitle = navBarPattern_->GetCurrentNavBarStatus();
         if (navBarPattern_ && navBarPattern_->IsTitleModeFree()) {
-            reactiveIn = !needMove;
+            if (minTitle && LessNotEqual(offset, 0.0)) {
+                reactiveIn = needMove;
+            } else {
+                reactiveIn = !needMove;
+            }
         }
     }
     return reactiveIn;
@@ -293,6 +299,7 @@ void ScrollablePattern::AddScrollEvent()
     auto scrollStart = [weak = WeakClaim(this)](float position) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->FireAndCleanScrollingListener();
         pattern->OnScrollStartRecursive(position);
     };
     scrollable->SetOnScrollStartRec(std::move(scrollStart));
@@ -1403,9 +1410,6 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
 
 bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
-    if (velocity == 0.0f) {
-        return true;
-    }
     if ((velocity > 0 && !IsAtTop()) || (velocity < 0 && !IsAtBottom())) {
         // trigger scroll animation if edge not reached
         scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
@@ -1487,5 +1491,20 @@ float ScrollablePattern::GetVelocity() const
     CHECK_NULL_RETURN(scrollable, velocity);
     velocity = scrollable->GetCurrentVelocity();
     return velocity;
+}
+
+void ScrollablePattern::RegisterScrollingListener(const RefPtr<ScrollingListener> listener)
+{
+    CHECK_NULL_VOID(listener);
+    scrollingListener_.emplace_back(listener);
+}
+
+void ScrollablePattern::FireAndCleanScrollingListener()
+{
+    for (auto listener : scrollingListener_) {
+        CHECK_NULL_VOID(listener);
+        listener->NotifyScrollingEvent();
+    }
+    scrollingListener_.clear();
 }
 } // namespace OHOS::Ace::NG

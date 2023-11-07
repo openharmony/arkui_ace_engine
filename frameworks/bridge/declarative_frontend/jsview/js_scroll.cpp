@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/scroll_model_impl.h"
@@ -284,6 +285,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("enableScrollInteraction", &JSScroll::SetScrollEnabled);
     JSClass<JSScroll>::StaticMethod("friction", &JSScroll::SetFriction);
     JSClass<JSScroll>::StaticMethod("scrollSnap", &JSScroll::SetScrollSnap);
+    JSClass<JSScroll>::StaticMethod("clip", &JSList::JsClip);
     JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -341,7 +343,18 @@ void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
         edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
         edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
     }
-    ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+    ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), true);
+
+    if (args.Length() == 2) { // 2 is parameter count
+        auto paramObject = JSRef<JSObject>::Cast(args[1]);
+        if (args[1]->IsNull() || args[1]->IsUndefined()) {
+            return;
+        } else {
+            JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
+            bool alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : true;
+            ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+        }
+    }
 }
 
 void JSScroll::JsWidth(const JSCallbackInfo& info)

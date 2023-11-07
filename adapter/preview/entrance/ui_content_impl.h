@@ -28,7 +28,6 @@
 #include "adapter/preview/external/ability/stage/stage_context.h"
 
 namespace OHOS::Ace {
-
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
@@ -113,6 +112,12 @@ public:
         const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config) override;
     void CloseModalUIExtension(int32_t sessionId) override;
 
+    void SetParentToken(sptr<IRemoteObject> token) override {}
+    sptr<IRemoteObject> GetParentToken() override
+    {
+        return nullptr;
+    }
+
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void DestroyCallback() const;
@@ -151,7 +156,6 @@ private:
     // ArkTS Form
     bool isFormRender_ = false;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_UI_CONTENT_IMPL_H

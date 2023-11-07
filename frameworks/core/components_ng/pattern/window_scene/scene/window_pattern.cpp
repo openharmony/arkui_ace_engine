@@ -115,7 +115,8 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
 
     auto state = session_->GetSessionState();
-    LOGI("Session state: %{public}u, bundle name: %{public}s", state, session_->GetSessionInfo().bundleName_.c_str());
+    LOGI("Session id: %{public}d, state: %{public}u, bundle name: %{public}s",
+        session_->GetPersistentId(), state, session_->GetSessionInfo().bundleName_.c_str());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         if (!HasStartingPage()) {
             return;
@@ -180,6 +181,8 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto imagePaintProperty = snapshotNode_->GetPaintProperty<ImageRenderProperty>();
+    imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
     snapshotNode_->SetHitTestMode(HitTestMode::HTMNONE);
 
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;

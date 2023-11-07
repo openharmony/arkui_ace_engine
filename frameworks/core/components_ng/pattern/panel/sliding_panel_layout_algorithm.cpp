@@ -50,7 +50,6 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
-        LOGE("fail to measure slidingPanel due to layoutConstraint is nullptr");
         return;
     }
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
@@ -79,7 +78,7 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childLayoutConstraint.parentIdealSize =
         OptionalSizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
     if (type == PanelType::CUSTOM) {
-        auto calc = layoutProperty->GetCustomHeight().value();
+        auto calc = layoutProperty->GetCustomHeight().value_or(Dimension(0.0));
         if (!calc.CalcValue().empty() && calc.CalcValue().find("wrapContent") != std::string::npos) {
             childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height()));
             childLayoutConstraint.parentIdealSize = OptionalSizeF(width, static_cast<float>(idealSize.Height()));
@@ -126,7 +125,7 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     customHeight_ = layoutProperty->GetCustomHeight().value_or(Dimension(0.0));
     auto type = layoutProperty->GetPanelType();
     if (type == PanelType::CUSTOM) {
-        auto calc = layoutProperty->GetCustomHeight().value();
+        auto calc = layoutProperty->GetCustomHeight().value_or(Dimension(0.0));
         if (!calc.CalcValue().empty() && calc.CalcValue().find("wrapContent") != std::string::npos) {
             customHeight_ = Dimension(columnGeometryNode->GetFrameSize().Height());
         }

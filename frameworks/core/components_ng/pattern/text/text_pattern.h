@@ -83,6 +83,8 @@ public:
 
     void OnModifyDone() override;
 
+    void PreCreateLayoutWrapper();
+
     void BeforeCreateLayoutWrapper() override;
 
     void AddChildSpanItem(const RefPtr<UINode>& child);
@@ -308,6 +310,13 @@ public:
         return GetHost();
     }
 
+    RefPtr<Paragraph> GetParagraph()
+    {
+        return paragraph_;
+    }
+
+    void OnAreaChangedInner() override;
+
 protected:
     virtual void HandleOnCopy();
     void InitMouseEvent();
@@ -319,7 +328,7 @@ protected:
     void HandleSingleClickEvent(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     bool IsDraggable(const Offset& localOffset);
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
@@ -388,6 +397,7 @@ private:
     OffsetF imageOffset_;
 
     OffsetF contentOffset_;
+    OffsetF parentGlobalOffset_;
     GestureEventFunc onClick_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;

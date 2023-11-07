@@ -359,11 +359,6 @@ public:
         }
     }
 
-    const shared_ptr<JsValue>& GetRenderContext() const
-    {
-        return renderContext_;
-    }
-
     void SetPluginBundleName(const std::string& pluginBundleName) override
     {
         pluginBundleName_ = pluginBundleName;
@@ -402,6 +397,7 @@ public:
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
     bool UpdateRootComponent() override;
+    bool LoadPluginComponent(const std::string &url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
     static void SetEntryObject(const panda::Global<panda::ObjectRef>& obj)
     {
         obj_ = obj;
@@ -433,7 +429,6 @@ private:
 
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
-    shared_ptr<JsValue> renderContext_;
 #if defined(PREVIEW)
     std::string assetPath_;
     std::string bundleName_;

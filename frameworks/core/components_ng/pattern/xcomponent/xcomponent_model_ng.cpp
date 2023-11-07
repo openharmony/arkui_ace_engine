@@ -39,7 +39,7 @@ void XComponentModelNG::SetSoPath(const std::string& soPath)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    if (layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+    if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
         return;
     }
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
@@ -50,7 +50,7 @@ void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    if (layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+    if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
         return;
     }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
@@ -62,7 +62,7 @@ void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    if (layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+    if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
         return;
     }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
@@ -77,5 +77,18 @@ bool XComponentModelNG::IsTexture()
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     return layoutProperty->GetXComponentTypeValue() == XComponentType::TEXTURE;
+}
+
+void XComponentModelNG::SetDetachCallback(DetachCallback&& onDetach)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDetachEvent(std::move(onDetach));
 }
 } // namespace OHOS::Ace::NG

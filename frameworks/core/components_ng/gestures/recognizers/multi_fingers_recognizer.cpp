@@ -31,13 +31,14 @@ MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers)
     }
 }
 
-void MultiFingersRecognizer::UpdateFingerListInfo(const Offset& coordinateOffset)
+void MultiFingersRecognizer::UpdateFingerListInfo()
 {
     fingerList_.clear();
     for (const auto& point : touchPoints_) {
-        Offset localLocation = point.second.GetOffset() - coordinateOffset;
-        FingerInfo fingerInfo = { point.first, point.second.GetOffset(), localLocation, point.second.sourceType,
-            point.second.sourceTool };
+        PointF localPoint(point.second.x, point.second.y);
+        NGGestureRecognizer::Transform(localPoint, GetNodeId());
+        FingerInfo fingerInfo = { point.first, point.second.GetOffset(),
+            Offset(localPoint.GetX(), localPoint.GetY()), point.second.sourceType, point.second.sourceTool };
         fingerList_.emplace_back(fingerInfo);
     }
 }

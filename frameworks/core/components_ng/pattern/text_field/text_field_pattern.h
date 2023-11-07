@@ -18,8 +18,8 @@
 
 #include <cstdint>
 #include <optional>
-#include <stack>
-#include <stdint.h>
+#include <queue>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
@@ -62,7 +62,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
-#include "core/gestures/gesture_info.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -279,6 +278,11 @@ public:
     bool GetEditingBoxModel() const override;
 #endif
 
+    bool ShouldDelayChildPressedState() const override
+    {
+        return false;
+    }
+
     void UpdateEditingValue(const std::string& value, int32_t caretPosition)
     {
         contentController_->SetTextValue(value);
@@ -311,7 +315,7 @@ public:
         return contentController_->GetWideText();
     }
 
-    int32_t GetCaretIndex()
+    int32_t GetCaretIndex() const
     {
         return selectController_->GetCaretIndex();
     }
@@ -1071,6 +1075,7 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
 
     void Delete(int32_t start, int32_t end);
+    void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
@@ -1111,6 +1116,7 @@ private:
     void NotifyOnEditChanged(bool isChanged);
     void StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste = false);
     void ProcessResponseArea();
+    bool HasInputOperation();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1240,9 +1246,9 @@ private:
     TimeStamp lastClickTimeStamp_;
     float paragraphWidth_ = 0.0f;
 
-    std::stack<int32_t> deleteBackwardOperations_;
-    std::stack<int32_t> deleteForwardOperations_;
-    std::stack<std::string> insertValueOperations_;
+    std::queue<int32_t> deleteBackwardOperations_;
+    std::queue<int32_t> deleteForwardOperations_;
+    std::queue<std::string> insertValueOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool showSelect_ = false;

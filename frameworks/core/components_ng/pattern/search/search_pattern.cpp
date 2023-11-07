@@ -764,7 +764,6 @@ void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 
 void SearchPattern::HandleFocusEvent()
 {
-    LOGI("Search %{public}d on focus", GetHost()->GetId());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -776,7 +775,6 @@ void SearchPattern::HandleFocusEvent()
 
 void SearchPattern::HandleBlurEvent()
 {
-    LOGI("Search %{public}d on blur", GetHost()->GetId());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -806,7 +804,6 @@ void SearchPattern::InitClickEvent()
 
 void SearchPattern::HandleClickEvent(GestureEvent& info)
 {
-    LOGI("Search %{public}d on click", GetHost()->GetId());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -855,6 +852,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
         ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str());
     auto maxLength = GetMaxLength();
     json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
+    json->Put("type", textFieldPattern->TextInputTypeToString().c_str());
     textFieldLayoutProperty->HasCopyOptions();
 }
 

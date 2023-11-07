@@ -59,8 +59,6 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(ResetLayoutConstraintMinWidth(child, childConstraint));
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        LOGD("child finish measure, child %{public}s size = %{public}s", child->GetHostTag().c_str(),
-            child->GetGeometryNode()->GetMarginFrameSize().ToString().c_str());
         contentHeight += childSize.Height();
     }
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));

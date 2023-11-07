@@ -17,6 +17,7 @@
 
 #include <sys/time.h>
 
+#include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
@@ -71,7 +72,7 @@ bool TimePickerTossAnimationController::Play()
     CHECK_NULL_RETURN(column, false);
     auto timeDiff = timeEnd_ - timeStart_;
     if (timeDiff < MIN_TIME) {
-        LOGW("toss time[%{public}lf] too small.", timeDiff);
+        TAG_LOGW(AceLogTag::ACE_DIALOG_TIMEPICKER, "toss time[%{public}lf] too small.", timeDiff);
         return false;
     }
     speed_ = column->GetMainVelocity() / VELOCTY_TRANS;
@@ -163,7 +164,6 @@ double TimePickerTossAnimationController::GetCurrentTime() const
     struct timeval tv = { 0 };
     int result = gettimeofday(&tv, nullptr);
     if (result != 0) {
-        LOGE("toss gettimeofday failed.");
         return 0.0;
     }
 

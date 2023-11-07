@@ -152,6 +152,7 @@ ohos_unittest("time_picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/dialog/mock_dialog_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/dialog/mock_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/menu/mock_menu_wrapper_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/navrouter/mock_navdestination_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/picker/mock_timepicker_model.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",

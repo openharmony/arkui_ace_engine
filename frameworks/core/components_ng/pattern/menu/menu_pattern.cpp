@@ -385,7 +385,6 @@ void MenuPattern::HideMenu(bool isMenuOnTouch) const
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch);
-    LOGI("MenuPattern closing menu %{public}d", targetId_);
 }
 
 void MenuPattern::HideSubMenu()
@@ -593,18 +592,13 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    auto bgColor = theme->GetBackgroundColor().BlendOpacity(theme->GetMenuBackgroundColorAlpha());
+    auto bgColor = theme->GetBackgroundColor();
     renderContext->UpdateBackgroundColor(bgColor);
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     // make menu round rect
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(theme->GetMenuBorderRadius());
     renderContext->UpdateBorderRadius(borderRadius);
-
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::THICK;
-    styleOption.colorMode = ThemeColorMode::SYSTEM;
-    renderContext->UpdateBackBlurStyle(styleOption);
 }
 
 void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)

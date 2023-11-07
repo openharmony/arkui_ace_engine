@@ -30,7 +30,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/type_definition.h"
 #include "core/event/ace_events.h"
-#include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_event.h"
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
 

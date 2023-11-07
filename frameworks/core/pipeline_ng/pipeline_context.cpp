@@ -106,6 +106,13 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
+RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
+{
+    auto pipeline = PipelineBase::GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return DynamicCast<PipelineContext>(pipeline);
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     auto context = GetCurrentContext();
@@ -231,7 +238,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         distributedUI->ApplyOneUpdate();
     } while (false);
 #endif
-    FlushAnimation(GetTimeFromExternalTimer());
+    FlushAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
@@ -490,6 +497,11 @@ void PipelineContext::SetupRootElement()
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     auto atomicService = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
+    auto container = Container::Current();
+    if (container && atomicService) {
+        auto appBar = Referenced::MakeRefPtr<AppBarView>(atomicService);
+        container->SetAppBar(appBar);
+    }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
         MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
         rootNode_->AddChild(
@@ -714,8 +726,7 @@ void PipelineContext::StartWindowMaximizeAnimation(
     AnimationOption option;
     int32_t duration = 400;
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-    if (maximizeMode == MaximizeMode::MODE_FULL_FILL
-        || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         duration = 0;
     }
     option.SetDuration(duration);
@@ -880,6 +891,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         float offsetFix = (rootSize.Height() - positionYWithOffset) > 100.0f
                               ? keyboardHeight - (rootSize.Height() - positionYWithOffset) / 2.0f
                               : keyboardHeight;
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+        if (offsetFix > 0.0f && positionYWithOffset < offsetFix) {
+            offsetFix = keyboardHeight - (rootSize.Height() - positionYWithOffset - height);
+        }
+#endif
         if (NearZero(keyboardHeight)) {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
@@ -1140,10 +1156,20 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
+        ResetDraggingStatus(scalePoint);
     }
 
     hasIdleTasks_ = true;
     RequestFrame();
+}
+
+void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint)
+{
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
+        manager->OnDragEnd({ touchPoint.x, touchPoint.y }, "");
+    }
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
@@ -1171,6 +1197,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             auto lastPage = stageManager_->GetLastPage();
             if (params.size() < USED_ID_FIND_FLAG && lastPage) {
                 lastPage->DumpTree(0);
+                DumpLog::GetInstance().OutPutBySize();
             }
             if (params.size() == USED_ID_FIND_FLAG && lastPage && !lastPage->DumpTreeById(0, params[2])) {
                 DumpLog::GetInstance().Print(
@@ -1209,7 +1236,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
         for (const auto& func : dumpListeners_) {
             func(jsParams);
-        } 
+        }
     }
 
     return true;
@@ -1357,9 +1384,6 @@ void PipelineContext::FlushMouseEvent()
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
-    if (!onFocus_) {
-        return false;
-    }
     if (mouseStyleNodeId_ != nodeId) {
         return false;
     }
@@ -1670,8 +1694,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
         }
     };
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-    if (maximizeMode == MaximizeMode::MODE_FULL_FILL
-        || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         constexpr int32_t delayedTime = 50;
         taskExecutor_->PostDelayedTask(callback, TaskExecutor::TaskType::UI, delayedTime);
     } else {

@@ -20,7 +20,6 @@
 
 #include "core/common/container.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 class ActionSheetModel {

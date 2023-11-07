@@ -247,6 +247,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
 {
 #ifndef USE_ROSEN_DRAWING
     // get skImage form pixelMap
+    CHECK_NULL_VOID(pixelMap);
     auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
@@ -257,6 +258,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     CHECK_NULL_VOID(image);
 
     const auto skCanvas = skCanvas_.get();
+    CHECK_NULL_VOID(skCanvas);
     SkPaint compositeOperationpPaint;
     InitPaintBlend(compositeOperationpPaint);
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
@@ -276,20 +278,19 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
         path.addRect(skRect);
         RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas, &imagePaint_);
     }
+
     switch (canvasImage.flag) {
         case 0:
             skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-
             skCanvas->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
             break;
         }
         case 2: {
             SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-
             skCanvas->drawImageRect(
                 image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
             break;

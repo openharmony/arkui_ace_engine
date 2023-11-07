@@ -53,7 +53,9 @@ template("web_pattern_unit_source_set") {
       ]
 
       external_deps = [
+        "ability_base:configuration",
         "ability_runtime:app_manager",
+        "ability_runtime:runtime",
         "webview:libnweb",
         "window_manager:libwm",
       ]

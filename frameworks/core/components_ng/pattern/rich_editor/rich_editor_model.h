@@ -50,6 +50,8 @@ struct ImageSpanOptions {
     std::optional<std::string> moduleName;
     std::optional<RefPtr<PixelMap>> imagePixelMap;
     std::optional<ImageSpanAttribute> imageAttribute;
+    GestureEventFunc onClick;
+    GestureEventFunc onLongPress;
 };
 
 struct SpanPositionInfo {
@@ -131,6 +133,8 @@ struct TextSpanOptions {
     std::string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
+    GestureEventFunc onClick;
+    GestureEventFunc onLongPress;
 };
 
 class ACE_EXPORT RichEditorControllerBase : public AceType {

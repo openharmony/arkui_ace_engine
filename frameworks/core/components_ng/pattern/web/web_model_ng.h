@@ -73,6 +73,7 @@ public:
     void SetRenderExitedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetRefreshAccessedHistoryId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetCacheMode(WebCacheMode cacheMode) override;
+    void SetOverScrollMode(OverScrollMode mode) override;
     void SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled) override;
     void SetFileFromUrlAccessEnabled(bool isFileFromUrlAccessEnabled) override;
     void SetDatabaseAccessEnabled(bool isDatabaseAccessEnabled) override;
@@ -143,6 +144,8 @@ public:
     void SetAudioExclusive(bool audioExclusive) override;
     void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetWrapContent(bool isWrapContentEnabled) override;
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

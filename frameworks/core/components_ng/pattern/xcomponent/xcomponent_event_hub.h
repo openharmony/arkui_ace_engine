@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 using LoadEvent = std::function<void(const std::string&)>;
 using DestroyEvent = std::function<void()>;
 using ExternalEvent = std::function<void(const std::string&, const uint32_t, const bool)>;
+using DetachEvent = std::function<void(const std::string&)>;
 
 class XComponentEventHub : public EventHub {
     DECLARE_ACE_TYPE(XComponentEventHub, EventHub)
@@ -68,10 +69,23 @@ public:
         }
     }
 
+    void SetDetachEvent(DetachEvent&& detachEvent)
+    {
+        detachEvent_ = std::move(detachEvent);
+    }
+
+    void FireDetachEvent(const std::string& componentId)
+    {
+        if (detachEvent_) {
+            detachEvent_(componentId);
+        }
+    }
+
 private:
     LoadEvent loadEvent_;
     DestroyEvent destroyEvent_;
     ExternalEvent surfaceInitEvent_;
+    DetachEvent detachEvent_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_EVENT_HUB_H

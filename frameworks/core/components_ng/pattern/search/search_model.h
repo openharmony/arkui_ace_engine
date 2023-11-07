@@ -72,6 +72,8 @@ public:
     virtual void SetCustomKeyboard(const std::function<void ()> &&buildFunc);
     virtual void SetMaxLength(uint32_t value);
     virtual void ResetMaxLength();
+    virtual void SetType(TextInputType value);
+
 private:
     static std::unique_ptr<SearchModel> instance_;
     static std::mutex mutex_;

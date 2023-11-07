@@ -71,8 +71,14 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
     auto defaultImageHeight =
         imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
-    auto imageHeight = std::min(defaultImageHeight, static_cast<float>(searchHeight));
+    auto imageHeight = std::min((NearZero(defaultImageHeight) && !layoutProperty->HasCancelButtonUDSize())
+                                    ? static_cast<float>(searchTheme->GetIconSize().ConvertToPx())
+                                    : defaultImageHeight,
+        static_cast<float>(searchHeight));
     CalcSize imageCalcSize;
+    if (NearZero(defaultImageHeight)) {
+        imageCalcSize.SetWidth(CalcLength(imageHeight));
+    }
     imageCalcSize.SetHeight(CalcLength(imageHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -108,8 +114,7 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto searchHeight =
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
-    cancelButtonHeight =
-        std::min(cancelButtonHeight, searchHeight - 0.0f);
+    cancelButtonHeight = std::min(cancelButtonHeight, searchHeight - 0.0f);
     CalcSize cancelButtonCalcSize((CalcLength(cancelButtonHeight)), CalcLength(cancelButtonHeight));
     cancelButtonLayoutProperty->UpdateUserDefinedIdealSize(cancelButtonCalcSize);
 
@@ -144,8 +149,6 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto searchWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     auto searchButtonNode = searchWrapper->GetHostNode();
     auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
-    auto cancelButtonNode = cancelButtonWrapper->GetHostNode();
-    auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     float leftPadding = padding.left.value_or(0.0f);
     float rightPadding = padding.right.value_or(0.0f);
@@ -160,14 +163,14 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
                          MULTIPLE_2 * searchTheme->GetDividerSideSpace().ConvertToPx();
     }
 
-    if (cancelButtonEvent->IsEnabled()) {
+    auto style = layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
+    if (style != CancelButtonStyle::INVISIBLE) {
         textFieldWidth = textFieldWidth - cancelButtonWidth;
     }
     auto themeHeight = searchTheme->GetHeight().ConvertToPx();
     auto searchHeight =
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
-    auto textFieldHeight =
-        std::min(themeHeight, searchHeight - 0.0f);
+    auto textFieldHeight = std::min(themeHeight, searchHeight - 0.0f);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
     childLayoutConstraint.selfIdealSize.SetHeight(textFieldHeight);
@@ -196,8 +199,14 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
     auto defaultImageHeight =
         imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
-    auto imageHeight = std::min(defaultImageHeight, static_cast<float>(searchHeight));
+    auto iconStretchSize = NearZero(defaultImageHeight) && !layoutProperty->HasSearchIconUDSize();
+    auto imageHeight =
+        std::min(iconStretchSize ? static_cast<float>(searchTheme->GetIconSize().ConvertToPx()) : defaultImageHeight,
+            static_cast<float>(searchHeight));
     CalcSize imageCalcSize;
+    if (iconStretchSize) {
+        imageCalcSize.SetWidth(CalcLength(imageHeight));
+    }
     imageCalcSize.SetHeight(CalcLength(imageHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
 
@@ -333,7 +342,6 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
                            : std::min(constraint->percentReference.Width(), constraint->maxSize.Width());
     SizeF idealSize(searchWidth, searchHeightAdapt);
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
-        LOGW("Size is infinity.");
         geometryNode->SetFrameSize(SizeF());
         return;
     }
@@ -349,7 +357,6 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
     if (children.empty()) {
-        LOGW("Search has no child node.");
         return;
     }
 
@@ -431,7 +438,6 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
     if (children.empty()) {
-        LOGW("Search has no child node.");
         return;
     }
 

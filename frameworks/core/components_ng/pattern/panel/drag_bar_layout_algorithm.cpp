@@ -54,7 +54,6 @@ std::optional<SizeF> DragBarLayoutAlgorithm::MeasureContent(
 
     auto fullScreenMode = layoutProperty->GetFullScreenMode().value_or(false);
     if (fullScreenMode) {
-        LOGI("fullScreenMode");
         idealSize.SetWidth(layoutConstraint->maxSize.Width());
         idealSize.SetHeight(static_cast<float>(hotRegionHeight));
     }

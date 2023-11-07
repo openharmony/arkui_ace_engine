@@ -37,7 +37,7 @@ public:
     static UIExtensionModel* GetInstance();
     virtual ~UIExtensionModel() = default;
 
-    virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
+    virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller = false);
     virtual void SetOnRemoteReady(std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onRemoteReady);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
     virtual void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult);

@@ -33,7 +33,6 @@ ScrollMotion::ScrollMotion(double position, double velocity, const ExtentPair& e
     if (spring && spring->IsValid()) {
         spring_ = spring;
     } else {
-        LOGW("construct scroll motion error. empty or invalid spring property, use default spring property.");
         spring_ =
             AceType::MakeRefPtr<SpringProperty>(DEFAULT_SPRING_MASS, DEFAULT_SPRING_STIFFNESS, DEFAULT_SPRING_DAMPING);
     }
@@ -42,8 +41,6 @@ ScrollMotion::ScrollMotion(double position, double velocity, const ExtentPair& e
         springMotion_ = MakeOverScrollMotion(position, velocity);
     } else if (position < initExtent.Leading()) {
         springMotion_ = MakeUnderScrollMotion(position, velocity);
-    } else {
-        LOGW("No available motion.");
     }
 }
 

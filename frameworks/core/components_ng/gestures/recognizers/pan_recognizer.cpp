@@ -158,7 +158,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     auto fingerNum = static_cast<int32_t>(touchPoints_.size());
 
-    if (fingerNum == fingers_) {
+    if ((fingerNum == fingers_) || ((fingerNum > fingers_) && (refereeState_ == RefereeState::READY))) {
         velocityTracker_.Reset();
         UpdateTouchPointInVelocityTracker(event);
         refereeState_ = RefereeState::DETECTING;
@@ -479,7 +479,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
-        UpdateFingerListInfo(coordinateOffset_);
+        UpdateFingerListInfo();
         info.SetFingerList(fingerList_);
         info.SetOffsetX(averageDistance_.GetX());
         info.SetOffsetY(averageDistance_.GetY());
@@ -492,8 +492,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
 #endif // ENABLE_DRAG_FRAMEWORK
         PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
         NGGestureRecognizer::Transform(localPoint, GetNodeId());
-        info.SetGlobalPoint(globalPoint_)
-            .SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
+        info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTargetDisplayId(touchPoint.targetDisplayId);

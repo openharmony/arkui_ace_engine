@@ -57,15 +57,17 @@ void LongPressRecognizer::OnAccepted()
     refereeState_ = RefereeState::SUCCEED;
     if (onLongPress_ && !touchPoints_.empty()) {
         TouchEvent trackPoint = touchPoints_.begin()->second;
+        PointF localPoint(trackPoint.GetOffset().GetX(), trackPoint.GetOffset().GetY());
+        NGGestureRecognizer::Transform(localPoint, GetNodeId());
         LongPressInfo info(trackPoint.id);
         info.SetTimeStamp(time_);
         info.SetScreenLocation(trackPoint.GetScreenOffset());
-        info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
+        info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         onLongPress_(info);
     }
 
-    UpdateFingerListInfo(coordinateOffset_);
+    UpdateFingerListInfo();
     SendCallbackMsg(onActionUpdate_, false);
     SendCallbackMsg(onAction_, false);
     if (repeat_) {

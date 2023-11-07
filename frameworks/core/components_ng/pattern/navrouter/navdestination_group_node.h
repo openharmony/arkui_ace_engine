@@ -27,6 +27,8 @@
 
 namespace OHOS::Ace::NG {
 
+class CustomNodeBase;
+
 using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
 class ACE_EXPORT NavDestinationGroupNode : public GroupNode {
@@ -118,6 +120,8 @@ public:
     {
         return transitionType_;
     }
+
+    RefPtr<CustomNodeBase> GetNavDestinationCustomNode();
 
 private:
     RefPtr<UINode> title_;

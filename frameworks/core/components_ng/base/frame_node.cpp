@@ -1546,6 +1546,13 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         translateCfg[GetId()] = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7],
             param[8], GetId(), localMat };
     }
+
+    if (GetInspectorId()->find("SCBScreen-Temp") != std::string::npos &&
+        static_cast<int>(translateCfg[GetId()].degree) != 0) {
+        translateCfg[GetId()].degree = 0.0;
+        translateCfg[GetId()].localMat = Matrix4();
+    }
+
     auto parent = GetAncestorNodeOfFrame();
     if (parent) {
         AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
@@ -2371,8 +2378,14 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         geometryNode_->SetContentSize(size.value());
     }
     GetPercentSensitive();
-    layoutAlgorithm_->Measure(this);
+    {
+        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
+            GetId(), GetParent() ? GetParent()->GetId() : 0);
+        layoutAlgorithm_->Measure(this);
+    }
     if (overlayNode_) {
+        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", overlayNode_->GetTag().c_str(),
+            overlayNode_->GetId(), overlayNode_->GetParent() ? overlayNode_->GetParent()->GetId() : 0);
         overlayNode_->Measure(layoutProperty_->CreateChildConstraint());
     }
     UpdatePercentSensitive();
@@ -2420,7 +2433,11 @@ void FrameNode::Layout()
             }
             layoutProperty_->UpdateContentConstraint();
         }
-        GetLayoutAlgorithm()->Layout(this);
+        {
+            ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
+                GetId(), GetParent() ? GetParent()->GetId() : 0);
+            GetLayoutAlgorithm()->Layout(this);
+        }
         if (overlayNode_) {
             LayoutOverlay();
         }
@@ -2682,6 +2699,8 @@ void FrameNode::LayoutOverlay()
     auto childSize = overlayNode_->GetGeometryNode()->GetMarginFrameSize();
     auto translate = Alignment::GetAlignPosition(size, childSize, align) + offset;
     overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
+    ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", overlayNode_->GetTag().c_str(),
+        GetId(), overlayNode_->GetParent() ? overlayNode_->GetParent()->GetId() : 0);
     overlayNode_->Layout();
 }
 

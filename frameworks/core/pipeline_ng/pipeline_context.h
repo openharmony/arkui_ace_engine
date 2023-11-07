@@ -63,6 +63,8 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContext();
 
+    static RefPtr<PipelineContext> GetMainPipelineContext();
+
     static float GetCurrentRootWidth();
 
     static float GetCurrentRootHeight();
@@ -440,6 +442,8 @@ private:
     void DumpPipelineInfo() const;
 
     void RegisterRootEvent();
+
+    void ResetDraggingStatus(const TouchEvent& touchPoint);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 

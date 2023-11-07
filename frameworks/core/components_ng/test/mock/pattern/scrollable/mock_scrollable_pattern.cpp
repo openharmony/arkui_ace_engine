@@ -80,4 +80,8 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
 void ScrollablePattern::OnScrollStartRecursive(float position) {}
 
 void ScrollablePattern::OnScrollEndRecursive() {}
+
+void ScrollablePattern::RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
+
+void ScrollablePattern::FireAndCleanScrollingListener() {}
 } // namespace OHOS::Ace::NG

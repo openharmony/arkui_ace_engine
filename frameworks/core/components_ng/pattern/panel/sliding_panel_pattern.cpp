@@ -22,6 +22,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/animation/friction_motion.h"
@@ -57,7 +58,7 @@ void SlidingPanelPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
     if (layoutProperty->GetPanelType() == PanelType::CUSTOM) {
-        auto calc = layoutProperty->GetCustomHeight().value();
+        auto calc = layoutProperty->GetCustomHeight().value_or(Dimension(0.0));
         if (!calc.CalcValue().empty() && calc.CalcValue().find("wrapContent") != std::string::npos) {
             ResetLayoutWeight();
         }
@@ -105,6 +106,9 @@ void SlidingPanelPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -126,6 +130,24 @@ bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& 
     return true;
 }
 
+void SlidingPanelPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    if (type != WindowSizeChangeReason::ROTATION) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireHeightChangeEvent();
+    });
+}
+
 void SlidingPanelPattern::Update()
 {
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -143,7 +165,7 @@ void SlidingPanelPattern::Update()
                     ? PanelMode::FULL
                     : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     if (type_ == PanelType::CUSTOM) {
-            mode = PanelMode::CUSTOM;
+        mode = PanelMode::CUSTOM;
     }
     if (mode_.value() == mode) {
         if (mode == PanelMode::HALF && type_ == PanelType::MINI_BAR) {
@@ -172,7 +194,7 @@ void SlidingPanelPattern::InitializeLayoutProps()
     CHECK_NULL_VOID(host);
     auto child = host->GetChildren();
     if (child.empty() || child.size() > 2) {
-        LOGE("Children size wrong in slide panel modal");
+        TAG_LOGW(AceLogTag::ACE_PANEL, "Children size wrong in slide panel modal");
         return;
     }
 
@@ -352,7 +374,6 @@ void SlidingPanelPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub
         return;
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& startInfo) {
-        LOGI("Pan event start");
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleDragStart(startInfo.GetLocalLocation());
@@ -365,14 +386,12 @@ void SlidingPanelPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub
         }
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleDragEnd(info.GetMainVelocity());
         }
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleDragEnd({});
@@ -434,7 +453,6 @@ void SlidingPanelPattern::HandleDragUpdate(const GestureEvent& info)
     auto tempOffset = currentOffset_;
     UpdateCurrentOffset(mainDelta);
     if (NearEqual(currentOffset_, tempOffset)) {
-        LOGI("Offset is not changed, needn't measure.");
         return;
     }
     FireHeightChangeEvent();
@@ -463,7 +481,6 @@ void SlidingPanelPattern::HandleDragEnd(float dragVelocity)
             break;
         }
         default: {
-            LOGE("Unsupported type:%{public}d", type_);
             return;
         }
     }
@@ -612,7 +629,6 @@ void SlidingPanelPattern::AppendBlankHeightAnimation(float targetLocation, Panel
         [weak = AceType::WeakClaim(this), start = currentOffset_, end = targetLocation, mode](float value) {
             auto panel = weak.Upgrade();
             if (!panel) {
-                LOGE("Panel is null.");
                 return;
             }
             if (value > 1.0) {
@@ -772,7 +788,6 @@ void SlidingPanelPattern::SetDragBarCallBack()
         } else if (panel->mode_.value_or(PanelMode::HALF) == PanelMode::FULL) {
             panel->mode_ = panel->type_ == PanelType::MINI_BAR ? PanelMode::MINI : PanelMode::HALF;
         } else {
-            LOGD("not support click in half mode");
         }
         if (panel->type_ == PanelType::TEMP_DISPLAY && panel->mode_ == PanelMode::HALF) {
             panel->isClosePanel_ = true;

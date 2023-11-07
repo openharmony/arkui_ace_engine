@@ -41,7 +41,6 @@
 #include "core/common/ace_engine.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/event/ace_events.h"
-#include "core/gestures/gesture_info.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #endif
 

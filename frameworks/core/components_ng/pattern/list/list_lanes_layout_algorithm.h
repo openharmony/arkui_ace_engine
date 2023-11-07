@@ -53,6 +53,7 @@ protected:
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) override;
     int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index) override;
+    int32_t GetLanesCeil(LayoutWrapper* layoutWrapper, int32_t index) override;
 
 private:
     static void ModifyLaneLength(

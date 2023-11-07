@@ -49,6 +49,11 @@ public:
 
     static RefPtr<CanvasImage> QueryFromCache(const std::string& key);
 
+    bool HasData() const override
+    {
+        return GetPixelMap();
+    }
+
 private:
     RefPtr<PixelMap> pixelMap_;
 

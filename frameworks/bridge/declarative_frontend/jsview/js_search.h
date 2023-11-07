@@ -57,6 +57,7 @@ public:
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
     static void SetCustomKeyboard(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
+    static void SetType(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

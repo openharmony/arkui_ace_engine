@@ -20,8 +20,8 @@
 
 #include "base/thread/cancelable_callback.h"
 #include "core/accessibility/accessibility_utils.h"
-#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/gestures/click_info.h"
 
 namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;

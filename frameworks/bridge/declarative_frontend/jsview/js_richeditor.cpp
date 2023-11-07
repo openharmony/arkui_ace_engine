@@ -20,6 +20,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
@@ -143,8 +144,7 @@ void JSRichEditor::Create(const JSCallbackInfo& info)
 
 void JSRichEditor::SetOnReady(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("args not function");
+    if (!args[0]->IsFunction()) {
         return;
     }
     JsEventCallback<void()> callback(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]));
@@ -257,8 +257,7 @@ JSRef<JSVal> JSRichEditor::CreateJSSelection(const RichEditorSelection& selectIn
 
 void JSRichEditor::SetOnSelect(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGI("args not function");
+    if (!args[0]->IsFunction()) {
         return;
     }
     auto jsSelectFunc =
@@ -272,8 +271,7 @@ void JSRichEditor::SetOnSelect(const JSCallbackInfo& args)
 }
 void JSRichEditor::SetAboutToIMEInput(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("args not function");
+    if (!args[0]->IsFunction()) {
         return;
     }
     auto jsAboutToIMEInputFunc = AceType::MakeRefPtr<JsEventFunction<NG::RichEditorInsertValue, 1>>(
@@ -292,8 +290,7 @@ void JSRichEditor::SetAboutToIMEInput(const JSCallbackInfo& args)
 
 void JSRichEditor::SetOnIMEInputComplete(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("args not function");
+    if (!args[0]->IsFunction()) {
         return;
     }
     auto jsOnIMEInputCompleteFunc = AceType::MakeRefPtr<JsEventFunction<NG::RichEditorAbstractSpanResult, 1>>(
@@ -307,8 +304,7 @@ void JSRichEditor::SetOnIMEInputComplete(const JSCallbackInfo& args)
 }
 void JSRichEditor::SetAboutToDelete(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("args not function");
+    if (!args[0]->IsFunction()) {
         return;
     }
     auto jsAboutToDeleteFunc = AceType::MakeRefPtr<JsEventFunction<NG::RichEditorDeleteValue, 1>>(
@@ -327,8 +323,7 @@ void JSRichEditor::SetAboutToDelete(const JSCallbackInfo& args)
 
 void JSRichEditor::SetOnDeleteComplete(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("args not function");
+    if (!args[0]->IsFunction()) {
         return;
     }
     JsEventCallback<void()> callback(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]));
@@ -341,7 +336,7 @@ void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
         RichEditorModel::GetInstance()->SetCustomKeyboard(nullptr);
         return;
     }
-    if (args.Length() < 1 || !args[0]->IsObject()) {
+    if (!args[0]->IsObject()) {
         return;
     }
     std::function<void()> buildFunc;
@@ -477,7 +472,6 @@ void JSRichEditor::JsClip(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (clipShape == nullptr) {
-            LOGD("clipShape is null");
             return;
         }
         ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
@@ -489,7 +483,6 @@ void JSRichEditor::JsClip(const JSCallbackInfo& info)
 void JSRichEditor::JsFocusable(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsBoolean()) {
-        LOGW("The info is wrong, it is supposed to be an boolean");
         return;
     }
     JSInteractableView::SetFocusable(info[0]->ToBoolean());
@@ -515,7 +508,6 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     RichEditorType editorType = RichEditorType::TEXT;
     if (info.Length() >= 1 && info[0]->IsNumber()) {
         auto spanType = info[0]->ToNumber<int32_t>();
-        LOGI("Set the spanType is %{public}d.", spanType);
         editorType = static_cast<RichEditorType>(spanType);
     }
 
@@ -527,7 +519,6 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
     auto builder = menuObj->GetProperty("builder");
     if (!builder->IsFunction()) {
-        LOGE("builder param is not a function.");
         return;
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
@@ -537,7 +528,6 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     ResponseType responseType = ResponseType::LONG_PRESS;
     if (info.Length() >= 3 && info[2]->IsNumber()) {
         auto response = info[2]->ToNumber<int32_t>();
-        LOGI("Set the responseType is %{public}d.", response);
         responseType = static_cast<ResponseType>(response);
     }
     std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
@@ -578,7 +568,6 @@ void JSRichEditor::ParseMenuParam(
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
         auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGI("About to call onAppear method on js");
             ACE_SCORING_EVENT("onDisappear");
             func->Execute();
         };
@@ -700,6 +689,12 @@ void JSRichEditorController::ParseJsTextStyle(
         !size.IsNegative() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
+    } else {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        size = theme->GetTextStyle().GetFontSize();
+        updateSpanStyle.updateFontSize = size;
+        style.SetFontSize(size);
     }
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
     if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
@@ -789,6 +784,43 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
         if (!imageAttribute->IsUndefined()) {
             ImageSpanAttribute imageStyle = ParseJsImageSpanAttribute(imageAttribute);
             options.imageAttribute = imageStyle;
+        }
+    }
+    if (args.Length() > 2 && args[2]->IsObject()) {
+        JSRef<JSObject> imageObject = JSRef<JSObject>::Cast(args[2]);
+        auto clickFunc = imageObject->GetProperty("onClick");
+        if (clickFunc->IsUndefined() && IsDisableEventVersion()) {
+            options.onClick = nullptr;
+        } else if (!clickFunc->IsFunction()) {
+            options.onClick = nullptr;
+        } else {
+            auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
+            auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                ACE_SCORING_EVENT("TextSpan.onClick");
+                func->Execute(*clickInfo);
+            };
+            auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
+            options.onClick = std::move(tmpClickFunc);
+        }
+
+        auto onLongPressFunc = imageObject->GetProperty("onLongPress");
+        if (onLongPressFunc->IsUndefined() && IsDisableEventVersion()) {
+            options.onLongPress = nullptr;
+        } else if (!onLongPressFunc->IsFunction()) {
+            options.onLongPress = nullptr;
+        } else {
+            auto jsLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(onLongPressFunc));
+            auto onLongPress = [
+                    execCtx = args.GetExecutionContext(), func = jsLongPressFunc](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                const auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                ACE_SCORING_EVENT("ImageSpan.onLongPress");
+                func->Execute(*longPressInfo);
+            };
+            auto tmpOnLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
+            options.onLongPress = std::move(tmpOnLongPressFunc);
         }
     }
     auto controller = controllerWeak_.Upgrade();
@@ -884,6 +916,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
         if (!styleObject->IsUndefined()) {
             auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<TextTheme>();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
@@ -896,6 +929,41 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
             if (ParseParagraphStyle(paraStyleObj, style)) {
                 options.paraStyle = style;
             }
+        }
+    }
+    if (args.Length() > 2 && args[2]->IsObject()) {
+        JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[2]);
+        auto clickFunc = spanObject->GetProperty("onClick");
+        if (clickFunc->IsUndefined() && IsDisableEventVersion()) {
+            options.onClick = nullptr;
+        } else if (!clickFunc->IsFunction()) {
+            options.onClick = nullptr;
+        } else {
+            auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
+            auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                ACE_SCORING_EVENT("Text.onClick");
+                func->Execute(*clickInfo);
+            };
+            auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
+            options.onClick = std::move(tmpClickFunc);
+        }
+        auto longPressFunc = spanObject->GetProperty("onLongPress");
+        if (longPressFunc->IsUndefined() && IsDisableEventVersion()) {
+            options.onLongPress = nullptr;
+        } else if (!longPressFunc->IsFunction()) {
+            options.onLongPress = nullptr;
+        } else {
+            auto jsLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(longPressFunc));
+            auto longPress = [execCtx = args.GetExecutionContext(), func = jsLongPressFunc](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                const auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                ACE_SCORING_EVENT("TextSpan.onLongPress");
+                func->Execute(*longPressInfo);
+            };
+            auto tmpLongPressFunc = [func = std::move(longPress)](GestureEvent& info) { func(&info); };
+            options.onLongPress = std::move(tmpLongPressFunc);
         }
     }
     auto controller = controllerWeak_.Upgrade();
@@ -1029,12 +1097,7 @@ void JSRichEditorController::SetCaretOffset(const JSCallbackInfo& args)
 namespace {
 bool ValidationCheck(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
-        return false;
-    }
     if (!info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGW("info[0] not is Object or Number");
         return false;
     }
     return true;
@@ -1074,7 +1137,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         // [LeadingMarginPlaceholder]
         JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(lm);
         style.leadingMargin = std::make_optional<NG::LeadingMargin>();
-        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("pixelMap");
+        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("placeholder");
         if (IsPixelMap(placeholder)) {
 #if defined(PIXEL_MAP_SUPPORTED)
             auto pixelMap = CreatePixelMapFromNapiValue(placeholder);
@@ -1113,6 +1176,7 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
 
     auto [start, end] = ParseRange(jsObject);
     auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     ImageSpanAttribute imageStyle;
@@ -1223,15 +1287,11 @@ void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
 {
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
-    if (info.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     if (!info[0]->IsObject()) {
-        LOGW("info[0] not is Object");
         return;
     }
     auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);

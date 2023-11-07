@@ -46,7 +46,7 @@ protected:
     static RefPtr<FrameNode> BuildMenuItemPadding(PaddingProperty padding, RefPtr<FrameNode> node);
     static void ResetHoverTimer();
     static bool sIsMenuPending_;
-    static bool sIsLeftMouse_;
+    static bool sIsForbidMenuEvent_;
     static bool enableSplit_;
     static OffsetF menuOffset_;
     static CancelableCallback<void()> sContextTimer_;

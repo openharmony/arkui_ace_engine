@@ -259,7 +259,7 @@ public:
      */
     Axis GetAxis() const override
     {
-        return Axis::FREE;
+        return axis_;
     }
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
     bool HandleScrollVelocity(float velocity) override;
@@ -267,6 +267,7 @@ public:
     void OnScrollEndRecursive() override;
     Axis GetParentAxis();
     RefPtr<NestableScrollContainer> WebSearchParent();
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
     /**
      *  End of NestableScrollContainer implementations
      */
@@ -311,6 +312,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -325,6 +327,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    void UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type);
+    std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMapFromString(const std::string& filePath);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
     void OnDateTimeChooserPopup(
@@ -358,6 +362,8 @@ public:
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
     bool IsImageDrag();
+    void UpdateJavaScriptOnDocumentStart();
+    void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
 #ifdef ENABLE_DRAG_FRAMEWORK
     DragRet GetDragAcceptableStatus();
 #endif
@@ -381,6 +387,7 @@ public:
     {
         return rootLayerHeight_;
     }
+    bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -440,6 +447,7 @@ private:
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
+    void OnOverScrollModeUpdate(const int32_t value);
     int GetWebId();
 
     void InitEvent();
@@ -588,12 +596,16 @@ private:
     bool isMemoryLevelEnable_ = true;
     bool isFirstFlingScrollVelocity_ = true;
     bool isWrapContentEnabled_ = false;
+    bool scrollState_ = false;
+    NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
+    Axis axis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     WeakPtr<NestableScrollContainer> parent_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
+    std::optional<ScriptItems> scriptItems_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

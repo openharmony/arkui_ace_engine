@@ -35,26 +35,18 @@ public:
         auto addVal = jsObject_->GetProperty("plus");
         if (addVal->IsFunction()) {
             addFunc_ = JSRef<JSFunc>::Cast(addVal);
-        } else {
-            LOGD("'plus' function does not exist on AnimatableArithmetic object");
         }
         auto minusVal = jsObject_->GetProperty("subtract");
         if (minusVal->IsFunction()) {
             minusFunc_ = JSRef<JSFunc>::Cast(minusVal);
-        } else {
-            LOGD("'minus' function does not exist on AnimatableArithmetic object");
         }
         auto multiplyVal = jsObject_->GetProperty("multiply");
         if (multiplyVal->IsFunction()) {
             multiplyFunc_ = JSRef<JSFunc>::Cast(multiplyVal);
-        } else {
-            LOGD("'multiply' function does not exist on AnimatableArithmetic object");
         }
         auto equalsVal = jsObject_->GetProperty("equals");
         if (equalsVal->IsFunction()) {
             equalsFunc_ = JSRef<JSFunc>::Cast(equalsVal);
-        } else {
-            LOGD("'equals' function does not exist on AnimatableArithmetic object");
         }
     }
 
@@ -68,7 +60,6 @@ public:
         JSRef<JSVal> argv[1] = { rhs->jsObject_ };
         auto retVal = addFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsObject()) {
-            LOGE("add: result is not an object!");
             return {};
         }
 
@@ -85,7 +76,6 @@ public:
         JSRef<JSVal> argv[1] = { rhs->jsObject_ };
         auto retVal = minusFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsObject()) {
-            LOGE("minus: result is not an object!");
             return {};
         }
 
@@ -98,7 +88,6 @@ public:
         JSRef<JSVal> argv[1] = { JSRef<JSVal>::Make(ToJSValue(scale)) };
         auto retVal = multiplyFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsObject()) {
-            LOGE("multiply: result is not an object!");
             return {};
         }
 
@@ -116,7 +105,6 @@ public:
         JSRef<JSVal> argv[1] = { rhs->jsObject_ };
         auto retVal = equalsFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsBoolean()) {
-            LOGE("equals: result is not an boolean!");
             return false;
         }
 

@@ -74,7 +74,10 @@ constexpr char NTC_PARAM_ZOOM_FACTOR[] = "zoom";
 constexpr char WEB_EVENT_PAGESTART[] = "onPageStarted";
 constexpr char WEB_EVENT_PAGEFINISH[] = "onPageFinished";
 constexpr char WEB_EVENT_DOWNLOADSTART[] = "onDownloadStart";
+constexpr char WEB_EVENT_LOADINTERCEPT[] = "onLoadIntercept";
 constexpr char WEB_EVENT_RUNJSCODE_RECVVALUE[] = "onRunJSRecvValue";
+constexpr char WEB_EVENT_SCROLL[] = "onScroll";
+constexpr char WEB_EVENT_SCALECHANGE[] = "onScaleChange";
 constexpr char WEB_EVENT_JS_INVOKE_METHOD[] = "onJSInvokeMethod";
 constexpr char WEB_EVENT_REFRESH_HISTORY[] = "onRefreshAccessedHistory";
 constexpr char WEB_EVENT_RENDER_EXITED[] = "onRenderExited";
@@ -89,8 +92,8 @@ constexpr char WEB_EVENT_GEOPERMISSION[] = "onGeoPermission";
 constexpr char WEB_EVENT_COMMONDIALOG[] = "onCommonDialog";
 constexpr char WEB_EVENT_CONSOLEMESSAGE[] = "onConsoleMessage";
 constexpr char WEB_EVENT_ERRORRECEIVE[] = "onErrorReceive";
-constexpr char WEB_EVENT_HTTPERRORRECEIVE[] = "onHttpErrorReceive";
 constexpr char WEB_EVENT_ONSHOWFILECHOOSER[] = "onShowFileChooser";
+constexpr char WEB_EVENT_ONHTTPERRORRECEIVE[] = "onHttpErrorReceive";
 
 constexpr char WEB_CREATE[] = "web";
 constexpr char NTC_PARAM_WEB[] = "web";
@@ -115,6 +118,16 @@ constexpr char WEB_ATTRIBUTE_ZOOM_ACCESS[] = "zoomAccess";
 constexpr char NTC_ZOOM_ACCESS[] = "zoomAccess";
 constexpr char WEB_ATTRIBUTE_JAVASCRIPT_ACCESS[] = "javascriptAccess";
 constexpr char NTC_JAVASCRIPT_ACCESS[] = "javascriptAccess";
+constexpr char WEB_ATTRIBUTE_MIN_FONT_SIZE[] = "minFontSize";
+constexpr char NTC_MIN_FONT_SIZE[] = "minFontSize";
+constexpr char WEB_ATTRIBUTE_HORIZONTAL_SCROLLBAR_ACCESS[] = "horizontalScrollBarAccess";
+constexpr char NTC_HORIZONTAL_SCROLLBAR_ACCESS[] = "horizontalScrollBarAccess";
+constexpr char WEB_ATTRIBUTE_VERTICAL_SCROLLBAR_ACCESS[] = "verticalScrollBarAccess";
+constexpr char NTC_VERTICAL_SCROLLBAR_ACCESS[] = "verticalScrollBarAccess";
+constexpr char WEB_ATTRIBUTE_BACKGROUND_COLOR[] = "backgroundColor";
+constexpr char NTC_BACKGROUND_COLOR[] = "backgroundColor";
+constexpr char WEB_ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS[] = "mediaPlayGestureAccess";
+constexpr char NTC_MEDIA_PLAY_GESTURE_ACCESS[] = "mediaPlayGestureAccess";
 
 const char WEB_PARAM_NONE[] = "";
 const char WEB_PARAM_AND[] = "#HWJS-&-#";
@@ -124,6 +137,9 @@ const char WEB_PARAM_BEGIN[] = "#HWJS-?-#";
 const char WEB_METHOD[] = "method";
 const char WEB_EVENT[] = "event";
 const char WEB_RESULT_FAIL[] = "fail";
+
+constexpr int FONT_MIN_SIZE = 1;
+constexpr int FONT_MAX_SIZE = 72;
 }
 
 std::map<std::string, std::string> WebResourceRequsetImpl::GetRequestHeader() const
@@ -160,6 +176,51 @@ bool WebResourceRequsetImpl::IsRedirect() const
     return false;
 }
 
+std::map<std::string, std::string> WebResourceResponseImpl::GetResponseHeader() const
+{
+    return std::map<std::string, std::string>();
+}
+
+std::string WebResourceResponseImpl::GetResponseData() const
+{
+    return "ResponseData";
+}
+
+std::string WebResourceResponseImpl::GetEncoding() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
+    if (!obj) {
+        LOGE("WebObjectEventManager get WebResourceResponseImpl encoding failed");
+        return std::string();
+    }
+    return obj->GetEncoding(object_);
+}
+
+std::string WebResourceResponseImpl::GetMimeType() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
+    if (!obj) {
+        LOGE("WebObjectEventManager get WebResourceResponseImpl mimeType failed");
+        return std::string();
+    }
+    return obj->GetMimeType(object_);
+}
+
+std::string WebResourceResponseImpl::GetReason() const
+{
+    return "ResponseReason";
+}
+
+int WebResourceResponseImpl::GetStatusCode() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
+    if (!obj) {
+        LOGE("WebObjectEventManager get WebResourceResponseImpl statusCode failed");
+        return 0;
+    }
+    return obj->GetStatusCode(object_);
+}
+
 std::string WebResourceErrorImpl::GetErrorInfo() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetResourceErrorObject();
@@ -173,9 +234,79 @@ int WebResourceErrorImpl::GetErrorCode() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetResourceErrorObject();
     if (!obj) {
-        return std::string();
+        return 0;
     }
     return obj->GetErrorCode(object_); 
+}
+
+double WebOffsetImpl::GetX() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetScrollObject();
+    if (!obj) {
+        LOGE("WebObjectEventManager get WebOffsetImpl X failed");
+        return 0.0;
+    }
+    return obj->GetX(object_);
+}
+
+double WebOffsetImpl::GetY() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetScrollObject();
+    if (!obj) {
+        LOGE("WebObjectEventManager get WebOffsetImpl Y failed");
+        return 0.0;
+    }
+    return obj->GetY(object_);
+}
+
+std::string WebConsoleMessage::GetMessage() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetConsoleMessageObject();
+    if (!obj) {
+        LOGE("WebObjectEventManager get WebConsoleMessage Message failed");
+        return std::string();
+    }
+    return obj->GetMessage(object_);
+}
+
+int WebConsoleMessage::GetMessageLevel() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetConsoleMessageObject();
+    if (!obj) {
+        LOGE("WebObjectEventManager get WebConsoleMessage MessageLevel failed");
+        return 0;
+    }
+    return obj->GetMessageLevel(object_);
+}
+
+std::string WebConsoleMessage::GetSourceId() const
+{
+    return "SourceId";
+}
+
+int WebConsoleMessage::GetLineNumber() const
+{
+    return 0;
+}
+
+float WebScaleChangeImpl::GetNewScale() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetScaleChangeObject();
+    if (!obj) {
+        LOGE("WebObjectEventManager get WebScaleChangeImpl newScale failed");
+        return 0.0f;
+    }
+    return obj->GetNewScale(object_);
+}
+
+float WebScaleChangeImpl::GetOldScale() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetScaleChangeObject();
+    if (!obj) {
+        LOGE("WebObjectEventManager get WebScaleChangeImpl oldScale failed");
+        return 0.0f;
+    }
+    return obj->GetOldScale(object_);
 }
 
 WebDelegateCross::~WebDelegateCross()
@@ -282,6 +413,19 @@ void WebDelegateCross::RegisterWebEvent()
             delegate->OnPageFinished(param);
         }
     });
+    resRegister->RegisterEvent(
+        MakeEventHash(WEB_EVENT_PAGECHANGED), [weak = WeakClaim(this)](const std::string& param) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnProgressChanged(param);
+            }
+        });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_RECVTITLE), [weak = WeakClaim(this)](const std::string& param) {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->OnReceivedTitle(param);
+        }
+    });
 }
 
 void WebDelegateCross::RegisterWebObjectEvent()
@@ -293,6 +437,43 @@ void WebDelegateCross::RegisterWebObjectEvent()
             delegate->OnErrorReceive(object);
         }
     });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_SCROLL), [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnScroll(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_SCALECHANGE), [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnScaleChange(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_ONHTTPERRORRECEIVE), [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnHttpErrorReceive(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithBoolReturn(MakeEventHash(WEB_EVENT_CONSOLEMESSAGE),
+        [weak = WeakClaim(this)](const std::string& param, void* object) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnConsoleMessage(object);
+            }
+            return false;
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithBoolReturn(MakeEventHash(WEB_EVENT_LOADINTERCEPT),
+        [weak = WeakClaim(this)](const std::string& param, void* object) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnLoadIntercept(object);
+            }
+            return false;
+        });
 }
 
 void WebDelegateCross::HandleTouchDown(
@@ -407,6 +588,54 @@ void WebDelegateCross::OnPageFinished(const std::string& param)
 void WebDelegateCross::OnPageError(const std::string& param)
 {}
 
+void WebDelegateCross::OnProgressChanged(const std::string& param)
+{
+    ContainerScope scope(instanceId_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnProgressChange = webEventHub->GetOnProgressChangeEvent();
+                CHECK_NULL_VOID(propOnProgressChange);
+                auto eventParam = std::make_shared<LoadWebProgressChangeEvent>(atoi(param.c_str()));
+                propOnProgressChange(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void WebDelegateCross::OnReceivedTitle(const std::string& param)
+{
+    ContainerScope scope(instanceId_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnTitleReceive = webEventHub->GetOnTitleReceiveEvent();
+                CHECK_NULL_VOID(propOnTitleReceive);
+                auto eventParam = std::make_shared<LoadWebTitleReceiveEvent>(param);
+                propOnTitleReceive(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void WebDelegateCross::OnErrorReceive(void* object)
 {
     ContainerScope scope(instanceId_);
@@ -446,8 +675,192 @@ void WebDelegateCross::OnErrorReceive(void* object)
         TaskExecutor::TaskType::JS);
 }
 
+void WebDelegateCross::OnScroll(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto webScrollOffset = AceType::MakeRefPtr<WebOffsetImpl>(object);
+    CHECK_NULL_VOID(webScrollOffset);
+    auto offsetX = webScrollOffset->GetX();
+    auto offsetY = webScrollOffset->GetY();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), offsetX, offsetY]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnScroll = webEventHub->GetOnScrollEvent();
+                CHECK_NULL_VOID(propOnScroll);
+                auto eventParam = std::make_shared<WebOnScrollEvent>(offsetX, offsetY);
+                propOnScroll(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void WebDelegateCross::OnScaleChange(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto webScaleChange = AceType::MakeRefPtr<WebScaleChangeImpl>(object);
+    CHECK_NULL_VOID(webScaleChange);
+    auto newScale = webScaleChange->GetNewScale();
+    auto oldScale = webScaleChange->GetOldScale();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), newScale, oldScale]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnScaleChange = webEventHub->GetOnScaleChangeEvent();
+                CHECK_NULL_VOID(propOnScaleChange);
+                auto eventParam = std::make_shared<ScaleChangeEvent>(oldScale, newScale);
+                propOnScaleChange(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void WebDelegateCross::OnHttpErrorReceive(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto webResourceRequest = AceType::MakeRefPtr<WebResourceRequsetImpl>(object);
+    CHECK_NULL_VOID(webResourceRequest);
+    auto webResourceResponse = AceType::MakeRefPtr<WebResourceResponseImpl>(object);
+    CHECK_NULL_VOID(webResourceResponse);
+    auto requestHeader = webResourceRequest->GetRequestHeader();
+    auto method = webResourceRequest->GetMethod();
+    auto url = webResourceRequest->GetRequestUrl();
+    auto hasGesture = webResourceRequest->IsRequestGesture();
+    auto isMainFrame = webResourceRequest->IsMainFrame();
+    auto isRedirect = webResourceRequest->IsRedirect();
+    auto request = AceType::MakeRefPtr<WebRequest>(requestHeader, method, url, hasGesture, isMainFrame, isRedirect);
+    auto responseHeader = webResourceResponse->GetResponseHeader();
+    auto responseDate = webResourceResponse->GetResponseData();
+    auto encoding = webResourceResponse->GetEncoding();
+    auto mimeType = webResourceResponse->GetMimeType();
+    auto reason = webResourceResponse->GetReason();
+    auto statusCode = webResourceResponse->GetStatusCode();
+    auto response =
+        AceType::MakeRefPtr<WebResponse>(responseHeader, responseDate, encoding, mimeType, reason, statusCode);
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), request, response]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnHttpErrorReceive = webEventHub->GetOnHttpErrorReceiveEvent();
+                CHECK_NULL_VOID(propOnHttpErrorReceive);
+                auto eventParam = std::make_shared<ReceivedHttpErrorEvent>(request, response);
+                propOnHttpErrorReceive(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+bool WebDelegateCross::OnConsoleMessage(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_RETURN(object, false);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto webConsoleMessage = AceType::MakeRefPtr<WebConsoleMessage>(object);
+    CHECK_NULL_RETURN(webConsoleMessage, false);
+    auto message = webConsoleMessage->GetMessage();
+    auto sourceId = webConsoleMessage->GetSourceId();
+    auto lineNumber = webConsoleMessage->GetLineNumber();
+    auto messageLevel = webConsoleMessage->GetMessageLevel();
+    auto consoleMessageParam = AceType::MakeRefPtr<WebConsoleMessageParam>(message, sourceId, lineNumber, messageLevel);
+
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), consoleMessageParam, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnConsole = webEventHub->GetOnConsoleEvent();
+                CHECK_NULL_VOID(propOnConsole);
+                auto eventParam = std::make_shared<LoadWebConsoleLogEvent>(consoleMessageParam);
+                result = propOnConsole(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+    return result;
+}
+bool WebDelegateCross::OnLoadIntercept(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_RETURN(object, false);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto webResourceRequest = AceType::MakeRefPtr<WebResourceRequsetImpl>(object);
+    CHECK_NULL_RETURN(webResourceRequest, false);
+    auto requestHeader = webResourceRequest->GetRequestHeader();
+    auto method = webResourceRequest->GetMethod();
+    auto url = webResourceRequest->GetRequestUrl();
+    auto hasGesture = webResourceRequest->IsRequestGesture();
+    auto isMainFrame = webResourceRequest->IsMainFrame();
+    auto isRedirect = webResourceRequest->IsRedirect();
+    auto request = AceType::MakeRefPtr<WebRequest>(requestHeader, method, url, hasGesture, isMainFrame, isRedirect);
+
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), request, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnLoadIntercept = webEventHub->GetOnLoadInterceptEvent();
+                CHECK_NULL_VOID(propOnLoadIntercept);
+                auto eventParam = std::make_shared<LoadInterceptEvent>(request);
+                result = propOnLoadIntercept(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+    return result;
+}
+
 void WebDelegateCross::UpdateUserAgent(const std::string& userAgent) {}
-void WebDelegateCross::UpdateBackgroundColor(const int backgroundColor) {}
+
+void WebDelegateCross::UpdateBackgroundColor(const int backgroundColor)
+{
+    hash_ = MakeResourceHash();
+    updateBackgroundColor_ = MakeMethodHash(WEB_ATTRIBUTE_BACKGROUND_COLOR);
+    std::stringstream paramStream;
+    paramStream << NTC_BACKGROUND_COLOR << WEB_PARAM_EQUALS << backgroundColor;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateBackgroundColor_, param, nullptr);
+}
+
 void WebDelegateCross::UpdateInitialScale(float scale) {}
 void WebDelegateCross::UpdateJavaScriptEnabled(const bool& isJsEnabled)
 {
@@ -514,7 +927,14 @@ void WebDelegateCross::UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnable
 {}
 
 void WebDelegateCross::UpdateMediaPlayGestureAccess(bool isNeedGestureAccess)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateMediaPlayGestureAccess_ = MakeMethodHash(WEB_ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_MEDIA_PLAY_GESTURE_ACCESS << WEB_PARAM_EQUALS << isNeedGestureAccess;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateMediaPlayGestureAccess_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled)
 {}
@@ -547,7 +967,14 @@ void WebDelegateCross::UpdateDefaultFontSize(int32_t defaultFontSize)
 {}
 
 void WebDelegateCross::UpdateMinFontSize(int32_t minFontSize)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateMinFontSize_ = MakeMethodHash(WEB_ATTRIBUTE_MIN_FONT_SIZE);
+    std::stringstream paramStream;
+    paramStream << NTC_MIN_FONT_SIZE << WEB_PARAM_EQUALS << std::clamp(minFontSize, FONT_MIN_SIZE, FONT_MAX_SIZE);
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateMinFontSize_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateMinLogicalFontSize(int32_t minLogicalFontSize)
 {}
@@ -556,10 +983,24 @@ void WebDelegateCross::UpdateBlockNetwork(bool isNetworkBlocked)
 {}
 
 void WebDelegateCross::UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateHorizontalScrollBarAccess_ = MakeMethodHash(WEB_ATTRIBUTE_HORIZONTAL_SCROLLBAR_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_HORIZONTAL_SCROLLBAR_ACCESS << WEB_PARAM_EQUALS << isHorizontalScrollBarAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateHorizontalScrollBarAccess_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateVerticalScrollBarAccess_ = MakeMethodHash(WEB_ATTRIBUTE_VERTICAL_SCROLLBAR_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_VERTICAL_SCROLLBAR_ACCESS << WEB_PARAM_EQUALS << isVerticalScrollBarAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateVerticalScrollBarAccess_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateScrollBarColor(const std::string& colorValue)
 {}

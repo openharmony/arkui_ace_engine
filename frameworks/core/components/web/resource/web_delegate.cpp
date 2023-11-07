@@ -2338,6 +2338,7 @@ void WebDelegate::InitWebViewWithWindow()
                 delegate->window_ = nullptr;
                 return;
             }
+            delegate->JavaScriptOnDocumentStart();
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             if (delegate->cookieManager_ == nullptr) {
                 return;
@@ -2624,6 +2625,7 @@ void WebDelegate::InitWebViewWithSurface()
                     (void *)(&delegate->surfaceInfo_),
                     initArgs,
                     delegate->drawSize_.Width(), delegate->drawSize_.Height());
+                delegate->JavaScriptOnDocumentStart();
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
                 TAG_LOGD(AceLogTag::ACE_WEB, "Create webview with surface in");
@@ -2634,6 +2636,7 @@ void WebDelegate::InitWebViewWithSurface()
                     surface,
                     initArgs,
                     delegate->drawSize_.Width(), delegate->drawSize_.Height());
+                delegate->JavaScriptOnDocumentStart();
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
@@ -5313,6 +5316,22 @@ void WebDelegate::UpdateScreenOffSet(double& offsetX, double& offsetY)
 #endif
 }
 
+void WebDelegate::UpdateOverScrollMode(const int overscrollModeValue)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), overscrollModeValue]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            CHECK_NULL_VOID(setting);
+            setting->PutOverscrollMode(overscrollModeValue);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::RegisterSurfacePositionChangedCallback()
 {
 #ifdef NG_BUILD
@@ -5486,5 +5505,32 @@ bool WebDelegate::ShouldVirtualKeyboardOverlay()
         return nweb_->ShouldVirtualKeyboardOverlay();
     }
     return false;
+}
+
+bool WebDelegate::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->FilterScrollEvent(x, y, xVelocity, yVelocity);
+}
+
+void WebDelegate::ScrollBy(float deltaX, float deltaY)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->ScrollBy(deltaX, deltaY);
+}
+
+void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems)
+{
+    scriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+}
+
+void WebDelegate::JavaScriptOnDocumentStart()
+{
+    CHECK_NULL_VOID(nweb_);
+    if (scriptItems_.has_value()) {
+        nweb_->JavaScriptOnDocumentStart(scriptItems_.value());
+        scriptItems_ = std::nullopt;
+    }
 }
 } // namespace OHOS::Ace

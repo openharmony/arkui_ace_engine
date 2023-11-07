@@ -220,7 +220,7 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
         LOGW("OnClipPath abandon, clipPath is empty");
         return;
     }
-    skCanvas_->clipPath(clipPath, SkClipOp::kIntersect);
+    skCanvas_->clipPath(clipPath, SkClipOp::kIntersect, true);
 #else
     if (!clipPath.IsValid()) {
         LOGW("OnClipPath abandon, clipPath is empty");
@@ -228,7 +228,6 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
     }
     rsCanvas_->ClipPath(clipPath, RSClipOp::INTERSECT);
 #endif
-    return;
 }
 
 void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)

@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPaintMethod, NodePaintMethod)
 public:
-    TextPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph, float baselineOffset,
+    TextPaintMethod(const WeakPtr<Pattern>& pattern, float baselineOffset,
         RefPtr<TextContentModifier> textContentModifier, RefPtr<TextOverlayModifier> textOverlayModifier);
 
     ~TextPaintMethod() override = default;
@@ -51,7 +51,6 @@ protected:
 
 private:
     WeakPtr<Pattern> pattern_;
-    RefPtr<Paragraph> paragraph_;
     float baselineOffset_;
 
     RefPtr<TextContentModifier> textContentModifier_;
