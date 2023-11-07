@@ -109,7 +109,7 @@ public:
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
 
-    bool IsWindowConsumed()
+    bool IsWindowConsumed() const
     {
         return isWindowConsumed_;
     }
@@ -147,7 +147,7 @@ public:
         isDragWindowShow_ = isDragWindowShow;
     }
 
-    bool IsDragWindowShow()
+    bool IsDragWindowShow() const
     {
         return isDragWindowShow_;
     }
@@ -180,7 +180,7 @@ public:
         notifyInDraggedCallback_ = callback;
     }
 
-    bool IsDragging()
+    bool IsDragging() const
     {
         return dragDropState_ == DragDropMgrState::DRAGGING;
     }
@@ -190,7 +190,7 @@ public:
         return dragDropState_ == DragDropMgrState::DRAGGING && draggedGridFrameNode_ != nullptr;
     }
 
-    bool IsAboutToPreview()
+    bool IsAboutToPreview() const
     {
         return dragDropState_ == DragDropMgrState::ABOUT_TO_PREVIEW;
     }
@@ -198,6 +198,16 @@ public:
     void ResetDragging(DragDropMgrState dragDropMgrState = DragDropMgrState::IDLE)
     {
         dragDropState_ = dragDropMgrState;
+    }
+
+    bool IsSameDraggingPointer(int32_t currentPointerId) const
+    {
+        return currentPointerId_ == currentPointerId;
+    }
+
+    void SetDraggingPointer(int32_t currentPointerId)
+    {
+        currentPointerId_ = currentPointerId;
     }
 
 private:
@@ -241,6 +251,7 @@ private:
     uint32_t recordSize_ = 0;
 #endif // ENABLE_DRAG_FRAMEWORK
     int64_t currentId_ = -1;
+    int32_t currentPointerId_ = -1;
 
     std::function<void(void)> notifyInDraggedCallback_ = nullptr;
     bool isDragged_ = false;

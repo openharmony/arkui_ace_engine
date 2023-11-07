@@ -125,7 +125,7 @@ void ScreenPattern::UpdateDisplayInfo()
     };
 
     float tempRotation = 0.0f;
-    if (static_cast<int>(displayNode->GetStagingProperties().GetRotation()) > 0) {
+    if (static_cast<int>(displayNode->GetStagingProperties().GetRotation()) != 0) {
         tempRotation = 90.0f;
     }
     MMI::DisplayInfo displayInfo = {

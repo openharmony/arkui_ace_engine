@@ -89,8 +89,6 @@ public:
 
     void AddChildSpanItem(const RefPtr<UINode>& child);
 
-    void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
-
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, false };
@@ -380,6 +378,7 @@ private:
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
+    void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
     RefPtr<RenderContext> GetRenderContext();
     // to check if drag is in progress
 

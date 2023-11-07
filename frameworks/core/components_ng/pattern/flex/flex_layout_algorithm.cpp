@@ -115,22 +115,32 @@ void UpdateChildLayoutConstrainByFlexBasis(
     if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
     }
+    auto tempBasis = flexBasis->ConvertToPx();
     if (child->GetLayoutProperty()->GetCalcLayoutConstraint()) {
         auto selfIdealSize = child->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
         if (child->GetHostTag() == V2::BLANK_ETS_TAG && selfIdealSize.has_value()) {
             if (IsHorizontal(direction) && selfIdealSize->Width().has_value() &&
-                selfIdealSize->Width()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                selfIdealSize->Width()->GetDimension().ConvertToPx() > tempBasis) {
                 return;
             } else if (!IsHorizontal(direction) && selfIdealSize->Height().has_value() &&
-                       selfIdealSize->Height()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                selfIdealSize->Height()->GetDimension().ConvertToPx() > tempBasis) {
                 return;
             }
         }
     }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (flexBasis->Unit() == DimensionUnit::PERCENT || !flexBasis->IsValid()) {
+            if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
+                tempBasis = flexBasis->ConvertToPxWithSize(layoutConstraint.percentReference.Width());
+            } else {
+                tempBasis = flexBasis->ConvertToPxWithSize(layoutConstraint.percentReference.Height());
+            }
+        }
+    }
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
-        layoutConstraint.selfIdealSize.SetWidth(flexBasis->ConvertToPx());
+        layoutConstraint.selfIdealSize.SetWidth(tempBasis);
     } else {
-        layoutConstraint.selfIdealSize.SetHeight(flexBasis->ConvertToPx());
+        layoutConstraint.selfIdealSize.SetHeight(tempBasis);
     }
 }
 
@@ -312,11 +322,6 @@ void FlexLayoutAlgorithm::MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrappe
 {
     const auto& layoutConstrain = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (const auto& child : outOfLayoutChildren_) {
-        if (child->GetHostNode()) {
-            ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
-                child->GetHostNode()->GetId(), child->GetHostNode()->GetParent() ?
-                    child->GetHostNode()->GetParent()->GetId() : 0);
-        }
         child->Measure(layoutConstrain);
     }
 }
@@ -354,16 +359,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                                 VisibleType::VISIBLE) == VisibleType::GONE) {
                             continue;
                         }
-                        {
-                            if (childLayoutWrapper->GetHostNode()) {
-                                ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]",
-                                    childLayoutWrapper->GetHostTag().c_str(),
-                                    childLayoutWrapper->GetHostNode()->GetId(),
-                                    childLayoutWrapper->GetHostNode()->GetParent() ?
-                                        childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
-                            }
-                            childLayoutWrapper->Measure(child.layoutConstraint);
-                        }
+                        childLayoutWrapper->Measure(child.layoutConstraint);
                         UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
                         CheckSizeValidity(childLayoutWrapper);
                         CheckBaselineProperties(childLayoutWrapper);
@@ -460,15 +456,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 if (LessOrEqual(childLayoutWeight, 0.0)) {
                     continue;
                 }
-                {
-                    if (childLayoutWrapper->GetHostNode()) {
-                        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
-                            childLayoutWrapper->GetHostNode()->GetId(),
-                            childLayoutWrapper->GetHostNode()->GetParent() ?
-                                childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
-                    }
-                    childLayoutWrapper->Measure(child.layoutConstraint);
-                }
+                childLayoutWrapper->Measure(child.layoutConstraint);
                 UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
                 CheckSizeValidity(childLayoutWrapper);
                 CheckBaselineProperties(childLayoutWrapper);
@@ -493,15 +481,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 const auto& childLayoutWrapper = child.layoutWrapper;
                 auto childLayoutConstraint = child.layoutConstraint;
                 UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, childLayoutConstraint);
-                {
-                    if (childLayoutWrapper->GetHostNode()) {
-                        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
-                            childLayoutWrapper->GetHostNode()->GetId(),
-                            childLayoutWrapper->GetHostNode()->GetParent() ?
-                                childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
-                    }
-                    childLayoutWrapper->Measure(childLayoutConstraint);
-                }
+                childLayoutWrapper->Measure(childLayoutConstraint);
                 UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
                 CheckSizeValidity(childLayoutWrapper);
                 CheckBaselineProperties(childLayoutWrapper);
@@ -540,15 +520,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 }
                 const auto& childLayoutWrapper = child.layoutWrapper;
                 UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
-                {
-                    if (childLayoutWrapper->GetHostNode()) {
-                        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
-                            childLayoutWrapper->GetHostNode()->GetId(),
-                            childLayoutWrapper->GetHostNode()->GetParent() ?
-                                childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
-                    }
-                    childLayoutWrapper->Measure(child.layoutConstraint);
-                }
+                childLayoutWrapper->Measure(child.layoutConstraint);
                 if (child.layoutWrapper && child.layoutWrapper->GetHostNode() &&
                     child.layoutWrapper->GetHostNode()->GetLayoutProperty() &&
                     child.layoutWrapper->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
@@ -580,16 +552,7 @@ bool FlexLayoutAlgorithm::HandleBlankFirstTimeMeasure(
 
     // if constainer is self adaptive, secondaryMeasure won't happen, blank can call Measure directly
     if (selfAdaptive_ || isInfiniteLayout_) {
-        {
-            if (childLayoutWrapper->GetHostNode()) {
-                ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
-                    childLayoutWrapper->GetHostNode()->GetId(),
-                    childLayoutWrapper->GetHostNode()->GetParent() ?
-                    childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
-            }
-            childLayoutWrapper->Measure(child.layoutConstraint);
-        }
-        
+        childLayoutWrapper->Measure(child.layoutConstraint);
         UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
         CheckSizeValidity(childLayoutWrapper);
         if (!isInfiniteLayout_) {
@@ -751,14 +714,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             ++iter;
             continue;
         }
-        {
-            if (childLayoutWrapper->GetHostNode()) {
-                ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", childLayoutWrapper->GetHostTag().c_str(),
-                    childLayoutWrapper->GetHostNode()->GetId(), childLayoutWrapper->GetHostNode()->GetParent() ?
-                        childLayoutWrapper->GetHostNode()->GetParent()->GetId() : 0);
-            }
-            childLayoutWrapper->Measure(child.layoutConstraint);
-        }
+        childLayoutWrapper->Measure(child.layoutConstraint);
         crossAxisSize_ = std::max(crossAxisSize_, GetChildCrossAxisSize(childLayoutWrapper));
         CheckBaselineProperties(child.layoutWrapper);
         ++iter;
@@ -1060,11 +1016,6 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     for (auto&& child : children) {
         if (!child->IsOutOfLayout() && child->IsActive()) {
-            if (child->GetHostNode()) {
-                ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
-                    child->GetHostNode()->GetId(), child->GetHostNode()->GetParent() ?
-                        child->GetHostNode()->GetParent()->GetId() : 0);
-            }
             child->Layout();
         }
     }
@@ -1118,11 +1069,6 @@ void FlexLayoutAlgorithm::PlaceChildren(
         if (child->IsOutOfLayout() || !child->IsActive()) {
             // adjust by postion property.
             child->GetGeometryNode()->SetMarginFrameOffset({});
-            if (child->GetHostNode()) {
-                ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", child->GetHostTag().c_str(),
-                    child->GetHostNode()->GetId(), child->GetHostNode()->GetParent() ?
-                        child->GetHostNode()->GetParent()->GetId() : 0);
-            }
             child->Layout();
             continue;
         }

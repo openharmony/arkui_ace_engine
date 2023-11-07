@@ -90,12 +90,6 @@ panda::Local<panda::JSValueRef> toJsiValue(T val)
     return toJsiValueWithVM(vm, val);
 }
 
-inline const panda::ecmascript::EcmaVM* getEcmaVm()
-{
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    return runtime->GetEcmaVm();
-}
-
 } // namespace JsiValueConvertor
 } // namespace OHOS::Ace::Framework
 

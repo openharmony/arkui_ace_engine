@@ -107,6 +107,7 @@ private:
     bool isStart_ = true;
     int32_t hourWest_ = 0;
     std::optional<int32_t> textId_;
+    bool isForm_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextClockPattern);
 };

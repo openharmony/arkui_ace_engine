@@ -33,6 +33,7 @@ constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
+constexpr int32_t MILLISECONDS_OF_MINUTE = 59000;
 const std::string DEFAULT_FORMAT = "hms";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
@@ -148,6 +149,9 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
             }
         });
     }
+    auto context = UINode::GetContext();
+    CHECK_NULL_VOID(context);
+    isForm_ = context->IsFormRender();
 }
 
 void TextClockPattern::UpdateTimeText()
@@ -190,6 +194,10 @@ void TextClockPattern::RequestUpdateForNextSecond()
     int32_t delayTime =
         (INTERVAL_OF_U_SECOND - static_cast<int32_t>(currentTime.tv_usec)) / MICROSECONDS_OF_MILLISECOND +
         1; // millisecond
+    if (isForm_) {
+        // prev delayTime is 1 second, then plus 59 second when in a form.
+        delayTime += MILLISECONDS_OF_MINUTE; // one minute
+    }
 
     auto context = UINode::GetContext();
     CHECK_NULL_VOID(context);

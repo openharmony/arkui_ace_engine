@@ -398,6 +398,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     }
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showPaste = false;
+    selectInfo.menuInfo.showCopyAll = !IsSelectAll();
     selectInfo.menuCallback.onCopy = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1233,9 +1234,9 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
             spans_.emplace_back(spanNode->GetSpanItem());
         }
     } else if (child->GetTag() == V2::IMAGE_ETS_TAG) {
-        auto imageNode = DynamicCast<FrameNode>(child);
+        auto imageNode = DynamicCast<ImageSpanNode>(child);
         if (imageNode) {
-            spans_.emplace_back(MakeRefPtr<ImageSpanItem>());
+            spans_.emplace_back(imageNode->GetSpanItem());
             spans_.back()->imageNodeId = imageNode->GetId();
         }
     }

@@ -28,6 +28,10 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr uint32_t PRESS_STYLE_DELAY = 300;
+}
+
 StateStyleManager::StateStyleManager(WeakPtr<FrameNode> frameNode) : host_(std::move(frameNode)) {}
 
 StateStyleManager::~StateStyleManager() = default;
@@ -41,16 +45,47 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
         auto stateStyleMgr = weak.Upgrade();
         CHECK_NULL_VOID(stateStyleMgr);
         const auto& touches = info.GetTouches();
-        if (touches.empty()) {
+        const auto& changeTouches = info.GetChangedTouches();
+        if (touches.empty() || changeTouches.empty()) {
+            LOGW("the touch info is illegal");
             return;
         }
-        const auto& type = touches.front().GetTouchType();
+
+        auto lastPoint = changeTouches.back();
+        const auto& type = lastPoint.GetTouchType();
         if (type == TouchType::DOWN) {
-            stateStyleMgr->UpdateCurrentUIState(UI_STATE_PRESSED);
-            return;
+            if (!stateStyleMgr->HandleScrollingParent()) {
+                stateStyleMgr->UpdateCurrentUIState(UI_STATE_PRESSED);
+            } else {
+                stateStyleMgr->PostPressStyleTask(PRESS_STYLE_DELAY);
+                stateStyleMgr->PendingPressedState();
+            }
+            stateStyleMgr->pointerId_.insert(lastPoint.GetFingerId());
         }
         if ((type == TouchType::UP) || (type == TouchType::CANCEL)) {
-            stateStyleMgr->ResetCurrentUIState(UI_STATE_PRESSED);
+            stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
+            if (stateStyleMgr->pointerId_.size() == 0) {
+                stateStyleMgr->ResetPressedState();
+            }
+        }
+        if (type == TouchType::MOVE) {
+            auto node = stateStyleMgr->host_.Upgrade();
+            CHECK_NULL_VOID(node);
+            int32_t sourceType = static_cast<int32_t>(touches.front().GetSourceDevice());
+            auto renderContext = node->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+
+            auto paintRect = renderContext->GetPaintRectWithoutTransform();
+            auto responseRegionList = node->GetResponseRegionList(paintRect, sourceType);
+            Offset offset = { paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() };
+            auto parentPoint = lastPoint.GetLocalLocation() + offset;
+
+            if (!node->InResponseRegionList({ parentPoint.GetX(), parentPoint.GetY() }, responseRegionList)) {
+                stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
+                if (stateStyleMgr->pointerId_.size() == 0) {
+                    stateStyleMgr->ResetPressedState();
+                }
+            }
         }
     };
     pressedFunc_ = MakeRefPtr<TouchEventImpl>(std::move(pressedCallback));
@@ -92,4 +127,58 @@ void StateStyleManager::FireStateFunc()
     customNode->FireNodeUpdateFunc(nodeId);
 }
 
+void StateStyleManager::PostPressStyleTask(uint32_t delayTime)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    if (IsPressedStatePending()) {
+        return;
+    }
+
+    auto weak = AceType::WeakClaim(this);
+    pressStyleTask_.Reset([weak = WeakClaim(this)] {
+        auto stateStyleMgr = weak.Upgrade();
+        CHECK_NULL_VOID(stateStyleMgr);
+        stateStyleMgr->ResetPressedPendingState();
+        stateStyleMgr->UpdateCurrentUIState(UI_STATE_PRESSED);
+    });
+
+    taskExecutor->PostDelayedTask(pressStyleTask_, TaskExecutor::TaskType::UI, delayTime);
+}
+
+bool StateStyleManager::HandleScrollingParent()
+{
+    auto node = host_.Upgrade();
+    CHECK_NULL_RETURN(node, false);
+
+    auto scrollingEventCallback = [weak = WeakClaim(this)]() {
+        auto stateStyleMgr = weak.Upgrade();
+        CHECK_NULL_VOID(stateStyleMgr);
+        stateStyleMgr->ResetCurrentUIState(UI_STATE_PRESSED);
+        stateStyleMgr->pointerId_.clear();
+        stateStyleMgr->ResetPressedPendingState();
+        if (stateStyleMgr->pressStyleTask_) {
+            stateStyleMgr->CancelPressStyleTask();
+        }
+    };
+
+    auto scrollingListener = MakeRefPtr<ScrollingListener>(std::move(scrollingEventCallback));
+
+    bool hasScrollingParent = false;
+    auto parent = node->GetAncestorNodeOfFrame();
+    while (parent) {
+        auto pattern = parent->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        if (pattern->ShouldDelayChildPressedState()) {
+            hasScrollingParent = true;
+            pattern->RegisterScrollingListener(scrollingListener);
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+
+    return hasScrollingParent;
+}
 } // namespace OHOS::Ace::NG

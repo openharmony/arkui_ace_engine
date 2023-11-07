@@ -215,7 +215,7 @@ void GridModelImpl::SetSupportDragAnimation(bool value)
     grid->SetDragAnimation(value);
 }
 
-void GridModelImpl::SetEdgeEffect(EdgeEffect edgeEffect)
+void GridModelImpl::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
