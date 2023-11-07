@@ -29,6 +29,8 @@ namespace OHOS::Ace::NG {
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
 
+class FrameNode;
+
 class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
 
@@ -39,7 +41,7 @@ public:
 
     static void ResetGlobalTransCfg();
 
-    static void Transform(PointF& localPointF, int id);
+    static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
     void BeginReferee(int32_t touchId, bool needUpdateChild = false)
