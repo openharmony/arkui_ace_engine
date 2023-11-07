@@ -31,8 +31,8 @@ namespace OHOS::Ace::NG {
 // and position(outNode identity), animates to the final size and position of inNode(outNode active). Although
 // we have two transitions but these two transitions fit together perfectly, so the appearance looks like a
 // single view move from its old position to its new position, thus visual focus guidance is completed.
-GeometryTransition::GeometryTransition(const std::string& id, const WeakPtr<FrameNode>& frameNode,
-    bool followWithoutTransition) : id_(id), inNode_(frameNode), followWithoutTransition_(followWithoutTransition) {}
+GeometryTransition::GeometryTransition(const std::string& id, bool followWithoutTransition) : id_(id),
+    followWithoutTransition_(followWithoutTransition) {}
 
 bool GeometryTransition::IsInAndOutEmpty() const
 {
@@ -130,18 +130,13 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         hasOutAnim_ = true;
     }
     if (isNodeIn && (frameNode != inNode_)) {
-        if (node->IsRemoving()) {
-            return;
-        }
         auto inNode = inNode_.Upgrade();
-        bool replace = !inNode || (!inNode->IsRemoving() && inNode->IsOnMainTree() &&
-            (id.empty() || id != inNode->GetInspectorId().value_or(""))) ? false : true;
-        if (replace) {
-            inNode_ = frameNode;
-            return;
-        }
-        SwapInAndOut(inNode != nullptr);
+        bool replace = inNode && !inNode->IsRemoving() && inNode->IsOnMainTree() &&
+            (id.empty() || id != inNode->GetInspectorId().value_or("")) ? false : true;
+        SwapInAndOut(!replace);
         inNode_ = frameNode;
+        bool isInAnimating = inNode && inNode->GetRenderContext() && inNode->GetRenderContext()->HasSandBox();
+        CHECK_NULL_VOID(!(replace && isInAnimating));
         hasInAnim_ = true;
     }
 
@@ -426,12 +421,9 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         CHECK_NULL_RETURN(parent, false);
         parent->ReplaceChild(holder_, inNode);
         parent->RemoveDisappearingChild(inNode);
-        state_ = State::ACTIVE;
-        MarkLayoutDirty(inNode, 1);
-        if (auto inNodeParent = inNode->GetAncestorNodeOfFrame()) {
-            MarkLayoutDirty(inNodeParent);
-        }
-        hasInAnim_ = true;
+        inNode->SetLayoutPriority(0);
+        inNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        hasInAnim_ = false;
         LOGI("GeometryTransition: follow ended, node %{public}d to %{public}d", holder_->GetId(), inNode->GetId());
         holder_ = nullptr;
     }
@@ -477,23 +469,28 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
     auto outNode = outNode_.Upgrade();
     CHECK_NULL_VOID(!staticNodeAbsRect_ && inNode && inNode->IsOnMainTree() &&
         outNode && outNode->IsRemoving() && outNodeTargetAbsRect_ && outNodeTargetAbsRect_->IsValid());
+    auto inRenderContext = inNode->GetRenderContext();
+    auto outRenderContext = outNode->GetRenderContext();
+    CHECK_NULL_VOID(inRenderContext && outRenderContext && inRenderContext->IsSynced() &&
+        (holder_ || inRenderContext->HasSandBox()));
     if (trigger.Upgrade()) {
         RecordAnimationOption(trigger, option);
         return;
     }
-    auto inRenderContext = inNode->GetRenderContext();
-    auto outRenderContext = outNode->GetRenderContext();
-    CHECK_NULL_VOID(inRenderContext && outRenderContext && inRenderContext->IsSynced());
     auto inNodeParentPos = inNode->GetPaintRectGlobalOffsetWithTranslate(true);
     auto inNodeAbsRect = GetNodeAbsFrameRect(inNode, inNodeParentPos);
     auto inNodeAbsRectOld = outNodeTargetAbsRect_.value();
-    CHECK_NULL_VOID(inNodeAbsRect != inNodeAbsRectOld);
+    bool sizeChanged = GreatNotEqual(std::fabs(inNodeAbsRect.Width() - inNodeAbsRectOld.Width()), 1.0f) ||
+        GreatNotEqual(std::fabs(inNodeAbsRect.Height() - inNodeAbsRectOld.Height()), 1.0f);
+    bool posChanged = GreatNotEqual(std::fabs(inNodeAbsRect.GetX() - inNodeAbsRectOld.GetX()), 1.0f) ||
+        GreatNotEqual(std::fabs(inNodeAbsRect.GetY() - inNodeAbsRectOld.GetY()), 1.0f);
+    CHECK_NULL_VOID(sizeChanged || posChanged);
     static constexpr int32_t defaultDuration = 1;
     auto animOption = animationOption_.IsValid() ? animationOption_ : AnimationOption(Curves::LINEAR, defaultDuration);
     AnimationUtils::Animate(animOption,
         [&]() {
             inRenderContext->SetSandBox(inNodeParentPos, true);
-            if (inNodeAbsRect.GetSize() == inNodeAbsRectOld.GetSize()) {
+            if (!sizeChanged) {
                 auto activeFrameRect = RectF(inNodeAbsRect.GetOffset() - outNodeParentPos_, inNodeAbsRect.GetSize());
                 outRenderContext->SyncGeometryProperties(activeFrameRect);
                 outNodeTargetAbsRect_ = inNodeAbsRect;

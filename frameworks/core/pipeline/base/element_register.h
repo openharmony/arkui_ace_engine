@@ -113,9 +113,8 @@ public:
         return nextUniqueElementId_++;
     }
 
-    RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(const std::string& id,
-                                                                 const WeakPtr<NG::FrameNode>& frameNode,
-                                                                 bool followWithoutTransition = false);
+    RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(
+        const std::string& id, bool followWithoutTransition = false);
     void DumpGeometryTransition();
 
     void ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger = nullptr,

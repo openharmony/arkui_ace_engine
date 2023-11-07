@@ -192,17 +192,15 @@ void ElementRegister::Clear()
     pendingRemoveNodes_.clear();
 }
 
-RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(const std::string& id,
-                                                                              const WeakPtr<NG::FrameNode>& frameNode,
-                                                                              bool followWithoutTransition)
+RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
+    const std::string& id, bool followWithoutTransition)
 {
     if (id.empty()) {
         return nullptr;
     }
-    CHECK_NULL_RETURN(frameNode.Upgrade(), nullptr);
     RefPtr<NG::GeometryTransition> geometryTransition;
     if (geometryTransitionMap_.find(id) == geometryTransitionMap_.end()) {
-        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(id, frameNode, followWithoutTransition);
+        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(id, followWithoutTransition);
         geometryTransitionMap_.emplace(id, geometryTransition);
     } else {
         geometryTransition = geometryTransitionMap_[id];

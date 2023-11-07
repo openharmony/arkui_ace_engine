@@ -18,9 +18,8 @@
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
-GeometryTransition::GeometryTransition(const std::string& id, const WeakPtr<FrameNode>& frameNode,
-    bool followWithoutTransition) : id_(id), inNode_(frameNode), followWithoutTransition_(followWithoutTransition)
-{}
+GeometryTransition::GeometryTransition(const std::string& id, bool followWithoutTransition) : id_(id),
+    followWithoutTransition_(followWithoutTransition) {}
 
 void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn) {}
 void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
