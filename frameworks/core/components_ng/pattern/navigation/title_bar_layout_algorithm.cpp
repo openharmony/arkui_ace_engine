@@ -516,6 +516,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         titleWrapper->Layout();
         return;
     }
+    initialTitleOffsetY_ = menuHeight_ + offsetY;
     auto overDragOffset = titlePattern->GetOverDragOffset();
     auto titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
         titlePattern->GetTempTitleOffsetY() + overDragOffset / 6.0f);
@@ -634,7 +635,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
         auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
         auto overDragOffset = titlePattern->GetOverDragOffset();
-        auto menuOffsetY = (SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx() - menuHeight_) / 2;
+        auto menuOffsetY = isCustomMenu ? 0 : (SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx() - menuHeight_) / 2;
         // custom menu width has no right padding
         auto offsetX = isCustomMenu ? maxWidth - menuWidth
                                     : (maxWidth - menuWidth - static_cast<float>(maxPaddingEnd_.ConvertToPx()) +

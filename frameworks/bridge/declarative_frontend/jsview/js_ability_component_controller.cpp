@@ -47,7 +47,6 @@ void JSAbilityComponentController::Destructor(JSAbilityComponentController* cont
 void JSAbilityComponentController::StartAbility(const JSCallbackInfo& args)
 {
     if (!controller_ || !args[0]->IsObject()) {
-        LOGE("Start ability fail, controller is empty or params is not valid.");
         return;
     }
     controller_->StartAbility(args[0]->ToString());

@@ -60,6 +60,7 @@
       OHOS::Ace::PluginComponentManager::*;
       OHOS::Ace::Scheduler::*;
       OHOS::Ace::ScopedDelegate::*;
+      OHOS::Ace::SpringMotion::*;
       OHOS::Ace::SubwindowManager::*;
       "OHOS::Ace::SystemGridInfo::ToString() const";
       OHOS::Ace::SystemProperties::*;
@@ -72,6 +73,7 @@
       OHOS::Ace::UdmfClient::*;
       OHOS::Ace::DragEvent::*;
       OHOS::Ace::ResourceManager::*;
+      OHOS::Ace::NG::AppBarView::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

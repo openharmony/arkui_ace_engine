@@ -56,4 +56,9 @@ bool NavBarPattern::IsTitleModeFree()
 {
     return true;
 }
+
+bool NavBarPattern::GetCurrentNavBarStatus() const
+{
+    return true;
+}
 }; // namespace OHOS::Ace::NG

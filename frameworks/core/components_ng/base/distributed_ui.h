@@ -28,7 +28,6 @@
 
 #define CHECK_NULL_BREAK(ptr)                                       \
     if (!(ptr)) {                                                   \
-        LOGW(#ptr " is null, break on line %{public}d", __LINE__); \
         break;                                                      \
     }
 

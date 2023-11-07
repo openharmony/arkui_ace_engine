@@ -43,7 +43,6 @@ ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 #ifdef OS_ACCOUNT_EXISTS
     return AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
 #else  // OS_ACCOUNT_EXISTS
-    LOGE("os account part not exists, use default id.");
     userIds.push_back(DEFAULT_OS_ACCOUNT_ID);
     return ERR_OK;
 #endif // OS_ACCOUNT_EXISTS
@@ -94,7 +93,8 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         info.dimension != pluginInfo_.dimension || data_ != data) {
         pluginInfo_ = info;
         data_ = data;
-        LOGI(" pluginInfo_ = info; pluginInfo_.width:: %{public}lf, pluginInfo_.height:: %{public}lf",
+        TAG_LOGI(AceLogTag::ACE_PLUGINCOMPONENT,
+            "pluginInfo = info; pluginInfo.width: %{public}lf, pluginInfo.height: %{public}lf",
             pluginInfo_.width.Value(), pluginInfo_.height.Value());
     } else {
         // for update pluguin component
@@ -228,7 +228,6 @@ void PluginPattern::CreatePluginSubContainer()
         CHECK_NULL_VOID(pluginSubContainer);
         auto packagePathStr = pluginPattern->GetPackagePath(weak, info);
         if (packagePathStr.empty()) {
-            LOGE("package path is empty.");
             pluginPattern->FireOnErrorEvent("1", "package path is empty.");
             return;
         }
@@ -283,7 +282,6 @@ std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
 
 void PluginPattern::FireOnCompleteEvent() const
 {
-    LOGI("FireOnCompleteEvent");
     if (loadFialState_) {
         return;
     }
@@ -298,7 +296,8 @@ void PluginPattern::FireOnCompleteEvent() const
 void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string& msg)
 {
     loadFialState_ = true;
-    LOGI("FireOnErrorEvent code: %{public}s, msg: %{public}s", code.c_str(), msg.c_str());
+    TAG_LOGI(AceLogTag::ACE_PLUGINCOMPONENT, "FireOnErrorEvent code: %{public}s, msg: %{public}s",
+        code.c_str(), msg.c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<PluginEventHub>();
@@ -311,21 +310,18 @@ void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string&
 
 void PluginPattern::OnActionEvent(const std::string& action) const
 {
-    LOGI("OnActionEvent action: %{public}s", action.c_str());
+    TAG_LOGI(AceLogTag::ACE_PLUGINCOMPONENT, "plugin send OnAction Event, action: %{public}s", action.c_str());
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
-        LOGE("get event action failed");
         return;
     }
     auto actionType = eventAction->GetValue("action");
     if (!actionType->IsValid()) {
-        LOGE("get event key failed");
         return;
     }
 
     auto type = actionType->GetString();
     if (type != "router" && type != "message") {
-        LOGE("undefined event type");
         return;
     }
 
@@ -390,7 +386,6 @@ std::string PluginPattern::GetPackagePathByWant(const WeakPtr<PluginPattern>& we
     std::vector<int32_t> userIds;
     ErrCode errCode = GetActiveAccountIds(userIds);
     if (errCode != ERR_OK) {
-        LOGE("Query Active OsAccountIds failed!");
         pluginPattern->FireOnErrorEvent("1", "Query Active OsAccountIds failed!");
         return packagePathStr;
     }
@@ -434,7 +429,6 @@ void PluginPattern::GetAbilityNameByWant(const WeakPtr<PluginPattern>& weak, Req
     std::vector<std::string> strList;
     pluginPattern->SplitString(info.pluginName, '&', strList);
     if (strList.empty()) {
-        LOGE("Template source is empty.");
         pluginPattern->FireOnErrorEvent("1", "Template source is empty.");
         return;
     }
@@ -469,13 +463,11 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
     CHECK_NULL_RETURN(pluginPattern, packagePathStr);
     auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
     if (!bms) {
-        LOGE("Bms bundleManager is nullptr.");
         pluginPattern->FireOnErrorEvent("1", "Bms bundleManager is nullptr.");
         return packagePathStr;
     }
 
     if (strList.empty()) {
-        LOGE("App bundleName or abilityName is empty.");
         pluginPattern->FireOnErrorEvent("1", "App bundleName is empty.");
         return packagePathStr;
     }
@@ -484,7 +476,6 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
     bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
         userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
     if (!ret) {
-        LOGE("Bms get bundleName failed!");
         pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
         return packagePathStr;
     }
@@ -493,7 +484,6 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
             if (bundleInfo.moduleResPaths.size() == 1) {
                 info.moduleResPath = bundleInfo.moduleResPaths[0];
             } else {
-                LOGE("Bms moduleResPaths is empty.");
                 pluginPattern->FireOnErrorEvent("1", "Bms moduleResPaths is empty.");
                 return packagePathStr;
             }
@@ -506,7 +496,6 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
             bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
                 userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
             if (!ret) {
-                LOGE("Bms get abilityInfo failed!");
                 pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
                 return packagePathStr;
             }
@@ -529,7 +518,6 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
         packagePathStr = result->hapPath;
         return packagePathStr;
     }
-    LOGE("Bms get hapInfo failed!");
     pluginPattern->FireOnErrorEvent(
         "1", "Bms get hapPath failed! Cannot find hap according to BundleName and ModuleName!");
     return packagePathStr;

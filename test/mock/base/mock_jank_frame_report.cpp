@@ -34,9 +34,10 @@ PerfMonitor* PerfMonitor::GetPerfMonitor()
     return nullptr;
 }
 
-void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note) {}
+void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note,
+    bool isReportInteractionEvent, bool isAnimationTrace) {}
 
-void PerfMonitor::End(const std::string& sceneId, bool isJsApi) {}
+void PerfMonitor::End(const std::string& sceneId, bool isJsApi, bool isAnimationTrace) {}
 
 void PerfMonitor::SetPageUrl(const std::string& pageUrl) {}
 
@@ -46,7 +47,7 @@ void PerfMonitor::ReportJankFrameApp(double jank) {}
 
 void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time) {}
 
-int64_t PerfMonitor::GetInputTime(PerfActionType type)
+int64_t PerfMonitor::GetInputTime(PerfActionType type, const std::string& note)
 {
     return 0;
 }

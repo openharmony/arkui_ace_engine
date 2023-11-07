@@ -268,6 +268,8 @@ public:
 
     void OnNavigationModeChange(bool modeChange);
 
+    static void FireNavigationStateChange(const RefPtr<UINode>& node, bool show);
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
@@ -309,6 +311,7 @@ private:
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
     void NotifyPageHide(const std::string& pageName);
     void NotifyPageShow(const std::string& pageName);
+    RefPtr<UINode> FireNavDestinationStateChange(bool show);
 };
 
 } // namespace OHOS::Ace::NG

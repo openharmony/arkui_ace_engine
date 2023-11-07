@@ -108,21 +108,19 @@ public:
 
     void OnFinish() const override
     {
-        LOGI("UIContent OnFinish");
         CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
     void OnStartAbility(const std::string& address) override
     {
-        LOGI("UIContent OnStartAbility");
         CHECK_NULL_VOID(onStartAbility_);
         onStartAbility_(address);
     }
 
     void OnStatusBarBgColorChanged(uint32_t color) override
     {
-        LOGI("UIContent OnStatusBarBgColorChanged");
+        LOGI("StartsBar background color changed.");
     }
 
 private:
@@ -222,7 +220,6 @@ public:
     ~DragWindowListener() = default;
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragWindowListener::OnDrag called.");
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         int32_t instanceId = instanceId_;
@@ -272,7 +269,6 @@ public:
         taskExecutor->PostTask(
             [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, false, true);
                 SubwindowManager::GetInstance()->HidePopupNG(-1, instanceId);
             },
             TaskExecutor::TaskType::UI);
@@ -286,7 +282,6 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 {
     CHECK_NULL_VOID(context);
     context_ = context->weak_from_this();
-    LOGI("Create UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -301,14 +296,12 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     SetConfiguration(context->GetConfiguration());
     context_ = context->weak_from_this();
-    TAG_LOGI(AceLogTag::ACE_FORM, "Create form UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
     context_ = ability->GetAbilityContext();
-    LOGI("Create UIContentImpl successfully.");
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -1142,6 +1135,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetWindowId(window_->GetWindowId());
     auto token = context->GetToken();
     container->SetToken(token);
+    container->SetParentToken(parentToken_);
     container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
@@ -1940,5 +1934,15 @@ void UIContentImpl::CloseModalUIExtension(int32_t sessionId)
             overlay->CloseModalUIExtension(sessionId);
         },
         TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetParentToken(sptr<IRemoteObject> token)
+{
+    parentToken_ = token;
+}
+
+sptr<IRemoteObject> UIContentImpl::GetParentToken()
+{
+    return parentToken_;
 }
 } // namespace OHOS::Ace

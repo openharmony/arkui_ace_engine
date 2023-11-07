@@ -441,8 +441,7 @@ void DialogContainer::ShowToast(
     auto delegate = frontend->GetDelegate();
     CHECK_NULL_VOID(delegate);
     delegate->SetToastStopListenerCallback([instanceId = instanceId]() {
-        TAG_LOGD(
-            AceLogTag::ACE_PROMPT_ACTION_TOAST, "Begin show Toast,hide window instanceId is %{public}d", instanceId);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Begin show Toast,hide window instanceId is %{public}d", instanceId);
         if (ContainerScope::CurrentId() >= 0) {
             DialogContainer::HideWindow(instanceId);
         }
@@ -499,9 +498,9 @@ void DialogContainer::ShowActionMenu(int32_t instanceId, const std::string& titl
     CHECK_NULL_VOID(frontend);
     auto delegate = frontend->GetDelegate();
     CHECK_NULL_VOID(delegate);
-    LOGI("show action menu begin");
     delegate->ShowActionMenu(title, button, std::move(callback), [instanceId = instanceId](bool isShow) {
-        LOGI("DialogContainer ShowActionMenu HideWindow instanceId = %{public}d", instanceId);
+        TAG_LOGD(AceLogTag::ACE_PROMPT_ACTION_MENU, "DialogContainer ShowActionMenu HideWindow instanceId = %{public}d",
+            instanceId);
         if (!isShow) {
             DialogContainer::HideWindow(instanceId);
         }

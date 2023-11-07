@@ -35,7 +35,6 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
@@ -157,6 +156,9 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest002, TestSize.Level1)
     // reconstruct a gestureEventHub
     eventHub = AceType::MakeRefPtr<EventHub>();
     EXPECT_TRUE(eventHub);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
     gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
     // set touchEventActuator_

@@ -109,6 +109,7 @@ public:
     bool GetDraggedDown();
     bool GetFullStatus();
     bool GetIsMinTitle() const;
+    bool GetCurrentNavBarStatus() const;
 
     bool GetToolbarHideStatus()
     {

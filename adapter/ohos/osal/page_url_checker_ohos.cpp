@@ -258,26 +258,12 @@ void PageUrlCheckerOhos::CheckPreload(const std::string& url)
 
 void PageUrlCheckerOhos::NotifyPageShow(const std::string& pageName)
 {
-    std::string moduleName;
     std::string targetBundleName;
     std::string targetModuleName;
-    moduleName = moduleNameCallback_(pageName);
-    if (moduleName.empty()) {
-        moduleName = abilityInfo_->moduleName;
-    }
-    if (pageName.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
-        size_t bundleEndPos = pageName.find('/');
-        targetBundleName = pageName.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
-        size_t moduleStartPos = bundleEndPos + 1;
-        size_t moduleEndPos = pageName.find('/', moduleStartPos);
-        targetModuleName = pageName.substr(moduleStartPos, moduleEndPos - moduleStartPos);
-    } else {
-        targetBundleName = abilityInfo_->bundleName;
-        targetModuleName = moduleName;
-    }
+    GetTargetPageInfo(pageName, targetBundleName, targetModuleName);
     AppExecFwk::PageStateData pageStateData;
     pageStateData.bundleName = abilityInfo_->bundleName;
-    pageStateData.moduleName = moduleName;
+    pageStateData.moduleName = abilityInfo_->moduleName;
     pageStateData.abilityName = abilityInfo_->name;
     pageStateData.pageName = pageName;
     pageStateData.targetBundleName = targetBundleName;
@@ -288,13 +274,23 @@ void PageUrlCheckerOhos::NotifyPageShow(const std::string& pageName)
 
 void PageUrlCheckerOhos::NotifyPageHide(const std::string& pageName)
 {
-    std::string moduleName;
     std::string targetBundleName;
     std::string targetModuleName;
-    moduleName = moduleNameCallback_(pageName);
-    if (moduleName.empty()) {
-        moduleName = abilityInfo_->moduleName;
-    }
+    GetTargetPageInfo(pageName, targetBundleName, targetModuleName);
+    AppExecFwk::PageStateData pageStateData;
+    pageStateData.bundleName = abilityInfo_->bundleName;
+    pageStateData.moduleName = abilityInfo_->moduleName;
+    pageStateData.abilityName = abilityInfo_->name;
+    pageStateData.pageName = pageName;
+    pageStateData.targetBundleName = targetBundleName;
+    pageStateData.targetModuleName = targetModuleName;
+    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->
+        NotifyPageHide(context_->GetToken(), pageStateData);
+}
+
+void PageUrlCheckerOhos::GetTargetPageInfo(const std::string& pageName, std::string& targetBundleName,
+    std::string& targetModuleName) const
+{
     if (pageName.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         size_t bundleEndPos = pageName.find('/');
         targetBundleName = pageName.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
@@ -303,17 +299,12 @@ void PageUrlCheckerOhos::NotifyPageHide(const std::string& pageName)
         targetModuleName = pageName.substr(moduleStartPos, moduleEndPos - moduleStartPos);
     } else {
         targetBundleName = abilityInfo_->bundleName;
+        std::string moduleName = moduleNameCallback_(pageName);
+        if (moduleName == "") {
+            moduleName = abilityInfo_->moduleName;
+        }
         targetModuleName = moduleName;
     }
-    AppExecFwk::PageStateData pageStateData;
-    pageStateData.bundleName = abilityInfo_->bundleName;
-    pageStateData.moduleName = moduleName;
-    pageStateData.abilityName = abilityInfo_->name;
-    pageStateData.pageName = pageName;
-    pageStateData.targetBundleName = targetBundleName;
-    pageStateData.targetModuleName = targetModuleName;
-    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->
-        NotifyPageHide(context_->GetToken(), pageStateData);
 }
 
 void PageUrlCheckerOhos::SetModuleNameCallback(std::function<std::string(const std::string&)>&& callback)

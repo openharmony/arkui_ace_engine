@@ -138,6 +138,12 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     XComponentModel::GetInstance()->Create(
         id->ToString(), xcomponentType, libraryname->ToString(), xcomponentController);
 
+    auto detachCallback = [](const std::string& xcomponentId) {
+        XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcomponentId);
+        XComponentClient::GetInstance().DeleteFromJsValMapById(xcomponentId);
+    };
+    XComponentModel::GetInstance()->SetDetachCallback(std::move(detachCallback));
+
     if (info.Length() > 1 && info[1]->IsString()) {
         auto soPath = info[1]->ToString();
         XComponentModel::GetInstance()->SetSoPath(soPath);

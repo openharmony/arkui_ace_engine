@@ -215,6 +215,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         centerIndex_ = listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty));
     }
     ProcessEvent(indexChanged, relativeOffset, isJump, prevStartOffset, prevEndOffset);
+    HandleScrollBarOutBoundary();
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
@@ -228,7 +229,17 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     SetScrollSource(SCROLL_FROM_NONE);
     isInitialized_ = true;
     MarkSelectedItems();
+    UpdateListDirectionInCardStyle();
     return true;
+}
+
+void ListPattern::UpdateListDirectionInCardStyle()
+{
+    if (isNeedToUpdateListDirection_) {
+        auto layoutProperty = GetLayoutProperty<ListLayoutProperty>();
+        layoutProperty->UpdateListDirection(Axis::VERTICAL);
+        isNeedToUpdateListDirection_ = false;
+    }
 }
 
 ScrollAlign ListPattern::GetScrollAlignByScrollSnapAlign() const
@@ -438,7 +449,7 @@ void ListPattern::CheckScrollable()
     } else {
         if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_) &&
             !IsScrollSnapAlignCenter()) {
-            scrollable_ = GreatNotEqual((endMainPos_ - startMainPos_), contentMainSize_);
+            scrollable_ = GetAlwaysEnabled() || GreatNotEqual((endMainPos_ - startMainPos_), contentMainSize_);
         } else {
             scrollable_ = true;
         }
@@ -709,7 +720,6 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
             overScroll = endPos - itemHeight / 2.0f - contentMainSize_ / 2.0f;
         }
     }
-    HandleScrollBarOutBoundary(overScroll);
 
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
         // adjust offset.
@@ -764,6 +774,10 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
         endPos += GetChainDelta(endIndex_);
     }
     bool outOfStart = (startIndex_ == 0) && Positive(startPos) && GreatNotEqual(endPos, contentMainSize_);
+    if (GetAlwaysEnabled()) {
+        outOfStart = (startIndex_ == 0) && Positive(startPos);
+    }
+
     bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, contentMainSize_) && Negative(startPos);
     if (IsScrollSnapAlignCenter()) {
         auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
@@ -1296,6 +1310,36 @@ Offset ListPattern::GetCurrentOffset() const
     return { 0.0, GetTotalOffset() };
 }
 
+void ListPattern::HandleScrollBarOutBoundary()
+{
+    if (itemPosition_.empty()) {
+        return;
+    }
+    if (!GetScrollBar() && !GetScrollBarProxy()) {
+        return;
+    }
+    if (!IsOutOfBoundary(false) || !scrollable_) {
+        return;
+    }
+    float overScroll = 0.0f;
+    if (!IsScrollSnapAlignCenter()) {
+        if ((itemPosition_.begin()->first == 0) && Positive(startMainPos_)) {
+            overScroll = startMainPos_;
+        } else {
+            overScroll = contentMainSize_ - endMainPos_;
+        }
+    } else {
+        float itemHeight = itemPosition_[centerIndex_].endPos - itemPosition_[centerIndex_].startPos;
+        if (startIndex_ == 0 && Positive(startMainPos_ + itemHeight / 2.0f - contentMainSize_ / 2.0f)) {
+            overScroll = startMainPos_ + itemHeight / 2.0f - contentMainSize_ / 2.0f;
+        } else if ((endIndex_ == maxListItemIndex_) &&
+                LessNotEqual(endMainPos_ - itemHeight / 2.0f, contentMainSize_ / 2.0f)) {
+            overScroll = endMainPos_ - itemHeight / 2.0f - contentMainSize_ / 2.0f;
+        }
+    }
+    ScrollablePattern::HandleScrollBarOutBoundary(overScroll);
+}
+
 Rect ListPattern::GetItemRect(int32_t index) const
 {
     if (index < 0 || index < startIndex_ || index > endIndex_) {
@@ -1354,6 +1398,9 @@ void ListPattern::UpdateScrollBarOffset()
     float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
     Offset scrollOffset = { currentOffset, currentOffset }; // fit for w/h switched.
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+    if (GetAlwaysEnabled()) {
+        estimatedHeight = estimatedHeight - spaceWidth_;
+    }
 
     // calculate padding offset of list
     auto host = GetHost();
@@ -1866,7 +1913,7 @@ void ListPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(endIndex_));
     DumpLog::GetInstance().AddDesc("centerIndex:" + std::to_string(centerIndex_));
     DumpLog::GetInstance().AddDesc("startMainPos:" + std::to_string(startMainPos_));
-    DumpLog::GetInstance().AddDesc("endMainPos_:" + std::to_string(endMainPos_));
+    DumpLog::GetInstance().AddDesc("endMainPos:" + std::to_string(endMainPos_));
     DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(currentOffset_));
     DumpLog::GetInstance().AddDesc("contentMainSize:" + std::to_string(contentMainSize_));
     DumpLog::GetInstance().AddDesc("contentStartOffset:" + std::to_string(contentStartOffset_));

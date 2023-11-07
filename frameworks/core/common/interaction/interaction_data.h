@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_DATA_H
 
 #include "base/image/pixel_map.h"
-#include "core/gestures/gesture_info.h"
+#include "core/gestures/drag_event.h"
 
 namespace OHOS::Ace {
 enum class DragCursorStyleCore {

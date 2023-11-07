@@ -22,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -141,7 +142,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
 
 void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 {
-    LOGI("DialogPattern::PopDialog from click");
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "DialogPattern::PopDialog from click");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -149,7 +150,6 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->IsRemoving()) {
-        LOGI("Dialog already in close animation, no need to fire event again.");
         return;
     }
 
@@ -201,7 +201,6 @@ RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dial
 
 void DialogPattern::BuildChild(const DialogProperties& props)
 {
-    LOGI("build dialog child");
     // append customNode
     auto customNode = customNode_.Upgrade();
     if (customNode) {
@@ -401,7 +400,6 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     auto contentStyle = dialogTheme_->GetContentTextStyle();
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
     contentProp->UpdateTextColor(contentStyle.GetTextColor());
-    LOGD("content = %s", props.content.c_str());
     // update padding
     Edge contentPaddingInTheme;
     PaddingProperty contentPadding;
@@ -631,7 +629,7 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
 
     AddButtonAndDivider(buttons, container, isVertical);
     container->MarkModifyDone();
-
+    buttonContainer_ = container;
     return container;
 }
 
@@ -758,7 +756,6 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoIcon(const std::string& icon)
     };
     auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     iconProps->UpdateMargin(margin);
-    LOGD("item icon src = %s", icon.c_str());
     auto imageSrc = ImageSourceInfo(icon);
     iconProps->UpdateImageSourceInfo(imageSrc);
     iconProps->UpdateUserDefinedIdealSize(CalcSize(SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE));
@@ -767,7 +764,6 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoIcon(const std::string& icon)
 
 RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& sheets)
 {
-    LOGI("start building action sheet items");
     auto listId = ElementRegister::GetInstance()->MakeUniqueId();
     auto list = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, listId, AceType::MakeRefPtr<ListPattern>());
     CHECK_NULL_RETURN(list, nullptr);
@@ -874,11 +870,11 @@ void DialogPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     if (!GetDialogProperties().customStyle) {
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto dialogTheme = context->GetTheme<DialogTheme>();
-        CHECK_NULL_VOID(dialogTheme);
         auto col = DynamicCast<FrameNode>(host->GetChildAtIndex(START_CHILD_INDEX));
         CHECK_NULL_VOID(col);
         auto colContext = col->GetContext();
@@ -887,9 +883,8 @@ void DialogPattern::OnColorConfigurationUpdate()
         CHECK_NULL_VOID(colRenderContext);
         colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
     }
-    auto menuNode = menuNode_.Upgrade();
-    CHECK_NULL_VOID(menuNode);
-    for (const auto& buttonNode : menuNode->GetChildren()) {
+    CHECK_NULL_VOID(buttonContainer_);
+    for (const auto& buttonNode : buttonContainer_->GetChildren()) {
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
         }
@@ -898,6 +893,13 @@ void DialogPattern::OnColorConfigurationUpdate()
         auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSkipColorConfigurationUpdate();
+        auto buttonTextNode = DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
+        CHECK_NULL_VOID(buttonTextNode);
+        auto buttonTextLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(buttonTextLayoutProperty);
+        buttonTextLayoutProperty->UpdateTextColor(dialogTheme->GetButtonDefaultFontColor());
+        buttonTextNode->MarkModifyDone();
+        buttonTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     OnModifyDone();
     host->MarkDirtyNode();

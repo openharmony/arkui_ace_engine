@@ -16,6 +16,8 @@
 #include "core/components/web/resource/web_delegate.h"
 
 #include <algorithm>
+#include <cctype>
+#include <cfloat>
 #include <iomanip>
 #include <optional>
 #include <sstream>
@@ -93,6 +95,9 @@ const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1;
 
+#define VISIBLERATIO_LENGTH 4
+#define FLOATRATIO_TO_INT 100
+
 static bool IsDeviceTabletOr2in1()
 {
     return OHOS::system::GetDeviceType() == "tablet" || OHOS::system::GetDeviceType() == "2in1";
@@ -120,7 +125,6 @@ void WebMessagePortOhos::Close()
 {
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
-        LOGE("delegate its null");
         return;
     }
     delegate->ClosePort(handle_);
@@ -130,7 +134,6 @@ void WebMessagePortOhos::PostMessage(std::string& data)
 {
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
-        LOGE("delegate its null");
         return;
     }
     delegate->PostPortMessage(handle_, data);
@@ -140,7 +143,6 @@ void WebMessagePortOhos::SetWebMessageCallback(std::function<void(const std::str
 {
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
-        LOGE("delegate its null");
         return;
     }
     delegate->SetPortMessageCallback(handle_, std::move(callback));
@@ -611,12 +613,12 @@ int FaviconReceivedOhos::GetAlphaType()
 
 WebDelegateObserver::~WebDelegateObserver()
 {
-    LOGI("WebDelegateObserver::~WebDelegateObserver");
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web Delegate Observer Destory Completion");
 }
 
 void WebDelegateObserver::NotifyDestory()
 {
-    LOGI("WebDelegateObserver::NotifyDestory");
+    TAG_LOGD(AceLogTag::ACE_WEB, "notify web delegate destory");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
@@ -662,7 +664,6 @@ void WebDelegate::Stop()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGI("fail to get context");
         return;
     }
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
@@ -683,7 +684,6 @@ void WebDelegate::UnregisterEvent()
     // TODO: add support for ng.
     auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
-        LOGI("fail to get context");
         return;
     }
     auto resRegister = context->GetPlatformResRegister();
@@ -756,14 +756,12 @@ void WebDelegate::Backward()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("Get context failed, it is null.");
         return;
     }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
-                LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
@@ -777,14 +775,12 @@ void WebDelegate::Forward()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("Get context failed, it is null.");
         return;
     }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
-                LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
@@ -798,14 +794,12 @@ void WebDelegate::ClearHistory()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("Get context failed, it is null.");
         return;
     }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
-                LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
@@ -817,17 +811,14 @@ void WebDelegate::ClearHistory()
 
 void WebDelegate::ClearSslCache()
 {
-    LOGE("WebDelegate ClearSslCache");
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("Get context failed, it is null.");
         return;
     }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
-                LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
@@ -839,17 +830,15 @@ void WebDelegate::ClearSslCache()
 
 void WebDelegate::ClearClientAuthenticationCache()
 {
-    LOGE("WebDelegate::ClearClientAuthenticationCache");
+    TAG_LOGD(AceLogTag::ACE_WEB, "web clear client authentication cache");
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("Get context failed, it is null.");
         return;
     }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
-                LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
@@ -863,7 +852,6 @@ bool WebDelegate::AccessStep(int32_t step)
 {
     auto delegate = WeakClaim(this).Upgrade();
     if (!delegate) {
-        LOGE("Get delegate failed, it is null.");
         return false;
     }
     if (delegate->nweb_) {
@@ -876,7 +864,6 @@ void WebDelegate::BackOrForward(int32_t step)
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("Get context failed, it is null.");
         return;
     }
 
@@ -884,7 +871,6 @@ void WebDelegate::BackOrForward(int32_t step)
         [weak = WeakClaim(this), step] {
             auto delegate = weak.Upgrade();
             if (!delegate) {
-                LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
@@ -898,7 +884,6 @@ bool WebDelegate::AccessBackward()
 {
     auto delegate = WeakClaim(this).Upgrade();
     if (!delegate) {
-        LOGE("Get delegate failed, it is null.");
         return false;
     }
     if (delegate->nweb_) {
@@ -911,7 +896,6 @@ bool WebDelegate::AccessForward()
 {
     auto delegate = WeakClaim(this).Upgrade();
     if (!delegate) {
-        LOGE("Get delegate failed, it is null.");
         return false;
     }
     if (delegate->nweb_) {
@@ -1145,7 +1129,6 @@ void WebDelegate::SetWebViewJavaScriptResultCallBack(
             }
             auto webJSResultCallBack = std::make_shared<WebJavaScriptResultCallBack>(Container::CurrentId());
             if (webJSResultCallBack) {
-                LOGI("WebDelegate SetWebViewJavaScriptResultCallBack");
                 webJSResultCallBack->SetJavaScriptCallBack(std::move(javaScriptCallBackImpl));
                 delegate->nweb_->SetNWebJavaScriptResultCallBack(webJSResultCallBack);
             }
@@ -1339,7 +1322,6 @@ int WebDelegate::ConverToWebHitTestType(int hitType)
             webHitType = WebHitTestType::EDIT;
             break;
         default:
-            LOGW("unknow hit test type:%{public}d", static_cast<int>(hitType));
             webHitType = WebHitTestType::UNKNOWN;
             break;
     }
@@ -1438,7 +1420,6 @@ void WebDelegate::CreatePluginResource(
     // TODO: add ng pattern.
     auto webCom = webComponent_.Upgrade();
     if (!webCom) {
-        LOGI("webCom is null");
         state_ = State::CREATEFAILED;
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
         return;
@@ -1446,7 +1427,6 @@ void WebDelegate::CreatePluginResource(
 
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
-        LOGI("pipelineContext is null");
         state_ = State::CREATEFAILED;
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to context is null");
         return;
@@ -1459,13 +1439,11 @@ void WebDelegate::CreatePluginResource(
     platformTaskExecutor.PostTask([weakWeb = AceType::WeakClaim(this), weakRes, size, position] {
         auto webDelegate = weakWeb.Upgrade();
         if (webDelegate == nullptr) {
-            LOGI("webDelegate is null!");
             return;
         }
         // TODO: add ng pattern.
         auto webCom = webDelegate->webComponent_.Upgrade();
         if (!webCom) {
-            LOGI("webCom is null!");
             webDelegate->OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
             return;
         }
@@ -1478,7 +1456,6 @@ void WebDelegate::CreatePluginResource(
         }
         auto context = webDelegate->context_.Upgrade();
         if (!context) {
-            LOGI("context is null");
             return;
         }
 
@@ -1548,7 +1525,6 @@ void WebDelegate::ShowWebView()
         window_->Show();
     }
 
-    LOGI("OnContinue webview");
     OnActive();
     OnWebviewShow();
 }
@@ -1559,7 +1535,6 @@ void WebDelegate::HideWebView()
         window_->Hide();
     }
 
-    LOGI("OnPause webview");
     OnInactive();
     OnWebviewHide();
 }
@@ -1570,7 +1545,6 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
     CHECK_NULL_VOID(context);
     auto rosenRenderSurface = DynamicCast<NG::RosenRenderSurface>(surface);
     if (!rosenRenderSurface) {
-        LOGI("source is nullptr, initialize with window");
         if (PrepareInitOHOSWeb(context)) {
             if (!isCreateWebView_) {
 #ifndef ENABLE_ROSEN_BACKEND
@@ -1579,7 +1553,7 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
 #endif
             }
         } else {
-            LOGE("prepare init web failed");
+            TAG_LOGD(AceLogTag::ACE_WEB, "prepare init web failed");
         }
         return;
     }
@@ -1591,13 +1565,11 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
 bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     ACE_SCOPED_TRACE("PrepareInitOHOSWeb");
-    LOGI("PrepareInitOHOSWeb");
 
     state_ = State::CREATING;
     // obtain hap data path
     auto container = Container::Current();
     if (container == nullptr) {
-        LOGE("Fail to get container");
         return false;
     }
     const std::string& bundlePath = container->GetBundlePath();
@@ -1605,7 +1577,6 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     std::string baseDir = "base";
     std::size_t baseIndex = filesDataPath.find(baseDir);
     if (baseIndex == std::string::npos) {
-        LOGE("Fail to parse hap data base path");
         return false;
     }
     std::string dataPath = filesDataPath.substr(0, baseIndex + baseDir.length());
@@ -1617,7 +1588,6 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     // load webview so
     OHOS::NWeb::NWebHelper::Instance().SetBundlePath(bundlePath_);
     if (!OHOS::NWeb::NWebHelper::Instance().Init()) {
-        LOGE("Fail to init NWebHelper");
         return false;
     }
     auto webCom = webComponent_.Upgrade();
@@ -1625,18 +1595,15 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     auto eventHub = webPattern ? webPattern->GetWebEventHub() : nullptr;
     auto useNewPipe = Container::IsCurrentUseNewPipeline();
     if (useNewPipe && !webPattern && !eventHub) {
-        LOGE("fail to call WebDelegate::Create due to webComponent is null");
         return false;
     }
     if (!useNewPipe && !webCom) {
-        LOGE("fail to call WebDelegate::Create due to webComponent is null");
         return false;
     }
     context_ = context;
     RegisterSurfacePositionChangedCallback();
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
-        LOGE("fail to call WebDelegate::Create due to context is null");
         return false;
     }
     state_ = State::CREATED;
@@ -1715,23 +1682,22 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
 
 void WebSurfaceCallback::OnSurfaceCreated(const sptr<OHOS::Surface>& surface)
 {
-    LOGI("WebSurfaceCallback::OnSurfaceCreated");
+    TAG_LOGD(AceLogTag::ACE_WEB, "web surface created.");
 }
 
 void WebSurfaceCallback::OnSurfaceChanged(const sptr<OHOS::Surface>& surface, int32_t width, int32_t height)
 {
     auto delegate = delegate_.Upgrade();
     if (!delegate) {
-        LOGE("WebSurfaceCallback::OnSurfaceChanged get delegate fail");
         return;
     }
-    LOGI("OnSurfaceChanged w:%{public}d, h:%{public}d", width, height);
+    TAG_LOGD(AceLogTag::ACE_WEB, "web surface changed, w:%{public}d, h:%{public}d", width, height);
     delegate->Resize((double)width, (double)height);
 }
 
 void WebSurfaceCallback::OnSurfaceDestroyed()
 {
-    LOGI("WebSurfaceCallback::OnSurfaceDestroyed");
+    TAG_LOGD(AceLogTag::ACE_WEB, "web surface destroyed");
 }
 
 EGLConfig WebDelegate::GLGetConfig(int version, EGLDisplay eglDisplay)
@@ -1748,7 +1714,6 @@ EGLConfig WebDelegate::GLGetConfig(int version, EGLDisplay eglDisplay)
     EGLConfig configs = NULL;
     int configsNum;
     if (!eglChooseConfig(eglDisplay, attribList, &configs, 1, &configsNum)) {
-        LOGE("eglChooseConfig ERROR");
         return NULL;
     }
     return configs;
@@ -1757,7 +1722,6 @@ EGLConfig WebDelegate::GLGetConfig(int version, EGLDisplay eglDisplay)
 void WebDelegate::GLContextInit(void* window)
 {
     if (!window) {
-        LOGE("unable to get EGL window.");
         return;
     }
     mEglWindow = static_cast<EGLNativeWindowType>(window);
@@ -1765,27 +1729,23 @@ void WebDelegate::GLContextInit(void* window)
     // 1. create sharedcontext
     mEGLDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (mEGLDisplay == EGL_NO_DISPLAY) {
-        LOGE("unable to get EGL display.");
         return;
     }
 
     EGLint eglMajVers, eglMinVers;
     if (!eglInitialize(mEGLDisplay, &eglMajVers, &eglMinVers)) {
         mEGLDisplay = EGL_NO_DISPLAY;
-        LOGE("unable to initialize display");
         return;
     }
 
     mEGLConfig = GLGetConfig(EGLCONFIG_VERSION, mEGLDisplay);
     if (mEGLConfig == nullptr) {
-        LOGE("GLContextInit config ERROR");
         return;
     }
 
     // 2. Create EGL Surface from Native Window
     mEGLSurface = eglCreateWindowSurface(mEGLDisplay, mEGLConfig, mEglWindow, nullptr);
     if (mEGLSurface == nullptr) {
-        LOGE("eglCreateContext eglSurface is null");
         return;
     }
 
@@ -1798,7 +1758,6 @@ void WebDelegate::GLContextInit(void* window)
     mEGLContext = eglCreateContext(mEGLDisplay, mEGLConfig, mSharedEGLContext, attrib3_list);
 
     if (!eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext)) {
-        LOGE("eglMakeCurrent error = %{public}d", eglGetError());
         return;
     }
 
@@ -1818,18 +1777,15 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
 {
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
-        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create due to context is null");
         return false;
     }
     uint32_t windowId = pipelineContext->GetWindowId();
     surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
     if (surfaceDelegate_ == nullptr) {
-        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceDelegate is null");
         return false;
     }
     surfaceCallback_ = new WebSurfaceCallback(AceType::WeakClaim(this));
     if (surfaceCallback_ == nullptr) {
-        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceCallback is null");
         return false;
     }
     surfaceDelegate_->AddSurfaceCallback(surfaceCallback_);
@@ -1838,7 +1794,6 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
     needResizeAtFirst_ = true;
     auto aNativeSurface = surfaceDelegate_->GetNativeWindow();
     if (aNativeSurface == nullptr) {
-        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create get NativeWindow is null");
         return false;
     }
     GLContextInit(aNativeSurface);
@@ -1849,14 +1804,14 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     if (!PrepareInitOHOSWeb(context)) {
-        LOGE("prepare init web failed");
+        TAG_LOGD(AceLogTag::ACE_WEB, "prepare init web failed");
         return;
     }
     if (!isCreateWebView_) {
         isCreateWebView_ = true;
         if (isEnhanceSurface_) {
             if (!InitWebSurfaceDelegate(context)) {
-                LOGE("init web surfacedelegate failed");
+                TAG_LOGD(AceLogTag::ACE_WEB, "init web surfacedelegate failed");
                 return;
             }
             InitWebViewWithSurface();
@@ -1995,7 +1950,7 @@ void WebDelegate::RegisterConfigObserver()
             CHECK_NULL_VOID(delegate->nweb_);
             auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
             if (appMgrClient->ConnectAppMgrService()) {
-                LOGE("connect to app mgr service failed");
+                TAG_LOGD(AceLogTag::ACE_WEB, "connect to app mgr service failed");
                 return;
             }
             delegate->configChangeObserver_ = sptr<AppExecFwk::IConfigurationObserver>(
@@ -2021,7 +1976,7 @@ void WebDelegate::UnRegisterConfigObserver()
             if (delegate->configChangeObserver_) {
                 auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
                 if (appMgrClient->ConnectAppMgrService()) {
-                    LOGE("connect to app mgr service failed");
+                    TAG_LOGD(AceLogTag::ACE_WEB, "connect to app mgr service failed");
                     return;
                 }
                 appMgrClient->UnregisterConfigurationObserver(delegate->configChangeObserver_);
@@ -2353,13 +2308,12 @@ void WebDelegate::SetWebCallBack()
         });
 
     } else {
-        LOGE("web controller is nullptr");
+        TAG_LOGW(AceLogTag::ACE_WEB, "web controller is nullptr");
     }
 }
 
 void WebDelegate::InitWebViewWithWindow()
 {
-    LOGI("Create webview with window");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(
@@ -2382,12 +2336,11 @@ void WebDelegate::InitWebViewWithWindow()
                 OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(delegate->window_.GetRefPtr(), initArgs);
             if (delegate->nweb_ == nullptr) {
                 delegate->window_ = nullptr;
-                LOGE("fail to get webview instance");
                 return;
             }
+            delegate->JavaScriptOnDocumentStart();
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             if (delegate->cookieManager_ == nullptr) {
-                LOGE("fail to get webview instance");
                 return;
             }
             auto webviewClient = std::make_shared<WebClientImpl>(Container::CurrentId());
@@ -2519,26 +2472,37 @@ std::string WebDelegate::GetCustomScheme()
     return customScheme;
 }
 
-void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
+void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
 {
-    LOGI("SurfaceOcclusion changed, occlusion:%{public}d, surfacenode id: %{public}" PRIu64 "", occlusion,
-         surfaceNodeId_);
-    if (surfaceOcclusion_ == occlusion) {
+    TAG_LOGD(AceLogTag::ACE_WEB, "SurfaceOcclusion changed, occlusionPoints:%{public}f, surfacenode id: %{public}"
+        PRIu64 "", visibleRatio, surfaceNodeId_);
+    if (fabs(visibleRatio_ - visibleRatio) <= FLT_EPSILON
+        || (fabs(visibleRatio) > FLT_EPSILON && visibleRatio < 0.0)
+        || (fabs(visibleRatio - 1.0) > FLT_EPSILON && visibleRatio > 1.0)) {
         return;
     }
-    surfaceOcclusion_ = occlusion;
+    visibleRatio_ = visibleRatio;
 
-    if (surfaceOcclusion_) {
+    if (fabs(visibleRatio_) > FLT_EPSILON && visibleRatio_ > 0.0) {
+        CHECK_NULL_VOID(nweb_);
         nweb_->OnUnoccluded();
+        if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON
+            || visibleRatio_ < lowerFrameRateVisibleRatio_) {
+            nweb_->SetEnableLowerFrameRate(true);
+        } else {
+            nweb_->SetEnableLowerFrameRate(false);
+        }
     } else {
         auto context = context_.Upgrade();
         CHECK_NULL_VOID(context);
+        CHECK_NULL_VOID(context->GetTaskExecutor());
         context->GetTaskExecutor()->PostDelayedTask(
             [weak = WeakClaim(this)]() {
                 auto delegate = weak.Upgrade();
                 CHECK_NULL_VOID(delegate);
-                if (!delegate->surfaceOcclusion_) {
-                    LOGD("the surface is still unvisual.");
+                if (fabs(delegate->visibleRatio_) <= FLT_EPSILON) {
+                    TAG_LOGD(AceLogTag::ACE_WEB, "the web is still all occluded");
+                    CHECK_NULL_VOID(delegate->nweb_);
                     delegate->nweb_->OnOccluded();
                 }
             },
@@ -2546,31 +2510,68 @@ void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
     }
 }
 
+void WebDelegate::ratioStrToFloat(const std::string& str)
+{
+    // LowerFrameRateConfig参数的格式限定为x.xx, 长度为4，
+    // 小数点在第二位，其余三位为数字，范围为0.00-1.00
+    if (str.size() != VISIBLERATIO_LENGTH) {
+        return;
+    }
+    auto dotCount = std::count(str.begin(), str.end(), '.');
+    if (dotCount != 1) {
+        return;
+    }
+    auto pos = str.find('.', 0);
+    if (pos != 1) {
+        return;
+    }
+    auto notDigitCount = std::count_if(str.begin(), str.end(),
+        [](char c) {
+            return !isdigit(c) && c != '.';
+        });
+    if (notDigitCount > 0) {
+        return;
+    }
+    float f = std::stof(str);
+    int i = f * FLOATRATIO_TO_INT;
+    if (i >= 0 && i <= 1) {
+        lowerFrameRateVisibleRatio_ = f;
+    }
+}
+
 void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 {
     if (!GetWebOptimizationValue()) {
-        LOGD("web optimization switch is closed.");
         return;
     }
     if (!IsDeviceTabletOr2in1()) {
-        LOGD("only pad and pc will RegisterSurfaceOcclusionChangeCallback");
         return;
+    }
+    std::string visibleAreaRatio = OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig",
+        "visibleAreaRatio");
+    ratioStrToFloat(visibleAreaRatio);
+    std::vector<float> partitionPoints;
+    if ((int)(lowerFrameRateVisibleRatio_ * FLOATRATIO_TO_INT) == 0) {
+        partitionPoints = {0};
+    } else {
+        partitionPoints = {0, lowerFrameRateVisibleRatio_};
     }
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
-        [weak = WeakClaim(this), weakContext = context_](bool occlusion) {
+        [weak = WeakClaim(this), weakContext = context_](float visibleRatio) {
             auto context = weakContext.Upgrade();
             CHECK_NULL_VOID(context);
             context->GetTaskExecutor()->PostTask(
-                [weakDelegate = weak, surfaceOcclusion = occlusion]() {
+                [weakDelegate = weak, webVisibleRatio = visibleRatio]() {
                     auto delegate = weakDelegate.Upgrade();
                     CHECK_NULL_VOID(delegate);
-                    delegate->SurfaceOcclusionCallback(surfaceOcclusion);
+                    delegate->SurfaceOcclusionCallback(webVisibleRatio);
                 },
                 TaskExecutor::TaskType::UI);
-        });
+        },
+        partitionPoints);
     if (ret != Rosen::StatusCode::SUCCESS) {
-        LOGE("RegisterSurfaceOcclusionChangeCallback failed, surfacenode id:%{public}" PRIu64 ""
+        TAG_LOGD(AceLogTag::ACE_WEB, "RegisterSurfaceOcclusionChangeCallback failed, surfacenode id:%{public}" PRIu64 ""
              ", ret: %{public}" PRIu32 "", surfaceNodeId_, ret);
     }
 }
@@ -2582,7 +2583,6 @@ void WebDelegate::InitWebViewWithSurface()
     auto window = context->GetWindow();
     CHECK_NULL_VOID(window);
     rosenWindowId_ = window->GetWindowId();
-    LOGI("Init WebView With Surface");
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), context = context_]() {
             auto delegate = weak.Upgrade();
@@ -2608,26 +2608,27 @@ void WebDelegate::InitWebViewWithSurface()
             if (!delegate->tempDir_.empty()) {
                 initArgs.web_engine_args_to_add.push_back(
                     std::string("--ohos-temp-dir=").append(delegate->tempDir_));
-                LOGI("Init --ohos-temp-dir:%{public}s", delegate->tempDir_.c_str());
+                TAG_LOGD(AceLogTag::ACE_WEB, "Init ohos temp dir:%{public}s", delegate->tempDir_.c_str());
             }
 
             std::string customScheme = delegate->GetCustomScheme();
             if (!customScheme.empty()) {
-                LOGI("custome scheme %{public}s", customScheme.c_str());
+                TAG_LOGD(AceLogTag::ACE_WEB, "custome scheme %{public}s", customScheme.c_str());
                 initArgs.web_engine_args_to_add.push_back(
                     std::string("--ohos-custom-scheme=").append(customScheme));
             }
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--init-background-color=").append(std::to_string(delegate->backgroundColor_)));
             if (isEnhanceSurface) {
-                LOGI("Create webview with isEnhanceSurface");
+                TAG_LOGD(AceLogTag::ACE_WEB, "Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
                     (void *)(&delegate->surfaceInfo_),
                     initArgs,
                     delegate->drawSize_.Width(), delegate->drawSize_.Height());
+                delegate->JavaScriptOnDocumentStart();
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
-                LOGI("Create webview with surface in");
+                TAG_LOGD(AceLogTag::ACE_WEB, "Create webview with surface in");
                 wptr<Surface> surfaceWeak(delegate->surface_);
                 sptr<Surface> surface = surfaceWeak.promote();
                 CHECK_NULL_VOID(surface);
@@ -2635,6 +2636,7 @@ void WebDelegate::InitWebViewWithSurface()
                     surface,
                     initArgs,
                     delegate->drawSize_.Width(), delegate->drawSize_.Height());
+                delegate->JavaScriptOnDocumentStart();
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
@@ -2648,7 +2650,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
 #ifdef OHOS_STANDARD_SYSTEM
             delegate->nweb_->RegisterScreenLockFunction(delegate->GetRosenWindowId(), [context](bool key) {
-                LOGD("SetKeepScreenOn %{public}d", key);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetKeepScreenOn %{public}d", key);
                 auto weakContext = context.Upgrade();
                 CHECK_NULL_VOID(weakContext);
                 auto window = weakContext->GetWindow();
@@ -3651,7 +3653,6 @@ void WebDelegate::Zoom(float factor)
         [weak = WeakClaim(this), factor]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
-                LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
@@ -3672,7 +3673,6 @@ bool WebDelegate::ZoomIn()
         [weak = WeakClaim(this), &result]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
-                LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
@@ -3694,7 +3694,6 @@ bool WebDelegate::ZoomOut()
         [weak = WeakClaim(this), &result]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
-                LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
@@ -4579,7 +4578,7 @@ void WebDelegate::OnContextMenuHide(const std::string& info)
             propOnContextMenuHideEvent(std::make_shared<ContextMenuHideEvent>(info));
             return;
         } else {
-            LOGE("current is not new pipeline");
+            TAG_LOGW(AceLogTag::ACE_WEB, "current is not new pipeline");
         }
     });
     return;
@@ -4708,17 +4707,16 @@ void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatc
 
 bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int height)
 {
-    LOGI("store pixel map, len = %{public}zu, width = %{public}d, height = %{public}d", len, width, height);
+    TAG_LOGD(AceLogTag::ACE_WEB, "store pixel map, len = %{public}zu, width = %{public}d, height = %{public}d",
+        len, width, height);
     pixelMap_ = PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height);
     if (pixelMap_ == nullptr) {
-        LOGE("convert drag image to pixel map failed");
         return false;
     }
     isRefreshPixelMap_ = true;
 
     auto webPattern = webPattern_.Upgrade();
     if (!webPattern) {
-        LOGE("web pattern is nullptr");
         return false;
     }
     return webPattern->NotifyStartDragTask();
@@ -4726,8 +4724,6 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
 
 bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData)
 {
-    LOGI("DragDrop event OnDragAndDropDataUdmf");
-
     const void *data = nullptr;
     size_t len = 0;
     int width = 0;
@@ -4735,7 +4731,6 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     dragData->GetPixelMapSetting(&data, len, width, height);
     pixelMap_ = PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height);
     if (pixelMap_ == nullptr) {
-        LOGE("convert drag image to pixel map failed");
         return false;
     }
     isRefreshPixelMap_ = true;
@@ -4743,7 +4738,6 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     dragData_ = dragData;
     auto webPattern = webPattern_.Upgrade();
     if (!webPattern) {
-        LOGE("web pattern is nullptr");
         return false;
     }
     return webPattern->NotifyStartDragTask();
@@ -5002,7 +4996,6 @@ bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> 
     }
     auto renderWeb = renderWeb_.Upgrade();
     if (!renderWeb || !params || !callback) {
-        LOGE("renderWeb is nullptr");
         return false;
     }
 
@@ -5198,7 +5191,6 @@ void WebDelegate::SetDrawSize(const Size& drawSize)
 
 void WebDelegate::SetEnhanceSurfaceFlag(const bool& isEnhanceSurface)
 {
-    LOGI("enhance flag %{public}d", isEnhanceSurface);
     isEnhanceSurface_ = isEnhanceSurface;
 }
 
@@ -5210,16 +5202,15 @@ sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
 void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard)
 {
     if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
-        LOGE("WebDelegate::SetBoundsOrResize width and height error");
         return;
     }
     if (isEnhanceSurface_) {
         if (surfaceDelegate_) {
-            LOGI("WebDelegate::SetBounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
+            TAG_LOGD(AceLogTag::ACE_WEB,
+                "Web Delegate Set Bounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
                 (int32_t)offset.GetX(), (int32_t)offset.GetY(),
                 (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
             if (needResizeAtFirst_) {
-                LOGI("WebDelegate::SetBounds: resize at first");
                 Resize(drawSize.Width(), drawSize.Height(), isKeyboard);
                 needResizeAtFirst_ = false;
             }
@@ -5325,6 +5316,22 @@ void WebDelegate::UpdateScreenOffSet(double& offsetX, double& offsetY)
 #endif
 }
 
+void WebDelegate::UpdateOverScrollMode(const int overscrollModeValue)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), overscrollModeValue]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            CHECK_NULL_VOID(setting);
+            setting->PutOverscrollMode(overscrollModeValue);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::RegisterSurfacePositionChangedCallback()
 {
 #ifdef NG_BUILD
@@ -5384,7 +5391,6 @@ void WebDelegate::RegisterSurfacePositionChangedCallback()
 void WebDelegate::UnregisterSurfacePositionChangedCallback()
 {
     if (callbackId_ <= 0) {
-        LOGE("callbackId_ = %{public}d", callbackId_);
         return;
     }
 #ifdef NG_BUILD
@@ -5484,5 +5490,47 @@ void WebDelegate::OnRootLayerChanged(int width, int height)
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->OnRootLayerChanged(width, height);
+}
+
+void WebDelegate::SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard)
+{
+    if (nweb_) {
+        nweb_->SetVirtualKeyBoardArg(width, height, keyboard);
+    }
+}
+
+bool WebDelegate::ShouldVirtualKeyboardOverlay()
+{
+    if (nweb_) {
+        return nweb_->ShouldVirtualKeyboardOverlay();
+    }
+    return false;
+}
+
+bool WebDelegate::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->FilterScrollEvent(x, y, xVelocity, yVelocity);
+}
+
+void WebDelegate::ScrollBy(float deltaX, float deltaY)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->ScrollBy(deltaX, deltaY);
+}
+
+void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems)
+{
+    scriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+}
+
+void WebDelegate::JavaScriptOnDocumentStart()
+{
+    CHECK_NULL_VOID(nweb_);
+    if (scriptItems_.has_value()) {
+        nweb_->JavaScriptOnDocumentStart(scriptItems_.value());
+        scriptItems_ = std::nullopt;
+    }
 }
 } // namespace OHOS::Ace

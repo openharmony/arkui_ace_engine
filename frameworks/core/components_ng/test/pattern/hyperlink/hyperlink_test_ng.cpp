@@ -31,7 +31,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected

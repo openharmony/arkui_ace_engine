@@ -80,6 +80,13 @@ var WordBreak;
   WordBreak[WordBreak["BREAK_WORD"] = 2] = "break-word";
 })(WordBreak || (WordBreak = {}));
 
+var EllipsisMode;
+(function (EllipsisMode) {
+  EllipsisMode[EllipsisMode["START"] = 0] = "start";
+  EllipsisMode[EllipsisMode["CENTER"] = 1] = "center";
+  EllipsisMode[EllipsisMode["END"] = 2] = "end";
+})(EllipsisMode || (EllipsisMode = {}));
+
 var Curve;
 (function (Curve) {
   Curve["Linear"] = "linear";
@@ -961,6 +968,12 @@ var WebDarkMode;
   WebDarkMode[WebDarkMode["On"] = 1] = "On";
   WebDarkMode[WebDarkMode["Auto"] = 2] = "Auto";
 })(WebDarkMode || (WebDarkMode = {}));
+
+var OverScrollMode;
+(function (OverScrollMode) {
+  OverScrollMode[OverScrollMode["NEVER"] = 0] = "NEVER";
+  OverScrollMode[OverScrollMode["ALWAYS"] = 1] = "ALWAYS";
+})(OverScrollMode || (OverScrollMode = {}));
 
 var RenderExitReason;
 (function (RenderExitReason) {

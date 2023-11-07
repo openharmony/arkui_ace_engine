@@ -199,7 +199,6 @@ LoadFailNotifyTask GaugePattern::CreateLoadFailCallback()
 
 void GaugePattern::OnImageLoadFail()
 {
-    LOGW("Image data load fail.");
     auto gaugePaintProperty = GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(gaugePaintProperty);
     gaugePaintProperty->ResetIndicatorIconSourceInfo();
@@ -218,7 +217,6 @@ void GaugePattern::OnImageLoadSuccess()
     CHECK_NULL_VOID(host);
     host->MarkNeedRenderOnly();
 
-    LOGD("Load show icon successfully");
     ImagePaintConfig config;
     config.isSvg_ = indicatorIconLoadingCtx_->GetSourceInfo().IsSvg();
     if (!config.isSvg_) {

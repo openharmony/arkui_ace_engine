@@ -58,6 +58,8 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
     return false;
 }
 
+void DragDropManager::CancelItemDrag() {}
+
 void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode) {}
 
 void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)

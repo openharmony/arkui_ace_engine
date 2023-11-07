@@ -21,7 +21,6 @@
 namespace OHOS::Ace::NG {
 void MenuModelNG::Create()
 {
-    LOGI("MenuView::Create");
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId,
@@ -40,7 +39,6 @@ void MenuModelNG::SetFontSize(const Dimension& fontSize)
     if (fontSize.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize);
     } else {
-        LOGW("FontSize value is not valid");
         ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize);
     }
 }

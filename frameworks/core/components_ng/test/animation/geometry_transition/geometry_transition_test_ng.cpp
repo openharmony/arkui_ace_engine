@@ -178,6 +178,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition003, TestSize.Level1)
      * @tc.steps: step1. create GeometryTransition with weakNode1.
      */
     Create(weakNode1, true);
+    weakNode1.Upgrade()->isRemoving_ = false;
     /**
      * @tc.steps: step2. try build with some condition.
      * @tc.expected: weakNode1 in the GeometryTransition swap to weakNode2.
@@ -186,6 +187,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition003, TestSize.Level1)
     gt_->Build(weakNode1, false);
     gt_->Build(weakNode2, false);
     EXPECT_EQ(weakNode1, gt_->outNode_);
+    gt_->inNode_ = weakNode2;
     /**
      * @tc.steps: step3. try change node status.
      * @tc.expected: the location of weakNode1 and weakNode2 meetings expectations.
@@ -204,7 +206,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition003, TestSize.Level1)
     gt_->Build(weakNode2, true);
     EXPECT_EQ(weakNode2, gt_->inNode_);
     gt_->outNode_.Upgrade()->onMainTree_ = false;
-    gt_->Build(weakNode1, true);
+    weakNode1.Upgrade()->isRemoving_ = false;
     gt_->Build(weakNode1, true);
     EXPECT_EQ(weakNode1, gt_->inNode_);
 }

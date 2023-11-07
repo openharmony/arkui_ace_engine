@@ -101,6 +101,8 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContext();
 
+    static RefPtr<PipelineBase> GetMainPipelineContext();
+
     static RefPtr<ThemeManager> CurrentThemeManager();
 
     virtual void SetupRootElement() = 0;
@@ -181,6 +183,8 @@ public:
     virtual void OnHide() = 0;
 
     virtual void WindowFocus(bool isFocus) = 0;
+
+    virtual void ContainerModalUnFocus() = 0;
 
     virtual void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) = 0;
 

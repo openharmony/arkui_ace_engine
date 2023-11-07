@@ -156,6 +156,7 @@ using RSParagraphStyle = Rosen::TypographyStyle;
 using RSTextRectHeightStyle = Rosen::TextRectHeightStyle;
 using RSTextRectWidthStyle = Rosen::TextRectWidthStyle;
 using RSTextRect = Rosen::TextRect;
+using RSEllipsisMode = Rosen::EllipsisModal;
 #endif
 } // namespace OHOS::Ace
 #else

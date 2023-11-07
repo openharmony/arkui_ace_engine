@@ -39,9 +39,9 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
 
 void HyperlinkModelNG::SetColor(const Color& value)
 {
-    LOGI("Hyperlink setColor.");
     ACE_UPDATE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value);
     ACE_UPDATE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, ForegroundColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
 }
 
@@ -52,7 +52,7 @@ void HyperlinkModelNG::SetTextStyle(
     auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
-    textLayoutProperty->UpdateContent(content);
+    textLayoutProperty->UpdateContent(content.empty() ? address : content);
     textLayoutProperty->UpdateAddress(address);
     auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);

@@ -56,6 +56,7 @@ void TxtParagraph::CreateBuilder()
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.maxLines = paraStyle_.maxLines;
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
+    style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
 #endif
     style.locale = paraStyle_.fontLocale;
@@ -147,6 +148,18 @@ void TxtParagraph::Build()
     if (paraStyle_.leadingMargin) {
         SetIndents({ paraStyle_.leadingMargin->size.Width() });
     }
+}
+
+uint32_t TxtParagraph::destructCount = 0;
+
+TxtParagraph::~TxtParagraph()
+{
+    if (destructCount % 100 == 0) {
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+        "destroy TxtParagraph with placeHolderIndex_ %{public}d, textAlign_ %{public}d, count %{public}u",
+        placeHolderIndex_, static_cast<int>(textAlign_), destructCount);
+    }
+    destructCount++;
 }
 
 void TxtParagraph::Reset()
@@ -378,6 +391,10 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
 #ifndef USE_GRAPHIC_TEXT_GINE
     bool isLtr = textBox.direction == txt::TextDirection::ltr;
 #else
+    if (isnan(textBox.rect.GetRight()) || isnan(textBox.rect.GetLeft())) {
+        LOGI("Right or left of textBox is NaN.");
+        return false;
+    }
     bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
 #endif
     // Caret is within width of the downstream glyphs.

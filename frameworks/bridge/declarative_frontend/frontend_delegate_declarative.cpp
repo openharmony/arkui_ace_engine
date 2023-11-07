@@ -625,8 +625,7 @@ void FrontendDelegateDeclarative::ResetStagingPage()
 {
     if (resetStagingPage_) {
         taskExecutor_->PostTask(
-            [resetStagingPage = resetStagingPage_] { resetStagingPage(); },
-            TaskExecutor::TaskType::JS);
+            [resetStagingPage = resetStagingPage_] { resetStagingPage(); }, TaskExecutor::TaskType::JS);
     } else {
         LOGE("resetStagingPage_ is null");
     }
@@ -797,8 +796,8 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
     }
 }
 
-void FrontendDelegateDeclarative::InitializeRouterManager(
-    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
+void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback,
+    NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
     NG::UpdateRootComponentCallback&& updateRootComponentCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
@@ -1324,11 +1323,6 @@ void FrontendDelegateDeclarative::PostJsTask(std::function<void()>&& task)
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
 }
 
-void FrontendDelegateDeclarative::RemoveVisibleChangeNode(NodeId id)
-{
-    LOGW("RemoveVisibleChangeNode: Not implemented yet.");
-}
-
 const std::string& FrontendDelegateDeclarative::GetAppID() const
 {
     return manifestParser_->GetAppInfo()->GetAppID();
@@ -1369,8 +1363,8 @@ void FrontendDelegateDeclarative::ShowToast(
                         const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            TAG_LOGD(AceLogTag::ACE_PROMPT_ACTION_TOAST,
-                "Begin to show toast message %{public}s,duration is %{public}d", message.c_str(), durationTime);
+            TAG_LOGD(AceLogTag::ACE_OVERLAY, "Begin to show toast message %{public}s,duration is %{public}d",
+                message.c_str(), durationTime);
             overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
         };
         MainWindowOverlay(std::move(task));
@@ -1471,9 +1465,8 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
-void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
-    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
-    const std::set<std::string>& callbacks)
+void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
@@ -1491,9 +1484,9 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
-void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
-    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
-    const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
+void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks,
+    std::function<void(bool)>&& onStatusChanged)
 {
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
@@ -1518,7 +1511,6 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
         dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
             taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },

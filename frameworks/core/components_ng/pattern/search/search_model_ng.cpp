@@ -595,6 +595,20 @@ void SearchModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc)
     }
 }
 
+void SearchModelNG::SetType(TextInputType value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldHost);
+    auto layoutProperty = textFieldHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
+        layoutProperty->UpdateTypeChanged(true);
+    }
+    layoutProperty->UpdateTextInputType(value);
+}
+
 void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::string>& placeholder,
     const std::optional<std::string>& value, bool hasTextFieldNode)
 {

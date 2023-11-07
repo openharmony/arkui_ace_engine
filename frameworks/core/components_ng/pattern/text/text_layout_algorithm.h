@@ -19,6 +19,7 @@
 #include <list>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "core/components_ng/layout/box_layout_algorithm.h"

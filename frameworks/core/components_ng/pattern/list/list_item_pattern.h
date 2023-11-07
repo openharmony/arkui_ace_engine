@@ -257,6 +257,7 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     bool isHover_ = false;
     bool isPressed_ = false;
+    std::optional<double> enableOpacity_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };

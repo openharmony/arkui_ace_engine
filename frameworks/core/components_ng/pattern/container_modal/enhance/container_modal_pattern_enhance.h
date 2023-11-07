@@ -26,6 +26,7 @@ public:
     ~ContainerModalPatternEnhance() override = default;
     void OnWindowFocused() override;
     void OnWindowUnfocused() override;
+    void OnWindowForceUnfocused() override;
     virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
 protected:

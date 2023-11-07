@@ -64,6 +64,11 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return MockPipelineBase::GetCurrent();
 }
 
+RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
+{
+    return MockPipelineBase::GetCurrent();
+}
+
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
 
 void PipelineContext::SetupRootElement() {}
@@ -97,6 +102,8 @@ void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
 void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
 void PipelineContext::WindowFocus(bool isFocus) {}
+
+void PipelineContext::ContainerModalUnFocus() {}
 
 void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate) {}
 
@@ -334,6 +341,12 @@ void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 
 void PipelineContext::SetWindowSceneConsumed(bool isConsumed) {}
+
+void PipelineContext::AddIsFocusActiveUpdateEvent(
+    const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback)
+{}
+
+void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node) {}
 } // namespace OHOS::Ace::NG
 
 // pipeline base

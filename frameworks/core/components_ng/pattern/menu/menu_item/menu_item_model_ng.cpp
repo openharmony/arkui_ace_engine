@@ -147,7 +147,6 @@ void MenuItemModelNG::SetFontSize(const Dimension& fontSize)
     if (fontSize.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, fontSize);
     } else {
-        LOGW("FontSize value is not valid");
         ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize);
     }
 }
@@ -181,7 +180,6 @@ void MenuItemModelNG::SetLabelFontSize(const Dimension& fontSize)
     if (fontSize.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, fontSize);
     } else {
-        LOGW("FontSize value is not valid");
         ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize);
     }
 }

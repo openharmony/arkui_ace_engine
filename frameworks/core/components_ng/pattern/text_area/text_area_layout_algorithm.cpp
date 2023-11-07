@@ -57,14 +57,14 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
         // Used for empty text.
         preferredHeight_ = pattern->PreferredLineHeight(true);
     }
-
+    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     // Paragraph layout.}
     if (isInlineStyle) {
-        return InlineMeasureContent(contentConstraint, layoutWrapper);
+        return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
     } else if (showPlaceHolder_) {
-        return PlaceHolderMeasureContent(contentConstraint, layoutWrapper);
+        return PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper);
     } else {
-        return TextAreaMeasureContent(contentConstraint, layoutWrapper);
+        return TextAreaMeasureContent(textFieldContentConstraint, layoutWrapper);
     }
 }
 
@@ -125,8 +125,11 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(textFieldLayoutProperty);
         auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
-        if (contentConstraint.selfIdealSize.Height().has_value()) {
-            frameSize.SetHeight(contentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
+        auto textFieldContentConstraint =
+            CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
+        if (textFieldContentConstraint.selfIdealSize.Height().has_value()) {
+            frameSize.SetHeight(
+                textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
         } else {
             frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum());
         }
@@ -163,6 +166,12 @@ void TextAreaLayoutAlgorithm::CounterNodeMeasureContent(uint32_t textLength, uin
     textLayoutProperty->UpdateFontWeight(countTextStyle.GetFontWeight());
     textLayoutProperty->UpdateTextAlign(TextAlign::END);
     textLayoutProperty->UpdateMaxLines(COUNTER_TEXT_MAXLINE);
+
+    auto host = textNode->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateForegroundColor(countTextStyle.GetTextColor());
 
     layoutWrapper->Measure(contentConstraint);
 }

@@ -431,6 +431,17 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
 
+    auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
+    if (customMenuNode) {
+        auto menuLayoutProperty = customMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+        auto renderContext = scroll->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, nullptr);
+        if (menuLayoutProperty && menuLayoutProperty->HasBorderRadius()) {
+            BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
+            renderContext->UpdateBorderRadius(borderRadius);
+        }
+    }
+    
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
     if (menuParam.backgroundEffectOption.has_value()) {

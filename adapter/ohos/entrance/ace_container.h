@@ -417,6 +417,8 @@ public:
 
     void SetToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetToken();
+    void SetParentToken(sptr<IRemoteObject>& token);
+    sptr<IRemoteObject> GetParentToken();
 
     std::string GetWebHapPath() const override
     {
@@ -485,6 +487,7 @@ private:
     std::string windowName_;
     uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
     sptr<IRemoteObject> token_;
+    sptr<IRemoteObject> parentToken_;
 
     bool isSubContainer_ = false;
     bool isFormRender_ = false;

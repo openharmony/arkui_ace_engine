@@ -39,6 +39,25 @@ struct DirtySwapConfig {
     bool skipLayout = false;
 };
 
+class ScrollingListener : public AceType {
+    DECLARE_ACE_TYPE(ScrollingListener, AceType);
+
+public:
+    explicit ScrollingListener(std::function<void()>&& callback) : callback_(std::move(callback)) {}
+
+    ~ScrollingListener() override = default;
+
+    void NotifyScrollingEvent()
+    {
+        if (callback_) {
+            callback_();
+        }
+    }
+
+private:
+    std::function<void()> callback_;
+};
+
 // Pattern is the base class for different measure, layout and paint behavior.
 class Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -372,6 +391,14 @@ public:
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
     virtual void OnDirectionOrDpiConfigurationUpdate() {}
+
+    virtual bool ShouldDelayChildPressedState() const
+    {
+        return false;
+    }
+
+    virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
+    virtual void FireAndCleanScrollingListener() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

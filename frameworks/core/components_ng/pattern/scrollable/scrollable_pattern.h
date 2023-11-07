@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 
+#include <vector>
+
 #include "base/geometry/axis.h"
 #include "core/animation/select_motion.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -40,6 +42,9 @@ class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
+    ScrollablePattern() = default;
+    ScrollablePattern(bool alwaysEnabled) : edgeEffectAlwaysEnabled_(alwaysEnabled) {}
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -50,6 +55,15 @@ public:
     {
         return axis_;
     }
+
+    virtual bool ShouldDelayChildPressedState() const override
+    {
+        return true;
+    }
+
+    void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
+    void FireAndCleanScrollingListener() override;
+
     void SetAxis(Axis axis);
     virtual bool UpdateCurrentOffset(float delta, int32_t source) = 0;
     virtual bool IsScrollable() const
@@ -304,6 +318,15 @@ public:
         return exp(-RATIO * gamma);
     }
 
+    bool GetAlwaysEnabled()
+    {
+        return edgeEffectAlwaysEnabled_;
+    }
+
+    void SetAlwaysEnabled(bool alwaysEnabled)
+    {
+        edgeEffectAlwaysEnabled_ = alwaysEnabled;
+    }
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -471,6 +494,9 @@ private:
     RefPtr<InputEvent> mouseEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
+
+    std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+    bool edgeEffectAlwaysEnabled_ = false;
 };
 } // namespace OHOS::Ace::NG
 

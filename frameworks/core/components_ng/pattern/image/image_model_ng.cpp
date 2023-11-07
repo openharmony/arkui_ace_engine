@@ -53,17 +53,23 @@ void ImageModelNG::Create(
     stack->Push(frameNode);
 
     // set draggable for framenode
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto draggable = pipeline->GetDraggable<ImageTheme>();
-    if (draggable && !frameNode->IsDraggable()) {
-        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->InitDragDropEvent();
+    if (frameNode->IsFirstBuilding()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto draggable = pipeline->GetDraggable<ImageTheme>();
+        if (draggable && !frameNode->IsDraggable()) {
+            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureHub);
+            gestureHub->InitDragDropEvent();
+        }
+        frameNode->SetDraggable(draggable);
     }
-    frameNode->SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(
         ImageLayoutProperty, ImageSourceInfo, CreateSourceInfo(src, pixMap, bundleName, moduleName));
+    auto renderProps = frameNode->GetPaintProperty<ImageRenderProperty>();
+    if (renderProps) {
+        renderProps->ResetNeedBorderRadius();
+    }
 }
 
 void ImageModelNG::SetAlt(const std::string& src)

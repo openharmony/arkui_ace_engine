@@ -28,6 +28,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
@@ -62,6 +63,8 @@ public:
     ~PipelineContext() override = default;
 
     static RefPtr<PipelineContext> GetCurrentContext();
+
+    static RefPtr<PipelineContext> GetMainPipelineContext();
 
     static float GetCurrentRootWidth();
 
@@ -152,6 +155,8 @@ public:
     void OnHide() override;
 
     void WindowFocus(bool isFocus) override;
+
+    void ContainerModalUnFocus() override;
 
     void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
 
@@ -280,6 +285,9 @@ public:
 
     bool SetIsFocusActive(bool isFocusActive);
 
+    void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
+    void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
+
     bool IsTabJustTriggerOnKeyEvent() const
     {
         return isTabJustTriggerOnKeyEvent_;
@@ -403,6 +411,22 @@ public:
         dragCleanTask_ = std::move(task);
     }
 
+    void AddGestureTask(const DelayedTask& task)
+    {
+        delayedTasks_.emplace_back(task);
+    }
+
+    void RemoveGestureTask(const DelayedTask& task)
+    {
+        for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
+            if (iter->recognizer == task.recognizer) {
+                delayedTasks_.erase(iter++);
+            } else {
+                ++iter;
+            }
+        }
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -430,6 +454,8 @@ private:
 
     void FlushTouchEvents();
 
+    void ProcessDelayTasks();
+
     void InspectDrew();
 
     void FlushBuildFinishCallbacks();
@@ -437,6 +463,8 @@ private:
     void DumpPipelineInfo() const;
 
     void RegisterRootEvent();
+
+    void ResetDraggingStatus(const TouchEvent& touchPoint);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
@@ -525,6 +553,9 @@ private:
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
     std::function<void()> dragCleanTask_;
+
+    std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
+    std::list<DelayedTask> delayedTasks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

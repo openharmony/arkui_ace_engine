@@ -268,7 +268,7 @@ void AceAbility::InitializeClipboard() const
 
 void AceAbility::OnBackPressed() const
 {
-    LOGD("Process Back Pressed Event");
+    LOGI("Process Back Pressed Event");
     EventDispatcher::GetInstance().DispatchBackPressedEvent();
 }
 
@@ -428,6 +428,7 @@ void AceAbility::ReplacePage(const std::string& url, const std::string& params)
 
 void AceAbility::LoadDocument(const std::string& url, const std::string& componentName, SystemParams& systemParams)
 {
+    LOGI("Component Preview start:%{public}s, ", componentName.c_str());
     AceApplicationInfo::GetInstance().ChangeLocale(systemParams.language, systemParams.region);
     runArgs_.isRound = systemParams.isRound;
     SurfaceChanged(systemParams.orientation, systemParams.density, systemParams.deviceWidth, systemParams.deviceHeight);
@@ -441,10 +442,12 @@ void AceAbility::LoadDocument(const std::string& url, const std::string& compone
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
     container->LoadDocument(url, componentName);
+    LOGI("Component Preview end");
 }
 
 std::string AceAbility::GetJSONTree()
 {
+    LOGI("Inspector start");
     std::string jsonTreeStr;
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_RETURN(container, "");
@@ -453,6 +456,7 @@ std::string AceAbility::GetJSONTree()
     taskExecutor->PostSyncTask(
         [&jsonTreeStr] { OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleJSONTreeStr(jsonTreeStr); },
         TaskExecutor::TaskType::UI);
+    LOGI("Inspector end");
     return jsonTreeStr;
 }
 
@@ -473,19 +477,21 @@ std::string AceAbility::GetDefaultJSONTree()
 
 bool AceAbility::OperateComponent(const std::string& attrsJson)
 {
-    LOGD("OperateComponent attrsJson %{public}s", attrsJson.c_str());
+    LOGI("Fast Preview start");
     auto root = JsonUtil::ParseJsonString(attrsJson);
     if (!root || !root->IsValid()) {
-        LOGW("the attrsJson is illegal json format");
+        LOGE("Fast Preview failed: the attrsJson is illegal json format");
         return false;
     }
 
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
+        LOGE("Fast Preview failed: container is null");
         return false;
     }
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
+        LOGE("Fast Preview failed: taskExecutor is null");
         return false;
     }
     taskExecutor->PostTask(
@@ -497,6 +503,7 @@ bool AceAbility::OperateComponent(const std::string& attrsJson)
             }
         },
         TaskExecutor::TaskType::UI);
+    LOGI("Fast Preview end");
     return true;
 }
 

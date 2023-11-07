@@ -51,6 +51,12 @@ public:
 #endif
     }
 
+    RectF GetRoundRect() const
+    {
+        auto rect = roundRect_.GetRect();
+        return RectF(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight());
+    }
+
     void SetRoundRect(const RoundRect& rect, float borderWidth)
     {
 #ifndef USE_ROSEN_DRAWING

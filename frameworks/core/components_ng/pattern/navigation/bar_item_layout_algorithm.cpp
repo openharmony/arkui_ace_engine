@@ -65,28 +65,7 @@ void BarItemLayoutAlgorithm::MeasureToolbarItemText(LayoutWrapper* layoutWrapper
     if (GreatOrEqual(textWidth, constraint.maxSize.Width())) {
         constraint.maxSize.SetWidth(textWidth);
     }
-
-    auto barItemMaxWidth = GetBarItemMaxWidth();
-    auto barItemWidth = barItemLayoutProperty->GetLayoutConstraint()->maxSize.Width();
     auto barItemConstraint = barItemLayoutProperty->GetLayoutConstraint().value();
-    if (GreatNotEqual(constraint.maxSize.Width(), barItemWidth) &&
-        LessOrEqual(constraint.maxSize.Width(), barItemMaxWidth)) {
-        barItemConstraint.maxSize.SetWidth(constraint.maxSize.Width());
-        barItemLayoutProperty->UpdateLayoutConstraint(barItemConstraint);
-    }
-
-    if (GreatOrEqual(constraint.maxSize.Width(), barItemMaxWidth)) {
-        constraint.maxSize.SetWidth(barItemMaxWidth);
-        barItemConstraint.maxSize.SetWidth(barItemMaxWidth);
-        barItemLayoutProperty->UpdateLayoutConstraint(barItemConstraint);
-        textLayoutProperty->UpdateAdaptMinFontSize(theme->GetToolBarItemMinFontSize());
-        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetToolBarItemFontSize());
-        textLayoutProperty->UpdateMaxLines(theme->GetToolbarItemTextMaxLines());
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-        textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
-        textWrapper->Measure(constraint);
-    }
-
     auto textHeight = textWrapper->GetGeometryNode()->GetContentSize().Height();
     float barItemChildrenTotalHeight = textHeight + (theme->GetToolbarIconSize() + TEXT_TOP_PADDING).ConvertToPx();
     if (GreatOrEqual(barItemChildrenTotalHeight, constraint.maxSize.Height())) {

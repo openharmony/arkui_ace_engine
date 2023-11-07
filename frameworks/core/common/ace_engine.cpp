@@ -75,17 +75,12 @@ void AceEngine::InitJsDumpHeadSignal()
 
 void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& container)
 {
-    LOGI("AddContainer %{public}d", instanceId);
     std::unique_lock<std::shared_mutex> lock(mutex_);
-    const auto result = containerMap_.try_emplace(instanceId, container);
-    if (!result.second) {
-        LOGW("already have container of this instance id: %{public}d", instanceId);
-    }
+    containerMap_.try_emplace(instanceId, container);
 }
 
 void AceEngine::RemoveContainer(int32_t instanceId)
 {
-    LOGI("RemoveContainer %{public}d", instanceId);
     size_t num = 0;
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);

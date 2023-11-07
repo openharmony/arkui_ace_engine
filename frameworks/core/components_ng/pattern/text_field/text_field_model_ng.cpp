@@ -78,7 +78,6 @@ void TextFieldModelNG::CreateNode(
     SetCaretColor(textFieldTheme->GetCursorColor());
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
-    textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
@@ -207,9 +206,7 @@ void TextFieldModelNG::SetCaretPosition(const int32_t& value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CaretPosition, value);
     pattern->SetCaretPosition(value);
 }
 
@@ -398,10 +395,18 @@ void TextFieldModelNG::SetPasswordIcon(const PasswordIcon& passwordIcon)
     if (passwordIcon.showResult != "") {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
             ImageSourceInfo(passwordIcon.showResult, passwordIcon.showBundleName, passwordIcon.showModuleName));
+    } else {
+        ImageSourceInfo showSystemSourceInfo;
+        showSystemSourceInfo.SetResourceId(InternalResource::ResourceId::SHOW_PASSWORD_SVG);
+        ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo, showSystemSourceInfo);
     }
     if (passwordIcon.hideResult != "") {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo,
             ImageSourceInfo(passwordIcon.hideResult, passwordIcon.hideBundleName, passwordIcon.hideModuleName));
+    } else {
+        ImageSourceInfo hideSystemSourceInfo;
+        hideSystemSourceInfo.SetResourceId(InternalResource::ResourceId::HIDE_PASSWORD_SVG);
+        ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo, hideSystemSourceInfo);
     }
 }
 

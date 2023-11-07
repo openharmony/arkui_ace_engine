@@ -1510,7 +1510,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG005, TestSize.Level1)
 
     auto toolBarWrapper = toolBarNode->CreateLayoutWrapper();
     ASSERT_NE(toolBarWrapper, nullptr);
-
+    NavigationTestNg::RunMeasureAndLayout(toolBarWrapper);
     toolbarLayoutAlgorithm->Measure(AceType::RawPtr(toolBarWrapper));
     ASSERT_FALSE(toolBarNode->isNewToolbar_);
 

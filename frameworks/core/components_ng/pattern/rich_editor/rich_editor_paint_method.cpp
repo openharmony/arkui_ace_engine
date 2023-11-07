@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager,
     float baselineOffset, const RefPtr<TextContentModifier>& contentMod,
     const RefPtr<TextOverlayModifier>& overlayMod)
-    : TextPaintMethod(pattern, pManager->GetParagraphs().begin()->paragraph, baselineOffset, contentMod, overlayMod),
+    : TextPaintMethod(pattern, baselineOffset, contentMod, overlayMod),
       pManager_(pManager)
 {}
 

@@ -115,7 +115,6 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     std::advance(iter, currentIndex_);
     RefPtr<NGGestureRecognizer> curRecognizer = *iter;
     if (!curRecognizer) {
-        LOGE("curRecognizer is nullptr");
         GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return true;
     }
@@ -142,7 +141,6 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
             curRecognizer->HandleEvent(point);
             break;
         default:
-            LOGW("unknown touch type");
             break;
     }
 
@@ -158,7 +156,6 @@ void SequencedRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
         if (recognizer->GetRefereeState() == RefereeState::SUCCEED) {
             return;
         }
-        LOGD("the sub recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
         if (currentIndex_ == static_cast<int32_t>((recognizers_.size() - 1))) {
             GroupAdjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         } else {
@@ -219,8 +216,6 @@ void SequencedRecognizer::DeadlineTimer()
         auto refPtr = weakPtr.Upgrade();
         if (refPtr) {
             refPtr->HandleOverdueDeadline();
-        } else {
-            LOGE("fail to handle overdue deadline due to context is nullptr");
         }
     };
 
@@ -231,7 +226,6 @@ void SequencedRecognizer::DeadlineTimer()
 
 void SequencedRecognizer::HandleOverdueDeadline()
 {
-    LOGI("sequence gesture recognizer does not receive touch down in time");
     if (refereeState_ == RefereeState::PENDING) {
         GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }

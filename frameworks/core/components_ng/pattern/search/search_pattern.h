@@ -104,7 +104,7 @@ public:
                 result = "CopyOptions.Distributed";
                 break;
             default:
-                LOGD("The input does not match any CopyOptions");
+                break;
         }
         return result;
     }

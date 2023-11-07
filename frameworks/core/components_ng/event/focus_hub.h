@@ -20,7 +20,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
-#include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -534,7 +534,7 @@ public:
     static RefPtr<FocusHub> GetCurrentMainView();
     static void LostFocusToViewRoot();
 
-    void InheritFocus();
+    bool HandleFocusOnMainView();
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
     void RemoveSelf(BlurReason reason = BlurReason::FRAME_DESTROY);
@@ -544,11 +544,11 @@ public:
 
     void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
     bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
-    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHub>& mainFocusHub);
+    bool HandleFocusByTabIndex(const KeyEvent& event);
     RefPtr<FocusHub> GetChildFocusNodeByType(FocusNodeType nodeType = FocusNodeType::DEFAULT);
     RefPtr<FocusHub> GetChildFocusNodeById(const std::string& id);
     void HandleParentScroll() const;
-    int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes);
+    int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const;
     bool RequestFocusImmediatelyById(const std::string& id);
 
     bool IsFocusableByTab();
@@ -939,11 +939,11 @@ private:
 
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
     int32_t lastFocusNodeIndex_ { -1 };
+    int32_t lastTabIndexNodeId_ { DEFAULT_TAB_FOCUSED_INDEX };
 
     bool focusable_ { true };
     bool parentFocusable_ { true };
     bool currentFocus_ { false };
-    bool isFirstFocusInPage_ { true };
     bool isFocusUnit_ { false };
     bool isViewRootScopeFocused_ { true };
 

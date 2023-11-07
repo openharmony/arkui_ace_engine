@@ -386,10 +386,12 @@ void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        UpdateTitleFontSize(navBarNode, theme->GetTitleFontSize());
-    } else {
-        UpdateTitleFontSize(navBarNode, theme->GetTitleFontSizeBig());
+    if (!navBarNode->GetPrevTitleIsCustomValue(false)) {
+        if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+            UpdateTitleFontSize(navBarNode, theme->GetTitleFontSize());
+        } else {
+            UpdateTitleFontSize(navBarNode, theme->GetTitleFontSizeBig());
+        }
     }
 
     if (navBarNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
@@ -600,6 +602,17 @@ void NavBarPattern::HandleOnDragEnd()
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     titlePattern->ProcessTitleDragEnd();
+}
+
+bool NavBarPattern::GetCurrentNavBarStatus() const
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, false);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, false);
+    return titlePattern->GetCurrentNavBarStatus();
 }
 
 void NavBarPattern::OnCoordScrollStart()

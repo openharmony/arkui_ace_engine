@@ -55,15 +55,15 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t VIEW_NUMBER = 10;
-constexpr int32_t TOTAL_NUMBER = 12;
+constexpr int32_t TOTAL_LINE_NUMBER = 10;
+constexpr int32_t VIEW_LINE_NUMBER = 8;
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
 constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
-constexpr float HORIZONTAL_LENGTH = DEVICE_WIDTH / VIEW_NUMBER;
-constexpr float VERTICAL_LENGTH = DEVICE_HEIGHT / VIEW_NUMBER;
-constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_NUMBER - VIEW_NUMBER) * VERTICAL_LENGTH;
+constexpr float ITEM_WIDTH = DEVICE_WIDTH / VIEW_LINE_NUMBER;
+constexpr float ITEM_HEIGHT = DEVICE_HEIGHT / VIEW_LINE_NUMBER;
+constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_LINE_NUMBER - VIEW_LINE_NUMBER) * ITEM_HEIGHT;
 } // namespace
 
 class ScrollTestNg : public testing::Test, public TestNG {
@@ -80,7 +80,7 @@ public:
     void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
     const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
 
-    static void CreateContent(int32_t childNumber = TOTAL_NUMBER);
+    static void CreateContent(int32_t childNumber = TOTAL_LINE_NUMBER);
     RefPtr<FrameNode> GetContentChild(int32_t index);
     void Touch(TouchLocationInfo locationInfo, SourceType sourceType);
     void Touch(TouchType touchType, Offset offset, SourceType sourceType);
@@ -177,27 +177,27 @@ void ScrollTestNg::CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimen
 void ScrollTestNg::CreateContent(int32_t childNumber)
 {
     if (GetAxis() == Axis::HORIZONTAL) {
-        RowModelNG rowModelNG;
-        rowModelNG.Create(Dimension(0), nullptr, "");
-        SetWidth(Dimension(childNumber * HORIZONTAL_LENGTH));
+        RowModelNG rowModel;
+        rowModel.Create(Dimension(0), nullptr, "");
+        SetWidth(Dimension(childNumber * ITEM_WIDTH));
         SetHeight(FILL_LENGTH);
         for (int32_t index = 0; index < childNumber; index++) {
-            RowModelNG rowModelNG;
-            rowModelNG.Create(Dimension(0), nullptr, "");
-            SetWidth(Dimension(HORIZONTAL_LENGTH));
+            RowModelNG rowModel;
+            rowModel.Create(Dimension(0), nullptr, "");
+            SetWidth(Dimension(ITEM_WIDTH));
             SetHeight(FILL_LENGTH);
             ViewStackProcessor::GetInstance()->Pop();
         }
     } else {
-        ColumnModelNG columnModel;
-        columnModel.Create(Dimension(0), nullptr, "");
+        ColumnModelNG colModel;
+        colModel.Create(Dimension(0), nullptr, "");
         SetWidth(FILL_LENGTH);
-        SetHeight(Dimension(childNumber * VERTICAL_LENGTH));
+        SetHeight(Dimension(childNumber * ITEM_HEIGHT));
         for (int32_t index = 0; index < childNumber; index++) {
-            ColumnModelNG columnModel;
-            columnModel.Create(Dimension(0), nullptr, "");
+            ColumnModelNG colModel;
+            colModel.Create(Dimension(0), nullptr, "");
             SetWidth(FILL_LENGTH);
-            SetHeight(Dimension(VERTICAL_LENGTH));
+            SetHeight(Dimension(ITEM_HEIGHT));
             ViewStackProcessor::GetInstance()->Pop();
         }
     }
@@ -284,7 +284,7 @@ Axis ScrollTestNg::GetAxis()
 float ScrollTestNg::GetOffset(float childNumber)
 {
     bool isHorizontal = pattern_->GetAxis() == Axis::HORIZONTAL;
-    float offset = childNumber * (isHorizontal ? HORIZONTAL_LENGTH : VERTICAL_LENGTH);
+    float offset = childNumber * (isHorizontal ? ITEM_WIDTH : ITEM_HEIGHT);
     return offset;
 }
 
@@ -407,13 +407,13 @@ HWTEST_F(ScrollTestNg, AttrEdgeEffect001, TestSize.Level1)
     /**
      * @tc.steps: step2. Text set value: SPRING
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING); });
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
     EXPECT_EQ(layoutProperty_->GetEdgeEffectValue(), EdgeEffect::SPRING);
 
     /**
      * @tc.steps: step3. Text set width value: FADE
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE); });
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE, true); });
     EXPECT_EQ(layoutProperty_->GetEdgeEffectValue(), EdgeEffect::FADE);
 }
 
@@ -480,7 +480,7 @@ HWTEST_F(ScrollTestNg, Event002, TestSize.Level1)
      * @tc.steps: step2. Trigger event by OnScrollCallback
      * @tc.expected: isTrigger is true
      */
-    pattern_->OnScrollCallback(-VERTICAL_LENGTH * TOTAL_NUMBER, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -506,7 +506,7 @@ HWTEST_F(ScrollTestNg, Event002, TestSize.Level1)
      * @tc.expected: isTrigger is true
      */
     isTrigger = false;
-    pattern_->OnScrollCallback(-HORIZONTAL_LENGTH * TOTAL_NUMBER, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(-ITEM_WIDTH * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -539,7 +539,7 @@ HWTEST_F(ScrollTestNg, Event003, TestSize.Level1)
      * @tc.steps: step2. Trigger event by OnScrollCallback
      * @tc.expected: isTrigger is true
      */
-    pattern_->OnScrollCallback(-VERTICAL_LENGTH * TOTAL_NUMBER, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -564,7 +564,7 @@ HWTEST_F(ScrollTestNg, Event003, TestSize.Level1)
      * @tc.steps: step5. Trigger event by OnScrollCallback
      * @tc.expected: isTrigger is true
      */
-    pattern_->OnScrollCallback(-HORIZONTAL_LENGTH * TOTAL_NUMBER, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(-ITEM_WIDTH * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -599,7 +599,7 @@ HWTEST_F(ScrollTestNg, Event004, TestSize.Level1)
      * @tc.steps: step2. Trigger onScrollStart event by OnScrollCallback
      * @tc.expected: isTrigger is true
      */
-    pattern_->OnScrollCallback(-VERTICAL_LENGTH * TOTAL_NUMBER, SCROLL_FROM_START);
+    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_LINE_NUMBER, SCROLL_FROM_START);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -627,7 +627,7 @@ HWTEST_F(ScrollTestNg, Event004, TestSize.Level1)
      */
     pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Resume();
-    pattern_->AnimateTo(VERTICAL_LENGTH * TOTAL_NUMBER, 1.f, Curves::LINEAR, false);
+    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_LINE_NUMBER, 1.f, Curves::LINEAR, false);
     EXPECT_TRUE(pattern_->GetScrollAbort());
 
     isTrigger = false;
@@ -652,7 +652,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionController001, TestSize.Level1)
     /**
      * @tc.steps: step1. Test AnimateTo
      */
-    bool animate = controller->AnimateTo(Dimension(VERTICAL_LENGTH * TOTAL_NUMBER), -1.f, Curves::LINEAR, false);
+    bool animate = controller->AnimateTo(Dimension(ITEM_HEIGHT * TOTAL_LINE_NUMBER), -1.f, Curves::LINEAR, false);
     EXPECT_TRUE(animate);
     animate = controller->AnimateTo(Dimension(1.0, DimensionUnit::PERCENT), 1.f, Curves::LINEAR, false);
     EXPECT_FALSE(animate);
@@ -661,15 +661,15 @@ HWTEST_F(ScrollTestNg, ScrollPositionController001, TestSize.Level1)
      * @tc.steps: step2. jump to a position
      * @tc.expected: CurrentOffset would be to the position
      */
-    pattern_->DoJump(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH));
+    pattern_->DoJump(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
 
     /**
      * @tc.steps: step3. jump to the same position
      * @tc.expected: CurrentOffset would not be change
      */
-    pattern_->DoJump(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH));
+    pattern_->DoJump(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
 
     /**
      * @tc.steps: step4. ScrollBy 0
@@ -684,20 +684,20 @@ HWTEST_F(ScrollTestNg, ScrollPositionController001, TestSize.Level1)
      * @tc.steps: step5. ScrollBy a distance
      * @tc.expected: Scroll by the distance
      */
-    controller->ScrollBy(HORIZONTAL_LENGTH, VERTICAL_LENGTH, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH));
+    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, false);
+    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
 
     /**
      * @tc.steps: step6. ScrollTo same currentOffset_
      * @tc.expected: JumpToPosition do not SendEventToAccessibility
      */
     pattern_->ScrollTo(-pattern_->currentOffset_);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH));
+    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
 
     /**
      * @tc.steps: step7. Test GetCurrentPosition
      */
-    EXPECT_EQ(controller->GetCurrentPosition(), -VERTICAL_LENGTH);
+    EXPECT_EQ(controller->GetCurrentPosition(), -ITEM_HEIGHT);
 
     /**
      * @tc.steps: step8. Test ScrollEdgeType::SCROLL_NONE
@@ -713,7 +713,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionController001, TestSize.Level1)
      * @tc.expected: CurrentOffset would to be bottom
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(DEVICE_HEIGHT - VERTICAL_LENGTH * TOTAL_NUMBER));
+    EXPECT_TRUE(IsEqualCurrentPosition(DEVICE_HEIGHT - ITEM_HEIGHT * TOTAL_LINE_NUMBER));
 
     /**
      * @tc.steps: step10. Test ScrollEdgeType::SCROLL_TOP
@@ -726,7 +726,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionController001, TestSize.Level1)
      * @tc.steps: step11. Test ScrollPage
      */
     controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(DEVICE_HEIGHT - VERTICAL_LENGTH * TOTAL_NUMBER));
+    EXPECT_TRUE(IsEqualCurrentPosition(DEVICE_HEIGHT - ITEM_HEIGHT * TOTAL_LINE_NUMBER));
 
     /**
      * @tc.steps: step12. Test ScrollPage
@@ -738,7 +738,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionController001, TestSize.Level1)
      * @tc.steps: step13. Test IsAtEnd
      */
     EXPECT_FALSE(controller->IsAtEnd());
-    UpdateCurrentOffset(-(VERTICAL_LENGTH * TOTAL_NUMBER - DEVICE_HEIGHT));
+    UpdateCurrentOffset(-(ITEM_HEIGHT * TOTAL_LINE_NUMBER - DEVICE_HEIGHT));
     EXPECT_TRUE(controller->IsAtEnd());
 }
 
@@ -756,7 +756,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionController002, TestSize.Level1)
     /**
      * @tc.steps: step1. Test AnimateTo
      */
-    bool animate = controller->AnimateTo(Dimension(VERTICAL_LENGTH * TOTAL_NUMBER), -1.f, Curves::LINEAR, false);
+    bool animate = controller->AnimateTo(Dimension(ITEM_HEIGHT * TOTAL_LINE_NUMBER), -1.f, Curves::LINEAR, false);
     EXPECT_TRUE(animate);
     animate = controller->AnimateTo(Dimension(1.0, DimensionUnit::PERCENT), 1.f, Curves::LINEAR, false);
     EXPECT_FALSE(animate);
@@ -765,15 +765,15 @@ HWTEST_F(ScrollTestNg, ScrollPositionController002, TestSize.Level1)
      * @tc.steps: step2. jump to a position
      * @tc.expected: CurrentOffset would be to the position
      */
-    pattern_->DoJump(-HORIZONTAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-HORIZONTAL_LENGTH));
+    pattern_->DoJump(-ITEM_WIDTH, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_WIDTH));
 
     /**
      * @tc.steps: step3. jump to the same position
      * @tc.expected: CurrentOffset would not be change
      */
-    pattern_->DoJump(-HORIZONTAL_LENGTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-HORIZONTAL_LENGTH));
+    pattern_->DoJump(-ITEM_WIDTH, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_WIDTH));
 
     /**
      * @tc.steps: step4. ScrollBy 0
@@ -788,13 +788,13 @@ HWTEST_F(ScrollTestNg, ScrollPositionController002, TestSize.Level1)
      * @tc.steps: step5. ScrollBy a distance
      * @tc.expected: Scroll by the distance
      */
-    controller->ScrollBy(HORIZONTAL_LENGTH, VERTICAL_LENGTH, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(-HORIZONTAL_LENGTH));
+    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, false);
+    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_WIDTH));
 
     /**
      * @tc.steps: step6. Test GetCurrentPosition
      */
-    EXPECT_EQ(controller->GetCurrentPosition(), -HORIZONTAL_LENGTH);
+    EXPECT_EQ(controller->GetCurrentPosition(), -ITEM_WIDTH);
 
     /**
      * @tc.steps: step7. Test ScrollEdgeType::SCROLL_NONE
@@ -810,7 +810,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionController002, TestSize.Level1)
      * @tc.expected: CurrentOffset would to be bottom
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(DEVICE_WIDTH - HORIZONTAL_LENGTH * TOTAL_NUMBER));
+    EXPECT_TRUE(IsEqualCurrentPosition(DEVICE_WIDTH - ITEM_WIDTH * TOTAL_LINE_NUMBER));
 
     /**
      * @tc.steps: step9. Test ScrollEdgeType::SCROLL_TOP
@@ -823,7 +823,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionController002, TestSize.Level1)
      * @tc.steps: step10. Test ScrollPage
      */
     controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(DEVICE_WIDTH - HORIZONTAL_LENGTH * TOTAL_NUMBER));
+    EXPECT_TRUE(IsEqualCurrentPosition(DEVICE_WIDTH - ITEM_WIDTH * TOTAL_LINE_NUMBER));
 
     /**
      * @tc.steps: step11. Test ScrollPage
@@ -835,7 +835,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionController002, TestSize.Level1)
      * @tc.steps: step12. Test IsAtEnd
      */
     EXPECT_FALSE(controller->IsAtEnd());
-    UpdateCurrentOffset(-(HORIZONTAL_LENGTH * TOTAL_NUMBER - DEVICE_WIDTH));
+    UpdateCurrentOffset(-(ITEM_WIDTH * TOTAL_LINE_NUMBER - DEVICE_WIDTH));
     EXPECT_TRUE(controller->IsAtEnd());
 }
 
@@ -852,7 +852,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionControlle003, TestSize.Level1)
     /**
      * @tc.steps: step1. Test AnimateTo
      */
-    bool animate = controller->AnimateTo(Dimension(VERTICAL_LENGTH * TOTAL_NUMBER), 1.f, Curves::LINEAR, false);
+    bool animate = controller->AnimateTo(Dimension(ITEM_HEIGHT * TOTAL_LINE_NUMBER), 1.f, Curves::LINEAR, false);
     EXPECT_FALSE(animate);
 
     /**
@@ -1011,7 +1011,7 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation003, TestSize.Level1)
     auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
     pattern_->SetScrollBar(DisplayMode::ON);
     EXPECT_TRUE(scrollBar->NeedPaint());
-    EXPECT_TRUE(NearEqual(scrollBar->GetActiveRect().Height(), 666.667f));
+    EXPECT_EQ(scrollBar->GetActiveRect().Height(), DEVICE_HEIGHT * VIEW_LINE_NUMBER / TOTAL_LINE_NUMBER);
 
     /**
      * @tc.steps: step1. change scrollBar height.
@@ -1033,7 +1033,7 @@ HWTEST_F(ScrollTestNg, SpringEffect001, TestSize.Level1)
     auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
     springEffect->ProcessScrollOver(0.0);
 
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING); });
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
     springEffect = AceType::DynamicCast<ScrollSpringEffect>(pattern_->GetScrollEdgeEffect());
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     springEffect->SetScrollable(scrollable);
@@ -1086,7 +1086,7 @@ HWTEST_F(ScrollTestNg, ScrollTest003, TestSize.Level1)
      * @tc.steps: step1. Set ScrollSpringEffect and call relevant callback functions.
      * @tc.expected: Check whether the return value is correct.
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING); });
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
     EXPECT_EQ(pattern_->scrollableDistance_, VERTICAL_SCROLLABLE_DISTANCE);
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEdgeEffect);
@@ -1141,8 +1141,8 @@ HWTEST_F(ScrollTestNg, ScrollTest003, TestSize.Level1)
      * @tc.expected: return 0.0
      */
     Create([](ScrollModelNG model) {
-        model.SetEdgeEffect(EdgeEffect::SPRING);
-        CreateContent(VIEW_NUMBER);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        CreateContent(VIEW_LINE_NUMBER);
     });
     EXPECT_EQ(pattern_->scrollableDistance_, 0);
     scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
@@ -1237,7 +1237,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     /**
      * @tc.steps: step3. When EdgeEffect::SPRING, Test ValidateOffset
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING); });
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
     EXPECT_FALSE(pattern_->IsRestrictBoundary());
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_JUMP));
     EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_BAR));
@@ -1251,7 +1251,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     pattern_->currentOffset_ = -1000.f;
     pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(),
-        -pattern_->currentOffset_ - (VERTICAL_LENGTH * TOTAL_NUMBER - DEVICE_HEIGHT));
+        -pattern_->currentOffset_ - (ITEM_HEIGHT * TOTAL_LINE_NUMBER - DEVICE_HEIGHT));
 
     pattern_->currentOffset_ = -100.f;
     pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
@@ -1265,7 +1265,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollFadeEffect001, TestSize.Level1)
 {
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE); });
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE, true); });
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     scrollEdgeEffect->SetScrollable(scrollable);
@@ -1316,42 +1316,42 @@ HWTEST_F(ScrollTestNg, ScrollFadeEffect001, TestSize.Level1)
      * @tc.steps: step5. Call CalculateOverScroll()
      */
     // minExtent:  0
-    // maxExtent: VERTICAL_LENGTH * 2
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(VERTICAL_LENGTH, true), 0.0));
+    // maxExtent: ITEM_HEIGHT * 2
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-VERTICAL_LENGTH, true), 0.0));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT, true), 0.0));
 
-    UpdateCurrentOffset(-VERTICAL_LENGTH);
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(VERTICAL_LENGTH * 2, true), 0.0));
+    UpdateCurrentOffset(-ITEM_HEIGHT);
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT * 2, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-VERTICAL_LENGTH * 2, true), 0.0));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT * 2, true), 0.0));
 
-    UpdateCurrentOffset(-VERTICAL_LENGTH);
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(VERTICAL_LENGTH, true), 0.0));
+    UpdateCurrentOffset(-ITEM_HEIGHT);
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-VERTICAL_LENGTH, true), 0.0));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT, true), 0.0));
 
-    pattern_->currentOffset_ = VERTICAL_LENGTH;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(VERTICAL_LENGTH, true), -VERTICAL_LENGTH));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), -VERTICAL_LENGTH));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-VERTICAL_LENGTH * 2, true), 0.0));
+    pattern_->currentOffset_ = ITEM_HEIGHT;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, true), -ITEM_HEIGHT));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), -ITEM_HEIGHT));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT * 2, true), 0.0));
 
-    pattern_->currentOffset_ = -VERTICAL_LENGTH;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(VERTICAL_LENGTH * 2, true), 0.0));
+    pattern_->currentOffset_ = -ITEM_HEIGHT;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT * 2, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-VERTICAL_LENGTH, true), 0.0));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT, true), 0.0));
 
     // over scroll
-    pattern_->currentOffset_ = -VERTICAL_LENGTH * 3;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(VERTICAL_LENGTH * 2, true), VERTICAL_LENGTH));
+    pattern_->currentOffset_ = -ITEM_HEIGHT * 3;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT * 2, true), ITEM_HEIGHT));
 
     // crash the bottom
-    pattern_->currentOffset_ = -VERTICAL_LENGTH * 3;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(VERTICAL_LENGTH, true), VERTICAL_LENGTH));
-    pattern_->currentOffset_ = -VERTICAL_LENGTH * 3;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(VERTICAL_LENGTH, false), 0.0));
-    pattern_->currentOffset_ = -VERTICAL_LENGTH * 3;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(VERTICAL_LENGTH * 3, false), 0.0));
+    pattern_->currentOffset_ = -ITEM_HEIGHT * 3;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, true), ITEM_HEIGHT));
+    pattern_->currentOffset_ = -ITEM_HEIGHT * 3;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, false), 0.0));
+    pattern_->currentOffset_ = -ITEM_HEIGHT * 3;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT * 3, false), 0.0));
 }
 
 /**
@@ -1361,7 +1361,7 @@ HWTEST_F(ScrollTestNg, ScrollFadeEffect001, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollFadeEffect002, TestSize.Level1)
 {
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE); });
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE, true); });
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     auto scrollFadeEffect = AceType::DynamicCast<ScrollFadeEffect>(scrollEdgeEffect);
     scrollFadeEffect->InitialEdgeEffect();
@@ -1730,7 +1730,7 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
      * @tc.expected: Verify bar rect
      */
     const float barWidth = 10.f;
-    const float ratio = static_cast<float>(VIEW_NUMBER) / TOTAL_NUMBER;
+    const float ratio = static_cast<float>(VIEW_LINE_NUMBER) / TOTAL_LINE_NUMBER;
     CreateWithContent([barWidth](ScrollModelNG model) {
         model.SetScrollBarWidth(Dimension(barWidth));
     });
@@ -1745,11 +1745,11 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
     );
     EXPECT_TRUE(IsEqual(rect, expectRect));
 
-    UpdateCurrentOffset(-VERTICAL_LENGTH);
+    UpdateCurrentOffset(-ITEM_HEIGHT);
     rect = scrollBar->touchRegion_;
     expectRect = Rect(
         DEVICE_WIDTH - barWidth,
-        VERTICAL_LENGTH * ratio,
+        ITEM_HEIGHT * ratio,
         barWidth,
         DEVICE_HEIGHT * ratio
     );
@@ -1774,10 +1774,10 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
     );
     EXPECT_TRUE(IsEqual(rect, expectRect));
 
-    UpdateCurrentOffset(-HORIZONTAL_LENGTH);
+    UpdateCurrentOffset(-ITEM_WIDTH);
     rect = scrollBar->touchRegion_;
     expectRect = Rect(
-        HORIZONTAL_LENGTH * ratio,
+        ITEM_WIDTH * ratio,
         DEVICE_HEIGHT - barWidth,
         DEVICE_WIDTH * ratio,
         barWidth
@@ -1887,7 +1887,7 @@ HWTEST_F(ScrollTestNg, Measure001, TestSize.Level1)
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
     auto scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
-    auto expectSize = SizeF(DEVICE_WIDTH, VERTICAL_LENGTH * TOTAL_NUMBER);
+    auto expectSize = SizeF(DEVICE_WIDTH, ITEM_HEIGHT * TOTAL_LINE_NUMBER);
     EXPECT_EQ(scrollSize, expectSize) << "scrollSize: " << scrollSize.ToString()
                                       << " expectSize: " << expectSize.ToString();
 }
@@ -1922,7 +1922,7 @@ HWTEST_F(ScrollTestNg, OnScrollCallback001, TestSize.Level1)
      * @tc.expected: Do nothing
      */
     CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::NONE); });
-    EXPECT_FALSE(OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE));
+    EXPECT_FALSE(OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_UPDATE));
 
     /**
      * @tc.steps: step2. animator_ is running and SCROLL_FROM_UPDATE
@@ -1931,7 +1931,7 @@ HWTEST_F(ScrollTestNg, OnScrollCallback001, TestSize.Level1)
     CreateWithContent();
     pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Resume();
-    EXPECT_FALSE(OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_UPDATE));
+    EXPECT_FALSE(OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_UPDATE));
 }
 
 /**
@@ -1950,7 +1950,7 @@ HWTEST_F(ScrollTestNg, OnScrollCallback002, TestSize.Level1)
         OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
         model.SetOnScrollStart(std::move(event));
     });
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_START);
+    OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_START);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -1960,7 +1960,7 @@ HWTEST_F(ScrollTestNg, OnScrollCallback002, TestSize.Level1)
     isTrigger = false;
     pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Stop();
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_START);
+    OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_START);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -1971,7 +1971,7 @@ HWTEST_F(ScrollTestNg, OnScrollCallback002, TestSize.Level1)
     pattern_->animator_->Resume();
     auto scrollable = pattern_->scrollableEvent_->GetScrollable();
     auto onScrollCallback = scrollable->callback_;
-    onScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_START);
+    onScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_START);
     EXPECT_TRUE(pattern_->animator_->IsStopped());
     EXPECT_FALSE(isTrigger);
 }
@@ -1985,10 +1985,10 @@ HWTEST_F(ScrollTestNg, OnScrollCallback003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create the content that total size is bigger than Scroll Component
-     * @tc.expected: The scrollableDistance_ is two of VERTICAL_LENGTH
+     * @tc.expected: The scrollableDistance_ is two of ITEM_HEIGHT
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING); });
-    EXPECT_EQ(pattern_->scrollableDistance_, VERTICAL_LENGTH * 2);
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    EXPECT_EQ(pattern_->scrollableDistance_, ITEM_HEIGHT * 2);
 
     /**
      * @tc.steps: step2. scroll to above of content
@@ -2022,7 +2022,7 @@ HWTEST_F(ScrollTestNg, OnScrollCallback003, TestSize.Level1)
     /**
      * @tc.steps: step6. Scroll to bottom for test other condition
      */
-    float scrollableDistance = VERTICAL_LENGTH * 2;
+    float scrollableDistance = ITEM_HEIGHT * 2;
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
     EXPECT_TRUE(IsEqualCurrentPosition(-scrollableDistance));
 
@@ -2077,8 +2077,8 @@ HWTEST_F(ScrollTestNg, OnScrollCallback004, TestSize.Level1)
      * @tc.expected: The scrollableDistance_ is 0
      */
     Create([](ScrollModelNG model) {
-        model.SetEdgeEffect(EdgeEffect::SPRING);
-        CreateContent(VIEW_NUMBER);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        CreateContent(VIEW_LINE_NUMBER);
     });
     EXPECT_EQ(pattern_->scrollableDistance_, 0);
 
@@ -2154,7 +2154,7 @@ HWTEST_F(ScrollTestNg, OnScrollCallback004, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, OnScrollCallback005, TestSize.Level1)
 {
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING); });
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
 
     /**
      * @tc.steps: step1. The delta is 0
@@ -2167,15 +2167,15 @@ HWTEST_F(ScrollTestNg, OnScrollCallback005, TestSize.Level1)
      * @tc.steps: step2. The source is SCROLL_FROM_ANIMATION
      * @tc.expected: AdjustOffset return
      */
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_ANIMATION);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH));
+    OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
 
     /**
      * @tc.steps: step3. The source is SCROLL_FROM_ANIMATION_SPRING
      * @tc.expected: AdjustOffset return
      */
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_ANIMATION_SPRING);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH * 2));
+    OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT * 2));
 
     /**
      * @tc.steps: step4. The viewPortLength_ is 0
@@ -2183,11 +2183,11 @@ HWTEST_F(ScrollTestNg, OnScrollCallback005, TestSize.Level1)
      */
     ScrollModelNG model;
     model.Create();
-    model.SetEdgeEffect(EdgeEffect::SPRING);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
     GetInstance();
     RunMeasureAndLayout(frameNode_, -1, -1);
-    OnScrollCallback(-VERTICAL_LENGTH, SCROLL_FROM_ANIMATION_SPRING);
-    EXPECT_TRUE(IsEqualCurrentPosition(-VERTICAL_LENGTH));
+    OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
 }
 
 /**
@@ -2203,8 +2203,8 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
      */
     CreateWithContent();
     EXPECT_TRUE(ScrollToNode(5, 0));
-    EXPECT_TRUE(ScrollToNode(10, -1));
-    EXPECT_TRUE(ScrollToNode(11, -2));
+    EXPECT_TRUE(ScrollToNode(8, -1));
+    EXPECT_TRUE(ScrollToNode(9, -2));
     EXPECT_TRUE(ScrollToNode(5, -2));
     EXPECT_TRUE(ScrollToNode(0, 0));
 
@@ -2214,8 +2214,8 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
      */
     CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::HORIZONTAL); });
     EXPECT_TRUE(ScrollToNode(5, 0));
-    EXPECT_TRUE(ScrollToNode(10, -1));
-    EXPECT_TRUE(ScrollToNode(11, -2));
+    EXPECT_TRUE(ScrollToNode(8, -1));
+    EXPECT_TRUE(ScrollToNode(9, -2));
     EXPECT_TRUE(ScrollToNode(5, -2));
     EXPECT_TRUE(ScrollToNode(0, 0));
 
@@ -2265,58 +2265,58 @@ HWTEST_F(ScrollTestNg, Test001, TestSize.Level1)
 {
     CreateWithContent();
 
-    OverScrollOffset offset = pattern_->GetOverScrollOffset(VERTICAL_LENGTH);
-    OverScrollOffset expectOffset = { VERTICAL_LENGTH, 0 };
+    OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
+    OverScrollOffset expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(0.f);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
-    offset = pattern_->GetOverScrollOffset(-VERTICAL_LENGTH);
+    offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
 
-    pattern_->currentOffset_ = -VERTICAL_LENGTH;
-    offset = pattern_->GetOverScrollOffset(VERTICAL_LENGTH * 2);
-    expectOffset = { VERTICAL_LENGTH, 0 };
+    pattern_->currentOffset_ = -ITEM_HEIGHT;
+    offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2);
+    expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(0.f);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
-    offset = pattern_->GetOverScrollOffset(-VERTICAL_LENGTH * 2);
-    expectOffset = { 0, -VERTICAL_LENGTH };
+    offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT * 2);
+    expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
 
-    pattern_->currentOffset_ = -VERTICAL_LENGTH * 2;
-    offset = pattern_->GetOverScrollOffset(VERTICAL_LENGTH);
+    pattern_->currentOffset_ = -ITEM_HEIGHT * 2;
+    offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(0.f);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
-    offset = pattern_->GetOverScrollOffset(-VERTICAL_LENGTH);
-    expectOffset = { 0, -VERTICAL_LENGTH };
+    offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
+    expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
 
-    pattern_->currentOffset_ = VERTICAL_LENGTH;
-    offset = pattern_->GetOverScrollOffset(VERTICAL_LENGTH);
-    expectOffset = { VERTICAL_LENGTH, 0 };
+    pattern_->currentOffset_ = ITEM_HEIGHT;
+    offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
+    expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(0.f);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
-    offset = pattern_->GetOverScrollOffset(-VERTICAL_LENGTH * 2);
-    expectOffset = { -VERTICAL_LENGTH, 0 };
+    offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT * 2);
+    expectOffset = { -ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
 
-    pattern_->currentOffset_ = -VERTICAL_LENGTH * 3;
-    offset = pattern_->GetOverScrollOffset(VERTICAL_LENGTH * 2);
-    expectOffset = { 0, VERTICAL_LENGTH };
+    pattern_->currentOffset_ = -ITEM_HEIGHT * 3;
+    offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2);
+    expectOffset = { 0, ITEM_HEIGHT };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(0.f);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
-    offset = pattern_->GetOverScrollOffset(-VERTICAL_LENGTH);
-    expectOffset = { 0, -VERTICAL_LENGTH };
+    offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
+    expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
 }
 
@@ -2349,7 +2349,7 @@ HWTEST_F(ScrollTestNg, AccessibilityProperty001, TestSize.Level1)
      * @tc.steps: step3. scroll to middle
      * @tc.expected: action is correct
      */
-    UpdateCurrentOffset(-VERTICAL_LENGTH);
+    UpdateCurrentOffset(-ITEM_HEIGHT);
     accessibilityProperty_->ResetSupportAction();
     expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
@@ -2360,7 +2360,7 @@ HWTEST_F(ScrollTestNg, AccessibilityProperty001, TestSize.Level1)
      * @tc.steps: step4. scroll to bottom
      * @tc.expected: action is correct
      */
-    UpdateCurrentOffset(-VERTICAL_LENGTH);
+    UpdateCurrentOffset(-ITEM_HEIGHT);
     accessibilityProperty_->ResetSupportAction();
     expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
@@ -2738,6 +2738,66 @@ HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
      * @tc.expected: Return actual Rect when input valid index.
      */
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0),
-        Rect(0, 0, TOTAL_NUMBER * HORIZONTAL_LENGTH, FILL_LENGTH.Value() * DEVICE_HEIGHT)));
+        Rect(0, 0, TOTAL_LINE_NUMBER * ITEM_WIDTH, FILL_LENGTH.Value() * DEVICE_HEIGHT)));
+}
+
+/**
+ * @tc.name: EdgeEffectOption001
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, EdgeEffectOption001, TestSize.Level1)
+{
+    Create([](ScrollModelNG model) {
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+        CreateContent(VIEW_LINE_NUMBER);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_FALSE(pattern_->GetScrollableEvent()->GetEnable());
+}
+
+/**
+ * @tc.name: EdgeEffectOption002
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, EdgeEffectOption002, TestSize.Level1)
+{
+    Create([](ScrollModelNG model) {
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        CreateContent(VIEW_LINE_NUMBER);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnable());
+}
+
+/**
+ * @tc.name: EdgeEffectOption003
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, EdgeEffectOption003, TestSize.Level1)
+{
+    Create([](ScrollModelNG model) {
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+        CreateContent(20); // 20 is childNumber.
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnable());
+}
+
+/**
+ * @tc.name: EdgeEffectOption004
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, EdgeEffectOption004, TestSize.Level1)
+{
+    Create([](ScrollModelNG model) {
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        CreateContent(20); // 20 is childNumber.
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnable());
 }
 } // namespace OHOS::Ace::NG

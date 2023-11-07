@@ -338,17 +338,10 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
 #endif
 {
     const auto& src = imageSourceInfo.GetSrc();
-#ifndef USE_ROSEN_DRAWING
-    auto skData = ImageLoader::LoadDataFromCachedFile(src);
-    if (skData) {
-        return skData;
-    }
-#else
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src);
     if (drawingData) {
         return drawingData;
     }
-#endif
     auto pipeline = context.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dataProvider = pipeline->GetDataProviderManager();
@@ -358,6 +351,7 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
 #ifndef USE_ROSEN_DRAWING
     auto data = SkData::MakeFromMalloc(res->GetData().release(), res->GetSize());
 #else
+    // function is ok, just pointer cast from SKData to RSData
     auto skData = SkData::MakeFromMalloc(res->GetData().release(), res->GetSize());
     CHECK_NULL_RETURN(skData, nullptr);
     auto data = std::make_shared<RSData>();

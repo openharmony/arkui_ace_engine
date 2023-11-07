@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -328,7 +327,11 @@ float ListItemPattern::CalculateFriction(float gamma)
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
     }
-    return ratio * std::pow(1.0 - gamma, SQUARE);
+    float result = ratio * std::pow(1.0 - gamma, SQUARE);
+    if (!std::isnan(result) && LessNotEqual(result, 1.0f)) {
+        return result;
+    }
+    return 1.0f;
 }
 
 float ListItemPattern::GetFriction()
@@ -830,12 +833,20 @@ void ListItemPattern::InitDisableEvent()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(theme);
+    auto UserDefineOpacity = renderContext->GetOpacityValue(1.0);
 
-    if (!eventHub->IsEnabled()) {
+    if (!eventHub->IsDeveloperEnabled()) {
         if (selectable_) {
             selectable_ = false;
         }
+        enableOpacity_ = renderContext->GetOpacityValue(1.0);
         renderContext->UpdateOpacity(theme->GetItemDisabledAlpha());
+    } else {
+        if (enableOpacity_.has_value()) {
+            renderContext->UpdateOpacity(enableOpacity_.value());
+        } else {
+            renderContext->UpdateOpacity(UserDefineOpacity);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

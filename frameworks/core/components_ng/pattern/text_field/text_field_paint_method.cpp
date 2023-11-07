@@ -90,6 +90,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         auto searchField = DynamicCast<SearchTextFieldPattern>(textFieldPattern);
         if (searchField) {
             auto parentFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
+            CHECK_NULL_VOID(parentFrameNode);
             auto searchPattern = parentFrameNode->GetPattern<SearchPattern>();
             CHECK_NULL_VOID(searchPattern);
             auto textFieldOffset = searchPattern->GetTextFieldOffset();

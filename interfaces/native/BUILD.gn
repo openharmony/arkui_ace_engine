@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-if (!is_cross_platform_build) {
+if (!is_arkui_x) {
   ohos_ndk_headers("ace_header") {
     dest_dir = "$ndk_headers_out_dir/ace/xcomponent/"
     sources = [

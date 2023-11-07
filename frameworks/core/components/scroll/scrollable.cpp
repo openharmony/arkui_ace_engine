@@ -598,6 +598,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, position is %{public}lf and %{public}lf, "
         "velocity is %{public}lf",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
+    isTouching_ = false;
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
     scrollSnapController_->ClearAllListeners();

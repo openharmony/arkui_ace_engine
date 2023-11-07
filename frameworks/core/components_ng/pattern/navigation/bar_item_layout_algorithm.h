@@ -34,16 +34,6 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void SetBarItemMaxWidth(float width)
-    {
-        barItemMaxWidth_ = width;
-    }
-
-    float GetBarItemMaxWidth() const
-    {
-        return barItemMaxWidth_;
-    }
-
 private:
     void MeasureIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
         const RefPtr<LayoutProperty>& barItemLayoutProperty);
@@ -62,7 +52,6 @@ private:
 
     Dimension iconSize_;
     Dimension menuHeight_;
-    float barItemMaxWidth_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

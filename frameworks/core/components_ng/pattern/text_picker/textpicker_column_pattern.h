@@ -130,7 +130,6 @@ public:
     void SetRange(const std::vector<std::string>& value)
     {
         if (value.empty()) {
-            LOGE("input value of range is empty.");
             return;
         }
         range_ = value;
@@ -166,7 +165,6 @@ public:
     std::string GetOption(uint32_t index) const
     {
         if (index >= GetOptionCount()) {
-            LOGE("index out of range.");
             return "";
         }
         return options_[index].text_;
@@ -209,8 +207,6 @@ public:
     {
         if (EventCallback_) {
             EventCallback_(refresh);
-        } else {
-            LOGE("event callback is null.");
         }
     }
 
@@ -254,8 +250,6 @@ public:
     {
         if (changeCallback_) {
             changeCallback_(GetHost(), isAdd, GetCurrentIndex(), needNotify);
-        } else {
-            LOGE("change callback is null.");
         }
     }
 

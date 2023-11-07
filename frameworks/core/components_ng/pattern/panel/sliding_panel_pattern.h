@@ -78,6 +78,7 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);

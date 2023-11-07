@@ -593,7 +593,6 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index, uint32_t showCount, bool isDown, double scale)
 {
     if (index >= animationProperties_.size()) {
-        LOGE("Animation Properties vactor is break.");
         return;
     }
     Dimension startFontSize = animationProperties_[index].fontSize;
@@ -669,9 +668,11 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 {
     CHECK_NULL_VOID(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
-        LOGI("Pan event start");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
+            return;
+        }
         pattern->HandleDragStart(event);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
@@ -681,7 +682,6 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
@@ -691,7 +691,6 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
@@ -719,11 +718,11 @@ void TimePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 
 void TimePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
-    animationBreak_ = false;
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
-        InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
+        InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0), true);
         return;
     }
+    animationBreak_ = false;
     CHECK_NULL_VOID(pressed_);
     CHECK_NULL_VOID(GetHost());
     CHECK_NULL_VOID(GetToss());
@@ -1093,23 +1092,6 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
 
-    auto textNodes = host->GetChildren();
-    TimePickerScrollDirection dir = isDown ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
-    if (dir == TimePickerScrollDirection::UP) {
-        for (auto iter = textNodes.begin(); iter != (--textNodes.end()); iter++) {
-            auto curNode = DynamicCast<FrameNode>(*iter);
-            auto shiftIter = std::next(iter, 1);
-            auto shiftNode = DynamicCast<FrameNode>(*shiftIter);
-            ShiftOptionProp(curNode, shiftNode);
-        }
-    } else {
-        for (auto iter = textNodes.rbegin(); iter != (--textNodes.rend()); iter++) {
-            auto curNode = DynamicCast<FrameNode>(*iter);
-            auto shiftIter = std::next(iter, 1);
-            auto shiftNode = DynamicCast<FrameNode>(*shiftIter);
-            ShiftOptionProp(curNode, shiftNode);
-        }
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     return true;
 }

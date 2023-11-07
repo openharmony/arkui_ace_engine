@@ -167,8 +167,6 @@ public:
     {
         if (changeCallback_) {
             changeCallback_(GetHost(), isAdd, GetCurrentIndex(), needNotify);
-        } else {
-            LOGE("change callback is null.");
         }
     }
 
@@ -186,8 +184,6 @@ public:
     {
         if (EventCallback_) {
             EventCallback_(refresh);
-        } else {
-            LOGE("event callback is null.");
         }
     }
 

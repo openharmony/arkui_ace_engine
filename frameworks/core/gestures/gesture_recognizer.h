@@ -24,7 +24,7 @@
 
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace {
 

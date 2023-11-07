@@ -27,7 +27,7 @@ template("declarative_frontend") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
 
-    if (platform == "ohos_ng" || is_cross_platform_build) {
+    if (platform == "ohos_ng" || is_arkui_x) {
       sources = [
         "ng/declarative_frontend_ng.cpp",
         "ng/frontend_delegate_declarative_ng.cpp",
@@ -97,7 +97,7 @@ gen_obj("ark_component") {
   snapshot_dep = []
 }
 
-if (!is_cross_platform_build) {
+if (!is_arkui_x) {
   gen_obj("js_mock_system_plugin") {
     input = "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js"
     if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
@@ -452,7 +452,7 @@ template("declarative_js_engine") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         sources += [
           "jsview/js_web.cpp",
           "jsview/models/web_model_impl.cpp",
@@ -520,7 +520,7 @@ template("declarative_js_engine") {
       deps += [ "$ace_root/build:libace_compatible" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        if (is_cross_platform_build) {
+        if (is_arkui_x) {
           deps += [ "$ace_napi:ace_container_scope_static" ]
         } else {
           deps += [ "$ace_napi:ace_container_scope" ]
@@ -540,7 +540,7 @@ template("declarative_js_engine") {
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
       if (defined(config.pixel_map_support) && config.pixel_map_support) {
@@ -819,7 +819,7 @@ template("declarative_js_engine_ng") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      if (!is_cross_platform_build) {
+      if (!is_arkui_x) {
         sources += [
           "jsview/js_richtext.cpp",
           "jsview/js_web.cpp",
@@ -873,7 +873,7 @@ template("declarative_js_engine_ng") {
     }
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       sources -= [
         "interfaces/profiler/js_profiler.cpp",
         "jsview/js_location_button.cpp",

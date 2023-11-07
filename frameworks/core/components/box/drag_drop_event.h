@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_DRAG_DROP_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_DRAG_DROP_EVENT_H
 
+#include "core/gestures/drag_event.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/base/memory/ace_type.h"
 #include "frameworks/base/window/drag_window.h"
-#include "frameworks/core/gestures/gesture_info.h"
 #include "frameworks/core/gestures/gesture_recognizer.h"
 #include "frameworks/core/common/clipboard/clipboard_proxy.h"
 

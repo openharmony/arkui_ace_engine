@@ -68,7 +68,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Image Load Success %{public}s", sourceInfo.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Image Load Success %{public}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
 }
@@ -235,6 +235,21 @@ void ImagePattern::SetImagePaintConfig(
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = isSvg;
 
+    auto host = GetHost();
+    if (!host) {
+        canvasImage->SetPaintConfig(config);
+        return;
+    }
+    auto renderContext = host->GetRenderContext();
+    if (!renderContext || !renderContext->HasBorderRadius()) {
+        canvasImage->SetPaintConfig(config);
+        return;
+    }
+
+    auto renderProps = host->GetPaintProperty<ImageRenderProperty>();
+    if (renderProps) {
+        renderProps->UpdateNeedBorderRadius(true);
+    }
     canvasImage->SetPaintConfig(config);
 }
 
@@ -284,7 +299,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     loadingCtx_->LoadImageData();
 }
 
@@ -342,15 +357,21 @@ void ImagePattern::OnModifyDone()
     CHECK_NULL_VOID(host);
 
     auto gestureHub = host->GetOrCreateGestureEventHub();
-    gestureHub->SetLongPressEvent(nullptr);
-    longPressEvent_ = nullptr;
+    if (longPressEvent_) {
+        gestureHub->SetLongPressEvent(nullptr);
+        longPressEvent_ = nullptr;
+    }
 
-    gestureHub->RemoveClickEvent(clickEvent_);
-    clickEvent_ = nullptr;
+    if (clickEvent_) {
+        gestureHub->RemoveClickEvent(clickEvent_);
+        clickEvent_ = nullptr;
+    }
 
-    auto inputHub = host->GetOrCreateInputEventHub();
-    inputHub->RemoveOnMouseEvent(mouseEvent_);
-    mouseEvent_ = nullptr;
+    if (mouseEvent_) {
+        auto inputHub = host->GetOrCreateInputEventHub();
+        inputHub->RemoveOnMouseEvent(mouseEvent_);
+        mouseEvent_ = nullptr;
+    }
 }
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
@@ -654,7 +675,6 @@ void ImagePattern::OpenSelectOverlay()
     CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "Opening select overlay");
     selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info, WeakClaim(this));
 
     // paint selected mask effect
@@ -667,7 +687,6 @@ void ImagePattern::CloseSelectOverlay()
         return;
     }
     if (!selectOverlay_->IsClosed()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "closing select overlay");
         selectOverlay_->Close();
     }
     selectOverlay_ = nullptr;
