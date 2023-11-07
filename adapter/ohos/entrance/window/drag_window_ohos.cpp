@@ -614,12 +614,12 @@ void DragWindowOhos::DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const Re
         path.LineTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
             textPattern->GetStartOffset().GetY() - globalOffset.GetY());
     }
-#endif
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
     auto recordingCanvas = canvasNode->BeginRecording(width_, height_);
-    paragraph->Paint(recordingCanvas, textPattern->GetTextContentRect().GetX(),
+    paragraph->Paint(*recordingCanvas, textPattern->GetTextContentRect().GetX(),
         textPattern->GetTextContentRect().GetY() - std::min(textPattern->GetBaselineOffset(), 0.0f));
+#endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 
