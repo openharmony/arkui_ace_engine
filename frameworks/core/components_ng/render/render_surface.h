@@ -79,6 +79,12 @@ public:
 
     virtual void SetSurfaceDefaultSize(int32_t width, int32_t height) {}
 
+    virtual void SetWebMessage(OffsetF offset) {}
+
+    virtual void SetPatternType(const std::string& type) {}
+
+    virtual void SetSurfaceQueueSize(int32_t queueSize) {}
+
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };
