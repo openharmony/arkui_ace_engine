@@ -1197,6 +1197,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             auto lastPage = stageManager_->GetLastPage();
             if (params.size() < USED_ID_FIND_FLAG && lastPage) {
                 lastPage->DumpTree(0);
+                DumpLog::GetInstance().OutPutBySize();
             }
             if (params.size() == USED_ID_FIND_FLAG && lastPage && !lastPage->DumpTreeById(0, params[2])) {
                 DumpLog::GetInstance().Print(
