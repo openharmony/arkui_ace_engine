@@ -1,0 +1,21 @@
+{
+    "files": [
+        "src/ArkComponent.ts",
+        "src/ArkButton.ts",
+        "src/ArkColor.ts",
+    ],
+
+    "compilerOptions": {
+        "module": "none",
+        "target": "ES2016",
+        "outDir": "../engine/",
+        "outFile": "../engine/arkComponent.js",
+        "rootDir": "./src/",
+        "declaration": false,
+        "noEmitOnError": true,
+        "experimentalDecorators": true,
+        "lib": [
+            "ES2016"
+        ],
+    }
+}
