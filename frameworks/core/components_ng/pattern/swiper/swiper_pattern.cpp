@@ -3276,13 +3276,13 @@ void SwiperPattern::DumpAdvanceInfo()
 {
     isLastIndicatorFocused_ ? DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:true")
                             : DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:false");
-    moveDirection_ ? DumpLog::GetInstance().AddDesc("moveDirection:false")
-                   : DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:false");
+    moveDirection_ ? DumpLog::GetInstance().AddDesc("moveDirection:true")
+                   : DumpLog::GetInstance().AddDesc("moveDirection:false");
     indicatorDoingAnimation_ ? DumpLog::GetInstance().AddDesc("indicatorDoingAnimation:true")
                              : DumpLog::GetInstance().AddDesc("indicatorDoingAnimation:false");
     isInit_ ? DumpLog::GetInstance().AddDesc("isInit:true") : DumpLog::GetInstance().AddDesc("isInit:false");
     hasVisibleChangeRegistered_ ? DumpLog::GetInstance().AddDesc("hasVisibleChangeRegistered:true")
-                                : DumpLog::GetInstance().AddDesc("hasVisibleChangeRegistered_:false");
+                                : DumpLog::GetInstance().AddDesc("hasVisibleChangeRegistered:false");
     isVisible_ ? DumpLog::GetInstance().AddDesc("isVisible:true") : DumpLog::GetInstance().AddDesc("isVisible:false");
     isVisibleArea_ ? DumpLog::GetInstance().AddDesc("isVisibleArea:true")
                    : DumpLog::GetInstance().AddDesc("isVisibleArea:false");
@@ -3346,7 +3346,7 @@ void SwiperPattern::DumpAdvanceInfo()
                                     "surfaceChangedCallbackId:" + std::to_string(surfaceChangedCallbackId_.value()))
                               : DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:null");
     lastSwiperIndicatorType_ ? DumpLog::GetInstance().AddDesc(
-                                   "surfaceChangedCallbackId:" + std::to_string(surfaceChangedCallbackId_.value()))
+                                   "lastSwiperIndicatorType:" + std::to_string(surfaceChangedCallbackId_.value()))
                              : DumpLog::GetInstance().AddDesc("lastSwiperIndicatorType:null");
     DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(startIndex_));
     DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(endIndex_));
