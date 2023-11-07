@@ -155,6 +155,7 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
         TAG_LOGW(AceLogTag::ACE_FONT, "can not get delegate.");
         return nullptr;
     }
+    TAG_LOGI(AceLogTag::ACE_FONT, "begin to register font.");
     delegate->RegisterFont(familyName, familySrc);
     return nullptr;
 }
