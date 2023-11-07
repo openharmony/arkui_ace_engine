@@ -657,6 +657,8 @@ void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
     }
 }
 
+void PipelineBase::ContainerModalUnFocus() {}
+
 Rect PipelineBase::GetCurrentWindowRect() const
 {
     if (window_) {
