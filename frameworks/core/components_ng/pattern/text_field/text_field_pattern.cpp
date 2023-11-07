@@ -4285,27 +4285,26 @@ void TextFieldPattern::TextIsEmptyRect(RectF& rect)
     rect = selectController_->CalculateEmptyValueCaretRect();
 }
 
-void TextFieldPattern::UpdateRectByAlignment(RectF& rect)
+void TextFieldPattern::UpdateRectByTextAlign(RectF& rect)
 {
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto alignment = layoutProperty->GetPositionProperty()
-                         ? layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER)
-                         : Alignment::CENTER;
-    if (alignment == Alignment::CENTER_LEFT || alignment == Alignment::CENTER || alignment == Alignment::CENTER_RIGHT) {
-        rect.SetTop(frameRect_.Height() / 2.0f - rect.Height() / 2.0f);
-    } else if (alignment == Alignment::BOTTOM_LEFT || alignment == Alignment::BOTTOM_CENTER ||
-               alignment == Alignment::BOTTOM_RIGHT) {
-        rect.SetTop(frameRect_.Height() - rect.Height());
-    } else if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER ||
-               alignment == Alignment::TOP_RIGHT) {
-        rect.SetTop(0);
-    } else {
+    if (!layoutProperty->HasTextAlign()) {
+        return;
     }
-    if (rect.Height() > contentRect_.Height()) {
-        rect.SetTop(textRect_.GetY());
+    switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+        case TextAlign::START:
+            return;
+        case TextAlign::CENTER:
+            rect.SetLeft(rect.GetOffset().GetX() + (contentRect_.Width() - textRect_.Width()) * 0.5f);
+            return;
+        case TextAlign::END:
+            rect.SetLeft(rect.GetOffset().GetX() + (contentRect_.Width() - textRect_.Width()));
+            return;
+        default:
+            return;
     }
 }
 

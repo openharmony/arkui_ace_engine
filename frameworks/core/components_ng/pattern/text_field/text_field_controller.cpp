@@ -79,21 +79,14 @@ Rect TextFieldController::GetTextContentRect()
         }
     } else {
         RectF rect = textFieldPattern->GetTextRect();
-        auto y = rect.GetY();
-        if (NearEqual(rect.GetY(), 0)) {
-            y = textFieldPattern->GetPaddingTop() + textFieldPattern->GetBorderTop();
+        if (textFieldPattern->IsTextArea()) {
+            textFieldPattern->UpdateRectByTextAlign(rect);
         }
-        textFieldPattern->TextIsEmptyRect(rect);
-        textFieldPattern->TextAreaInputRectUpdate(rect);
-        rect.SetTop(y);
-        textFieldPattern->UpdateRectByAlignment(rect);
         if (textFieldPattern->IsOperation()) {
             return { rect.GetX(), rect.GetY(), rect.Width(), rect.Height() };
         }
-        if (NearEqual(rect.GetX(), -Infinity<float>())) {
-            return { textFieldPattern->GetPaddingLeft(), rect.GetY(), 0, 0 };
-        }
-        return { rect.GetX(), rect.GetY(), 0, 0 };
+        auto controller = textFieldPattern->GetTextSelectController();
+        return { controller->GetCaretRect().GetX(), controller->GetCaretRect().GetY(), 0, 0 };
     }
     return { 0, 0, 0, 0 };
 }

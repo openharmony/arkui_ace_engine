@@ -140,7 +140,7 @@ private:
     void HandleCaretPosition(int32_t caretPosition);
     int32_t HandleGetCaretIndex();
     NG::OffsetF HandleGetCaretPosition();
-    Rect HandleTextContentRect();
+    void HandleTextContentRect(Rect& rect);
     int32_t HandleTextContentLines();
     void StopEditing();
     // Init key event
