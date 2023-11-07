@@ -788,7 +788,7 @@ var SearchType;
   SearchType[SearchType["NORMAL"] = 0] = "NORMAL";
   SearchType[SearchType["NUMBER"] = 2] = "NUMBER";
   SearchType[SearchType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
-  SearchType[SearchType["EMAIL"] = 5] = "EmaEMAILil";
+  SearchType[SearchType["EMAIL"] = 5] = "EMAIL";
 })(SearchType || (SearchType = {}));
 
 var TextAreaType;
