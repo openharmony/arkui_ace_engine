@@ -155,10 +155,10 @@ void JankFrameReport::RecordJankStatus(double jank)
     needReport_ = true;
     frameJankRecord_[GetJankRange(jank)]++;
     if (jank >= 6.0f) {
-        PerfMonitor::GetPerfMonitor()->ReportJankFrameApp(jank);
         jankFrameCount_++;
         ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
     }
+    PerfMonitor::GetPerfMonitor()->ReportJankFrameApp(jank);
 }
 
 void JankFrameReport::RecordPreviousEnd()
