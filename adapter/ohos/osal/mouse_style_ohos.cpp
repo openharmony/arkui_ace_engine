@@ -72,11 +72,7 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
         { MouseFormat::LOADING, MMI::LOADING },
         { MouseFormat::RUNNING, MMI::RUNNING },
     };
-    if (pointerStyle == MouseFormat::CURSOR_NONE) {
-        inputManager->SetPointerVisible(false);
-    } else {
-        inputManager->SetPointerVisible(true);
-    }
+    SetPointerVisible(pointerStyle);
     int32_t MMIPointStyle = MMI::DEFAULT;
     int64_t idx = BinarySearchFindIndex(mouseFormatMap, ArraySize(mouseFormatMap), pointerStyle);
     if (idx >= 0) {
@@ -126,10 +122,21 @@ void MouseStyleOhos::SetMouseIcon(
 {
     auto inputManager = MMI::InputManager::GetInstance();
     if (pointerStyle == MouseFormat::CONTEXT_MENU) {
+        inputManager->SetPointerVisible(true);
         inputManager->SetMouseIcon(windowId, static_cast<void*>(pixelMap.get()));
     } else if (pointerStyle == MouseFormat::ALIAS) {
         inputManager->SetMouseIcon(windowId, static_cast<void*>(pixelMap.get()));
+        inputManager->SetPointerVisible(true);
     }
 }
 
+void MouseStyleOhos::SetPointerVisible(MouseFormat pointerStyle) const
+{
+    auto inputManager = MMI::InputManager::GetInstance();
+    if (pointerStyle != MouseFormat::CURSOR_NONE) {
+        inputManager->SetPointerVisible(true);
+    } else {
+        inputManager->SetPointerVisible(false);
+    }
+}
 } // namespace OHOS::Ace

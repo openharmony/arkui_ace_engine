@@ -78,9 +78,25 @@ void JSList::SetScrollBar(const JSCallbackInfo& info)
     ListModel::GetInstance()->SetScrollBar(static_cast<DisplayMode>(scrollBar));
 }
 
-void JSList::SetEdgeEffect(int32_t edgeEffect)
+void JSList::SetEdgeEffect(const JSCallbackInfo& info)
 {
-    ListModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+    int32_t edgeEffect;
+    if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsInt32(info[0], edgeEffect) ||
+        edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
+        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
+    }
+    ListModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), false);
+
+    if (info.Length() == 2) { // 2 is parameter count
+        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+        if (info[1]->IsNull() || info[1]->IsUndefined()) {
+            return;
+        } else {
+            JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
+            bool alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : false;
+            ListModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+        }
+    }
 }
 
 void JSList::SetEditMode(bool editMode)

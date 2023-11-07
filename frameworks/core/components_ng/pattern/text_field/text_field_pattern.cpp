@@ -4174,7 +4174,7 @@ std::string TextFieldPattern::GetShowResultImageSrc() const
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     auto showImageSource = layoutProperty->GetShowPasswordSourceInfo();
-    if (showImageSource) {
+    if (showImageSource && !showImageSource->GetSrc().empty()) {
         return showImageSource->GetSrc();
     }
     return SHOW_PASSWORD_SVG;
@@ -4187,7 +4187,7 @@ std::string TextFieldPattern::GetHideResultImageSrc() const
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     auto hideSourceInfo = layoutProperty->GetHidePasswordSourceInfo();
-    if (hideSourceInfo) {
+    if (hideSourceInfo && !hideSourceInfo->GetSrc().empty()) {
         return hideSourceInfo->GetSrc();
     }
     return HIDE_PASSWORD_SVG;

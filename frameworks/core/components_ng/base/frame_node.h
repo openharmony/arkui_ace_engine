@@ -565,6 +565,9 @@ public:
         return nullptr;
     }
 
+    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
+
     bool IsFirstBuilding() const
     {
         return isFirstBuilding_;
@@ -614,8 +617,6 @@ private:
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     bool GetTouchable() const;
-    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     void ProcessAllVisibleCallback(
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);

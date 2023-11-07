@@ -58,7 +58,7 @@ public:
     virtual void SetMultiSelectable(bool value) = 0;
     virtual void SetSupportAnimation(bool value) = 0;
     virtual void SetSupportDragAnimation(bool value) = 0;
-    virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;
+    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
     virtual void SetScrollEnabled(bool scrollEnabled) = 0;
     virtual void SetFriction(double friction) = 0;

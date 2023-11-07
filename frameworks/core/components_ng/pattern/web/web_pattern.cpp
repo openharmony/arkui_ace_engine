@@ -2582,11 +2582,8 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
     if (nestedScrollMode_ == NestedScrollMode::PARENT_FIRST) {
         if (offset != 0) {
             auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-            float remainOffset = result.remain;
-            CHECK_NULL_RETURN(delegate_, true);
-            TAG_LOGD(AceLogTag::ACE_WEB, "FilterScrollEvent ScrollBy remainOffset = %{public}f", remainOffset);
-            GetAxis() == Axis::HORIZONTAL ? delegate_->ScrollBy(-remainOffset, 0)
-                                          : delegate_->ScrollBy(0, -remainOffset);
+            TAG_LOGD(AceLogTag::ACE_WEB, "FilterScrollEvent ScrollBy remainOffset = %{public}f", result.remain);
+            return NearZero(result.remain);
         } else {
             HandleScrollVelocity(velocity);
         }

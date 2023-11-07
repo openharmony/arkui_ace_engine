@@ -21,6 +21,7 @@
 
 #include "hisysevent.h"
 
+#include "base/log/ace_trace.h"
 #include "base/json/json_util.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
@@ -336,6 +337,8 @@ void EventReport::ReportEventComplete(DataBase& data)
         EVENT_KEY_ANIMATION_END_LATENCY, static_cast<uint64_t>(animationEndLantency),
         EVENT_KEY_E2E_LATENCY, static_cast<uint64_t>(e2eLatency),
         EVENT_KEY_NOTE, note);
+    ACE_SCOPED_TRACE("INTERACTION_COMPLETED_LATENCY: inputTime(ms)=%lld, e2eLatency(ms)=%lld",
+        static_cast<long long>(inputTime), static_cast<long long>(e2eLatency));
 }
 
 void EventReport::ReportEventJankFrame(DataBase& data)
@@ -374,6 +377,8 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_MAX_FRAMETIME, static_cast<uint64_t>(maxFrameTime),
         EVENT_KEY_MAX_SEQ_MISSED_FRAMES, maxSeqMissedFrames,
         EVENT_KEY_NOTE, note);
+    ACE_SCOPED_TRACE("INTERACTION_APP_JANK: inputTime(ms)=%lld, maxFrameTime(ms)=%lld",
+        static_cast<long long>(startTime), static_cast<long long>(maxFrameTime));
 }
 
 void EventReport::ReportJankFrameApp(JankInfo& info)
@@ -395,5 +400,6 @@ void EventReport::ReportJankFrameApp(JankInfo& info)
         EVENT_KEY_VERSION_CODE, versionCode,
         EVENT_KEY_VERSION_NAME, versionName,
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
+    ACE_SCOPED_TRACE("JANK_FRAME_APP: skipppedFrameTime(ms)=%lld", static_cast<long long>(skippedFrameTime / NS_TO_MS));
 }
 } // namespace OHOS::Ace

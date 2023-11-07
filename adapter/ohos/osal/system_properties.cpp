@@ -45,6 +45,7 @@ constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstac
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
+constexpr int DEFAULT_THRESHOLD_JANK = 15;
 constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
 std::shared_mutex mutex_;
@@ -463,5 +464,10 @@ bool SystemProperties::IsFormAnimationLimited()
 bool SystemProperties::GetResourceDecoupling()
 {
     return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
+}
+
+int32_t SystemProperties::GetJankFrameThreshold()
+{
+    return system::GetIntParameter<int>("persist.sys.arkui.perf.threshold", DEFAULT_THRESHOLD_JANK);
 }
 } // namespace OHOS::Ace

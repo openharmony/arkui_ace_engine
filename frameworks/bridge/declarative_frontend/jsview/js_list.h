@@ -53,7 +53,7 @@ public:
     static void SetDivider(const JSCallbackInfo& args);
     static void SetDirection(int32_t direction);
     static void SetScrollBar(const JSCallbackInfo& info);
-    static void SetEdgeEffect(int32_t edgeEffect);
+    static void SetEdgeEffect(const JSCallbackInfo& info);
     static void SetEditMode(bool editMode);
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetChainAnimation(bool enableChainAnimation);
