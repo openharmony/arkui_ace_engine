@@ -455,6 +455,11 @@ public:
 
     void RestoreDefault() override;
 
+    // for frontend animation interface.
+    void OpenFrontendAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallback);
+    void CloseFrontendAnimation();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

@@ -2853,4 +2853,34 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg062, TestSize.Level1)
     context_->RestoreDefault();
     ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg063
+ * @tc.desc: Test the function OpenFrontendAnimation and CloseFrontendAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg063, TestSize.Level1)
+{
+    decltype(context_->pendingFrontendAnimation_) temp;
+    std::swap(context_->pendingFrontendAnimation_, temp);
+    /**
+     * @tc.steps1: Call CloseFrontAnimation directly.
+     * @tc.expected: No animation is generated. The pending flag stack is empty.
+     */
+    context_->CloseFrontendAnimation();
+    EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 0);
+    /**
+     * @tc.steps2: Call OpenFrontendAnimation.
+     * @tc.expected: A pending flag is pushed to the stack.
+     */
+    AnimationOption option(Curves::EASE, 1000);
+    context_->OpenFrontendAnimation(option, option.GetCurve(), nullptr);
+    EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 1);
+    /**
+     * @tc.steps3: Call CloseFrontendAnimation after OpenFrontendAnimation.
+     * @tc.expected: The pending flag is out of stack.
+     */
+    context_->CloseFrontendAnimation();
+    EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 0);
+}
 } // namespace OHOS::Ace::NG
