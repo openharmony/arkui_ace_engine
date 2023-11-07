@@ -167,4 +167,8 @@ class ArkColor implements Equable{
     fromRGB(red: number, green: number, blue: number) {
         return this.fromARGB(0xff, red, green, blue);
     }
+
+    getColor(): number | undefined{
+        return this.color;
+    }
 }
