@@ -124,7 +124,11 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("shadow", "ShadowStyle.OuterFloatingMD");
     } else {
         jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
-        jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+        if (shadow.GetShadowColorStrategy() == ShadowColorStrategy::AVERAGE) {
+            jsonShadow->Put("color", "ColoringStrategy.AVERAGE");
+        } else {
+            jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+        }
         jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
         jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
         jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());

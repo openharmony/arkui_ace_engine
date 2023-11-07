@@ -45,7 +45,7 @@ union ColorParam {
     uint32_t value;
 };
 
-enum class ForegroundColorStrategy : uint32_t {
+enum class ForegroundColorStrategy : char {
     NONE,
     INVERT,
 };

@@ -3560,16 +3560,22 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 
 bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy)
 {
-    if (!jsValue->IsString()) {
-        return false;
-    }
     if (jsValue->IsString()) {
         std::string colorStr = jsValue->ToString();
-        // Remove all " ".
-        colorStr.erase(std::remove(colorStr.begin(), colorStr.end(), ' '), colorStr.end());
-        std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
         if (colorStr.compare("invert") == 0) {
             strategy = ForegroundColorStrategy::INVERT;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, ShadowColorStrategy& strategy)
+{
+    if (jsValue->IsString()) {
+        std::string colorStr = jsValue->ToString();
+        if (colorStr.compare("average") == 0) {
+            strategy = ShadowColorStrategy::AVERAGE;
             return true;
         }
     }
@@ -5804,6 +5810,8 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
         shadow = Shadow::CreateShadow(style);
         return true;
     }
+    CHECK_NULL_RETURN(jsValue->IsObject(), false);
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     auto argsPtrItem = JsonUtil::ParseJsonString(jsValue->ToString());
     if (!argsPtrItem || argsPtrItem->IsNull()) {
         return false;
@@ -5832,9 +5840,13 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
         }
     }
     Color color;
-    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        shadow.SetColor(color);
+    ShadowColorStrategy shadowColorStrategy;
+    if (ParseJsShadowColorStrategy(jsObj->GetProperty("color"), shadowColorStrategy)) {
+        shadow.SetShadowColorStrategy(shadowColorStrategy);
+    } else if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
+        shadow.SetShadowColorStrategy(ShadowColorStrategy::NONE);
     }
+    shadow.SetColor(color);
     auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
     type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(type));

@@ -32,7 +32,8 @@ var Color;
 
 var ColoringStrategy;
 (function (ColoringStrategy) {
-  ColoringStrategy["INVERT"] = "Invert";
+  ColoringStrategy["INVERT"] = "invert";
+  ColoringStrategy["AVERAGE"] = "average";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 var TextInputStyle;

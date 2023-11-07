@@ -41,6 +41,10 @@ enum class ShadowType {
     BLUR,
 };
 
+enum class ShadowColorStrategy : char {
+    NONE,
+    AVERAGE,
+};
 // A style class indicates the way to render shadow effect
 class Shadow final {
 public:
@@ -202,6 +206,16 @@ public:
         return type_;
     }
 
+    void SetShadowColorStrategy(ShadowColorStrategy colorStrategy)
+    {
+        colorStrategy_ = colorStrategy;
+    }
+
+    ShadowColorStrategy GetShadowColorStrategy() const
+    {
+        return colorStrategy_;
+    }
+
     bool GetIsFilled() const
     {
         return isFilled_;
@@ -227,6 +241,7 @@ private:
     bool isFilled_ = false;
     ShadowStyle style_ = ShadowStyle::None;
     ShadowType type_ = ShadowType::COLOR;
+    ShadowColorStrategy colorStrategy_ = ShadowColorStrategy::NONE;
 };
 
 } // namespace OHOS::Ace
