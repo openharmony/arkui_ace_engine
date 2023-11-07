@@ -112,8 +112,6 @@ public:
     virtual void PostJsTask(std::function<void()>&& task) = 0;
     virtual void PostUITask(std::function<void()>&& task) {}
 
-    virtual void RemoveVisibleChangeNode(NodeId id) = 0;
-
     // ----------------
     // system.app
     // ----------------

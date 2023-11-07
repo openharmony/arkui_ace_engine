@@ -157,7 +157,6 @@ public:
 
     void WaitTimer(const std::string& callbackId, const std::string& delay, bool isInterval, bool isFirst) override;
     void ClearTimer(const std::string& callbackId) override;
-    void RemoveVisibleChangeNode(NodeId id) override {}
     void AddTaskObserver(std::function<void()>&& task) override {}
     void RemoveTaskObserver() override {}
     void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) override {}

@@ -857,16 +857,6 @@ void FrontendDelegateImpl::PostUITask(std::function<void()>&& task)
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
-void FrontendDelegateImpl::RemoveVisibleChangeNode(NodeId id)
-{
-    auto task = [nodeId = id, pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get())]() {
-        if (pipeline) {
-            pipeline->RemoveVisibleChangeNode(nodeId);
-        }
-    };
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
-}
-
 const std::string& FrontendDelegateImpl::GetAppID() const
 {
     return manifestParser_->GetAppInfo()->GetAppID();
