@@ -1319,11 +1319,6 @@ void FrontendDelegateDeclarative::PostJsTask(std::function<void()>&& task)
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
 }
 
-void FrontendDelegateDeclarative::RemoveVisibleChangeNode(NodeId id)
-{
-    LOGW("RemoveVisibleChangeNode: Not implemented yet.");
-}
-
 const std::string& FrontendDelegateDeclarative::GetAppID() const
 {
     return manifestParser_->GetAppInfo()->GetAppID();

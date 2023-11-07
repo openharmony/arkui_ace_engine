@@ -890,11 +890,6 @@ void PluginFrontendDelegate::PostJsTask(std::function<void()>&& task)
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
 }
 
-void PluginFrontendDelegate::RemoveVisibleChangeNode(NodeId id)
-{
-    LOGW("RemoveVisibleChangeNode: Not implemented yet.");
-}
-
 const std::string& PluginFrontendDelegate::GetAppID() const
 {
     return manifestParser_->GetAppInfo()->GetAppID();
