@@ -1536,7 +1536,6 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         }
 
         auto nextIndex = ComputeNextIndexByVelocity(static_cast<float>(dragVelocity), true);
-        nextIndex = std::clamp(nextIndex, 0, TotalCount() - GetDisplayCount());
         if (currentIndex_ != nextIndex) {
             UpdateCurrentIndex(nextIndex);
             do {
@@ -1614,10 +1613,7 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     }
 
     if (!IsLoop()) {
-        auto totalCount = TotalCount();
-        if (itemPosition_.rbegin()->first == totalCount - 1) {
-            nextIndex = std::clamp(nextIndex, 0, totalCount - GetDisplayCount());
-        }
+        nextIndex = std::clamp(nextIndex, 0, TotalCount() - GetDisplayCount());
     }
     return nextIndex;
 }
@@ -1959,7 +1955,6 @@ void SwiperPattern::OnSpringAnimationStart(float velocity)
     info.currentOffset = GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
 
     auto nextIndex = ComputeNextIndexByVelocity(velocity);
-    nextIndex = std::clamp(nextIndex, 0, TotalCount() - GetDisplayCount());
     if (GetLoopIndex(currentIndex_) == GetLoopIndex(nextIndex)) {
         info.targetOffset = info.currentOffset;
     } else {
@@ -2010,7 +2005,6 @@ void SwiperPattern::OnFadeAnimationStart()
     AnimationCallbackInfo info;
     info.currentOffset = GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     auto nextIndex = ComputeNextIndexByVelocity(0.0);
-    nextIndex = std::clamp(nextIndex, 0, TotalCount() - GetDisplayCount());
     if (GetLoopIndex(currentIndex_) == GetLoopIndex(nextIndex)) {
         info.targetOffset = info.currentOffset;
     } else {
