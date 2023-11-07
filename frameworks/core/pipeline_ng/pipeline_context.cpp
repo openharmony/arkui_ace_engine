@@ -1209,7 +1209,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
         for (const auto& func : dumpListeners_) {
             func(jsParams);
-        } 
+        }
     }
 
     return true;
@@ -1975,7 +1975,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     canUseLongPredictTask_ = false;
 }
 
-void PipelineContext::Finish(bool /*autoFinish*/) const
+void PipelineContext::Finish(bool /* autoFinish */) const
 {
     CHECK_RUN_ON(UI);
     if (finishEventHandler_) {
