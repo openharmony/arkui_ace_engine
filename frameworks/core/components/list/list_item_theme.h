@@ -50,7 +50,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->clickColor_ = themeConstants->GetColor(THEME_ITEM_CLICK_COLOR);
             theme->clickAlphaBegin_ = themeConstants->GetDouble(THEME_ITEM_CLICK_ALPHA_BEGIN);
             theme->clickAlphaEnd_ = themeConstants->GetDouble(THEME_ITEM_CLICK_ALPHA_END);
             theme->clickScale_ = themeConstants->GetDouble(THEME_ITEM_CLICK_SCALE);
@@ -92,6 +91,7 @@ public:
             theme->itemLeftPadding_ = LISTITEM_PADDING;
             theme->itemRightPadding_ = LISTITEM_PADDING;
             theme->focusBorderColor_ = pattern->GetAttr<Color>("item_focus_color", Color::WHITE);
+            theme->clickColor_ = pattern->GetAttr<Color>("item_press_color", Color::WHITE);
             theme->hoverColor_ = pattern->GetAttr<Color>("item_hover_color", Color::WHITE);
             theme->pressColor_ = pattern->GetAttr<Color>("item_press_color", Color::WHITE);
             theme->disabledAlpha_ = pattern->GetAttr<double>("item_disabled_alpha", 0.0);
