@@ -139,22 +139,22 @@ int32_t InteractionImpl::GetDragState(MsdpDragState& dragState)
     int32_t ret = InteractionManager::GetInstance()->GetDragState(state);
     switch (state) {
         case Msdp::DeviceStatus::DragState::ERROR:
-            dragState = MsdpDragState::DragState::ERROR;
+            dragState = MsdpDragState::ERROR;
             break;
         case Msdp::DeviceStatus::DragState::START:
-            dragState = MsdpDragState::DragState::START;
+            dragState = MsdpDragState::START;
             break;
         case Msdp::DeviceStatus::DragState::STOP:
-            dragState = MsdpDragState::DragState::STOP;
+            dragState = MsdpDragState::STOP;
             break;
         case Msdp::DeviceStatus::DragState::CANCEL:
-            dragState = MsdpDragState::DragState::CANCEL;
+            dragState = MsdpDragState::CANCEL;
             break;
         case Msdp::DeviceStatus::DragState::MOTION_DRAGGING:
-            dragState = MsdpDragState::DragState::MOTION_DRAGGING;
+            dragState = MsdpDragState::MOTION_DRAGGING;
             break;
         default:
-            dragState = MsdpDragState::DragState::ERROR;
+            dragState = MsdpDragState::ERROR;
             LOGW("unknow msdp drag state: %d", state);
             break;
     }
