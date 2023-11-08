@@ -1921,9 +1921,9 @@ var SwiperNestedScrollMode;
   SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
 })(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
 
-var CheckBoxStyle;
-(function (CheckBoxStyle) {
-  CheckBoxStyle["CIRCULAR_STYLE"] = 0;
-  CheckBoxStyle["SQUARE_STYLE"] = 1;
-})(CheckBoxStyle || (CheckBoxStyle = {}));
+var CheckBoxShape;
+(function (CheckBoxShape) {
+  CheckBoxShape["CIRCLE"] = 0;
+  CheckBoxShape["ROUNDED_SQUARE"] = 1;
+})(CheckBoxShape || (CheckBoxShape = {}));
 
