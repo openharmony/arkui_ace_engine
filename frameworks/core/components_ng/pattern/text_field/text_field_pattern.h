@@ -986,7 +986,8 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-
+    void HandleTouchMove(const TouchEventInfo& info);
+    void UpdateCaretByTouchMove(const TouchEventInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
     void InitTouchEvent();
@@ -1095,6 +1096,7 @@ private:
     void UpdateSelectController();
     void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
+    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1254,6 +1256,7 @@ private:
     CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
+    bool isTouchCaret_ = false;
 };
 } // namespace OHOS::Ace::NG
 
