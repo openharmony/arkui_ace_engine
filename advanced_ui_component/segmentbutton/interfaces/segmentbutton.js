@@ -1321,7 +1321,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                     __Common__.create();
                                     __Common__.onAreaChange(((t, o) => {
                                         this.buttonItemsRealHeight[e] = o.height;
-                                        let s = Math.max(...this.buttonItemsRealHeight);
+                                        let s = Math.max(...this.buttonItemsRealHeight.slice(0, this.options.buttons.length - 1));
                                         for (let t = 0;t < this.buttonItemsSize.length; t++) this.buttonItemsSize[t] = {
                                             width: this.buttonItemsSize[t].width,
                                             height: s
