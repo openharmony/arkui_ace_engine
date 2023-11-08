@@ -347,6 +347,11 @@ void PipelineContext::AddIsFocusActiveUpdateEvent(
 {}
 
 void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node) {}
+
+bool PipelineContext::HasDifferentDirectionGesture() const
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG
 
 // pipeline base

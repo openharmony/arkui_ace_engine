@@ -130,6 +130,33 @@ void EventManager::TouchTest(
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
 }
 
+bool EventManager::HasDifferentDirectionGesture()
+{
+    uint8_t verticalFlag = 0;
+    uint8_t horizontalFlag = 0;
+    for (const auto& axisResult : axisTouchTestResults_) {
+        auto axisRecognizerList = axisResult.second;
+        for (const auto& axisRecognizer : axisRecognizerList) {
+            if (!axisRecognizer) {
+                continue;
+            }
+            auto axisDirection = axisRecognizer->GetAxisDirection();
+            if (axisDirection == Axis::FREE) {
+                return true;
+            }
+            if (axisDirection == Axis::VERTICAL) {
+                verticalFlag = 0x1;
+            } else if (axisDirection == Axis::HORIZONTAL) {
+                horizontalFlag = 0x2;
+            }
+            if ((verticalFlag | horizontalFlag) == 0x3) {
+                return true;
+            }
+        }
+    }
+    return (verticalFlag | horizontalFlag) == 0x3;
+}
+
 void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
 {
     if (touchPoint.type != TouchType::DOWN) {

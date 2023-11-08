@@ -149,5 +149,10 @@ void EventManager::DispatchKeyboardShortcut(const KeyEvent& event) {}
 
 void EventManager::ClearResults() {}
 
+bool EventManager::HasDifferentDirectionGesture()
+{
+    return false;
+}
+
 EventManager::EventManager() {}
 } // namespace OHOS::Ace

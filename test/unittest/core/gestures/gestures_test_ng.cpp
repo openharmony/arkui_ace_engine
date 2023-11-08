@@ -6689,8 +6689,8 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerTest002, TestSize.Level1)
 
     AxisEvent axisEvent;
     swipeRecognizer.HandleTouchDownEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0.0);
-    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0.0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0.0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0.0);
     EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::DETECTING);
 }
 
@@ -7207,8 +7207,8 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchMoveEventTest001, TestSize.Le
     swipeRecognizer.refereeState_ = RefereeState::FAIL;
     swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
     swipeRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0);
-    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0);
 }
 
 /**
@@ -7250,8 +7250,8 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerTest004, TestSize.Level1)
     swipeRecognizer.HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
-    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0);
-    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0);
 }
 
 /**
@@ -7364,8 +7364,8 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchMoveEventTest002, TestSize.Le
     swipeRecognizer.refereeState_ = RefereeState::FAIL;
     swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
     swipeRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0);
-    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0);
 }
 
 /**
@@ -7406,8 +7406,8 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchMoveEventTest003, TestSize.Le
     swipeRecognizer.refereeState_ = RefereeState::FAIL;
     swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
     swipeRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0);
-    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0);
 }
 
 /**
@@ -7446,8 +7446,8 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchMoveEventTest004, TestSize.Le
     swipeRecognizer.refereeState_ = RefereeState::FAIL;
     swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
     swipeRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0);
-    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0);
 }
 
 /**
@@ -7468,8 +7468,8 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerTest006, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     swipeRecognizer.OnResetStatus();
-    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0.0);
-    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0.0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0.0);
+    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0.0);
     EXPECT_EQ(swipeRecognizer.resultSpeed_, 0.0);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), 0.0);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), 0.0);

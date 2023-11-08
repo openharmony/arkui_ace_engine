@@ -1577,6 +1577,12 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
     OnMouseEvent(mouseEvent);
 }
 
+bool PipelineContext::HasDifferentDirectionGesture() const
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    return eventManager_->HasDifferentDirectionGesture();
+}
+
 void PipelineContext::AddVisibleAreaChangeNode(
     const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
 {
