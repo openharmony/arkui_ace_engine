@@ -255,6 +255,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             if (GreatNotEqual(
                 Positive(prevMargin_) ? item.second.endPos + prevMargin_ + spaceWidth_ : item.second.endPos, 0.0f)) {
                 startIndexInVisibleWindow = item.first;
+                startPos = item.second.startPos;
                 break;
             }
         }
