@@ -260,6 +260,9 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 // NG ImageLoader entrance
 bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
 {
+#ifndef USE_ROSEN_DRAWING
+    return false;
+#endif
     auto container = Container::Current();
     return sync ? DownloadManagerV2::DownloadSync(std::move(downloadCallback), src)
                 : DownloadManagerV2::DownloadAsync(std::move(downloadCallback), src, Container::CurrentId());
