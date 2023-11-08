@@ -64,8 +64,26 @@ NG::OffsetF TextFieldController::GetCaretPosition()
     return OffsetF(ERROR, ERROR);
 }
 
+bool TextFieldController::IsTextSelectionIllegal(int32_t& selectionStart, int32_t& selectionEnd)
+{
+    if (selectionEnd < selectionStart) {
+        return false;
+    }
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    auto wideText = textFieldPattern->GetWideText();
+    auto startIndex = std::clamp(selectionStart, 0, static_cast<int32_t>(wideText.length()));
+    auto endIndex = std::clamp(selectionEnd, 0, static_cast<int32_t>(wideText.length()));
+    selectionStart = startIndex;
+    selectionEnd = endIndex;
+    return true;
+}
+
 void TextFieldController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
 {
+    if (!IsTextSelectionIllegal(selectionStart, selectionEnd)) {
+        return;
+    }
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     textFieldPattern->SetSelectionFlag(selectionStart, selectionEnd);
 }
