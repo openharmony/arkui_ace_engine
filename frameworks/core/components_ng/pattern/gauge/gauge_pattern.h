@@ -139,7 +139,8 @@ public:
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void InitDescriptionNode();
-    void InitLimitValueText(const int32_t valueTextId, const bool isMin);
+    void InitLimitValueText(int32_t valueTextId, bool isMin);
+    void HideLimitValueText(int32_t valueTextId, bool isMin);
     void InitIndicatorImage();
 
     LoadSuccessNotifyTask CreateLoadSuccessCallback();

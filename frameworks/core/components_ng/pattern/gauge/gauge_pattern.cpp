@@ -61,9 +61,17 @@ void GaugePattern::OnModifyDone()
         auto gaugeLayoutProperty = GetLayoutProperty<GaugeLayoutProperty>();
         CHECK_NULL_VOID(gaugeLayoutProperty);
 
-        if (gaugeLayoutProperty->GetIsShowLimitValueValue(false)) {
+        if (gaugeLayoutProperty->GetIsShowLimitValueValue(false) &&
+            gaugePaintProperty->GetGradientColorsValue().size() != 0) {
             InitLimitValueText(GetMinValueTextId(), true);
             InitLimitValueText(GetMaxValueTextId(), false);
+        } else {
+            if (minValueTextId_.has_value()) {
+                HideLimitValueText(GetMinValueTextId(), true);
+            }
+            if (maxValueTextId_.has_value()) {
+                HideLimitValueText(GetMaxValueTextId(), false);
+            }
         }
         if (gaugeLayoutProperty->GetIsShowDescriptionValue(false)) {
             InitDescriptionNode();
@@ -89,7 +97,7 @@ void GaugePattern::InitDescriptionNode()
     linearNode->MarkModifyDone();
 }
 
-void GaugePattern::InitLimitValueText(const int32_t valueTextId, const bool isMin)
+void GaugePattern::InitLimitValueText(int32_t valueTextId, bool isMin)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -129,6 +137,23 @@ void GaugePattern::InitLimitValueText(const int32_t valueTextId, const bool isMi
 
     textNode->MountToParent(frameNode);
     textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    textNode->MarkModifyDone();
+}
+
+void GaugePattern::HideLimitValueText(int32_t valueTextId, bool isMin)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(textNode);
+    auto geometryNode = textNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(SizeF(0, 0));
+    auto limitValueTextProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(limitValueTextProperty);
+    limitValueTextProperty->Reset();
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     textNode->MarkModifyDone();
 }
 
