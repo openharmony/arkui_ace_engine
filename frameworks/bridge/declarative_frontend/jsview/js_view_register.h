@@ -28,6 +28,7 @@ namespace OHOS::Ace::Framework {
  */
 void JsRegisterViews(BindingTarget globalObj);
 void JsRegisterFormViews(BindingTarget globalObj);
+void JsUINodeRegisterCleanUp(BindingTarget globalObj);
 
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_REGISTER_H

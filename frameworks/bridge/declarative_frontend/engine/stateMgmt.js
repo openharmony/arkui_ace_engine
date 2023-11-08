@@ -66,7 +66,7 @@
  *
  * @since 9
  */
- class LocalStorage extends NativeLocalStorage {
+class LocalStorage extends NativeLocalStorage {
     /**
      * Construct new instance of LocalStorage
      * initialzie with all properties and their values that Object.keys(params) returns
@@ -363,6 +363,7 @@
             p.aboutToBeDeleted();
         }
         this.storage_.clear();
+        
         return true;
     }
     /**
@@ -454,13 +455,6 @@
  * @since 7
  */
 class AppStorage extends LocalStorage {
-    /** singleton class, app can not create instances
-     *
-     * not a public / sdk function
-    */
-    constructor(initializingProperties) {
-        super(initializingProperties);
-    }
     /**
      * create and initialize singleton
      * initialzie with all properties and their values that Object.keys(params) returns
@@ -757,6 +751,13 @@ class AppStorage extends LocalStorage {
         }
         return AppStorage.Instance_;
     }
+    /** singleton class, app can not create instances
+     *
+     * not a public / sdk function
+    */
+    constructor(initializingProperties) {
+        super(initializingProperties);
+    }
 }
 // instance functions below:
 // Should all be protected, but TS lang does not allow access from static member to protected member
@@ -780,16 +781,6 @@ AppStorage.Instance_ = undefined;
  * public API to manage IPropertySubscriber
  */
 class SubscriberManager {
-    /**
-     * SubscriberManager is a singleton created by the framework
-     * do not use
-     *
-     * internal method
-     */
-    constructor() {
-        this.subscriberById_ = new Map();
-        
-    }
     /**
       * check subscriber is known
       * same as ES6 Map.prototype.has()
@@ -951,6 +942,16 @@ class SubscriberManager {
      */
     makeId() {
         return ViewStackProcessor.MakeUniqueId();
+    }
+    /**
+     * SubscriberManager is a singleton created by the framework
+     * do not use
+     *
+     * internal method
+     */
+    constructor() {
+        this.subscriberById_ = new Map();
+        
     }
 }
 /*
@@ -1152,14 +1153,6 @@ class SubscribaleAbstract {
  */
 class PersistentStorage {
     /**
-     * all following methods are framework internal
-     */
-    constructor() {
-        this.links_ = new Map();
-        this.id_ = SubscriberManager.MakeId();
-        SubscriberManager.Add(this);
-    }
-    /**
      *
      * @param storage method to be used by the framework to set the backend
      * this is to be done during startup
@@ -1261,6 +1254,14 @@ class PersistentStorage {
     static NotifyHasChanged(propName) {
         
         PersistentStorage.Storage_.set(propName, PersistentStorage.GetOrCreate().links_.get(propName).get());
+    }
+    /**
+     * all following methods are framework internal
+     */
+    constructor() {
+        this.links_ = new Map();
+        this.id_ = SubscriberManager.MakeId();
+        SubscriberManager.Add(this);
     }
     keys() {
         return this.links_.keys();
@@ -1372,10 +1373,6 @@ PersistentStorage.Instance_ = undefined;
  *
  */
 class Environment {
-    constructor() {
-        this.props_ = new Map();
-        Environment.EnvBackend_.onValueChanged(this.onValueChanged.bind(this));
-    }
     static GetOrCreate() {
         if (Environment.Instance_) {
             // already initialized
@@ -1402,6 +1399,10 @@ class Environment {
     }
     static Keys() {
         return Environment.GetOrCreate().keys();
+    }
+    constructor() {
+        this.props_ = new Map();
+        Environment.EnvBackend_.onValueChanged(this.onValueChanged.bind(this));
     }
     envProp(key, value) {
         let prop = AppStorage.Prop(key);
@@ -1914,23 +1915,6 @@ class ExtendableProxy {
 }
 class ObservedObject extends ExtendableProxy {
     /**
-     * To create a new ObservableObject use CreateNew function
-     *
-     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
-     * notifications
-     * @param obj  raw Object, if obj is a ObservableOject throws an error
-     * @param objectOwner
-     */
-    constructor(obj, handler, objectOwningProperty) {
-        super(obj, handler);
-        if (ObservedObject.IsObservedObject(obj)) {
-            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
-        }
-        if (objectOwningProperty != undefined) {
-            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
-        }
-    } // end of constructor
-    /**
      * Factory function for ObservedObjects /
      *  wrapping of objects for proxying
      *
@@ -2095,6 +2079,23 @@ class ObservedObject extends ExtendableProxy {
             ? Object.getPrototypeOf(proto.constructor.prototype)
             : proto;
     }
+    /**
+     * To create a new ObservableObject use CreateNew function
+     *
+     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
+     * notifications
+     * @param obj  raw Object, if obj is a ObservableOject throws an error
+     * @param objectOwner
+     */
+    constructor(obj, handler, objectOwningProperty) {
+        super(obj, handler);
+        if (ObservedObject.IsObservedObject(obj)) {
+            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+        }
+        if (objectOwningProperty != undefined) {
+            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
+        }
+    } // end of constructor
 }
 ObservedObject.__IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
 ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT = Symbol("_____raw_object__");
@@ -2853,6 +2854,23 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class View extends NativeViewFullUpdate {
+    get localStorage_() {
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+        }
+        this.localStoragebackStore_ = instance;
+    }
     /**
      * Create a View
      *
@@ -2895,23 +2913,6 @@ class View extends NativeViewFullUpdate {
         }
         SubscriberManager.Add(this);
         
-    }
-    get localStorage_() {
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
-        }
-        this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -3878,6 +3879,108 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
     }
 }
 /*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// Define a global function
+function globalRegisterCleanUpFunction() {
+    
+    UINodeRegisterProxy.obtainDeletedElmtIds();
+}
+class UINodeRegisterProxy {
+    constructor() {
+        this.elmtIdsToUnregister_ = new Set();
+        this.tagByElmtId_ = new Map();
+        this.elmtIdsUnregisteredAheadOfTime_ = new Set();
+    }
+    static UINodeRegisterCleanUpFunction() {
+        
+        UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
+    }
+    static obtainDeletedElmtIds() {
+        
+        UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
+    }
+    static accountElmtIdsAsUnregistered(elmtIds) {
+        
+        UINodeRegisterProxy.instance_.accountElmtIdsAsUnregistered(elmtIds);
+    }
+    static consume(elmtId) {
+        return UINodeRegisterProxy.instance_.consume(elmtId);
+    }
+    /*
+    a function to enable an optimization, returns true if UINodeRegisterProxy
+    has any elmtIds that need to be unregistered
+    */
+    static hasElmtIdsPendingUnregister() {
+        return UINodeRegisterProxy.instance_.elmtIdsToUnregister_.size > 0;
+    }
+    // private properties & functions:
+    /* move elmtIds from C++ ElementRegister, elmtIds of UINodes that have been deleted
+     two processing steps for each moved elmtId:
+     1. check if elmtId has been unregistered ahead of time (when a ViewPU gets deleted)
+     2. if not, memorize elmtId to still need un-registration
+    */
+    obtainDeletedElmtIds() {
+        
+        let removedElementsInfo = new Array();
+        ViewStackProcessor.moveDeletedElmtIds(removedElementsInfo);
+        
+        removedElementsInfo.forEach(rmElmtInfo => {
+            if (this.elmtIdsUnregisteredAheadOfTime_.has(rmElmtInfo.elmtId)) {
+                
+                this.elmtIdsUnregisteredAheadOfTime_.delete(rmElmtInfo.elmtId);
+            }
+            else {
+                
+                this.elmtIdsToUnregister_.add(rmElmtInfo.elmtId);
+                this.tagByElmtId_.set(rmElmtInfo.elmtId, rmElmtInfo.tag);
+            }
+        });
+    }
+    /*
+        called from ViewPU with all its child elmtIds
+        memorize these elmtIds until obtainDeletedElmtIds finds them in ElementRegister later (see its step 1)
+    */
+    accountElmtIdsAsUnregistered(elmtIds) {
+        
+        // get info about latest deleted elmtIds from C++ to UINodeRegisterProxy
+        this.obtainDeletedElmtIds();
+        elmtIds.filter((elmtId) => {
+            return /* can not unregister elmtId */ !this.consume(elmtId);
+        }).forEach((elmtIdUnregisteredAheadOfTime) => {
+            // add to Set of elmtIds that have been unregistered already
+            // when the elmtId arrives with later ObtainDeletedElementIds, we know it is unregistered already
+            this.elmtIdsUnregisteredAheadOfTime_.add(elmtIdUnregisteredAheadOfTime);
+        });
+    }
+    /* called view View to query if given elmtId needs to be unregistered
+      (these are the elmtIds added in step 2 of obtainDeletedElmtIds)
+      if true, forget about the elmtId because called ViewPU will unregistered it next, tell it
+      to do so by returning true.
+    */
+    consume(elmtId) {
+        if (this.elmtIdsToUnregister_.delete(elmtId)) {
+            
+            this.tagByElmtId_.delete(elmtId);
+            return true;
+        }
+        return false;
+    }
+}
+UINodeRegisterProxy.instance_ = new UINodeRegisterProxy();
+const UINodeRegisterCleanUpFunction = UINodeRegisterProxy.UINodeRegisterCleanUpFunction;
+/*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -3901,6 +4004,27 @@ const UndefinedElmtId = -1;
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class ViewPU extends NativeViewPartialUpdate {
+    get localStorage_() {
+        if (!this.localStoragebackStore_ && this.parent_) {
+            
+            this.localStoragebackStore_ = this.parent_.localStorage_;
+        }
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+        }
+        this.localStoragebackStore_ = instance;
+    }
     /**
      * Create a View
      *
@@ -3952,27 +4076,6 @@ class ViewPU extends NativeViewPartialUpdate {
         SubscriberManager.Add(this);
         
     }
-    get localStorage_() {
-        if (!this.localStoragebackStore_ && this.parent_) {
-            
-            this.localStoragebackStore_ = this.parent_.localStorage_;
-        }
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
-        }
-        this.localStoragebackStore_ = instance;
-    }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
         return this.id_;
@@ -3980,15 +4083,19 @@ class ViewPU extends NativeViewPartialUpdate {
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
-        // When a custom component is deleted, need to notify the C++ side to clean the corresponding deletion cache Map,
-        // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the
-        // updateDirtyElements function.
-        let removedElmtIds = [];
-        this.updateFuncByElmtId.forEach((value, key) => {
-            this.purgeVariableDependenciesOnElmtId(key);
-            removedElmtIds.push(key);
-        });
-        this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
+        
+        // tell UINodeRegisterProxy that all elmtIds under
+        // this ViewPU should be treated as already unregistered
+        
+        UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
+        // unregister the elmtId of this ViewPU / its CustomNode object
+        UINodeRegisterProxy.consume(this.id__());
+        // unregistration of ElementIDs
+        
+        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
+        UINodeRegisterProxy.obtainDeletedElmtIds();
+        this.purgeDeletedElmtIdsRecursively();
+        
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
@@ -3997,6 +4104,57 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         this.localStoragebackStore_ = undefined;
         this.isDeleting_ = true;
+    }
+    purgeDeletedElmtIdsRecursively() {
+        
+        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
+        UINodeRegisterProxy.obtainDeletedElmtIds();
+        this.purgeDeletedElmtIdsRecursivelyInternal();
+        
+    }
+    purgeDeletedElmtIdsRecursivelyInternal() {
+        if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
+            
+            return;
+        }
+        this.purgeDeletedElmtIdsInternal();
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
+                    
+                    return;
+                }
+                child.purgeDeletedElmtIdsRecursively();
+            }
+        });
+    }
+    purgeDeletedElmtIdsInternal() {
+        
+        const elmtIdsOfThisView = this.updateFuncByElmtId.keys();
+        for (const rmElmtId of elmtIdsOfThisView) {
+            if (UINodeRegisterProxy.consume(rmElmtId)) {
+                
+                // remove entry from Map elmtId -> update function
+                this.updateFuncByElmtId.delete(rmElmtId);
+                // for each state var, remove dependent elmtId (if present)
+                // purgeVariableDependenciesOnElmtId needs to be generated by the compiler
+                this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
+                if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
+                    
+                    return;
+                }
+            } // for all elmtIds that need to unregister
+        }
+        
+    }
+    purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
+        Object.getOwnPropertyNames(this).filter((varName => varName.startsWith("__"))).forEach((stateVarName) => {
+            let variable = Reflect.get(this, stateVarName);
+            if ("purgeDependencyOnElmtId" in variable) {
+                variable.purgeDependencyOnElmtId(elmtId);
+            }
+        });
     }
     setParent(parent) {
         if (this.parent_ && parent) {
@@ -4054,7 +4212,8 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     UpdateElement(elmtId) {
         // do not process an Element that has been marked to be deleted
-        const updateFunc = this.updateFuncByElmtId.get(elmtId);
+        const updateFunc1 = this.updateFuncByElmtId.get(elmtId);
+        const updateFunc = ((typeof updateFunc1 == "object") ? (updateFunc1.updateFunc) : updateFunc1);
         if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
             stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
         }
@@ -4078,12 +4237,9 @@ class ViewPU extends NativeViewPartialUpdate {
      */
     forceCompleteRerender(deep = false) {
         stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - start.`);
-        // request list of all (gloabbly) deleted elmtIds;
-        let deletedElmtIds = [];
-        this.getDeletedElemtIds(deletedElmtIds);
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
-        this.purgeDeletedElmtIds(deletedElmtIds);
+        this.purgeDeletedElmtIds();
         Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
         if (deep) {
             this.childrenWeakrefMap_.forEach((weakRefChild) => {
@@ -4103,12 +4259,9 @@ class ViewPU extends NativeViewPartialUpdate {
      * framework internal functions, apps must not call
      */
     forceRerenderNode(elmtId) {
-        // request list of all (gloabbly) deleted elmtIds;
-        let deletedElmtIds = [];
-        this.getDeletedElemtIds(deletedElmtIds);
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
-        this.purgeDeletedElmtIds(deletedElmtIds);
+        this.purgeDeletedElmtIds();
         this.UpdateElement(elmtId);
         // remove elemtId from dirtDescendantElementIds.
         this.dirtDescendantElementIds_.delete(elmtId);
@@ -4215,12 +4368,9 @@ class ViewPU extends NativeViewPartialUpdate {
     updateDirtyElements() {
         do {
             
-            // request list of all (gloabbly) deleteelmtIds;
-            let deletedElmtIds = [];
-            this.getDeletedElemtIds(deletedElmtIds);
             // see which elmtIds are managed by this View
             // and clean up all book keeping for them
-            this.purgeDeletedElmtIds(deletedElmtIds);
+            this.purgeDeletedElmtIds();
             // process all elmtIds marked as needing update in ascending order.
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
@@ -4231,26 +4381,15 @@ class ViewPU extends NativeViewPartialUpdate {
         } while (this.dirtDescendantElementIds_.size);
     }
     //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
-    purgeDeletedElmtIds(rmElmtIds) {
-        if (rmElmtIds.length == 0) {
+    purgeDeletedElmtIds() {
+        
+        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
+        UINodeRegisterProxy.obtainDeletedElmtIds();
+        if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
+            
             return;
         }
-        
-        // rmElmtIds is the array of ElemntIds that
-        let removedElmtIds = [];
-        rmElmtIds.forEach((elmtId) => {
-            // remove entry from Map elmtId -> update function
-            if (this.updateFuncByElmtId.delete(elmtId)) {
-                // for each state var, remove dependent elmtId (if present)
-                // purgeVariableDependenciesOnElmtId needs to be generated by the compiler
-                this.purgeVariableDependenciesOnElmtId(elmtId);
-                // keep track of elmtId that has been de-registered
-                removedElmtIds.push(elmtId);
-            }
-        });
-        this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
-        
-        
+        this.purgeDeletedElmtIdsInternal();
     }
     // the current executed update function
     observeComponentCreation(compilerAssignedUpdateFunc) {
@@ -4261,7 +4400,7 @@ class ViewPU extends NativeViewPartialUpdate {
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         
         compilerAssignedUpdateFunc(elmtId, /* is first rneder */ true);
-        this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
+        this.updateFuncByElmtId.set(elmtId, { updateFunc: compilerAssignedUpdateFunc, componentName: "unknown" });
         
     }
     // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
@@ -4304,7 +4443,8 @@ class ViewPU extends NativeViewPartialUpdate {
                     return `${index}__${JSON.stringify(item)}`;
                 }
                 catch (e) {
-                    throw new Error(`${this.constructor.name}[${this.id__()}]: ForEach id ${elmtId}: use of default id generator function not possble on provided data structure. Need to specify id generator function (ForEach 3rd parameter).`);
+                    throw new Error(`${this.constructor.name}[${this.id__()}]: ForEach id ${elmtId}: use of default id generator function not possble on provided data structure.
+  Need to specify id generator function (ForEach 3rd parameter).`);
                 }
             };
         }

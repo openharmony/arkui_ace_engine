@@ -70,4 +70,7 @@ declare class ViewStackProcessor {
    * JS signatire: MakeUniqueId() : number
   */
   public static MakeUniqueId(): number;
+
+  /** move deleted elmtIds from ElementRegistery in C++ to the caller */
+  public static moveDeletedElmtIds(elmtIds : Array<RemovedElementInfo>)
 }

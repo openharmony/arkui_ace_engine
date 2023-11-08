@@ -27,8 +27,6 @@ declare class NativeViewPartialUpdate {
   restoreInstanceId(): void;
   static create(newView: NativeViewPartialUpdate): void;
   finishUpdateFunc(elmtId: number): void;
-  getDeletedElemtIds(elmtIds : number[]) : void; // caller allocates an empty Array<number>
-  deletedElmtIdsHaveBeenPurged(elmtIds : number[]) : void; // caller provides filled Array<number>
   isLazyItemRender(elmtId : number) : boolean;
   setCardId(cardId: number): void;
   getCardId(): number;

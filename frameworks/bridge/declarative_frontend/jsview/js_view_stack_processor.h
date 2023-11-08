@@ -76,6 +76,12 @@ public:
         return it->second;
     }
 
+    /*
+     move deleted elmtIds from C+ ElementRegistry to this component.
+     JS caller must allocate empty Array<number> and provide as param
+    */
+    static void JsMoveDeletedElmtIds(const JSCallbackInfo& info);
+
 private:
     static void JSVisualState(const JSCallbackInfo& info);
     static std::map<std::string, JSRef<JSObject>> viewMap_;
