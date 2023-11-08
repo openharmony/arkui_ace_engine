@@ -216,7 +216,6 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
     LOGD("parentID = %{public}d, slot = %{public}d", parentID, slot);
     if (Container::IsCurrentUseNewPipeline()) {
         static RefPtr<NG::UINode> parent = nullptr;
-        static int32_t preSlot = -1;
         auto newChild = GetNewFrameNodeWithJsCode(root);
         CHECK_NULL_RETURN(newChild, false);
         NG::Inspector::HideAllMenus();
@@ -228,12 +227,21 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
         auto nodeId = root->GetInt("id");
         auto oldChild = ElementRegister::GetInstance()->GetUINodeById(nodeId);
         if (!oldChild) {
-            return OperateGeneralUINode(parent, preSlot, newChild);
+            // Quickly modify components
+            auto iter = parents_.find(nodeId);
+            if (iter != parents_.end()) {
+                auto uiNode = iter->second.Upgrade()->GetChildAtIndex(slots_[nodeId]);
+                slots_.emplace(uiNode->GetId(), slots_[nodeId]);
+                parents_.emplace(uiNode->GetId(), parents_[nodeId]);
+                return OperateGeneralUINode(parents_[uiNode->GetId()].Upgrade(), slots_[uiNode->GetId()], newChild);
+            }
+            return false;
         }
         parent = oldChild->GetParent();
         CHECK_NULL_RETURN(parent, false);
         slot = parent->GetChildIndex(oldChild);
-        preSlot = slot;
+        slots_.emplace(nodeId, slot);
+        parents_.emplace(nodeId, parent);
         return OperateGeneralUINode(parent, slot, newChild);
     } else {
         auto operateType = root->GetString("type", "");
