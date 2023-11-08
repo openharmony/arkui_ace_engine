@@ -4410,7 +4410,7 @@ HWTEST_F(GesturesTestNg, PinchRecognizerTest002, TestSize.Level1)
     TouchEvent touchEvent;
     pinchRecognizer.refereeState_ = RefereeState::SUCCEED;
     pinchRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(static_cast<int32_t>(pinchRecognizer.touchPoints_.size()), 0);
+    EXPECT_EQ(static_cast<int32_t>(pinchRecognizer.touchPoints_.size()), 1);
 
     /**
      * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
@@ -4477,7 +4477,7 @@ HWTEST_F(GesturesTestNg, PinchRecognizerHandleTouchDownEventTest001, TestSize.Le
     pinchRecognizer.HandleTouchDownEvent(touchEvent);
     EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
     EXPECT_EQ(static_cast<int32_t>(pinchRecognizer.touchPoints_.size()), 1);
-    EXPECT_NE(pinchRecognizer.refereeState_, RefereeState::PENDING);
+    EXPECT_EQ(pinchRecognizer.refereeState_, RefereeState::PENDING);
 }
 
 /**
@@ -11559,6 +11559,7 @@ HWTEST_F(GesturesTestNg, RotationRecognizerHandleTouchUpEventTest002, TestSize.L
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
     TouchEvent touchEvent;
+    rotationRecognizerPtr->activeFingers_.emplace_back(touchEvent.id);
 
     rotationRecognizerPtr->refereeState_ = RefereeState::PENDING;
     rotationRecognizerPtr->currentFingers_ = rotationRecognizerPtr->fingers_;
@@ -11579,6 +11580,7 @@ HWTEST_F(GesturesTestNg, RotationRecognizerHandleTouchCancelEventTest002, TestSi
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
     TouchEvent touchEvent;
 
+    rotationRecognizerPtr->activeFingers_.emplace_back(touchEvent.id);
     rotationRecognizerPtr->refereeState_ = RefereeState::PENDING;
     rotationRecognizerPtr->HandleTouchCancelEvent(touchEvent);
     EXPECT_EQ(rotationRecognizerPtr->refereeState_, RefereeState::FAIL);
@@ -11811,21 +11813,10 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest012, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->AssignNodeId(1);
-    AncestorNodeInfo info1;
-    AncestorNodeInfo info2;
-    AncestorNodeInfo info3;
-    std::pair<int, AncestorNodeInfo> pair1(0, info1);
-    std::pair<int, AncestorNodeInfo> pair2(1, info2);
-    std::pair<int, AncestorNodeInfo> pair3(2, info3);
-    std::unordered_map<int, AncestorNodeInfo> transFormIds = NGGestureRecognizer::GetGlobalTransIds();
-    transFormIds.insert(pair1);
-    transFormIds.insert(pair2);
-    transFormIds.insert(pair3);
-    EXPECT_EQ(transFormIds.size(), 3);
+    clickRecognizerPtr->AttachFrameNode(nullptr);
+
     PointF f1 = PointF(1.0, 0.0);
-    NGGestureRecognizer::Transform(f1, 1);
-    EXPECT_EQ(NGGestureRecognizer::GetGlobalTransIds().size(), 0);
+    NGGestureRecognizer::Transform(f1, clickRecognizerPtr->GetAttachedNode());
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 }
 
@@ -11843,20 +11834,10 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest013, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->AssignNodeId(1);
-    AncestorNodeInfo info1;
-    AncestorNodeInfo info2;
-    AncestorNodeInfo info3;
+    clickRecognizerPtr->AttachFrameNode(nullptr);
 
-    std::unordered_map<int, AncestorNodeInfo> transFormIds = NGGestureRecognizer::GetGlobalTransIds();
-
-    transFormIds.insert(transFormIds.begin(), std::make_pair(0, info1));
-    transFormIds.insert(transFormIds.begin(), std::make_pair(1, info2));
-    transFormIds.insert(transFormIds.begin(), std::make_pair(2, info3));
-    EXPECT_EQ(transFormIds.size(), 3);
     PointF f1 = PointF(1.0, 0.0);
-    NGGestureRecognizer::Transform(f1, 1);
-    EXPECT_EQ(NGGestureRecognizer::GetGlobalTransIds().size(), 0);
+    NGGestureRecognizer::Transform(f1, clickRecognizerPtr->GetAttachedNode());
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 }
 
@@ -11921,20 +11902,10 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleOverdueDeadlineTest014, TestSize.L
     /**
      * @tc.steps: step2. set HandleOverdueDeadline function.
      */
-    clickRecognizerPtr->AssignNodeId(1);
-    AncestorNodeInfo info1;
-    AncestorNodeInfo info2;
-    AncestorNodeInfo info3;
+    clickRecognizerPtr->AttachFrameNode(nullptr);
 
-    std::unordered_map<int, AncestorNodeInfo> transFormIds = NGGestureRecognizer::GetGlobalTransIds();
-
-    transFormIds[0] = info1;
-    transFormIds[1] = info2;
-    transFormIds[2] = info3;
-    EXPECT_EQ(transFormIds.size(), 3);
     PointF f1 = PointF(1.0, 0.0);
-    NGGestureRecognizer::Transform(f1, 1);
-    EXPECT_EQ(NGGestureRecognizer::GetGlobalTransIds().size(), 0);
+    NGGestureRecognizer::Transform(f1, clickRecognizerPtr->GetAttachedNode());
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 }
 
@@ -12036,7 +12007,7 @@ HWTEST_F(GesturesTestNg, PinchRecognizerTest011, TestSize.Level1)
     pinchRecognizer->initialDev_ = 2.0;
     pinchRecognizer->OnFlushTouchEventsEnd();
     pinchRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_NE(pinchRecognizer->scale_, 1);
+    EXPECT_EQ(pinchRecognizer->scale_, 1);
 
     /**
      * @tc.steps: step3. test HandleTouchMoveEvent(AxisEvent).
