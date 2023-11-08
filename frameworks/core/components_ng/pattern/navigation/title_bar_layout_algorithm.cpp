@@ -132,10 +132,12 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
     } else {
         occupiedWidth += menuWidth_;
-        // title is custom, the title right margin is not needed
-        occupiedWidth += isCustom ? 0.0f : (NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
         auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
         occupiedWidth += isCustomMenu ? 0.0f : (defaultPaddingStart_).ConvertToPx();
+        // title is custom or menu is custom, the title right margin is not needed
+        if (!isCustomMenu) {
+            occupiedWidth += isCustom ? 0.0f : (NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
+        }
     }
     return titleBarSize.Width() < occupiedWidth ? 0 : titleBarSize.Width() - occupiedWidth;
 }
