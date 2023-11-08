@@ -38,17 +38,10 @@ bool DownloadManagerV2::DownloadAsync(DownloadCallback&& downloadCallback, const
     task->OnSuccess([callback = std::move(downloadCallback.successCallback), instanceId](
                         const NetStackRequest& request, const NetStackResponse& response) {
         ContainerScope scope(instanceId);
-        std::string result = response.GetResult();
-        std::vector<uint8_t> dataOut;
-        for (auto iter = result.begin(); iter != result.end(); iter++) {
-            dataOut.emplace_back(static_cast<uint8_t>(*iter));
-        }
-        dataOut.shrink_to_fit();
-        LOGI("Async http task of url %{private}s success, data size %{public}zu", request.GetURL().c_str(),
-            dataOut.size());
-        NG::ImageUtils::PostToUI([data = std::move(dataOut), successCallback = std::move(callback)]() {
+        LOGI("Async http task of url %{private}s success", request.GetURL().c_str());
+        NG::ImageUtils::PostToUI([data = std::move(response.GetResult()), successCallback = std::move(callback)]() {
             if (successCallback) {
-                successCallback(data);
+                successCallback(std::move(data));
             }
         });
     });
@@ -107,11 +100,7 @@ bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const 
             CHECK_NULL_VOID(downloadCondition);
             std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
             downloadCondition->downloadSuccess = true;
-            std::string result = response.GetResult();
-            for (auto iter = result.begin(); iter != result.end(); iter++) {
-                downloadCondition->dataOut.emplace_back(static_cast<uint8_t>(*iter));
-            }
-            downloadCondition->dataOut.shrink_to_fit();
+            downloadCondition->dataOut = std::move(response.GetResult());
         }
         downloadCondition->cv.notify_all();
     });
@@ -154,7 +143,7 @@ bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const 
     downloadCondition->cv.wait_for(downloadlock, std::chrono::seconds(MAXIMUM_WAITING_PERIOD));
     downloadlock.unlock();
     if (downloadCondition->downloadSuccess) {
-        downloadCallback.successCallback(downloadCondition->dataOut);
+        downloadCallback.successCallback(std::move(downloadCondition->dataOut));
     } else {
         downloadCallback.failCallback(downloadCondition->errorMsg);
     }
