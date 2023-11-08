@@ -605,6 +605,14 @@ private:
         return GetDirection();
     }
 
+    /**
+     * @brief Closes gap to the edge, called before Swiper transfers extra offset to parent/child to ensure that Swiper
+     * actually reaches the edge.
+     *
+     * @param offset The scroll offset from DragUpdate.
+     */
+    void CloseTheGap(float offset);
+
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
     ScrollResult HandleScrollSelfFirst(float offset, int32_t source, NestedState state);
 
