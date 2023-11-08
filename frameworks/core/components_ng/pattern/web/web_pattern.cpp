@@ -2003,6 +2003,7 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::
         if (idx >= 0) {
             pointStyle = g_cursorTypeMap[idx].value;
         }
+        mouseStyle->SetPointerVisible(pointStyle);
         if (static_cast<int32_t>(pointStyle) != curPointerStyle) {
             mouseStyle->SetPointerStyle(windowId, pointStyle);
         }
