@@ -255,6 +255,21 @@ public:
     }
 
     void UpdateCurrentOffset(float offset);
+    /**
+     * @brief Checks if the given offset exceeds the bounds of the swiper container and triggers overScroll.
+     *
+     * @param offset The offset to check.
+     * @return True if overScroll is triggered, false otherwise.
+     */
+    bool CheckOverScroll(float offset);
+
+    /**
+     * @brief Applies spring effect to the over-scrolling of the swiper.
+     *
+     * @param offset The offset of the swiper.
+     * @return true if the spring effect is applied successfully, false otherwise.
+     */
+    bool SpringOverScroll(float offset);
 
     void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f);
 

@@ -1207,48 +1207,80 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     if (itemPosition_.empty()) {
         return;
     }
-    auto edgeEffect = GetEdgeEffect();
-    auto isOutOfBoundary = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
-    if (!IsLoop() && isOutOfBoundary && edgeEffect == EdgeEffect::SPRING && (isDragging_ || childScrolling_)) {
-        targetIndex_.reset();
-
-        auto visibleSize = CalculateVisibleSize();
-        if (LessOrEqual(visibleSize, 0.0)) {
+    if (!IsLoop() && (isDragging_ || childScrolling_)) {
+        // handle edge effects
+        if (CheckOverScroll(offset)) {
             return;
         }
-        auto friction = currentIndexOffset_ > 0
-                            ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
-                            : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
-
-        currentDelta_ = currentDelta_ - friction * offset;
-        currentIndexOffset_ += friction * offset;
+    }
+    currentDelta_ = currentDelta_ - offset;
+    currentIndexOffset_ += offset;
+    if (isDragging_) {
         AnimationCallbackInfo callbackInfo;
         callbackInfo.currentOffset =
             GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
         FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
-    } else if (!IsLoop() && IsOutOfBoundary(offset) &&
-               (edgeEffect == EdgeEffect::FADE || edgeEffect == EdgeEffect::NONE) && (isDragging_ || childScrolling_)) {
-        currentDelta_ = currentDelta_ - offset;
-        if (edgeEffect == EdgeEffect::FADE) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
-                auto remainOffset = GetDistanceToEdge();
-                fadeOffset_ += (offset - remainOffset);
-            }
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-    } else {
-        currentDelta_ = currentDelta_ - offset;
-        currentIndexOffset_ += offset;
-        if (isDragging_) {
-            AnimationCallbackInfo callbackInfo;
-            callbackInfo.currentOffset =
-                GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-            FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
-        }
     }
     MarkDirtyNodeSelf();
+}
+
+bool SwiperPattern::CheckOverScroll(float offset)
+{
+    switch (GetEdgeEffect()) {
+        case EdgeEffect::SPRING:
+            if (SpringOverScroll(offset)) {
+                return true;
+            }
+            break;
+        case EdgeEffect::FADE:
+            if (IsOutOfBoundary(offset)) {
+                currentDelta_ = currentDelta_ - offset;
+                auto host = GetHost();
+                CHECK_NULL_RETURN(host, false);
+                if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
+                    auto remainOffset = GetDistanceToEdge();
+                    fadeOffset_ += (offset - remainOffset);
+                }
+                host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                MarkDirtyNodeSelf();
+                return true;
+            }
+            break;
+        case EdgeEffect::NONE:
+            if (IsOutOfBoundary(offset)) {
+                currentDelta_ = currentDelta_ - offset;
+                MarkDirtyNodeSelf();
+                return true;
+            }
+            break;
+    }
+    return false;
+}
+
+bool SwiperPattern::SpringOverScroll(float offset)
+{
+    bool outOfBounds = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
+    if (!outOfBounds) {
+        return false;
+    }
+    targetIndex_.reset();
+
+    auto visibleSize = CalculateVisibleSize();
+    if (LessOrEqual(visibleSize, 0.0)) {
+        return true;
+    }
+    auto friction = currentIndexOffset_ > 0
+                        ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
+                        : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
+
+    currentDelta_ = currentDelta_ - friction * offset;
+    currentIndexOffset_ += friction * offset;
+    AnimationCallbackInfo callbackInfo;
+    callbackInfo.currentOffset =
+        GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
+    FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
+    MarkDirtyNodeSelf();
+    return true;
 }
 
 void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
