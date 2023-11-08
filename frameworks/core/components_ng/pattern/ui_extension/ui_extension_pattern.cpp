@@ -186,8 +186,10 @@ void UIExtensionPattern::OnConnect()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
     auto pipeline = PipelineBase::GetCurrentContext();
+    auto weak = WeakClaim(this);
+    auto pattern = weak.Upgrade();
     if (onRemoteReadyCallback_) {
-        onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(session_));
+        onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(session_, pattern));
     }
     if (onModalRemoteReadyCallback_) {
         onModalRemoteReadyCallback_(std::make_shared<ModalUIExtensionProxyImpl>(session_));
@@ -599,10 +601,80 @@ void UIExtensionPattern::SetOnRemoteReadyCallback(const std::function<void(const
                 TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension OnRemoteReady called");
                 auto pattern = weak.Upgrade();
                 if (pattern && pattern->onRemoteReadyCallback_) {
-                    pattern->onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(pattern->session_));
+                    pattern->onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
                 }
             }, TaskExecutor::TaskType::UI);
         };
+}
+
+void UIExtensionPattern::SetOnSyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+{
+    onSyncOnCallback_ = std::move(callback);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
+    extSessionEventCallback->notifySyncOnFunc_ =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor]() {
+            taskExecutor->PostTask([weak, instanceId]() {
+                ContainerScope scope(instanceId);
+                auto pattern = weak.Upgrade();
+                if (pattern && pattern->onSyncOnCallback_) {
+                    pattern->onSyncOnCallback_(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
+                }
+            }, TaskExecutor::TaskType::UI);
+        };
+}
+
+void UIExtensionPattern::SetOnAsyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+{
+    onAsyncOnCallback_ = std::move(callback);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
+    extSessionEventCallback->notifyAsyncOnFunc_ =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor]() {
+            taskExecutor->PostTask([weak, instanceId]() {
+                ContainerScope scope(instanceId);
+                auto pattern = weak.Upgrade();
+                if (pattern && pattern->onAsyncOnCallback_) {
+                    pattern->onAsyncOnCallback_(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
+                }
+            }, TaskExecutor::TaskType::UI);
+        };
+}
+
+void UIExtensionPattern::SetOnSyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+{
+    onSyncOnCallback_ = std::move(callback);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
+    extSessionEventCallback->notifySyncOnFunc_ = nullptr;
+}
+
+void UIExtensionPattern::SetOnAsyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+{
+    onAsyncOnCallback_ = std::move(callback);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
+    extSessionEventCallback->notifyAsyncOnFunc_ = nullptr;
 }
 
 void UIExtensionPattern::SetModalOnRemoteReadyCallback(

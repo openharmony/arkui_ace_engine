@@ -67,8 +67,12 @@ public:
 
     void SetModalOnDestroy(const std::function<void()>&& callback);
     void SetModalOnRemoteReadyCallback(
-        const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
+    const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
     void SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnSyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnAsyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnSyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnAsyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
     void SetOnReleaseCallback(const std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
@@ -149,6 +153,8 @@ private:
     std::function<void()> onModalDestroy_;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
+    std::function<void(const RefPtr<UIExtensionProxy>&)> onSyncOnCallback_;
+    std::function<void(const RefPtr<UIExtensionProxy>&)> onAsyncOnCallback_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
