@@ -807,11 +807,20 @@ void SharedMemoryImageLoader::UpdateData(const std::string& uri, const std::vect
 
 void ImageLoader::WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData)
 {
+    WriteCacheToFileWithData(uri, imageData.data(), imageData.size());
+}
+
+void ImageLoader::WriteCacheToFile(const std::string& uri, const std::string& imageData)
+{
+    WriteCacheToFileWithData(uri, imageData.data(), imageData.size());
+}
+
+void ImageLoader::WriteCacheToFileWithData(const std::string& uri, const void* const data, size_t size)
+{
     BackgroundTaskExecutor::GetInstance().PostTask(
-        [uri, imgData = std::move(imageData)]() {
-            ImageFileCache::GetInstance().WriteCacheFile(uri, imgData.data(), imgData.size());
+        [uri, data, size]() {
+            ImageFileCache::GetInstance().WriteCacheFile(uri, data, size);
         },
         BgTaskPriority::LOW);
 }
-
 } // namespace OHOS::Ace

@@ -72,6 +72,8 @@ public:
     static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string& key, const std::string& suffix);
 
     static void WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData);
+    static void WriteCacheToFile(const std::string& uri, const std::string& imageData);
+    static void WriteCacheToFileWithData(const std::string& uri, const void* const data, size_t size);
 };
 
 // File image provider: read image from file.
