@@ -1911,3 +1911,23 @@ var CheckBoxStyle;
   CheckBoxStyle["SQUARE_STYLE"] = 1;
 })(CheckBoxStyle || (CheckBoxStyle = {}));
 
+var ModelType;
+(function (ModelType) {
+  ModelType[ModelType["TEXTURE"] = 0] = "TEXTURE";
+  ModelType[ModelType["SURFACE"] = 1] = "SURFACE";
+})(ModelType || (ModelType = {}));
+
+var ModelLightType;
+(function (ModelLightType) {
+  ModelLightType[ModelLightType["INVALID"] = 0] = "INVALID";
+  ModelLightType[ModelLightType["DIRECTIONAL"] = 1] = "DIRECTIONAL";
+  ModelLightType[ModelLightType["POINT"] = 2] = "POINT";
+  ModelLightType[ModelLightType["SPOT"] = 3] = "SPOT";
+})(ModelLightType || (ModelLightType = {}));
+
+var ModelAnimationStates;
+(function (ModelAnimationStates) {
+  ModelAnimationStates[ModelAnimationStates["PLAY"] = 0] = "PLAY";
+  ModelAnimationStates[ModelAnimationStates["PAUSE"] = 1] = "PAUSE";
+  ModelAnimationStates[ModelAnimationStates["STOP"] = 2] = "STOP";
+})(ModelAnimationStates || (ModelAnimationStates = {}));

@@ -669,7 +669,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
-    { "Model", JSSceneView::JSBind },
+    { "Component3D", JSSceneView::JSBind },
 #endif
 #if defined(WINDOW_SCENE_SUPPORTED)
     { "RootScene", JSRootScene::JSBind },
