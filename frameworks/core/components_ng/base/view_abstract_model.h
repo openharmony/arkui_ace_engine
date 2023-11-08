@@ -205,6 +205,7 @@ public:
     virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
     virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
     virtual void SetDraggable(bool draggable) = 0;
+    virtual void SetDragPreviewOptions(const NG::DragPreviewOption& previewOption) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
     virtual void SetOnDragEnd(OnNewDragFunc&& onDragEnd) = 0;
