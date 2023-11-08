@@ -329,6 +329,7 @@ void ScrollBar::SetGestureEvent()
                     inRegion = scrollBar->InBarTouchRegion(point);
                 } else if (info.GetSourceDevice() == SourceType::MOUSE) {
                     inRegion = scrollBar->InBarHoverRegion(point);
+                    scrollBar->MarkNeedRender();
                 }
                 scrollBar->SetPressed(inRegion);
                 if (inRegion && !scrollBar->IsHover()) {
@@ -342,6 +343,7 @@ void ScrollBar::SetGestureEvent()
                     scrollBar->ScheduleDisappearDelayTask();
                 }
                 scrollBar->SetPressed(false);
+                scrollBar->MarkNeedRender();
             }
         });
     }
