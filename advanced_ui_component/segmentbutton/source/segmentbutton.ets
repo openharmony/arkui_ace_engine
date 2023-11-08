@@ -175,7 +175,6 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
 export class SegmentButtonOptions {
   type: "tab" | "capsule"
   multiply: boolean = false
-  buttons: SegmentButtonItemOptionsArray
   fontColor: ResourceColor
   selectedFontColor: ResourceColor
   fontSize: DimensionNoPercentage
@@ -192,6 +191,18 @@ export class SegmentButtonOptions {
   showIcon: boolean = false
   iconTextRadius?: number
   iconTextBackgroundRadius?: number
+
+  private _buttons: SegmentButtonItemOptionsArray
+  get buttons() {
+    return this._buttons
+  }
+  set buttons(val) {
+    if (this._buttons !== void 0 && this._buttons !== val) {
+      this.onButtonsChange?.()
+    }
+    this._buttons = val
+  }
+  onButtonsChange?: () => void
 
   constructor(options: TabSegmentButtonOptions | CapsuleSegmentButtonOptions) {
     this.fontColor = options.fontColor ?? $r('sys.color.ohos_id_color_text_secondary')
@@ -751,6 +762,13 @@ export struct SegmentButton {
   aboutToAppear() {
     if (this.options === void 0 || this.options.buttons === void 0) {
       return
+    }
+    this.options.onButtonsChange = () => {
+      if (this.options.type === 'tab') {
+        this.selectedIndexes = [0]
+      } else {
+        this.selectedIndexes = []
+      }
     }
     this.updateSelectedIndexes()
     this.setItemsSelected()
