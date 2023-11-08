@@ -3258,6 +3258,7 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     auto parent = parent_.Upgrade();
     if (!parent || !enableNestedScroll_) {
         if (IsOutOfBoundary(offset) && ChildFirst(state)) {
+            CloseTheGap(offset);
             return { offset, true };
         }
         UpdateCurrentOffset(offset);
@@ -3270,6 +3271,7 @@ ScrollResult SwiperPattern::HandleScrollSelfFirst(float offset, int32_t source, 
 {
     // priority: self scroll > parent scroll > parent overScroll > self overScroll
     if (IsOutOfBoundary(offset)) {
+        CloseTheGap(offset);
         // skip CHECK_NULL, already checked in HandleScroll
         auto parent = parent_.Upgrade();
 
@@ -3295,6 +3297,14 @@ ScrollResult SwiperPattern::HandleScrollSelfFirst(float offset, int32_t source, 
         UpdateCurrentOffset(offset);
     }
     return { 0.0f, !IsLoop() && GetDistanceToEdge() <= 0.0f };
+}
+
+void SwiperPattern::CloseTheGap(float offset)
+{
+    float distanceToEdge = GetDistanceToEdge();
+    if (distanceToEdge > 0.0f) {
+        UpdateCurrentOffset(offset > 0 ? distanceToEdge : -distanceToEdge);
+    }
 }
 
 inline bool SwiperPattern::ChildFirst(NestedState state)
@@ -3508,5 +3518,5 @@ void SwiperPattern::FireAndCleanScrollingListener()
         listener->NotifyScrollingEvent();
     }
     scrollingListener_.clear();
-} // namespace OHOS::Ace::NG
 }
+} // namespace OHOS::Ace::NG
