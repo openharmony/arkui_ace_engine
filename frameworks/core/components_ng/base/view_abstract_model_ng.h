@@ -47,7 +47,7 @@ public:
     ~ViewAbstractModelNG() override = default;
 
     static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
-        const NG::OffsetF& offset, std::function<void()>& previewBuildFunc, const MenuParam& menuParam = MenuParam());
+        const NG::OffsetF& offset, std::function<void()>& previewBuildFunc, MenuParam menuParam);
 
     void SetWidth(const CalcDimension& width) override
     {
