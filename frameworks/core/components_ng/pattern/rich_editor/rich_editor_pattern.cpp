@@ -60,6 +60,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+#if defined(ENABLE_STANDARD_INPUT)
+// should be moved to theme
+constexpr float CARET_WIDTH = 1.5f;
+constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
+#endif
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr float DEFAULT_IMAGE_SIZE = 57.0f;
@@ -244,9 +249,8 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
 
-    auto imageNode =
-            ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                                               []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
 
     // Disable the image itself event
@@ -1179,7 +1183,7 @@ bool RichEditorPattern::HandleUserGestureEvent(
         return false;
     }
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
-                          info.GetLocalLocation().GetY() - textContentRect.GetY() };
+        info.GetLocalLocation().GetY() - textContentRect.GetY() };
     int32_t start = 0;
     for (const auto& item : spans_) {
         if (!item) {
@@ -1199,7 +1203,7 @@ bool RichEditorPattern::HandleUserGestureEvent(
 
 bool RichEditorPattern::HandleUserClickEvent(GestureEvent& info)
 {
-    auto clickFunc = [] (RefPtr<SpanItem> item, GestureEvent& info) -> bool {
+    auto clickFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool {
         if (item && item->onClick) {
             item->onClick(info);
             return true;
@@ -1391,7 +1395,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
 
 bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
 {
-    auto longPressFunc = [] (RefPtr<SpanItem> item, GestureEvent& info) -> bool {
+    auto longPressFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool {
         if (item && item->onLongPress) {
             item->onLongPress(info);
             return true;
