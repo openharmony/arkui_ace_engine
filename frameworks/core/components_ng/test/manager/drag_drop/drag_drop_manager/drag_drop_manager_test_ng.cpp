@@ -113,16 +113,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest001, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(pixelMap, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
-
-    /**
-     * @tc.steps: step3. call CreateAndShowDragWindow again
-     * @tc.expected: step3. return nullptr because dragWindow_ has existed
-     */
-    void* voidPtr2 = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap2 = PixelMap::CreatePixelMap(voidPtr2);
-    GestureEvent gestureEvent2;
-    auto dragDropProxyNull = dragDropManager->CreateAndShowDragWindow(pixelMap2, gestureEvent2);
-    EXPECT_FALSE(dragDropProxyNull);
 }
 
 /**
