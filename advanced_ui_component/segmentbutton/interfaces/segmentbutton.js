@@ -201,6 +201,16 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
         this.componentPadding = this.multiply ? 0 : 2
     }
 
+    get buttons() {
+        return this._buttons
+    }
+
+    set buttons(t) {
+        var e;
+        void 0 !== this._buttons && this._buttons !== t && (null === (e = this.onButtonsChange) || void 0 === e || e.call(this));
+        this._buttons = t
+    }
+
     static tab(t) {
         return new SegmentButtonOptions_1(Object.assign({ type: "tab" }, t))
     }
@@ -1621,6 +1631,9 @@ class SegmentButton extends ViewPU {
 
     aboutToAppear() {
         if (void 0 !== this.options && void 0 !== this.options.buttons) {
+            this.options.onButtonsChange = () => {
+                    "tab" === this.options.type ? this.selectedIndexes = [0] : this.selectedIndexes = []
+            };
             this.updateSelectedIndexes();
             this.setItemsSelected();
             this.updateAnimatedProperty(null)
