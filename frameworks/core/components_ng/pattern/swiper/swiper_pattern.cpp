@@ -572,6 +572,10 @@ int32_t SwiperPattern::GetLoopIndex(int32_t originalIndex) const
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (!isDragging_) {
+        SetLazyForEachLongPredict(true);
+    }
+
     auto isNotInit = true;
     if (isInit_) {
         isNotInit = false;
@@ -2700,17 +2704,11 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
 
 void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
 {
-    // lazyBuild feature.
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
-    for (auto&& child : children) {
-        auto lazyForEach = DynamicCast<LazyForEachNode>(child);
-        if (lazyForEach) {
-            lazyForEach->SetRequestLongPredict(useLazyLoad);
-        }
-    }
+    SetLazyForEachLongPredict(useLazyLoad);
+
     if (useLazyLoad) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto cacheCount = layoutProperty->GetCachedCountValue(1);
@@ -2722,6 +2720,8 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
         if (forEachIndexSet.empty()) {
             return;
         }
+
+        const auto& children = host->GetChildren();
         for (const auto& child : children) {
             if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
                 continue;
@@ -2743,6 +2743,20 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
                     }
                 },
                 TaskExecutor::TaskType::UI);
+        }
+    }
+}
+
+void SwiperPattern::SetLazyForEachLongPredict(bool useLazyLoad) const
+{
+    // lazyBuild feature.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    for (auto&& child : children) {
+        auto lazyForEach = DynamicCast<LazyForEachNode>(child);
+        if (lazyForEach) {
+            lazyForEach->SetRequestLongPredict(useLazyLoad);
         }
     }
 }
