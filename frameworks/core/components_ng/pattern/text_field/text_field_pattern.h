@@ -940,10 +940,46 @@ public:
     {
         return showSelect_;
     }
+
+    RefPtr<PixelMap> GetPixelMap();
+
+    void UpdateShowMagnifier(bool isShowMagnifier = false)
+    {
+        isShowMagnifier_ = isShowMagnifier;
+    }
+
+    bool GetShowMagnifier() const
+    {
+        return isShowMagnifier_;
+    }
+
+    void SetLocalOffset(OffsetF localOffset)
+    {
+        localOffset_.SetX(localOffset.GetX());
+        localOffset_.SetY(localOffset.GetY());
+        isShowMagnifier_ = true;
+    }
+
+    OffsetF GetLocalOffset() const
+    {
+        return localOffset_;
+    }
+
+    int32_t GetCaretPosition()
+    {
+        return operationRecords_.back().caretPosition;
+    }
+
+    int32_t GetContentWideTextLength()
+    {
+        return static_cast<int32_t>(contentController_->GetWideText().length());
+    }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
 protected:
     virtual void InitDragEvent();
 #endif
+
 private:
     void GetTextSelectRectsInRangeAndWillChange();
     bool HasFocus() const;
@@ -1216,6 +1252,8 @@ private:
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;
+    bool isShowMagnifier_ = false;
+    OffsetF localOffset_;
 };
 } // namespace OHOS::Ace::NG
 

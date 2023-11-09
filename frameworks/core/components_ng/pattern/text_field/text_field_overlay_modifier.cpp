@@ -18,11 +18,23 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float MAGNIFIER_GAIN = 1.25f;
+constexpr Dimension MAGNIFIER_WIDTH = 140.0_vp;
+constexpr Dimension MAGNIFIER_HEIGHT = 50.0_vp;
+constexpr Dimension MAGNIFIER_OFFSET_Y = 10.0_vp;
+constexpr Dimension PIXEL_MAP_IMAGE_OFFSET = 5.0_vp;
+constexpr Dimension CLOSE_MAGNIFIER_MAX_OFFSET_X = 70.0_vp;
+constexpr Dimension MAGNIFIER_BOUNDRY_WIDTH = 1.0_vp;
+constexpr uint32_t MAGNIFIER_COLOR_BG = 0xffffffff;
+} // namespace
+
 TextFieldOverlayModifier::TextFieldOverlayModifier(
     const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
     : pattern_(pattern), edgeEffect_(edgeEffect)
@@ -82,6 +94,11 @@ void TextFieldOverlayModifier::onDraw(DrawingContext& context)
     PaintScrollBar(context);
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
+#ifndef USE_ROSEN_DRAWING
+#ifdef ENABLE_ROSEN_BACKEND
+    PaintMagnifier(context);
+#endif
+#endif
 }
 
 void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
@@ -166,6 +183,9 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     auto& canvas = context.canvas;
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->GetShowMagnifier()) {
+        cursorVisible_->Set(true);
+    }
     if (!cursorVisible_->Get() || textFieldPattern->GetSelectMode() == SelectionMode::SELECT_ALL) {
         return;
     }
@@ -217,6 +237,150 @@ void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
     }
 }
 
+void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
+{
+    auto pattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetShowMagnifier()) {
+        return;
+    }
+    auto& canvas = context.canvas;
+    canvas.Save();
+    float startX = 0.0f;
+    float startY = 0.0f;
+    float endX = 0.0f;
+    float endY = 0.0f;
+    float localOffsetX = 0.0f;
+    if (!GetMagnifierRect(startX, startY, endX, endY, localOffsetX)) {
+        return;
+    }
+
+    Color color(MAGNIFIER_COLOR_BG);
+    RSBrush brush;
+    brush.SetColor(ToRSColor(color));
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+
+    std::vector<TextPoint> drawPathPoints = GetTextPoints(startX, startY, endX, endY, true);
+    auto drawPath = GetPathByPoints(drawPathPoints);
+    canvas.DrawPath(*drawPath);
+    std::vector<TextPoint> clipPathPoints = GetTextPoints(startX, startY, endX, endY, false);
+    auto clipPath = GetPathByPoints(clipPathPoints);
+    canvas.ClipPath(*clipPath, RSClipOp::INTERSECT, true);
+
+    auto magnifierGain = MAGNIFIER_GAIN;
+    auto pixelMapImageOffset = PIXEL_MAP_IMAGE_OFFSET.ConvertToPx();
+
+    auto pixelMap = pattern->GetPixelMap();
+    PixelMapImage pixelMapImage(pixelMap);
+    auto magnifierPaintConfig = pixelMapImage.GetPaintConfig();
+    magnifierPaintConfig.scaleX_ = magnifierGain;
+    magnifierPaintConfig.scaleY_ = magnifierGain;
+    pixelMapImage.SetPaintConfig(magnifierPaintConfig);
+
+    RectF dstRect;
+    dstRect.SetRect(localOffsetX - localOffsetX * magnifierGain,
+        startY - cursorOffset_->Get().GetY() * magnifierGain + pixelMapImageOffset,
+        pixelMap->GetWidth() * magnifierGain, pixelMap->GetHeight() * magnifierGain);
+    pixelMapImage.DrawRect(canvas, ToRSRect(dstRect));
+
+    canvas.DetachBrush();
+    canvas.Restore();
+}
+
+bool TextFieldOverlayModifier::GetMagnifierRect(
+    float& startX, float& startY, float& endX, float& endY, float& localOffsetX)
+{
+    auto pattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(pattern, false);
+    auto cursorOffsetX = cursorOffset_->Get().GetX();
+    auto magnifierWidth = MAGNIFIER_WIDTH.ConvertToPx();
+    auto magnifierHeight = MAGNIFIER_HEIGHT.ConvertToPx();
+    auto magnifierOffsetY = MAGNIFIER_OFFSET_Y.ConvertToPx();
+    auto closeMagnifierMaxOffsetX = CLOSE_MAGNIFIER_MAX_OFFSET_X.ConvertToPx();
+    localOffsetX = pattern->GetLocalOffset().GetX();
+    localOffsetX = std::max(localOffsetX, contentOffset_->Get().GetX());
+    localOffsetX = std::min(localOffsetX, contentSize_->Get().Width() + contentOffset_->Get().GetX());
+    auto textBoxesLeft = 0.0f;
+    if (!pattern->GetTextBoxes().empty()) {
+        textBoxesLeft = pattern->GetTextBoxes()[0].Left();
+    }
+    if (std::abs(localOffsetX - cursorOffsetX) > closeMagnifierMaxOffsetX &&
+        std::abs(localOffsetX - textBoxesLeft) > closeMagnifierMaxOffsetX) {
+        return false;
+    }
+    startX = localOffsetX - magnifierWidth / 2.0f;
+    if (pattern->GetCaretPosition() == pattern->GetContentWideTextLength() && localOffsetX >= cursorOffsetX) {
+        startX = cursorOffsetX - magnifierWidth / 2.0f;
+        localOffsetX = cursorOffsetX;
+    }
+    startY = cursorOffset_->Get().GetY() - magnifierHeight - magnifierOffsetY;
+    if (startY < 0 && (pattern->GetParentGlobalOffset().GetY() + startY) < 0) {
+        startY = cursorOffset_->Get().GetY() + pattern->GetLineHeight() + magnifierHeight + magnifierOffsetY;
+    }
+    startX = std::max(startX, 0.0f);
+    endX = startX + magnifierWidth;
+    endY = startY;
+    if (endX > contentSize_->Get().Width() + contentOffset_->Get().GetX() * 2.0f) {
+        endX = contentSize_->Get().Width() + contentOffset_->Get().GetX() * 2.0f;
+        startX = endX - magnifierWidth;
+    }
+    return true;
+}
+
+std::vector<TextPoint> TextFieldOverlayModifier::GetTextPoints(
+    float startX, float startY, float endX, float endY, bool haveOffset)
+{
+    std::vector<TextPoint> textPoints;
+    auto lineHeight = MAGNIFIER_HEIGHT.ConvertToPx();
+    auto offset = MAGNIFIER_BOUNDRY_WIDTH.ConvertToPx();
+    if (haveOffset) {
+        textPoints.emplace_back(TextPoint(startX - offset, startY - offset));
+        textPoints.emplace_back(TextPoint(endX + offset, endY - offset));
+        textPoints.emplace_back(TextPoint(endX + offset, endY + lineHeight + offset));
+        textPoints.emplace_back(TextPoint(startX - offset, endY + lineHeight + offset));
+        textPoints.emplace_back(TextPoint(startX - offset, endY - offset));
+        textPoints.emplace_back(TextPoint(endX + offset, endY - offset));
+        return textPoints;
+    }
+    textPoints.emplace_back(TextPoint(startX, startY));
+    textPoints.emplace_back(TextPoint(endX, endY));
+    textPoints.emplace_back(TextPoint(endX, endY + lineHeight));
+    textPoints.emplace_back(TextPoint(startX, endY + lineHeight));
+    textPoints.emplace_back(TextPoint(startX, endY));
+    textPoints.emplace_back(TextPoint(endX, endY));
+    return textPoints;
+}
+
+std::shared_ptr<RSPath> TextFieldOverlayModifier::GetPathByPoints(std::vector<TextPoint> points)
+{
+    std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
+    auto radius = MAGNIFIER_HEIGHT.ConvertToPx() / 2.0f;
+    path->MoveTo(points[0].x + radius, points[0].y);
+    size_t step = 2;
+    for (size_t i = 0; i + step < points.size(); i++) {
+        auto firstPoint = points[i];
+        auto crossPoint = points[i + 1];
+        auto secondPoint = points[i + step];
+
+        if (crossPoint.y == firstPoint.y) {
+            int32_t directionX = (crossPoint.x - firstPoint.x) > 0 ? 1 : -1;
+            int32_t directionY = (secondPoint.y - crossPoint.y) > 0 ? 1 : -1;
+            auto direction =
+                (directionX * directionY > 0) ? RSPathDirection::CW_DIRECTION : RSPathDirection::CCW_DIRECTION;
+            path->LineTo(crossPoint.x - radius * directionX, crossPoint.y);
+            path->ArcTo(radius, radius, 0.0f, direction, crossPoint.x, crossPoint.y + radius * directionY);
+        } else {
+            int32_t directionX = (secondPoint.x - crossPoint.x) > 0 ? 1 : -1;
+            int32_t directionY = (crossPoint.y - firstPoint.y) > 0 ? 1 : -1;
+            auto direction =
+                (directionX * directionY < 0) ? RSPathDirection::CW_DIRECTION : RSPathDirection::CCW_DIRECTION;
+            path->LineTo(crossPoint.x, crossPoint.y - radius * directionY);
+            path->ArcTo(radius, radius, 0.0f, direction, crossPoint.x + radius * directionX, secondPoint.y);
+        }
+    }
+    return path;
+}
 void TextFieldOverlayModifier::SetCursorColor(Color& value)
 {
     cursorColor_->Set(LinearColor(value));

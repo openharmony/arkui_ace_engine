@@ -1157,8 +1157,8 @@ void TextFieldPattern::InitDragEvent()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!IsInPasswordMode() &&
-        layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None && host->IsDraggable()) {
+    if (!IsInPasswordMode() && layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None &&
+        host->IsDraggable()) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
     } else {
@@ -2102,6 +2102,7 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     CHECK_NULL_VOID(SelectOverlayIsOn());
     CHECK_NULL_VOID(!contentController_->IsEmpty());
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
+    SetLocalOffset(localOffset);
     if (isSingleHandle_) {
         selectController_->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
     } else {
@@ -2175,6 +2176,7 @@ void TextFieldPattern::UpdateCopyAllStatus()
 void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFirstHandle)
 {
     UpdateCopyAllStatus();
+    UpdateShowMagnifier();
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     if (!isSingleHandle_) {
@@ -2540,8 +2542,7 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
         .windowId = pipeline->GetFocusWindowId(),
-        .positionY =
-            (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY(),
+        .positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY(),
         .height = frameRect_.Height() };
     return textConfig;
 }
@@ -3598,8 +3599,8 @@ bool TextFieldPattern::OnBackPressed()
     CHECK_NULL_RETURN(tmpHost, false);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d receives back press event", tmpHost->GetId());
     if (SelectOverlayIsOn()) {
-        selectController_->UpdateCaretIndex(std::max(
-            selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
+        selectController_->UpdateCaretIndex(
+            std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
         CloseSelectOverlay();
         return true;
     }
@@ -4400,9 +4401,8 @@ bool TextFieldPattern::IsInPasswordMode() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
-    return inputType == TextInputType::VISIBLE_PASSWORD
-        || inputType == TextInputType::NUMBER_PASSWORD
-        || inputType == TextInputType::SCREEN_LOCK_PASSWORD;
+    return inputType == TextInputType::VISIBLE_PASSWORD || inputType == TextInputType::NUMBER_PASSWORD ||
+           inputType == TextInputType::SCREEN_LOCK_PASSWORD;
 }
 
 void TextFieldPattern::RestorePreInlineStates()
@@ -4968,5 +4968,14 @@ void TextFieldPattern::ScrollToSafeArea() const
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->ScrollTextFieldToSafeArea();
+}
+
+RefPtr<PixelMap> TextFieldPattern::GetPixelMap()
+{
+    auto context = GetHost()->GetRenderContext();
+    CHECK_NULL_RETURN(context, NULL);
+    auto pixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_RETURN(pixelMap, NULL);
+    return pixelMap;
 }
 } // namespace OHOS::Ace::NG
