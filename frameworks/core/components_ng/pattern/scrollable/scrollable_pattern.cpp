@@ -1125,9 +1125,10 @@ void ScrollablePattern::LimitMouseEndOffset()
 {
     float limitedMainOffset = -1.0f;
     float limitedCrossOffset = -1.0f;
-    auto hostSize = GetHostFrameSize();
-    auto mainSize = hostSize->MainSize(axis_);
-    auto crossSize = hostSize->CrossSize(axis_);
+    auto host = GetHost();
+    auto hostSize = host->GetGeometryNode()->GetFrameSize();
+    auto mainSize = hostSize.MainSize(axis_);
+    auto crossSize = hostSize.CrossSize(axis_);
     auto mainOffset = mouseEndOffset_.GetMainOffset(axis_);
     auto crossOffset = mouseEndOffset_.GetCrossOffset(axis_);
     if (LessNotEqual(mainOffset, 0.0f)) {
