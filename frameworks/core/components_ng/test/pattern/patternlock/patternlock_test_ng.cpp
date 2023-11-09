@@ -554,7 +554,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest006, TestSize.Level1)
 
 /**
  * @tc.name: PatternLockPatternTest007
- * @tc.desc: Test PatternLock pattern method HandleGestureUpdate.
+ * @tc.desc: Test PatternLock pattern method OnTouchMove.
  * @tc.type: FUNC
  */
 HWTEST_F(PatternLockTestNg, PatternLockPatternTest007, TestSize.Level1)
@@ -581,18 +581,14 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest007, TestSize.Level1)
     float offsetY = 1.0f;
     Offset offset(offsetX, offsetY);
     pattern->isMoveEventValid_ = false;
-    GestureEvent info;
-    info.SetInputEventType(InputEventType::AXIS);
-    pattern->HandleGestureUpdate(info);
-    EXPECT_EQ(pattern->cellCenter_.GetX(), .0f);
-    EXPECT_EQ(pattern->cellCenter_.GetY(), .0f);
-    info.SetGlobalLocation(offset);
-    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
-    pattern->HandleGestureUpdate(info);
+    TouchLocationInfo locationInfo(0);
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetGlobalLocation(offset);
+    pattern->OnTouchMove(locationInfo);
     EXPECT_EQ(pattern->cellCenter_.GetX(), .0f);
     EXPECT_EQ(pattern->cellCenter_.GetY(), .0f);
     pattern->isMoveEventValid_ = true;
-    pattern->HandleGestureUpdate(info);
+    pattern->OnTouchMove(locationInfo);
     EXPECT_EQ(pattern->cellCenter_.GetX(), offset.GetX());
     EXPECT_EQ(pattern->cellCenter_.GetY(), offset.GetY());
 }
@@ -632,11 +628,8 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest008, TestSize.Level1)
     pattern->isMoveEventValid_ = false;
     TouchLocationInfo locationInfo(0);
     locationInfo.SetLocalLocation(offset);
-    TouchEventInfo touchEventInfo("onTouchDown");
-    touchEventInfo.AddTouchLocationInfo(std::move(locationInfo));
-    pattern->OnTouchDown(touchEventInfo);
     pattern->isMoveEventValid_ = true;
-    pattern->OnTouchDown(touchEventInfo);
+    pattern->OnTouchDown(locationInfo);
     EXPECT_EQ(pattern->cellCenter_.GetX(), offset.GetX());
     EXPECT_EQ(pattern->cellCenter_.GetY(), offset.GetY());
 }
@@ -675,8 +668,20 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest009, TestSize.Level1)
     locationInfoTouchDown.SetLocalLocation(offset);
     locationInfoTouchDown.SetTouchType(TouchType::DOWN);
     TouchEventInfo touchEventInfoTouchDown("onTouchDown");
-    touchEventInfoTouchDown.AddTouchLocationInfo(std::move(locationInfoTouchDown));
+    touchEventInfoTouchDown.AddChangedTouchLocationInfo(std::move(locationInfoTouchDown));
     pattern->HandleTouchEvent(touchEventInfoTouchDown);
+    EXPECT_EQ(pattern->fingerId_, 0);
+    EXPECT_EQ(pattern->cellCenter_.GetX(), offset.GetX());
+    EXPECT_EQ(pattern->cellCenter_.GetY(), offset.GetY());
+    pattern->cellCenter_.Reset();
+
+    pattern->isMoveEventValid_ = true;
+    TouchLocationInfo locationInfoTouchMove(0);
+    locationInfoTouchMove.SetGlobalLocation(offset);
+    locationInfoTouchMove.SetTouchType(TouchType::MOVE);
+    TouchEventInfo touchEventInfoTouchMove("onTouchMove");
+    touchEventInfoTouchMove.AddChangedTouchLocationInfo(std::move(locationInfoTouchMove));
+    pattern->HandleTouchEvent(touchEventInfoTouchMove);
     EXPECT_EQ(pattern->cellCenter_.GetX(), offset.GetX());
     EXPECT_EQ(pattern->cellCenter_.GetY(), offset.GetY());
     pattern->cellCenter_.Reset();
@@ -686,16 +691,17 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest009, TestSize.Level1)
     locationInfoTouchUp.SetLocalLocation(offset);
     locationInfoTouchUp.SetTouchType(TouchType::UP);
     TouchEventInfo touchEventInfoUp("onTouchUp");
-    touchEventInfoUp.AddTouchLocationInfo(std::move(locationInfoTouchUp));
+    touchEventInfoUp.AddChangedTouchLocationInfo(std::move(locationInfoTouchUp));
     pattern->HandleTouchEvent(touchEventInfoUp);
     EXPECT_EQ(pattern->isMoveEventValid_, false);
+    EXPECT_EQ(pattern->fingerId_, -1);
 
     pattern->isMoveEventValid_ = true;
     TouchLocationInfo locationInfoTouchUnkown(0);
     locationInfoTouchUnkown.SetLocalLocation(offset);
     locationInfoTouchUnkown.SetTouchType(TouchType::UNKNOWN);
     TouchEventInfo touchEventInfoTouchUnkown("onTouchUnkown");
-    touchEventInfoTouchUnkown.AddTouchLocationInfo(std::move(locationInfoTouchUnkown));
+    touchEventInfoTouchUnkown.AddChangedTouchLocationInfo(std::move(locationInfoTouchUnkown));
     pattern->HandleTouchEvent(touchEventInfoTouchUnkown);
 }
 
