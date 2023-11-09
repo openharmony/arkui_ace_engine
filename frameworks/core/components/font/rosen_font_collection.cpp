@@ -111,7 +111,7 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
         }
         fontCollection_->ClearFontFamilyCache();
 #else
-        LOGE("Drawing is not supported");
+        LOGE("Drawing is not supported dynamic font");
 #endif
 #else
         fontCollection_->LoadFont(familyName, fontData, length);

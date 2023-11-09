@@ -215,20 +215,12 @@ void RosenRenderChart::PaintText(RSCanvas* canvas, const Rect& paintRegion, cons
 #endif
         paragraph->Layout(paragraphSize);
         Size textSize = Size(paragraph->GetMinIntrinsicWidth(), paragraph->GetHeight());
-#ifndef USE_ROSEN_DRAWING
         if (text.GetPlacement() == Placement::TOP) {
             paragraph->Paint(canvas, pointPosition.GetX() - textSize.Width() / 2,
                 pointPosition.GetY() - textSize.Height() - TEXT_PADDING);
         } else if (text.GetPlacement() == Placement::BOTTOM) {
             paragraph->Paint(canvas, pointPosition.GetX() - textSize.Width() / 2, pointPosition.GetY() + TEXT_PADDING);
         }
-#else
-        if (text.GetPlacement() == Placement::TOP) {
-            LOGE("Drawing is not supported");
-        } else if (text.GetPlacement() == Placement::BOTTOM) {
-            LOGE("Drawing is not supported");
-        }
-#endif
     }
 }
 

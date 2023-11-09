@@ -2826,7 +2826,7 @@ void PipelineContext::RemoveFontNode(const WeakPtr<RenderNode>& node)
 
 void PipelineContext::SetClickPosition(const Offset& position) const
 {
-    LOGI("SetClickPosition position:%{public}s rootOffest:%{public}s", position.ToString().c_str(),
+    LOGI("SetClickPosition position:%{public}s rootOffset:%{public}s", position.ToString().c_str(),
         rootOffset_.ToString().c_str());
     if (textFieldManager_) {
         textFieldManager_->SetClickPosition(position - rootOffset_);
