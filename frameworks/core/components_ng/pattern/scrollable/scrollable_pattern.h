@@ -318,7 +318,7 @@ public:
         return exp(-RATIO * gamma);
     }
 
-    bool GetAlwaysEnabled()
+    bool GetAlwaysEnabled() const
     {
         return edgeEffectAlwaysEnabled_;
     }
