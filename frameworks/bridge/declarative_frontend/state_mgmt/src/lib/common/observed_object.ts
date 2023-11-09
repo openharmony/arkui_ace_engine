@@ -129,7 +129,6 @@ class SubscribableHandler {
     this.owningProperties_.delete(subscriberId);
   }
 
-
   protected notifyObjectPropertyHasChanged(propName: string, newValue: any) {
     stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {

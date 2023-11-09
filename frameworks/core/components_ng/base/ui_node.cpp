@@ -30,7 +30,7 @@ thread_local int32_t UINode::currentAccessibilityId_ = 0;
 UINode::~UINode()
 {
     if (!removeSilently_) {
-        ElementRegister::GetInstance()->RemoveItem(nodeId_);
+        ElementRegister::GetInstance()->RemoveItem(nodeId_, tag_);
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }

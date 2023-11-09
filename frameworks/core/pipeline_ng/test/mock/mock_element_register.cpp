@@ -27,7 +27,7 @@ ElementRegister* ElementRegister::GetInstance()
     return (ElementRegister::instance_);
 }
 
-RefPtr<Element> ElementRegister::GetElementById(ElementIdType /*elementId*/)
+RefPtr<Element> ElementRegister::GetElementById(ElementIdType /* elementId */)
 {
     return nullptr;
 }
@@ -50,12 +50,12 @@ RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
     return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
 }
 
-RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType /*elementId*/)
+RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType /* elementId */)
 {
     return nullptr;
 }
 
-bool ElementRegister::Exists(ElementIdType /*elementId*/)
+bool ElementRegister::Exists(ElementIdType /* elementId */)
 {
     return false;
 }
@@ -66,12 +66,12 @@ bool ElementRegister::AddReferenced(ElementIdType elementId, const WeakPtr<AceTy
     return result.second;
 }
 
-bool ElementRegister::AddElement(const RefPtr<Element>& /*element*/)
+bool ElementRegister::AddElement(const RefPtr<Element>& /* element */)
 {
     return false;
 }
 
-bool ElementRegister::AddElementProxy(const WeakPtr<V2::ElementProxy>& /*elementProxy*/)
+bool ElementRegister::AddElementProxy(const WeakPtr<V2::ElementProxy>& /* elementProxy */)
 {
     return false;
 }
@@ -84,7 +84,7 @@ bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
     return AddReferenced(node->GetId(), node);
 }
 
-bool ElementRegister::RemoveItem(ElementIdType /*elementId*/)
+bool ElementRegister::RemoveItem(ElementIdType /* elementId */, const std::string& /* tag */)
 {
     return true;
 }
@@ -97,12 +97,11 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
     return itemMap_.erase(elementId);
 }
 
-std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
+void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
 {
-    return removedItems_;
+    removedItems = removedItems_;
+    removedItems_ = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>();
 }
-
-void ElementRegister::ClearRemovedItems(ElementIdType elementId) {}
 
 void ElementRegister::Clear()
 {

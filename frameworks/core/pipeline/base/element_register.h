@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <functional>
 #include "base/memory/referenced.h"
 #include "frameworks/base/memory/ace_type.h"
 
@@ -33,6 +34,19 @@ class UINode;
 namespace OHOS::Ace {
 using ElementIdType = int32_t;
 class Element;
+
+
+// removed_items is a Set of elmtId and UINode TAG
+// The TAG aims easier analysis for DFX and debug
+// This std::pair needs a custom has function
+struct deleted_element_hash {
+    inline std::size_t operator()(const std::pair<ElementIdType, std::string>& v) const
+    {
+        return v.first;
+    }
+};
+
+using RemovedElementsType = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>;
 
 class ACE_EXPORT ElementRegister {
 public:
@@ -66,7 +80,7 @@ public:
      * means GetElementById on this elmtId no longer returns an Element
      * method adds the elmtId to the removed Element Set
      */
-    bool RemoveItem(ElementIdType elementId);
+    bool RemoveItem(ElementIdType elementId, const std::string& tag = std::string("undefined TAG"));
 
     /**
      * remove Element with given elmtId from the Map
@@ -77,12 +91,7 @@ public:
      */
     bool RemoveItemSilently(ElementIdType elementId);
 
-    /**
-     * return  removed elements set to the caller
-     * should be followed by ClearRemovedElements() call
-     */
-    std::unordered_set<ElementIdType>& GetRemovedItems();
-    void ClearRemovedItems(ElementIdType elmtId);
+    void MoveRemovedItems(RemovedElementsType& removedItems);
 
     /**
      * does a complete reset
@@ -93,6 +102,30 @@ public:
     ElementIdType MakeUniqueId()
     {
         return nextUniqueElementId_++;
+    }
+
+    void RegisterJSUINodeRegisterCallbackFunc(const std::function<void(void)>& jsCallback) {
+        LOGD("RegisterJSUINodeRegisterCallbackFunc registered");
+        jsUnregisterCallback_ = std::move(jsCallback);
+    }
+
+    void RegisterJSUINodeRegisterGlobalFunc(const std::function<void(void)>& jsCallback) {
+        LOGD("RegisterJSUINodeRegisterGlobalFunc registered");
+        jsUnregisterElmtIDCallback_ = std::move(jsCallback);
+    }
+
+    void CallJSUINodeRegisterCallbackFunc() {
+        if (jsUnregisterCallback_) {
+            LOGD("jsUnregisterCallback_ is valid");
+            jsUnregisterCallback_();
+        }
+    }
+
+    void CallJSUINodeRegisterGlobalFunc() {
+        if (jsUnregisterElmtIDCallback_) {
+            LOGD("jsUnregisterElmtIDCallback_ is valid");
+            jsUnregisterElmtIDCallback_();
+        }
     }
 
 private:
@@ -112,12 +145,13 @@ private:
     std::unordered_map<ElementIdType, WeakPtr<AceType>> itemMap_;
 
     // Set of removed Elements (not in itemMap_ anymore)
-    std::unordered_set<ElementIdType> removedItems_;
+    RemovedElementsType removedItems_;
 
     // Cache IDs that are referenced by other object
-    // which causes delayed destruction  when custom node is destoryed.
+    // which causes delayed destruction  when custom node is destroyed.
     std::unordered_set<ElementIdType> deletedCachedItems_;
-
+    std::function<void(void)> jsUnregisterCallback_;
+    std::function<void(void)> jsUnregisterElmtIDCallback_;
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };
 } // namespace OHOS::Ace
