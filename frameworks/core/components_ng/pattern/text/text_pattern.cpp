@@ -1229,10 +1229,17 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
             spans_.emplace_back(spanNode->GetSpanItem());
         }
     } else if (child->GetTag() == V2::IMAGE_ETS_TAG) {
-        auto imageNode = DynamicCast<ImageSpanNode>(child);
+        auto imageSpanNode = DynamicCast<ImageSpanNode>(child);
+        if (imageSpanNode) {
+            spans_.emplace_back(imageSpanNode->GetSpanItem());
+            spans_.back()->imageNodeId = imageSpanNode->GetId();
+            return;
+        }
+        auto imageNode = DynamicCast<FrameNode>(child);
         if (imageNode) {
-            spans_.emplace_back(imageNode->GetSpanItem());
+            spans_.emplace_back(MakeRefPtr<ImageSpanItem>());
             spans_.back()->imageNodeId = imageNode->GetId();
+            return;
         }
     }
 }
