@@ -28,7 +28,9 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/test/pattern/app_bar/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -37,8 +39,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {
-} // namespace
+namespace {} // namespace
 
 class AppBarTestNg : public testing::Test {
 public:
@@ -84,9 +85,9 @@ HWTEST_F(AppBarTestNg, Test001, TestSize.Level1)
 {
     auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
     auto frameNode = AppBarView::Create(test);
-    EXPECT_EQ(frameNode->GetChildren().size(), 2);
+    EXPECT_EQ(frameNode->GetChildren().size(), 3);
     auto titleBar = frameNode->GetChildAtIndex(0);
-    EXPECT_EQ(titleBar->GetChildren().size(), 3);
+    EXPECT_EQ(titleBar->GetChildren().size(), 2);
 }
 
 /**
@@ -126,15 +127,113 @@ HWTEST_F(AppBarTestNg, Test003, TestSize.Level1)
     auto frameNode = AppBarView::Create(test);
     AppBarView::BindContentCover(0);
     EXPECT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetChildren().size(), 2);
+    EXPECT_EQ(frameNode->GetChildren().size(), 3);
     auto titleBar = frameNode->GetChildAtIndex(0);
     EXPECT_TRUE(titleBar);
-    EXPECT_EQ(titleBar->GetChildren().size(), 3);
+    EXPECT_EQ(titleBar->GetChildren().size(), 2);
     auto backBtn = AceType::DynamicCast<FrameNode>(titleBar->GetChildAtIndex(0));
     EXPECT_TRUE(backBtn);
     ClickBtn(backBtn);
     auto shareBtn = AceType::DynamicCast<FrameNode>(titleBar->GetChildAtIndex(2));
     EXPECT_TRUE(shareBtn);
     SUCCEED();
+}
+
+/**
+ * @tc.name: AppBarSetVisible004
+ * @tc.desc: Test use of SetVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, AppBarSetVisible004, TestSize.Level1)
+{
+    auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto atom = AppBarView::Create(test);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+    appBar->SetVisible(false);
+    EXPECT_EQ(titleBar->GetLayoutProperty()->GetVisibility(), VisibleType::GONE);
+    appBar->SetVisible(true);
+    EXPECT_EQ(titleBar->GetLayoutProperty()->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: AppBarSetRowColor005
+ * @tc.desc: Test use of SetRowColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, AppBarSetRowColor005, TestSize.Level1)
+{
+    auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto atom = AppBarView::Create(test);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+    auto renderContext = titleBar->GetRenderContext();
+    auto originColor = renderContext->GetBackgroundColorValue();
+    appBar->SetRowColor(Color::RED);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
+    std::optional<Color> NonColor = std::nullopt;
+    appBar->SetRowColor(NonColor);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), originColor);
+}
+
+/**
+ * @tc.name: AppBarSetContent006
+ * @tc.desc: Test use of SetContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, AppBarSetContent006, TestSize.Level1)
+{
+    auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto atom = AppBarView::Create(test);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    auto titleBar = atom->GetFirstChild();
+    auto label = AceType::DynamicCast<FrameNode>(titleBar->GetLastChild());
+    auto property = label->GetLayoutProperty<TextLayoutProperty>();
+    appBar->SetContent("content of test");
+    EXPECT_EQ(property->GetContent(), "content of test");
+}
+
+/**
+ * @tc.name: AppBarSetFontStyle007
+ * @tc.desc: Test use of SetFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, AppBarSetFontStyle007, TestSize.Level1)
+{
+    auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto atom = AppBarView::Create(test);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+    auto label = AceType::DynamicCast<FrameNode>(titleBar->GetLastChild());
+    auto property = label->GetLayoutProperty<TextLayoutProperty>();
+    appBar->SetFontStyle(Ace::FontStyle::NORMAL);
+    std::optional<Ace::FontStyle> fontStyle = property->GetItalicFontStyle();
+    ASSERT_NE(fontStyle, std::nullopt);
+    EXPECT_EQ(fontStyle.value(), Ace::FontStyle::NORMAL);
+    appBar->SetFontStyle(Ace::FontStyle::ITALIC);
+    fontStyle = property->GetItalicFontStyle();
+    ASSERT_NE(fontStyle, std::nullopt);
+    EXPECT_EQ(fontStyle.value(), Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: AppBarSetIconColor008
+ * @tc.desc: Test use of SetIconColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, AppBarSetIconColor008, TestSize.Level1)
+{
+    auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto atom = AppBarView::Create(test);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    auto faBtn = atom->GetLastChild();
+    auto faIcon = AceType::DynamicCast<FrameNode>(faBtn->GetFirstChild());
+    auto property = faIcon->GetLayoutProperty<ImageLayoutProperty>();
+    auto originColor = property->GetImageSourceInfo()->GetFillColor();
+    appBar->SetIconColor(Color::RED);
+    EXPECT_EQ(property->GetImageSourceInfo()->GetFillColor(), Color::RED);
+    std::optional<Color> NonColor = std::nullopt;
+    appBar->SetIconColor(NonColor);
+    EXPECT_EQ(property->GetImageSourceInfo()->GetFillColor(), originColor);
 }
 } // namespace OHOS::Ace::NG
