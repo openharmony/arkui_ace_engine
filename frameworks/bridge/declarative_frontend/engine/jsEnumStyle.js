@@ -1927,3 +1927,8 @@ var CheckBoxShape;
   CheckBoxShape["ROUNDED_SQUARE"] = 1;
 })(CheckBoxShape || (CheckBoxShape = {}));
 
+var WebLayoutMode;
+(function (WebLayoutMode) {
+  WebLayoutMode[WebLayoutMode["NONE"] = 0] = "NONE";
+  WebLayoutMode[WebLayoutMode["FIT_CONTENT"] = 1] = "FIT_CONTENT";
+})(WebLayoutMode || (WebLayoutMode = {}));

@@ -1640,7 +1640,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
-    JSClass<JSWeb>::StaticMethod("wrapContent", &JSWeb::WrapContent);
+    JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
     JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -3595,9 +3595,21 @@ void JSWeb::OnOverScroll(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetOverScrollId(jsCallback);
 }
 
-void JSWeb::WrapContent(bool isWrapContentEnabled)
+void JSWeb::SetLayoutMode(int32_t layoutMode)
 {
-    WebModel::GetInstance()->SetWrapContent(isWrapContentEnabled);
+    auto mode = WebLayoutMode::NONE;
+    switch (layoutMode) {
+        case 0:
+            mode = WebLayoutMode::NONE;
+            break;
+        case 1:
+            mode = WebLayoutMode::FIT_CONTENT;
+            break;
+        default:
+            mode = WebLayoutMode::NONE;
+            break;
+    }
+    WebModel::GetInstance()->SetLayoutMode(mode);
 }
 
 void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
