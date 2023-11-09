@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_position_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
@@ -49,7 +49,7 @@ void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
 
 RefPtr<ScrollControllerBase> WaterFlowModelNG::CreateScrollController()
 {
-    return AceType::MakeRefPtr<WaterFlowPositionController>();
+    return AceType::MakeRefPtr<ScrollableController>();
 }
 
 RefPtr<ScrollProxy> WaterFlowModelNG::CreateScrollBarProxy()
@@ -61,7 +61,7 @@ void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr
 {
     auto waterFlow = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WaterFlowPattern>();
     CHECK_NULL_VOID(waterFlow);
-    waterFlow->SetPositionController(AceType::DynamicCast<WaterFlowPositionController>(scroller));
+    waterFlow->SetPositionController(AceType::DynamicCast<ScrollableController>(scroller));
     waterFlow->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
 }
 

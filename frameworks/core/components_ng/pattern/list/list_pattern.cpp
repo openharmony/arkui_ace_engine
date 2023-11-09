@@ -1277,15 +1277,6 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign
     isScrollEnd_ = true;
 }
 
-void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
-{
-    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
-        ScrollToIndex(0, smooth_, ScrollAlign::START);
-    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth_, ScrollAlign::END);
-    }
-}
-
 bool ListPattern::ScrollPage(bool reverse)
 {
     StopAnimate();

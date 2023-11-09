@@ -30,6 +30,9 @@
 #include "core/components_ng/pattern/pattern.h"
 #define protected public
 #define private public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -43,7 +46,6 @@
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_position_controller.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
@@ -89,7 +91,9 @@ protected:
 
 void WaterFlowTestNg::SetUpTestSuite()
 {
+    MockContainer::SetUp();
     MockPipelineBase::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
@@ -100,6 +104,7 @@ void WaterFlowTestNg::SetUpTestSuite()
 void WaterFlowTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+    MockContainer::TearDown();
 }
 
 void WaterFlowTestNg::SetUp() {}
@@ -603,7 +608,7 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset001, TestSize.Level1)
      */
     UpdateCurrentOffset(-ITEM_HEIGHT);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * 2));
-    EXPECT_TRUE(pattern_->controller_->IsAtEnd());
+    EXPECT_TRUE(pattern_->positionController_->IsAtEnd());
 
     /**
      * @tc.steps: step4. Continue scroll down
@@ -635,7 +640,7 @@ HWTEST_F(WaterFlowTestNg, PositionController001, TestSize.Level1)
     /**
      * @tc.steps: step1. Test ScrollPage and IsAtEnd
      */
-    auto controller = pattern_->controller_;
+    auto controller = pattern_->positionController_;
     controller->ScrollPage(false, false);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * 2));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), ITEM_HEIGHT * 2);
@@ -652,6 +657,51 @@ HWTEST_F(WaterFlowTestNg, PositionController001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_.jumpIndex_, 2);
     controller->JumpTo(0, false, ScrollAlign::START, 0);
     EXPECT_EQ(pattern_->layoutInfo_.jumpIndex_, 0);
+}
+
+/**
+ * @tc.name: PositionController002
+ * @tc.desc: Test PositionController ScrollBy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionController002, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    auto controller = pattern_->positionController_;
+
+    /**
+     * @tc.steps: step1. Test ScrollBy
+     */
+    controller->ScrollBy(0, ITEM_HEIGHT, true);
+    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT));
+    EXPECT_EQ(controller->GetCurrentOffset().GetY(), ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: PositionController003
+ * @tc.desc: Test PositionController ScrollEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionController003, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    auto controller = pattern_->positionController_;
+
+    /**
+     * @tc.steps: step1. Test ScrollToEdge
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_TRUE(IsEqualTotalOffset(2 * ITEM_HEIGHT));
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    EXPECT_TRUE(IsEqualTotalOffset(0));
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, true);
+    EXPECT_TRUE(IsEqualTotalOffset(0));
 }
 
 /**
@@ -1003,7 +1053,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPositionController_ScrollPage001, TestSize.Le
         CreateItem(TOTAL_LINE_NUMBER * 2);
         model.SetColumnsTemplate("1fr 1fr");
     });
-    auto controller = pattern_->controller_;
+    auto controller = pattern_->positionController_;
     
     /**
      * @tc.steps: step2. test function.

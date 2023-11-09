@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/event/mouse_event.h"
 
@@ -88,8 +89,6 @@ public:
         return scrollableEvent_;
     }
     virtual bool OnScrollCallback(float offset, int32_t source);
-
-public:
     virtual void OnScrollStartCallback() {};
     bool ScrollableIdle()
     {
@@ -317,6 +316,34 @@ public:
         }
         return exp(-RATIO * gamma);
     }
+    virtual float GetMainContentSize() const;
+
+    virtual bool SupportScrollToIndex() const
+    {
+        return true;
+    }
+
+    virtual ScrollAlign GetDefaultScrollAlign() const
+    {
+        return ScrollAlign::START;
+    }
+
+    virtual void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) {}
+
+    virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
+
+    void SetPositionController(RefPtr<ScrollableController> control)
+    {
+        positionController_ = control;
+        if (control) {
+            control->SetScrollPattern(AceType::WeakClaim(this));
+        }
+    }
+
+    virtual Rect GetItemRect(int32_t index) const
+    {
+        return Rect();
+    };
 
     bool GetAlwaysEnabled() const
     {
@@ -377,6 +404,8 @@ protected:
     {
         scrollBarOverlayModifier_ = scrollBarOverlayModifier;
     }
+    // just for hold ScrollableController
+    RefPtr<ScrollableController> positionController_;
 
 private:
     virtual void OnScrollEndCallback() {};
