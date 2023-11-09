@@ -1743,6 +1743,7 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
     }
     json->Put("friction", GetFriction());
+    json->Put("edgeEffectAlwaysEnabled", GetAlwaysEnabled());
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
