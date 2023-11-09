@@ -23,6 +23,11 @@ const curves = globalThis.requireNativeModule("ohos.curves");
 const KeyCode = globalThis.requireNapi("multimodalInput.keyCode").KeyCode;
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
+
+function nearEqual(t, e) {
+    return Math.abs(t - e) < .001
+}
+
 let SegmentButtonItemOptions = class {
     constructor(t) {
         this.icon = t.icon;
@@ -1441,6 +1446,8 @@ class SegmentButton extends ViewPU {
         this.addProvidedVar("zoomScaleArray", this.__zoomScaleArray);
         this.doSelectedChangeAnimate = !1;
         this.isCurrentPositionSelected = !1;
+        this.panGestureStartPoint = { x: 0, y: 0 };
+        this.isPanGestureMoved = !1;
         this.setInitiallyProvidedValue(e);
         this.declareWatch("options", this.onOptionsChange);
         this.declareWatch("selectedIndexes", this.onSelectedChange);
@@ -1459,7 +1466,9 @@ class SegmentButton extends ViewPU {
         void 0 !== t.selectedItemPosition && (this.selectedItemPosition = t.selectedItemPosition);
         void 0 !== t.zoomScaleArray && (this.zoomScaleArray = t.zoomScaleArray);
         void 0 !== t.doSelectedChangeAnimate && (this.doSelectedChangeAnimate = t.doSelectedChangeAnimate);
-        void 0 !== t.isCurrentPositionSelected && (this.isCurrentPositionSelected = t.isCurrentPositionSelected)
+        void 0 !== t.isCurrentPositionSelected && (this.isCurrentPositionSelected = t.isCurrentPositionSelected);
+        void 0 !== t.panGestureStartPoint && (this.panGestureStartPoint = t.panGestureStartPoint);
+        void 0 !== t.isPanGestureMoved && (this.isPanGestureMoved = t.isPanGestureMoved)
     }
 
     updateStateVars(t) {
@@ -1627,6 +1636,14 @@ class SegmentButton extends ViewPU {
         }
     }
 
+    isMouseWheelScroll(t) {
+        return t.source === SourceType.Mouse && !this.isPanGestureMoved
+    }
+
+    isMovedFromPanGestureStartPoint(t, e) {
+        return!nearEqual(t, this.panGestureStartPoint.x) || !nearEqual(e, this.panGestureStartPoint.y)
+    }
+
     initialRender() {
         this.observeComponentCreation(((t, e) => {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
@@ -1651,7 +1668,7 @@ class SegmentButton extends ViewPU {
             TapGesture.create();
             TapGesture.onAction((t => {
                 var e;
-                let o = t.fingerList.find((t => null !== t));
+                let o = t.fingerList.find(Boolean);
                 if (void 0 === o) return;
                 if (void 0 === this.options || void 0 === this.options.buttons) return;
                 let s = o.localX;
@@ -1685,9 +1702,11 @@ class SegmentButton extends ViewPU {
                 var e;
                 if (void 0 === this.options || void 0 === this.options.buttons) return;
                 if ("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e) return;
-                let o = t.fingerList.find((t => null !== t));
+                let o = t.fingerList.find(Boolean);
                 if (void 0 === o) return;
                 let s = o.localX;
+                this.panGestureStartPoint = { x: o.globalX, y: o.globalY };
+                this.isPanGestureMoved = !1;
                 for (let t = 0;t < Math.min(this.options.buttons.length, this.buttonItemsSize.length); t++) {
                     s -= this.buttonItemsSize[t].width;
                     if (s < 0) {
@@ -1701,9 +1720,10 @@ class SegmentButton extends ViewPU {
                 if (void 0 === this.options || void 0 === this.options.buttons) return;
                 if ("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e) return;
                 if (!this.isCurrentPositionSelected) return;
-                let o = t.fingerList.find((t => null !== t));
+                let o = t.fingerList.find(Boolean);
                 if (void 0 === o) return;
                 let s = o.localX;
+                !this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(o.globalX, o.globalY) && (this.isPanGestureMoved = !0);
                 for (let t = 0;t < Math.min(this.options.buttons.length, this.buttonItemsSize.length); t++) {
                     s -= this.buttonItemsSize[t].width;
                     if (s < 0) {
@@ -1725,8 +1745,12 @@ class SegmentButton extends ViewPU {
             }));
             PanGesture.onActionEnd((t => {
                 var e;
-                if (void 0 !== this.options && void 0 !== this.options.buttons && ("capsule" !== this.options.type || null === (e = this.options.multiply) || void 0 === e || !e)) {
-                    if (t.source === SourceType.Mouse) {
+                if (void 0 === this.options || void 0 === this.options.buttons) return;
+                if ("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e) return;
+                let o = t.fingerList.find(Boolean);
+                if (void 0 !== o) {
+                    !this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(o.globalX, o.globalY) && (this.isPanGestureMoved = !0);
+                    if (this.isMouseWheelScroll(t)) {
                         let e = 0 !== t.offsetX ? t.offsetX : t.offsetY;
                         this.doSelectedChangeAnimate = !0;
                             e > 0 && this.selectedIndexes[0] > 0 ? this.selectedIndexes[0] -= 1 : e < 0 && this.selectedIndexes[0] < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1 && (this.selectedIndexes[0] += 1);
