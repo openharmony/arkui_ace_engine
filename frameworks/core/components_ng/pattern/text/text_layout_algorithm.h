@@ -122,6 +122,7 @@ private:
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
     void UpdateParagraph(LayoutWrapper* layoutWrapper);
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) const;
+    virtual OffsetF GetTextRectOffset(LayoutWrapper* layoutWrapper) const;
     bool CreateImageSpanAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool IncludeImageSpan(LayoutWrapper* layoutWrapper);

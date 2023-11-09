@@ -20,6 +20,8 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
 #include "base/geometry/dimension.h"
@@ -118,15 +120,21 @@ protected:
 void RichEditorTestNg::SetUp()
 {
     MockPipelineBase::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     richEditorNode_ = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->InitScrollablePattern();
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
     richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>();
+    richEditorPattern->CreateScrollBarOverlayModifier();
+    richEditorPattern->SetEdgeEffect(EdgeEffect::FADE);
+    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>(
+        richEditorPattern, richEditorPattern->GetScrollBarOverlayModifier(), richEditorPattern->GetScrollEdgeEffect());
     richEditorNode_->GetGeometryNode()->SetContentSize({});
 }
 
@@ -1858,8 +1866,8 @@ HWTEST_F(RichEditorTestNg, CreateNodePaintMethod002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->contentMod_ =
-        AceType::MakeRefPtr<RichEditorContentModifier>(richEditorPattern->textStyle_, &richEditorPattern->paragraphs_);
+    richEditorPattern->contentMod_ = AceType::MakeRefPtr<RichEditorContentModifier>(
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
     richEditorPattern->isCustomFont_ = true;
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_NE(richEditorPattern->contentMod_, nullptr);
@@ -2431,5 +2439,145 @@ HWTEST_F(RichEditorTestNg, SetSelection001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
     EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+}
+
+/**
+ * @tc.name: OnScrollCallback
+ * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, OnScrollCallback, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    int32_t SCROLL_FROM_START = 10;
+    EXPECT_TRUE(richEditorPattern->OnScrollCallback(0, SCROLL_FROM_START));
+
+    int32_t SCROLL_FROM_UPDATE = 1;
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    EXPECT_FALSE(richEditorPattern->OnScrollCallback(10, SCROLL_FROM_UPDATE)) << "Reach Top Boundary";
+
+    richEditorPattern->richTextRect_ = RectF(0, -40, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    EXPECT_FALSE(richEditorPattern->OnScrollCallback(-10, SCROLL_FROM_UPDATE)) << "Reach Bottom Boundary";
+
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    EXPECT_TRUE(richEditorPattern->OnScrollCallback(-10, SCROLL_FROM_UPDATE)) << "Scroll Up 10";
+    EXPECT_EQ(richEditorPattern->scrollOffset_, -10);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -10);
+
+    EXPECT_TRUE(richEditorPattern->OnScrollCallback(-50, SCROLL_FROM_UPDATE)) << "Scroll Up 50";
+    EXPECT_EQ(richEditorPattern->scrollOffset_, -40);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -40);
+
+    EXPECT_TRUE(richEditorPattern->OnScrollCallback(10, SCROLL_FROM_UPDATE)) << "Scroll Down 10";
+    EXPECT_EQ(richEditorPattern->scrollOffset_, -30);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -30);
+
+    EXPECT_TRUE(richEditorPattern->OnScrollCallback(50, SCROLL_FROM_UPDATE)) << "Scroll Down 50";
+    EXPECT_EQ(richEditorPattern->scrollOffset_, 0);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
+}
+
+/**
+ * @tc.name: MoveHandle
+ * @tc.desc: test whether the handle is moved when scrolling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, MoveHandle, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    SelectOverlayInfo info;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    richEditorPattern->selectOverlayProxy_ =
+        selectOverlayManager->CreateAndShowSelectOverlay(info, richEditorPattern, false);
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->selectOverlayManager_ = selectOverlayManager;
+
+    richEditorPattern->textSelector_.selectionBaseOffset = OffsetF(20, 20);
+    richEditorPattern->textSelector_.firstHandle = RectF(20, 20, 20, 20);
+    richEditorPattern->textSelector_.selectionDestinationOffset = OffsetF(60, 40);
+    richEditorPattern->textSelector_.secondHandle = RectF(60, 40, 20, 20);
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+
+    richEditorPattern->OnScrollCallback(-10, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionBaseOffset.GetY(), 10);
+    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle.GetY(), 10);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionDestinationOffset.GetY(), 30);
+    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle.GetY(), 30);
+
+    richEditorPattern->OnScrollCallback(5, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionBaseOffset.GetY(), 15);
+    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle.GetY(), 15);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionDestinationOffset.GetY(), 35);
+    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle.GetY(), 35);
+}
+
+/**
+ * @tc.name: AutoScrollByEdgeDetection
+ * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE, .handleRect = RectF(50, 160, 20, 20) };
+    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(0, 160), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->autoScrollTask_);
+    richEditorPattern->StopAutoScroll();
+
+    param.autoScrollEvent = AutoScrollEvent::MOUSE;
+    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(0, 160), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->autoScrollTask_);
+    richEditorPattern->StopAutoScroll();
+
+    param.autoScrollEvent = AutoScrollEvent::DRAG;
+    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(0, 90), EdgeDetectionStrategy::IN_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->autoScrollTask_);
+    richEditorPattern->StopAutoScroll();
+    pipeline->taskExecutor_.Reset();
+}
+
+/**
+ * @tc.name: CheckScrollable
+ * @tc.desc: test CheckScrollable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, CheckScrollable, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+
+    richEditorPattern->CheckScrollable();
+    EXPECT_FALSE(richEditorPattern->scrollable_);
+
+    AddSpan(TEST_INSERT_VALUE);
+    richEditorPattern->CheckScrollable();
+    EXPECT_TRUE(richEditorPattern->scrollable_);
+
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 80);
+    richEditorPattern->CheckScrollable();
+    EXPECT_FALSE(richEditorPattern->scrollable_);
+
+    ClearSpan();
 }
 } // namespace OHOS::Ace::NG
