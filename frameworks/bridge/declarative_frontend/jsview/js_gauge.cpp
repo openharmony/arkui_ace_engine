@@ -198,7 +198,9 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
             auto tempColors = JSRef<JSArray>::Cast(jsValue);
             // Get weight
             float weight = tempColors->GetValueAt(1)->ToNumber<float>();
-            weight = Negative(weight) ? 0.0f : weight;
+            if (NonPositive(weight)) {
+                continue;
+            }
             weights.push_back(weight);
             // Get color
             JSRef<JSVal> jsColorValue = tempColors->GetValueAt(0);
