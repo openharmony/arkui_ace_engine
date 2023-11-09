@@ -500,6 +500,12 @@ void CustomPaintPaintMethod::InitPaintBlend(RSBrush& brush)
     brush.SetBlendMode(ConvertEnumToDrawingEnum(
         globalState_.GetType(), DRAWING_BLEND_MODE_TABLE, BLEND_MODE_SIZE, RSBlendMode::SRC_OVER));
 }
+
+void CustomPaintPaintMethod::InitPaintBlend(RSPen& pen)
+{
+    pen.SetBlendMode(ConvertEnumToDrawingEnum(
+        globalState_.GetType(), DRAWING_BLEND_MODE_TABLE, BLEND_MODE_SIZE, RSBlendMode::SRC_OVER));
+}
 #endif
 
 #ifndef USE_ROSEN_DRAWING

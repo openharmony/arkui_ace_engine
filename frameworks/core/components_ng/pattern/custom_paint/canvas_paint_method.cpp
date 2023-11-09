@@ -230,7 +230,9 @@ void CanvasPaintMethod::DrawImage(
     }
 #else
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
-    InitPaintBlend(imageBrush_);
+    if (globalState_.HasGlobalAlpha()) {
+        imageBrush_.setAlphaf(globalState_.GetAlpha());
+    }
 
     const auto rsCanvas = rsCanvas_.get();
     if (HasImageShadow()) {
@@ -241,20 +243,40 @@ void CanvasPaintMethod::DrawImage(
         PaintShadow(path, *imageShadow_, rsCanvas);
     }
 
-    if (globalState_.HasGlobalAlpha()) {
-        imageBrush_.SetAlphaF(globalState_.GetAlpha());
-    }
-
+    RSRect bounds = RSRect(0, 0, lastLayoutSize_.Widht(), lastLayoutSize_.Height());
+    rosen::SaveLayerOps layerOps(&bounds, &imageBrush_);
     switch (canvasImage.flag) {
         case 0:
-            rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, RSSamplingOptions());
+            if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+                rsCanvas_->AttachBrush(imageBrush_);
+                rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampleOptions_);
+                rsCanvas_->DetachBrush();
+            } else {
+                InitPaintBlend(imageBrush_);
+                rsCanvas_->SaveLayer(layerOps);
+                rsCanvas_->AttachBrush(imageBrush_);
+                rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampleOptions_);
+                rsCanvas_->DetachBrush();
+                rsCanvas_->Restore();
+            }
             break;
         case 1: {
             RSRect rect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
                 canvasImage.dHeight + canvasImage.dy);
-            rsCanvas_->AttachBrush(imageBrush_);
-            rsCanvas_->DrawImageRect(*image, rect, sampleOptions_);
-            rsCanvas_->DetachBrush();
+
+            if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+                rsCanvas_->AttachBrush(imageBrush_);
+                rsCanvas_->DrawImageRect(*image, rect, sampleOptions_);
+                rsCanvas_->DetachBrush();
+            } else {
+                InitPaintBlend(imageBrush_);
+                rsCanvas_->SaveLayer(layerOps);
+                rsCanvas_->AttachBrush(imageBrush_);
+                rsCanvas_->DrawImageRect(*image, rect, sampleOptions_);
+                rsCanvas_->DetachBrush();
+                rsCanvas_->Restore();
+            }
+            }
             break;
         }
         case 2: {
@@ -262,9 +284,19 @@ void CanvasPaintMethod::DrawImage(
                 canvasImage.dHeight + canvasImage.dy);
             RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
                 canvasImage.sHeight + canvasImage.sy);
-            rsCanvas_->AttachBrush(imageBrush_);
-            rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
-            rsCanvas_->DetachBrush();
+
+            if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+                rsCanvas_->AttachBrush(imageBrush_);
+                rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
+                rsCanvas_->DetachBrush();
+            } else {
+                InitPaintBlend(imageBrush_);
+                rsCanvas_->SaveLayer(layerOps);
+                rsCanvas_->AttachBrush(&imageBrush_);
+                rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
+                rsCanvas_->DetachBrush();
+                rsCanvas_->Restore();
+            }
             break;
         }
         default:
