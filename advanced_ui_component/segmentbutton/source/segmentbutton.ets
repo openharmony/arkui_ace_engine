@@ -19,6 +19,15 @@ const KeyCode = globalThis.requireNapi("multimodalInput.keyCode").KeyCode;
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
 
+interface Point {
+  x: number
+  y: number
+}
+
+function nearEqual(first: number, second: number): boolean {
+  return Math.abs(first - second) < 0.001
+}
+
 interface SegmentButtonTextItem {
   text: ResourceStr
 }
@@ -687,6 +696,8 @@ export struct SegmentButton {
   @Provide zoomScaleArray: number[] = Array.from({ length: MAX_ITEM_COUNT }, () => 1.0)
   private doSelectedChangeAnimate: boolean = false
   private isCurrentPositionSelected: boolean = false
+  private panGestureStartPoint: Point = { x: 0, y: 0 }
+  private isPanGestureMoved: boolean = false
 
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
@@ -773,6 +784,14 @@ export struct SegmentButton {
     this.updateSelectedIndexes()
     this.setItemsSelected()
     this.updateAnimatedProperty(null)
+  }
+
+  private isMouseWheelScroll(event: GestureEvent) {
+    return event.source === SourceType.Mouse && !this.isPanGestureMoved
+  }
+
+  private isMovedFromPanGestureStartPoint(x: number, y: number) {
+    return !nearEqual(x, this.panGestureStartPoint.x) || !nearEqual(y, this.panGestureStartPoint.y)
   }
 
   build() {
@@ -868,9 +887,7 @@ export struct SegmentButton {
       GestureGroup(GestureMode.Parallel,
         TapGesture()
           .onAction((event: GestureEvent) => {
-            let fingerInfo = event.fingerList.find(value => {
-              return value !== null
-            })
+            let fingerInfo = event.fingerList.find(Boolean)
             if (fingerInfo === void 0) {
               return
             }
@@ -931,13 +948,13 @@ export struct SegmentButton {
               // Non drag gesture in multi-select mode
               return
             }
-            let fingerInfo = event.fingerList.find(value => {
-              return value !== null
-            })
+            let fingerInfo = event.fingerList.find(Boolean)
             if (fingerInfo === void 0) {
               return
             }
             let selectedInfo = fingerInfo.localX
+            this.panGestureStartPoint = { x: fingerInfo.globalX, y: fingerInfo.globalY }
+            this.isPanGestureMoved = false
             for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
               selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
               if (selectedInfo < 0) {
@@ -957,13 +974,14 @@ export struct SegmentButton {
             if (!this.isCurrentPositionSelected) {
               return
             }
-            let fingerInfo = event.fingerList.find(value => {
-              return value !== null
-            })
+            let fingerInfo = event.fingerList.find(Boolean)
             if (fingerInfo === void 0) {
               return
             }
             let selectedInfo = fingerInfo.localX
+            if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX, fingerInfo.globalY)) {
+              this.isPanGestureMoved = true
+            }
             for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
               selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
               if (selectedInfo < 0) {
@@ -993,7 +1011,14 @@ export struct SegmentButton {
               // Non drag gesture in multi-select mode
               return
             }
-            if (event.source === SourceType.Mouse) {
+            let fingerInfo = event.fingerList.find(Boolean)
+            if (fingerInfo === void 0) {
+              return
+            }
+            if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX, fingerInfo.globalY)) {
+              this.isPanGestureMoved = true
+            }
+            if (this.isMouseWheelScroll(event)) {
               let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY
               this.doSelectedChangeAnimate = true
               if (offset > 0 && this.selectedIndexes[0] > 0) {
