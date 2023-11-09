@@ -379,8 +379,6 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     SelectOverlayInfo selectInfo;
     selectInfo.firstHandle.paintRect = firstHandle;
     selectInfo.secondHandle.paintRect = secondHandle;
-    CheckHandles(selectInfo.firstHandle);
-    CheckHandles(selectInfo.secondHandle);
     selectInfo.onHandleMove = [weak = WeakClaim(this)](const RectF& handleRect, bool isFirst) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1001,19 +999,12 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         SelectHandleInfo firstHandleInfo;
         firstHandleInfo.paintRect = textSelector_.firstHandle;
-        if (firstHandleInfo.paintRect != selectInfo.firstHandle.paintRect) {
-            CheckHandles(firstHandleInfo);
-        } else {
-            firstHandleInfo.isShow = selectInfo.firstHandle.isShow;
-        }
+        CheckHandles(firstHandleInfo);
 
         SelectHandleInfo secondHandleInfo;
         secondHandleInfo.paintRect = textSelector_.secondHandle;
-        if (secondHandleInfo.paintRect != selectInfo.secondHandle.paintRect) {
-            CheckHandles(secondHandleInfo);
-        } else {
-            secondHandleInfo.isShow = selectInfo.secondHandle.isShow;
-        }
+        CheckHandles(secondHandleInfo);
+
         auto start = textSelector_.GetTextStart();
         auto end = textSelector_.GetTextEnd();
         selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
@@ -1023,6 +1014,10 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         selectInfo.callerFrameNode = GetHost();
+        if (!selectInfo.isUsingMouse) {
+            CheckHandles(selectInfo.firstHandle);
+            CheckHandles(selectInfo.secondHandle);
+        }
         selectOverlayProxy_ =
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this), animation);
         CHECK_NULL_VOID(selectOverlayProxy_);

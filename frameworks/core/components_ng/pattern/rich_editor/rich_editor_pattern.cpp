@@ -181,7 +181,11 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(richEditorLayoutAlgorithm, false);
     parentGlobalOffset_ = richEditorLayoutAlgorithm->GetParentGlobalOffset();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+    // skip show selectoverlay in the TextPattern.
+    auto restoreSelectOverlayProxy = selectOverlayProxy_;
+    selectOverlayProxy_.Reset();
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
+    selectOverlayProxy_ = restoreSelectOverlayProxy;
     if (textSelector_.baseOffset != -1 && textSelector_.destinationOffset != -1) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
