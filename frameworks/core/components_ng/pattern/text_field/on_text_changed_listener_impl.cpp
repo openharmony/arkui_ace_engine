@@ -165,7 +165,7 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
             case TextInputAction::SEARCH:
             case TextInputAction::SEND:
             case TextInputAction::GO:
-                client->PerformAction(action);
+                client->PerformAction(action, true);
                 break;
             default:
                 LOGE("TextInputAction  is not support: %{public}d", action);
