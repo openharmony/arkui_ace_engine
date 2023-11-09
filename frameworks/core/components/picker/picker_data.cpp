@@ -91,8 +91,12 @@ uint32_t PickerDate::ToDays() const
     for (uint32_t month = 1; month < month_; ++month) {
         days += PickerDate::GetMaxDay(year_, month);
     }
-    // year start from 1900
-    for (uint32_t year = 1900; year < year_; ++year) {
+    // year start from 1900 or 1
+    uint32_t startYear = 1900;
+    if (year_ < startYear) {
+        startYear = 1;
+    }
+    for (uint32_t year = startYear; year < year_; ++year) {
         // leap year has 366 days, other year has 365 days.
         days += (PickerDate::IsLeapYear(year) ? 366 : 365);
     }
