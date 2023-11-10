@@ -172,7 +172,8 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         OnScrollCallback(offset, source);
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS);
+            refreshCoordination_->OnScrollStart(
+                source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS, GetVelocity());
         }
     }
     if (IsAtTop() &&
@@ -181,17 +182,19 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS);
+            refreshCoordination_->OnScrollStart(
+                source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS, GetVelocity());
         }
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         (refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
         source != SCROLL_FROM_AXIS && isRefreshInReactive_) {
         isRefreshInReactive_ = false;
-        refreshCoordination_->OnScrollEnd(0.0f);
+        refreshCoordination_->OnScrollEnd(GetVelocity());
     }
     if (refreshCoordination_ && refreshCoordination_->InCoordination() && isRefreshInReactive_) {
-        if (!refreshCoordination_->OnScroll(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
+        if (!refreshCoordination_->OnScroll(
+                GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset, GetVelocity())) {
             isRefreshInReactive_ = false;
             coordinationMode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
         }

@@ -2225,6 +2225,8 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
 
 void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
 {
+    LOGD("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}d", GetTag().c_str(),
+        scene.c_str(), speed, DynamicCast<int32_t>(status));
     if (status == SceneStatus::RUNNING) {
         return;
     }

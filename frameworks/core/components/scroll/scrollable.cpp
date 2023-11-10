@@ -360,6 +360,7 @@ void Scrollable::HandleScrollEnd()
 void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
+    currentVelocity_ = info.GetMainVelocity();
     if (continuousDragStatus_) {
         IncreaseContinueDragCount();
         task_.Cancel();
@@ -557,6 +558,7 @@ ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState
 void Scrollable::HandleDragUpdate(const GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
+    currentVelocity_ = info.GetMainVelocity();
     if (!NearZero(info.GetMainVelocity()) && dragCount_ >= FIRST_THRESHOLD) {
         if (Negative(lastVelocity_ / info.GetMainVelocity())) {
             ResetContinueDragCount();
