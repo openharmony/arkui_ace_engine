@@ -26,6 +26,9 @@
 #include "core/image/image_file_cache.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -50,13 +53,13 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
     rsData = ImageLoader::QueryImageDataFromImageCache(src);
     if (rsData) {
         dataHit = true;
-        return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&rsData));
+        return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
     }
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src.GetSrc());
     if (drawingData) {
         auto data = std::make_shared<RSData>();
         data->BuildWithCopy(drawingData->data(), drawingData->size());
-        return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&data));
+        return AceType::MakeRefPtr<NG::DrawingImageData>(data);
     }
 #endif
     return nullptr;
