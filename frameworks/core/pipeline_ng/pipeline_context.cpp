@@ -1418,9 +1418,9 @@ void PipelineContext::FlushTouchEvents()
                     newIdTouchPoints[idIter.first] = newTouchEvent;
                 }
                 if (SystemProperties::GetDebugEnabled()) {
-                    LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}ld",
+                    LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f",
                         newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX,
-                        newTouchEvent.screenY, static_cast<int64_t>(newTouchEvent.time.time_since_epoch().count()));
+                        newTouchEvent.screenY);
                 }
                 historyPointsById_[idIter.first] = idIter.second.history;
             }
