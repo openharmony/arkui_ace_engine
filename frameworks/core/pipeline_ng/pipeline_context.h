@@ -472,6 +472,12 @@ private:
         }
     };
 
+    std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint64_t> &history,
+        const std::tuple<float, float, uint64_t> &current, const uint64_t &nanoTimeStamp);
+
+    std::pair<float, float> GetResamplePoint(const std::vector<TouchEvent> &history, const std::vector<TouchEvent> &current,
+        const uint64_t &nanoTimeStamp, const bool isScreen);
+
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
@@ -517,6 +523,7 @@ private:
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
+    uint64_t resampleTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
@@ -530,6 +537,8 @@ private:
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
+
+    std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
 
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;

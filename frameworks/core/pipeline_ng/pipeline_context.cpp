@@ -77,6 +77,11 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace {
+constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
+constexpr uint64_t INTERPOLATION_THRESHOLD = 300 * 1000 * 1000; // 300ms
+constexpr int32_t INDEX_X = 0;
+constexpr int32_t INDEX_Y = 1;
+constexpr int32_t INDEX_TIME = 2;
 constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t USED_ID_FIND_FLAG = 3; // if args >3 , it means use id to find
@@ -219,6 +224,92 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
     scheduleTasks_.erase(id);
 }
 
+std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint64_t> &history,
+    const std::tuple<float, float, uint64_t> &current, const uint64_t &nanoTimeStamp)
+{
+    if (nanoTimeStamp == std::get<INDEX_TIME>(history) || nanoTimeStamp == std::get<INDEX_TIME>(current)) {
+        return std::make_pair(0, 0);
+    }
+    if (std::get<INDEX_TIME>(current) < std::get<INDEX_TIME>(history)) {
+        return std::make_pair(0, 0);
+    }
+    if (std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history) > INTERPOLATION_THRESHOLD) {
+        return std::make_pair(0, 0);
+    }
+    if (nanoTimeStamp < std::get<INDEX_TIME>(history)) {
+        return std::make_pair(0, 0);
+    }
+    if (nanoTimeStamp < std::get<INDEX_TIME>(current)) {
+        float alpha = (float)(nanoTimeStamp - std::get<INDEX_TIME>(history)) /
+            (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
+        float x = std::get<INDEX_X>(history) + alpha * (std::get<INDEX_X>(current) - std::get<INDEX_X>(history));
+        float y = std::get<INDEX_Y>(history) + alpha * (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history));
+        return std::make_pair(x, y);
+    } else if (nanoTimeStamp > std::get<INDEX_TIME>(current)) {
+        float alpha = (float)(nanoTimeStamp - std::get<INDEX_TIME>(current)) /
+            (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
+        float x = std::get<INDEX_X>(current) + alpha * (std::get<INDEX_X>(current) - std::get<INDEX_X>(history));
+        float y = std::get<INDEX_Y>(current) + alpha * (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history));
+        return std::make_pair(x, y);
+    }
+    return std::make_pair(0, 0);
+}
+
+std::pair<float, float> GetResamplePoint(const std::vector<TouchEvent> &history, const std::vector<TouchEvent> &current,
+    const uint64_t &nanoTimeStamp, const bool isScreen)
+{
+    float avgHistoryX = 0.f;
+    float avgHistoryY = 0.f;
+    float avgCurrentX = 0.f;
+    float avgCurrentY = 0.f;
+    uint64_t avgHistoryTime = 0;
+    uint64_t avgCurrentTime = 0;
+    int32_t i = 0;
+    uint64_t lastTime = 0;
+    if (history.empty() || current.empty()) {
+        return std::make_pair(0, 0);
+    }
+    for (const auto &iter = history.begin(); iter != history.end(); iter++) {
+        if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
+            if (!isScreen) {
+                avgHistoryX += iter->x;
+                avgHistoryY += iter->y;
+            } else {
+                avgHistoryX += iter->screenX;
+                avgHistoryY += iter->screenY;
+            }
+            avgHistoryTime += static_cast<uint64_t>(iter->time.time_since_epoch().count());
+            i++;
+            lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
+        }
+    }
+    avgHistoryX /= i;
+    avgHistoryY /= i;
+    avgHistoryTime /= i;
+    i = 0;
+    lastTime = 0;
+    for (const auto &iter = current.begin(); iter != current.end(); iter++) {
+        if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
+            if (!isScreen) {
+                avgCurrentX += iter->x;
+                avgCurrentY += iter->y;
+            } else {
+                avgCurrentX += iter->screenX;
+                avgCurrentY += iter->screenY;
+            }
+            avgCurrentTime += static_cast<uint64_t>(iter->time.time_since_epoch().count());
+            i++;
+            lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
+        }
+    }
+    avgCurrentX /= i;
+    avgCurrentY /= i;
+    avgCurrentTime /= i;
+    std::tuple<float, float, uint64_t> historyPoint(avgHistoryX, avgHistoryY, avgHistoryTime);
+    std::tuple<float, float, uint64_t> currentPoint(avgCurrentX, avgCurrentY, avgCurrentTime);
+    return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
+}
+
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
@@ -229,6 +320,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushFrameTrace();
+    resampleTimeStamp_ = nanoTimestamp - window_->GetVSyncPeriod() + ONE_MS_IN_NS;
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -1294,14 +1386,58 @@ void PipelineContext::FlushTouchEvents()
         canUseLongPredictTask_ = false;
         eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::unordered_map<int, TouchEvent> idToTouchPoints;
+        bool needInterpolation = true;
+        std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
         for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
             auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
             idToTouchPoints.emplace(scalePoint.id, scalePoint);
             idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
+            if (iter->type != TouchType::MOVE) {
+                needInterpolation = false;
+            }
+        }
+        if (needInterpolation) {
+            auto targetTimeStamp = resampleTimeStamp_;
+            for (const auto &idIter : idToTouchPoints) {
+                auto newXy = GetResamplePoint(historyPointsById_[idIter.first], idIter.second.history,
+                    targetTimeStamp, false);
+                auto newScreenXy = GetResamplePoint(historyPointsById_[idIter.first], idIter.second.history,
+                    targetTimeStamp, true);
+                TouchEvent newTouchEvent;
+                newTouchEvent = idIter.second;
+                if (newXy.first != 0 && newXy.second != 0) {
+                    newTouchEvent.x = newXy.first;
+                    newTouchEvent.y = newXy.second;
+                    newTouchEvent.screenX = newScreenXy.first;
+                    newTouchEvent.screenY = newScreenXy.second;
+                    std::chrono::nanoseconds nanoseconds(targetTimeStamp);
+                    newTouchEvent.time = TimeStamp(nanoseconds);
+                    newTouchEvent.history = idIter.second.history;
+                    newTouchEvent.pointers = idIter.second.pointers;
+                    newTouchEvent.isInterpolated = true;
+                    newIdTouchPoints[idIter.first] = newTouchEvent;
+                }
+                if (SystemProperties::GetDebugEnabled()) {
+                    LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}ld",
+                        newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX,
+                        newTouchEvent.screenY, static_cast<int64_t>(newTouchEvent.time.time_since_epoch().count()));
+                }
+                historyPointsById_[idIter.first] = idIter.second.history;
+            }
         }
         std::list<TouchEvent> touchPoints;
         for (auto& [_, item] : idToTouchPoints) {
             touchPoints.emplace_back(std::move(item));
+        }
+        int32_t i = 0;
+        if (!newIdTouchPoints.empty()) {
+            for (const auto &iter : newIdTouchPoints) {
+                if (i == 0) {
+                    touchPoints.clear();
+                    i++;
+                }
+                touchPoints.insert(touchPoints.begin(), iter.second);
+            }
         }
         auto maxSize = touchPoints.size();
         for (auto iter = touchPoints.rbegin(); iter != touchPoints.rend(); ++iter) {

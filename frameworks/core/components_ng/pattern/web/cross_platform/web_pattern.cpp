@@ -1467,7 +1467,7 @@ bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>
     if (info.GetTouches().empty()) {
         return false;
     }
-    for (const auto& point : info.GetTouches()) {
+    for (const auto& point : info.GetChangedTouches()) {
         TouchInfo touchInfo;
         touchInfo.id = point.GetFingerId();
         const Offset& location = point.GetLocalLocation();
