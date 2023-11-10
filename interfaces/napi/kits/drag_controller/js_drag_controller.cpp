@@ -41,6 +41,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/event/ace_events.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -289,6 +290,31 @@ void HandleFail(DragControllerAsyncCtx* asyncCtx, int32_t errorCode)
     }
 }
 
+void HandleOnDragStart(DragControllerAsyncCtx* asyncCtx)
+{
+    ContainerScope scope(asyncCtx->instanceId);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGW("pipelineContext is null!");
+        return;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGW("taskExecutor is null!");
+        return;
+    }
+    taskExecutor->PostTask(
+        [globalX = asyncCtx->globalX, globalY = asyncCtx->globalY, context = pipelineContext]() {
+            context->OnDragEvent({ globalX, globalY }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
 {
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
@@ -368,6 +394,10 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
             if (asyncCtx->dragState == DragState::SENDING) {
                 asyncCtx->dragState = DragState::SUCCESS;
                 Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(asyncCtx->env, &scope);
+                HandleOnDragStart(asyncCtx);
+                napi_close_handle_scope(asyncCtx->env, scope);
             }
         },
         TaskExecutor::TaskType::JS);
@@ -445,6 +475,10 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 if (asyncCtx->dragState == DragState::SENDING) {
                     asyncCtx->dragState = DragState::SUCCESS;
                     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+                    napi_handle_scope scope = nullptr;
+                    napi_open_handle_scope(asyncCtx->env, &scope);
+                    HandleOnDragStart(asyncCtx);
+                    napi_close_handle_scope(asyncCtx->env, scope);
                 }
             }
         },

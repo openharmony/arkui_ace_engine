@@ -105,6 +105,7 @@ enum class DragEventAction {
     DRAG_EVENT_MOVE,
     DRAG_EVENT_END,
     DRAG_EVENT_OUT,
+    DRAG_EVENT_START_FOR_CONTROLLER,
 };
 
 enum class InputEventType {
