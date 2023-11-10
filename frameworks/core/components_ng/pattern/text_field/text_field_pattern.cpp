@@ -863,7 +863,7 @@ void TextFieldPattern::HandleOnCopy()
     if (!IsSelected()) {
         return;
     }
-    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD) {
+    if (IsInPasswordMode()) {
         UpdateSelection(selectController_->GetEndIndex());
         StartTwinkling();
         return;
@@ -1143,7 +1143,7 @@ void TextFieldPattern::InitDragEvent()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD &&
+    if (!IsInPasswordMode() &&
         layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None && host->IsDraggable()) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
@@ -2039,8 +2039,7 @@ bool TextFieldPattern::AllowCopy()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None &&
-           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD;
+    return layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None && !IsInPasswordMode();
 }
 
 void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -4000,8 +3999,7 @@ void TextFieldPattern::SetShowError()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto passWordMode =
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    auto passWordMode = IsInPasswordMode();
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     auto tmpHost = GetHost();
@@ -4377,7 +4375,10 @@ bool TextFieldPattern::IsInPasswordMode() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    return inputType == TextInputType::VISIBLE_PASSWORD
+        || inputType == TextInputType::NUMBER_PASSWORD
+        || inputType == TextInputType::SCREEN_LOCK_PASSWORD;
 }
 
 void TextFieldPattern::RestorePreInlineStates()
@@ -4898,8 +4899,7 @@ bool TextFieldPattern::IsShowPasswordIcon() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetShowPasswordIconValue(true) &&
-           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    return layoutProperty->GetShowPasswordIconValue(true) && IsInPasswordMode();
 }
 
 void TextFieldPattern::ProcessResponseArea()

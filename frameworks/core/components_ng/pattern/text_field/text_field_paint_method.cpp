@@ -69,8 +69,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textValue = textFieldPattern->GetTextValue();
-    auto isPasswordType =
-        textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    auto isPasswordType = textFieldPattern->IsInPasswordMode();
     auto showPlaceHolder = textFieldLayoutProperty->GetValueValue("").empty();
     auto needObscureText = isPasswordType && textFieldPattern->GetTextObscured() && !showPlaceHolder;
     auto text =

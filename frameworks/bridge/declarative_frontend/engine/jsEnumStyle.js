@@ -781,6 +781,8 @@ var InputType;
   InputType[InputType["PhoneNumber"] = 3] = "PhoneNumber";
   InputType[InputType["Email"] = 5] = "Email";
   InputType[InputType["Password"] = 7] = "Password";
+  InputType[InputType["NUMBER_PASSWORD"] = 8] = "NUMBER_PASSWORD";
+  InputType[InputType["SCREEN_LOCK_PASSWORD"] = 9] = "SCREEN_LOCK_PASSWORD";
 })(InputType || (InputType = {}));
 
 var SearchType;

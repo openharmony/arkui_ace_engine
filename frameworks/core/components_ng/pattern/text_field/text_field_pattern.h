@@ -502,8 +502,7 @@ public:
     {
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, false);
-        return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD &&
-               layoutProperty->GetShowPasswordIconValue(true);
+        return IsInPasswordMode() && layoutProperty->GetShowPasswordIconValue(true);
     }
 
     void SetEnableTouchAndHoverEffect(bool enable)
@@ -924,6 +923,7 @@ public:
     }
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
+    bool IsInPasswordMode() const;
 
     bool GetShowSelect() const
     {
@@ -1040,7 +1040,7 @@ private:
     void RestorePreInlineStates();
 
     bool ResetObscureTickCountDown();
-    bool IsInPasswordMode() const;
+
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void UpdateErrorTextMargin();
