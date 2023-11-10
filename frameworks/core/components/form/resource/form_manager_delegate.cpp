@@ -50,7 +50,7 @@ constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
-constexpr int32_t READDFORM_DELAY_TIME = 50;
+constexpr int32_t READD_FORM_DELAY_TIME = 50;
 
 bool GetFormInfo(
     std::string& bundleName, std::string& moduleName, const std::string& cardName, OHOS::AppExecFwk::FormInfo& formInfo)
@@ -702,7 +702,7 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
-            std::this_thread::sleep_for(std::chrono::milliseconds(READDFORM_DELAY_TIME));
+            std::this_thread::sleep_for(std::chrono::milliseconds(READD_FORM_DELAY_TIME));
             ReAddForm();
             break;
         case FORM_NOT_TRUST_CODE:
