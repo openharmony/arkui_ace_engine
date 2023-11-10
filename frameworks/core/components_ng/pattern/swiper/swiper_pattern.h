@@ -589,6 +589,7 @@ private:
     void BeforeCreateLayoutWrapper() override;
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
+    void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
     int32_t ComputeNextIndexByVelocity(float velocity) const;
     void UpdateCurrentIndex(int32_t index);
