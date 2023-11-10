@@ -62,6 +62,8 @@ public:
             theme->controlImageColor_ = sideBarPattern->GetAttr<Color>("control_image_color", Color::BLACK);
             theme->sideBarBackgroundColor_ = sideBarPattern->GetAttr<Color>("side_bar_background_color", Color::WHITE);
             theme->controlButtonRadius_ = sideBarPattern->GetAttr<Dimension>("control_button_radius", 0.0_vp);
+            auto dividerShadowEnable = sideBarPattern->GetAttr<std::string>("divider_shadow_enable", "0");
+            theme->dividerShadowEnable_ = StringUtils::StringToInt(dividerShadowEnable);
         }
     };
 
@@ -82,6 +84,11 @@ public:
         return controlButtonRadius_;
     }
 
+    uint32_t GetDividerShadowEnable() const
+    {
+        return dividerShadowEnable_;
+    }
+
 protected:
     SideBarTheme() = default;
 
@@ -89,6 +96,7 @@ private:
     Color controlImageColor_ = Color::BLACK;
     Color sideBarBackgroundColor_ = Color::WHITE;
     Dimension controlButtonRadius_;
+    uint32_t dividerShadowEnable_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SIDE_BAR_SIDE_BAR_THEME_H
