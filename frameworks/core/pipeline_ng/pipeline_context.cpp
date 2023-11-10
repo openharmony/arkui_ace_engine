@@ -1673,6 +1673,12 @@ void PipelineContext::WindowFocus(bool isFocus)
         if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
             rootFocusHub->RequestFocusImmediately();
         }
+        if (focusWindowId_.has_value()) {
+            auto curMainView = FocusHub::GetCurrentMainView();
+            if (curMainView) {
+                curMainView->HandleFocusOnMainView();
+            }
+        }
     }
     FlushWindowFocusChangedCallback(isFocus);
 }
