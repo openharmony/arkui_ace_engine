@@ -255,7 +255,7 @@ std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint6
     return std::make_pair(0, 0);
 }
 
-std::pair<float, float> GetResamplePoint(std::vector<TouchEvent> &history, std::vector<TouchEvent> &current,
+std::pair<float, float> GetResamplePoint(const std::vector<TouchEvent> &history, const std::vector<TouchEvent> &current,
     const uint64_t &nanoTimeStamp, const bool isScreen)
 {
     float avgHistoryX = 0.f;

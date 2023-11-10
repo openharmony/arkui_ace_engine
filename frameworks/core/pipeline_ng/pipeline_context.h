@@ -475,7 +475,7 @@ private:
     std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint64_t> &history,
         const std::tuple<float, float, uint64_t> &current, const uint64_t &nanoTimeStamp);
 
-    std::pair<float, float> GetResamplePoint(std::vector<TouchEvent> history, std::vector<TouchEvent> current,
+    std::pair<float, float> GetResamplePoint(const std::vector<TouchEvent> &history, const std::vector<TouchEvent> &current,
         const uint64_t &nanoTimeStamp, const bool isScreen);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
