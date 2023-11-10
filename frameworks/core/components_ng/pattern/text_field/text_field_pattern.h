@@ -426,7 +426,7 @@ public:
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
-        return contentController_->GetTextValue().length() > 0;
+        return !contentController_->IsEmpty();
     }
 
     bool CursorMoveLeft() override;
@@ -840,7 +840,7 @@ public:
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
     void TextAreaInputRectUpdate(RectF& rect);
-    void UpdateRectByAlignment(RectF& rect);
+    void UpdateRectByTextAlign(RectF& rect);
 
     void EditingValueFilterChange();
 
