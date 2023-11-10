@@ -929,7 +929,10 @@ public:
     {
         return showSelect_;
     }
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+protected:
+    virtual void InitDragEvent();
+#endif
 private:
     void GetTextSelectRectsInRangeAndWillChange();
     bool HasFocus() const;
@@ -943,7 +946,6 @@ private:
     void InitLongPressEvent();
     void InitClickEvent();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void InitDragEvent();
     void InitDragDropEvent();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
