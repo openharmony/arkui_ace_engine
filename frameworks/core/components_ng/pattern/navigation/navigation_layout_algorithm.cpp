@@ -452,6 +452,11 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     if (ifNeedInit_) {
         RangeCalculation(hostNode, navigationLayoutProperty);
+    } else {
+        auto parentSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
+        auto navBarWidthValue = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH);
+        auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+        realNavBarWidth_ = navBarWidth;
     }
     if (size.Width() == 0.0f) {
         return;
@@ -467,37 +472,6 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         SetNavigationHeight(layoutWrapper, size);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
-    CHECK_NULL_VOID(hostNode);
-    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
-    CHECK_NULL_VOID(navigationPattern);
-    auto navigationStack = navigationPattern->GetNavigationStack();
-    CHECK_NULL_VOID(navigationStack);
-    auto curTopNavPath = navigationStack->GetTopNavPath();
-    CHECK_NULL_VOID(curTopNavPath);
-    auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-        NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
-    CHECK_NULL_VOID(curDestination);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto size = curDestination->GetGeometryNode()->GetFrameSize();
-    curDestination->GetRenderContext()->ClipWithRRect(
-        RectF(0.0f, 0.0f, size.Width(), size.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
-    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
-    if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
-        curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
-        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
-        return;
-    }
-    auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
-    auto navBarProperty = navBarNode->GetLayoutProperty();
-    navBarProperty->UpdateVisibility(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE));
-    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
-    curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
-    navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-    auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
-    CHECK_NULL_VOID(titleNode);
-    titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
 }
 
 void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
