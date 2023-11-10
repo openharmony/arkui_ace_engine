@@ -160,6 +160,11 @@ public:
         }
     }
 
+    const std::function<void()>& GetMenuDisappearCallback()
+    {
+        return onDisappearCallback_;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
