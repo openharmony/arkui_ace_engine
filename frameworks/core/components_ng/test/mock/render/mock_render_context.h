@@ -33,6 +33,7 @@ public:
     MOCK_METHOD2(AddChild, void(const RefPtr<RenderContext>& renderContext, int index));
     MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
     MOCK_METHOD1(SetVisible, void(bool));
+    MOCK_METHOD0(GetLocalTransformMatrix, Matrix4());
 
     void ResetBlendBgColor() override
     {
