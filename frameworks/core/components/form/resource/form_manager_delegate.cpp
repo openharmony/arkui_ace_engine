@@ -702,7 +702,7 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
-            std::this_thread::sleep_for(std::chrono:milliseconds(READDFORM_DELAY_TIME));
+            std::this_thread::sleep_for(std::chrono::milliseconds(READDFORM_DELAY_TIME));
             ReAddForm();
             break;
         case FORM_NOT_TRUST_CODE:
