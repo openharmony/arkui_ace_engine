@@ -1224,6 +1224,10 @@ bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdLi
 #ifndef USE_ROSEN_DRAWING
 bool RosenRenderContext::GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
     std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList, SkRect* rect)
+#else
+bool RosenRenderContext::GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    std::shared_ptr<RSDrawCmdList> drawCmdList, Rosen::Drawing::Rect* rect)
+#endif
 {
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     if (!rsCanvasDrawingNode) {
@@ -1231,7 +1235,6 @@ bool RosenRenderContext::GetPixelMap(const std::shared_ptr<Media::PixelMap>& pix
     }
     return rsCanvasDrawingNode->GetPixelmap(pixelMap, drawCmdList, rect);
 }
-#endif
 
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
 {
