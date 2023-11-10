@@ -403,8 +403,12 @@ void TextFieldPattern::UpdateCaretInfoToController() const // todo确定更新�
 // return: true if text rect offset will NOT be further changed by caret position
 void TextFieldPattern::UpdateCaretRect()
 {
-    CHECK_NULL_VOID(!IsSelected());
     auto focusHub = GetFocusHub();
+    if (IsSelected()) {
+        selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex());
+        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex());
+        return;
+    }
     if (focusHub && !focusHub->IsCurrentFocus()) {
         CloseSelectOverlay(true);
         return;
@@ -3561,10 +3565,11 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
         StartTwinkling();
     } else {
         cursorVisible_ = false;
+        showSelect_ = true;
         HandleSetSelection(selectionStart, selectionEnd, false);
+        selectController_->MoveFirstHandleToContentRect(selectionStart);
+        selectController_->MoveSecondHandleToContentRect(selectionEnd);
     }
-    cursorVisible_ = false;
-    HandleSetSelection(selectionStart, selectionEnd, false);
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
