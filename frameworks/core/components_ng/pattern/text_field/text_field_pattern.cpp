@@ -2527,7 +2527,10 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
-        .windowId = pipeline->GetFocusWindowId() };
+        .windowId = pipeline->GetFocusWindowId(),
+        .positionY =
+            (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY(),
+        .height = frameRect_.Height() };
     return textConfig;
 }
 #endif

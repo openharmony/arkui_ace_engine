@@ -730,6 +730,9 @@ public:
 
     void OnVirtualKeyboardAreaChange(
         Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    void OnVirtualKeyboardAreaChange(
+        Rect keyboardArea, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
@@ -992,6 +995,10 @@ protected:
 
     virtual void OnVirtualKeyboardHeightChange(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
+    {}
+    virtual void OnVirtualKeyboardHeightChange(
+        float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
     {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
