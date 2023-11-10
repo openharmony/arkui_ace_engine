@@ -109,7 +109,7 @@ SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF
 
 void ImageLoadingContext::OnUnloaded()
 {
-    LOGD("ImageLoadingContext: OnUnloaded, reset params");
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "ImageLoadingContext: OnUnloaded, reset params");
     imageObj_ = nullptr;
     canvasImage_ = nullptr;
     srcRect_ = RectF();
@@ -244,8 +244,8 @@ void ImageLoadingContext::OnMakeCanvasImage()
         }
     }
 
-    LOGD("start MakeCanvasImage: %{public}s, size = %{public}s", imageObj_->GetSourceInfo().ToString().c_str(),
-        targetSize.ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "start MakeCanvasImage: %{public}s, size = %{public}s",
+        imageObj_->GetSourceInfo().ToString().c_str(), targetSize.ToString().c_str());
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
@@ -267,7 +267,8 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
-    LOGW("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(),
+        errorMsg.c_str());
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }
 
@@ -396,7 +397,8 @@ std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 {
     CHECK_NULL_RETURN(sourceSizePtr_, std::nullopt);
     if (sourceSizePtr_->Width() <= 0.0 || sourceSizePtr_->Height() <= 0.0) {
-        LOGW("Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
         return std::nullopt;
     }
     return { *sourceSizePtr_ };

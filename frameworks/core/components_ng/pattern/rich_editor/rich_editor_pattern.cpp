@@ -1319,6 +1319,7 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
         }
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Request close soft keyboard.");
 #if defined(ENABLE_STANDARD_INPUT)
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (!imeAttached_) {
@@ -1709,6 +1710,8 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
     CHECK_NULL_RETURN(inputMethod, false);
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_RETURN(miscTextConfig.has_value(), false);
+    TAG_LOGI(
+        AceLogTag::ACE_RICH_TEXT, "RequestKeyboard set calling window id is : %{public}u", miscTextConfig->windowId);
     inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, miscTextConfig.value());
     if (context) {
         inputMethod->SetCallingWindow(context->GetWindowId());
@@ -1799,6 +1802,12 @@ void RichEditorPattern::UpdateCaretInfoToController()
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
         StringUtils::Str8ToStr16(text), textSelector_.GetStart(), textSelector_.GetEnd());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "Caret position update, left %{public}f, top %{public}f, width %{public}f, height %{public}f; textSelector_ "
+        "Start "
+        "%{public}d, end %{public}d",
+        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, textSelector_.GetStart(),
+        textSelector_.GetEnd());
 #else
     if (HasConnection()) {
         TextEditingValue editingValue;
@@ -1852,6 +1861,9 @@ bool RichEditorPattern::CloseCustomKeyboard()
 
 void RichEditorPattern::InsertValue(const std::string& insertValue)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Insert value '%{public}s'", insertValue.c_str());
+    }
     bool isSelector = false;
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
