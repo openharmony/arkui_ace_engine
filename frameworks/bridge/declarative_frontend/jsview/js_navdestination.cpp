@@ -103,6 +103,30 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
 
         // CustomBuilder | NavigationCustomTitle
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        do {
+            if (!jsObj->HasProperty("height")) {
+                break;
+            }
+            JSRef<JSVal> height = jsObj->GetProperty("height");
+            CalcDimension titleHeight;
+            bool isValid = JSContainerBase::ParseJsDimensionVp(height, titleHeight);
+            if (height->IsString()) {
+                std::string heightValue;
+                ParseJsString(height, heightValue);
+                if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
+                    NavDestinationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
+                    break;
+                }
+                if (heightValue == NG::TITLE_MAIN) {
+                    NavDestinationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
+                    break;
+                }
+            }
+            if (!isValid || titleHeight.Value() < 0) {
+                return;
+            }
+            NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
+        } while (0);
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
@@ -111,25 +135,6 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
             jsBuilderFunc.Execute();
             auto customNode = ViewStackModel::GetInstance()->Finish();
             NavDestinationModel::GetInstance()->SetCustomTitle(customNode);
-        }
-        JSRef<JSVal> height = jsObj->GetProperty("height");
-        if (height->IsNumber()) {
-            if (height->ToNumber<int32_t>() == 0 || height->ToNumber<int32_t>() == 1) {
-                NavDestinationModel::GetInstance()->SetTitleHeight(height->ToNumber<int32_t>());
-                return;
-            }
-            CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
-                return;
-            }
-            NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
-            return;
-        } else {
-            CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
-                return;
-            }
-            NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
         }
     } else {
         NavDestinationModel::GetInstance()->SetTitle("", false);

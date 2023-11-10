@@ -178,10 +178,8 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
             constraint.maxSize.SetWidth(maxWidth);
             // custom title must be single line title
 
-            auto navDestinationProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
-            auto titleHeight = navDestinationProperty->GetTitleBarHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
-            constraint.parentIdealSize.SetHeight(titleHeight.ConvertToPx());
-            constraint.maxSize.SetHeight(titleHeight.ConvertToPx());
+            constraint.parentIdealSize.SetHeight(titleBarSize.Height());
+            constraint.maxSize.SetHeight(titleBarSize.Height());
             titleWrapper->Measure(constraint);
             return;
         }
@@ -201,8 +199,8 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     if (titleBarLayoutProperty->HasTitleHeight()) {
         constraint.parentIdealSize.SetWidth(maxWidth);
         constraint.maxSize.SetWidth(maxWidth);
-        constraint.parentIdealSize.SetHeight(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx());
-        constraint.maxSize.SetHeight(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx());
+        constraint.parentIdealSize.SetHeight(titleBarSize.Height());
+        constraint.maxSize.SetHeight(titleBarSize.Height());
         titleWrapper->Measure(constraint);
         return;
     }
