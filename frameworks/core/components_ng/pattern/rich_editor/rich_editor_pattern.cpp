@@ -22,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
@@ -1870,6 +1871,7 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ScrollToSafeArea();
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex()));
     if (spanNode == nullptr && info.GetSpanIndex() == 0) {
         CreateTextSpanNode(spanNode, info, insertValueTemp);
@@ -2136,6 +2138,7 @@ void RichEditorPattern::DeleteBackward(int32_t length)
     if (!caretVisible_) {
         StartTwinkling();
     }
+    ScrollToSafeArea();
 }
 
 void RichEditorPattern::DeleteForward(int32_t length)
@@ -3585,5 +3588,25 @@ std::shared_ptr<SelectionMenuParams> RichEditorPattern::GetMenuParams(bool using
         return it->second;
     }
     return nullptr;
+}
+
+RectF RichEditorPattern::GetCaretRect() const
+{
+    RectF rect;
+    CHECK_NULL_RETURN(overlayMod_, rect);
+    auto richEditorOverlay = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    CHECK_NULL_RETURN(richEditorOverlay, rect);
+    rect.SetOffset(richEditorOverlay->GetCaretOffset());
+    rect.SetHeight(richEditorOverlay->GetCaretHeight());
+    return rect;
+}
+
+void RichEditorPattern::ScrollToSafeArea() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->ScrollTextFieldToSafeArea();
 }
 } // namespace OHOS::Ace::NG

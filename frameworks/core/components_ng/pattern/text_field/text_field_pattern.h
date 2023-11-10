@@ -565,7 +565,7 @@ public:
         enableTouchAndHoverEffect_ = enable;
     }
 
-    RectF GetCaretRect() const
+    RectF GetCaretRect() const override
     {
         return selectController_->GetCaretRect();
     }
@@ -1112,6 +1112,7 @@ private:
     void StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste = false);
     void ProcessResponseArea();
     bool HasInputOperation();
+    void ScrollToSafeArea() const override;
 
     RectF frameRect_;
     RectF contentRect_;
