@@ -255,7 +255,7 @@ std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint6
     return std::make_pair(0, 0);
 }
 
-std::pair<float, float> GetResamplePoint(const std::vector<TouchEvent> &history, const std::vector<TouchEvent> &current,
+std::pair<float, float> GetResamplePoint(std::vector<TouchEvent> history, std::vector<TouchEvent> current,
     const uint64_t &nanoTimeStamp, const bool isScreen)
 {
     float avgHistoryX = 0.f;
@@ -269,7 +269,7 @@ std::pair<float, float> GetResamplePoint(const std::vector<TouchEvent> &history,
     if (history.empty() || current.empty()) {
         return std::make_pair(0, 0);
     }
-    for (auto &iter = history.begin(); iter != history.end(); iter++) {
+    for (auto iter = history.begin(); iter != history.end(); iter++) {
         if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
             if (!isScreen) {
                 avgHistoryX += iter->x;
@@ -288,7 +288,7 @@ std::pair<float, float> GetResamplePoint(const std::vector<TouchEvent> &history,
     avgHistoryTime /= i;
     i = 0;
     lastTime = 0;
-    for (auto &iter = current.begin(); iter != current.end(); iter++) {
+    for (auto iter = current.begin(); iter != current.end(); iter++) {
         if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
             if (!isScreen) {
                 avgCurrentX += iter->x;
