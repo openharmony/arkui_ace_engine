@@ -59,6 +59,7 @@ constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 constexpr Dimension SWIPER_MARGIN = 16.0_vp;
 constexpr Dimension SWIPER_GUTTER = 16.0_vp;
 constexpr float PX_EPSILON = 0.01f;
+const std::string SWIPER_DRAG_SCENE = "swiper_drag_scene";
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -1425,6 +1426,7 @@ void SwiperPattern::HandleTouchUp()
 void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag start.");
+    UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
     if (usePropertyAnimation_) {
         StopPropertyTranslateAnimation();
     }
@@ -1463,6 +1465,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag update.");
+    UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::RUNNING);
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
         isTouchPad_ = true;
@@ -1490,6 +1493,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
     TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag end.");
+    UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         UpdateItemRenderGroup(false);
         return;
@@ -3195,6 +3199,13 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         // lazyBuild feature.
         SetLazyLoadFeature(true);
     }
+}
+
+void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddFRCSceneInfo(SWIPER_DRAG_SCENE, speed, sceneStatus);
 }
 
 void SwiperPattern::OnScrollStartRecursive(float position)
