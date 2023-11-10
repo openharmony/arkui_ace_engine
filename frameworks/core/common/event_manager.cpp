@@ -75,6 +75,11 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
     const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent do TouchTest in EventManager: "
+        "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
+        "touchPoint referee state:%{public}d, needAppend:%{public}d", touchPoint.id,
+        touchPoint.x, touchPoint.y, (int)(refereeNG_->QueryAllDone(touchPoint.id)),
+        (int)needAppend);
     ContainerScope scope(instanceId_);
 
     ACE_FUNCTION_TRACE();
@@ -259,6 +264,11 @@ void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 {
+    if (event.type != TouchType::MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Dispatch in EventManager: "
+            "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
+            "type=%{public}d", event.id, event.x, event.y, (int)event.type);
+    }
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
 #ifdef ENABLE_DRAG_FRAMEWORK
