@@ -1050,7 +1050,7 @@ var CopyOptions;
   CopyOptions[CopyOptions["None"] = 0] = "None";
   CopyOptions[CopyOptions["InApp"] = 1] = "InApp";
   CopyOptions[CopyOptions["LocalDevice"] = 2] = "LocalDevice";
-  CopyOptions[CopyOptions["CrossDevice"] = 3] = "CrossDevice";
+  CopyOptions[CopyOptions["CROSS_DEVICE"] = 3] = "CrossDevice";
 })(CopyOptions || (CopyOptions = {}));
 
 var RichEditorSpanType;
