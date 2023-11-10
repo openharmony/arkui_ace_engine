@@ -224,7 +224,7 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
     scheduleTasks_.erase(id);
 }
 
-std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint64_t> &history,
+std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<float, float, uint64_t> &history,
     const std::tuple<float, float, uint64_t> &current, const uint64_t &nanoTimeStamp)
 {
     if (nanoTimeStamp == std::get<INDEX_TIME>(history) || nanoTimeStamp == std::get<INDEX_TIME>(current)) {
@@ -255,7 +255,7 @@ std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint6
     return std::make_pair(0, 0);
 }
 
-std::pair<float, float> GetResamplePoint(const std::vector<TouchEvent> &history, const std::vector<TouchEvent> &current,
+std::pair<float, float> PipelineContext::GetResamplePoint(const std::vector<TouchEvent> &history, const std::vector<TouchEvent> &current,
     const uint64_t &nanoTimeStamp, const bool isScreen)
 {
     float avgHistoryX = 0.f;
