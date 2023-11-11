@@ -1112,6 +1112,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     let nodeInfo = (entry as UpdateFuncRecord).node;
     if (nodeInfo === undefined) {
       nodeInfo = builder();
+      entry.node = nodeInfo;
     }
     return nodeInfo;
   }
