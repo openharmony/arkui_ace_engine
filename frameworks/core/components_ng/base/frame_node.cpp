@@ -2316,6 +2316,8 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0);
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
@@ -2380,14 +2382,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         geometryNode_->SetContentSize(size.value());
     }
     GetPercentSensitive();
-    {
-        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
-            GetId(), GetParent() ? GetParent()->GetId() : 0);
-        layoutAlgorithm_->Measure(this);
-    }
+    layoutAlgorithm_->Measure(this);
     if (overlayNode_) {
-        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", overlayNode_->GetTag().c_str(),
-            overlayNode_->GetId(), overlayNode_->GetParent() ? overlayNode_->GetParent()->GetId() : 0);
         overlayNode_->Measure(layoutProperty_->CreateChildConstraint());
     }
     UpdatePercentSensitive();
@@ -2414,6 +2410,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 // Called to perform layout children.
 void FrameNode::Layout()
 {
+    ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0);
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
@@ -2435,11 +2433,7 @@ void FrameNode::Layout()
             }
             layoutProperty_->UpdateContentConstraint();
         }
-        {
-            ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
-                GetId(), GetParent() ? GetParent()->GetId() : 0);
-            GetLayoutAlgorithm()->Layout(this);
-        }
+        GetLayoutAlgorithm()->Layout(this);
         if (overlayNode_) {
             LayoutOverlay();
         }
@@ -2701,8 +2695,6 @@ void FrameNode::LayoutOverlay()
     auto childSize = overlayNode_->GetGeometryNode()->GetMarginFrameSize();
     auto translate = Alignment::GetAlignPosition(size, childSize, align) + offset;
     overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
-    ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", overlayNode_->GetTag().c_str(),
-        GetId(), overlayNode_->GetParent() ? overlayNode_->GetParent()->GetId() : 0);
     overlayNode_->Layout();
 }
 
