@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 
+#include <mutex>
+
 #include "input_manager.h"
 #include "ipc_skeleton.h"
 #include "root_scene.h"
@@ -33,7 +35,9 @@ constexpr float DIRECTION180 = 180;
 constexpr float DIRECTION270 = 270;
 constexpr uint32_t DOT_PER_INCH = 160;
 
-std::vector<MMI::DisplayInfo> displayInfoVector;
+std::vector<MMI::DisplayInfo> g_displayInfoVector;
+
+std::mutex g_vecLock;
 
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
@@ -65,24 +69,6 @@ void ScreenPattern::OnAttachToFrameNode()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(displayNode);
-
-    if (screenSession_->GetScreenProperty().GetScreenType() == Rosen::ScreenType::VIRTUAL) {
-        LOGW("Virtual screen, not update return");
-        return;
-    }
-
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto window = static_cast<RosenWindow*>(container->GetWindow());
-    CHECK_NULL_VOID(window);
-    auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
-    CHECK_NULL_VOID(rootScene);
-    auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
-    Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
-        screenBounds.rect_.width_, screenBounds.rect_.height_ };
-    float density = screenSession_->GetScreenProperty().GetDensity();
-    rootScene->SetDisplayDensity(density);
-    rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
 }
 
 void ScreenPattern::UpdateDisplayInfo()
@@ -145,15 +131,16 @@ void ScreenPattern::UpdateDisplayInfo()
         .direction = ConvertDegreeToMMIRotation(tempRotation)
     };
 
+    std::lock_guard<std::mutex> lock(g_vecLock);
     DeduplicateDisplayInfo();
-    displayInfoVector.insert(displayInfoVector.begin(), displayInfo);
+    g_displayInfoVector.insert(g_displayInfoVector.begin(), displayInfo);
 
     MMI::DisplayGroupInfo displayGroupInfo = {
         .width = paintRect.Width(),
         .height = paintRect.Height(),
         .focusWindowId = 0, // root scene id 0
         .windowsInfo = { windowInfo },
-        .displaysInfo = displayInfoVector
+        .displaysInfo = g_displayInfoVector
     };
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
 }
@@ -161,17 +148,19 @@ void ScreenPattern::UpdateDisplayInfo()
 void ScreenPattern::DeduplicateDisplayInfo()
 {
     auto screenId = screenSession_->GetScreenId();
-    for (int i = 0; i < displayInfoVector.size(); i++) {
-        if (displayInfoVector[i].id == screenId) {
-            displayInfoVector.erase(displayInfoVector.begin() + i);
-            break;
-        }
-    }
+    auto it = std::remove_if(g_displayInfoVector.begin(), g_displayInfoVector.end(),
+        [screenId](MMI::DisplayInfo displayInfo) {
+            return displayInfo.id == screenId;
+        });
+    g_displayInfoVector.erase(it, g_displayInfoVector.end());
 }
 
 bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
     UpdateDisplayInfo();
+    if (screenSession_->GetScreenProperty().GetScreenType() == Rosen::ScreenType::VIRTUAL) {
+        return false;
+    }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto window = static_cast<RosenWindow*>(container->GetWindow());

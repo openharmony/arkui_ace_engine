@@ -73,8 +73,6 @@ template("ace_core_pipeline_ng_source_set") {
       ]
     }
 
-    external_deps += [ "window_manager:screen_session" ]
-    include_dirs += [ "//foundation/window/window_manager/window_scene" ]
     if (platform == "ohos" && defined(config.enable_native_view) &&
         config.enable_native_view) {
       sources += [ "layers/ace_scene_builder.cpp" ]

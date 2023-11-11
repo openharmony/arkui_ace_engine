@@ -44,7 +44,6 @@ protected:
 
 private:
     void UpdateDisplayInfo();
-
     void DeduplicateDisplayInfo();
 
     sptr<Rosen::ScreenSession> screenSession_;

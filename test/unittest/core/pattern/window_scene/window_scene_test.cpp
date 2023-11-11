@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_model.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_node.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -68,7 +69,7 @@ HWTEST_F(WindowPatternTest, ScreenPatternTest001, TestSize.Level1)
     uint64_t screenId = 0;
     model.Create(screenId);
 
-    auto screenNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto screenNode = AceType::DynamicCast<ScreenNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     EXPECT_EQ(screenNode, nullptr);
 }
 

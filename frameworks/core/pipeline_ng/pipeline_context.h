@@ -430,9 +430,6 @@ protected:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
 private:
-    void TraverseRootNode(const std::list<RefPtr<UINode>>& list, const uint64_t& targetId,
-        RefPtr<FrameNode>& screenNode);
-
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
 
     void FlushWindowStateChangedCallback(bool isShow);
