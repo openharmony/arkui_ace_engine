@@ -97,6 +97,8 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
     JSClass<JSTextInput>::StaticMethod("selectionMenuHidden", &JSTextField::SetSelectionMenuHidden);
     JSClass<JSTextInput>::StaticMethod("customKeyboard", &JSTextField::SetCustomKeyboard);
+    JSClass<JSTextInput>::StaticMethod("passwordRules", &JSTextField::SetPasswordRules);
+    JSClass<JSTextInput>::StaticMethod("enableAutoFill", &JSTextField::SetEnableAutoFill);
     JSClass<JSTextInput>::StaticMethod("cancelButton", &JSTextField::SetCancelButton);
     JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
 

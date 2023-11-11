@@ -528,6 +528,21 @@ void FrameNode::DumpAdvanceInfo()
     }
 }
 
+void FrameNode::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
+{
+    if (pattern_) {
+        pattern_->DumpViewDataPageNode(viewDataWrap);
+    }
+}
+
+bool FrameNode::CheckAutoSave()
+{
+    if (pattern_) {
+        return pattern_->CheckAutoSave();
+    }
+    return false;
+}
+
 void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     bool enabled = true;
@@ -1325,6 +1340,32 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame() const
         parent = parent->GetParent();
     }
     return nullptr;
+}
+
+RefPtr<FrameNode> FrameNode::GetPageNode()
+{
+    if (GetTag() == "page") {
+        return Claim(this);
+    }
+    auto parent = GetParent();
+    while (parent && parent->GetTag() != "page") {
+        parent = parent->GetParent();
+    }
+    return AceType::DynamicCast<FrameNode>(parent);
+}
+
+void FrameNode::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
+{
+    if (pattern_) {
+        pattern_->NotifyFillRequestSuccess(nodeWrap, autoFillType);
+    }
+}
+
+void FrameNode::NotifyFillRequestFailed(int32_t errCode)
+{
+    if (pattern_) {
+        pattern_->NotifyFillRequestFailed(errCode);
+    }
 }
 
 void FrameNode::MarkNeedRenderOnly()

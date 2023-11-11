@@ -555,6 +555,16 @@ void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc
     }
 }
 
+void TextFieldModelNG::SetPasswordRules(const std::string& passwordRules)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules);
+}
+
+void TextFieldModelNG::SetEnableAutoFill(bool enableAutoFill)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFill, enableAutoFill);
+}
+
 void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

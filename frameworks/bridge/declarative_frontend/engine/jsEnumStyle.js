@@ -793,6 +793,8 @@ var InputType;
   InputType[InputType["Password"] = 7] = "Password";
   InputType[InputType["NUMBER_PASSWORD"] = 8] = "NUMBER_PASSWORD";
   InputType[InputType["SCREEN_LOCK_PASSWORD"] = 9] = "SCREEN_LOCK_PASSWORD";
+  InputType[InputType["USER_NAME"] = 10] = "USER_NAME";
+  InputType[InputType["NEW_PASSWORD"] = 11] = "NEW_PASSWORD";
 })(InputType || (InputType = {}));
 
 var SearchType;

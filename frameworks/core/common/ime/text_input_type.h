@@ -35,7 +35,9 @@ enum class TextInputType {
     VISIBLE_PASSWORD = 7,
     NUMBER_PASSWORD = 8,
     SCREEN_LOCK_PASSWORD = 9,
-    END = SCREEN_LOCK_PASSWORD,
+    USER_NAME = 10,
+    NEW_PASSWORD = 11,
+    END = NEW_PASSWORD,
 };
 
 TextInputType CastToTextInputType(int32_t value);

@@ -2086,8 +2086,14 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetTextInputType0
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PASSWORD);
 
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::USER_NAME);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_USER_NAME);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::NEW_PASSWORD);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_NEW_PASSWORD);
+
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::END);
-    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PASSWORD);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_NEW_PASSWORD);
 }
 
 /**
@@ -2178,6 +2184,9 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetText001, TestS
     EXPECT_EQ(textFieldAccessibilityProperty->GetText(), TEXT_CONTENT);
 
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetText(), DEFAULT_PASSWORD);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::NEW_PASSWORD);
     EXPECT_EQ(textFieldAccessibilityProperty->GetText(), DEFAULT_PASSWORD);
 }
 
@@ -4942,6 +4951,8 @@ HWTEST_F(TextFieldPatternTestNg, TextInputTypeToString, TestSize.Level2)
         std::make_pair(TextInputType::NUMBER, "InputType.Number"),
         std::make_pair(TextInputType::EMAIL_ADDRESS, "InputType.Email"),
         std::make_pair(TextInputType::VISIBLE_PASSWORD, "InputType.Password"),
+        std::make_pair(TextInputType::USER_NAME, "InputType.USER_NAME"),
+        std::make_pair(TextInputType::NEW_PASSWORD, "InputType.NEW_PASSWORD"),
         std::make_pair(TextInputType::PHONE, "InputType.Normal"),
         std::make_pair(TextInputType::UNSPECIFIED, "InputType.Normal"),
     };

@@ -142,11 +142,32 @@ public:
         isRenderDone_ = true;
     }
 
+    void SetAutoFillPasswordTriggered(bool value)
+    {
+        autoFillPasswordTriggered_ = value;
+    }
+
+    bool IsAutoFillPasswordTriggered() const
+    {
+        return autoFillPasswordTriggered_;
+    }
+
+    void SetAutoFillNewPasswordTriggered(bool value)
+    {
+        autoFillNewPasswordTriggered_ = value;
+    }
+
+    bool IsAutoFillNewPasswordTriggered() const
+    {
+        return autoFillNewPasswordTriggered_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
+    void ProcessAutoSave();
 
     bool AvoidKeyboard() const override;
     bool AvoidTop() const override
@@ -168,6 +189,8 @@ private:
     bool isFirstLoad_ = true;
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
+    bool autoFillPasswordTriggered_ = false;
+    bool autoFillNewPasswordTriggered_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

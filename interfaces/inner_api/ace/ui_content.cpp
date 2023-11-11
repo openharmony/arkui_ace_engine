@@ -27,9 +27,11 @@ namespace OHOS::Ace {
 using CreateCardFunc = UIContent* (*)(void*, void*, bool);
 using CreateFunc = UIContent* (*)(void*, void*);
 using CreateFunction = UIContent* (*)(void*);
+using GetUIContentFunc = UIContent* (*)(int32_t);
 constexpr char UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateUIContent";
 constexpr char Card_CREATE_FUNC[] = "OHOS_ACE_CreateFormContent";
 constexpr char SUB_WINDOW_UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateSubWindowUIContent";
+constexpr char GET_UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_GetUIContent";
 
 OHOS::AbilityRuntime::Context* context_ = nullptr;
 
@@ -120,6 +122,23 @@ void UIContent::ShowDumpHelp(std::vector<std::string>& info)
     info.emplace_back(" -render                        |show render tree");
     info.emplace_back(" -inspector                     |show inspector tree");
     info.emplace_back(" -frontend                      |show path and components count of current page");
+}
+
+UIContent* UIContent::GetUIContent(int32_t instanceId)
+{
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+    if (handle == nullptr) {
+        return nullptr;
+    }
+
+    auto entry = reinterpret_cast<GetUIContentFunc>(LOADSYM(handle, GET_UI_CONTENT_CREATE_FUNC));
+    if (entry == nullptr) {
+        FREELIB(handle);
+        return nullptr;
+    }
+
+    auto content = entry(instanceId);
+    return content;
 }
 
 } // namespace OHOS::Ace

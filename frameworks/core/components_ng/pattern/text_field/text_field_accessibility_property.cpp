@@ -34,9 +34,9 @@ bool TextFieldAccessibilityProperty::IsPassword() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, false);
-    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
-    return textFieldLayoutProperty->GetTextInputType() == TextInputType::VISIBLE_PASSWORD;
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    return textFieldPattern->IsInPasswordMode();
 }
 
 AceTextCategory TextFieldAccessibilityProperty::GetTextInputType() const
@@ -66,6 +66,12 @@ AceTextCategory TextFieldAccessibilityProperty::GetTextInputType() const
             break;
         case TextInputType::VISIBLE_PASSWORD:
             ret = AceTextCategory::INPUT_TYPE_PASSWORD;
+            break;
+        case TextInputType::USER_NAME:
+            ret = AceTextCategory::INPUT_TYPE_USER_NAME;
+            break;
+        case TextInputType::NEW_PASSWORD:
+            ret = AceTextCategory::INPUT_TYPE_NEW_PASSWORD;
             break;
         default:
             break;

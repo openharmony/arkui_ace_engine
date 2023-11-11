@@ -28,6 +28,7 @@
 #include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -851,6 +852,10 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
+    void NotifyFillRequestFailed(int32_t errCode) override;
+    bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
     bool NeedPaintSelect();
 
@@ -1110,6 +1115,9 @@ private:
     void StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste = false);
     void ProcessResponseArea();
     bool HasInputOperation();
+    AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
+    bool CheckAutoFill();
+    bool ProcessAutoFill();
     void ScrollToSafeArea() const override;
 
     RectF frameRect_;
@@ -1252,6 +1260,7 @@ private:
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
+    std::string lastAutoFillPasswordTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;

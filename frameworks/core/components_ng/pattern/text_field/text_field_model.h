@@ -232,6 +232,8 @@ public:
     virtual void SetCancelIconSize(const CalcDimension& iconSize) = 0;
     virtual void SetCanacelIconSrc(const std::string& iconSrc) = 0;
     virtual void SetCancelIconColor(const Color& iconColor) = 0;
+    virtual void SetPasswordRules(const std::string& passwordRules) = 0;
+    virtual void SetEnableAutoFill(bool enableAutoFill) = 0;
 
     virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;
 
