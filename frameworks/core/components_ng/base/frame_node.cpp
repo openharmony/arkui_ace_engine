@@ -1553,11 +1553,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         translateCfg[GetId()].degree = 0.0;
         translateCfg[GetId()].localMat = Matrix4();
     }
-
+    int32_t parentId = -1;
     auto parent = GetAncestorNodeOfFrame();
     if (parent) {
         AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
         translateIds[GetId()] = ancestorNodeInfo;
+        parentId = parent->GetId();
     }
 
     auto responseRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.sourceType));
@@ -1571,7 +1572,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        if (IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType))) {
+        bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType));
+        AddFrameNodeSnapshot(!isOutOfRegion, parentId);
+        if (isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
@@ -2713,4 +2716,21 @@ void FrameNode::OnInspectorIdUpdate(const std::string& /*unused*/)
     }
 }
 
+void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+
+    FrameNodeSnapshot info = {
+        .nodeId = GetId(),
+        .parentNodeId = parentId,
+        .tag = GetTag(),
+        .comId = propInspectorId_.value_or(""),
+        .isHit = isHit,
+        .hitTestMode = static_cast<int32_t>(GetHitTestMode())
+    };
+    eventMgr->GetEventTreeRecord().AddFrameNodeSnapshot(std::move(info));
+}
 } // namespace OHOS::Ace::NG

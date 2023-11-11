@@ -29,6 +29,7 @@
 #include "core/event/touch_event.h"
 #include "core/focus/focus_node.h"
 #include "core/gestures/gesture_referee.h"
+#include "core/common/event_dump.h"
 
 namespace OHOS::Ace {
 
@@ -194,6 +195,15 @@ public:
         return isLastMoveBeforeUp_;
     }
 
+    NG::EventTreeRecord& GetEventTreeRecord()
+    {
+        return eventTree_;
+    }
+
+    void DumpEvent() const;
+
+    void AddGestureSnapshot(int32_t finger, const RefPtr<TouchEventTarget>& target);
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -219,6 +229,7 @@ private:
     RefPtr<NG::GestureReferee> refereeNG_;
     std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
     std::vector<KeyCode> pressedKeyCodes_;
+    NG::EventTreeRecord eventTree_;
 };
 
 } // namespace OHOS::Ace
