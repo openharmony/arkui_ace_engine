@@ -57,11 +57,16 @@ private:
     DataPlatformFinish onFinish_;
 };
 
-int32_t AceDataAbility::instanceId_ = 200000;
 const std::string AceDataAbility::START_PARAMS_KEY = "__startParams";
 const std::string AceDataAbility::URI = "url";
 
 REGISTER_AA(AceDataAbility)
+
+AceDataAbility::AceDataAbility()
+{
+    abilityId_ = Container::GenerateId<PA_DATA_CONTAINER>();
+}
+
 void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     Ability::OnStart(want, sessionInfo);

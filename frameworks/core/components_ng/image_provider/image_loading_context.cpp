@@ -188,7 +188,7 @@ void ImageLoadingContext::DownloadImage()
     if (NotifyReadyIfCacheHit()) {
         return;
     }
-    downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](const std::vector<uint8_t>& imageData) {
+    downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](const std::string&& imageData) {
         auto ctx = weak.Upgrade();
         CHECK_NULL_VOID(ctx);
         auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());

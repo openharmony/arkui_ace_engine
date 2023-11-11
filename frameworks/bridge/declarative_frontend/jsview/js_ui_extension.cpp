@@ -17,6 +17,7 @@
 
 #include <functional>
 #include <string>
+#include "want_params.h"
 
 #include "base/log/ace_scoring_log.h"
 #include "base/want/want_wrap.h"
@@ -26,6 +27,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "interfaces/include/ws_common.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<UIExtensionModel> UIExtensionModel::instance_ = nullptr;
@@ -57,6 +59,9 @@ void JSUIExtensionProxy::JSBind(BindingTarget globalObj)
 {
     JSClass<JSUIExtensionProxy>::Declare("UIExtensionProxy ");
     JSClass<JSUIExtensionProxy>::CustomMethod("send", &JSUIExtensionProxy::Send);
+    JSClass<JSUIExtensionProxy>::CustomMethod("sendSync", &JSUIExtensionProxy::SendSync);
+    JSClass<JSUIExtensionProxy>::CustomMethod("on", &JSUIExtensionProxy::On);
+    JSClass<JSUIExtensionProxy>::CustomMethod("off", &JSUIExtensionProxy::Off);
     JSClass<JSUIExtensionProxy>::Bind(globalObj, &JSUIExtensionProxy::Constructor, &JSUIExtensionProxy::Destructor);
 }
 
@@ -91,6 +96,111 @@ void JSUIExtensionProxy::Send(const JSCallbackInfo& info)
     auto wantParams = WantParamsWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
     if (proxy_) {
         proxy_->SendData(wantParams);
+    }
+}
+
+void JSUIExtensionProxy::SendSync(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scopeNapi(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    auto wantParams = WantParamsWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
+    if (proxy_) {
+        AAFwk::WantParams reWantParams;
+        Rosen::WSErrorCode sendCode = proxy_->SendDataSync(wantParams, reWantParams);
+        if (sendCode != Rosen::WSErrorCode::WS_OK) {
+            const int32_t reErrorCode = static_cast<int32_t>(sendCode);
+            std::string errMsg;
+            if (reErrorCode == ERROR_CODE_UIEXTENSION_NOT_REGISTER_SYNC_CALLBACK) {
+                errMsg = "No callback has been registered to process synchronous data transferring.";
+            } else if (reErrorCode == ERROR_CODE_UIEXTENSION_TRANSFER_DATA_FAILED) {
+                errMsg = "Transferring data failed.";
+            } else {
+                errMsg = "Unknown error.";
+            }
+            JSException::Throw(reErrorCode, errMsg.c_str());
+            return;
+        }
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        auto execCtx = info.GetExecutionContext();
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto reNativeWantParams =
+            WantWrap::ConvertParamsToNativeValue(reWantParams, reinterpret_cast<napi_env>(nativeEngine));
+        auto reWantParamsJSVal = Framework::JsConverter::ConvertNapiValueToJsVal(reNativeWantParams);
+        info.SetReturnValue(reWantParamsJSVal);
+    }
+}
+
+void JSUIExtensionProxy::On(const JSCallbackInfo& info)
+{
+    const int argCount = 2;
+    if (info.Length() != argCount || !info[0]->IsString() || !info[1]->IsFunction()) {
+        return;
+    }
+    const std::string registerType = info[0]->ToString();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onOnFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+        (const RefPtr<NG::UIExtensionProxy>& session) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        JSRef<JSObject> contextObj = JSClass<JSUIExtensionProxy>::NewInstance();
+        RefPtr<JSUIExtensionProxy> proxy = Referenced::Claim(contextObj->Unwrap<JSUIExtensionProxy>());
+        proxy->SetInstanceId(instanceId);
+        proxy->SetProxy(session);
+        auto param = JSRef<JSVal>::Cast(contextObj);
+        func->ExecuteJS(1, &param);
+    };
+
+    auto pattern = proxy_->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    const std::string syncType = "syncReceiverRegister";
+    const std::string asyncType = "asyncReceiverRegister";
+    if (registerType == syncType) {
+        pattern->SetOnSyncOnCallback(std::move(onOnFunc));
+    } else if (registerType == asyncType) {
+        pattern->SetOnAsyncOnCallback(std::move(onOnFunc));
+    }
+}
+
+void JSUIExtensionProxy::Off(const JSCallbackInfo& info)
+{
+    const int argCount = 2;
+    if (info.Length() != argCount || !info[0]->IsString() || !info[1]->IsFunction()) {
+        return;
+    }
+    const std::string registerType = info[0]->ToString();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onOffFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+        (const RefPtr<NG::UIExtensionProxy>& session) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        JSRef<JSObject> contextObj = JSClass<JSUIExtensionProxy>::NewInstance();
+        RefPtr<JSUIExtensionProxy> proxy = Referenced::Claim(contextObj->Unwrap<JSUIExtensionProxy>());
+        proxy->SetInstanceId(instanceId);
+        proxy->SetProxy(session);
+        auto param = JSRef<JSVal>::Cast(contextObj);
+        func->ExecuteJS(1, &param);
+    };
+
+    auto pattern = proxy_->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    const std::string syncType = "syncReceiverRegister";
+    const std::string asyncType = "asyncReceiverRegister";
+    if (registerType == syncType) {
+        pattern->SetOnSyncOffCallback(std::move(onOffFunc));
+    } else if (registerType == asyncType) {
+        pattern->SetOnAsyncOffCallback(std::move(onOffFunc));
     }
 }
 

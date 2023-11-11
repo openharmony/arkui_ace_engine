@@ -81,13 +81,8 @@ RefPtr<NG::ImageData> ImageFileCache::GetDataFromCacheFile(const std::string& fi
         return nullptr;
     }
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
-#ifndef USE_ROSEN_DRAWING
-    auto data = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
-    return NG::ImageData::MakeFromDataWrapper(&data);
-#else
     auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
     return NG::ImageData::MakeFromDataWrapper(&rsData);
-#endif
 }
 
 void ImageFileCache::WriteCacheFile(

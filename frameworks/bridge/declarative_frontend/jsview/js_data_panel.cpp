@@ -275,6 +275,9 @@ bool JSDataPanel::ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::
     }
 
     size_t colorLength = jsLinearGradient->GetGradient().size();
+    if (colorLength == 0) {
+        return false;
+    }
     for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
         OHOS::Ace::NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));

@@ -505,6 +505,9 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity)
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto listItem = weak.Upgrade();
         CHECK_NULL_VOID(listItem);
+        if (NearZero(listItem->curOffset_)) {
+            listItem->ResetToItemChild();
+        }
         listItem->MarkDirtyNode();
     });
 }

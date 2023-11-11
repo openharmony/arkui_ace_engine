@@ -929,6 +929,86 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 #endif
 }
 
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    CHECK_RUN_ON(UI);
+    // prevent repeated trigger with same keyboardHeight
+    CHECK_NULL_VOID(safeAreaManager_);
+    if (keyboardHeight == safeAreaManager_->GetKeyboardInset().Length()) {
+        return;
+    }
+
+    ACE_FUNCTION_TRACE();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+
+    auto weak = WeakClaim(this);
+    auto func = [weak, keyboardHeight, positionY, height]() mutable {
+        auto context = weak.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        if (keyboardHeight > 0) {
+            // add height of navigation bar
+            keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+        }
+
+        auto manager = DynamicCast<TextFieldManagerNG>(context->PipelineBase::GetTextFieldManager());
+        CHECK_NULL_VOID(manager);
+        float uiExtensionHeight = 0.0f;
+        if (manager) {
+            uiExtensionHeight = static_cast<float>(manager->GetHeight());
+            if (uiExtensionHeight == 0) {
+                LOGE("UIExtension Component Height equals zero");
+                return;
+            }
+            if (positionY + height > uiExtensionHeight) {
+                height = uiExtensionHeight - positionY;
+            }
+            positionY += static_cast<float>(manager->GetClickPosition().GetY());
+        }
+        SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
+        float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
+        float positionYWithOffset = positionY - keyboardOffset;
+        float offsetFix = (rootSize.Height() - positionY - height) < keyboardHeight
+                                ? keyboardHeight - (rootSize.Height() - positionY - height)
+                                : keyboardHeight;
+        if (NearZero(keyboardHeight)) {
+            context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
+                   LessOrEqual(rootSize.Height() - positionYWithOffset, keyboardHeight)) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-keyboardHeight);
+        } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
+        } else if ((positionYWithOffset + height > rootSize.Height() - keyboardHeight &&
+                       positionYWithOffset < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
+                   NearZero(context->rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
+        } else {
+            context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        }
+        context->SyncSafeArea(true);
+        // layout immediately
+        context->FlushUITasks();
+
+        manager->ScrollTextFieldToSafeArea();
+        context->FlushUITasks();
+    };
+
+    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
+    Animate(option, option.GetCurve(), func);
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
 bool PipelineContext::OnBackPressed()
 {
     LOGD("OnBackPressed");
@@ -1084,8 +1164,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     HandleEtsCardTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
-    LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
-        scalePoint.type);
+    if (scalePoint.type != TouchType::MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Process in ace_container: "
+            "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
+            "type=%{public}d", scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
+    }
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
@@ -1673,8 +1756,27 @@ void PipelineContext::WindowFocus(bool isFocus)
         if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
             rootFocusHub->RequestFocusImmediately();
         }
+        if (focusWindowId_.has_value()) {
+            auto curMainView = FocusHub::GetCurrentMainView();
+            if (curMainView) {
+                curMainView->HandleFocusOnMainView();
+            }
+        }
     }
     FlushWindowFocusChangedCallback(isFocus);
+}
+
+void PipelineContext::ContainerModalUnFocus()
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->OnWindowForceUnfocused();
 }
 
 void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -1985,7 +2087,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     canUseLongPredictTask_ = false;
 }
 
-void PipelineContext::Finish(bool /*autoFinish*/) const
+void PipelineContext::Finish(bool /* autoFinish */) const
 {
     CHECK_RUN_ON(UI);
     if (finishEventHandler_) {

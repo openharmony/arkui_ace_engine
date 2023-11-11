@@ -83,7 +83,7 @@ void JSList::SetEdgeEffect(const JSCallbackInfo& info)
     int32_t edgeEffect;
     if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsInt32(info[0], edgeEffect) ||
         edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
-        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
+        edgeEffect = static_cast<int32_t>(EdgeEffect::SPRING);
     }
     ListModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), false);
 

@@ -30,8 +30,7 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -244,15 +243,6 @@ bool GridPattern::IsItemSelected(const MouseInfo& info)
     return itemPattern->IsSelected();
 }
 
-float GridPattern::GetMainContentSize() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0.0);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0.0);
-    return geometryNode->GetPaddingSize().MainSize(gridLayoutInfo_.axis_);
-}
-
 void GridPattern::FireOnScrollStart()
 {
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
@@ -357,7 +347,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         HandleScrollBarOutBoundary(overScroll);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
-        if (GreatOrEqual(gridLayoutInfo_.currentOffset_, GetMainContentSize() - itemsHeight)) {
+        if (GreatNotEqual(gridLayoutInfo_.currentOffset_, GetMainContentSize() - itemsHeight)) {
             gridLayoutInfo_.offsetEnd_ = false;
             gridLayoutInfo_.reachEnd_ = false;
         }
@@ -377,7 +367,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         HandleScrollBarOutBoundary(overScroll);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
-        if (LessOrEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
+        if (LessNotEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
             gridLayoutInfo_.reachStart_ = false;
         }
         return true;
@@ -1294,14 +1284,6 @@ bool GridPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
-void GridPattern::SetPositionController(const RefPtr<ScrollableController>& controller)
-{
-    positionController_ = DynamicCast<GridPositionController>(controller);
-    if (controller) {
-        controller->SetScrollPattern(AceType::WeakClaim<GridPattern>(this));
-    }
-}
-
 void GridPattern::ScrollPage(bool reverse)
 {
     StopAnimate();
@@ -1841,5 +1823,15 @@ Rect GridPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(itemGeometry, Rect());
     return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
+
+void GridPattern::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign align)
+{
+    // move to layout algorithm
+    if (index == LAST_ITEM) {
+        index = gridLayoutInfo_.childrenCount_ - 1;
+    }
+    StopAnimate();
+    UpdateStartIndex(index, align);
 }
 } // namespace OHOS::Ace::NG

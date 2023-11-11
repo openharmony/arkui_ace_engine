@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "base/geometry/ng/rect_t.h"
 
 #define protected public
 #define private public
@@ -744,7 +745,8 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate011, TestSize.Level1)
      */
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->HandleTextContentRect();
+    Rect rect;
+    pattern->HandleTextContentRect(rect);
     EXPECT_FALSE(textFieldPattern->IsOperation());
 
     /**
@@ -755,7 +757,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate011, TestSize.Level1)
     textRect.SetLeft(0.0);
     textFieldPattern->SetTextRect(textRect);
     textFieldPattern->UpdateEditingValue("aaa", 0);
-    pattern->HandleTextContentRect();
+    pattern->HandleTextContentRect(rect);
     EXPECT_TRUE(textFieldPattern->IsOperation());
 }
 

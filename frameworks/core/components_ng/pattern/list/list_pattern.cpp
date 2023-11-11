@@ -1277,15 +1277,6 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign
     isScrollEnd_ = true;
 }
 
-void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
-{
-    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
-        ScrollToIndex(0, smooth_, ScrollAlign::START);
-    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth_, ScrollAlign::END);
-    }
-}
-
 bool ListPattern::ScrollPage(bool reverse)
 {
     StopAnimate();
@@ -1743,6 +1734,7 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
     }
     json->Put("friction", GetFriction());
+    json->Put("edgeEffectAlwaysEnabled", GetAlwaysEnabled());
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -1913,7 +1905,7 @@ void ListPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(endIndex_));
     DumpLog::GetInstance().AddDesc("centerIndex:" + std::to_string(centerIndex_));
     DumpLog::GetInstance().AddDesc("startMainPos:" + std::to_string(startMainPos_));
-    DumpLog::GetInstance().AddDesc("endMainPos_:" + std::to_string(endMainPos_));
+    DumpLog::GetInstance().AddDesc("endMainPos:" + std::to_string(endMainPos_));
     DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(currentOffset_));
     DumpLog::GetInstance().AddDesc("contentMainSize:" + std::to_string(contentMainSize_));
     DumpLog::GetInstance().AddDesc("contentStartOffset:" + std::to_string(contentStartOffset_));

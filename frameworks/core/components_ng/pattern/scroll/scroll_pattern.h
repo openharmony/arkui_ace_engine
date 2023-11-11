@@ -18,8 +18,6 @@
 
 #include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
@@ -27,10 +25,10 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
-#include "core/components_ng/pattern/scroll/scroll_position_controller.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/web/scroll_update_listener.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,10 +38,7 @@ class ScrollPattern : public ScrollablePattern {
 public:
     ScrollPattern() : ScrollablePattern(true) {}
 
-    ~ScrollPattern() override
-    {
-        positionController_ = nullptr;
-    }
+    ~ScrollPattern() override = default;
 
     bool IsAtomicNode() const override
     {
@@ -114,7 +109,8 @@ public:
 
     float GetTotalOffset() const override
     {
-        return -currentOffset_;
+        return GetScrollSource() == SCROLL_FROM_JUMP || GetScrollSource() == SCROLL_FROM_BAR
+                                    ? -std::clamp(currentOffset_, -scrollableDistance_, 0.0f) : -currentOffset_;
     }
 
     void ResetPosition();
@@ -143,14 +139,9 @@ public:
         return  direction_ == FlexDirection::COLUMN_REVERSE;
     }
 
-    RefPtr<ScrollPositionController> GetScrollPositionController() const
+    RefPtr<ScrollableController> GetScrollPositionController() const
     {
         return positionController_;
-    }
-
-    void SetScrollPositionController(const RefPtr<ScrollPositionController>& positionController)
-    {
-        positionController_ = positionController;
     }
 
     void SetDirection(FlexDirection direction)
@@ -173,15 +164,23 @@ public:
     void OnAnimateStop() override;
     bool UpdateCurrentOffset(float offset, int32_t source) override;
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
-    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
     bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr);
     void ScrollTo(float position) override;
     void JumpToPosition(float position, int32_t source = SCROLL_FROM_JUMP);
+    float GetMainContentSize() const override
+    {
+        return viewPortLength_;
+    }
+    bool SupportScrollToIndex() const override
+    {
+        return false;
+    }
     bool ScrollPageCheck(float delta, int32_t source);
     void AdjustOffset(float& delta, int32_t source);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-    Rect GetItemRect(int32_t index) const;
+    Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
     std::optional<float> CalePredictSnapOffset(float delta) override;
@@ -260,6 +259,8 @@ public:
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
 
+    void registerScrollUpdateListener(const std::shared_ptr<IScrollUpdateCallback>& listener);
+
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
@@ -291,7 +292,6 @@ private:
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
 
-    RefPtr<ScrollPositionController> positionController_;
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
@@ -301,6 +301,7 @@ private:
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
     bool scrollStop_ = false;
+    std::vector<std::shared_ptr<IScrollUpdateCallback>> listenerVector_;
 
     // scrollSnap
     std::vector<float> snapOffsets_;

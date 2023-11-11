@@ -75,6 +75,10 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
 
 void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height) {}
 
-void RosenRenderSurface::ConsumeBuffer() {}
+void RosenRenderSurface::ConsumeWebBuffer() {}
+
+void DrawBuffer() {}
+
+void ConsumeXComponentBuffer() {}
 
 } // namespace OHOS::Ace::NG

@@ -426,6 +426,8 @@ public:
 
     void WindowFocus(bool isFocus) override;
 
+    void ContainerModalUnFocus() override;
+
     void OnPageShow() override;
 
     double GetStatusBarHeight() const

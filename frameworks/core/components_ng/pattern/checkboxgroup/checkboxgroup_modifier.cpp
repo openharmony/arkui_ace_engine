@@ -82,11 +82,7 @@ CheckBoxGroupModifier::CheckBoxGroupModifier(const Parameters& parameters)
 void CheckBoxGroupModifier::PaintCheckBox(
     DrawingContext& context, const OffsetF& paintOffset, const SizeF& contentSize) const
 {
-#ifndef USE_ROSEN_DRAWING
-    auto canvas = context.canvas;
-#else
     auto& canvas = context.canvas;
-#endif
     auto color = activeColor_;
 
     RSPen pen;

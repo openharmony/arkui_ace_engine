@@ -39,7 +39,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     event.SetPointerEvent(lastPoint.pointerEvent);
     TouchLocationInfo changedInfo("onTouch", lastPoint.id);
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);
-    NGGestureRecognizer::Transform(lastLocalPoint, GetNodeId());
+    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode());
     auto localX = static_cast<float>(lastLocalPoint.GetX());
     auto localY = static_cast<float>(lastLocalPoint.GetY());
     changedInfo.SetLocalLocation(Offset(localX, localY));
@@ -64,7 +64,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         float screenX = item.screenX;
         float screenY = item.screenY;
         PointF localPoint(globalX, globalY);
-        NGGestureRecognizer::Transform(localPoint, GetNodeId());
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
         TouchLocationInfo info("onTouch", item.id);
@@ -90,7 +90,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         float screenX = item.screenX;
         float screenY = item.screenY;
         PointF localPoint(globalX, globalY);
-        NGGestureRecognizer::Transform(localPoint, GetNodeId());
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
         TouchLocationInfo historyInfo("onTouch", item.id);

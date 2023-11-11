@@ -280,7 +280,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("barState"), "BarState.AUTO");
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
-    EXPECT_EQ(json->GetString("caretPosition"), "0");
+    EXPECT_EQ(json->GetString("caretPosition"), "");
     EXPECT_TRUE(json->GetBool("showUnderline"));
 }
 

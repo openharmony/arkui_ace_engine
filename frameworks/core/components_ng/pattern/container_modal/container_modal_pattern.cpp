@@ -249,6 +249,8 @@ void ContainerModalPattern::OnWindowUnfocused()
     WindowFocus(false);
 }
 
+void ContainerModalPattern::OnWindowForceUnfocused() {}
+
 void ContainerModalPattern::WindowFocus(bool isFocus)
 {
     isFocus_ = isFocus;

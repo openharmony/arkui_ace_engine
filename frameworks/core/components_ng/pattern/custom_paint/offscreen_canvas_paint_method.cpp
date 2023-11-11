@@ -665,11 +665,15 @@ void OffscreenCanvasPaintMethod::PaintText(
     }
 #else
     double dx = x + GetAlignOffset(align, paragraph_);
+    auto baseline =
+        isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
+    double dy = y + GetBaselineOffset(baseline, paragraph_);
 
     std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
     if (hasShadow) {
         rsCanvas_->Save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
+        auto shadowOffsetY = shadow_.GetOffset().GetY();
         if (scale.has_value()) {
             if (!NearZero(scale.value())) {
                 dx /= scale.value();
@@ -677,6 +681,7 @@ void OffscreenCanvasPaintMethod::PaintText(
             }
             rsCanvas_->Scale(scale.value(), 1.0);
         }
+        paragraph_->Paint(rsCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         rsCanvas_->Restore();
         return;
     }
@@ -696,8 +701,10 @@ void OffscreenCanvasPaintMethod::PaintText(
 #else
         rsCanvas_->Save();
         rsCanvas_->Scale(scale.value(), 1.0);
+        paragraph_->Paint(rsCanvas_.get(), dx, dy);
         rsCanvas_->Restore();
     } else {
+        paragraph_->Paint(rsCanvas_.get(), dx, dy);
     }
 #endif
 }
@@ -814,13 +821,13 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(
     return true;
 }
 
+#ifndef USE_ROSEN_DRAWING
 #ifndef USE_GRAPHIC_TEXT_GINE
 void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
 #else
 void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow)
 #endif
 {
-#ifndef USE_ROSEN_DRAWING
     using namespace Constants;
     if (!isStroke) {
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
@@ -891,9 +898,63 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
         txtStyle.has_foreground = true;
 #endif
     }
-#else
-#endif
 }
+#else
+void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
+{
+    using namespace Constants;
+    if (!isStroke) {
+        txtStyle.foreground_pen.Reset();
+        txtStyle.has_foreground_pen = false;
+        txtStyle.color = ConvertSkColor(fillState_.GetColor());
+        txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
+        ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
+        if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
+            RSBrush brush;
+            RSSamplingOptions options;
+            InitImagePaint(nullptr, &brush, options);
+            UpdatePaintShader(OffsetF(0, 0), nullptr, &brush, fillState_.GetGradient());
+            txtStyle.foreground_brush = brush;
+            txtStyle.has_foreground_brush = true;
+        }
+        if (globalState_.HasGlobalAlpha()) {
+            if (txtStyle.has_foreground_brush) {
+                txtStyle.foreground_brush.SetColor(fillState_.GetColor().GetValue());
+                txtStyle.foreground_brush.SetAlphaf(globalState_.GetAlpha()); // set alpha after color
+            } else {
+                RSBrush brush;
+                RSSamplingOptions options;
+                InitImagePaint(nullptr, &brush, options);
+                brush.SetColor(fillState_.GetColor().GetValue());
+                brush.SetAlphaf(globalState_.GetAlpha()); // set alpha after color
+                txtStyle.foreground_brush = brush;
+                txtStyle.has_foreground_brush = true;
+            }
+        }
+    } else {
+        // use foreground to draw stroke
+        txtStyle.foreground_pen.Reset();
+        txtStyle.has_foreground_pen = false;
+        RSPen pen;
+        RSSamplingOptions options;
+        GetStrokePaint(pen, options);
+        ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
+        txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
+        if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
+            UpdatePaintShader(OffsetF(0, 0), &pen, nullptr, strokeState_.GetGradient());
+        }
+        if (hasShadow) {
+            pen.SetColor(shadow_.GetColor().GetValue());
+            RSFilter filter;
+            filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL,
+                RosenDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
+            pen.SetFilter(filter);
+        }
+        txtStyle.foreground_pen = pen;
+        txtStyle.has_foreground_pen = true;
+    }
+}
+#endif
 
 #ifndef USE_ROSEN_DRAWING
 void OffscreenCanvasPaintMethod::PaintShadow(

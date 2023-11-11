@@ -105,7 +105,7 @@ ohos_unittest("ThemeManagerTest") {
     deps += [ "$ace_root/frameworks/base:ace_base_ohos" ]
     external_deps = [
       "hilog:libhilog",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
       "resmgr:resourcemanager",
     ]
   } else {
@@ -218,7 +218,7 @@ ohos_unittest("ThemeConstantsTest") {
   } else {
     external_deps = [
       "hilog:libhilog",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
   }
   external_deps += [ "c_utils:utils" ]
