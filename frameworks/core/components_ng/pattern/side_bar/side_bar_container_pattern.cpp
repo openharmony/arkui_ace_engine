@@ -73,6 +73,12 @@ void SideBarContainerPattern::OnAttachToFrameNode()
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     userSetSidebarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto sideBarTheme = pipelineContext->GetTheme<SideBarTheme>();
+    if (sideBarTheme && sideBarTheme->GetSideBarUnfocusEffectEnable()) {
+        pipelineContext->AddWindowFocusChangedCallback(host->GetId());
+    }
 }
 
 void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
@@ -224,6 +230,46 @@ RefPtr<FrameNode> SideBarContainerPattern::GetSideBarNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(sideBarNode, nullptr);
 
     return sideBarNode;
+}
+
+RefPtr<FrameNode> SideBarContainerPattern::GetSideBarNodeOrFirstChild() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    const auto& children = host->GetChildren();
+    if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
+        return nullptr;
+    }
+
+    auto iter = children.rbegin();
+    std::advance(iter, SIDE_BAR_INDEX);
+    if (AceType::InstanceOf<NG::CustomNode>(*iter)) {
+        auto sideBarNode = AceType::DynamicCast<CustomNode>(*iter);
+        CHECK_NULL_RETURN(sideBarNode, nullptr);
+        auto sideBarFirstChild = sideBarNode->GetChildren().front();
+        CHECK_NULL_RETURN(sideBarFirstChild, nullptr);
+        auto sideBarFirstChildNode = AceType::DynamicCast<FrameNode>(sideBarFirstChild);
+        CHECK_NULL_RETURN(sideBarFirstChildNode, nullptr);
+        return sideBarFirstChildNode;
+    }
+    auto sideBarNode = AceType::DynamicCast<FrameNode>(*iter);
+    CHECK_NULL_RETURN(sideBarNode, nullptr);
+    return sideBarNode;
+}
+
+RefPtr<FrameNode> SideBarContainerPattern::GetControlButtonNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto children = host->GetChildren();
+    if (children.empty()) {
+        return nullptr;
+    }
+    auto controlButtonNode = children.back();
+    if (controlButtonNode->GetTag() != V2::BUTTON_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
+        return nullptr;
+    }
+    return AceType::DynamicCast<FrameNode>(controlButtonNode);
 }
 
 RefPtr<FrameNode> SideBarContainerPattern::GetControlImageNode() const
@@ -1037,5 +1083,32 @@ Dimension SideBarContainerPattern::ConvertPxToPercent(float value) const
     }
 
     return result;
+}
+
+void SideBarContainerPattern::WindowFocus(bool isFocus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    CHECK_NULL_VOID(sideBarTheme);
+
+    auto sideBarNode = GetSideBarNodeOrFirstChild();
+    CHECK_NULL_VOID(sideBarNode);
+
+    Color maskColor = sideBarTheme->GetSideBarUnfocusColor();
+    auto maskProperty = AceType::MakeRefPtr<ProgressMaskProperty>();
+    maskProperty->SetColor((isFocus || !sideBarNode->IsVisible())?Color::TRANSPARENT:maskColor);
+
+    auto sideBarRenderContext = sideBarNode->GetRenderContext();
+    CHECK_NULL_VOID(sideBarRenderContext);
+    sideBarRenderContext->UpdateProgressMask(maskProperty);
+
+    auto buttonNode = GetControlButtonNode();
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonRenderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(buttonRenderContext);
+    buttonRenderContext->UpdateProgressMask(maskProperty);
 }
 } // namespace OHOS::Ace::NG
