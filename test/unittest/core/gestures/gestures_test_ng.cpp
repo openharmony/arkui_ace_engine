@@ -12108,7 +12108,7 @@ HWTEST_F(GesturesTestNg, GestureAccessibilityEventTest002, TestSize.Level1)
 HWTEST_F(GesturesTestNg, TransformTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create FrameNode.
+     * @tc.steps: step1. create FrameNode.
      */
     RefPtr<FrameNode> FRAME_NODE_0 = FrameNode::CreateFrameNode("0", 0, AceType::MakeRefPtr<Pattern>());
     RefPtr<FrameNode> FRAME_NODE_1 = FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<Pattern>());
@@ -12117,21 +12117,11 @@ HWTEST_F(GesturesTestNg, TransformTest001, TestSize.Level1)
     FRAME_NODE_1->SetParent(WeakPtr<FrameNode>(FRAME_NODE_0));
 
     /**
-     * @tc.steps: step2. mock RenderContext.
+     * @tc.steps: step2. mock local matrix.
      */
-    auto mockRenderContext0 = AceType::MakeRefPtr<MockRenderContext>();
-    auto mockRenderContext1 = AceType::MakeRefPtr<MockRenderContext>();
-    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_CALL(*(mockRenderContext0), GetLocalTransformMatrix())
-        .WillRepeatedly(Return(Matrix4::CreateIdentity()));
-    EXPECT_CALL(*(mockRenderContext1), GetLocalTransformMatrix())
-        .WillRepeatedly(Return(Matrix4::CreateIdentity()));
-    EXPECT_CALL(*(mockRenderContext2), GetLocalTransformMatrix())
-        .WillRepeatedly(Return(Matrix4::CreateIdentity()));
-
-    FRAME_NODE_0->renderContext_ = mockRenderContext0;
-    FRAME_NODE_2->renderContext_ = mockRenderContext1;
-    FRAME_NODE_1->renderContext_ = mockRenderContext2;
+    FRAME_NODE_0->localMat_ = Matrix4::CreateIdentity();
+    FRAME_NODE_1->localMat_ = Matrix4::CreateIdentity();
+    FRAME_NODE_2->localMat_ = Matrix4::CreateIdentity();
 
     /**
      * @tc.steps: step2. call callback function.
@@ -12158,25 +12148,15 @@ HWTEST_F(GesturesTestNg, TransformTest002, TestSize.Level1)
     FRAME_NODE_1->SetParent(WeakPtr<FrameNode>(FRAME_NODE_0));
 
     /**
-     * @tc.steps: step2. mock RenderContext.
+     * @tc.steps: step2. mock local matrix.
      */
-    auto mockRenderContext0 = AceType::MakeRefPtr<MockRenderContext>();
-    auto mockRenderContext1 = AceType::MakeRefPtr<MockRenderContext>();
-    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_CALL(*(mockRenderContext0), GetLocalTransformMatrix())
-        .WillRepeatedly(Return(Matrix4::CreateIdentity()));
-    EXPECT_CALL(*(mockRenderContext1), GetLocalTransformMatrix())
-        .WillRepeatedly(Return(Matrix4::Invert(
+    FRAME_NODE_0->localMat_ = Matrix4::CreateIdentity();
+    FRAME_NODE_1->localMat_ = Matrix4::Invert(
             Matrix4::CreateTranslate(100, 200, 0) * Matrix4::CreateRotate(90, 0, 0, 1) *
-            Matrix4::CreateScale(0.6, 0.8, 1))));
-    EXPECT_CALL(*(mockRenderContext2), GetLocalTransformMatrix())
-        .WillRepeatedly(Return(Matrix4::Invert(
+            Matrix4::CreateScale(0.6, 0.8, 1));
+    FRAME_NODE_2->localMat_ = Matrix4::Invert(
             Matrix4::CreateTranslate(400, 300, 0) * Matrix4::CreateRotate(30, 0, 0, 1) *
-            Matrix4::CreateScale(0.5, 0.5, 1))));
-
-    FRAME_NODE_0->renderContext_ = mockRenderContext0;
-    FRAME_NODE_1->renderContext_ = mockRenderContext1;
-    FRAME_NODE_2->renderContext_ = mockRenderContext2;
+            Matrix4::CreateScale(0.5, 0.5, 1));
 
     /**
      * @tc.steps: step3. call callback function.
@@ -12203,25 +12183,15 @@ HWTEST_F(GesturesTestNg, TransformTest003, TestSize.Level1)
     FRAME_NODE_1->SetParent(WeakPtr<FrameNode>(FRAME_NODE_0));
 
     /**
-     * @tc.steps: step2. mock RenderContext.
+     * @tc.steps: step2. mock local matrix.
      */
-    auto mockRenderContext0 = AceType::MakeRefPtr<MockRenderContext>();
-    auto mockRenderContext1 = AceType::MakeRefPtr<MockRenderContext>();
-    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_CALL(*(mockRenderContext0), GetLocalTransformMatrix())
-        .WillRepeatedly(Return(Matrix4::CreateIdentity()));
-    EXPECT_CALL(*(mockRenderContext1), GetLocalTransformMatrix())
-        .WillRepeatedly(Return(Matrix4::Invert(
+    FRAME_NODE_0->localMat_ = Matrix4::CreateIdentity();
+    FRAME_NODE_2->localMat_ = Matrix4::Invert(
             Matrix4::CreateTranslate(100, 200, 0) * Matrix4::CreateRotate(90, 0, 0, 1) *
-            Matrix4::CreateScale(0.6, 0.8, 1))));
-    EXPECT_CALL(*(mockRenderContext2), GetLocalTransformMatrix())
-        .WillRepeatedly(Return(Matrix4::Invert(
+            Matrix4::CreateScale(0.6, 0.8, 1));
+    FRAME_NODE_1->localMat_ = Matrix4::Invert(
             Matrix4::CreateTranslate(400, 300, 0) * Matrix4::CreateRotate(30, 0, 0, 1) *
-            Matrix4::CreateScale(0.5, 0.5, 1))));
-
-    FRAME_NODE_0->renderContext_ = mockRenderContext0;
-    FRAME_NODE_2->renderContext_ = mockRenderContext1;
-    FRAME_NODE_1->renderContext_ = mockRenderContext2;
+            Matrix4::CreateScale(0.5, 0.5, 1));
 
     /**
      * @tc.steps: step3. call callback function.
