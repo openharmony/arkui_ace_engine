@@ -583,6 +583,11 @@ public:
         isFirstBuilding_ = false;
     }
 
+    Matrix4 GetLocalMatrix()
+    {
+        return localMat_;
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -692,6 +697,7 @@ private:
     bool customerSet_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
+    Matrix4 localMat_ = Matrix4::CreateIdentity();
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
