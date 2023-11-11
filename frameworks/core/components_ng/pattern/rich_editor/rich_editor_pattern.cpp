@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -2738,6 +2739,8 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
             selectMenuInfo_.showCopyAll = true;
             selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
         }
+        selectOverlayProxy_ = nullptr;
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
         return;
     }
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -2914,7 +2917,7 @@ RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end, 
 
 void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
 {
-    auto selectType = selectedType_.value_or(RichEditorType::TEXT);
+    auto selectType = selectedType_.value_or(RichEditorType::NONE);
     std::shared_ptr<SelectionMenuParams> menuParams = nullptr;
     if (selectType == RichEditorType::TEXT) {
         menuParams = GetMenuParams(selectInfo.isUsingMouse, RichEditorType::TEXT);
@@ -2922,9 +2925,6 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
         menuParams = GetMenuParams(selectInfo.isUsingMouse, RichEditorType::IMAGE);
     } else if (selectType == RichEditorType::MIXED) {
         menuParams = GetMenuParams(selectInfo.isUsingMouse, RichEditorType::MIXED);
-        if (menuParams == nullptr) {
-            menuParams = GetMenuParams(selectInfo.isUsingMouse, RichEditorType::TEXT);
-        }
     }
 
     if (menuParams == nullptr) {
@@ -3563,7 +3563,7 @@ float RichEditorPattern::GetLineHeight() const
 
 void RichEditorPattern::UpdateSelectionType(RichEditorSelection& selection)
 {
-    selectedType_.reset();
+    selectedType_ = RichEditorType::NONE;
     auto list = selection.GetSelection().resultObjects;
     bool imageSelected = false;
     bool textSelected = false;
