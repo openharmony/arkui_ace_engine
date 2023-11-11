@@ -1164,8 +1164,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     HandleEtsCardTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
-    LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
-        scalePoint.type);
+    if (scalePoint.type != TouchType::MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Process in ace_container: "
+            "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
+            "type=%{public}d", scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
+    }
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
