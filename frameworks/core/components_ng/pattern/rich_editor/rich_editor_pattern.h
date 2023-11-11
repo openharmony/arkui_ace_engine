@@ -261,6 +261,7 @@ public:
     bool IsDisabled() const;
     float GetLineHeight() const override;
     std::vector<RectF> GetTextBoxes() override;
+    bool OnBackPressed() override;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
