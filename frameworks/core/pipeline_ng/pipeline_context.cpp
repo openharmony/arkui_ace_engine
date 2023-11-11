@@ -310,6 +310,30 @@ std::pair<float, float> PipelineContext::GetResamplePoint(const std::vector<Touc
     return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
 }
 
+TouchEvent PipelineContext::GetLatestPoint(const std::vectoe<TouchEvent> &current, const uint64_t &nanoTimeStamp)
+{
+    TouchEvent result;
+    uint64_t gap = UINT64_MAX;
+    for (auto iter = current.begin(); iter != current.end(); iter++) {
+        uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
+        if (timeStamp == nanoTimeStamp) {
+            result - *iter;
+            return result;
+        } else if (timeStamp > nanoTimeStamp) {
+            if (timeStamp - nanoTimeStamp < gap) {
+                gap = timeStamp - nanoTimeStamp;
+                result = *iter;
+            }
+        } else {
+            if (nanoTimeStamp - timeStamp < gap) {
+                gap = nanoTimeStamp - timeStamp;
+                result = *iter;
+            }
+        }
+    }
+    return result;
+}
+
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
@@ -1404,7 +1428,7 @@ void PipelineContext::FlushTouchEvents()
                 auto newScreenXy = GetResamplePoint(historyPointsById_[idIter.first], idIter.second.history,
                     targetTimeStamp, true);
                 TouchEvent newTouchEvent;
-                newTouchEvent = idIter.second;
+                newTouchEvent = GetLatestPoint(idIter.second.history, targetTimeStamp);
                 if (newXy.first != 0 && newXy.second != 0) {
                     newTouchEvent.x = newXy.first;
                     newTouchEvent.y = newXy.second;
@@ -1426,17 +1450,11 @@ void PipelineContext::FlushTouchEvents()
             }
         }
         std::list<TouchEvent> touchPoints;
-        for (auto& [_, item] : idToTouchPoints) {
-            touchPoints.emplace_back(std::move(item));
-        }
-        int32_t i = 0;
-        if (!newIdTouchPoints.empty()) {
-            for (const auto &iter : newIdTouchPoints) {
-                if (i == 0) {
-                    touchPoints.clear();
-                    i++;
-                }
-                touchPoints.insert(touchPoints.begin(), iter.second);
+        for (const auto &iter : idToTouchPoints) {
+            if (newIdTouchPoints.find(iter.first) != newIdTouchPoints.end()) {
+                touchPoints.emplace_back(newIdTouchPoints[iter.first]);
+            } else {
+                touchPoints.emplace_back(iter.second);
             }
         }
         auto maxSize = touchPoints.size();

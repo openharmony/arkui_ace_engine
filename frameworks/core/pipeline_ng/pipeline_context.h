@@ -478,6 +478,8 @@ private:
     std::pair<float, float> GetResamplePoint(const std::vector<TouchEvent> &history, const std::vector<TouchEvent> &current,
         const uint64_t &nanoTimeStamp, const bool isScreen);
 
+    TouchEvent GetLatestPoint(const std::vectoe<TouchEvent> &current, const uint64_t &nanoTimeStamp);
+
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
