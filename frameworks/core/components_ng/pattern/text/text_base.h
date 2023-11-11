@@ -57,6 +57,11 @@ public:
         return OffsetF(0, 0);
     }
 
+    virtual bool OnBackPressed()
+    {
+        return true;
+    }
+
     virtual bool IsSelected() const
     {
         return textSelector_.IsValid() && !textSelector_.StartEqualToDest();
