@@ -125,6 +125,11 @@ public:
         return itemDisplayStartIndex_;
     }
 
+    int32_t GetItemStartIndex() const
+    {
+        return itemStartIndex_;
+    }
+
     int32_t GetEndIndexInGroup() const
     {
         return (itemTotalCount_ - 1);
