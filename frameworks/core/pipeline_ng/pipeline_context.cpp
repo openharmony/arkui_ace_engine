@@ -317,7 +317,7 @@ TouchEvent PipelineContext::GetLatestPoint(const std::vector<TouchEvent> &curren
     for (auto iter = current.begin(); iter != current.end(); iter++) {
         uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
         if (timeStamp == nanoTimeStamp) {
-            result - *iter;
+            result = *iter;
             return result;
         } else if (timeStamp > nanoTimeStamp) {
             if (timeStamp - nanoTimeStamp < gap) {
