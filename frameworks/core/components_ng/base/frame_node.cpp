@@ -30,6 +30,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -2226,8 +2227,12 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
 
 void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
 {
-    LOGD("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}d", GetTag().c_str(),
-        scene.c_str(), speed, DynamicCast<int32_t>(status));
+    if (SystemProperties::GetDebugEnabled()) {
+        const std::string sceneStatusStrs[] = {"START", "RUNNING", "END"};
+        LOGI("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
+            scene.c_str(), speed, sceneStatusStrs[static_cast<int32_t>(status)].c_str());
+    }
+
     if (status == SceneStatus::RUNNING) {
         return;
     }
