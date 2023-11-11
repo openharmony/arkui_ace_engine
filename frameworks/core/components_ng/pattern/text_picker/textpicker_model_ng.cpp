@@ -64,6 +64,11 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetColumnsKind(columnKind);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    textPickerPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
     CHECK_NULL_VOID(pickerTheme);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
 
