@@ -24,4 +24,5 @@ void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void GradientProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 } // namespace OHOS::Ace::NG

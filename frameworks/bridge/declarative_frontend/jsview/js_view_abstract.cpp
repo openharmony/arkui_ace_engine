@@ -132,6 +132,8 @@ const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALI
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
 const std::string SHEET_HEIGHT_AUTO = "auto";
+const std::string BLOOM_RADIUI_SYS_RES_NAME = "ohos_id_point_light_bloom_radius";
+const std::string BLOOM_COLOR_SYS_RES_NAME = "ohos_id_point_light_bloom_color";
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -5355,6 +5357,58 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
+}
+
+void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSObject> lightSource = object->GetProperty("lightSource");
+    if (!lightSource->IsUndefined()) {
+        JSRef<JSVal> positionX = lightSource->GetProperty("positionX");
+        JSRef<JSVal> positionY = lightSource->GetProperty("positionY");
+        JSRef<JSVal> positionZ = lightSource->GetProperty("positionZ");
+        JSRef<JSVal> intensity = lightSource->GetProperty("intensity");
+
+        CalcDimension dimPositionX, dimPositionY, dimPositionZ;
+        if (ParseJsDimensionVp(positionX, dimPositionX) && ParseJsDimensionVp(positionY, dimPositionY) &&
+            ParseJsDimensionVp(positionZ, dimPositionZ)) {
+            ViewAbstractModel::GetInstance()->SetLightPosition(dimPositionX, dimPositionY, dimPositionZ);
+        }
+
+        if (intensity->IsNumber()) {
+            float intensityValue = intensity->ToNumber<float>();
+            ViewAbstractModel::GetInstance()->SetLightIntensity(intensityValue);
+        }
+    }
+
+    JSRef<JSVal> illuminated = object->GetProperty("illuminated");
+    if (illuminated->IsNumber()) {
+        uint32_t illuminatedValue = illuminated->ToNumber<uint32_t>();
+        ViewAbstractModel::GetInstance()->SetLightIlluminated(illuminatedValue);
+    }
+
+    auto resourceWrapper = CreateResourceWrapper();
+    if (!resourceWrapper) {
+        return;
+    }
+    double bloomRadius = resourceWrapper->GetDoubleByName(BLOOM_RADIUI_SYS_RES_NAME);
+    Color bloomColor = resourceWrapper->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
+
+    JSRef<JSVal> bloom = object->GetProperty("bloom");
+    if (bloom->IsNumber()) {
+        float bloomValue = bloom->ToNumber<float>();
+        ViewAbstractModel::GetInstance()->SetBloom(bloomValue);
+
+        Shadow shadow;
+        shadow.SetBlurRadius(bloomValue * bloomRadius);
+        shadow.SetColor(bloomColor);
+        std::vector<Shadow> shadows { shadow };
+        ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
+    }
 }
 
 void JSViewAbstract::JSBind(BindingTarget globalObj)

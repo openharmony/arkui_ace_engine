@@ -290,6 +290,13 @@ public:
         const std::string& propertyName, RefPtr<NG::CustomAnimatableArithmetic>& value) = 0;
     virtual void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) = 0;
 
+    // global light
+    virtual void SetLightPosition(
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) = 0;
+    virtual void SetLightIntensity(const float value) = 0;
+    virtual void SetLightIlluminated(const uint32_t value) = 0;
+    virtual void SetBloom(const float value) = 0;
+
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
     static std::mutex mutex_;

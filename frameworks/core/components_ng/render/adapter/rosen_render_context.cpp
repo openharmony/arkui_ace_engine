@@ -404,6 +404,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         OnTransformTranslateUpdate(propTransform_->GetTransformTranslateValue());
     }
 
+    if (propPointLight_ && propPointLight_->HasLightPosition()) {
+        // if lightPosition unit is percent, it is related with frameSize
+        OnLightPositionUpdate(propPointLight_->GetLightPositionValue());
+    }
+
     if (bgLoadingCtx_ && bgImage_) {
         PaintBackground();
     }
@@ -3326,6 +3331,50 @@ void RosenRenderContext::OnMotionPathUpdate(const MotionPathOption& motionPath)
         motionPath.GetRotate() ? Rosen::RotationMode::ROTATE_AUTO : Rosen::RotationMode::ROTATE_NONE);
     motionOption.SetPathNeedAddOrigin(HasOffset());
     rsNode_->SetMotionPathOption(std::make_shared<Rosen::RSMotionPathOption>(motionOption));
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnLightPositionUpdate(const TranslateOptions& translate)
+{
+    CHECK_NULL_VOID(rsNode_);
+    float xValue = 0.0f;
+    float yValue = 0.0f;
+    if (translate.x.Unit() == DimensionUnit::PERCENT || translate.y.Unit() == DimensionUnit::PERCENT) {
+        auto rect = GetPaintRectWithoutTransform();
+        if (rect.IsEmpty()) {
+            // size is not determined yet
+            return;
+        }
+        xValue = translate.x.ConvertToPxWithSize(rect.Width());
+        yValue = translate.y.ConvertToPxWithSize(rect.Height());
+    } else {
+        xValue = translate.x.ConvertToPx();
+        yValue = translate.y.ConvertToPx();
+    }
+    // translateZ doesn't support percentage
+    float zValue = translate.z.ConvertToPx();
+    rsNode_->SetLightPosition(xValue, yValue, zValue);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnLightIntensityUpdate(const float lightIntensity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetLightIntensity(lightIntensity);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnLightIlluminatedUpdate(const uint32_t lightIlluminated)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetIlluminatedType(lightIlluminated);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBloomUpdate(const float bloomIntensity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBloom(bloomIntensity);
     RequestNextFrame();
 }
 

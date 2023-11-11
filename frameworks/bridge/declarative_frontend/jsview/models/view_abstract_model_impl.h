@@ -228,6 +228,13 @@ public:
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
+
+    // global light
+    void SetLightPosition(
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
+    void SetLightIntensity(const float value) override {};
+    void SetLightIlluminated(const uint32_t value) override {};
+    void SetBloom(const float value) override {};
 };
 
 } // namespace OHOS::Ace::Framework
