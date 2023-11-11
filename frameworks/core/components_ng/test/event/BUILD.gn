@@ -24,6 +24,7 @@ group("event_unittest") {
     "long_press_event:long_press_event_test_ng",
     "pan_event:pan_event_test_ng",
     "scrollable_event:scrollable_event_test_ng",
+    "state_style:state_style_test_ng",
     "touch_event:touch_event_test_ng",
   ]
 }

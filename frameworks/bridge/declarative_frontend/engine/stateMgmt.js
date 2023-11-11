@@ -4483,9 +4483,6 @@ const uiNodeRegisterCleanUpFunction = UINodeRegisterProxy.uiNodeRegisterCleanUpF
 */
 // denotes a missing elemntId, this is the case during initial render
 const UndefinedElmtId = -1;
-
-//stores ViewPU processing
-var thisViewPu = [];
 // NativeView
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
@@ -4558,9 +4555,6 @@ class ViewPU extends NativeViewPartialUpdate {
         this.providedVars_ = parent ? new Map(parent.providedVars_)
             : new Map();
         this.localStoragebackStore_ = undefined;
-
-        //stores ArkComponent with elmtId
-        this.arkComponentByElmtId = new Map();
         
         if (parent) {
             // this View is not a top-level View
@@ -4783,18 +4777,15 @@ class ViewPU extends NativeViewPartialUpdate {
         const updateFunc = ((typeof updateFunc1 == "object") ? (updateFunc1.updateFunc) : updateFunc1);
         const componentName = (typeof updateFunc1 == "object") ? updateFunc1.componentName : "unknown component type";
         if (typeof updateFunc !== "function") {
-            stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
+            stateMgmtConsole.debug(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
         }
         else {
             
             this.isRenderInProgress = true;
-
-            thisViewPu.push(this);
+            
             updateFunc(elmtId, /* isFirstRender */ false);
-            if (thisViewPu.length !== 0) {
-                thisViewPu.pop(this);
-            }
-                    
+            
+            
             this.finishUpdateFunc(elmtId);
             
             this.isRenderInProgress = false;
@@ -5115,26 +5106,30 @@ class ViewPU extends NativeViewPartialUpdate {
         const _componentName = (classObject && ("name" in classObject)) ? Reflect.get(classObject, "name") : "unspecified UINode";
         const _popFunc = (classObject && "pop" in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
-            
             this.syncInstanceId();
+            
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
             }
             ViewStackProcessor.StopGetAccessRecording();
-            this.restoreInstanceId();
             
+            this.restoreInstanceId();
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-
-        thisViewPu.push(this);
-        updateFunc(elmtId, /* is first render */ true);
-        if (thisViewPu.length !== 0) {
-            thisViewPu.pop(this);
-        }
-
+        // needs to move set before updateFunc.
+        // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
         this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, componentName: _componentName });
+        try {
+            updateFunc(elmtId, /* is first render */ true);
+        }
+        catch (error) {
+            // avoid the incompatible change that move set function before updateFunc.
+            this.updateFuncByElmtId.delete(elmtId);
+            stateMgmtConsole.applicationError(`${this.debugInfo()} has error in update func: ${error.message}`);
+            throw error;
+        }
     }
     getOrCreateRecycleManager() {
         if (!this.recycleManager) {
@@ -5183,7 +5178,8 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.delete(oldElmtId);
         this.updateFuncByElmtId.set(newElmtId, {
             updateFunc: compilerAssignedUpdateFunc,
-            componentName: (typeof oldEntry == "object") ? oldEntry.componentName : "unknown"
+            componentName: (typeof oldEntry == "object") ? oldEntry.componentName : "unknown",
+            node: (typeof oldEntry == "object") ? oldEntry.node : undefined,
         });
         node.updateId(newElmtId);
         node.updateRecycleElmtId(oldElmtId, newElmtId);
@@ -5375,14 +5371,19 @@ class ViewPU extends NativeViewPartialUpdate {
         this.ownStorageLinksProps_.add(localStorageProp);
         return localStorageProp;
     }
-    getOrCreateArkComponent(elmtId, constructor, nativePtr) {
-        if (this.arkComponentByElmtId.has(elmtId)) {
-            return this.arkComponentByElmtId.get(elmtId);
-        } else {
-            const instance = constructor(nativePtr);
-            this.arkComponentByElmtId.set(elmtId, instance);
-            return instance;
+    createOrGetNode(elmtId, builder) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        if (entry === undefined) {
+            throw new Error(`${this.debugInfo()} fail to create node, elemtId is illegal`);
         }
+        if (typeof entry !== 'object') {
+            throw new Error('need update toolchain version');
+        }
+        let nodeInfo = entry.node;
+        if (nodeInfo === undefined) {
+            nodeInfo = builder();
+        }
+        return nodeInfo;
     }
     /**
      * onDumpInfo is used to process commands delivered by the hidumper process

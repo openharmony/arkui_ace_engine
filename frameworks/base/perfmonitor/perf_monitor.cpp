@@ -20,6 +20,7 @@
 #include "base/log/event_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
 
@@ -28,7 +29,8 @@ using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
-constexpr double JANK_SKIPPED_THRESHOLD = 15;
+const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
+const std::string NO_USER = "NO_USER";
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -109,16 +111,25 @@ void ReportPerfEventToRS(DataBase& data)
     ConvertToRsData(dataRs, data);
     switch (dataRs.eventType) {
         case EVENT_RESPONSE:
-            Rosen::RSInterfaces::GetInstance().ReportEventResponse(dataRs);
-            break;
-        case EVENT_COMPLETE:
-            if (data.needReportToRS) {
-                Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
+            {
+                ACE_SCOPED_TRACE("EVENT_REPORT_RESPONSE_RS");
+                Rosen::RSInterfaces::GetInstance().ReportEventResponse(dataRs);
+                break;
             }
-            break;
+        case EVENT_COMPLETE:
+            {
+                ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS");
+                if (data.needReportToRS) {
+                    Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
+                }
+                break;
+            }
         case EVENT_JANK_FRAME:
-            Rosen::RSInterfaces::GetInstance().ReportEventJankFrame(dataRs);
-            break;
+            {
+                ACE_SCOPED_TRACE("EVENT_REPORT_JANK_RS");
+                Rosen::RSInterfaces::GetInstance().ReportEventJankFrame(dataRs);
+                break;
+            }
         default :
             break;
     }
@@ -133,9 +144,7 @@ void ReportPerfEventToUI(DataBase data)
             }
             break;
         case EVENT_JANK_FRAME:
-            if (data.totalMissed > 0) {
-                EventReport::ReportEventJankFrame(data);
-            }
+            EventReport::ReportEventJankFrame(data);
             break;
         default :
             break;
@@ -171,9 +180,6 @@ void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skipp
     }
     skippedFrames = static_cast<int32_t>(duration / SINGLE_FRAME_TIME);
     if (!isFirstFrame && skippedFrames >= 1) {
-        if (duration > maxFrameTime) {
-            maxFrameTime = duration;
-        }
         if (isSuccessive) {
             seqMissFrames = seqMissFrames + skippedFrames;
         } else {
@@ -187,6 +193,9 @@ void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skipp
     } else {
         isSuccessive = false;
         seqMissFrames = 0;
+    }
+    if (!isFirstFrame && duration > maxFrameTime) {
+        maxFrameTime = duration;
     }
     totalFrames++;
 }
@@ -234,11 +243,7 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 {
     AceAsyncTraceBegin(0, sceneId.c_str());
     std::lock_guard<std::mutex> Lock(mMutex);
-    // inactive animator start on inputtime
-    if (GetInputTime(type) <= 0) {
-        RecordInputEvent(type, UNKNOWN_SOURCE, 0);
-    }
-    int64_t inputTime = GetInputTime(type);
+    int64_t inputTime = GetInputTime(type, note);
     SceneRecord* record = GetRecord(sceneId);
     if (record != nullptr) {
         record->Reset();
@@ -272,14 +277,23 @@ void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceTyp
     }
     switch (type) {
         case LAST_DOWN:
-            mInputTime[LAST_DOWN] = time;
-            break;
+            {
+                ACE_SCOPED_TRACE("RecordInputEvent: last_down(ns)=%lld", static_cast<long long>(time));
+                mInputTime[LAST_DOWN] = time;
+                break;
+            }
         case LAST_UP:
-            mInputTime[LAST_UP] = time;
-            break;
+            {
+                ACE_SCOPED_TRACE("RecordInputEvent: last_up(ns)=%lld", static_cast<long long>(time));
+                mInputTime[LAST_UP] = time;
+                break;
+            }
         case FIRST_MOVE:
-            mInputTime[FIRST_MOVE] = time;
-            break;
+            {
+                ACE_SCOPED_TRACE("RecordInputEvent: first_move(ns)=%lld", static_cast<long long>(time));
+                mInputTime[FIRST_MOVE] = time;
+                break;
+            }
         default:
             break;
     }
@@ -308,7 +322,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank)
 
 void PerfMonitor::ReportJankFrameApp(double jank)
 {
-    if (jank >= JANK_SKIPPED_THRESHOLD) {
+    if (jank >= static_cast<double>(JANK_SKIPPED_THRESHOLD)) {
         JankInfo jankInfo;
         jankInfo.skippedFrameTime = static_cast<int64_t>(jank * SINGLE_FRAME_TIME);
         RecordBaseInfo(nullptr);
@@ -359,7 +373,7 @@ void PerfMonitor::RemoveRecord(const std::string& sceneId)
     }
 }
 
-int64_t PerfMonitor::GetInputTime(PerfActionType type)
+int64_t PerfMonitor::GetInputTime(PerfActionType type, const std::string& note)
 {
     int64_t inputTime = 0;
     switch (type) {
@@ -375,7 +389,8 @@ int64_t PerfMonitor::GetInputTime(PerfActionType type)
         default:
             break;
     }
-    if (inputTime <= 0) {
+    if (inputTime <= 0 || note == NO_USER) {
+        ACE_SCOPED_TRACE("GetInputTime: now time");
         inputTime = GetCurrentRealTimeNs();
     }
     return inputTime;
@@ -391,18 +406,18 @@ void PerfMonitor::ReportAnimateStart(const std::string& sceneId, SceneRecord* re
     ReportPerfEvent(EVENT_RESPONSE, data);
 }
 
-void PerfMonitor::ReportAnimateEnd(const std::string& sceneId, SceneRecord* record, bool needCompleteTime)
+void PerfMonitor::ReportAnimateEnd(const std::string& sceneId, SceneRecord* record, bool needReportToRS)
 {
     if (record == nullptr) {
         return;
     }
     DataBase data;
-    FlushDataBase(record, data, needCompleteTime);
+    FlushDataBase(record, data, needReportToRS);
     ReportPerfEvent(EVENT_JANK_FRAME, data);
     ReportPerfEvent(EVENT_COMPLETE, data);
 }
 
-void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needCompleteTime)
+void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needReportToRS)
 {
     if (record == nullptr) {
         return;
@@ -421,7 +436,7 @@ void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needCo
     data.maxSuccessiveFrames = record->maxSuccessiveFrames;
     data.totalMissed = record->totalMissed;
     data.totalFrames = record->totalFrames;
-    data.needReportToRS = needCompleteTime;
+    data.needReportToRS = needReportToRS;
     data.sourceType = record->sourceType;
     data.actionType = record->actionType;
     data.baseInfo = baseInfo;

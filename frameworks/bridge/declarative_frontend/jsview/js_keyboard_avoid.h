@@ -24,7 +24,7 @@ class JSKeyboardAvoid : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
     static void SetKeyboardAvoidMode(const JSCallbackInfo& info);
-    static KeyBoardAvoidMode GetKeyboardAvoidMode();
+    static void GetKeyboardAvoidMode(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_KEYBOARD_AVOID_JS_KEYBOARD_AVOID_H

@@ -18,8 +18,7 @@
 
 #include <cstdint>
 #include <optional>
-#include <stack>
-#include <stdint.h>
+#include <queue>
 #include <string>
 #include <utility>
 #include <vector>
@@ -62,7 +61,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
-#include "core/gestures/gesture_info.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -76,15 +74,6 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace::NG {
-
-constexpr Dimension CURSOR_WIDTH = 1.5_vp;
-constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
-constexpr Dimension UNDERLINE_WIDTH = 1.0_px;
-constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
-constexpr Dimension ACTIVED_UNDERLINE_WIDTH = 2.0_px;
-constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
-constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
-constexpr float ERROR_TEXT_BOUNDSRECT_MARGIN = 33.0f;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
@@ -149,56 +138,7 @@ public:
     TextFieldPattern();
     ~TextFieldPattern() override;
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        if (!textFieldContentModifier_) {
-            textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
-        }
-        auto textFieldOverlayModifier = AceType::DynamicCast<TextFieldOverlayModifier>(GetScrollBarOverlayModifier());
-        if (!textFieldOverlayModifier) {
-            textFieldOverlayModifier =
-                AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect());
-            SetScrollBarOverlayModifier(textFieldOverlayModifier);
-        }
-        if (isCustomFont_) {
-            textFieldContentModifier_->SetIsCustomFont(true);
-        }
-        auto paint =
-            MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier, textFieldContentModifier_);
-        auto scrollBar = GetScrollBar();
-        if (scrollBar) {
-            paint->SetScrollBar(scrollBar);
-            if (scrollBar->NeedPaint()) {
-                textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect());
-            }
-        }
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, paint);
-        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, paint);
-        auto geometryNode = host->GetGeometryNode();
-        auto frameOffset = geometryNode->GetFrameOffset();
-        auto frameSize = geometryNode->GetFrameSize();
-        if (layoutProperty->GetShowErrorTextValue(false) && errorParagraph_) {
-            auto contentOffset = geometryNode->GetContentOffset();
-            auto errorTextWidth = errorParagraph_->GetLongestLine();
-            RectF boundsRect(contentOffset.GetX(), frameOffset.GetY(), errorTextWidth,
-                frameSize.Height() + ERROR_TEXT_BOUNDSRECT_MARGIN);
-            textFieldOverlayModifier->SetBoundsRect(boundsRect);
-        } else {
-            if (NearEqual(maxFrameOffsetY_, 0.0f) && NearEqual(maxFrameHeight_, 0.0f)) {
-                maxFrameOffsetY_ = frameOffset.GetY();
-                maxFrameHeight_ = frameSize.Height();
-            }
-            maxFrameOffsetY_ = LessOrEqual(frameOffset.GetY(), maxFrameOffsetY_)
-                                   ? frameOffset.GetY()
-                                   : maxFrameOffsetY_ - frameOffset.GetY();
-            maxFrameHeight_ = LessOrEqual(frameSize.Height(), maxFrameHeight_) ? maxFrameHeight_ : frameSize.Height();
-            RectF boundsRect(frameOffset.GetX(), maxFrameOffsetY_, frameSize.Width(), maxFrameHeight_);
-            textFieldOverlayModifier->SetBoundsRect(boundsRect);
-        }
-        return paint;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -279,6 +219,11 @@ public:
     bool GetEditingBoxModel() const override;
 #endif
 
+    bool ShouldDelayChildPressedState() const override
+    {
+        return false;
+    }
+
     void UpdateEditingValue(const std::string& value, int32_t caretPosition)
     {
         contentController_->SetTextValue(value);
@@ -296,7 +241,7 @@ public:
         return { FocusType::NODE, true };
     }
 
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
+    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void UpdateInputFilterErrorText(const std::string& errorText) override;
 
@@ -311,7 +256,7 @@ public:
         return contentController_->GetWideText();
     }
 
-    int32_t GetCaretIndex()
+    int32_t GetCaretIndex() const
     {
         return selectController_->GetCaretIndex();
     }
@@ -481,7 +426,7 @@ public:
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
-        return contentController_->GetTextValue().length() > 0;
+        return !contentController_->IsEmpty();
     }
 
     bool CursorMoveLeft() override;
@@ -895,7 +840,7 @@ public:
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
     void TextAreaInputRectUpdate(RectF& rect);
-    void UpdateRectByAlignment(RectF& rect);
+    void UpdateRectByTextAlign(RectF& rect);
 
     void EditingValueFilterChange();
 
@@ -984,7 +929,10 @@ public:
     {
         return showSelect_;
     }
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+protected:
+    virtual void InitDragEvent();
+#endif
 private:
     void GetTextSelectRectsInRangeAndWillChange();
     bool HasFocus() const;
@@ -998,7 +946,6 @@ private:
     void InitLongPressEvent();
     void InitClickEvent();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void InitDragEvent();
     void InitDragDropEvent();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
@@ -1071,6 +1018,7 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
 
     void Delete(int32_t start, int32_t end);
+    void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
@@ -1111,6 +1059,7 @@ private:
     void NotifyOnEditChanged(bool isChanged);
     void StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste = false);
     void ProcessResponseArea();
+    bool HasInputOperation();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1179,7 +1128,7 @@ private:
     bool updateSelectionAfterObscure_ = false;
     float currentOffset_ = 0.0f;
     float countHeight_ = 0.0f;
-    Dimension underlineWidth_ = UNDERLINE_WIDTH;
+    Dimension underlineWidth_ = 1.0_px;
     Color underlineColor_;
     bool scrollBarVisible_ = false;
     bool isCounterIdealheight_ = false;
@@ -1240,9 +1189,9 @@ private:
     TimeStamp lastClickTimeStamp_;
     float paragraphWidth_ = 0.0f;
 
-    std::stack<int32_t> deleteBackwardOperations_;
-    std::stack<int32_t> deleteForwardOperations_;
-    std::stack<std::string> insertValueOperations_;
+    std::queue<int32_t> deleteBackwardOperations_;
+    std::queue<int32_t> deleteForwardOperations_;
+    std::queue<std::string> insertValueOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool showSelect_ = false;

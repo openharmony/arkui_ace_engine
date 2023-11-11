@@ -163,7 +163,6 @@ RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEff
                 break;
             }
             default: {
-                LOGW("not support effect type: %{public}d", static_cast<int>(currentEffect->GetType()));
                 return res;
             }
         }
@@ -193,8 +192,6 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
         switch (nowEffect->GetType()) {
             case ChainedTransitionEffectType::IDENTITY: {
                 if (!AceType::InstanceOf<RosenIdentityTransitionEffect>(nowRSEffect)) {
-                    LOGW("type not matched, need IDENTITY type, actual type is %{public}s",
-                        AceType::TypeName(nowRSEffect));
                     return false;
                 }
                 break;
@@ -202,8 +199,6 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
             case ChainedTransitionEffectType::OPACITY: {
                 auto rosenOpacityEffect = AceType::DynamicCast<RosenOpacityTransitionEffect>(nowRSEffect);
                 if (!rosenOpacityEffect) {
-                    LOGW("type not matched, need OPACITY type, actual type is %{public}s",
-                        AceType::TypeName(nowRSEffect));
                     return false;
                 }
                 auto opacityEffect = AceType::DynamicCast<ChainedOpacityEffect>(nowEffect);
@@ -213,7 +208,6 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
             case ChainedTransitionEffectType::MOVE: {
                 auto rosenMoveEffect = AceType::DynamicCast<RosenMoveTransitionEffect>(nowRSEffect);
                 if (!rosenMoveEffect) {
-                    LOGW("type not matched, need MOVE type, actual type is %{public}s", AceType::TypeName(nowRSEffect));
                     return false;
                 }
                 auto moveEffect = AceType::DynamicCast<ChainedMoveEffect>(nowEffect);
@@ -223,8 +217,6 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
             case ChainedTransitionEffectType::ROTATE: {
                 auto rosenRotateEffect = AceType::DynamicCast<RosenRotation3DTransitionEffect>(nowRSEffect);
                 if (!rosenRotateEffect) {
-                    LOGW("type not matched, need ROTATE type, actual type is %{public}s",
-                        AceType::TypeName(nowRSEffect));
                     return false;
                 }
                 auto rotateEffect = AceType::DynamicCast<ChainedRotateEffect>(nowEffect);
@@ -234,8 +226,6 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
             case ChainedTransitionEffectType::SCALE: {
                 auto rosenScaleEffect = AceType::DynamicCast<RosenScaleTransitionEffect>(nowRSEffect);
                 if (!rosenScaleEffect) {
-                    LOGW(
-                        "type not matched, need SCALE type, actual type is %{public}s", AceType::TypeName(nowRSEffect));
                     return false;
                 }
                 auto scaleEffect = AceType::DynamicCast<ChainedScaleEffect>(nowEffect);
@@ -245,8 +235,6 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
             case ChainedTransitionEffectType::TRANSLATE: {
                 auto rosenTranslateEffect = AceType::DynamicCast<RosenTranslateTransitionEffect>(nowRSEffect);
                 if (!rosenTranslateEffect) {
-                    LOGW("type not matched, need TRANSLATE type, actual type is %{public}s",
-                        AceType::TypeName(nowRSEffect));
                     return false;
                 }
                 auto translateEffect = AceType::DynamicCast<ChainedTranslateEffect>(nowEffect);
@@ -256,19 +244,15 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
             case ChainedTransitionEffectType::ASYMMETRIC: {
                 auto rosenAsymmetricEffect = AceType::DynamicCast<RosenAsymmetricTransitionEffect>(nowRSEffect);
                 if (!rosenAsymmetricEffect) {
-                    LOGW("type not matched, need ASYMMETRIC type, actual type is %{public}s",
-                        AceType::TypeName(nowRSEffect));
                     return false;
                 }
                 auto asymmetricEffect = AceType::DynamicCast<ChainedAsymmetricEffect>(nowEffect);
                 if (!UpdateRosenTransitionEffect(
                     rosenAsymmetricEffect->GetTransitionInEffect(), asymmetricEffect->GetAppearEffect())) {
-                    LOGW("asymmetricEffect update transitionIn failed");
                     return false;
                 }
                 if (!UpdateRosenTransitionEffect(
                     rosenAsymmetricEffect->GetTransitionOutEffect(), asymmetricEffect->GetDisappearEffect())) {
-                    LOGW("asymmetricEffect update transitionOut failed");
                     return false;
                 }
                 break;
@@ -277,7 +261,6 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
                 break;
             }
             default: {
-                LOGW("not support effect type: %{public}d", static_cast<int>(nowEffect->GetType()));
                 return false;
             }
         }
@@ -350,8 +333,8 @@ void RosenPivotTransitionEffect::SetPivot(const Dimension& centerX, const Dimens
     centerZ_ = centerZ;
 }
 
-RosenPivotTransitionEffect::RosenPivotTransitionEffect(const Dimension& centerX, const Dimension& centerY,
-    const Dimension& centerZ)
+RosenPivotTransitionEffect::RosenPivotTransitionEffect(
+    const Dimension& centerX, const Dimension& centerY, const Dimension& centerZ)
     : centerX_(centerX), centerY_(centerY), centerZ_(centerZ)
 {}
 
@@ -473,7 +456,7 @@ void RosenMoveTransitionEffect::OnUpdateTransitionContext(
             break;
         }
         default: {
-            LOGW("invalid Edge");
+            break;
         }
     }
     SetActiveValue(value);

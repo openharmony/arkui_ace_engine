@@ -17,9 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLL_CONTROLLER_H
 
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
+class ScrollablePattern;
 class ACE_EXPORT ScrollableController : public ScrollControllerBase {
     DECLARE_ACE_TYPE(ScrollableController, ScrollControllerBase);
 
@@ -37,10 +37,16 @@ public:
     {
         return scroll_;
     }
-
+    void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
     Offset GetCurrentOffset() const override;
     Axis GetScrollDirection() const override;
+    void ScrollBy(double pixelX, double pixelY, bool smooth) override;
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
+    void ScrollPage(bool reverse, bool smooth) override;
+    bool IsAtEnd() const override;
+    Rect GetItemRect(int32_t index) const override;
+
 protected:
     WeakPtr<ScrollablePattern> scroll_;
 };

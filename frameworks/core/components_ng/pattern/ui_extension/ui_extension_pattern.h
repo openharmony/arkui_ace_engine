@@ -67,13 +67,18 @@ public:
 
     void SetModalOnDestroy(const std::function<void()>&& callback);
     void SetModalOnRemoteReadyCallback(
-        const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
+    const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
     void SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnSyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnAsyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnSyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnAsyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
     void SetOnReleaseCallback(const std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
     void SetOnErrorCallback(
         const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
+    void SetTransferringCaller(bool value);
 
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
@@ -148,6 +153,8 @@ private:
     std::function<void()> onModalDestroy_;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
+    std::function<void(const RefPtr<UIExtensionProxy>&)> onSyncOnCallback_;
+    std::function<void(const RefPtr<UIExtensionProxy>&)> onAsyncOnCallback_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
@@ -161,6 +168,8 @@ private:
     int32_t instanceId_ = Container::CurrentId();
     AbilityState state_ = AbilityState::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
+
+    bool transferringCaller_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H

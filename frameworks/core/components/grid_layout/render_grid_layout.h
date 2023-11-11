@@ -33,7 +33,6 @@
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/gestures/drag_recognizer.h"
-#include "core/gestures/gesture_info.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 

@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/utils.h"
+#include "base/geometry/axis.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -38,8 +39,10 @@
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
 #include "core/components_ng/pattern/web/web_paint_property.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
+#include "core/components_ng/pattern/web/web_paint_method.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -81,8 +84,8 @@ public:
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
     WebPattern();
-    WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
-    WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
+    WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE);
+    WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE);
 
     ~WebPattern() override;
 
@@ -94,13 +97,21 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::HARDWARE_SURFACE, "RosenWeb" };
+        if (type_ == WebType::TEXTURE) {
+            return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+        } else {
+            return RenderContext::ContextParam { RenderContext::ContextType::HARDWARE_SURFACE, "RosenWeb" };
+        }
     }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool IsAtomicNode() const override
     {
         return true;
     }
+
+    void UpdateScrollOffset(SizeF frameSize) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -187,6 +198,16 @@ public:
         return setWebIdCallback_;
     }
 
+    void SetWebType(WebType type)
+    {
+        type_ = type;
+    }
+
+    WebType GetWebType()
+    {
+        return type_;
+    }
+
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
     {
         onControllerAttachedCallback_ = std::move(callback);
@@ -259,7 +280,7 @@ public:
      */
     Axis GetAxis() const override
     {
-        return Axis::FREE;
+        return axis_;
     }
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
     bool HandleScrollVelocity(float velocity) override;
@@ -267,6 +288,7 @@ public:
     void OnScrollEndRecursive() override;
     Axis GetParentAxis();
     RefPtr<NestableScrollContainer> WebSearchParent();
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
     /**
      *  End of NestableScrollContainer implementations
      */
@@ -311,6 +333,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -325,6 +348,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    void UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type);
+    std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMapFromString(const std::string& filePath);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
     void OnDateTimeChooserPopup(
@@ -342,6 +367,7 @@ public:
         selectOverlayDragging_ = selectOverlayDragging;
     }
     void UpdateLocale();
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void SetSelectPopupMenuShowing(bool showing)
     {
         selectPopupMenuShowing_ = showing;
@@ -358,19 +384,21 @@ public:
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
     bool IsImageDrag();
+    void UpdateJavaScriptOnDocumentStart();
+    void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
 #ifdef ENABLE_DRAG_FRAMEWORK
     DragRet GetDragAcceptableStatus();
 #endif
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
-    void SetWrapContent(bool isWrapContentEnabled)
+    void SetLayoutMode(WebLayoutMode mode)
     {
-        isWrapContentEnabled_ = isWrapContentEnabled;
+        layoutMode_ = mode;
     }
-    bool GetWrapContent() const
+    WebLayoutMode GetLayoutMode() const
     {
-        return isWrapContentEnabled_;
+        return layoutMode_;
     }
     void OnRootLayerChanged(int width, int height);
     int GetRootLayerWidth() const
@@ -381,6 +409,7 @@ public:
     {
         return rootLayerHeight_;
     }
+    bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -440,6 +469,7 @@ private:
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
+    void OnOverScrollModeUpdate(const int32_t value);
     int GetWebId();
 
     void InitEvent();
@@ -469,6 +499,10 @@ private:
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
     void ResetDragAction();
+    RefPtr<ScrollPattern> SearchParent();
+    void InitScrollUpdateListener();
+    void CalculateHorizontalDrawRect(const SizeF frameSize);
+    void CalculateVerticalDrawRect(const SizeF frameSize);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -534,12 +568,14 @@ private:
     bool ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
         const std::vector<NWeb::DateTimeSuggestion>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
+    void PostTaskToUI(const std::function<void()>&& task) const;
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    WebType type_;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
@@ -586,14 +622,20 @@ private:
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;
+    bool isParentHasScroll_ = false;
+    OffsetF relativeOffsetOfScroll_;
     bool isFirstFlingScrollVelocity_ = true;
-    bool isWrapContentEnabled_ = false;
+    WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
+    bool scrollState_ = false;
+    NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
+    Axis axis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     WeakPtr<NestableScrollContainer> parent_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
+    std::optional<ScriptItems> scriptItems_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

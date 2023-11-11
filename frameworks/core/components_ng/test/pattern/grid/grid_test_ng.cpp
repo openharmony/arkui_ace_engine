@@ -52,12 +52,11 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t VIEWPORT_LINE_NUMBER = 4;
-constexpr float ITEM_WIDTH = DEVICE_WIDTH / VIEWPORT_LINE_NUMBER;
-constexpr float ITEM_HEIGHT = DEVICE_HEIGHT / VIEWPORT_LINE_NUMBER;
+constexpr int32_t VIEW_LINE_NUMBER = 4;
+constexpr float ITEM_WIDTH = DEVICE_WIDTH / VIEW_LINE_NUMBER;
+constexpr float ITEM_HEIGHT = DEVICE_HEIGHT / VIEW_LINE_NUMBER;
 constexpr Dimension GRIDITEM_FOCUS_INTERVAL = 3.0_vp;
 constexpr Dimension BORDER_RADIUS = 8.0_vp;
-constexpr int32_t NULL_VALUE = -1;
 constexpr float COL_GAP = 10.f;
 constexpr float ROW_GAP = 5.f;
 } // namespace
@@ -70,19 +69,19 @@ protected:
     void TearDown() override;
     void GetInstance();
 
-    void CreateGrid(const std::function<void(GridModelNG)>& callback = nullptr);
-    void CreateGridNoProxy(const std::function<void(GridModelNG)>& callback = nullptr);
+    void Create(const std::function<void(GridModelNG)>& callback = nullptr);
+    void CreateWithNoProxy(const std::function<void(GridModelNG)>& callback = nullptr);
     static void CreateItem(int32_t count = 10, float width = NULL_VALUE, float height = NULL_VALUE,
         bool focusable = false, GridItemStyle gridItemStyle = GridItemStyle::NONE);
-    static void CreateVerticalItem(
+    static void CreateColItem(
         int32_t count, bool focusable = false, GridItemStyle gridItemStyle = GridItemStyle::NONE);
-    static void CreateHorizontalItem(
+    static void CreateRowItem(
         int32_t count, bool focusable = false, GridItemStyle gridItemStyle = GridItemStyle::NONE);
     static void CreateBigItem(int32_t rowStart = NULL_VALUE, int32_t rowEnd = NULL_VALUE,
         int32_t colStart = NULL_VALUE, int32_t colEnd = NULL_VALUE, float width = NULL_VALUE,
         float height = NULL_VALUE);
-    static void CreateColBigItem(int32_t colStart, int32_t colEnd);
-    static void CreateRowBigItem(int32_t rowStart, int32_t rowEnd);
+    static void CreateBigColItem(int32_t colStart, int32_t colEnd);
+    static void CreateBigRowItem(int32_t rowStart, int32_t rowEnd);
     void UpdateLayoutWrapper(
         RefPtr<FrameNode>& frameNode, float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
@@ -160,26 +159,26 @@ void GridTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<GridAccessibilityProperty>();
 }
 
-void GridTestNg::CreateGrid(const std::function<void(GridModelNG)>& callback)
+void GridTestNg::Create(const std::function<void(GridModelNG)>& callback)
 {
-    GridModelNG gridModelNG;
-    RefPtr<ScrollControllerBase> positionController = gridModelNG.CreatePositionController();
-    RefPtr<ScrollProxy> scrollBarProxy = gridModelNG.CreateScrollBarProxy();
-    gridModelNG.Create(positionController, scrollBarProxy);
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
+    model.Create(positionController, scrollBarProxy);
     if (callback) {
-        callback(gridModelNG);
+        callback(model);
     }
     GetInstance();
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 }
 
-void GridTestNg::CreateGridNoProxy(const std::function<void(GridModelNG)>& callback)
+void GridTestNg::CreateWithNoProxy(const std::function<void(GridModelNG)>& callback)
 {
-    GridModelNG gridModelNG;
-    RefPtr<ScrollControllerBase> positionController = gridModelNG.CreatePositionController();
-    gridModelNG.Create(positionController, nullptr);
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    model.Create(positionController, nullptr);
     if (callback) {
-        callback(gridModelNG);
+        callback(model);
     }
     GetInstance();
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
@@ -189,8 +188,8 @@ void GridTestNg::CreateItem(
     int32_t count, float width, float height, bool focusable, GridItemStyle gridItemStyle)
 {
     for (int32_t i = 0; i < count; i++) {
-        GridItemModelNG gridItemModel;
-        gridItemModel.Create(gridItemStyle);
+        GridItemModelNG itemModel;
+        itemModel.Create(gridItemStyle);
         if (width != NULL_VALUE) {
             SetWidth(Dimension(width));
         }
@@ -206,13 +205,13 @@ void GridTestNg::CreateItem(
     }
 }
 
-void GridTestNg::CreateVerticalItem(
+void GridTestNg::CreateColItem(
     int32_t count, bool focusable, GridItemStyle gridItemStyle)
 {
     CreateItem(count, NULL_VALUE, ITEM_HEIGHT, focusable, gridItemStyle);
 }
 
-void GridTestNg::CreateHorizontalItem(
+void GridTestNg::CreateRowItem(
     int32_t count, bool focusable, GridItemStyle gridItemStyle)
 {
     CreateItem(count, ITEM_WIDTH, NULL_VALUE, focusable, gridItemStyle);
@@ -221,19 +220,19 @@ void GridTestNg::CreateHorizontalItem(
 void GridTestNg::CreateBigItem(
     int32_t rowStart, int32_t rowEnd, int32_t colStart, int32_t colEnd, float width, float height)
 {
-        GridItemModelNG gridItemModel;
-        gridItemModel.Create(GridItemStyle::NONE);
+        GridItemModelNG itemModel;
+        itemModel.Create(GridItemStyle::NONE);
         if (rowStart != NULL_VALUE) {
-            gridItemModel.SetRowStart(rowStart);
+            itemModel.SetRowStart(rowStart);
         }
         if (rowEnd != NULL_VALUE) {
-            gridItemModel.SetRowEnd(rowEnd);
+            itemModel.SetRowEnd(rowEnd);
         }
         if (colStart != NULL_VALUE) {
-            gridItemModel.SetColumnStart(colStart);
+            itemModel.SetColumnStart(colStart);
         }
         if (colEnd != NULL_VALUE) {
-            gridItemModel.SetColumnEnd(colEnd);
+            itemModel.SetColumnEnd(colEnd);
         }
         if (width != NULL_VALUE) {
             SetWidth(Dimension(width));
@@ -244,12 +243,12 @@ void GridTestNg::CreateBigItem(
         ViewStackProcessor::GetInstance()->Pop();
 }
 
-void GridTestNg::CreateColBigItem(int32_t colStart, int32_t colEnd)
+void GridTestNg::CreateBigColItem(int32_t colStart, int32_t colEnd)
 {
     CreateBigItem(NULL_VALUE, NULL_VALUE, colStart, colEnd, NULL_VALUE, ITEM_HEIGHT);
 }
 
-void GridTestNg::CreateRowBigItem(int32_t rowStart, int32_t rowEnd)
+void GridTestNg::CreateBigRowItem(int32_t rowStart, int32_t rowEnd)
 {
     CreateBigItem(rowStart, rowEnd, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
 }
@@ -305,7 +304,7 @@ AssertionResult GridTestNg::IsEqualNextFocusNode(
     RefPtr<FocusHub> currentFocusNode = GetChildFocusHub(frameNode_, currentIndex);
     currentFocusNode->RequestFocusImmediately();
     RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNode(step, currentFocusNode).Upgrade();
-    if (expectNextIndex != NULL_INDEX && nextFocusNode == nullptr) {
+    if (expectNextIndex != NULL_VALUE && nextFocusNode == nullptr) {
         return AssertionFailure() << "Next FocusNode is null";
     }
     int32_t nextIndex = findFocusNodeIndex(nextFocusNode);
@@ -321,7 +320,7 @@ int32_t GridTestNg::findFocusNodeIndex(RefPtr<FocusHub>& focusNode)
             return index;
         }
     }
-    return NULL_INDEX;
+    return NULL_VALUE;
 }
 
 AssertionResult GridTestNg::IsEqualCurrentOffset(float expectOffset)
@@ -390,20 +389,20 @@ AssertionResult GridTestNg::VerifyBigItemRect(int32_t index, RectF expectRect)
  */
 HWTEST_F(GridTestNg, Property001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr");
-        gridModelNG.SetColumnsGap(Dimension(COL_GAP));
-        gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        gridModelNG.SetCachedCount(2);
-        gridModelNG.SetEditable(true);
-        gridModelNG.SetLayoutDirection(FlexDirection::ROW);
-        gridModelNG.SetMaxCount(5);
-        gridModelNG.SetMinCount(2);
-        gridModelNG.SetCellLength(100);
-        gridModelNG.SetEdgeEffect(EdgeEffect::SPRING);
-        gridModelNG.SetScrollEnabled(false);
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetRowsTemplate("1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+        model.SetCachedCount(2);
+        model.SetEditable(true);
+        model.SetLayoutDirection(FlexDirection::ROW);
+        model.SetMaxCount(5);
+        model.SetMinCount(2);
+        model.SetCellLength(100);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+        model.SetScrollEnabled(false);
+        CreateColItem(10);
     });
 
     /**
@@ -460,10 +459,10 @@ HWTEST_F(GridTestNg, Property001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, Property002, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsGap(Dimension(-5));
-        gridModelNG.SetColumnsGap(Dimension(-10));
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetRowsGap(Dimension(-5));
+        model.SetColumnsGap(Dimension(-10));
+        CreateColItem(10);
     });
 
     /**
@@ -481,15 +480,15 @@ HWTEST_F(GridTestNg, Property002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, Property003, TestSize.Level1)
 {
-    GridItemModelNG gridItemModelNG;
-    gridItemModelNG.Create(GridItemStyle::NONE);
-    gridItemModelNG.SetRowStart(1);
-    gridItemModelNG.SetRowEnd(2);
-    gridItemModelNG.SetColumnStart(1);
-    gridItemModelNG.SetColumnEnd(2);
-    gridItemModelNG.SetForceRebuild(true);
-    gridItemModelNG.SetSelectable(false);
-    gridItemModelNG.SetOnSelect([](bool) {});
+    GridItemModelNG itemModel;
+    itemModel.Create(GridItemStyle::NONE);
+    itemModel.SetRowStart(1);
+    itemModel.SetRowEnd(2);
+    itemModel.SetColumnStart(1);
+    itemModel.SetColumnEnd(2);
+    itemModel.SetForceRebuild(true);
+    itemModel.SetSelectable(false);
+    itemModel.SetOnSelect([](bool) {});
 
     /**
      * @tc.steps: step1. Get frameNode and properties.
@@ -538,11 +537,11 @@ HWTEST_F(GridTestNg, Property003, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrColumnsTemplate001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetColumnsGap(Dimension(COL_GAP));
-        gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+        CreateColItem(20);
     });
 
     /**
@@ -572,9 +571,9 @@ HWTEST_F(GridTestNg, AttrColumnsTemplate001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrColumnsTemplate002, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 2fr 3fr 1fr");
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 2fr 3fr 1fr");
+        CreateColItem(10);
     });
 
     /**
@@ -599,9 +598,9 @@ HWTEST_F(GridTestNg, AttrColumnsTemplate002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrColumnsTemplate003, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 0fr 0fr 1fr");
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 0fr 0fr 1fr");
+        CreateColItem(10);
     });
 
     /**
@@ -621,11 +620,11 @@ HWTEST_F(GridTestNg, AttrColumnsTemplate003, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrColumnsTemplate004, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("repeat(auto-fit, 90px)");
-        gridModelNG.SetColumnsGap(Dimension(COL_GAP));
-        gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("repeat(auto-fit, 90px)");
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+        CreateColItem(20);
     });
 
     /**
@@ -657,11 +656,11 @@ HWTEST_F(GridTestNg, AttrColumnsTemplate004, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrRowsTemplate001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetColumnsGap(Dimension(COL_GAP));
-        gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateHorizontalItem(20);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+        CreateRowItem(20);
     });
 
     /**
@@ -691,9 +690,9 @@ HWTEST_F(GridTestNg, AttrRowsTemplate001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrRowsTemplate002, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 2fr 3fr 1fr");
-        CreateHorizontalItem(10);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 2fr 3fr 1fr");
+        CreateRowItem(10);
     });
 
     /**
@@ -718,9 +717,9 @@ HWTEST_F(GridTestNg, AttrRowsTemplate002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrRowsTemplate003, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 0fr 0fr 1fr");
-        CreateHorizontalItem(10);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 0fr 0fr 1fr");
+        CreateRowItem(10);
     });
 
     /**
@@ -740,11 +739,11 @@ HWTEST_F(GridTestNg, AttrRowsTemplate003, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrRowsTemplate004, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("repeat(auto-fit, 90px)");
-        gridModelNG.SetColumnsGap(Dimension(COL_GAP));
-        gridModelNG.SetRowsGap(Dimension(ROW_GAP));
-        CreateHorizontalItem(24);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("repeat(auto-fit, 90px)");
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+        CreateRowItem(24);
     });
 
     /**
@@ -771,10 +770,10 @@ HWTEST_F(GridTestNg, AttrRowsTemplate004, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrColumnsRows001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("");
-        gridModelNG.SetColumnsTemplate("");
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("");
+        model.SetColumnsTemplate("");
+        CreateColItem(10);
     });
 
     /**
@@ -794,11 +793,11 @@ HWTEST_F(GridTestNg, AttrColumnsRows001, TestSize.Level1)
 HWTEST_F(GridTestNg, AttrColumnsRows002, TestSize.Level1)
 {
     // not set gridItem width/height, gridItem will fill the mesh size by default
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetColumnsGap(Dimension(COL_GAP));
-        gridModelNG.SetRowsGap(Dimension(ROW_GAP));
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
         CreateItem(20);
     });
 
@@ -828,13 +827,13 @@ HWTEST_F(GridTestNg, AttrColumnsRows002, TestSize.Level1)
 HWTEST_F(GridTestNg, AttrLayoutDirection001, TestSize.Level1)
 {
     float itemWidth = 100.f;
-    CreateGrid([itemWidth](GridModelNG gridModelNG) {
-        gridModelNG.SetLayoutDirection(FlexDirection::ROW);
-        gridModelNG.SetCellLength(ITEM_HEIGHT);
-        gridModelNG.SetMinCount(2);
-        gridModelNG.SetMaxCount(4);
-        gridModelNG.SetColumnsGap(Dimension(COL_GAP));
-        gridModelNG.SetRowsGap(Dimension(ROW_GAP));
+    Create([itemWidth](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::ROW);
+        model.SetCellLength(ITEM_HEIGHT);
+        model.SetMinCount(2);
+        model.SetMaxCount(4);
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
         CreateItem(20, itemWidth, ITEM_HEIGHT);
     });
 
@@ -861,13 +860,13 @@ HWTEST_F(GridTestNg, AttrLayoutDirection001, TestSize.Level1)
 HWTEST_F(GridTestNg, AttrLayoutDirection002, TestSize.Level1)
 {
     float itemWidth = 100.f;
-    CreateGrid([itemWidth](GridModelNG gridModelNG) {
-        gridModelNG.SetLayoutDirection(FlexDirection::ROW_REVERSE);
-        gridModelNG.SetCellLength(ITEM_HEIGHT);
-        gridModelNG.SetMinCount(2);
-        gridModelNG.SetMaxCount(4);
-        gridModelNG.SetColumnsGap(Dimension(COL_GAP));
-        gridModelNG.SetRowsGap(Dimension(ROW_GAP));
+    Create([itemWidth](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::ROW_REVERSE);
+        model.SetCellLength(ITEM_HEIGHT);
+        model.SetMinCount(2);
+        model.SetMaxCount(4);
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
         CreateItem(20, itemWidth, ITEM_HEIGHT);
     });
 
@@ -894,13 +893,13 @@ HWTEST_F(GridTestNg, AttrLayoutDirection002, TestSize.Level1)
 HWTEST_F(GridTestNg, AttrLayoutDirection003, TestSize.Level1)
 {
     float itemHeight = 100.f;
-    CreateGrid([itemHeight](GridModelNG gridModelNG) {
-        gridModelNG.SetLayoutDirection(FlexDirection::COLUMN);
-        gridModelNG.SetCellLength(ITEM_WIDTH);
-        gridModelNG.SetMinCount(2);
-        gridModelNG.SetMaxCount(4);
-        gridModelNG.SetColumnsGap(Dimension(COL_GAP));
-        gridModelNG.SetRowsGap(Dimension(ROW_GAP));
+    Create([itemHeight](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::COLUMN);
+        model.SetCellLength(ITEM_WIDTH);
+        model.SetMinCount(2);
+        model.SetMaxCount(4);
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
         CreateItem(20, ITEM_WIDTH, itemHeight);
     });
 
@@ -927,13 +926,13 @@ HWTEST_F(GridTestNg, AttrLayoutDirection003, TestSize.Level1)
 HWTEST_F(GridTestNg, AttrLayoutDirection004, TestSize.Level1)
 {
     float itemHeight = 100.f;
-    CreateGrid([itemHeight](GridModelNG gridModelNG) {
-        gridModelNG.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
-        gridModelNG.SetCellLength(ITEM_WIDTH);
-        gridModelNG.SetMinCount(2);
-        gridModelNG.SetMaxCount(4);
-        gridModelNG.SetColumnsGap(Dimension(COL_GAP));
-        gridModelNG.SetRowsGap(Dimension(ROW_GAP));
+    Create([itemHeight](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
+        model.SetCellLength(ITEM_WIDTH);
+        model.SetMinCount(2);
+        model.SetMaxCount(4);
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
         CreateItem(20, ITEM_WIDTH, itemHeight);
     });
 
@@ -958,9 +957,9 @@ HWTEST_F(GridTestNg, AttrLayoutDirection004, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrGridItem001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateBigItem(1, 2, 1, 2);
         CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
         CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
@@ -988,12 +987,12 @@ HWTEST_F(GridTestNg, AttrGridItem001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrGridItem002, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateRowBigItem(1, 2);
-        CreateRowBigItem(0, 2);
-        CreateRowBigItem(2, 3);
-        CreateHorizontalItem(7);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        CreateBigRowItem(1, 2);
+        CreateBigRowItem(0, 2);
+        CreateBigRowItem(2, 3);
+        CreateRowItem(7);
     });
 
     float averageHeight = DEVICE_HEIGHT / 4;
@@ -1021,12 +1020,12 @@ HWTEST_F(GridTestNg, AttrGridItem002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrGridItem003, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColBigItem(2, 3);
-        CreateColBigItem(0, 2);
-        CreateColBigItem(2, 1);
-        CreateVerticalItem(7);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateBigColItem(2, 3);
+        CreateBigColItem(0, 2);
+        CreateBigColItem(2, 1);
+        CreateColItem(7);
     });
 
     float averageWidth = DEVICE_WIDTH / 4;
@@ -1054,15 +1053,15 @@ HWTEST_F(GridTestNg, AttrGridItem003, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetScrollEnabled(true);
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetScrollEnabled(true);
+        CreateColItem(10);
     });
     EXPECT_EQ(layoutProperty_->GetScrollEnabled(), true);
 
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetScrollEnabled(false);
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetScrollEnabled(false);
+        CreateColItem(10);
     });
     EXPECT_EQ(layoutProperty_->GetScrollEnabled(), false);
 }
@@ -1078,9 +1077,9 @@ HWTEST_F(GridTestNg, KeyEvent001, TestSize.Level1)
      * @tc.steps: step1. KeyAction::UNKNOWN.
      * @tc.expected: Nothing changed.
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     KeyEvent event;
     pattern_->OnKeyEvent(event);
@@ -1118,10 +1117,10 @@ HWTEST_F(GridTestNg, KeyEvent001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetMultiSelectable(true);
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetMultiSelectable(true);
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
 
     /**
@@ -1148,8 +1147,8 @@ HWTEST_F(GridTestNg, GridTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. !isConfigScrollable_
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        CreateColItem(10);
     });
     pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR, false);
     ASSERT_EQ(pattern_->animator_, nullptr);
@@ -1157,9 +1156,9 @@ HWTEST_F(GridTestNg, GridTest002, TestSize.Level1)
     /**
      * @tc.steps: step2. isConfigScrollable_
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR, false);
     ASSERT_NE(pattern_->animator_, nullptr);
@@ -1182,18 +1181,18 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
     /**
      * @tc.steps: step1. Test OnScrollPosition/OnScrollEnd.
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_START));
     pattern_->OnScrollEnd();
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
-    auto event1 = [](double) { return true; };
-    auto event2 = [](bool) {};
-    auto event3 = [](double) {};
+    auto event1 = [](float, float) { return true; };
+    auto event2 = [](bool, float) {};
+    auto event3 = [](float) {};
     coordinationEvent->SetOnScrollEvent(event1);
     coordinationEvent->SetOnScrollStartEvent(event2);
     coordinationEvent->SetOnScrollEndEvent(event3);
@@ -1207,9 +1206,9 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
     /**
      * @tc.steps: step2. Test OnScrollCallback.
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     EXPECT_TRUE(pattern_->OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_START));
     EXPECT_TRUE(IsEqualCurrentOffset(0));
@@ -1217,6 +1216,70 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT));
     EXPECT_TRUE(pattern_->OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT * 2));
+}
+
+/**
+ * @tc.name: EdgeEffectOption001
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption002
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption003
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(3); // 3 is item count
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_FALSE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption004
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(3); // 3 is item count
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
 }
 
 /**
@@ -1232,10 +1295,10 @@ HWTEST_F(GridTestNg, Event001, TestSize.Level1)
         offsetY = offset;
         scrollState = state;
     };
-    CreateGrid([event](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(event);
-        CreateVerticalItem(10);
+    Create([event](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(event);
+        CreateColItem(10);
     });
 
     UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
@@ -1311,10 +1374,10 @@ HWTEST_F(GridTestNg, Event002, TestSize.Level1)
         startIndex = start;
         endIndex = end;
     };
-    CreateGrid([event](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScrollIndex(event);
-        CreateVerticalItem(12);
+    Create([event](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScrollIndex(event);
+        CreateColItem(12);
     });
 
     UpdateCurrentOffset(-ITEM_HEIGHT);
@@ -1335,10 +1398,10 @@ HWTEST_F(GridTestNg, Event003, TestSize.Level1)
 {
     bool isTrigger = false;
     auto event = [&isTrigger]() { isTrigger = true; };
-    CreateGrid([event](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnReachStart(event);
-        CreateVerticalItem(12);
+    Create([event](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnReachStart(event);
+        CreateColItem(12);
     });
     EXPECT_TRUE(isTrigger);
 
@@ -1422,10 +1485,10 @@ HWTEST_F(GridTestNg, Event004, TestSize.Level1)
 {
     bool isTrigger = false;
     auto event = [&isTrigger]() { isTrigger = true; };
-    CreateGrid([event](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnReachEnd(event);
-        CreateVerticalItem(10);
+    Create([event](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnReachEnd(event);
+        CreateColItem(10);
     });
 
     isTrigger = false;
@@ -1519,11 +1582,11 @@ HWTEST_F(GridTestNg, Event005, TestSize.Level1)
     bool isScrollStopCalled = false;
     auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
     auto scrollStop = [&isScrollStopCalled]() { isScrollStopCalled = true; };
-    CreateGrid([scrollStart, scrollStop](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScrollStart(scrollStart);
-        gridModelNG.SetOnScrollStop(scrollStop);
-        CreateVerticalItem(10);
+    Create([scrollStart, scrollStop](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScrollStart(scrollStart);
+        model.SetOnScrollStop(scrollStop);
+        CreateColItem(10);
     });
 
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
@@ -1549,10 +1612,10 @@ HWTEST_F(GridTestNg, Event006, TestSize.Level1)
         ScrollFrameResult result;
         return result;
     };
-    CreateGrid([event](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScrollFrameBegin(event);
-        CreateVerticalItem(10);
+    Create([event](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScrollFrameBegin(event);
+        CreateColItem(10);
     });
 
     auto scrollableEvent = pattern_->GetScrollableEvent();
@@ -1591,14 +1654,14 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithoutAnimation001, TestSize.L
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGridNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateVerticalItem(20);
+    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        CreateColItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1647,14 +1710,14 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithoutAnimation002, TestSize.L
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGridNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateVerticalItem(20);
+    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        CreateColItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1700,15 +1763,15 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithAnimation001, TestSize.Leve
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGridNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        gridModelNG.SetSupportAnimation(true);
-        CreateVerticalItem(20);
+    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        model.SetSupportAnimation(true);
+        CreateColItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1753,15 +1816,15 @@ HWTEST_F(GridTestNg, VerticalGridWithoutScrollBarWithAnimation002, TestSize.Leve
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGridNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        gridModelNG.SetSupportAnimation(true);
-        CreateVerticalItem(20);
+    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        model.SetSupportAnimation(true);
+        CreateColItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1813,14 +1876,14 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithoutAnimation001, TestSize
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGridNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateHorizontalItem(20);
+    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        CreateRowItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1869,14 +1932,14 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithoutAnimation002, TestSize
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGridNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateHorizontalItem(20);
+    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        CreateRowItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1922,15 +1985,15 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithAnimation001, TestSize.Le
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGridNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        gridModelNG.SetSupportAnimation(true);
-        CreateHorizontalItem(20);
+    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        model.SetSupportAnimation(true);
+        CreateRowItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -1978,15 +2041,15 @@ HWTEST_F(GridTestNg, HorizontalGridWithoutScrollBarWithAnimation002, TestSize.Le
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGridNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        gridModelNG.SetSupportAnimation(true);
-        CreateHorizontalItem(20);
+    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        model.SetSupportAnimation(true);
+        CreateRowItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2036,14 +2099,14 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithoutAnimation001, TestSize.Leve
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGrid([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateVerticalItem(20);
+    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        CreateColItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2091,14 +2154,14 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithoutAnimation002, TestSize.Leve
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGrid([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateVerticalItem(20);
+    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        CreateColItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2142,15 +2205,15 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithAnimation001, TestSize.Level1)
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGrid([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        gridModelNG.SetSupportAnimation(true);
-        CreateVerticalItem(20);
+    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        model.SetSupportAnimation(true);
+        CreateColItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2200,15 +2263,15 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithAnimation002, TestSize.Level1)
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGrid([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        gridModelNG.SetSupportAnimation(true);
-        CreateVerticalItem(20);
+    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        model.SetSupportAnimation(true);
+        CreateColItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2258,14 +2321,14 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithoutAnimation001, TestSize.Le
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGrid([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateHorizontalItem(20);
+    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        CreateRowItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2314,14 +2377,14 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithoutAnimation002, TestSize.Le
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGrid([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        CreateHorizontalItem(20);
+    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        CreateRowItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2368,15 +2431,15 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithAnimation001, TestSize.Level
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGrid([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        gridModelNG.SetSupportAnimation(true);
-        CreateHorizontalItem(20);
+    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        model.SetSupportAnimation(true);
+        CreateRowItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2425,15 +2488,15 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithAnimation002, TestSize.Level
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateGrid([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        gridModelNG.SetOnScroll(onScroll);
-        gridModelNG.SetOnScrollStart(onScrollStart);
-        gridModelNG.SetOnScrollStop(onScrollStop);
-        gridModelNG.SetOnReachStart(onReachStart);
-        gridModelNG.SetOnReachEnd(onReachEnd);
-        gridModelNG.SetSupportAnimation(true);
-        CreateHorizontalItem(20);
+    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetOnScrollStart(onScrollStart);
+        model.SetOnScrollStop(onScrollStop);
+        model.SetOnReachStart(onReachStart);
+        model.SetOnReachEnd(onReachEnd);
+        model.SetSupportAnimation(true);
+        CreateRowItem(20);
     });
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
@@ -2462,9 +2525,9 @@ HWTEST_F(GridTestNg, HorizontalGridWithScrollBarWithAnimation002, TestSize.Level
  */
 HWTEST_F(GridTestNg, GetOverScrollOffset001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateColItem(10);
     });
 
     OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
@@ -2529,9 +2592,9 @@ HWTEST_F(GridTestNg, GetOverScrollOffset001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GetOverScrollOffset002, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        CreateVerticalItem(8);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateColItem(8);
     });
 
     OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
@@ -2596,9 +2659,9 @@ HWTEST_F(GridTestNg, GetOverScrollOffset002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        CreateVerticalItem(10, true);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateColItem(10, true);
     });
 
     /**
@@ -2629,9 +2692,9 @@ HWTEST_F(GridTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, ScrollToNode001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        CreateVerticalItem(10, true);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateColItem(10, true);
     });
 
     /**
@@ -2652,9 +2715,9 @@ HWTEST_F(GridTestNg, ScrollToNode001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, EventHub001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(8);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(8);
     });
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, DEVICE_HEIGHT);
     auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_);
@@ -2689,8 +2752,8 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
      * @tc.steps: step1. Unscrollable
      * @tc.expected: jumpIndex_ not change
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        CreateVerticalItem(14);
+    Create([](GridModelNG model) {
+        CreateColItem(14);
     });
     auto controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::START, 3);
@@ -2701,9 +2764,9 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
      * @tc.steps: step2. Test JumpTo func.
      * @tc.expected: Verify return value.
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::START, 3);
@@ -2716,9 +2779,9 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::CENTER, 3);
@@ -2731,9 +2794,9 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(-100.f));
 
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::END, 3);
@@ -2746,9 +2809,9 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::AUTO, 3);
@@ -2761,9 +2824,9 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::NONE, 3);
@@ -2788,9 +2851,9 @@ HWTEST_F(GridTestNg, PositionController002, TestSize.Level1)
      * @tc.steps: step2. Test AnimateTo func.
      * @tc.expected: Verify return value.
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     auto controller = pattern_->positionController_;
     controller->AnimateTo(Dimension(100.f, DimensionUnit::PX), 200.f, Curves::LINEAR, false);
@@ -2853,9 +2916,9 @@ HWTEST_F(GridTestNg, PositionController003, TestSize.Level1)
     /**
      * @tc.steps: step1. Change Grid width to 300.
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateHorizontalItem(20);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        CreateRowItem(20);
     });
     RunMeasureAndLayout(frameNode_, 300.f, DEVICE_HEIGHT);
 
@@ -2902,11 +2965,11 @@ HWTEST_F(GridTestNg, PositionController004, TestSize.Level1)
      * @tc.steps: step1. Supplement ScrollPage, GetCurrentOffset branch,
      * has no condition that axis_ is Axis::NONE.
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
-    pattern_->gridLayoutInfo_.axis_ = Axis::NONE;
+    pattern_->SetAxis(Axis::NONE);
     auto controller = pattern_->positionController_;
     controller->ScrollPage(true, true);
     controller->GetCurrentOffset();
@@ -2920,11 +2983,11 @@ HWTEST_F(GridTestNg, PositionController004, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridAccessibilityTest001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetMultiSelectable(true);
-        gridModelNG.SetEditable(true);
-        CreateVerticalItem(14);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetMultiSelectable(true);
+        model.SetEditable(true);
+        CreateColItem(14);
     });
 
     /**
@@ -2949,8 +3012,8 @@ HWTEST_F(GridTestNg, GridAccessibilityTest001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridAccessibilityTest002, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        CreateVerticalItem(8);
+    Create([](GridModelNG model) {
+        CreateColItem(8);
     });
 
     /**
@@ -2974,9 +3037,9 @@ HWTEST_F(GridTestNg, GridAccessibilityTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll to Top.
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(24);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(24);
     });
     UpdateCurrentOffset(ITEM_HEIGHT);
     accessibilityProperty_->ResetSupportAction();
@@ -3006,8 +3069,8 @@ HWTEST_F(GridTestNg, GridAccessibilityTest003, TestSize.Level1)
     /**
      * @tc.steps: step4. UnScrollable.
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        CreateVerticalItem(14);
+    Create([](GridModelNG model) {
+        CreateColItem(14);
     });
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_4 = 0;
@@ -3021,9 +3084,9 @@ HWTEST_F(GridTestNg, GridAccessibilityTest003, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridAccessibilityTest007, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     auto itemAccessibility = GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 1);
 
@@ -3057,15 +3120,15 @@ HWTEST_F(GridTestNg, GridAccessibilityTest007, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridAccessibilityTest008, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        GridItemModelNG gridItemModel;
-        gridItemModel.Create(GridItemStyle::NONE);
-        gridItemModel.SetColumnStart(0);
-        gridItemModel.SetColumnEnd(3);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        GridItemModelNG itemModel;
+        itemModel.Create(GridItemStyle::NONE);
+        itemModel.SetColumnStart(0);
+        itemModel.SetColumnEnd(3);
         SetHeight(Dimension(ITEM_HEIGHT));
         ViewStackProcessor::GetInstance()->Pop();
-        CreateVerticalItem(10);
+        CreateColItem(10);
     });
 
     /**
@@ -3088,10 +3151,10 @@ HWTEST_F(GridTestNg, GridAccessibilityTest008, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, MouseSelect001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetMultiSelectable(true);
-        CreateVerticalItem(8);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetMultiSelectable(true);
+        CreateColItem(8);
     });
 
     /**
@@ -3114,10 +3177,10 @@ HWTEST_F(GridTestNg, MouseSelect002, TestSize.Level1)
     const Offset LEFT_BOTTOM = Offset(itemWidth * 0.5, ITEM_HEIGHT * 1.5);
     const Offset RIGHT_TOP = Offset(itemWidth * 1.5, ITEM_HEIGHT * 0.5);
     const Offset RIGHT_BOTTOM = Offset(itemWidth * 1.5, ITEM_HEIGHT * 1.5);
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetMultiSelectable(true);
-        CreateVerticalItem(8);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetMultiSelectable(true);
+        CreateColItem(8);
     });
 
     /**
@@ -3177,10 +3240,10 @@ HWTEST_F(GridTestNg, MouseSelect003, TestSize.Level1)
     const Offset LEFT_BOTTOM = Offset(ITEM_WIDTH * 0.5, itemHeight * 1.5);
     const Offset RIGHT_TOP = Offset(ITEM_WIDTH * 1.5, itemHeight * 0.5);
     const Offset RIGHT_BOTTOM = Offset(ITEM_WIDTH * 1.5, itemHeight * 1.5);
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetMultiSelectable(true);
-        CreateHorizontalItem(8);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetMultiSelectable(true);
+        CreateRowItem(8);
     });
 
     /**
@@ -3235,10 +3298,10 @@ HWTEST_F(GridTestNg, MouseSelect003, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, MouseSelect004, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetMultiSelectable(true);
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetMultiSelectable(true);
+        CreateColItem(10);
     });
     bool isSixthItemSelected = false;
     auto selectCallback = [&isSixthItemSelected](bool) { isSixthItemSelected = true; };
@@ -3266,10 +3329,10 @@ HWTEST_F(GridTestNg, MouseSelect004, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, MouseSelect005, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetMultiSelectable(true);
-        CreateVerticalItem(8);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetMultiSelectable(true);
+        CreateColItem(8);
     });
     const Offset startOffset = Offset(225.f, 50.f);
     const Offset endOffset = Offset(315.f, 150.f);
@@ -3320,11 +3383,11 @@ HWTEST_F(GridTestNg, Drag001, TestSize.Level1)
         auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
         return AceType::DynamicCast<UINode>(dragItem);
     };
-    CreateGrid([onItemDragStart](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetEditable(true);
-        gridModelNG.SetOnItemDragStart(onItemDragStart);
-        CreateVerticalItem(8);
+    Create([onItemDragStart](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetEditable(true);
+        model.SetOnItemDragStart(onItemDragStart);
+        CreateColItem(8);
     });
     eventHub_->onItemDragStart_ = onItemDragStart;
 
@@ -3366,14 +3429,14 @@ HWTEST_F(GridTestNg, Drag001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetEditable(true);
-        gridModelNG.SetSupportAnimation(true);
-        CreateColBigItem(2, 3);
-        CreateColBigItem(0, 2);
-        CreateColBigItem(2, 1);
-        CreateVerticalItem(8);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetEditable(true);
+        model.SetSupportAnimation(true);
+        CreateBigColItem(2, 3);
+        CreateBigColItem(0, 2);
+        CreateBigColItem(2, 1);
+        CreateColItem(8);
     });
     auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
         auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
@@ -3450,14 +3513,14 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
 HWTEST_F(GridTestNg, Drag003, TestSize.Level1)
 {
     const int32_t itemCount = 8;
-    CreateGrid([itemCount](GridModelNG gridModelNG) {
-        gridModelNG.SetLayoutDirection(FlexDirection::ROW);
-        gridModelNG.SetEditable(true);
-        gridModelNG.SetCellLength(ITEM_HEIGHT);
-        gridModelNG.SetMinCount(2);
-        gridModelNG.SetMaxCount(4);
-        gridModelNG.SetSupportAnimation(true);
-        CreateVerticalItem(itemCount);
+    Create([itemCount](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::ROW);
+        model.SetEditable(true);
+        model.SetCellLength(ITEM_HEIGHT);
+        model.SetMinCount(2);
+        model.SetMaxCount(4);
+        model.SetSupportAnimation(true);
+        CreateColItem(itemCount);
     });
     auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
         auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
@@ -3533,9 +3596,9 @@ HWTEST_F(GridTestNg, Drag003, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, FocusStep001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(10, true);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(10, true);
     });
 
     /**
@@ -3631,9 +3694,9 @@ HWTEST_F(GridTestNg, FocusStep001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateHorizontalItem(10, true);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        CreateRowItem(10, true);
     });
 
     /**
@@ -3729,9 +3792,9 @@ HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, FocusStep003, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateItem(10, NULL_VALUE, NULL_VALUE, true);
     });
 
@@ -3828,12 +3891,12 @@ HWTEST_F(GridTestNg, FocusStep003, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, FocusStep004, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColBigItem(2, 3);
-        CreateColBigItem(0, 2);
-        CreateColBigItem(2, 1);
-        CreateVerticalItem(7, true);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateBigColItem(2, 3);
+        CreateBigColItem(0, 2);
+        CreateBigColItem(2, 1);
+        CreateColItem(7, true);
     });
 
     /**
@@ -3929,12 +3992,12 @@ HWTEST_F(GridTestNg, FocusStep004, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, FocusStep005, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateRowBigItem(1, 2);
-        CreateRowBigItem(0, 2);
-        CreateRowBigItem(2, 3);
-        CreateHorizontalItem(7, true);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        CreateBigRowItem(1, 2);
+        CreateBigRowItem(0, 2);
+        CreateBigRowItem(2, 3);
+        CreateRowItem(7, true);
     });
 
     /**
@@ -4030,9 +4093,9 @@ HWTEST_F(GridTestNg, FocusStep005, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, FocusStep006, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateBigItem(1, 2, 1, 2);
         CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
         CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
@@ -4132,9 +4195,9 @@ HWTEST_F(GridTestNg, FocusStep006, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, FocusStep007, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(10, true);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(10, true);
     });
 
     /**
@@ -4153,9 +4216,9 @@ HWTEST_F(GridTestNg, FocusStep007, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, FocusStep008, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(24, true);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(24, true);
     });
 
     /**
@@ -4179,9 +4242,9 @@ HWTEST_F(GridTestNg, FocusStep008, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, FocusStep009, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(24, true);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(24, true);
     });
 
     /**
@@ -4205,9 +4268,9 @@ HWTEST_F(GridTestNg, FocusStep009, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, Focus001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(18, true);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(18, true);
     });
 
     /**
@@ -4244,9 +4307,9 @@ HWTEST_F(GridTestNg, Focus001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, UpdateCurrentOffset001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(IsEqualCurrentOffset(-100.f));
@@ -4255,9 +4318,9 @@ HWTEST_F(GridTestNg, UpdateCurrentOffset001, TestSize.Level1)
     UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(IsEqualCurrentOffset(-200.f));
 
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     UpdateCurrentOffset(-100.f, SCROLL_FROM_BAR);
     EXPECT_TRUE(IsEqualCurrentOffset(-100.f));
@@ -4266,9 +4329,9 @@ HWTEST_F(GridTestNg, UpdateCurrentOffset001, TestSize.Level1)
     UpdateCurrentOffset(-200.f, SCROLL_FROM_BAR);
     EXPECT_TRUE(IsEqualCurrentOffset(-200.f));
 
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     pattern_->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
     UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
@@ -4286,9 +4349,9 @@ HWTEST_F(GridTestNg, UpdateCurrentOffset001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridPaintMethodTest001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        CreateColItem(10);
     });
     auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
     auto paintProperty = pattern_->CreatePaintProperty();
@@ -4331,10 +4394,10 @@ HWTEST_F(GridTestNg, ScrollLayout001, TestSize.Level1)
     const Offset clickPosition = Offset(100.f, DEVICE_HEIGHT + ITEM_HEIGHT);
     textFieldManager->SetClickPosition(clickPosition);
 
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetMaxCount(2);
-        CreateVerticalItem(18, true);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetMaxCount(2);
+        CreateColItem(18, true);
     });
     const float smallerHeight = DEVICE_HEIGHT - ITEM_HEIGHT;
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, smallerHeight);
@@ -4369,10 +4432,10 @@ HWTEST_F(GridTestNg, ScrollLayout002, TestSize.Level1)
     const Offset clickPosition = Offset(100.f, 100.f);
     textFieldManager->SetClickPosition(clickPosition);
 
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetMaxCount(2);
-        CreateVerticalItem(18, true);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetMaxCount(2);
+        CreateColItem(18, true);
     });
 
     /**
@@ -4417,12 +4480,12 @@ HWTEST_F(GridTestNg, ScrollLayout002, TestSize.Level1)
 HWTEST_F(GridTestNg, AdaptiveLayout001, TestSize.Level1)
 {
     float itemWidth = 100.f;
-    CreateGrid([itemWidth](GridModelNG gridModelNG) {
-        gridModelNG.SetLayoutDirection(FlexDirection::ROW);
-        gridModelNG.SetEditable(true);
-        gridModelNG.SetCellLength(ITEM_HEIGHT);
-        gridModelNG.SetMinCount(4);
-        gridModelNG.SetMaxCount(2);
+    Create([itemWidth](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::ROW);
+        model.SetEditable(true);
+        model.SetCellLength(ITEM_HEIGHT);
+        model.SetMinCount(4);
+        model.SetMaxCount(2);
         CreateItem(10, itemWidth, ITEM_HEIGHT);
     });
 
@@ -4447,9 +4510,9 @@ HWTEST_F(GridTestNg, AdaptiveLayout001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, PerformActionTest001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
     auto gridItemAccessibilityProperty = GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 0);
@@ -4486,9 +4549,9 @@ HWTEST_F(GridTestNg, PerformActionTest002, TestSize.Level1)
      * @tc.steps: step1. When grid is not Scrollable
      * @tc.expected: can not scrollpage
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(10);
     });
     accessibilityProperty_->ActActionScrollForward();
     EXPECT_TRUE(IsEqualCurrentOffset(0.f));
@@ -4499,9 +4562,9 @@ HWTEST_F(GridTestNg, PerformActionTest002, TestSize.Level1)
      * @tc.steps: step2. When grid is Scrollable
      * @tc.expected: can scrollpage
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     accessibilityProperty_->ActActionScrollForward();
     EXPECT_TRUE(IsEqualCurrentOffset(-DEVICE_HEIGHT));
@@ -4516,17 +4579,17 @@ HWTEST_F(GridTestNg, PerformActionTest002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridScrollTest001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
+    Create([](GridModelNG model) {
         ScrollBarUpdateFunc scrollFunc = [](int32_t index, Dimension offset) {
             std::optional<float> horizontalOffset = offset.ConvertToPx();
             std::optional<float> verticalOffset = offset.ConvertToPx();
             return std::make_pair(horizontalOffset, verticalOffset);
         };
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        gridModelNG.SetRowsGap(Dimension(5));
-        gridModelNG.SetOnScrollBarUpdate(std::move(scrollFunc));
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetRowsGap(Dimension(5));
+        model.SetOnScrollBarUpdate(std::move(scrollFunc));
         CreateBigItem(1, 1, 1, 2);
-        CreateVerticalItem(2);
+        CreateColItem(2);
     });
     Dimension offset(1.0);
     auto fireOnScroll = eventHub_->FireOnScrollBarUpdate(1.0, offset);
@@ -4544,10 +4607,10 @@ HWTEST_F(GridTestNg, GridScrollTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. Create girdItem and initialize related properties.
      */
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(Dimension(5));
+    GridModelNG model;
+    model.Create(nullptr, nullptr);
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5));
     UpdateLayoutInfo();
     auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->gridLayoutInfo_, 2, 0);
     ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
@@ -4566,11 +4629,11 @@ HWTEST_F(GridTestNg, GridScrollTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. Create girdItem and initialize related properties.
      */
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetColumnsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(Dimension(5));
-    CreateVerticalItem(10);
+    GridModelNG model;
+    model.Create(nullptr, nullptr);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    CreateColItem(10);
     UpdateLayoutInfo();
     auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->gridLayoutInfo_, 2, 0);
     ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
@@ -4589,10 +4652,10 @@ HWTEST_F(GridTestNg, GridScrollTest004, TestSize.Level1)
     /**
      * @tc.steps: step1. Create girdItem and initialize related properties.
      */
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(Dimension(5));
+    GridModelNG model;
+    model.Create(nullptr, nullptr);
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5));
     UpdateLayoutInfo();
     auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->gridLayoutInfo_, 2, 0);
     auto ret1 = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(0, 100), 1, 1, 0);
@@ -4607,14 +4670,14 @@ HWTEST_F(GridTestNg, GridScrollTest004, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridScrollTest005, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr");
-        GridItemModelNG gridItemModelNG;
-        gridItemModelNG.Create(GridItemStyle::NONE);
-        gridItemModelNG.SetRowStart(NULL_VALUE);
-        gridItemModelNG.SetRowEnd(NULL_VALUE);
-        gridItemModelNG.SetColumnStart(NULL_VALUE);
-        gridItemModelNG.SetColumnEnd(NULL_VALUE);
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        GridItemModelNG itemModel;
+        itemModel.Create(GridItemStyle::NONE);
+        itemModel.SetRowStart(NULL_VALUE);
+        itemModel.SetRowEnd(NULL_VALUE);
+        itemModel.SetColumnStart(NULL_VALUE);
+        itemModel.SetColumnEnd(NULL_VALUE);
         ViewStackProcessor::GetInstance()->Pop();
     });
     auto layoutProperty = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 0);
@@ -4635,16 +4698,16 @@ HWTEST_F(GridTestNg, GridSetFriction001, TestSize.Level1)
      * @tc.steps: step1. friction <= 0
      * @tc.expected: friction would be default
      */
-    CreateGrid([](GridModelNG gridModelNG) { gridModelNG.SetFriction(NULL_VALUE); });
+    Create([](GridModelNG model) { model.SetFriction(NULL_VALUE); });
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), DEFAULT_FRICTION);
-    CreateGrid([](GridModelNG gridModelNG) { gridModelNG.SetFriction(0); });
+    Create([](GridModelNG model) { model.SetFriction(0); });
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), DEFAULT_FRICTION);
 
     /**
      * @tc.steps: step2. friction > 0
      * @tc.expected: friction would be itself
      */
-    CreateGrid([](GridModelNG gridModelNG) { gridModelNG.SetFriction(1); });
+    Create([](GridModelNG model) { model.SetFriction(1); });
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 1);
 }
 
@@ -4655,16 +4718,16 @@ HWTEST_F(GridTestNg, GridSetFriction001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, ScrollTo001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(10);
     });
     pattern_->ScrollTo(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     pattern_->ScrollTo(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT));
@@ -4680,18 +4743,18 @@ HWTEST_F(GridTestNg, GetTotalHeight001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create 10 gridItem
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(10);
     });
     EXPECT_EQ(pattern_->GetTotalHeight(), ITEM_HEIGHT * 3);
 
     /**
      * @tc.steps: step2. Create 20 gridItem
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     EXPECT_EQ(pattern_->GetTotalHeight(), ITEM_HEIGHT * 5);
 }
@@ -4706,18 +4769,18 @@ HWTEST_F(GridTestNg, GetAverageHeight001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create 10 gridItem
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(10);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(10);
     });
     EXPECT_EQ(pattern_->GetAverageHeight(), 60);
 
     /**
      * @tc.steps: step2. Create 20 gridItem
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateVerticalItem(20);
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
     });
     EXPECT_EQ(pattern_->GetAverageHeight(), 50);
 }
@@ -4729,8 +4792,8 @@ HWTEST_F(GridTestNg, GetAverageHeight001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridItemHoverEventTest001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        CreateVerticalItem(10, false, GridItemStyle::PLAIN);
+    Create([](GridModelNG model) {
+        CreateColItem(10, false, GridItemStyle::PLAIN);
     });
 
     /**
@@ -4759,8 +4822,8 @@ HWTEST_F(GridTestNg, GridItemHoverEventTest001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridItemPressEventTest001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        CreateVerticalItem(10, false, GridItemStyle::PLAIN);
+    Create([](GridModelNG model) {
+        CreateColItem(10, false, GridItemStyle::PLAIN);
     });
 
     /**
@@ -4791,8 +4854,8 @@ HWTEST_F(GridTestNg, GridItemPressEventTest001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridItemDisableEventTest001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) {
-        CreateVerticalItem(10, false, GridItemStyle::PLAIN);
+    Create([](GridModelNG model) {
+        CreateColItem(10, false, GridItemStyle::PLAIN);
     });
 
     /**
@@ -4816,7 +4879,7 @@ HWTEST_F(GridTestNg, GridItemDisableEventTest001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, GridItemGetInnerFocusPaintRectTest001, TestSize.Level1)
 {
-    CreateGrid([](GridModelNG gridModelNG) { CreateVerticalItem(10); });
+    Create([](GridModelNG model) { CreateColItem(10); });
     auto gridItemNode = GetChildFrameNode(frameNode_, 0);
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
 
@@ -4860,10 +4923,10 @@ HWTEST_F(GridTestNg, GridScrollWithOptions001, TestSize.Level1)
         return gridItemSize;
     };
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    CreateGrid([option](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetLayoutOptions(option);
-        CreateVerticalItem(10);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        CreateColItem(10);
     });
 
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
@@ -4884,10 +4947,10 @@ HWTEST_F(GridTestNg, GridScrollWithOptions002, TestSize.Level1)
     option.regularSize.rows = 1;
     option.regularSize.columns = 1;
     option.irregularIndexes = { 6, 1, 2, 3, 4, 5, 0 };
-    CreateGrid([option](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetLayoutOptions(option);
-        CreateHorizontalItem(10);
+    Create([option](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        CreateRowItem(10);
     });
 
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
@@ -4913,10 +4976,10 @@ HWTEST_F(GridTestNg, GridScrollWithOptions003, TestSize.Level1)
         return gridItemSize;
     };
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    CreateGrid([option](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr");
-        gridModelNG.SetLayoutOptions(option);
-        CreateHorizontalItem(10);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr");
+        model.SetLayoutOptions(option);
+        CreateRowItem(10);
     });
     pattern_->UpdateStartIndex(3);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
@@ -4944,10 +5007,10 @@ HWTEST_F(GridTestNg, GridScrollWithOptions004, TestSize.Level1)
         return gridItemSize;
     };
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    CreateGrid([option](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr");
-        gridModelNG.SetLayoutOptions(option);
-        CreateHorizontalItem(10);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr");
+        model.SetLayoutOptions(option);
+        CreateRowItem(10);
     });
     pattern_->UpdateStartIndex(3);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
@@ -4977,10 +5040,10 @@ HWTEST_F(GridTestNg, GridScrollWithOptions005, TestSize.Level1)
         return gridItemSize;
     };
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    CreateGrid([option](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetLayoutOptions(option);
-        CreateHorizontalItem(10);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        CreateRowItem(10);
     });
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =
@@ -5006,10 +5069,10 @@ HWTEST_F(GridTestNg, GridScrollWithOptions006, TestSize.Level1)
         return gridItemSize;
     };
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    CreateGrid([option](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetLayoutOptions(option);
-        CreateHorizontalItem(10);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        CreateRowItem(10);
     });
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =
@@ -5027,7 +5090,7 @@ HWTEST_F(GridTestNg, GridDistributed001, TestSize.Level1)
     /**
      * @tc.steps: step1. Init Grid node
      */
-    CreateGrid();
+    Create();
 
     /**
      * @tc.steps: step2. get pattern .
@@ -5058,10 +5121,10 @@ HWTEST_F(GridTestNg, SearchIrregularFocusableChildInScroll001, TestSize.Level1)
     option.regularSize.rows = 1;
     option.regularSize.columns = 1;
     option.irregularIndexes = { 6, 1, 2, 3, 4, 5, 0 };
-    CreateGrid([option](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetLayoutOptions(option);
-        CreateHorizontalItem(10);
+    Create([option](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        CreateRowItem(10);
     });
 
     /**
@@ -5094,10 +5157,10 @@ HWTEST_F(GridTestNg, SearchIrregularFocusableChildInScroll002, TestSize.Level1)
         return gridItemSize;
     };
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    CreateGrid([option](GridModelNG gridModelNG) {
+    Create([option](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetLayoutOptions(option);
-        CreateHorizontalItem(10, true);
+        CreateRowItem(10, true);
     });
 
     /**
@@ -5182,11 +5245,11 @@ HWTEST_F(GridTestNg, SearchIrregularFocusableChildInNormalGrid001, TestSize.Leve
     /**
      * @tc.steps: step1. Create gridItems with irregular shape in fixed shape grid.
      */
-    CreateGrid([](GridModelNG gridModelNG) {
-        gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateBigItem(1, 2, 1, 2);
-        CreateHorizontalItem(10, true);
+        CreateRowItem(10, true);
     });
 
     /**
@@ -5251,10 +5314,10 @@ HWTEST_F(GridTestNg, GridPattern_GetItemRect001, TestSize.Level1)
         return gridItemSize;
     };
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    CreateGrid([option](GridModelNG gridModelNG) {
-        gridModelNG.SetColumnsTemplate("1fr 1fr");
-        gridModelNG.SetLayoutOptions(option);
-        CreateVerticalItem(10);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions(option);
+        CreateColItem(10);
     });
     pattern_->UpdateStartIndex(3, ScrollAlign::START);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, ITEM_HEIGHT * 3);

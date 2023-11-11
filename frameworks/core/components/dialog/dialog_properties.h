@@ -23,7 +23,6 @@
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/event/ace_event_handler.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {

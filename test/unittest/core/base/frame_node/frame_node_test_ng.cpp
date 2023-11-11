@@ -32,6 +32,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -265,8 +266,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg008, TestSize.Level1)
      * @tc.steps: step 2. call AddFRCSceneInfo .
      * @tc.expect: rosenContext set scene and speed, no expect
      */
-    node->AddFRCSceneInfo("test", 0, SelectOverlayNode::SceneStatus::START);
-    node->AddFRCSceneInfo("test", 0, SelectOverlayNode::SceneStatus::RUNNING);
+    node->AddFRCSceneInfo("test", 0, SceneStatus::START);
+    node->AddFRCSceneInfo("test", 0, SceneStatus::RUNNING);
 
     /**
      * @tc.steps: step 3. call CheckSecurityComponentStatus .
@@ -765,22 +766,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      */
     FRAME_NODE2->lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
     FRAME_NODE2->lastFrameRect_ = std::make_unique<RectF>();
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
-    EXPECT_FALSE(flag);
-
-    /**
-     * @tc.steps: step6.set FrameSize
-     * @tc.expected: expect flag is turns true
-     */
-    FRAME_NODE2->geometryNode_->SetFrameSize(SizeF(10, 10));
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
-    EXPECT_TRUE(flag);
-
-    /**
-     * @tc.steps: step7.set lastParentOffsetToWindow_
-     * @tc.expected: expect flag is turns false
-     */
-    FRAME_NODE2->lastParentOffsetToWindow_->SetX(7);
     FRAME_NODE2->TriggerOnAreaChangeCallback();
     EXPECT_FALSE(flag);
 }

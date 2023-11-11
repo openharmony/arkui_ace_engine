@@ -338,17 +338,10 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
 #endif
 {
     const auto& src = imageSourceInfo.GetSrc();
-#ifndef USE_ROSEN_DRAWING
-    auto skData = ImageLoader::LoadDataFromCachedFile(src);
-    if (skData) {
-        return skData;
-    }
-#else
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src);
     if (drawingData) {
         return drawingData;
     }
-#endif
     auto pipeline = context.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dataProvider = pipeline->GetDataProviderManager();
@@ -358,6 +351,7 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
 #ifndef USE_ROSEN_DRAWING
     auto data = SkData::MakeFromMalloc(res->GetData().release(), res->GetSize());
 #else
+    // function is ok, just pointer cast from SKData to RSData
     auto skData = SkData::MakeFromMalloc(res->GetData().release(), res->GetSize());
     CHECK_NULL_RETURN(skData, nullptr);
     auto data = std::make_shared<RSData>();
@@ -807,11 +801,20 @@ void SharedMemoryImageLoader::UpdateData(const std::string& uri, const std::vect
 
 void ImageLoader::WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData)
 {
+    WriteCacheToFileWithData(uri, imageData.data(), imageData.size());
+}
+
+void ImageLoader::WriteCacheToFile(const std::string& uri, const std::string& imageData)
+{
+    WriteCacheToFileWithData(uri, imageData.data(), imageData.size());
+}
+
+void ImageLoader::WriteCacheToFileWithData(const std::string& uri, const void* const data, size_t size)
+{
     BackgroundTaskExecutor::GetInstance().PostTask(
-        [uri, imgData = std::move(imageData)]() {
-            ImageFileCache::GetInstance().WriteCacheFile(uri, imgData.data(), imgData.size());
+        [uri, data, size]() {
+            ImageFileCache::GetInstance().WriteCacheFile(uri, data, size);
         },
         BgTaskPriority::LOW);
 }
-
 } // namespace OHOS::Ace

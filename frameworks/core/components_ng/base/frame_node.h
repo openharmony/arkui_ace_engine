@@ -31,6 +31,7 @@
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/ui_node.h"
@@ -85,6 +86,15 @@ public:
         return 1;
     }
 
+    void SetCheckboxFlag(const bool checkboxFlag)
+    {
+        checkboxFlag_ = checkboxFlag;
+    }
+
+    bool GetCheckboxFlag() const
+    {
+        return checkboxFlag_;
+    }
     void OnInspectorIdUpdate(const std::string& /*unused*/) override;
 
     struct ZIndexComparator {
@@ -458,11 +468,6 @@ public:
 
     std::optional<RectF> GetViewPort() const;
 
-    enum class SceneStatus {
-        START,
-        RUNNING,
-        END,
-    };
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
@@ -565,6 +570,9 @@ public:
         return nullptr;
     }
 
+    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
+
     bool IsFirstBuilding() const
     {
         return isFirstBuilding_;
@@ -614,8 +622,6 @@ private:
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     bool GetTouchable() const;
-    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     void ProcessAllVisibleCallback(
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
@@ -688,6 +694,7 @@ private:
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
 
     bool isRestoreInfoUsed_ = false;
+    bool checkboxFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

@@ -39,6 +39,7 @@
 #include "file_uri.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "parameters.h"
+#include "image_source.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
@@ -53,10 +54,13 @@ namespace OHOS::Ace::NG {
 using namespace Msdp::DeviceStatus;
 #endif // ENABLE_DRAG_FRAMEWORK
 namespace {
+const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
+const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
     { OHOS::NWeb::CursorType::CT_IBEAM, MouseFormat::TEXT_CURSOR },
+    { OHOS::NWeb::CursorType::CT_WAIT, MouseFormat::LOADING },
     { OHOS::NWeb::CursorType::CT_HELP, MouseFormat::HELP },
     { OHOS::NWeb::CursorType::CT_EASTRESIZE, MouseFormat::WEST_EAST },
     { OHOS::NWeb::CursorType::CT_NORTHRESIZE, MouseFormat::NORTH_SOUTH },
@@ -82,8 +86,12 @@ const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] =
     { OHOS::NWeb::CursorType::CT_SOUTHWESTPANNING, MouseFormat::MIDDLE_BTN_SOUTH_WEST },
     { OHOS::NWeb::CursorType::CT_WESTPANNING, MouseFormat::MIDDLE_BTN_WEST },
     { OHOS::NWeb::CursorType::CT_MOVE, MouseFormat::CURSOR_MOVE },
+    { OHOS::NWeb::CursorType::CT_VERTICALTEXT, MouseFormat::HORIZONTAL_TEXT_CURSOR },
+    { OHOS::NWeb::CursorType::CT_CELL, MouseFormat::CURSOR_CROSS },
+    { OHOS::NWeb::CursorType::CT_PROGRESS, MouseFormat::RUNNING },
     { OHOS::NWeb::CursorType::CT_NODROP, MouseFormat::CURSOR_FORBID },
     { OHOS::NWeb::CursorType::CT_COPY, MouseFormat::CURSOR_COPY },
+    { OHOS::NWeb::CursorType::CT_NONE, MouseFormat::CURSOR_NONE },
     { OHOS::NWeb::CursorType::CT_NOTALLOWED, MouseFormat::CURSOR_FORBID },
     { OHOS::NWeb::CursorType::CT_ZOOMIN, MouseFormat::ZOOM_IN },
     { OHOS::NWeb::CursorType::CT_ZOOMOUT, MouseFormat::ZOOM_OUT },
@@ -145,18 +153,23 @@ constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
+constexpr uint32_t DEFAULT_WEB_DRAW_HEIGHT = 4000;
+const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
+constexpr int32_t SURFACE_QUEUE_SIZE = 8;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
+const std::vector<int32_t> DEFAULT_HEIGHT_GEAR {7998, 7999, 8001, 8002, 8003};
+const std::vector<int32_t> DEFAULT_ORIGN_GEAR {0, 2000, 4000, 6000, 8000};
 
 WebPattern::WebPattern() = default;
 
-WebPattern::WebPattern(std::string webSrc, const RefPtr<WebController>& webController)
-    : webSrc_(std::move(webSrc)), webController_(webController)
+WebPattern::WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type)
+    : webSrc_(std::move(webSrc)), webController_(webController), type_(type)
 {}
 
-WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback)
-    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback)
+WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type)
+    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), type_(type)
 {}
 
 WebPattern::~WebPattern()
@@ -1187,6 +1200,13 @@ void WebPattern::OnDarkModeUpdate(WebDarkMode mode)
     }
 }
 
+void WebPattern::OnOverScrollModeUpdate(int mode)
+{
+    if (delegate_) {
+        delegate_->UpdateOverScrollMode(mode);
+    }
+}
+
 void WebPattern::OnForceDarkAccessUpdate(bool access)
 {
     if (delegate_) {
@@ -1418,6 +1438,7 @@ void WebPattern::OnModifyDone()
         observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
         CHECK_NULL_VOID(observer_);
         delegate_->SetObserver(observer_);
+        delegate_->SetWebType(type_);
         InitEnhanceSurfaceFlag();
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
@@ -1433,9 +1454,18 @@ void WebPattern::OnModifyDone()
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
             renderSurface_->SetRenderContext(host->GetRenderContext());
+            if (type_ == WebType::TEXTURE) {
+                renderSurface_->SetIsTexture(true);
+                renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
+                renderSurface_->SetSurfaceQueueSize(SURFACE_QUEUE_SIZE);
+            } else {
+                renderSurface_->SetIsTexture(false);
+            }
             renderSurface_->InitSurface();
+            renderSurface_->UpdateXComponentConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
         }
+        UpdateJavaScriptOnDocumentStart();
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
@@ -1472,6 +1502,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
         delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
         delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
+        delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }
@@ -1490,6 +1521,13 @@ void WebPattern::OnModifyDone()
     // Initialize web params.
     InitFeatureParam();
 
+    // Initialize scrollupdate listener
+    if (type_ == WebType::TEXTURE) {
+        auto task = [this]() {
+            InitScrollUpdateListener();
+        };
+        PostTaskToUI(std::move(task));
+    }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddOnAreaChangeNode(host->GetId());
@@ -1957,15 +1995,51 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::
     if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) == -1) {
         return false;
     }
-    MouseFormat pointStyle = MouseFormat::DEFAULT;
-    int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
-    if (idx >= 0) {
-        pointStyle = g_cursorTypeMap[idx].value;
-    }
-    if ((int32_t)pointStyle != curPointerStyle) {
-        mouseStyle->SetPointerStyle(windowId, pointStyle);
+    if ((type == OHOS::NWeb::CursorType::CT_CONTEXTMENU) || (type == OHOS::NWeb::CursorType::CT_ALIAS)) {
+        UpdateLocalCursorStyle(windowId, type);
+    } else {
+        MouseFormat pointStyle = MouseFormat::DEFAULT;
+        int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
+        if (idx >= 0) {
+            pointStyle = g_cursorTypeMap[idx].value;
+        }
+        mouseStyle->SetPointerVisible(pointStyle);
+        if (static_cast<int32_t>(pointStyle) != curPointerStyle) {
+            mouseStyle->SetPointerStyle(windowId, pointStyle);
+        }
     }
     return true;
+}
+
+void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    if (type == NWeb::CursorType::CT_CONTEXTMENU) {
+        MouseFormat pointStyle = MouseFormat::CONTEXT_MENU;
+        pixelMap = CreatePixelMapFromString(IMAGE_POINTER_CONTEXT_MENU_PATH);
+        mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
+    } else if (type == NWeb::CursorType::CT_ALIAS) {
+        MouseFormat pointStyle = MouseFormat::ALIAS;
+        pixelMap = CreatePixelMapFromString(IMAGE_POINTER_ALIAS_PATH);
+        mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
+    }
+}
+
+std::shared_ptr<OHOS::Media::PixelMap> WebPattern::CreatePixelMapFromString(const std::string& filePath)
+{
+    OHOS::Media::SourceOptions opts;
+    opts.formatHint = "image/svg+xml";
+    uint32_t errCode = 0;
+    auto imageSource = OHOS::Media::ImageSource::CreateImageSource(filePath, opts, errCode);
+    CHECK_NULL_RETURN(imageSource, nullptr);
+    std::set<std::string> formats;
+    errCode = imageSource->GetSupportedFormats(formats);
+    Media::DecodeOptions decodeOpts;
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errCode);
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+
+    return pixelMap;
 }
 
 void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
@@ -2405,6 +2479,7 @@ int WebPattern::GetWebId()
 
 ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState state)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScroll offset = %{public}f", offset);
     auto parent = parent_.Upgrade();
     if (parent) {
         return parent->HandleScroll(offset, source, state);
@@ -2414,6 +2489,7 @@ ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState 
 
 bool WebPattern::HandleScrollVelocity(float velocity)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity velocity = %{public}f", velocity);
     auto parent = parent_.Upgrade();
     if (parent) {
         if (parent->HandleScrollVelocity(velocity)) {
@@ -2446,18 +2522,24 @@ void WebPattern::OnScrollEndRecursive()
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
 {
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    if (nestedScrollMode_ != NestedScrollMode::SELF_FIRST) {
+        return;
+    }
     if (isFling) {
-        if (isFirstFlingScrollVelocity_) {
+        if (velocity != 0 && isFirstFlingScrollVelocity_) {
             HandleScrollVelocity(velocity);
             isFirstFlingScrollVelocity_ = false;
         }
     } else {
-        HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        if (scrollState_) {
+            HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        }
     }
 }
 
 void WebPattern::OnScrollState(bool scrollState)
 {
+    scrollState_ = scrollState;
     if (!scrollState) {
         OnScrollEndRecursive();
     }
@@ -2468,7 +2550,8 @@ Axis WebPattern::GetParentAxis()
     auto parent = WebSearchParent();
     parent_ = parent;
     CHECK_NULL_RETURN(parent, Axis::HORIZONTAL);
-    return parent->GetAxis();
+    axis_ = parent->GetAxis();
+    return axis_;
 }
 
 RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
@@ -2491,10 +2574,178 @@ RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
 
 void WebPattern::OnRootLayerChanged(int width, int height)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "width = %{public}d, height = %{public}d", width, height);
     rootLayerWidth_ = width;
     rootLayerHeight_ = height;
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto newRect = Size(width, height);
+        drawSize_.SetSize(newRect);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+        delegate_->SetBoundsOrResize(drawSize_, offset, false);
+    }
+}
+
+void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    if (nestedOpt.forward == NestedScrollMode::SELF_ONLY &&
+        nestedOpt.backward == NestedScrollMode::SELF_ONLY) {
+        nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
+    } else if (nestedOpt.forward == NestedScrollMode::SELF_FIRST &&
+               nestedOpt.backward == NestedScrollMode::SELF_FIRST) {
+        nestedScrollMode_ = NestedScrollMode::SELF_FIRST;
+    } else if (nestedOpt.forward == NestedScrollMode::PARENT_FIRST &&
+               nestedOpt.backward == NestedScrollMode::PARENT_FIRST) {
+        nestedScrollMode_ = NestedScrollMode::PARENT_FIRST;
+    } else if (nestedOpt.forward == NestedScrollMode::PARALLEL &&
+               nestedOpt.backward == NestedScrollMode::PARALLEL) {
+        nestedScrollMode_ = NestedScrollMode::PARALLEL;
+    }
+    TAG_LOGD(AceLogTag::ACE_WEB, "SetNestedScroll %{public}d", nestedScrollMode_);
+}
+
+bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
+{
+    float offset = GetAxis() == Axis::HORIZONTAL ? x : y;
+    float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    if (nestedScrollMode_ == NestedScrollMode::PARENT_FIRST) {
+        if (offset != 0) {
+            auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+            TAG_LOGD(AceLogTag::ACE_WEB, "FilterScrollEvent ScrollBy remainOffset = %{public}f", result.remain);
+            return NearZero(result.remain);
+        } else {
+            HandleScrollVelocity(velocity);
+        }
+        return true;
+    } else if (nestedScrollMode_ == NestedScrollMode::PARALLEL) {
+        if (offset != 0) {
+            HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        } else {
+            HandleScrollVelocity(velocity);
+        }
+    }
+    return false;
+}
+
+RefPtr<ScrollPattern> WebPattern::SearchParent()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    if (isParentHasScroll_) {
+        relativeOffsetOfScroll_.Reset();
+    }
+    relativeOffsetOfScroll_ += host->GetGeometryNode()->GetFrameOffset();
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        auto pattern = frameNode->GetPattern<ScrollPattern>();
+        if (!pattern) {
+            relativeOffsetOfScroll_ += frameNode->GetGeometryNode()->GetFrameOffset();
+            continue;
+        }
+        isParentHasScroll_ = true;
+        return pattern;
+    }
+    isParentHasScroll_ = false;
+    return nullptr;
+}
+
+void WebPattern::InitScrollUpdateListener()
+{
+    std::shared_ptr<ScrollUpdateListener> listener = std::make_shared<ScrollUpdateListener>();
+    listener->SetPatternToListener(AceType::WeakClaim(this));
+    auto pattern = SearchParent();
+    CHECK_NULL_VOID(pattern);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerScrollUpdateListener");
+    pattern->registerScrollUpdateListener(listener);
+    axis_ = pattern->GetAxis();
+}
+
+void WebPattern::UpdateScrollOffset(SizeF frameSize)
+{
+    if (isParentHasScroll_) {
+        SearchParent();
+        switch (axis_) {
+            case Axis::HORIZONTAL:
+                CalculateHorizontalDrawRect(frameSize);
+                break;
+            case Axis::VERTICAL:
+                CalculateVerticalDrawRect(frameSize);
+                break;
+            default :
+                break;
+        }
+    }
+}
+
+void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "Horizontal scroll current is not supported in web");
+}
+
+void WebPattern::CalculateVerticalDrawRect(SizeF frameSize)
+{
+    if (relativeOffsetOfScroll_.GetY() >= 0) {
+        return;
+    }
+
+    int32_t stepGear = (-relativeOffsetOfScroll_.GetY()) / DEFAULT_WEB_DRAW_HEIGHT;
+    if (stepGear >= DEFAULT_HEIGHT_GEAR.size()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "stepGear out of DEFAULT_HEIGHT_GEAR orign");
+        return;
+    }
+    int32_t height = DEFAULT_HEIGHT_GEAR[stepGear];
+    int32_t y = DEFAULT_ORIGN_GEAR[stepGear];
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetWebMessage({ 0, y });
+
+    TAG_LOGD(AceLogTag::ACE_WEB, "SetDrawRect x:%{public}d, y:%{public}d, width:%{public}d, height:%{public}d",
+        (int32_t)relativeOffsetOfScroll_.GetX(), y, (int32_t)frameSize.Width(), height);
+    SetDrawRect(relativeOffsetOfScroll_.GetX(), -y, frameSize.Width(), height);
+}
+
+void WebPattern::PostTaskToUI(const std::function<void()>&& task) const
+{
+    CHECK_NULL_VOID(task);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
+void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->SetDrawRect(x, -y, width, height);
+}
+
+RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
+{
+    auto paint = MakeRefPtr<WebPaintMethod>(renderSurface_);
+    return paint;
+}
+
+void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
+{
+    scriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    if (delegate_) {
+        UpdateJavaScriptOnDocumentStart();
+        delegate_->JavaScriptOnDocumentStart();
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentStart()
+{
+    if (delegate_ && scriptItems_.has_value()) {
+        delegate_->SetJavaScriptItems(scriptItems_.value());
+        scriptItems_ = std::nullopt;
+    }
 }
 } // namespace OHOS::Ace::NG

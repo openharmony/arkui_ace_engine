@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -506,6 +505,9 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity)
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto listItem = weak.Upgrade();
         CHECK_NULL_VOID(listItem);
+        if (NearZero(listItem->curOffset_)) {
+            listItem->ResetToItemChild();
+        }
         listItem->MarkDirtyNode();
     });
 }
@@ -834,12 +836,20 @@ void ListItemPattern::InitDisableEvent()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(theme);
+    auto UserDefineOpacity = renderContext->GetOpacityValue(1.0);
 
-    if (!eventHub->IsEnabled()) {
+    if (!eventHub->IsDeveloperEnabled()) {
         if (selectable_) {
             selectable_ = false;
         }
+        enableOpacity_ = renderContext->GetOpacityValue(1.0);
         renderContext->UpdateOpacity(theme->GetItemDisabledAlpha());
+    } else {
+        if (enableOpacity_.has_value()) {
+            renderContext->UpdateOpacity(enableOpacity_.value());
+        } else {
+            renderContext->UpdateOpacity(UserDefineOpacity);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

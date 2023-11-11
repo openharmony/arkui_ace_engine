@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
@@ -28,8 +29,11 @@
 namespace OHOS::Ace::NG {
 namespace {
 const char* const SURFACE_STRIDE_ALIGNMENT = "8";
-constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 constexpr int32_t EXT_SURFACE_DEFAULT_SIZE = 1;
+constexpr int32_t MAX_BUFFER_SIZE = 3;
+const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
+const std::vector<int32_t> DEFAULT_HEIGHT_GEAR {7998, 7999, 8001, 8002, 8003};
+const std::vector<int32_t> DEFAULT_ORIGN_GEAR {0, 2000, 4000, 6000, 8000};
 } // namespace
 RosenRenderSurface::~RosenRenderSurface()
 {
@@ -111,7 +115,7 @@ void RosenRenderSurface::UpdateXComponentConfig()
         LOGE("add surface error: %{public}d", ret);
     }
 
-    producerSurface_->SetQueueSize(SURFACE_QUEUE_SIZE);
+    producerSurface_->SetQueueSize(queueSize_);
     producerSurface_->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
     producerSurface_->SetUserData("SURFACE_FORMAT", std::to_string(GRAPHIC_PIXEL_FMT_RGBA_8888));
 }
@@ -177,7 +181,117 @@ void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height)
     }
 }
 
-void RosenRenderSurface::ConsumeBuffer()
+void RosenRenderSurface::DrawBuffer()
+{
+#ifdef OHOS_PLATFORM
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
+    auto rosenRenderContext = DynamicCast<RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    std::shared_ptr<SurfaceBufferNode> surfaceNode = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+
+        if (availableBuffers_.size() >= 1) {
+            surfaceNode = availableBuffers_.back();
+        }
+    }
+    if (!surfaceNode) {
+        LOGE("RosenRenderSurface::surfaceNode is null");
+        return;
+    }
+    ACE_SCOPED_TRACE("Web DrawBuffer");
+    rosenRenderContext->StartRecording();
+    auto rsNode = rosenRenderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->DrawOnNode(
+#ifndef USE_ROSEN_DRAWING
+        Rosen::RSModifierType::CONTENT_STYLE, [surfaceNode](const std::shared_ptr<SkCanvas>& canvas) {
+            CHECK_NULL_VOID(canvas);
+            LOGD("RSRecordingCanvas->onDrawRect");
+            Rosen::RSSurfaceBufferInfo info { surfaceNode->buffer_, surfaceNode->orgin_.GetX(),
+                surfaceNode->orgin_.GetY(), surfaceNode->buffer_->GetSurfaceBufferWidth(),
+                surfaceNode->buffer_->GetSurfaceBufferHeight() };
+            auto* recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas.get());
+            CHECK_NULL_VOID(recordingCanvas);
+            recordingCanvas->DrawSurfaceBuffer(info);
+#else
+        Rosen::RSModifierType::CONTENT_STYLE,
+        [surfaceNode->buffer_, width, height](const std::shared_ptr<RSCanvas>& canvas) {
+            CHECK_NULL_VOID(canvas);
+#endif
+        });
+    rosenRenderContext->StopRecordingIfNeeded();
+#endif
+}
+
+void RosenRenderSurface::ConsumeWebBuffer()
+{
+#ifdef OHOS_PLATFORM
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(consumerSurface_);
+
+    sptr<SurfaceBuffer> surfaceBuffer = nullptr;
+    int32_t fence = -1;
+    int64_t timestamp = 0;
+    OHOS::Rect damage;
+
+    SurfaceError surfaceErr = consumerSurface_->AcquireBuffer(surfaceBuffer, fence, timestamp, damage);
+    if (surfaceErr != SURFACE_ERROR_OK) {
+        LOGE("cannot acquire buffer error = %{public}d", surfaceErr);
+        return;
+    }
+    int32_t bufferHeight = surfaceBuffer->GetSurfaceBufferHeight();
+    LOGD("x = %{public}d, y = %{public}d, width = %{public}d, height = %{public}d)", (int32_t)orgin_.GetX(),
+        (int32_t)(orgin_.GetY()), surfaceBuffer->GetSurfaceBufferWidth(), bufferHeight);
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
+    auto task = [renderContext]() {
+        auto rosenRenderContext = DynamicCast<RosenRenderContext>(renderContext);
+        CHECK_NULL_VOID(rosenRenderContext);
+        auto host = rosenRenderContext->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkNeedRenderOnly();
+    };
+    PostTaskToUI(std::move(task));
+
+    if (std::count(DEFAULT_HEIGHT_GEAR.begin(), DEFAULT_HEIGHT_GEAR.end(), bufferHeight)) {
+        auto iterator = std::find(DEFAULT_HEIGHT_GEAR.begin(), DEFAULT_HEIGHT_GEAR.end(), bufferHeight);
+        int32_t index = iterator - DEFAULT_HEIGHT_GEAR.begin();
+        LOGD("RSRecordingCanvas->onDrawRect, index = %{public}d", index);
+        if (index >= (int32_t)DEFAULT_HEIGHT_GEAR.size()) {
+            LOGE("surfaceBuffer'height out of range");
+            return;
+        }
+        orgin_.SetY(DEFAULT_ORIGN_GEAR[index]);
+    }
+
+    std::shared_ptr<SurfaceBufferNode> surfaceNode = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+        if (availableBuffers_.size() >= MAX_BUFFER_SIZE) {
+            surfaceNode = availableBuffers_.front();
+            availableBuffers_.pop();
+            consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, surfaceNode->fence_);
+        }
+        availableBuffers_.push(std::make_shared<SurfaceBufferNode>(surfaceBuffer, fence, orgin_));
+    }
+#endif
+}
+
+void RosenRenderSurface::PostTaskToUI(const std::function<void()>&& task) const
+{
+    CHECK_NULL_VOID(task);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
+void RosenRenderSurface::ConsumeXComponentBuffer()
 {
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(consumerSurface_);
@@ -219,9 +333,19 @@ void RosenRenderSurface::ConsumeBuffer()
 #endif
         });
     rosenRenderContext->StopRecordingIfNeeded();
-    auto host = rosenRenderContext->GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = renderContext_]() {
+            auto renderContext = weak.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            auto host = renderContext->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkNeedRenderOnly();
+        },
+        TaskExecutor::TaskType::UI);
 
     surfaceErr = consumerSurface_->ReleaseBuffer(surfaceBuffer, fence);
     if (surfaceErr != SURFACE_ERROR_OK) {
@@ -235,7 +359,11 @@ void DrawBufferListener::OnBufferAvailable()
     LOGD("buffer is available");
     auto renderSurface = renderSurface_.Upgrade();
     CHECK_NULL_VOID(renderSurface);
-    renderSurface->ConsumeBuffer();
+    if (renderSurface->GetPatternType() == PATTERN_TYPE_WEB) {
+        renderSurface->ConsumeWebBuffer();
+    } else {
+        renderSurface->ConsumeXComponentBuffer();
+    }
 }
 
 void ExtSurfaceCallback::OnSurfaceCreated(const sptr<Surface>& /* surface */)

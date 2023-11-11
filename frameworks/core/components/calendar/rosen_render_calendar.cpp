@@ -107,11 +107,7 @@ void DrawCalendarText(RSCanvas* canvas,
     // paint text in center of item
     double textPaintOffsetX = (boxRect.Width() - textWidth) / 2.0;
     double textPaintOffsetY = (boxRect.Height() - textHeight) / 2.0;
-#ifndef USE_ROSEN_DRAWING
     paragraph->Paint(canvas, offset.GetX() + textPaintOffsetX, offset.GetY() + textPaintOffsetY);
-#else
-    LOGE("Drawing is not supported");
-#endif
     textRect.SetRect(offset.GetX() + textPaintOffsetX, offset.GetY() + textPaintOffsetY, textWidth, textHeight);
 }
 

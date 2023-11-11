@@ -479,6 +479,7 @@ public:
     void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
+    void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -506,6 +507,7 @@ public:
     RefPtr<PixelMap> GetDragPixelMap();
     std::string GetUrl();
     void UpdateLocale();
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void OnInactive();
     void OnActive();
     void OnWebviewHide();
@@ -598,6 +600,7 @@ public:
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
     void OnRootLayerChanged(int width, int height);
+    bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -610,6 +613,8 @@ public:
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
+    void JavaScriptOnDocumentStart();
+    void SetJavaScriptItems(const ScriptItems& scriptItems);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -633,8 +638,10 @@ public:
     }
 #endif
     void SetToken();
+    void SetWebType(WebType type);
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
+    void ScrollBy(float deltaX, float deltaY);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -708,8 +715,9 @@ private:
     void NotifyPopupWindowResult(bool result);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
-    void SurfaceOcclusionCallback(bool occlusion);
+    void SurfaceOcclusionCallback(float visibleRatio);
     void RegisterSurfaceOcclusionChangeFun();
+    void ratioStrToFloat(const std::string& str);
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -762,6 +770,7 @@ private:
     EventCallbackV2 onOverScrollV2_;
     EventCallbackV2 onScreenCaptureRequestV2_;
 
+    int32_t webType_;
     std::string bundlePath_;
     std::string bundleDataPath_;
     std::string hapPath_;
@@ -790,8 +799,10 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     Rosen::NodeId surfaceNodeId_ = 0;
-    bool surfaceOcclusion_ = true;
+    float visibleRatio_ = 1.0;
     uint32_t delayTime_ = 500;
+    float lowerFrameRateVisibleRatio_ = 0.1;
+    std::optional<ScriptItems> scriptItems_;
 #endif
 };
 

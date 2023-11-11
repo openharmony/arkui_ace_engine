@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
 
+#include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
@@ -117,6 +118,8 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWaterFlow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSWaterFlow>::StaticMethod("friction", &JSWaterFlow::SetFriction);
+    JSClass<JSWaterFlow>::StaticMethod("clip", &JSList::JsClip);
+    JSClass<JSWaterFlow>::StaticMethod("cachedCount", &JSWaterFlow::SetCachedCount);
 
     JSClass<JSWaterFlow>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -308,5 +311,20 @@ void JSWaterFlow::ScrollFrameBeginCallback(const JSCallbackInfo& args)
         };
         WaterFlowModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));
     }
+}
+
+void JSWaterFlow::SetCachedCount(const JSCallbackInfo& info)
+{
+    int32_t cachedCount = 1;
+    auto jsValue = info[0];
+
+    if (!jsValue->IsUndefined() && jsValue->IsNumber()) {
+        ParseJsInt32(jsValue, cachedCount);
+        if (cachedCount < 0) {
+            cachedCount = 1;
+        }
+    }
+
+    WaterFlowModel::GetInstance()->SetCachedCount(cachedCount);
 }
 } // namespace OHOS::Ace::Framework

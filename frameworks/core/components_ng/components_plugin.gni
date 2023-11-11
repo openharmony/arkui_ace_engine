@@ -114,7 +114,7 @@ template("build_component_plugin") {
 
       # TODO: new skia configs
 
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [ "//plugins/libs/napi:napi_$platform" ]
       } else {
         deps += [ "//foundation/arkui/napi/:ace_napi" ]

@@ -31,13 +31,7 @@ public:
     DataPanelPattern() = default;
     ~DataPanelPattern() override = default;
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        if (!dataPanelModifier_) {
-            dataPanelModifier_ = AceType::MakeRefPtr<DataPanelModifier>();
-        }
-        return MakeRefPtr<DataPanelPaintMethod>(dataPanelModifier_);
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {

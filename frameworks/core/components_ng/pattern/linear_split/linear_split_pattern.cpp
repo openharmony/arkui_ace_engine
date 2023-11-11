@@ -22,7 +22,6 @@
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "core/event/mouse_event.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -169,8 +168,11 @@ float LinearSplitPattern::GetMaxPosFromIndex(std::size_t index)
 {
     auto curMin = childrenConstrains_[index + 1];
     auto max = Infinity<float>();
-    if (index + SPLIT_INDEX_INC_TWO < childrenDragPos_.size()) {
+    if (index + SPLIT_INDEX_INC_TWO < childrenDragPos_.size() - 1) {
         max = childrenDragPos_[index + SPLIT_INDEX_INC_TWO] - static_cast<float>(DEFAULT_SPLIT_HEIGHT) - curMin;
+    }
+    if (index + SPLIT_INDEX_INC_TWO == childrenDragPos_.size() - 1) {
+        max = childrenDragPos_[index + SPLIT_INDEX_INC_TWO] - curMin;
     }
     return max;
 }

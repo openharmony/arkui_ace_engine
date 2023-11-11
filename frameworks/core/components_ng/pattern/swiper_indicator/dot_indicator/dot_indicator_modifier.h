@@ -240,6 +240,11 @@ public:
         isCustomSize_ = isCustomSize;
     }
 
+    void SetAnimationDuration(int32_t duration)
+    {
+        animationDuration_ = duration;
+    }
+
 private:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -278,6 +283,7 @@ private:
     bool indicatorMask_ = false;
     bool isCustomSize_ = false;
     int32_t currentIndex_ = 0;
+    int32_t animationDuration_ = 0;
     OffsetF offset_;
     float itemWidth_ = 0.0f;
     float itemHeight_ = 0.0f;

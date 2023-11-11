@@ -1124,9 +1124,8 @@ void ViewAbstract::BindPopup(
             }
         } else {
             if (popupPattern) {
-                popupPattern->StartExitingAnimation([targetId]() {
-                    SubwindowManager::GetInstance()->HidePopupNG(targetId);
-                });
+                popupPattern->StartExitingAnimation(
+                    [targetId]() { SubwindowManager::GetInstance()->HidePopupNG(targetId); });
             }
         }
         return;
@@ -1152,8 +1151,8 @@ void ViewAbstract::BindPopup(
     }
 }
 
-void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
-    const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset, const MenuParam& menuParam)
+void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
+    const NG::OffsetF& offset, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(targetNode);
 
@@ -1171,15 +1170,10 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
 {
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
-    auto type = menuParam.type;
-#ifdef PREVIEW
-    // unable to use the subWindow in the Previewer.
-    type = MenuType::MENU;
-#endif
     auto menuNode =
         MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
     RegisterMenuCallback(menuNode, menuParam);
-    if (type == MenuType::CONTEXT_MENU) {
+    if (menuParam.type == MenuType::CONTEXT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
@@ -1603,8 +1597,8 @@ void ViewAbstract::SetKeyboardShortcut(
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
 }
 
-void ViewAbstract::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-    const std::function<void(float)>& onCallbackEvent)
+void ViewAbstract::CreateAnimatablePropertyFloat(
+    const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1627,8 +1621,8 @@ void ViewAbstract::CreateAnimatableArithmeticProperty(const std::string& propert
     frameNode->CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
 }
 
-void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-    RefPtr<CustomAnimatableArithmetic>& value)
+void ViewAbstract::UpdateAnimatableArithmeticProperty(
+    const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

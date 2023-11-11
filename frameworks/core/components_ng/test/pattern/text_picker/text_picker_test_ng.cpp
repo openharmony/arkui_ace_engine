@@ -3522,39 +3522,6 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextPickerPatternTest001
- * @tc.desc: test OnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerTestNg, TextPickerPatternTest001, TestSize.Level1)
-{
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
-    frameNode->MarkModifyDone();
-    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
-    ASSERT_NE(pickerProperty, nullptr);
-
-    /**
-     * @tc.cases: case1. up KeyEvent.
-     */
-    KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
-    focusHub->ProcessOnKeyEventInternal(keyEventUp);
-    auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
-
-    /**
-     * @tc.cases: case1. down KeyEvent.
-     */
-    KeyEvent keyEventDown(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
-    focusHub->ProcessOnKeyEventInternal(keyEventDown);
-    propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
-}
-
-/**
  * @tc.name: TextPickerPatternTest002
  * @tc.desc: test OnKeyEvent
  * @tc.type: FUNC
@@ -3576,7 +3543,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest002, TestSize.Level1)
     KeyEvent keyEventLeft(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
     focusHub->ProcessOnKeyEventInternal(keyEventLeft);
     auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_NE(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 
     /**
      * @tc.cases: case1. right KeyEvent.
@@ -3584,7 +3551,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest002, TestSize.Level1)
     KeyEvent keyEventRight(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
     focusHub->ProcessOnKeyEventInternal(keyEventRight);
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_NE(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 }
 
 /**

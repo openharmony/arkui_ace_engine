@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -470,6 +471,10 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                 CHECK_NULL_VOID(root);
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
                 menuWrapperPattern->CallMenuDisappearCallback();
+                auto mainPipeline = PipelineContext::GetMainPipelineContext();
+                if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
+                    mainPipeline->FlushPipelineImmediately();
+                }
                 // clear contextMenu then return
                 if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
@@ -569,7 +574,7 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
 
 void OverlayManager::PopToast(int32_t toastId)
 {
-    TAG_LOGD(AceLogTag::ACE_PROMPT_ACTION_TOAST, "Overlay starts to pop Toast");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "Overlay starts to pop Toast");
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetCurve(curve);
@@ -830,7 +835,6 @@ void OverlayManager::HideAllPopups()
 void OverlayManager::ErasePopup(int32_t targetId)
 {
     if (popupMap_.find(targetId) != popupMap_.end()) {
-        LOGI("Erase popup id %{public}d when destroyed.", targetId);
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_VOID(rootNode);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
@@ -850,7 +854,6 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
     } else {
         // creating new menu
         menuMap_[targetId] = menu;
-        LOGD("menuNode %{public}d added to map", targetId);
     }
     CHECK_NULL_RETURN(menu, false);
 
@@ -922,21 +925,16 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     auto menuPattern = menu->GetPattern<PopupBasePattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetContainerId(Container::CurrentId());
-    LOGI("menuNode mounted in subwindow");
 }
 
 void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId)
 {
-    if (menuMap_.find(targetId) == menuMap_.end()) {
-        LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
-    }
     CHECK_NULL_VOID(menu);
     PopMenuAnimation(menu);
 }
 
 void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDrag)
 {
-    LOGI("OverlayManager HideMenu in subWindow from close");
     if (menuMap_.empty()) {
         return;
     }
@@ -953,16 +951,11 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
     if (it != menuMap_.end()) {
         return it->second;
     }
-    LOGW("menuNode doesn't exists %{public}d", targetId);
     return nullptr;
 }
 
 void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
-    LOGI("OverlayManager HideMenuNode menu targetId is %{public}d", targetId);
-    if (menuMap_.find(targetId) == menuMap_.end()) {
-        LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
-    }
     PopMenuAnimation(menu);
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -1008,7 +1001,6 @@ void OverlayManager::DeleteMenu(int32_t targetId)
 {
     auto it = menuMap_.find(targetId);
     if (it == menuMap_.end()) {
-        LOGW("OverlayManager: menuNode %{public}d doesn't exist", targetId);
         return;
     }
     menuMap_.erase(it);
@@ -1120,7 +1112,6 @@ void OverlayManager::BeforeShowDialog(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
     if (dialogMap_.find(node->GetId()) != dialogMap_.end()) {
-        LOGW("dialog #%{public}d exists", node->GetId());
         return;
     }
     dialogMap_[node->GetId()] = node;
@@ -1195,7 +1186,6 @@ void OverlayManager::RemoveDialogFromMap(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
     if (dialogMap_.find(node->GetId()) == dialogMap_.end()) {
-        LOGW("dialog #%{public}d node in map", node->GetId());
         return;
     }
     dialogMap_.erase(node->GetId());
@@ -1324,10 +1314,8 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         }
         rootNode->RemoveChild(overlay);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        LOGI("overlay removed successfully");
         return true;
     }
-    LOGI("No overlay in this page.");
     return false;
 }
 
@@ -1462,7 +1450,6 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, false);
     if (rootNode->GetChildren().empty()) {
-        LOGI("No overlay in this subwindow.");
         return false;
     }
 
@@ -1502,7 +1489,6 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     if (rootNode->GetChildren().empty()) {
         SubwindowManager::GetInstance()->HideSubWindowNG();
     }
-    LOGI("overlay removed successfully");
     return true;
 }
 
@@ -1667,7 +1653,6 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
     std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
     std::function<void()>&& onDisappear, int32_t targetId)
 {
-    LOGI("BindContentCover isShow: %{public}d, targetId: %{public}d", isShow, targetId);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto modalTransition = modalStyle.modalTransition;
@@ -1948,7 +1933,6 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
     std::function<void()>&& onDisappear, int32_t targetId)
 {
-    LOGI("BindSheet isShow: %{public}d, targetId: %{public}d", isShow, targetId);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -2509,7 +2493,6 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
 
     scaleOption.SetOnFinishEvent([this, id = Container::CurrentId()] {
         ContainerScope scope(id);
-        LOGD("Drag window start with default pixelMap");
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);

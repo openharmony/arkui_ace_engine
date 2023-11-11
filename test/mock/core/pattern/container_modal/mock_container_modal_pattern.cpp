@@ -36,6 +36,8 @@ void ContainerModalPattern::WindowFocus(bool isFocus)
     isFocus_ = isFocus;
 }
 
+void ContainerModalPattern::OnWindowForceUnfocused() {}
+
 void ContainerModalPattern::ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus) {}
 
 void ContainerModalPattern::ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus) {}

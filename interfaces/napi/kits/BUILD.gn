@@ -29,7 +29,7 @@ foreach(module, common_napi_libs) {
     ace_napi_lib(module) {
       platform = "linux"
     }
-  } else if (!is_cross_platform_build) {
+  } else if (!is_arkui_x) {
     ace_napi_lib(module) {
       # napi libs remain isolate in libace.z.so and asan version
       if (is_asan) {

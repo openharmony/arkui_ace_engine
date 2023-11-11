@@ -145,6 +145,7 @@ template("ace_core_source_set") {
 
       # gestures
       "gestures/click_recognizer.cpp",
+      "gestures/drag_event.cpp",
       "gestures/drag_recognizer.cpp",
       "gestures/exclusive_recognizer.cpp",
       "gestures/gesture_recognizer.cpp",
@@ -436,7 +437,7 @@ template("ace_core_source_set") {
         }
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
         if (ace_use_rosen_drawing) {
@@ -456,7 +457,7 @@ template("ace_core_source_set") {
     }
 
     if (defined(config.web_components_support) &&
-        config.web_components_support && !is_cross_platform_build) {
+        config.web_components_support && !is_arkui_x) {
       deps += [
         "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_for_web_$platform",
         "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
@@ -494,10 +495,6 @@ template("ace_core_source_set") {
       }
     }
 
-    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
-      sources += [ "gestures/gesture_info.cpp" ]
-    }
-
     if (defined(config.remote_window_support) && config.remote_window_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
         deps += [
@@ -510,7 +507,7 @@ template("ace_core_source_set") {
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [ "$ace_napi:ace_container_scope_static" ]
       } else {
         external_deps += [ "napi:ace_container_scope" ]
@@ -531,11 +528,9 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/preview_mock:ace_core_components_preview_mock_pattern_ng_$platform" ]
     }
 
-    include_dirs += [
-      "//foundation/window/window_manager/interfaces/innerkits",
-      "//foundation/window/window_manager/window_scene",
-    ]
-    if (is_cross_platform_build) {
+    include_dirs +=
+        [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    if (is_arkui_x) {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
@@ -661,6 +656,7 @@ template("ace_core_ng_source_set") {
 
       # gestures
       "gestures/click_recognizer.cpp",
+      "gestures/drag_event.cpp",
       "gestures/drag_recognizer.cpp",
       "gestures/exclusive_recognizer.cpp",
       "gestures/gesture_recognizer.cpp",
@@ -778,7 +774,7 @@ template("ace_core_ng_source_set") {
       "components/declaration/common/declaration.cpp",
     ]
     include_dirs = []
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
@@ -816,7 +812,7 @@ template("ace_core_ng_source_set") {
     ]
     external_deps = []
 
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
     }
     if (is_ohos) {
@@ -827,9 +823,6 @@ template("ace_core_ng_source_set") {
     }
 
     external_deps = []
-    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
-      sources += [ "gestures/gesture_info.cpp" ]
-    }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
@@ -840,7 +833,7 @@ template("ace_core_ng_source_set") {
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [ "$ace_napi:ace_container_scope_static" ]
       } else {
         external_deps += [ "napi:ace_container_scope" ]
@@ -862,7 +855,7 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       deps -= [ "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform" ]
     }
 
@@ -881,7 +874,7 @@ template("ace_core_ng_source_set") {
     }
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      if (!is_cross_platform_build) {
+      if (!is_arkui_x) {
         include_dirs += [
           "$ability_runtime_path/interfaces/kits/native/appkit/app",
           "//foundation/window/window_manager/interfaces/innerkits/wm",
@@ -898,11 +891,8 @@ template("ace_core_ng_source_set") {
         ]
 
         external_deps += [
-          "ability_base:base",
-          "ability_base:configuration",
           "ability_runtime:abilitykit_native",
           "ability_runtime:app_manager",
-          "ability_runtime:appkit_native",
           "c_utils:utils",
           "init:libbegetutil",
           "ipc:ipc_core",
@@ -940,7 +930,7 @@ template("ace_core_ng_source_set") {
         }
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform",
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",

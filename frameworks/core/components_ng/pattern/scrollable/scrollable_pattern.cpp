@@ -172,7 +172,8 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         OnScrollCallback(offset, source);
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS);
+            refreshCoordination_->OnScrollStart(
+                source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS, GetVelocity());
         }
     }
     if (IsAtTop() &&
@@ -181,17 +182,19 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS);
+            refreshCoordination_->OnScrollStart(
+                source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS, GetVelocity());
         }
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         (refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
         source != SCROLL_FROM_AXIS && isRefreshInReactive_) {
         isRefreshInReactive_ = false;
-        refreshCoordination_->OnScrollEnd(0.0f);
+        refreshCoordination_->OnScrollEnd(GetVelocity());
     }
     if (refreshCoordination_ && refreshCoordination_->InCoordination() && isRefreshInReactive_) {
-        if (!refreshCoordination_->OnScroll(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
+        if (!refreshCoordination_->OnScroll(
+                GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset, GetVelocity())) {
             isRefreshInReactive_ = false;
             coordinationMode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
         }
@@ -225,10 +228,16 @@ bool ScrollablePattern::CoordinateWithNavigation(bool isAtTop, bool isDraggedDow
         isReactInParentMovement_ = false;
         ProcessNavBarReactOnEnd();
     }
-    if (isReactInParentMovement_) {
+
+    if (isReactInParentMovement_ && navBarPattern_) {
         auto needMove = ProcessNavBarReactOnUpdate(offset);
+        auto minTitle = navBarPattern_->GetCurrentNavBarStatus();
         if (navBarPattern_ && navBarPattern_->IsTitleModeFree()) {
-            reactiveIn = !needMove;
+            if (minTitle && LessNotEqual(offset, 0.0)) {
+                reactiveIn = needMove;
+            } else {
+                reactiveIn = !needMove;
+            }
         }
     }
     return reactiveIn;
@@ -293,6 +302,7 @@ void ScrollablePattern::AddScrollEvent()
     auto scrollStart = [weak = WeakClaim(this)](float position) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->FireAndCleanScrollingListener();
         pattern->OnScrollStartRecursive(position);
     };
     scrollable->SetOnScrollStartRec(std::move(scrollStart));
@@ -1127,9 +1137,10 @@ void ScrollablePattern::LimitMouseEndOffset()
 {
     float limitedMainOffset = -1.0f;
     float limitedCrossOffset = -1.0f;
-    auto hostSize = GetHostFrameSize();
-    auto mainSize = hostSize->MainSize(axis_);
-    auto crossSize = hostSize->CrossSize(axis_);
+    auto host = GetHost();
+    auto hostSize = host->GetGeometryNode()->GetFrameSize();
+    auto mainSize = hostSize.MainSize(axis_);
+    auto crossSize = hostSize.CrossSize(axis_);
     auto mainOffset = mouseEndOffset_.GetMainOffset(axis_);
     auto crossOffset = mouseEndOffset_.GetCrossOffset(axis_);
     if (LessNotEqual(mainOffset, 0.0f)) {
@@ -1403,9 +1414,6 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
 
 bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
-    if (velocity == 0.0f) {
-        return true;
-    }
     if ((velocity > 0 && !IsAtTop()) || (velocity < 0 && !IsAtBottom())) {
         // trigger scroll animation if edge not reached
         scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
@@ -1487,5 +1495,39 @@ float ScrollablePattern::GetVelocity() const
     CHECK_NULL_RETURN(scrollable, velocity);
     velocity = scrollable->GetCurrentVelocity();
     return velocity;
+}
+
+void ScrollablePattern::RegisterScrollingListener(const RefPtr<ScrollingListener> listener)
+{
+    CHECK_NULL_VOID(listener);
+    scrollingListener_.emplace_back(listener);
+}
+
+void ScrollablePattern::FireAndCleanScrollingListener()
+{
+    for (auto listener : scrollingListener_) {
+        CHECK_NULL_VOID(listener);
+        listener->NotifyScrollingEvent();
+    }
+    scrollingListener_.clear();
+}
+
+float ScrollablePattern::GetMainContentSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    return geometryNode->GetPaddingSize().MainSize(axis_);
+}
+
+void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
+{
+    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
+        ScrollToIndex(0, smooth, ScrollAlign::START);
+    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
+        // use LAST_ITEM for children count changed after scrollEdge(Edge.Bottom) and before layout
+        ScrollToIndex(LAST_ITEM, smooth, ScrollAlign::END);
+    }
 }
 } // namespace OHOS::Ace::NG

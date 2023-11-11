@@ -67,6 +67,10 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
         { MouseFormat::MIDDLE_BTN_SOUTH_EAST, MMI::MIDDLE_BTN_SOUTH_EAST },
         { MouseFormat::MIDDLE_BTN_SOUTH_WEST, MMI::MIDDLE_BTN_SOUTH_WEST },
         { MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST, MMI::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
+        { MouseFormat::HORIZONTAL_TEXT_CURSOR, MMI::HORIZONTAL_TEXT_CURSOR },
+        { MouseFormat::CURSOR_CROSS, MMI::CURSOR_CROSS },
+        { MouseFormat::LOADING, MMI::LOADING },
+        { MouseFormat::RUNNING, MMI::RUNNING },
     };
     int32_t MMIPointStyle = MMI::DEFAULT;
     int64_t idx = BinarySearchFindIndex(mouseFormatMap, ArraySize(mouseFormatMap), pointerStyle);
@@ -77,7 +81,7 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
     style.id = MMIPointStyle;
     int32_t setResult = inputManager->SetPointerStyle(windowId, style);
     if (setResult == -1) {
-        LOGE("SetPointerStyle result is false");
+        LOGW("SetPointerStyle result is false");
         return false;
     }
     return true;
@@ -90,7 +94,7 @@ int32_t MouseStyleOhos::GetPointerStyle(int32_t windowId, int32_t& pointerStyle)
     MMI::PointerStyle style;
     int32_t getResult = inputManager->GetPointerStyle(windowId, style);
     if (getResult == -1) {
-        LOGE("GetPointerStyle result is false");
+        LOGW("GetPointerStyle result is false");
         return -1;
     }
     pointerStyle = style.id;
@@ -101,7 +105,7 @@ bool MouseStyleOhos::ChangePointerStyle(int32_t windowId, MouseFormat mouseForma
 {
     int32_t curPointerStyle = -1;
     if (GetPointerStyle(windowId, curPointerStyle) == -1) {
-        LOGE("ChangePointerStyle: GetPointerStyle return failed");
+        LOGW("ChangePointerStyle: GetPointerStyle return failed");
         return false;
     }
     if (curPointerStyle == static_cast<int32_t>(mouseFormat)) {
@@ -112,4 +116,26 @@ bool MouseStyleOhos::ChangePointerStyle(int32_t windowId, MouseFormat mouseForma
     return SetPointerStyle(windowId, mouseFormat);
 }
 
+void MouseStyleOhos::SetMouseIcon(
+    int32_t windowId, MouseFormat pointerStyle, std::shared_ptr<Media::PixelMap> pixelMap) const
+{
+    auto inputManager = MMI::InputManager::GetInstance();
+    if (pointerStyle == MouseFormat::CONTEXT_MENU) {
+        inputManager->SetPointerVisible(true);
+        inputManager->SetMouseIcon(windowId, static_cast<void*>(pixelMap.get()));
+    } else if (pointerStyle == MouseFormat::ALIAS) {
+        inputManager->SetMouseIcon(windowId, static_cast<void*>(pixelMap.get()));
+        inputManager->SetPointerVisible(true);
+    }
+}
+
+void MouseStyleOhos::SetPointerVisible(MouseFormat pointerStyle) const
+{
+    auto inputManager = MMI::InputManager::GetInstance();
+    if (pointerStyle != MouseFormat::CURSOR_NONE) {
+        inputManager->SetPointerVisible(true);
+    } else {
+        inputManager->SetPointerVisible(false);
+    }
+}
 } // namespace OHOS::Ace

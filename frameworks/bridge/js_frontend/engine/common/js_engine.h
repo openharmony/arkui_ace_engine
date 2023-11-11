@@ -135,6 +135,11 @@ public:
         return false;
     }
 
+    virtual bool LoadPluginComponent(const std::string &url, const RefPtr<JsAcePage>& page, bool isMainPage)
+    {
+        return false;
+    }
+
     // Update running page
     virtual void UpdateRunningPage(const RefPtr<JsAcePage>& page) = 0;
 

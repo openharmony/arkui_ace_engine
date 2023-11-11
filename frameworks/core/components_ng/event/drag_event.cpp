@@ -430,7 +430,7 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(frameNode);
     auto parent = frameNode->GetParent();
     CHECK_NULL_VOID(parent);
-    while (parent->GetDepth() != 1) {
+    while (parent && parent->GetDepth() != 1) {
         parent = parent->GetParent();
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();

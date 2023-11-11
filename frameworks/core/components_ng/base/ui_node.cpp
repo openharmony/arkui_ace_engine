@@ -453,7 +453,7 @@ void UINode::DumpTree(int32_t depth)
             DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
         }
         DumpInfo();
-        DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(GetChildren().size()));
+        DumpLog::GetInstance().Append(depth, tag_, static_cast<int32_t>(GetChildren().size()));
     }
     for (const auto& item : GetChildren()) {
         item->DumpTree(depth + 1);

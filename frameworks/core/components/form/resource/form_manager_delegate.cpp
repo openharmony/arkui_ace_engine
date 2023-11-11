@@ -50,6 +50,7 @@ constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
+constexpr int32_t READD_FORM_DELAY_TIME = 50;
 
 bool GetFormInfo(
     std::string& bundleName, std::string& moduleName, const std::string& cardName, OHOS::AppExecFwk::FormInfo& formInfo)
@@ -179,15 +180,14 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
-        LOGE("Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
         OnFormError(std::to_string(ret), errorMsg);
         return;
     }
 
-    LOGI("Add form success formId: %{public}s", std::to_string(formJsInfo.formId).c_str());
-    LOGI("Add form success type: %{public}d", static_cast<int>(formJsInfo.type));
-    LOGI("Add form success uiSyntax: %{public}d", static_cast<int>(formJsInfo.uiSyntax));
-    LOGI("Add form success isDynamic: %{public}d", isDynamic_);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "Add form success, formId: %{public}s, type: %{public}d, uiSyntax: %{public}d, isDynamic: %{public}d",
+        std::to_string(formJsInfo.formId).c_str(), static_cast<int>(formJsInfo.type),
+        static_cast<int>(formJsInfo.uiSyntax), isDynamic_);
     if (formCallbackClient_ == nullptr) {
         formCallbackClient_ = std::make_shared<FormCallbackClient>();
         formCallbackClient_->SetInstanceId(Container::CurrentId());
@@ -247,14 +247,14 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
 {
     std::stringstream paramStream;
-    paramStream << "bundle" << FORM_MANAGER_PARAM_EQUALS << info.bundleName << FORM_MANAGER_PARAM_AND
-                << "ability" << FORM_MANAGER_PARAM_EQUALS << info.abilityName << FORM_MANAGER_PARAM_AND
-                << "module" << FORM_MANAGER_PARAM_EQUALS << info.moduleName << FORM_MANAGER_PARAM_AND
-                << "name" << FORM_MANAGER_PARAM_EQUALS << info.cardName << FORM_MANAGER_PARAM_AND
-                << "dimension" << FORM_MANAGER_PARAM_EQUALS << info.dimension << FORM_MANAGER_PARAM_AND
-                << "id" << FORM_MANAGER_PARAM_EQUALS << info.id << FORM_MANAGER_PARAM_AND
-                << "temporary" << FORM_MANAGER_PARAM_EQUALS << info.temporary << FORM_MANAGER_PARAM_AND
-                << "cardkey" << FORM_MANAGER_PARAM_EQUALS << info.ToString();
+    paramStream << "bundle" << FORM_MANAGER_PARAM_EQUALS << info.bundleName << FORM_MANAGER_PARAM_AND << "ability"
+                << FORM_MANAGER_PARAM_EQUALS << info.abilityName << FORM_MANAGER_PARAM_AND << "module"
+                << FORM_MANAGER_PARAM_EQUALS << info.moduleName << FORM_MANAGER_PARAM_AND << "name"
+                << FORM_MANAGER_PARAM_EQUALS << info.cardName << FORM_MANAGER_PARAM_AND << "dimension"
+                << FORM_MANAGER_PARAM_EQUALS << info.dimension << FORM_MANAGER_PARAM_AND << "id"
+                << FORM_MANAGER_PARAM_EQUALS << info.id << FORM_MANAGER_PARAM_AND << "temporary"
+                << FORM_MANAGER_PARAM_EQUALS << info.temporary << FORM_MANAGER_PARAM_AND << "cardkey"
+                << FORM_MANAGER_PARAM_EQUALS << info.ToString();
     return paramStream.str();
 }
 
@@ -291,14 +291,14 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
 
         std::stringstream paramStream;
         paramStream << NTC_PARAM_RICH_TEXT << FORM_MANAGER_PARAM_EQUALS << delegate->id_ << FORM_MANAGER_PARAM_AND
-                    << "bundle" << FORM_MANAGER_PARAM_EQUALS << info.bundleName << FORM_MANAGER_PARAM_AND
-                    << "ability" << FORM_MANAGER_PARAM_EQUALS << info.abilityName << FORM_MANAGER_PARAM_AND
-                    << "module" << FORM_MANAGER_PARAM_EQUALS << info.moduleName << FORM_MANAGER_PARAM_AND
-                    << "name" << FORM_MANAGER_PARAM_EQUALS << info.cardName << FORM_MANAGER_PARAM_AND
-                    << "dimension" << FORM_MANAGER_PARAM_EQUALS << info.dimension << FORM_MANAGER_PARAM_AND
-                    << "id" << FORM_MANAGER_PARAM_EQUALS << info.id << FORM_MANAGER_PARAM_AND
-                    << "temporary" << FORM_MANAGER_PARAM_EQUALS << info.temporary << FORM_MANAGER_PARAM_AND
-                    << "cardkey" << FORM_MANAGER_PARAM_EQUALS << info.ToString();
+                    << "bundle" << FORM_MANAGER_PARAM_EQUALS << info.bundleName << FORM_MANAGER_PARAM_AND << "ability"
+                    << FORM_MANAGER_PARAM_EQUALS << info.abilityName << FORM_MANAGER_PARAM_AND << "module"
+                    << FORM_MANAGER_PARAM_EQUALS << info.moduleName << FORM_MANAGER_PARAM_AND << "name"
+                    << FORM_MANAGER_PARAM_EQUALS << info.cardName << FORM_MANAGER_PARAM_AND << "dimension"
+                    << FORM_MANAGER_PARAM_EQUALS << info.dimension << FORM_MANAGER_PARAM_AND << "id"
+                    << FORM_MANAGER_PARAM_EQUALS << info.id << FORM_MANAGER_PARAM_AND << "temporary"
+                    << FORM_MANAGER_PARAM_EQUALS << info.temporary << FORM_MANAGER_PARAM_AND << "cardkey"
+                    << FORM_MANAGER_PARAM_EQUALS << info.ToString();
 
         std::string param = paramStream.str();
         delegate->id_ = resRegister->CreateResource(FORM_ADAPTOR_RESOURCE_NAME, param);
@@ -615,8 +615,8 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     hash_ = MakeResourceHash();
     Method actionMethod = MakeMethodHash("onAction");
     std::stringstream paramStream;
-    paramStream << "type" << FORM_MANAGER_PARAM_EQUALS << type << FORM_MANAGER_PARAM_AND
-                << "action" << FORM_MANAGER_PARAM_EQUALS << action;
+    paramStream << "type" << FORM_MANAGER_PARAM_EQUALS << type << FORM_MANAGER_PARAM_AND << "action"
+                << FORM_MANAGER_PARAM_EQUALS << action;
     std::string param = paramStream.str();
     LOGI("send method:%{private}s, type:%{public}s params:%{private}s", actionMethod.c_str(), type.c_str(),
         param.c_str());
@@ -701,6 +701,7 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
+            std::this_thread::sleep_for(std::chrono::milliseconds(READD_FORM_DELAY_TIME));
             ReAddForm();
             break;
         case FORM_NOT_TRUST_CODE:

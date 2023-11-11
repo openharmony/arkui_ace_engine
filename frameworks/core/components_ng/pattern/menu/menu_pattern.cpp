@@ -156,19 +156,6 @@ void MenuPattern::OnAttachToFrameNode()
     RegisterOnKeyEvent(focusHub);
     DisableTabInMenu();
     InitTheme(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-    CHECK_NULL_VOID(targetNode);
-    pipelineContext->AddOnAreaChangeNode(targetNode->GetId());
-    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
-                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
-                                              const OffsetF& /* origin */) {
-        auto menuNode = menuNodeWk.Upgrade();
-        CHECK_NULL_VOID(menuNode);
-        menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-    targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
 }
 
 void MenuPattern::OnModifyDone()
@@ -398,7 +385,6 @@ void MenuPattern::HideMenu(bool isMenuOnTouch) const
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch);
-    LOGI("MenuPattern closing menu %{public}d", targetId_);
 }
 
 void MenuPattern::HideSubMenu()

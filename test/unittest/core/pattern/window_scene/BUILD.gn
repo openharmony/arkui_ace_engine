@@ -113,6 +113,7 @@ ohos_unittest("window_scene_test") {
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/navrouter/mock_navdestination_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_path_painter.cpp",

@@ -34,6 +34,7 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
 
     #mock
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/navrouter/mock_navdestination_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/plugin/mock/mock_plugin_component_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/plugin/mock/mock_plugin_frontend.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/plugin/mock/mock_plugin_frontend_delegate.cpp",

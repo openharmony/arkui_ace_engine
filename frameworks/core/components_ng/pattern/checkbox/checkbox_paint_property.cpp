@@ -41,6 +41,7 @@ void CheckBoxPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         checkboxTheme->GetCheckStroke()).ToString().c_str());
 
     json->Put("mark", markJsValue->ToString().c_str());
+    json->Put("shape", std::to_string((int)(GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE))).c_str());
 }
 
 } // namespace OHOS::Ace::NG

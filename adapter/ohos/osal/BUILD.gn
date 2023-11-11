@@ -40,7 +40,7 @@ template("ace_osal_ohos_source_set") {
       external_deps = [
         "hilog:libhilog",
         "hitrace:hitrace_meter",
-        "init_lite:libbegetutil",
+        "init:libbegetutil",
       ]
 
       configs = [ "$ace_root:ace_config" ]
@@ -108,7 +108,6 @@ template("ace_osal_ohos_source_set") {
         sources += [ "js_accessibility_manager.cpp" ]
         deps += [ "$ace_root/frameworks/bridge/common/accessibility:bridge_accessibility_$platform" ]
         external_deps += [
-          "ability_runtime:ability_manager",
           "accessibility:accessibilityclient",
           "accessibility:accessibilityconfig",
         ]
@@ -137,9 +136,7 @@ template("ace_osal_ohos_source_set") {
     external_deps += [
       "ability_runtime:abilitykit_native",
       "ability_runtime:app_manager",
-      "ability_runtime:runtime",
       "app_file_service:fileuri_native",
-      "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "graphic_2d:librender_service_client",
       "hichecker:libhichecker",

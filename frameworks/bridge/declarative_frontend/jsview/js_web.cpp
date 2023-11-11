@@ -1631,6 +1631,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onTouchIconUrlReceived", &JSWeb::OnTouchIconUrlReceived);
     JSClass<JSWeb>::StaticMethod("darkMode", &JSWeb::DarkMode);
     JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
+    JSClass<JSWeb>::StaticMethod("overScrollMode", &JSWeb::OverScrollMode);
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
@@ -1639,7 +1640,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
-    JSClass<JSWeb>::StaticMethod("wrapContent", &JSWeb::WrapContent);
+    JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
+    JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
+    JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -1890,6 +1893,11 @@ void JSWeb::Create(const JSCallbackInfo& info)
     if (!controllerObj->IsObject()) {
         return;
     }
+    auto type = paramObject->GetProperty("type");
+    WebType webType = WebType::SURFACE;
+    if (type->IsNumber() && (type->ToNumber<int32_t>() >= 0) && (type->ToNumber<int32_t>() <= 1)) {
+        webType = static_cast<WebType>(type->ToNumber<int32_t>());
+    }
     auto controller = JSRef<JSObject>::Cast(controllerObj);
     auto setWebIdFunction = controller->GetProperty("setWebId");
     if (setWebIdFunction->IsFunction()) {
@@ -1912,7 +1920,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         WebModel::GetInstance()->Create(
-            dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback), parentNWebId, isPopup);
+            dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback), parentNWebId, isPopup, webType);
 
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
@@ -1931,7 +1939,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
-        WebModel::GetInstance()->Create(dstSrc.value(), jsWebController->GetController());
+        WebModel::GetInstance()->Create(dstSrc.value(), jsWebController->GetController(), webType);
     }
 
     WebModel::GetInstance()->SetFocusable(true);
@@ -2700,6 +2708,23 @@ void JSWeb::CacheMode(int32_t cacheMode)
             break;
     }
     WebModel::GetInstance()->SetCacheMode(mode);
+}
+
+void JSWeb::OverScrollMode(int overScrollMode)
+{
+    auto mode = OverScrollMode::NEVER;
+    switch (overScrollMode) {
+        case 0:
+            mode = OverScrollMode::NEVER;
+            break;
+        case 1:
+            mode = OverScrollMode::ALWAYS;
+            break;
+        default:
+            mode = OverScrollMode::NEVER;
+            break;
+    }
+    WebModel::GetInstance()->SetOverScrollMode(mode);
 }
 
 void JSWeb::OverviewModeAccess(bool isOverviewModeAccessEnabled)
@@ -3570,8 +3595,87 @@ void JSWeb::OnOverScroll(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetOverScrollId(jsCallback);
 }
 
-void JSWeb::WrapContent(bool isWrapContentEnabled)
+void JSWeb::SetLayoutMode(int32_t layoutMode)
 {
-    WebModel::GetInstance()->SetWrapContent(isWrapContentEnabled);
+    auto mode = WebLayoutMode::NONE;
+    switch (layoutMode) {
+        case 0:
+            mode = WebLayoutMode::NONE;
+            break;
+        case 1:
+            mode = WebLayoutMode::FIT_CONTENT;
+            break;
+        default:
+            mode = WebLayoutMode::NONE;
+            break;
+    }
+    WebModel::GetInstance()->SetLayoutMode(mode);
+}
+
+void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    int32_t froward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
+    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        froward = 0;
+    }
+    int32_t backward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
+    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        backward = 0;
+    }
+    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
+    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
+    WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+    args.ReturnSelf();
+}
+
+void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
+{
+    if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
+        return;
+    }
+    auto paramArray = JSRef<JSArray>::Cast(args[0]);
+    size_t length = paramArray->Length();
+    if (length == 0) {
+        return;
+    }
+    std::string script;
+    ScriptItems scriptItems;
+    std::vector<std::string> scriptRules;
+    for (size_t i = 0; i < length; i++) {
+        auto item = paramArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            return;
+        }
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        JSRef<JSVal> jsScript = itemObject->GetProperty("script");
+        JSRef<JSVal> jsScriptRules = itemObject->GetProperty("scriptRules");
+        if (!jsScriptRules->IsArray() || JSRef<JSArray>::Cast(jsScriptRules)->Length() == 0) {
+            return;
+        }
+        if (!JSViewAbstract::ParseJsString(jsScript, script)) {
+            return;
+        }
+        scriptRules.clear();
+        if (!JSViewAbstract::ParseJsStrArray(jsScriptRules, scriptRules)) {
+            return;
+        }
+        if (scriptItems.find(script) == scriptItems.end()) {
+            scriptItems.insert(std::make_pair(script, scriptRules));
+        }
+    }
+    WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
 }
 } // namespace OHOS::Ace::Framework

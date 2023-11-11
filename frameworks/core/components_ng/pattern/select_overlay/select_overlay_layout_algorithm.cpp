@@ -35,11 +35,10 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(*info_)) {
+    if (!CheckInShowArea(*info_) ||
+        (!info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible)) {
         menu->SetActive(false);
         return;
-    } else if (!info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible) {
-        menu->SetActive(false);
     } else {
         menu->SetActive(true);
     }
@@ -151,6 +150,11 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         if (info_->firstHandle.isShow && !info_->secondHandle.isShow && info_->handleReverse) {
             menuPosition.SetY(firstHandleRect.Bottom() + menuSpacing);
         }
+        if (info_->firstHandle.isShow && info_->secondHandle.isShow &&
+            !NearEqual(firstHandleRect.Top(), secondHandleRect.Top())) {
+            auto top = std::min(firstHandleRect.Top(), secondHandleRect.Top());
+            menuPosition.SetY(static_cast<float>(top - menuSpacing - menuHeight));
+        }
     }
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
@@ -198,7 +202,20 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             menuPosition.SetY(top);
         }
     }
-
+    if (info_->firstHandle.isShow && info_->secondHandle.isShow &&
+        !NearEqual(firstHandleRect.Top(), secondHandleRect.Top())) {
+        auto menuRect = RectF(menuPosition, SizeF(menuWidth, menuHeight));
+        auto downHandleRect =
+            LessNotEqual(firstHandleRect.Top(), secondHandleRect.Top()) ? secondHandleRect : firstHandleRect;
+        auto circleDiameter = menuSpacingBetweenHandle;
+        auto circleOffset =
+            OffsetF(downHandleRect.GetX() - (circleDiameter - downHandleRect.Width()) / 2.0f, downHandleRect.Bottom());
+        auto downHandleCircleRect = RectF(circleOffset, SizeF(circleDiameter, circleDiameter));
+        if (menuRect.IsIntersectWith(downHandleRect) || menuRect.IsInnerIntersectWith(downHandleCircleRect)) {
+            auto menuSpacing = static_cast<float>(menuSpacingBetweenText + circleDiameter);
+            menuPosition.SetY(downHandleRect.Bottom() + menuSpacing);
+        }
+    }
     LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     if (isExtension) {

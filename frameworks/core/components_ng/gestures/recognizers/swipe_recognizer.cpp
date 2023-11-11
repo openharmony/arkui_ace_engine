@@ -128,8 +128,8 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if ((refereeState_ == RefereeState::DETECTING) || (refereeState_ == RefereeState::PENDING)) {
         PointF curPoint(event.x, event.y);
         PointF downPoint(downEvents_[event.id].x, downEvents_[event.id].y);
-        NGGestureRecognizer::Transform(curPoint, GetNodeId());
-        NGGestureRecognizer::Transform(downPoint, GetNodeId());
+        NGGestureRecognizer::Transform(curPoint, GetAttachedNode());
+        NGGestureRecognizer::Transform(downPoint, GetAttachedNode());
 
         Offset offset(curPoint.GetX() - downPoint.GetX(), curPoint.GetY() - downPoint.GetY());
         // nanoseconds duration to seconds.
@@ -193,8 +193,8 @@ void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     PointF curLocalPoint(event.x, event.y);
     PointF lastLocalPoint(touchPoints_[event.id].x, touchPoints_[event.id].y);
-    NGGestureRecognizer::Transform(curLocalPoint, GetNodeId());
-    NGGestureRecognizer::Transform(lastLocalPoint, GetNodeId());
+    NGGestureRecognizer::Transform(curLocalPoint, GetAttachedNode());
+    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode());
     Offset moveDistance(curLocalPoint.GetX() - lastLocalPoint.GetX(), curLocalPoint.GetY() - lastLocalPoint.GetY());
     touchPoints_[event.id] = event;
     if (NearZero(moveDistance.GetX()) && NearZero(moveDistance.GetY())) {

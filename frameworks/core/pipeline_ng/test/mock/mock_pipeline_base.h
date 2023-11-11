@@ -55,6 +55,7 @@ public:
     MOCK_METHOD0(OnShow, void());
     MOCK_METHOD0(OnHide, void());
     MOCK_METHOD1(WindowFocus, void(bool isFocus));
+    MOCK_METHOD0(ContainerModalUnFocus, void());
     MOCK_METHOD3(ShowContainerTitle, void(bool isShow, bool hasDeco, bool needUpdate));
     MOCK_METHOD4(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type,
                                        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
@@ -92,6 +93,8 @@ public:
     MOCK_METHOD0(FlushPipelineImmediately, void());
     MOCK_METHOD2(OnVirtualKeyboardHeightChange,
         void(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
+    MOCK_METHOD4(OnVirtualKeyboardHeightChange, void(float keyboardHeight, double positionY, double height,
+                                                    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
     MOCK_METHOD1(SetTouchPipeline, void(const WeakPtr<PipelineBase>& context));
     MOCK_METHOD2(AddEtsCardTouchEventCallback, void(int32_t ponitId, EtsCardTouchEventCallback&& callback));

@@ -161,14 +161,6 @@ void WaterFlowPattern::CheckScrollable()
     }
 }
 
-void WaterFlowPattern::SetPositionController(RefPtr<WaterFlowPositionController> control)
-{
-    controller_ = control;
-    if (control) {
-        control->SetScrollPattern(AceType::WeakClaim<WaterFlowPattern>(this));
-    }
-}
-
 void WaterFlowPattern::InitScrollableEvent()
 {
     AddScrollEvent();
@@ -284,5 +276,15 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(itemGeometry, Rect());
     return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
+
+void WaterFlowPattern::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign /* align */)
+{
+    // move to layout algorithm
+    if (index == LAST_ITEM) {
+        index = layoutInfo_.childrenCount_ - 1;
+    }
+    StopAnimate();
+    UpdateStartIndex(index);
 }
 } // namespace OHOS::Ace::NG

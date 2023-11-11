@@ -37,7 +37,7 @@ constexpr float DEVICE_WIDTH = 480.f;
 constexpr float DEVICE_HEIGHT = 800.f;
 constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
 constexpr double DEFAULT_FRICTION = 0.6;
-constexpr int32_t NULL_INDEX = -1;
+constexpr int32_t NULL_VALUE = -1;
 } // namespace
 
 class TestNG {

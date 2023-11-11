@@ -163,6 +163,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
     layoutInfo_.lastMainSize_ = mainSize_;
+
+    layoutWrapper->SetCacheCount(layoutProperty->GetCachedCountValue(1));
 }
 
 void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -330,7 +332,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
                 -(layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex].first) + layoutInfo_.restoreOffset_;
             // restoreOffSet only be used once
             layoutInfo_.restoreOffset_ = 0.0f;
-            layoutInfo_.startIndex_ = layoutInfo_.jumpIndex_;
+            layoutInfo_.UpdateStartIndex();
             layoutInfo_.jumpIndex_ = -1;
             layoutInfo_.itemStart_ = false;
         }

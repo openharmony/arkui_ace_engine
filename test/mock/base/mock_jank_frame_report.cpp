@@ -46,7 +46,7 @@ void PerfMonitor::ReportJankFrameApp(double jank) {}
 
 void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time) {}
 
-int64_t PerfMonitor::GetInputTime(PerfActionType type)
+int64_t PerfMonitor::GetInputTime(PerfActionType type, const std::string& note)
 {
     return 0;
 }

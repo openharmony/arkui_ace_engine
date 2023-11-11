@@ -36,7 +36,6 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/property/property.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -139,6 +138,7 @@ void NavigationPattern::OnModifyDone()
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
+    CHECK_NULL_VOID(navigationStack_);
     auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
     auto preSize = navigationStack_->PreSize();

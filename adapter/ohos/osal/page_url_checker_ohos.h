@@ -46,6 +46,8 @@ private:
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo_;
     std::function<std::string(const std::string&)> moduleNameCallback_;
+    void GetTargetPageInfo(const std::string& pageName, std::string& targetBundleName,
+        std::string& targetModuleName) const;
 };
 } // namespace OHOS::Ace
 

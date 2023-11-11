@@ -72,11 +72,7 @@ public:
 
     ~ScrollSpringMotion() override = default;
 
-    void Move(float offsetTime) override;
-
     bool IsCompleted() override;
-
-    double GetCurrentPosition() override;
 };
 
 } // namespace OHOS::Ace

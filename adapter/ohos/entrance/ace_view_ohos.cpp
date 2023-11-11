@@ -359,15 +359,17 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     };
 
     CHECK_NULL_VOID(axisEventCallback_);
-    if (event.action == AxisAction::BEGIN) {
+    if (event.action == AxisAction::BEGIN && event.sourceType == SourceType::MOUSE) {
+        axisEventCallback_(event, nullptr);
         /* The first step of axis event is equivalent to touch event START + UPDATE.
          * Create a fake UPDATE event here to adapt to axis event.
          * As the event would pass through sceneboard process. A simple MMI axis event(e.g START-END) would
          * be added a fake UPDATE in sceneboard(START-UPDATE-END), then be added another UPDATE in
          * application(START-UPDATE-UPDATE-END). The second UPDATE provides no additional movement.
          */
-        axisEventCallback_(event, nullptr);
-        event.action = AxisAction::UPDATE;
+        auto fakeAxisEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+        fakeAxisEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE);
+        ConvertAxisEvent(fakeAxisEvent, event);
     }
     axisEventCallback_(event, markProcess);
 }

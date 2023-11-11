@@ -91,19 +91,30 @@ void WindowScene::OnAttachToFrameNode()
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
-    auto lostFocusCallback = [weakThis = WeakClaim(this)]() {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        auto focusHub = host->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->LostFocus();
+    RegisterFocusCallback();
+
+    WindowPattern::OnAttachToFrameNode();
+}
+
+void WindowScene::RegisterFocusCallback()
+{
+    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto focusHub = host->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->LostFocus();
+        },
+            TaskExecutor::TaskType::UI);
     };
     CHECK_NULL_VOID(session_);
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
-
-    WindowPattern::OnAttachToFrameNode();
 }
 
 void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
@@ -222,7 +233,9 @@ void WindowScene::OnActivation()
             CHECK_NULL_VOID(host);
             host->AddChild(self->contentNode_, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            self->session_->GetSurfaceNode()->SetBufferAvailableCallback(self->callback_);
+            auto surfaceNode = self->session_->GetSurfaceNode();
+            CHECK_NULL_VOID(surfaceNode);
+            surfaceNode->SetBufferAvailableCallback(self->callback_);
         }
     };
 
@@ -271,6 +284,7 @@ void WindowScene::OnForeground()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->RemoveChild(self->snapshotNode_);
+        self->snapshotNode_.Reset();
         host->AddChild(self->contentNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -295,7 +309,7 @@ void WindowScene::OnDisconnect()
         CHECK_NULL_VOID(host);
         host->RemoveChild(self->contentNode_);
         self->contentNode_.Reset();
-        if (host->GetChildIndex(self->snapshotNode_) < 0) {
+        if (!self->snapshotNode_) {
             self->CreateSnapshotNode(snapshot);
             host->AddChild(self->snapshotNode_, 0);
         }

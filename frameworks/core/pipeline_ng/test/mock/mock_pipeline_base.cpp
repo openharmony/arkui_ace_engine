@@ -64,6 +64,11 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return MockPipelineBase::GetCurrent();
 }
 
+RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
+{
+    return MockPipelineBase::GetCurrent();
+}
+
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
 
 void PipelineContext::SetupRootElement() {}
@@ -97,6 +102,8 @@ void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
 void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
 void PipelineContext::WindowFocus(bool isFocus) {}
+
+void PipelineContext::ContainerModalUnFocus() {}
 
 void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate) {}
 
@@ -140,6 +147,10 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{}
+
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,

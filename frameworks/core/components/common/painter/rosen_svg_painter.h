@@ -124,8 +124,13 @@ public:
     static void SetGradientStyle(RSBrush& brush, const FillState& fillState, double opacity);
 #endif
 
+#ifndef USE_ROSEN_DRAWING
     static sk_sp<SkTypeface> fontTypeChinese_;
     static sk_sp<SkTypeface> fontTypeNormal_;
+#else
+    static std::shared_ptr<RSTypeface> fontTypeChinese_;
+    static std::shared_ptr<RSTypeface> fontTypeNormal_;
+#endif
 };
 
 } // namespace OHOS::Ace

@@ -27,6 +27,10 @@ namespace OHOS::MMI {
 class PointerEvent;
 } // namespace OHOS::MMI
 
+namespace OHOS::Ace::NG {
+class FrameNode;
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace {
 
 static const int32_t TOUCH_TOOL_BASE_ID = 100;
@@ -524,6 +528,19 @@ public:
         return nodeId_;
     }
 
+    virtual void AttachFrameNode(const WeakPtr<NG::FrameNode>& node)
+    {
+        if (!(node_.Invalid())) {
+            return;
+        }
+        node_ = node;
+    }
+
+    WeakPtr<NG::FrameNode> GetAttachedNode() const
+    {
+        return node_;
+    }
+
 protected:
     Offset coordinateOffset_;
     GetEventTargetImpl getEventTargetImpl_;
@@ -532,6 +549,7 @@ protected:
     float viewScale_ = 1.0f;
     std::string nodeName_ = "NULL";
     int32_t nodeId_ = -1;
+    WeakPtr<NG::FrameNode> node_ = nullptr;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

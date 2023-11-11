@@ -30,11 +30,7 @@ namespace OHOS::Ace {
 
 class AceServiceAbility final : public OHOS::AppExecFwk::Ability {
 public:
-    AceServiceAbility()
-    {
-        abilityId_ = instanceId_;
-        instanceId_++;
-    }
+    AceServiceAbility();
     virtual ~AceServiceAbility() = default;
 
     void OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo = nullptr) override;
@@ -44,9 +40,8 @@ public:
     void OnCommand(const AAFwk::Want &want, bool restart, int startId) override;
 
 private:
-    int32_t abilityId_ = 100000;
+    int32_t abilityId_;
 
-    static int32_t instanceId_;
     static const std::string START_PARAMS_KEY;
     static const std::string URI;
 };

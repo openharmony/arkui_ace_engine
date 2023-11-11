@@ -53,7 +53,7 @@ template("js_engine") {
       deps += [ "$ace_root/build:libace_compatible" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        if (is_cross_platform_build) {
+        if (is_arkui_x) {
           deps += [ "$ace_napi:ace_container_scope_static" ]
         } else {
           external_deps += [ "napi:ace_container_scope" ]

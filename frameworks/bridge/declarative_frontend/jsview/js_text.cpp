@@ -186,9 +186,6 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
 
 void JSText::SetTextShadow(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     auto tmpInfo = info[0];
     if (!tmpInfo->IsNumber() && !tmpInfo->IsObject() && !tmpInfo->IsArray()) {
         return;
@@ -196,7 +193,6 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
     if (!tmpInfo->IsArray()) {
         Shadow shadow;
         if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
-            TAG_LOGI(AceLogTag::ACE_TEXT, "Parse shadow object failed.");
             return;
         }
         std::vector<Shadow> shadows { shadow };
@@ -210,7 +206,6 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
         auto shadowJsVal = params->GetValueAt(i);
         Shadow shadow;
         if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
-            TAG_LOGI(AceLogTag::ACE_TEXT, "Parse shadow object failed.");
             continue;
         }
         shadows[i] = shadow;
@@ -299,9 +294,6 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
 
 void JSText::SetTextIndent(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         TextModel::GetInstance()->SetTextIndent(value);
@@ -337,9 +329,6 @@ void JSText::SetAlign(const JSCallbackInfo& info)
 
 void JSText::SetLineHeight(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     CalcDimension value;
     ParseJsDimensionFp(info[0], value);
     if (value.IsNegative()) {
@@ -350,12 +339,8 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
 
 void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        TAG_LOGI(AceLogTag::ACE_TEXT, "Parse FontFamilies failed");
         return;
     }
     TextModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -363,9 +348,6 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 
 void JSText::SetMinFontSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     CalcDimension fontSize;
     ParseJsDimensionFp(info[0], fontSize);
     TextModel::GetInstance()->SetAdaptMinFontSize(fontSize);
@@ -373,9 +355,6 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
 
 void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     CalcDimension fontSize;
     ParseJsDimensionFp(info[0], fontSize);
     TextModel::GetInstance()->SetAdaptMaxFontSize(fontSize);
@@ -383,9 +362,6 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 
 void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     if (info[0]->IsString()) {
         auto value = info[0]->ToString();
         if (!value.empty() && value.back() == '%') {
@@ -415,9 +391,6 @@ void JSText::SetTextCase(int32_t value)
 
 void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;

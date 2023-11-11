@@ -63,7 +63,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const Moda
     return frameNode;
 }
 
-void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
+void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -71,6 +71,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
         []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetTransferringCaller(transferringCaller);
     pattern->UpdateWant(wantWrap);
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();

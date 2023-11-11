@@ -25,6 +25,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
@@ -104,6 +105,21 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     auto currentContainer = Container::Current();
     CHECK_NULL_RETURN(currentContainer, nullptr);
     return currentContainer->GetPipelineContext();
+}
+
+RefPtr<PipelineBase> PipelineBase::GetMainPipelineContext()
+{
+    auto containerId = Container::CurrentId();
+    RefPtr<PipelineBase> context;
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        context = parentContainer->GetPipelineContext();
+    } else {
+        context = PipelineBase::GetCurrentContext();
+    }
+    return context;
 }
 
 RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
@@ -625,6 +641,24 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction);
 }
 
+void PipelineBase::OnVirtualKeyboardAreaChange(
+    Rect keyboardArea, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    auto currentContainer = Container::Current();
+    if (currentContainer && !currentContainer->IsSubContainer()) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
+        if (subwindow && subwindow->GetShown()) {
+            // subwindow is shown, main window no need to handle the keyboard event
+            return;
+        }
+    }
+    double keyboardHeight = keyboardArea.Height();
+    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
+        return;
+    }
+    OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction);
+}
+
 double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const
 {
     auto windowRect = GetCurrentWindowRect();
@@ -640,6 +674,8 @@ void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
         window_->SetGetWindowRectImpl(std::move(callback));
     }
 }
+
+void PipelineBase::ContainerModalUnFocus() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
 {

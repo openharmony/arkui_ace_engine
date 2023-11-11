@@ -45,7 +45,6 @@
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"

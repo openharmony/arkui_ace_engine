@@ -81,6 +81,7 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
 
     JSClass<JSCheckbox>::StaticMethod("create", &JSCheckbox::Create);
     JSClass<JSCheckbox>::StaticMethod("select", &JSCheckbox::SetSelect);
+    JSClass<JSCheckbox>::StaticMethod("shape", &JSCheckbox::SetCheckboxStyle);
     JSClass<JSCheckbox>::StaticMethod("onChange", &JSCheckbox::SetOnChange);
     JSClass<JSCheckbox>::StaticMethod("selectedColor", &JSCheckbox::SelectedColor);
     JSClass<JSCheckbox>::StaticMethod("unselectedColor", &JSCheckbox::UnSelectedColor);
@@ -254,6 +255,11 @@ void JSCheckbox::UnSelectedColor(const JSCallbackInfo& info)
     CheckBoxModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
 }
 
+void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
+{
+    CheckBoxStyle curCheckBoxStyle = static_cast<CheckBoxStyle>(checkBoxStyle);
+    CheckBoxModel::GetInstance()->SetCheckboxStyle(curCheckBoxStyle);
+}
 void JSCheckbox::Mark(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {

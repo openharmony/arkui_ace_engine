@@ -464,7 +464,6 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         CHECK_NULL_VOID(linearLayoutNode);
         auto children = linearLayoutNode->GetChildren();
         if (children.size() != MIXTURE_CHILD_COUNT) {
-            LOGE("children number is wrong.");
             continue;
         }
         auto iconNode = DynamicCast<FrameNode>(linearLayoutNode->GetFirstChild());
@@ -589,8 +588,8 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetColor().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
+    textLayoutProperty->UpdateTextColor(
+        textPickerLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (textPickerLayoutProperty->HasFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetFontSize().value());
     } else {
@@ -598,12 +597,12 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         textLayoutProperty->UpdateAdaptMinFontSize(
             pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
     }
-    textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetWeight().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontWeight(
+        textPickerLayoutProperty->GetWeight().value_or(pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
     textLayoutProperty->UpdateFontFamily(textPickerLayoutProperty->GetFontFamily().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
-    textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetFontStyle().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    textLayoutProperty->UpdateItalicFontStyle(
+        textPickerLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
 }
 
 void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -611,8 +610,8 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetSelectedColor().value_or(
-        pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+    textLayoutProperty->UpdateTextColor(
+        textPickerLayoutProperty->GetSelectedColor().value_or(pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     if (textPickerLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetSelectedFontSize().value());
     } else {
@@ -685,7 +684,6 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(
     const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index, uint32_t showCount, bool isDown, double scale)
 {
     if (index >= animationProperties_.size()) {
-        LOGE("Animation Properties vactor is break.");
         return;
     }
     if ((!index && isDown) || ((index == (showCount - 1)) && !isDown)) {
@@ -738,7 +736,6 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
         } else if (columnkind_ == MIXTURE) {
             auto children = rangeNode->GetChildren();
             if (children.size() != MIXTURE_CHILD_COUNT) {
-                LOGE("children number is wrong.");
                 continue;
             }
             auto textNode = DynamicCast<FrameNode>(rangeNode->GetLastChild());
@@ -765,7 +762,6 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 {
     CHECK_NULL_VOID(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
-        LOGI("Pan event start");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(event);
@@ -776,7 +772,6 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -785,7 +780,6 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
@@ -806,7 +800,6 @@ RefPtr<TextPickerLayoutProperty> TextPickerColumnPattern::GetParentLayout() cons
     auto property = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
     return property;
 }
-
 
 void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
@@ -891,8 +884,6 @@ void TextPickerColumnPattern::CreateAnimation()
         auto column = weak.Upgrade();
         if (column) {
             column->HandleCurveStopped();
-        } else {
-            LOGE("timepicker column is null.");
         }
     });
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
@@ -1008,9 +999,9 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
             if (dir == ScrollDirection::UP) {
                 distance = -optionProperties_[nextIndex].height;
             } else {
-                distance = optionProperties_[index].height +
-                           (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
-                           HALF_NUMBER;
+                distance =
+                    optionProperties_[index].height +
+                    (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
             }
             break;
 
@@ -1059,9 +1050,9 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
             if (dir == ScrollDirection::UP) {
                 distance = 0.0 - optionProperties_[index].height;
             } else {
-                distance = optionProperties_[index].height +
-                           (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
-                           HALF_NUMBER;
+                distance =
+                    optionProperties_[index].height +
+                    (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
             }
             break;
 
@@ -1202,9 +1193,8 @@ bool TextPickerColumnPattern::InnerHandleScroll(int32_t step, bool isUpateProper
     if (!canLoop) {
         // scroll down
         if (step > 0) {
-            currentIndex = (currentIndex + step) > (totalOptionCount - 1) ?
-                totalOptionCount - 1 : currentIndex + step;
-        // scroll up
+            currentIndex = (currentIndex + step) > (totalOptionCount - 1) ? totalOptionCount - 1 : currentIndex + step;
+            // scroll up
         } else if (step < 0) {
             currentIndex = currentIndex + step < 0 ? 0 : currentIndex + step;
         }

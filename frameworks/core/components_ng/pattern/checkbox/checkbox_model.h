@@ -21,6 +21,8 @@
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 
 namespace OHOS::Ace {
+enum class CheckBoxStyle { CIRCULAR_STYLE = 0, SQUARE_STYLE };
+
 class CheckBoxModel {
 public:
     static CheckBoxModel* GetInstance();
@@ -40,6 +42,7 @@ public:
     virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag);
     virtual void SetChangeEvent(std::function<void(bool)>&& changeEvent) = 0;
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
+    virtual void SetCheckboxStyle(CheckBoxStyle checkboxStyle) {};
 
 private:
     static std::unique_ptr<CheckBoxModel> instance_;

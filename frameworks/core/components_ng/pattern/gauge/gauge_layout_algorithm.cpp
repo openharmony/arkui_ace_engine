@@ -162,6 +162,7 @@ void GaugeLayoutAlgorithm::MeasureTitleChild(LayoutWrapper* layoutWrapper, const
     auto diameter = std::min(paddingSize.Width(), paddingSize.Height());
     childLayoutConstraint.minSize = { 0.0f, 0.0f };
     childLayoutConstraint.maxSize = { diameter, diameter };
+    childLayoutConstraint.selfIdealSize = { diameter, diameter };
     auto index = hostNode->GetChildIndexById(pattern->GetTitleChildId());
     auto titleChildLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(titleChildLayoutWrapper);

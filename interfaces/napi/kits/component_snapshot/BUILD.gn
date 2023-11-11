@@ -38,13 +38,13 @@ template("napi_componentsnapshot_static") {
       deps += [ config.libace_target ]
     }
 
-    if (platform != "" && is_cross_platform_build) {
+    if (platform != "" && is_arkui_x) {
       deps += [ "//plugins/libs/napi:napi_$platform" ]
     } else {
       external_deps += [ "napi:ace_napi" ]
     }
 
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       if (defined(config.pixel_map_support) && config.pixel_map_support) {
         configs = [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
       }

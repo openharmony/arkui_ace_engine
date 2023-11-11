@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
 #include <optional>
+#include <vector>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -49,6 +50,14 @@ public:
     {
         return false;
     }
+
+    bool ShouldDelayChildPressedState() const override
+    {
+        return true;
+    }
+
+    void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
+    void FireAndCleanScrollingListener() override;
 
     bool UsResRegion() override
     {
@@ -246,6 +255,21 @@ public:
     }
 
     void UpdateCurrentOffset(float offset);
+    /**
+     * @brief Checks if the given offset exceeds the bounds of the swiper container and triggers overScroll.
+     *
+     * @param offset The offset to check.
+     * @return True if overScroll is triggered, false otherwise.
+     */
+    bool CheckOverScroll(float offset);
+
+    /**
+     * @brief Applies spring effect to the over-scrolling of the swiper.
+     *
+     * @param offset The offset of the swiper.
+     * @return true if the spring effect is applied successfully, false otherwise.
+     */
+    bool SpringOverScroll(float offset);
 
     void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f);
 
@@ -454,6 +478,7 @@ public:
     void StopSpringAnimation();
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
+    int32_t GetDuration() const;
 
 private:
     void OnModifyDone() override;
@@ -486,7 +511,7 @@ private:
     void HandleDragEnd(double dragVelocity);
 
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown();
+    void HandleTouchDown(const TouchEventInfo& info);
     void HandleTouchUp();
 
     void HandleMouseEvent(const MouseInfo& info);
@@ -526,7 +551,6 @@ private:
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
         float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
-    int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
     EdgeEffect GetEdgeEffect() const;
@@ -565,6 +589,7 @@ private:
     void BeforeCreateLayoutWrapper() override;
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
+    void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
     int32_t ComputeNextIndexByVelocity(float velocity) const;
     void UpdateCurrentIndex(int32_t index);
@@ -581,12 +606,28 @@ private:
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
 
     /**
+     * @brief Checks if the animation is currently running.
+     *
+     * @return true if the animation is running, false otherwise.
+     */
+    inline bool AnimationRunning() const;
+
+    /**
      *  NestableScrollContainer implementations
+     *  ============================================================
      */
     Axis GetAxis() const override
     {
         return GetDirection();
     }
+
+    /**
+     * @brief Closes gap to the edge, called before Swiper transfers extra offset to parent/child to ensure that Swiper
+     * actually reaches the edge.
+     *
+     * @param offset The scroll offset from DragUpdate.
+     */
+    void CloseTheGap(float offset);
 
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
     ScrollResult HandleScrollSelfFirst(float offset, int32_t source, NestedState state);
@@ -595,9 +636,16 @@ private:
 
     void OnScrollStartRecursive(float position) override;
     void OnScrollEndRecursive() override;
+    /**
+     * @brief Notifies the parent NestableScrollContainer that the scroll has ended.
+     */
+    void NotifyParentScrollEnd();
+
+    inline bool ChildFirst(NestedState state);
 
     WeakPtr<NestableScrollContainer> parent_;
     /**
+     *  ============================================================
      *  End of NestableScrollContainer implementations
      */
 
@@ -702,6 +750,7 @@ private:
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
 
     WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 };
 } // namespace OHOS::Ace::NG
 

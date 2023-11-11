@@ -773,7 +773,11 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
         blendFrameIndex_ = index;
     } else {
         blendFrameIndex_ = -1;
+#ifndef USE_ROSEN_DRAWING
         blendCanvas_->clear(SK_ColorTRANSPARENT);
+#else
+        blendCanvas_->clear(RSColor::COLOR_TRANSPARENT);
+#endif
 
         if (frameInfo->blendFromIndex == frameInfo->index) {
 #ifndef USE_ROSEN_DRAWING

@@ -127,6 +127,13 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
+RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
+{
+    auto pipeline = PipelineBase::GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return DynamicCast<PipelineContext>(pipeline);
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     auto context = GetCurrentContext();
@@ -252,7 +259,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         distributedUI->ApplyOneUpdate();
     } while (false);
 #endif
-    FlushAnimation(GetTimeFromExternalTimer());
+    FlushAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
@@ -511,6 +518,11 @@ void PipelineContext::SetupRootElement()
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     auto atomicService = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
+    auto container = Container::Current();
+    if (container && atomicService) {
+        auto appBar = Referenced::MakeRefPtr<AppBarView>(atomicService);
+        container->SetAppBar(appBar);
+    }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
         MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
         rootNode_->AddChild(
@@ -735,8 +747,7 @@ void PipelineContext::StartWindowMaximizeAnimation(
     AnimationOption option;
     int32_t duration = 400;
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-    if (maximizeMode == MaximizeMode::MODE_FULL_FILL
-        || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         duration = 0;
     }
     option.SetDuration(duration);
@@ -901,6 +912,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         float offsetFix = (rootSize.Height() - positionYWithOffset) > 100.0f
                               ? keyboardHeight - (rootSize.Height() - positionYWithOffset) / 2.0f
                               : keyboardHeight;
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+        if (offsetFix > 0.0f && positionYWithOffset < offsetFix) {
+            offsetFix = keyboardHeight - (rootSize.Height() - positionYWithOffset - height);
+        }
+#endif
         if (NearZero(keyboardHeight)) {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
@@ -922,6 +938,86 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         CHECK_NULL_VOID(manager);
         manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
+    };
+
+    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
+    Animate(option, option.GetCurve(), func);
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    CHECK_RUN_ON(UI);
+    // prevent repeated trigger with same keyboardHeight
+    CHECK_NULL_VOID(safeAreaManager_);
+    if (keyboardHeight == safeAreaManager_->GetKeyboardInset().Length()) {
+        return;
+    }
+
+    ACE_FUNCTION_TRACE();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+
+    auto weak = WeakClaim(this);
+    auto func = [weak, keyboardHeight, positionY, height]() mutable {
+        auto context = weak.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        if (keyboardHeight > 0) {
+            // add height of navigation bar
+            keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+        }
+
+        auto manager = DynamicCast<TextFieldManagerNG>(context->PipelineBase::GetTextFieldManager());
+        CHECK_NULL_VOID(manager);
+        float uiExtensionHeight = 0.0f;
+        if (manager) {
+            uiExtensionHeight = static_cast<float>(manager->GetHeight());
+            if (uiExtensionHeight == 0) {
+                LOGE("UIExtension Component Height equals zero");
+                return;
+            }
+            if (positionY + height > uiExtensionHeight) {
+                height = uiExtensionHeight - positionY;
+            }
+            positionY += static_cast<float>(manager->GetClickPosition().GetY());
+        }
+        SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
+        float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
+        float positionYWithOffset = positionY - keyboardOffset;
+        float offsetFix = (rootSize.Height() - positionY - height) < keyboardHeight
+                                ? keyboardHeight - (rootSize.Height() - positionY - height)
+                                : keyboardHeight;
+        if (NearZero(keyboardHeight)) {
+            context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
+                   LessOrEqual(rootSize.Height() - positionYWithOffset, keyboardHeight)) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-keyboardHeight);
+        } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
+        } else if ((positionYWithOffset + height > rootSize.Height() - keyboardHeight &&
+                       positionYWithOffset < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
+                   NearZero(context->rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
+        } else {
+            context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        }
+        context->SyncSafeArea(true);
+        // layout immediately
+        context->FlushUITasks();
+
+        manager->ScrollTextFieldToSafeArea();
+        context->FlushUITasks();
     };
 
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
@@ -1172,10 +1268,20 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
+        ResetDraggingStatus(scalePoint);
     }
 
     hasIdleTasks_ = true;
     RequestFrame();
+}
+
+void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint)
+{
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
+        manager->OnDragEnd({ touchPoint.x, touchPoint.y }, "");
+    }
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
@@ -1203,6 +1309,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             auto lastPage = stageManager_->GetLastPage();
             if (params.size() < USED_ID_FIND_FLAG && lastPage) {
                 lastPage->DumpTree(0);
+                DumpLog::GetInstance().OutPutBySize();
             }
             if (params.size() == USED_ID_FIND_FLAG && lastPage && !lastPage->DumpTreeById(0, params[2])) {
                 DumpLog::GetInstance().Print(
@@ -1241,7 +1348,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
         for (const auto& func : dumpListeners_) {
             func(jsParams);
-        } 
+        }
     }
 
     return true;
@@ -1389,9 +1496,6 @@ void PipelineContext::FlushMouseEvent()
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
-    if (!onFocus_) {
-        return false;
-    }
     if (mouseStyleNodeId_ != nodeId) {
         return false;
     }
@@ -1681,8 +1785,27 @@ void PipelineContext::WindowFocus(bool isFocus)
         if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
             rootFocusHub->RequestFocusImmediately();
         }
+        if (focusWindowId_.has_value()) {
+            auto curMainView = FocusHub::GetCurrentMainView();
+            if (curMainView) {
+                curMainView->HandleFocusOnMainView();
+            }
+        }
     }
     FlushWindowFocusChangedCallback(isFocus);
+}
+
+void PipelineContext::ContainerModalUnFocus()
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->OnWindowForceUnfocused();
 }
 
 void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -1702,8 +1825,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
         }
     };
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-    if (maximizeMode == MaximizeMode::MODE_FULL_FILL
-        || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+    if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         constexpr int32_t delayedTime = 50;
         taskExecutor_->PostDelayedTask(callback, TaskExecutor::TaskType::UI, delayedTime);
     } else {
@@ -1994,7 +2116,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     canUseLongPredictTask_ = false;
 }
 
-void PipelineContext::Finish(bool /*autoFinish*/) const
+void PipelineContext::Finish(bool /* autoFinish */) const
 {
     CHECK_RUN_ON(UI);
     if (finishEventHandler_) {

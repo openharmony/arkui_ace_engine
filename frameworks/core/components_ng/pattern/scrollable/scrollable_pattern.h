@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 
+#include <vector>
+
 #include "base/geometry/axis.h"
 #include "core/animation/select_motion.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -27,6 +29,7 @@
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/event/mouse_event.h"
 
@@ -40,6 +43,9 @@ class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
+    ScrollablePattern() = default;
+    ScrollablePattern(bool alwaysEnabled) : edgeEffectAlwaysEnabled_(alwaysEnabled) {}
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -50,6 +56,15 @@ public:
     {
         return axis_;
     }
+
+    virtual bool ShouldDelayChildPressedState() const override
+    {
+        return true;
+    }
+
+    void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
+    void FireAndCleanScrollingListener() override;
+
     void SetAxis(Axis axis);
     virtual bool UpdateCurrentOffset(float delta, int32_t source) = 0;
     virtual bool IsScrollable() const
@@ -74,8 +89,6 @@ public:
         return scrollableEvent_;
     }
     virtual bool OnScrollCallback(float offset, int32_t source);
-
-public:
     virtual void OnScrollStartCallback() {};
     bool ScrollableIdle()
     {
@@ -303,7 +316,44 @@ public:
         }
         return exp(-RATIO * gamma);
     }
+    virtual float GetMainContentSize() const;
 
+    virtual bool SupportScrollToIndex() const
+    {
+        return true;
+    }
+
+    virtual ScrollAlign GetDefaultScrollAlign() const
+    {
+        return ScrollAlign::START;
+    }
+
+    virtual void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) {}
+
+    virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
+
+    void SetPositionController(RefPtr<ScrollableController> control)
+    {
+        positionController_ = control;
+        if (control) {
+            control->SetScrollPattern(AceType::WeakClaim(this));
+        }
+    }
+
+    virtual Rect GetItemRect(int32_t index) const
+    {
+        return Rect();
+    };
+
+    bool GetAlwaysEnabled() const
+    {
+        return edgeEffectAlwaysEnabled_;
+    }
+
+    void SetAlwaysEnabled(bool alwaysEnabled)
+    {
+        edgeEffectAlwaysEnabled_ = alwaysEnabled;
+    }
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -354,6 +404,8 @@ protected:
     {
         scrollBarOverlayModifier_ = scrollBarOverlayModifier;
     }
+    // just for hold ScrollableController
+    RefPtr<ScrollableController> positionController_;
 
 private:
     virtual void OnScrollEndCallback() {};
@@ -471,6 +523,9 @@ private:
     RefPtr<InputEvent> mouseEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
+
+    std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+    bool edgeEffectAlwaysEnabled_ = false;
 };
 } // namespace OHOS::Ace::NG
 

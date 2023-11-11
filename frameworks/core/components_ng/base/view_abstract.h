@@ -55,23 +55,16 @@ struct OptionParam {
     std::function<void()> action;
 
     OptionParam() = default;
-    OptionParam(
-        const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(iconParam),
-          enabled(true),
-          action(actionParam) {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
+        : value(valueParam), icon(iconParam), enabled(true), action(actionParam)
+    {}
     OptionParam(const std::string& valueParam, const std::string& iconParam, bool enabledParam,
         const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(iconParam),
-          enabled(enabledParam),
-          action(actionParam) {}
+        : value(valueParam), icon(iconParam), enabled(enabledParam), action(actionParam)
+    {}
     OptionParam(const std::string& valueParam, const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(""),
-          enabled(true),
-          action(actionParam) {}
+        : value(valueParam), icon(""), enabled(true), action(actionParam)
+    {}
 
     ~OptionParam() = default;
 };

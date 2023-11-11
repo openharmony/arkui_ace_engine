@@ -125,6 +125,7 @@ void ImageLoadingContext::OnLoadSuccess()
     if (notifiers_.onLoadSuccess_) {
         notifiers_.onLoadSuccess_(src_);
     }
+    ImageUtils::PostToUI(std::move(pendingMakeCanvasImageTask_));
 }
 
 void ImageLoadingContext::OnLoadFail()
@@ -187,7 +188,7 @@ void ImageLoadingContext::DownloadImage()
     if (NotifyReadyIfCacheHit()) {
         return;
     }
-    downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](const std::vector<uint8_t>& imageData) {
+    downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](const std::string&& imageData) {
         auto ctx = weak.Upgrade();
         CHECK_NULL_VOID(ctx);
         auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
@@ -314,8 +315,15 @@ bool ImageLoadingContext::MakeCanvasImageIfNeed(
     } else if (dstSize_ == SizeF()) {
         res |= dstSize.IsPositive();
     }
-
-    if (res) {
+    CHECK_NULL_RETURN(res, res);
+    if (stateManager_->GetCurrentState() == ImageLoadingState::MAKE_CANVAS_IMAGE) {
+        pendingMakeCanvasImageTask_ = [weak = AceType::WeakClaim(this), dstSize, autoResize, imageFit, sourceSize]() {
+            auto ctx = weak.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            CHECK_NULL_VOID(ctx->SizeChanging(dstSize));
+            ctx->MakeCanvasImage(dstSize, autoResize, imageFit, sourceSize);
+        };
+    } else {
         MakeCanvasImage(dstSize, autoResize, imageFit, sourceSize);
     }
     return res;

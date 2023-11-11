@@ -152,6 +152,7 @@ private:
         std::function<void(int32_t, int32_t)>&& callback);
 
     RefPtr<PipelineBase> GetChildPipelineContext() const;
+    void ContainerModalUnFocus();
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     void HideFilter();

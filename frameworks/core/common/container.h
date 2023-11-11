@@ -19,6 +19,9 @@
 #include <functional>
 #include <mutex>
 #include <unordered_map>
+#include <atomic>
+
+#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
@@ -33,9 +36,9 @@
 #include "core/common/settings.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/distributed_ui.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/pipeline/pipeline_base.h"
-#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 namespace OHOS::Ace {
 
@@ -49,9 +52,19 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 using DragEventCallBack = std::function<void(int32_t x, int32_t y, const DragEventAction& action)>;
 using StopDragCallback = std::function<void()>;
 
-constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
-constexpr int32_t INSTANCE_ID_PLATFORM = -2;
-constexpr int32_t MIN_PLUGIN_SUBCONTAINER_ID = 2000000;
+enum ContainerType {
+    STAGE_CONTAINER = 1,
+    FA_CONTAINER,
+    PA_SERVICE_CONTAINER,
+    PA_DATA_CONTAINER,
+    PA_FORM_CONTAINER,
+    FA_SUBWINDOW_CONTAINER,
+    COMPONENT_SUBWINDOW_CONTAINER,
+    PLUGIN_SUBCONTAINER = 20,
+};
+
+constexpr int32_t CONTAINER_ID_DIVIDE_SIZE = 100000;
+constexpr int32_t MIN_PLUGIN_SUBCONTAINER_ID = PLUGIN_SUBCONTAINER * CONTAINER_ID_DIVIDE_SIZE;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -368,6 +381,22 @@ public:
                PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
     }
 
+    void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
+    {
+        appBar_ = appBar;
+    }
+
+    RefPtr<NG::AppBarView> GetAppBar() const
+    {
+        return appBar_;
+    }
+
+    template<ContainerType type>
+    static int32_t GenerateId();
+
+private:
+    static bool IsIdAvailable(int32_t id);
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
@@ -387,8 +416,23 @@ private:
     RefPtr<PageUrlChecker> pageUrlChecker_;
     bool isModule_ = false;
     std::shared_ptr<NG::DistributedUI> distributedUI_;
+    RefPtr<NG::AppBarView> appBar_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
+
+template<ContainerType type>
+int32_t Container::GenerateId()
+{
+    static std::atomic<int32_t> gInstanceId;
+    int32_t id;
+    do {
+        id = type * CONTAINER_ID_DIVIDE_SIZE + gInstanceId.fetch_add(1) % CONTAINER_ID_DIVIDE_SIZE;
+    } while (!IsIdAvailable(id));
+    return id;
+}
+
+template<>
+int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>();
 
 } // namespace OHOS::Ace
 

@@ -50,6 +50,9 @@ bool ParseString(const ResourceInfo& info, std::string& result);
 
 std::string ErrorToMessage(int32_t code);
 
+bool GetSingleParam(napi_env env, napi_callback_info info, napi_value* argv, napi_valuetype& valueType);
+
+std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuetype& valueType);
 } // namespace OHOS::Ace::Napi
 
 #endif // FOUNDATION_ACE_INTERFACES_NAPI_KITS_UTILS_H

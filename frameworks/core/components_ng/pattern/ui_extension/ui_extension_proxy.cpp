@@ -20,7 +20,8 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 
 namespace OHOS::Ace::NG {
-UIExtensionProxy::UIExtensionProxy(const sptr<Rosen::Session>& session): session_(session) {}
+UIExtensionProxy::UIExtensionProxy(const sptr<Rosen::Session>& session,
+    const RefPtr<UIExtensionPattern>& pattern): session_(session), pattern_(pattern) {}
 
 void UIExtensionProxy::SendData(const RefPtr<WantParamsWrap>& wantParams)
 {
@@ -30,5 +31,23 @@ void UIExtensionProxy::SendData(const RefPtr<WantParamsWrap>& wantParams)
         auto params = DynamicCast<WantParamsWrapOhos>(wantParams)->GetWantParams();
         extensionSession->TransferComponentData(params);
     }
+}
+
+OHOS::Rosen::WSErrorCode UIExtensionProxy::SendDataSync(const RefPtr<WantParamsWrap>& wantParams,
+                                                        AAFwk::WantParams& reWantParams)
+{
+    Rosen::WSErrorCode transferCode = Rosen::WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
+    auto session = session_.promote();
+    if (session) {
+        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session.GetRefPtr()));
+        auto params = DynamicCast<WantParamsWrapOhos>(wantParams)->GetWantParams();
+        transferCode = extensionSession->TransferComponentDataSync(params, reWantParams);
+    }
+    return transferCode;
+}
+
+RefPtr<UIExtensionPattern> UIExtensionProxy::GetPattern() const
+{
+    return pattern_.Upgrade();
 }
 } // namespace OHOS::Ace::NG

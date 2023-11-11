@@ -19,6 +19,7 @@
 
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -277,7 +278,9 @@ void SearchPattern::InitSearchController()
     searchController_->SetGetTextContentRect([weak = WeakClaim(this)]() {
         auto search = weak.Upgrade();
         CHECK_NULL_RETURN(search, Rect(0, 0, 0, 0));
-        return search->HandleTextContentRect();
+        auto rect = search->searchController_->GetTextContentRect();
+        search->HandleTextContentRect(rect);
+        return rect;
     });
 
     searchController_->SetGetTextContentLinesNum([weak = WeakClaim(this)]() {
@@ -338,29 +341,17 @@ void SearchPattern::HandleCaretPosition(int32_t caretPosition)
     textFieldPattern->SetCaretPosition(caretPosition);
 }
 
-Rect SearchPattern::HandleTextContentRect()
+void SearchPattern::HandleTextContentRect(Rect& rect)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, Rect(0, 0, 0, 0));
+    CHECK_NULL_VOID(host);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
-    CHECK_NULL_RETURN(textFieldFrameNode, Rect(0, 0, 0, 0));
+    CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(textFieldPattern, Rect(0, 0, 0, 0));
-    RectF rect = textFieldPattern->GetTextRect();
+    CHECK_NULL_VOID(textFieldPattern);
     RectF frameRect = textFieldPattern->GetFrameRect();
-    textFieldPattern->TextIsEmptyRect(rect);
-    textFieldPattern->UpdateRectByAlignment(rect);
-    auto y = rect.GetY() + frameRect.GetY();
-    if (NearEqual(rect.GetY(), 0)) {
-        y = textFieldPattern->GetPaddingTop() + textFieldPattern->GetBorderTop() + frameRect.GetY();
-    }
-    if (!textFieldPattern->IsOperation()) {
-        return Rect(rect.GetX() + frameRect.GetX(), y, 0, 0);
-    }
-    if (NearEqual(rect.GetX(), -Infinity<float>())) {
-        return Rect(frameRect.GetX(), y, 0, 0);
-    }
-    return Rect(rect.GetX() + frameRect.GetX(), y, rect.Width(), rect.Height());
+    rect.SetLeft(rect.Left() + frameRect.Left());
+    rect.SetTop(rect.Top() + frameRect.Top());
 }
 
 int32_t SearchPattern::HandleTextContentLines()

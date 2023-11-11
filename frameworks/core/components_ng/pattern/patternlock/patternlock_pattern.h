@@ -120,10 +120,10 @@ private:
     void InitTouchEvent(RefPtr<GestureEventHub>& gestureHub, RefPtr<TouchEventImpl>& touchDownListener);
     void InitPatternLockController();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void OnTouchDown(const TouchEventInfo& info);
+    void OnTouchDown(const TouchLocationInfo& info);
+    void OnTouchMove(const TouchLocationInfo& info);
     void AddPointEnd();
     void OnTouchUp();
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleGestureUpdate(const GestureEvent& info);
 
     bool CheckChoosePoint(int32_t x, int32_t y) const;
@@ -169,6 +169,7 @@ private:
     std::vector<PatternLockCell> choosePoint_;
     int32_t passPointCount_ = 0;
     OffsetF cellCenter_;
+    int32_t fingerId_ = -1;
 
     mutable bool autoReset_ = true;
     Dimension circleRadius_;

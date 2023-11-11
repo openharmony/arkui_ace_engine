@@ -63,6 +63,8 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContext();
 
+    static RefPtr<PipelineContext> GetMainPipelineContext();
+
     static float GetCurrentRootWidth();
 
     static float GetCurrentRootHeight();
@@ -152,6 +154,8 @@ public:
     void OnHide() override;
 
     void WindowFocus(bool isFocus) override;
+
+    void ContainerModalUnFocus() override;
 
     void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
 
@@ -421,6 +425,9 @@ protected:
 
     void OnVirtualKeyboardHeightChange(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+    void OnVirtualKeyboardHeightChange(
+        float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
 private:
     void TraverseRootNode(const std::list<RefPtr<UINode>>& list, const uint64_t& targetId,
@@ -443,6 +450,8 @@ private:
     void DumpPipelineInfo() const;
 
     void RegisterRootEvent();
+
+    void ResetDraggingStatus(const TouchEvent& touchPoint);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
