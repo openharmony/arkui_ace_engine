@@ -424,6 +424,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         PaintClip(paintRect.GetSize());
     }
 
+    if (HasProgressMask() && GetProgressMaskValue()) {
+        PaintProgressMask();
+    }
+
     if (propGraphics_) {
         PaintGraphics();
     }
@@ -2994,12 +2998,6 @@ void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& cli
 
 void RosenRenderContext::PaintClipMask(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize)
 {
-    if (moonProgressModifier_) {
-        auto modifierAdapter =
-            std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(moonProgressModifier_));
-        rsNode_->RemoveModifier(modifierAdapter);
-        moonProgressModifier_ = nullptr;
-    }
     auto basicShape = clip->GetClipMaskValue();
 #ifndef USE_ROSEN_DRAWING
     auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
@@ -3042,10 +3040,6 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
 
 void RosenRenderContext::PaintProgressMask()
 {
-    if (clipMaskModifier_) {
-        rsNode_->RemoveModifier(clipMaskModifier_);
-        clipMaskModifier_ = nullptr;
-    }
     if (!moonProgressModifier_) {
         moonProgressModifier_ = AceType::MakeRefPtr<MoonProgressModifier>();
         auto modifierAdapter =
@@ -3128,20 +3122,35 @@ void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape*/)
+void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape)
 {
-    RectF rect = GetPaintRectWithoutTransform();
-    if (!RectIsNull()) {
-        PaintClip(SizeF(rect.Width(), rect.Height()));
+    CHECK_NULL_VOID(rsNode_);
+    if (basicShape) {
+        if (!RectIsNull()) {
+            RectF rect = GetPaintRectWithoutTransform();
+            PaintClipMask(GetOrCreateClip(), rect.GetSize());
+        }
+    } else if (clipMaskModifier_) {
+        rsNode_->RemoveModifier(clipMaskModifier_);
+        clipMaskModifier_ = nullptr;
     }
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& /* progress */)
+void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress)
 {
-    PaintProgressMask();
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetClipToBounds(true);
+    if (progress) {
+        if (!RectIsNull()) {
+            PaintProgressMask();
+        }
+        rsNode_->SetClipToBounds(true);
+    } else if (moonProgressModifier_) {
+        auto modifierAdapter =
+            std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(moonProgressModifier_));
+        rsNode_->RemoveModifier(modifierAdapter);
+        moonProgressModifier_ = nullptr;
+    }
     RequestNextFrame();
 }
 
