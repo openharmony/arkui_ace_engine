@@ -80,4 +80,6 @@ void FormManagerDelegate::ReleaseForm() {}
 void FormManagerDelegate::ReleaseRenderer() {}
 
 void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) {}
+
+void FormManagerDelegate::SetVisibleChange(bool isVisible) {}
 } // namespace OHOS::Ace

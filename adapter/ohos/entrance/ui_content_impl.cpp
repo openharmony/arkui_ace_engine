@@ -1944,4 +1944,20 @@ sptr<IRemoteObject> UIContentImpl::GetParentToken()
 {
     return parentToken_;
 }
+
+void UIContentImpl::ProcessVisibleChange(bool isVisible)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, isVisible]() {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            pipeline->HandleFormVisibleChangeEvent(isVisible);
+        },
+        TaskExecutor::TaskType::UI);
+}
 } // namespace OHOS::Ace

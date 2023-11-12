@@ -47,6 +47,16 @@ void TextClockModelNG::SetFormat(const std::string& format)
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format);
 }
 
+void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value);
+}
+
+void TextClockModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFeature, value);
+}
+
 void TextClockModelNG::SetHoursWest(const int32_t& hoursWest)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, HoursWest, hoursWest);

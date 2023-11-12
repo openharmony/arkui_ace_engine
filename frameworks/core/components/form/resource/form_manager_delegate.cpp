@@ -746,6 +746,12 @@ void FormManagerDelegate::ReAddForm()
     }
 }
 
+void FormManagerDelegate::SetVisibleChange(bool isVisible)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->SetVisibleChange(isVisible);
+}
+
 #ifdef OHOS_STANDARD_SYSTEM
 void FormManagerDelegate::ResetForm()
 {
