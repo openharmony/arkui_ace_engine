@@ -451,11 +451,20 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
         if (fabs(offset) < judgeDistance) {
             return GestureAcceptResult::DETECTING;
         }
-        if ((direction_.type & PanDirection::UP) == 0) {
-            return CalculateTruthFingers(true) ? GestureAcceptResult::ACCEPT : GestureAcceptResult::REJECT;
-        }
-        if ((direction_.type & PanDirection::DOWN) == 0) {
-            return CalculateTruthFingers(false) ? GestureAcceptResult::ACCEPT : GestureAcceptResult::REJECT;
+        if (inputEventType_ == InputEventType::AXIS) {
+            if ((direction_.type & PanDirection::UP) == 0 && offset < 0) {
+                return GestureAcceptResult::REJECT;
+            }
+            if ((direction_.type & PanDirection::DOWN) == 0 && offset > 0) {
+                return GestureAcceptResult::REJECT;
+            }
+        } else {
+            if ((direction_.type & PanDirection::UP) == 0) {
+                return CalculateTruthFingers(true) ? GestureAcceptResult::ACCEPT : GestureAcceptResult::REJECT;
+            }
+            if ((direction_.type & PanDirection::DOWN) == 0) {
+                return CalculateTruthFingers(false) ? GestureAcceptResult::ACCEPT : GestureAcceptResult::REJECT;
+            }
         }
         return GestureAcceptResult::ACCEPT;
     }
