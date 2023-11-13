@@ -349,61 +349,158 @@ class ArkLinearGradientBlur {
     }
 }
 
-class ArkBackgroundBlurStyle {
-    blurStyle: number | undefined;
-    colorMode: number | undefined;
-    adaptiveColor: number | undefined;
-    scale: number | undefined;
+class ArkFont implements Equable {
+    size: string | number | Resource;
+    weight: string;
+    family: string | Resource | undefined;
+    style: number | undefined;
 
     constructor() {
-        this.blurStyle = undefined;
-        this.colorMode = undefined;
-        this.adaptiveColor = undefined;
-        this.scale = undefined;
+        this.size = "16fp"
+        this.weight = "400";
     }
 
-    isEqual(another: ArkBackgroundBlurStyle): boolean {
-        return ((this.blurStyle === another.blurStyle) &&
-            (this.colorMode === another.colorMode) && (this.adaptiveColor === another.adaptiveColor) &&
-            (this.scale === another.scale));
+    setFamily(family: string | Resource) {
+        this.family = family;
+    }
+
+    setSize(size: string | number | Resource) {
+        this.size = size;
+    }
+
+    setStyle(style: number) {
+        this.style = style;
+    }
+
+    isEqual(another: ArkFont): boolean {
+        return this.size === another.size && this.weight === another.weight && this.family === another.family && this.style === another.style;
+    }
+
+    parseFontWeight(value: string | number) {
+        const valueWeightMap = {
+            [0]: 'Lighter',
+            [1]: 'Normal',
+            [2]: 'Regular',
+            [3]: 'Medium',
+            [4]: 'Bold',
+            [5]: 'Bolder'
+        };
+        if (value in valueWeightMap) {
+            this.weight = valueWeightMap[value];
+        } else {
+            this.weight = value.toString();
+        }
     }
 }
 
-class ArkForegroundBlurStyle {
-    blurStyle: number | undefined;
-    colorMode: number | undefined;
-    adaptiveColor: number | undefined;
-    scale: number | undefined;
+class ArkMenuAlignType implements Equable {
+    alignType: number;
+    dx: number;
+    dy: number;
 
     constructor() {
-        this.blurStyle = undefined;
-        this.colorMode = undefined;
-        this.adaptiveColor = undefined;
-        this.scale = undefined;
+        this.alignType = 2;
+        this.dx = 0;
+        this.dy = 0;
     }
 
-    isEqual(another: ArkForegroundBlurStyle): boolean {
-        return ((this.blurStyle === another.blurStyle) &&
-            (this.colorMode === another.colorMode) && (this.adaptiveColor === another.adaptiveColor) &&
-            (this.scale === another.scale));
+    isEqual(another: ArkMenuAlignType): boolean {
+        return (this.alignType === another.alignType) && (this.dx === another.dx) && (this.dy === another.dy);
     }
 }
 
-class ArkLinearGradientBlur {
-    blurRadius: number | undefined;
-    fractionStops: FractionStop[] | undefined;
-    direction: number | undefined;
-
+class ArkSliderTips implements Equable {
+    showTip: boolean;
+    tipText: string | undefined;
+    
     constructor() {
-        this.blurRadius = undefined;
-        this.fractionStops = undefined;
-        this.direction = undefined;
+        this.showTip = false;
+        this.tipText = undefined;
     }
 
-    isEqual(another: ArkLinearGradientBlur): boolean {
-        return ((this.blurRadius === another.blurRadius) &&
-            (ArkDeepCompareArrays(this.fractionStops, another.fractionStops)) &&
-            (this.direction === another.direction));
+    isEqual(another: ArkSliderTips): boolean {
+        return this.showTip === another.showTip && this.tipText === another.tipText
+    }
+
+}
+
+class ArkTextStyle implements Equable {
+    color: number | string | undefined
+    font: ArkFont | undefined
+
+    constructor() {
+        this.color = undefined;
+        this.font = new ArkFont();
+    }
+
+    parseTextStyle(value: PickerTextStyle, defaultColor: string, defaultSize: string, defaultWeight: string) {
+        if (isObject(value)) {
+            let color = new ArkColor();
+            let inputFont = value.font;
+            let inputColor = value.color;
+
+            if (!isUndefined(inputColor) && (isNumber(inputColor) || isString(inputColor))) {
+                color.parseColorValue(inputColor);
+                this.color = color.getColor();
+            }
+
+            if (!isUndefined(inputFont) && isObject(inputFont)) {
+
+                if (!isUndefined(inputFont.size)) {
+                    this.font.size = inputFont.size;
+                }
+
+                if (!isUndefined(inputFont.weight)) {
+                    this.font.parseFontWeight(inputFont.weight);
+                }
+                this.font.family = inputFont.family;
+                this.font.style = inputFont.style;
+            }
+        } else {
+            this.color = defaultColor;
+            this.font.size = defaultSize;
+            this.font.parseFontWeight(defaultWeight);
+        }
+    }
+
+    isEqual(another: ArkTextStyle): boolean {
+        return this.color === another.color && this.font.isEqual(another.font)
+    }
+}
+
+class ArkRadioStyle {
+    checkedBackgroundColor: number | undefined;
+    uncheckedBorderColor: number | undefined;
+    indicatorColor: number | undefined;
+
+    constructor() {
+        this.checkedBackgroundColor = undefined;
+        this.uncheckedBorderColor = undefined;
+        this.indicatorColor = undefined;
+    }
+
+    isEqual(another: ArkRadioStyle): boolean {
+        return (this.checkedBackgroundColor === another.checkedBackgroundColor &&
+            this.uncheckedBorderColor === another.uncheckedBorderColor &&
+            this.indicatorColor === another.indicatorColor);
+    }
+}
+
+class ArkStarStyle implements Equable {
+    backgroundUri: string | undefined;
+    foregroundUri: string | undefined;
+    secondaryUri: string | undefined;
+
+    constructor() {
+        this.backgroundUri = undefined;
+        this.foregroundUri = undefined;
+        this.secondaryUri = undefined;
+    }
+
+    isEqual(another: ArkStarStyle): boolean {
+        return this.backgroundUri === another.backgroundUri &&
+            this.foregroundUri === another.foregroundUri &&
+            this.secondaryUri === another.secondaryUri;
     }
 }
 

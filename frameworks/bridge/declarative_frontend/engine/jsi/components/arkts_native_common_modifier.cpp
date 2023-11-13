@@ -1764,6 +1764,38 @@ void ResetAllowDrop(NodeHandle node)
     ViewAbstract::SetAllowDrop(frameNode, allowDrop);
 }
 
+void SetAccessibilityLevel(NodeHandle node, const char* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityImportance(frameNode, valueStr);
+}
+
+void ResetAccessibilityLevel(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityImportance(frameNode, "");
+}
+
+void SetAccessibilityDescription(NodeHandle node, const char* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, valueStr);
+}
+
+void ResetAccessibilityDescription(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, "");
+}
+
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -1791,7 +1823,8 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetDisplayPriority, ResetDisplayPriority, SetOffset, ResetOffset,
         SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
         SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText,
-        SetAllowDrop, ResetAllowDrop };
+        SetAllowDrop, ResetAllowDrop, SetAccessibilityLevel, ResetAccessibilityLevel,
+        SetAccessibilityDescription, ResetAccessibilityDescription };
 
     return modifier;
 }

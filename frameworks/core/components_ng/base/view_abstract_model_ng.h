@@ -973,6 +973,8 @@ public:
         ViewAbstract::SetBloom(value);
     }
 
+    static void SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance);
+    static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);
 private:
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
