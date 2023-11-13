@@ -32,6 +32,9 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propIsShowLimitValue_ = CloneIsShowLimitValue();
         value->propIsShowDescription_ = CloneIsShowDescription();
+        value->propStrokeWidth_ = CloneStrokeWidth();
+        value->propStartAngle_ = CloneStartAngle();
+        value->propEndAngle_ = CloneEndAngle();
         return value;
     }
 
@@ -40,10 +43,16 @@ public:
         LayoutProperty::Reset();
         ResetIsShowLimitValue();
         ResetIsShowDescription();
+        ResetStrokeWidth();
+        ResetStartAngle();
+        ResetEndAngle();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowLimitValue, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowDescription, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartAngle, float, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndAngle, float, PROPERTY_UPDATE_MEASURE_SELF);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GaugeLayoutProperty);

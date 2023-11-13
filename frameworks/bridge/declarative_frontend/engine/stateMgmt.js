@@ -5382,6 +5382,7 @@ class ViewPU extends NativeViewPartialUpdate {
         let nodeInfo = entry.node;
         if (nodeInfo === undefined) {
             nodeInfo = builder();
+            entry.node = nodeInfo;
         }
         return nodeInfo;
     }

@@ -63,7 +63,10 @@ ohos_unittest("ui_content_test") {
 
 ohos_unittest("form_render_test") {
   module_out_path = "$interface_test_output_path/inner_api"
-  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
+  include_dirs = [
+    "$ace_root/interfaces/inner_api/form_render/include",
+    "${accessibility_path}/interfaces/innerkits/common/include/",
+  ]
   sources = [
     # mock
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
@@ -98,6 +101,7 @@ ohos_unittest("form_render_test") {
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",

@@ -343,4 +343,16 @@ GestureEventFunc LongPressRecognizer::GetLongPressActionFunc()
     return callback;
 }
 
+RefPtr<GestureSnapshot> LongPressRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "duration: " <<  duration_ << ", "
+        << "isForDrag: " << isForDrag_ << ", "
+        << "repeat: " << repeat_ << ", "
+        << "fingers: " << fingers_;
+    info->customInfo = oss.str();
+    return info;
+}
+
 } // namespace OHOS::Ace::NG

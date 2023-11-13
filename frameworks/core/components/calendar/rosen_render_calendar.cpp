@@ -1014,8 +1014,13 @@ void RosenRenderCalendar::SetWorkStateStyle(
     const CalendarDay& day, SkColor workColor, SkColor offColor, Rosen::TextStyle& workStateStyle) const
 #endif
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderCalendar::SetWorkStateStyle(const CalendarDay& day, RSColorQuad workColor,
     RSColorQuad offColor, txt::TextStyle& workStateStyle) const
+#else
+void RosenRenderCalendar::SetWorkStateStyle(
+    const CalendarDay& day, SkColor workColor, RSColorQuad offColor, Rosen::TextStyle& workStateStyle) const
+#endif
 #endif
 {
     if (day.dayMark == "work") {

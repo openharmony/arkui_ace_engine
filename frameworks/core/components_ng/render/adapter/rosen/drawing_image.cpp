@@ -80,6 +80,7 @@ RSColorType DrawingImage::PixelFormatToRSColorType(const RefPtr<PixelMap>& pixma
         case PixelFormat::ALPHA_8:
             return RSColorType::COLORTYPE_ALPHA_8;
         case PixelFormat::RGBA_F16:
+            return RSColorType::COLORTYPE_RGBA_F16;
         case PixelFormat::UNKNOWN:
         case PixelFormat::ARGB_8888:
         case PixelFormat::RGB_888:
@@ -207,11 +208,11 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
     return false;
 #endif
 }
+} // namespace OHOS::Ace::NG
 
-namespace OHOS:Ace {
+namespace OHOS::Ace {
 void ImageCache::Purge()
 {
     SkGraphics::PurgeResourceCache();
-}
 }
 } // namespace OHOS::Ace::NG

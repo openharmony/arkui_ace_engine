@@ -1917,18 +1917,8 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest005, TestSize.Level1)
     auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
     columnPattern->OnAttachToFrameNode();
-    ASSERT_NE(columnPattern->toController_, nullptr);
-    columnPattern->toController_->NotifyStopListener();
-    /**
-     * test fromBottomCurve_ callback
-     */
-    ASSERT_NE(columnPattern->fromBottomCurve_, nullptr);
-    columnPattern->fromBottomCurve_->NotifyListener(0.1);
-    /**
-     * test fromTopCurve_ callback
-     */
-    ASSERT_NE(columnPattern->fromTopCurve_, nullptr);
-    columnPattern->fromTopCurve_->NotifyListener(0.0);
+    ASSERT_NE(columnPattern->scrollProperty_, nullptr);
+    ASSERT_NE(columnPattern->aroundClickProperty_, nullptr);
 }
 
 /**
@@ -2803,10 +2793,8 @@ HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest002, TestSize.Level1)
      * @tc.step: step3. call IsRunning.
      * @tc.expected: Check animator isRunning value.
      */
-    auto controller = columnPattern_->fromController_;
-    ASSERT_NE(controller, nullptr);
-    auto isRunning = controller->IsRunning();
-    EXPECT_TRUE(isRunning);
+    auto animation = columnPattern_->animation_;
+    ASSERT_NE(animation, nullptr);
 }
 
 /**
@@ -3207,60 +3195,46 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest012, TestSize.Level1)
      * @tc.steps: step1. Create columnNode and columnPattern.
      */
     CreateDatePickerColumnNode();
-    ASSERT_NE(columnPattern_, nullptr);
+    ASSERT_NE(columnNode_, nullptr);
+    auto childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(1));
+    ASSERT_NE(childNode, nullptr);
     auto param = AceType::MakeRefPtr<DatePickerEventParam>();
-    columnPattern_->clickBreak_ = true;
-    columnPattern_->OnAroundButtonClick(param);
+    param->instance_ = childNode;
+    param->itemIndex_ = 1;
+    param->itemTotalCounts_ = static_cast<int32_t>(columnNode_->GetChildren().size());
+    ASSERT_NE(columnPattern_, nullptr);
 
     /**
      * @tc.steps: step2. Call OnAroundButtonClick.
-     * @tc.expected: Duration of columnPattern's fromController_ is set 300.
+     * @tc.expected: cover branch clickBreak_ is true and expect animation is not running.
      */
-    columnPattern_->clickBreak_ = false;
-    param->itemIndex_ = 1;
-    columnPattern_->showCount_ = 2;
+    columnPattern_->SetclickBreak(true);
     columnPattern_->OnAroundButtonClick(param);
-    param->itemIndex_ = 2;
-    columnPattern_->fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    columnPattern_->fromController_->status_ = Animator::Status::RUNNING;
+    EXPECT_EQ(columnPattern_->animation_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call OnAroundButtonClick.
+     * @tc.expected: cover branch reset clickBreak_ is false and expect animation is running.
+     */
+    columnPattern_->SetclickBreak(false);
     columnPattern_->OnAroundButtonClick(param);
-    EXPECT_EQ(columnPattern_->fromController_->GetDuration(), 300);
+    ASSERT_NE(columnPattern_->animation_, nullptr);
+
+    /**
+     * @tc.steps: step4. Call OnAroundButtonClick.
+     * @tc.expected: cover branch step is 0 and expect animation is running.
+     */
+    param->itemIndex_ = 3;
+    columnPattern_->OnAroundButtonClick(param);
+    ASSERT_NE(columnPattern_->animation_, nullptr);
 }
 
 /**
  * @tc.name: DatePickerColumnPatternTest013
- * @tc.desc: Test DatePickerColumnPattern HandleCurveStopped.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest013, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create columnNode and columnPattern.
-     */
-    CreateDatePickerColumnNode();
-    ASSERT_NE(columnPattern_, nullptr);
-    columnPattern_->fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    columnPattern_->fromTopCurve_ = columnPattern_->CreateAnimation(0.0f, 0.0f);
-    columnPattern_->fromBottomCurve_ = columnPattern_->CreateAnimation(0.0f, 0.0f);
-
-    /**
-     * @tc.steps: step2. Call OnAroundButtonClick with different scrollDelta_.
-     * @tc.expected: Interpolators_ of fromController_ is added.
-     */
-    columnPattern_->scrollDelta_ = -1.0f;
-    columnPattern_->HandleCurveStopped();
-    EXPECT_EQ(columnPattern_->fromController_->interpolators_.size(), 1);
-    columnPattern_->scrollDelta_ = 1.0f;
-    columnPattern_->HandleCurveStopped();
-    EXPECT_EQ(columnPattern_->fromController_->interpolators_.size(), 1);
-}
-
-/**
- * @tc.name: DatePickerColumnPatternTest014
  * @tc.desc: Test DatePickerColumnPattern UpdateFinishToss.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest014, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnNode and columnPattern.
@@ -3300,11 +3274,11 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest015
+ * @tc.name: DatePickerColumnPatternTest014
  * @tc.desc: Test DatePickerColumnPattern CalcScrollIndex.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest015, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnNode and columnPattern.
@@ -3326,11 +3300,11 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest016
+ * @tc.name: DatePickerColumnPatternTest015
  * @tc.desc: Test DatePickerColumnPattern GetShiftDistanceForLandscape.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest016, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnPattern and set pickerTheme.
@@ -3366,11 +3340,11 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest017
+ * @tc.name: DatePickerColumnPatternTest016
  * @tc.desc: Test DatePickerColumnPattern UpdateColumnChildPosition.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest017, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnPattern.
@@ -3406,11 +3380,11 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest018
+ * @tc.name: DatePickerColumnPatternTest017
  * @tc.desc: Test DatePickerColumnPattern SetAccessibilityAction.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest018, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest017, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnNode and columnPattern.
@@ -3429,25 +3403,22 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest018, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Call SetAccessibilityAction and get the scroll action.
-     * @tc.expected: interpolators_ of fromController_ is set.
+     * @tc.expected: Related function is called.
      */
     columnPattern_->SetCurrentIndex(1);
     auto accessibilityProperty = columnNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
     columnPattern_->SetAccessibilityAction();
-    auto actionScrollForward = accessibilityProperty->actionScrollForwardImpl_;
-    auto actionScrollBackward = accessibilityProperty->actionScrollBackwardImpl_;
-    actionScrollForward();
-    EXPECT_EQ(columnPattern_->fromController_->interpolators_.size(), 1);
-    actionScrollBackward();
-    EXPECT_EQ(columnPattern_->fromController_->interpolators_.size(), 1);
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest019
+ * @tc.name: DatePickerColumnPatternTest018
  * @tc.desc: Test DatePickerColumnPattern PlayRestAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest018, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnPattern.
@@ -3468,7 +3439,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
     columnPattern_->scrollDelta_ = OFFSET_X;
     columnPattern_->PlayRestAnimation();
     EXPECT_FLOAT_EQ(columnPattern_->scrollDelta_, OFFSET_X);
-    EXPECT_EQ(columnPattern_->fromController_->interpolators_.size(), 1);
     datePickerOptionProperty.prevDistance = 1.0f;
     datePickerOptionProperty.nextDistance = 2.0f;
     columnPattern_->optionProperties_.clear();
@@ -3478,11 +3448,11 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest020
+ * @tc.name: DatePickerColumnPatternTest019
  * @tc.desc: Test DatePickerColumnPattern AddHotZoneRectToText.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnPattern and Set text node height.
