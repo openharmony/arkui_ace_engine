@@ -328,8 +328,8 @@ TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent> 
         }
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f",
-        newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX,
-        newTouchEvent.screenY);
+            newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX,
+            newTouchEvent.screenY);
     }
     return newTouchEvent;
 }
