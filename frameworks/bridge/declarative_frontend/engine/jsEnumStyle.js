@@ -1253,6 +1253,27 @@ var FunctionKey;
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
 })(FunctionKey || (FunctionKey = {}));
 
+var GestureJudgeResult;
+(function (GestureJudgeResult) {
+  GestureJudgeResult[GestureJudgeResult["CONTINUE"] = 0] = "CONTINUE";
+  GestureJudgeResult[GestureJudgeResult["REJECT"] = 1] = "REJECT";
+})(GestureJudgeResult || (GestureJudgeResult = {}));
+
+var GestureControl;
+(function (GestureControl) {
+    let GestureType;
+    (function (GestureType) {
+        GestureType[GestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
+        GestureType[GestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
+        GestureType[GestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
+        GestureType[GestureType["PINCH_GESTURE"] = 3] = "PINCH_GESTURE";
+        GestureType[GestureType["SWIPE_GESTURE"] = 4] = "SWIPE_GESTURE";
+        GestureType[GestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
+        GestureType[GestureType["DRAG"] = 6] = "DRAG";
+        GestureType[GestureType["CLICK"] = 7] = "CLICK";
+    })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
+})(GestureControl || (GestureControl = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';

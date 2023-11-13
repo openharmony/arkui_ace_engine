@@ -73,7 +73,8 @@ RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 }
 
 bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint)
+    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+    const RefPtr<TargetComponent>& targetComponent)
 {
     size_t idx = innerTargets.size();
     size_t newIdx = 0;
@@ -107,6 +108,13 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
         if (recognizer) {
             recognizer->BeginReferee(touchId);
+            recognizer->SetTargetComponent(targetComponent);
+            if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+                auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+                if (group) {
+                    group->SetChildrenTargetComponent(targetComponent);
+                }
+            }
         }
         longPressRecognizers.emplace_back(AceType::DynamicCast<NGGestureRecognizer>(item));
     }
@@ -130,18 +138,21 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
             if (!recognizerGroup && newIdx >= idx) {
                 recognizer->AssignNodeId(host->GetId());
                 recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
+                recognizer->SetTargetComponent(targetComponent);
+                recognizer->SetIsSystemGesture(true);
             }
             recognizer->BeginReferee(touchId);
             innerRecognizers.push_back(std::move(recognizer));
         } else {
             eventTarget->AssignNodeId(host->GetId());
             eventTarget->AttachFrameNode(WeakPtr<FrameNode>(host));
+            eventTarget->SetTargetComponent(targetComponent);
             finalResult.push_back(eventTarget);
         }
         newIdx++; // not process previous recognizers
     }
 
-    ProcessTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, finalResult, touchId);
+    ProcessTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, finalResult, touchId, targetComponent);
 
     return false;
 }
@@ -155,7 +166,8 @@ void GestureEventHub::OnModifyDone()
 }
 
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId)
+    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent)
 {
     auto host = GetFrameNode();
     if (!host) {
@@ -180,6 +192,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         innerExclusiveRecognizer_->SetCoordinateOffset(offset);
         innerExclusiveRecognizer_->BeginReferee(touchId);
         innerExclusiveRecognizer_->AttachFrameNode(WeakPtr<FrameNode>(host));
+        innerExclusiveRecognizer_->SetTargetComponent(targetComponent);
         current = innerExclusiveRecognizer_;
     }
 
@@ -198,11 +211,13 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             for (const auto& groupRecognizer : groupRecognizers) {
                 if (groupRecognizer) {
                     groupRecognizer->SetCoordinateOffset(offset);
+                    groupRecognizer->SetTargetComponent(targetComponent);
                 }
             }
         }
         recognizer->AssignNodeId(host->GetId());
         recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
+        recognizer->SetTargetComponent(targetComponent);
         recognizer->SetSize(size.Height(), size.Width());
         recognizer->SetCoordinateOffset(offset);
         recognizer->BeginReferee(touchId, true);
@@ -229,6 +244,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
                 externalParallelRecognizer_[parallelIndex]->AssignNodeId(host->GetId());
                 externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
+                externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
                 current = externalParallelRecognizer_[parallelIndex];
                 parallelIndex++;
             } else if (recognizers.size() == 1) {
@@ -254,6 +270,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
                 externalExclusiveRecognizer_[exclusiveIndex]->AssignNodeId(host->GetId());
                 externalExclusiveRecognizer_[exclusiveIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
+                externalExclusiveRecognizer_[exclusiveIndex]->SetTargetComponent(targetComponent);
                 current = externalExclusiveRecognizer_[exclusiveIndex];
                 exclusiveIndex++;
             } else if (recognizers.size() == 1) {
@@ -920,6 +937,11 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent)
     clickEventActuator_->SetUserCallback(std::move(clickEvent));
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+}
+
+void GestureEventHub::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc)
+{
+    gestureJudgeFunc_ = std::move(gestureJudgeFunc);
 }
 
 void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)

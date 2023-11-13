@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_PAN_RECOGNIZER_H
 
 #include <map>
+#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
@@ -99,10 +100,13 @@ private:
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    GestureJudgeResult TriggerGestureJudgeCallback();
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
     void ChangeDistance(double distance);
     double GetMainAxisDelta();
+    RefPtr<DragEventActuator> GetDragEventActuator();
+    bool HandlePanAccept();
 
     void OnResetStatus() override;
     void OnSucceedCancel() override;

@@ -43,6 +43,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
@@ -56,6 +57,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/border_image.h"
@@ -64,6 +66,7 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -5499,6 +5502,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
+    JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
@@ -6146,6 +6150,24 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         func->Execute(*info);
     };
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
+}
+
+void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(nullptr);
+        return;
+    }
+
+    auto jsOnGestureJudgeFunc = AceType::MakeRefPtr<JsGestureJudgeFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onGestureJudgefunc = [execCtx = info.GetExecutionContext(), func = jsOnGestureJudgeFunc](
+                                  const RefPtr<NG::GestureInfo>& gestureInfo,
+                                  const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, GestureJudgeResult::CONTINUE);
+        ACE_SCORING_EVENT("onGestureJudgeBegin");
+        return func->Execute(gestureInfo, info);
+    };
+    ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(std::move(onGestureJudgefunc));
 }
 
 void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)

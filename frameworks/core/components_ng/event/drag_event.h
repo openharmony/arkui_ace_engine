@@ -158,6 +158,16 @@ public:
         return isNotInPreviewState_;
     }
 
+    void SetIsDragUserReject(bool isDragUserReject)
+    {
+        isDragUserReject_ = isDragUserReject;
+    }
+
+    bool IsDragUserReject() const
+    {
+        return isDragUserReject_;
+    }
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;
@@ -174,6 +184,8 @@ private:
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
+
+    bool isDragUserReject_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;
