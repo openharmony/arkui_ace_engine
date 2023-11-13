@@ -2147,6 +2147,15 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return hitFrameNodes.rbegin()->second;
 }
 
+RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const std::string& propertyName) const
+{
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter == nodeAnimatablePropertyMap_.end()) {
+        return nullptr;
+    }
+    return iter->second;
+}
+
 void FrameNode::CreateAnimatablePropertyFloat(
     const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
 {
@@ -2159,6 +2168,17 @@ void FrameNode::CreateAnimatablePropertyFloat(
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(value, std::move(onCallbackEvent));
     context->AttachNodeAnimatableProperty(property);
     nodeAnimatablePropertyMap_.emplace(propertyName, property);
+}
+
+void FrameNode::DeleteAnimatablePropertyFloat(const std::string& propertyName)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    RefPtr<NodeAnimatablePropertyBase> propertyRef = GetAnimatablePropertyFloat(propertyName);
+    if (propertyRef) {
+        context->DetachNodeAnimatableProperty(propertyRef);
+        nodeAnimatablePropertyMap_.erase(propertyName);
+    }
 }
 
 void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)

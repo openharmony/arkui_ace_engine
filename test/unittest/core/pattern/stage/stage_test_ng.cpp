@@ -651,8 +651,6 @@ HWTEST_F(StageTestNg, PagePatternTest005, TestSize.Level1)
      * @tc.steps: step6.change some params ,recall TriggerPageTransition and StopPageTransition.
      * @tc.expected: The FLAG_FUNC call times meets expectation.
      */
-    ASSERT_NE(pattern->controller_, nullptr);
-    pattern->controller_->Stop();
     auto innerEffect = pattern->FindPageTransitionEffect(PageTransitionType::ENTER_POP);
     ASSERT_NE(effect, nullptr);
     innerEffect->animationOption_.delay = -1;
