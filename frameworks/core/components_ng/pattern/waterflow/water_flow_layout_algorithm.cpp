@@ -114,7 +114,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Axis axis = layoutProperty->GetAxis();
     auto idealSize =
         CreateIdealSize(layoutProperty->GetLayoutConstraint().value(), axis, layoutProperty->GetMeasureType(), true);
-    auto matchChildren = GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>());
+    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(idealSize, axis));
     if (!matchChildren) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
