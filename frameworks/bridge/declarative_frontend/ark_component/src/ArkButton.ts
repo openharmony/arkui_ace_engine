@@ -3,7 +3,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error("Method not implemented.");
   }
-  type (value: ButtonType): this {
+  type (value: ButtonType): ButtonAttribute {
     if (typeof value === "number") {
       modifier(this._modifiers, ButtonTypeModifier, value);
     }
@@ -12,7 +12,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  stateEffect(value: boolean): this {
+  stateEffect(value: boolean): ButtonAttribute {
     if (typeof value === "boolean") {
       modifier(this._modifiers, ButtonStateEffectModifier, value);
     } else {
@@ -20,7 +20,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  fontColor(value: ResourceColor): this {
+  fontColor(value: ResourceColor): ButtonAttribute {
     var arkColor = new ArkColor();
     if (arkColor.parseColorValue(value)) {
       modifier(this._modifiers, ButtonFontColorModifier, arkColor.color);
@@ -29,7 +29,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  fontSize(value: Length): this {
+  fontSize(value: Length): ButtonAttribute {
     if (typeof value === "number" || typeof value === "string") {
       modifier(this._modifiers, ButtonFontSizeModifier, value);
     } else {
@@ -37,7 +37,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  fontWeight(value: string | number | FontWeight): this {
+  fontWeight(value: string | number | FontWeight): ButtonAttribute {
     if (typeof value === "string") {
       modifier(this._modifiers, ButtonFontWeightModifier, value);
     } else {
@@ -45,7 +45,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  fontStyle(value: FontStyle): this {
+  fontStyle(value: FontStyle): ButtonAttribute {
     if (typeof value === "number" && value >= 0 && value < 2) {
       modifier(this._modifiers, ButtonFontStyleModifier, value);
     } else {
@@ -53,7 +53,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  fontFamily(value: string | Resource): this {
+  fontFamily(value: string | Resource): ButtonAttribute {
     if (typeof value === "string") {
       modifier(this._modifiers, ButtonFontFamilyModifier, value);
     } else {
@@ -61,9 +61,21 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  labelStyle(value: ArkLabelStyle): this {
+  labelStyle(value: LabelStyle): ButtonAttribute {
     if (typeof value === "object") {
-      modifier(this._modifiers, ButtonLabelStyleModifier, value);
+      let data = new ArkLabelStyle();
+      data.heightAdaptivePolicy = value.heightAdaptivePolicy;
+      data.maxFontSize = value.maxFontSize;
+      data.maxLines = value.maxLines;
+      data.minFontSize = value.minFontSize;
+      data.overflow = value.overflow;
+      if (typeof value.font === "object") {
+        data.font.family = value.font.family;
+        data.font.size = value.font.size;
+        data.font.style = value.font.style;
+        data.font.weight = value.font.weight;
+      }
+      modifier(this._modifiers, ButtonLabelStyleModifier, data);
     } else {
       modifier(this._modifiers, ButtonLabelStyleModifier, undefined);
     }
@@ -77,7 +89,7 @@ class ButtonStateEffectModifier extends Modifier<boolean> {
       GetUINativeModule().button.resetStateEffect(node);
     }
     else {
-      GetUINativeModule().button.setStateEffecte(node, this.value);
+      GetUINativeModule().button.setStateEffect(node, this.value);
     }
   }
 }
@@ -178,7 +190,7 @@ class ButtonFontWeightModifier extends Modifier<string> {
     }
   }
 }
-
+// @ts-ignore
 globalThis.Button.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);

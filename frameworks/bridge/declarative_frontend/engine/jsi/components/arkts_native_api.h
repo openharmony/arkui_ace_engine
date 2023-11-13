@@ -124,6 +124,11 @@ struct ArkUIToggleModifierAPI {
     void (*ResetToggleSwitchPointColor)(NodeHandle node);
 };
 
+struct ArkUINavDestinationModifierAPI {
+    void (*SetHideTitleBar)(NodeHandle node, bool hideTitle);
+    void (*ResetHideTitleBar)(NodeHandle node);
+};
+
 struct ArkUIImageSpanModifierAPI {
     void (*SetImageSpanVerticalAlign)(NodeHandle node, int32_t value);
     void (*ResetImageSpanVerticalAlign)(NodeHandle node);
@@ -286,6 +291,7 @@ struct ArkUINodeAPI {
     ArkUIRatingModifierAPI (*GetRatingModifier)();
     ArkUISliderModifierAPI (*GetSliderModifier)();
     ArkUIDividerModifierAPI (*GetDividerModifier)();
+    ArkUINavDestinationModifierAPI(*GetNavDestinationModifier)();
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
