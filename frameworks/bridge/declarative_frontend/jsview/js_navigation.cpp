@@ -361,7 +361,10 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
-    NavigationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap);
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
+    NavigationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap, bundleName, moduleName);
 }
 
 void JSNavigation::SetHideBackButton(bool hide)

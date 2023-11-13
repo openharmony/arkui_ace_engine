@@ -17,14 +17,37 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H
 
 #include <cstdint>
-#include "base/memory/ace_type.h"
-#include "interfaces/inner_api/ace/macros.h"
 
 typedef void* NodeHandle;
 
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
     void (*ResetBackgroundColor)(NodeHandle node);
+    void (*SetWidth)(NodeHandle node, double value, int unit);
+    void (*ResetWidth)(NodeHandle node);
+    void (*SetHeight)(NodeHandle node, double value, int unit);
+    void (*ResetHeight)(NodeHandle node);
+    void (*SetBorderRadius)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*ResetBorderRadius)(NodeHandle node);
+    void (*SetBorderWidth)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*ResetBorderWidth)(NodeHandle node);
+    void (*SetTransform)(NodeHandle node, const float* matrix, int32_t length);
+    void (*ResetTransform)(NodeHandle node);
+    void (*SetBorderColor)(NodeHandle node, const uint32_t& leftColorInt, const uint32_t& rightColorInt,
+        const uint32_t& topColorInt, const uint32_t& bottomColorInt);
+    void (*ResetBorderColor)(NodeHandle node);
+    void (*SetPosition)(NodeHandle node, double xValue, int xUnit, double yValue, int yUnit);
+    void (*ResetPosition)(NodeHandle node);
+    void (*SetBorderStyle)(NodeHandle node, const int32_t* styles, int32_t length);
+    void (*ResetBorderStyle)(NodeHandle node);
+    void (*SetBackShadow)(NodeHandle node, const double* shadows, int32_t length);
+    void (*ResetBackShadow)(NodeHandle node);
+    void (*SetHitTestBehavior)(NodeHandle node, uint32_t value);
+    void (*ResetHitTestBehavior)(NodeHandle node);
+    void (*SetZIndex)(NodeHandle node, int32_t value);
+    void (*ResetZIndex)(NodeHandle node);
+    void (*SetOpacity)(NodeHandle node, double opacity);
+    void (*ResetOpacity)(NodeHandle node);
 };
 
 struct ArkUINodeAPI {

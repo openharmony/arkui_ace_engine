@@ -26,6 +26,8 @@ constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
 constexpr float DEFAULT_SCROLL_TO_STIFFNESS = 227.0f;
 constexpr float DEFAULT_SCROLL_TO_DAMPING = 33.0f;
 constexpr float DEFAULT_SCROLL_TO_VELOCITY = 7.0f;
+// for add item and scrollEdge(Edge.Bottom) in one layout
+constexpr int32_t LAST_ITEM = -1;
 
 enum class ScrollState {
     IDLE = 0,

@@ -34,8 +34,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension FONT_SIZE = Dimension(2.0);
-const int32_t ANIMATION_ZERO_TO_OUTER = 200; // 200ms for animation that from zero to outer.
-const int32_t ANIMATION_OUTER_TO_ZERO = 150; // 150ms for animation that from outer to zero.
 const Dimension FOCUS_SIZE = Dimension(1.0);
 const float MOVE_DISTANCE = 5.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 40;
@@ -867,60 +865,50 @@ void TextPickerColumnPattern::HandleDragEnd()
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0) ? 1 : -1, true);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == ScrollDirection::UP ? -1 : 1);
     }
-    auto curve = CreateAnimation(scrollDelta_, 0.0);
-    fromController_->ClearInterpolators();
-    fromController_->AddInterpolator(curve);
-    fromController_->Play();
+    CreateAnimation(scrollDelta_, 0.0);
     frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 
 void TextPickerColumnPattern::CreateAnimation()
 {
     CHECK_NULL_VOID(!animationCreated_);
-    toController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
-    auto weak = AceType::WeakClaim(this);
-    toController_->AddStopListener([weak]() {
-        auto column = weak.Upgrade();
-        if (column) {
-            column->HandleCurveStopped();
-        }
-    });
-    fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
-    fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
-    fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    fromController_->SetDuration(ANIMATION_OUTER_TO_ZERO);
-    animationCreated_ = true;
-}
-
-RefPtr<CurveAnimation<double>> TextPickerColumnPattern::CreateAnimation(double from, double to)
-{
-    auto weak = AceType::WeakClaim(this);
-    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FRICTION);
-    curve->AddListener(Animation<double>::ValueCallback([weak](double value) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto propertyCallback = [weak = AceType::WeakClaim(this)](float value) {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);
         column->ScrollOption(value);
-    }));
-    return curve;
+    };
+    scrollProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    renderContext->AttachNodeAnimatableProperty(scrollProperty_);
+
+    auto aroundClickCallback = [weak = AceType::WeakClaim(this)](float value) {
+        auto column = weak.Upgrade();
+        CHECK_NULL_VOID(column);
+        if (value > 0) {
+            column->UpdateColumnChildPosition(std::ceil(value));
+        } else {
+            column->UpdateColumnChildPosition(std::floor(value));
+        }
+    };
+    aroundClickProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(aroundClickCallback));
+    renderContext->AttachNodeAnimatableProperty(aroundClickProperty_);
+    animationCreated_ = true;
 }
 
-void TextPickerColumnPattern::HandleCurveStopped()
+void TextPickerColumnPattern::CreateAnimation(double from, double to)
 {
-    CHECK_NULL_VOID(animationCreated_);
-    if (NearZero(scrollDelta_)) {
-        return;
-    }
-    ScrollOption(0.0 - scrollDelta_);
-    int32_t step = GreatNotEqual(scrollDelta_, 0.0) ? 1 : -1;
-    InnerHandleScroll(step);
-    fromController_->ClearInterpolators();
-    if (LessNotEqual(scrollDelta_, 0.0)) {
-        fromController_->AddInterpolator(fromTopCurve_);
-    } else {
-        fromController_->AddInterpolator(fromBottomCurve_);
-    }
-    fromController_->Play();
+    AnimationOption option;
+    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
+    option.SetDuration(CLICK_ANIMATION_DURATION);
+    scrollProperty_->Set(from);
+    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), to]() {
+        auto column = weak.Upgrade();
+        CHECK_NULL_VOID(column);
+        column->scrollProperty_->Set(to);
+    });
 }
 
 void TextPickerColumnPattern::ScrollOption(double delta)
@@ -1262,10 +1250,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
             return;
         }
         pattern->InnerHandleScroll(1);
-        CHECK_NULL_VOID(pattern->fromController_);
-        pattern->fromController_->ClearInterpolators();
-        pattern->fromController_->AddInterpolator(pattern->fromTopCurve_);
-        pattern->fromController_->Play();
+        pattern->CreateAnimation(0.0 - pattern->jumpInterval_, 0.0);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
@@ -1279,10 +1264,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
             return;
         }
         pattern->InnerHandleScroll(-1);
-        CHECK_NULL_VOID(pattern->fromController_);
-        pattern->fromController_->ClearInterpolators();
-        pattern->fromController_->AddInterpolator(pattern->fromBottomCurve_);
-        pattern->fromController_->Play();
+        pattern->CreateAnimation(pattern->jumpInterval_, 0.0);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
@@ -1294,20 +1276,24 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
     int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
     int32_t step = param->itemIndex - middleIndex;
     if (step != 0) {
-        if (fromController_->IsRunning()) {
-            fromController_->Finish();
+        if (animation_) {
+            AnimationUtils::StopAnimation(animation_);
+            yLast_ = 0.0;
+            yOffset_ = 0.0;
         }
         InnerHandleScroll(step);
         double distance =
             (step > 0 ? optionProperties_[middleIndex].prevDistance : optionProperties_[middleIndex].nextDistance) *
             std::abs(step);
-        auto curveTop = CreateAnimation(abs(distance), 0.0);
-        auto curveBottom = CreateAnimation(0 - abs(distance), 0.0);
-        fromController_->ClearInterpolators();
-
-        fromController_->AddInterpolator(step > 0 ? curveTop : curveBottom);
-        fromController_->SetDuration(CLICK_ANIMATION_DURATION);
-        fromController_->Play();
+        AnimationOption option;
+        option.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        option.SetDuration(CLICK_ANIMATION_DURATION);
+        aroundClickProperty_->Set(0.0);
+        animation_ = AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), step, distance]() {
+            auto column = weak.Upgrade();
+            CHECK_NULL_VOID(column);
+            column->aroundClickProperty_->Set(step > 0 ? 0.0 - abs(distance) : abs(distance));
+        });
     }
 }
 } // namespace OHOS::Ace::NG

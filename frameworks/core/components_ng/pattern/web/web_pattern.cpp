@@ -2479,6 +2479,7 @@ int WebPattern::GetWebId()
 
 ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState state)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScroll offset = %{public}f", offset);
     auto parent = parent_.Upgrade();
     if (parent) {
         return parent->HandleScroll(offset, source, state);
@@ -2488,6 +2489,7 @@ ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState 
 
 bool WebPattern::HandleScrollVelocity(float velocity)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity velocity = %{public}f", velocity);
     auto parent = parent_.Upgrade();
     if (parent) {
         if (parent->HandleScrollVelocity(velocity)) {
@@ -2575,7 +2577,7 @@ void WebPattern::OnRootLayerChanged(int width, int height)
     TAG_LOGD(AceLogTag::ACE_WEB, "width = %{public}d, height = %{public}d", width, height);
     rootLayerWidth_ = width;
     rootLayerHeight_ = height;
-    if (isWrapContentEnabled_) {
+    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         auto newRect = Size(width, height);

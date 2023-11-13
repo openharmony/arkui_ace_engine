@@ -93,6 +93,9 @@ public:
                 auto dividerShadowEnable = pattern->GetAttr<std::string>("divider_shadow_enable", "0");
                 theme->dividerShadowEnable_ = StringUtils::StringToInt(dividerShadowEnable);
                 theme->navigationGroupColor_ = pattern->GetAttr<Color>("navigation_group_color", Color::TRANSPARENT);
+                auto navBarUnfocusEffectEnable = pattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
+                theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
+                theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
             }
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
@@ -127,6 +130,9 @@ public:
             auto dividerShadowEnable = pattern->GetAttr<std::string>("divider_shadow_enable", "0");
             theme->dividerShadowEnable_ = StringUtils::StringToInt(dividerShadowEnable);
             theme->navigationGroupColor_ = pattern->GetAttr<Color>("navigation_group_color", Color::TRANSPARENT);
+            auto navBarUnfocusEffectEnable = pattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
+            theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
+            theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
         }
     };
 
@@ -359,6 +365,14 @@ public:
     {
         return navigationGroupColor_;
     }
+    uint32_t GetNavBarUnfocusEffectEnable() const
+    {
+        return navBarUnfocusEffectEnable_;
+    }
+    const Color& GetNavBarUnfocusColor() const
+    {
+        return navBarUnfocusColor_;
+    }
 protected:
     NavigationBarTheme() = default;
 
@@ -421,6 +435,8 @@ private:
     uint32_t toolbarLimitGridCount_ = 8;
     uint32_t dividerShadowEnable_ = 0;
     Color navigationGroupColor_ = Color::TRANSPARENT;
+    uint32_t navBarUnfocusEffectEnable_ = 0;
+    Color navBarUnfocusColor_ = Color::TRANSPARENT;
 };
 
 } // namespace OHOS::Ace

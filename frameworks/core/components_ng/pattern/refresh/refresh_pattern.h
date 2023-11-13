@@ -22,6 +22,7 @@
 #include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
+#include "frameworks/core/components_ng/base/frame_scene_status.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_accessibility_property.h"
@@ -114,8 +115,8 @@ public:
 
 private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart(bool isDrag = true);
-    void HandleDragUpdate(float delta);
+    void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
+    void HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
     void HandleDragCancel();
     void TriggerFinish();
@@ -170,6 +171,7 @@ private:
     RefreshAnimationState GetLoadingProgressStatus();
     void RefreshStatusChangeEffect();
     float GetTargetOffset();
+    void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;

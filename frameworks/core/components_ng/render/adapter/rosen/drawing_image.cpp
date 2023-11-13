@@ -207,11 +207,11 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
     return false;
 #endif
 }
+} // namespace OHOS::Ace::NG
 
-namespace OHOS:Ace {
+namespace OHOS::Ace {
 void ImageCache::Purge()
 {
     SkGraphics::PurgeResourceCache();
-}
 }
 } // namespace OHOS::Ace::NG

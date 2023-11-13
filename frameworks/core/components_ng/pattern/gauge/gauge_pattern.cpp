@@ -46,12 +46,7 @@ void GaugePattern::OnModifyDone()
     }
 
     if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if ((host->TotalChildCount() > 0) && (!titleChildId_.has_value())) {
-            auto firstChild = host->GetFirstChild();
-            CHECK_NULL_VOID(firstChild);
-            titleChildId_ = firstChild->GetId();
-        }
-
+        InitTitleContent();
         auto gaugePaintProperty = GetPaintProperty<GaugePaintProperty>();
         CHECK_NULL_VOID(gaugePaintProperty);
         if (gaugePaintProperty->GetIsShowIndicatorValue(false) && gaugePaintProperty->HasIndicatorIconSourceInfo()) {
@@ -79,12 +74,33 @@ void GaugePattern::OnModifyDone()
     }
 }
 
+void GaugePattern::InitTitleContent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if ((host->TotalChildCount() > 0) && (!titleChildId_.has_value())) {
+        auto firstChild = host->GetFirstChild();
+        CHECK_NULL_VOID(firstChild);
+        if (firstChild->GetTag() == V2::GAUGE_DESCRIPTION_TAG) {
+            return;
+        }
+
+        if (minValueTextId_.has_value() && (firstChild->GetId() == minValueTextId_.value())) {
+            return;
+        }
+
+        titleChildId_ = firstChild->GetId();
+    }
+}
+
 void GaugePattern::InitDescriptionNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto linearNode = FrameNode::GetOrCreateFrameNode(V2::GAUGE_DESCRIPTION_TAG, GetDescriptionNodeId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    CHECK_NULL_VOID(linearNode);
+    linearNode->Clean();
     auto descriptionRenderContext = linearNode->GetRenderContext();
     CHECK_NULL_VOID(descriptionRenderContext);
     descriptionRenderContext->UpdateClipEdge(true);

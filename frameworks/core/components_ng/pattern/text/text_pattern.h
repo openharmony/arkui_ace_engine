@@ -316,6 +316,7 @@ public:
     }
 
     void OnAreaChangedInner() override;
+    void RemoveAreaChangeInner();
 
 protected:
     virtual void HandleOnCopy();

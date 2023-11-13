@@ -653,7 +653,7 @@ void NavigationModelNG::Create()
         contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT_SELF);
         auto renderContext = contentNode->GetRenderContext();
-        if (theme) {
+        if (theme && !renderContext->HasBackgroundColor()) {
             renderContext->UpdateBackgroundColor(theme->GetNavigationGroupColor());
         }
         navigationGroupNode->AddChild(contentNode);
@@ -997,7 +997,8 @@ void NavigationModelNG::SetHideNavBar(bool hideNavBar)
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar);
 }
 
-void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+    const std::string& bundleName, const std::string& moduleName)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1009,7 +1010,7 @@ void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap,
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    ImageSourceInfo imageSourceInfo(src);
+    ImageSourceInfo imageSourceInfo(src, bundleName, moduleName);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, noPixMap);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap);

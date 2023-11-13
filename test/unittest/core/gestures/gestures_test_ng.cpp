@@ -46,6 +46,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "core/components_ng/test/mock/render/mock_media_player.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -12098,5 +12099,106 @@ HWTEST_F(GesturesTestNg, GestureAccessibilityEventTest002, TestSize.Level1)
      */
     longPressRecognizer.OnAccepted();
     EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: TransformTest001
+ * @tc.desc: Test Transform in Default Condition
+ */
+HWTEST_F(GesturesTestNg, TransformTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode.
+     */
+    RefPtr<FrameNode> FRAME_NODE_0 = FrameNode::CreateFrameNode("0", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> FRAME_NODE_1 = FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> FRAME_NODE_2 = FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE_2->SetParent(WeakPtr<FrameNode>(FRAME_NODE_1));
+    FRAME_NODE_1->SetParent(WeakPtr<FrameNode>(FRAME_NODE_0));
+
+    /**
+     * @tc.steps: step2. mock local matrix.
+     */
+    FRAME_NODE_0->localMat_ = Matrix4::CreateIdentity();
+    FRAME_NODE_1->localMat_ = Matrix4::CreateIdentity();
+    FRAME_NODE_2->localMat_ = Matrix4::CreateIdentity();
+
+    /**
+     * @tc.steps: step2. call callback function.
+     */
+    PointF f1(1.0, 1.0);
+    NGGestureRecognizer::Transform(f1, WeakPtr<FrameNode>(FRAME_NODE_2));
+    PointF f2(1.000000, 1.000000);
+    EXPECT_EQ(f1, f2);
+}
+
+/**
+ * @tc.name: TransformTest002
+ * @tc.desc: Test Transform with Matrix
+ */
+HWTEST_F(GesturesTestNg, TransformTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode.
+     */
+    RefPtr<FrameNode> FRAME_NODE_0 = FrameNode::CreateFrameNode("0", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> FRAME_NODE_1 = FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> FRAME_NODE_2 = FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE_2->SetParent(WeakPtr<FrameNode>(FRAME_NODE_1));
+    FRAME_NODE_1->SetParent(WeakPtr<FrameNode>(FRAME_NODE_0));
+
+    /**
+     * @tc.steps: step2. mock local matrix.
+     */
+    FRAME_NODE_0->localMat_ = Matrix4::CreateIdentity();
+    FRAME_NODE_1->localMat_ = Matrix4::Invert(
+            Matrix4::CreateTranslate(100, 200, 0) * Matrix4::CreateRotate(90, 0, 0, 1) *
+            Matrix4::CreateScale(0.6, 0.8, 1));
+    FRAME_NODE_2->localMat_ = Matrix4::Invert(
+            Matrix4::CreateTranslate(400, 300, 0) * Matrix4::CreateRotate(30, 0, 0, 1) *
+            Matrix4::CreateScale(0.5, 0.5, 1));
+
+    /**
+     * @tc.steps: step3. call callback function.
+     */
+    PointF f1(1.0, 1.0);
+    NGGestureRecognizer::Transform(f1, WeakPtr<FrameNode>(FRAME_NODE_2));
+    PointF f2(-1443.533813, 426.392731);
+    EXPECT_EQ(f1, f2);
+}
+
+/**
+ * @tc.name: TransformTest003
+ * @tc.desc: Test Transform with Matrix in Reverse Order
+ */
+HWTEST_F(GesturesTestNg, TransformTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode.
+     */
+    RefPtr<FrameNode> FRAME_NODE_0 = FrameNode::CreateFrameNode("0", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> FRAME_NODE_1 = FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> FRAME_NODE_2 = FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE_2->SetParent(WeakPtr<FrameNode>(FRAME_NODE_1));
+    FRAME_NODE_1->SetParent(WeakPtr<FrameNode>(FRAME_NODE_0));
+
+    /**
+     * @tc.steps: step2. mock local matrix.
+     */
+    FRAME_NODE_0->localMat_ = Matrix4::CreateIdentity();
+    FRAME_NODE_2->localMat_ = Matrix4::Invert(
+            Matrix4::CreateTranslate(100, 200, 0) * Matrix4::CreateRotate(90, 0, 0, 1) *
+            Matrix4::CreateScale(0.6, 0.8, 1));
+    FRAME_NODE_1->localMat_ = Matrix4::Invert(
+            Matrix4::CreateTranslate(400, 300, 0) * Matrix4::CreateRotate(30, 0, 0, 1) *
+            Matrix4::CreateScale(0.5, 0.5, 1));
+
+    /**
+     * @tc.steps: step3. call callback function.
+     */
+    PointF f1(1.0, 1.0);
+    NGGestureRecognizer::Transform(f1, WeakPtr<FrameNode>(FRAME_NODE_2));
+    PointF f2(-531.471924, 1362.610352);
+    EXPECT_EQ(f1, f2);
 }
 } // namespace OHOS::Ace::NG

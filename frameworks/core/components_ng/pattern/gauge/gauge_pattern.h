@@ -142,6 +142,7 @@ private:
     void InitLimitValueText(int32_t valueTextId, bool isMin);
     void HideLimitValueText(int32_t valueTextId, bool isMin);
     void InitIndicatorImage();
+    void InitTitleContent();
 
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
     DataReadyNotifyTask CreateDataReadyCallback();

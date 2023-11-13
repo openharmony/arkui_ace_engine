@@ -30,7 +30,7 @@ class Modifier<T extends number | string | boolean | Equable> {
         return (this.value === undefined);
     }
 
-    applyPeer(node: KNode, reset: boolean): void {}
+    applyPeer(node: KNode, reset: boolean): void { }
 }
 
 class BackgroundColorModifier extends Modifier<string> {
@@ -42,6 +42,196 @@ class BackgroundColorModifier extends Modifier<string> {
             globalThis.getArkUINativeModule().common.setBackgroundColor(node, this.value!);
         }
     }
+}
+
+
+class WidthModifier extends Modifier<number | string> {
+    static identity: Symbol = Symbol("width");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetWidth(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setWidth(node, this.value);
+        }
+    }
+}
+
+class BorderWidthModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("borderWidth");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderWidth(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderWidth(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+        }
+    }
+}
+
+
+class HeightModifier extends Modifier<number | string> {
+    static identity: Symbol = Symbol("height");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetHeight(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setHeight(node, this.value);
+        }
+    }
+}
+
+class BorderRadiusModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("borderRadius");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderRadius(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        }
+    }
+}
+
+class PositionModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("position");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetPosition(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setPosition(node, this.value.x, this.value.y);
+        }
+    }
+}
+
+class BorderColorModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("borderColor");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderColor(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderColor(node, this.value.leftColor, this.value.rightColor, this.value.topColor, this.value.bottomColor);
+        }
+    }
+}
+class TransformModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("transform");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetTransform(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setTransform(node, this.value.matrix);
+        }
+    }
+}
+
+class BorderStyleModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("borderStyle");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderStyle(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderStyle(node, this.value.type, this.value.style,
+                this.value.top, this.value.right, this.value.bottom, this.value.left);
+        }
+    }
+}
+
+class ShadowModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("shadow");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetShadow(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setShadow(node, this.value.style,
+                this.value.radius, this.value.type, this.value.color,
+                this.value.offsetX, this.value.offsetY, this.value.fill);
+        }
+    }
+}
+
+class HitTestBehaviorModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("hitTestBehavior");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetHitTestBehavior(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setHitTestBehavior(node, this.value);
+        }
+    }
+}
+
+class ZIndexModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("zIndex");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetZIndex(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setZIndex(node, this.value);
+        }
+    }
+}
+
+class OpacityModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("opacity");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetOpacity(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setOpacity(node, this.value);
+        }
+    }
+}
+
+const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
+const isString = (val: any) => typeof val === 'string'
+const isNumber = (val: any) => typeof val === 'number'
+const isBigint = (val: any) => typeof val === 'bigint'
+const isBoolean = (val: any) => typeof val === 'boolean'
+const isSymbol = (val: any) => typeof val === 'symbol'
+const isUndefined = (val: any) => typeof val === 'undefined'
+const isObject = (val: any) => typeof val === 'object'
+const isFunction = (val: any) => typeof val === 'function'
+
+function CheckJSCallbackInfo(value: any, checklist: any[]) {
+    var typeVerified = false;
+    checklist.forEach(function (infoType) {
+        switch (infoType) {
+            case JSCallbackInfoType.STRING:
+                if (isString(value)) {
+                    typeVerified = true;
+                }
+                break;
+            case JSCallbackInfoType.NUMBER:
+                if (isNumber(value)) {
+                    typeVerified = true;
+                }
+                break;
+            case JSCallbackInfoType.OBJECT:
+                if (isObject(value)) {
+                    typeVerified = true;
+                }
+                break;
+            case JSCallbackInfoType.FUNCTION:
+                if (isFunction(value)) {
+                    typeVerified = true;
+                }
+                break;
+            default:
+                break;
+        }
+
+    });
+    return typeVerified || checklist.length == 0;
 }
 
 function modifier<T extends number | string | boolean | Equable, M extends Modifier<T>>(
@@ -74,18 +264,32 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
                 expiringItems.push(key);
             }
         });
-    
+
         expiringItems.forEach(key => {
             this._modifiers.delete(key);
         });
     }
 
     width(value: Length): this {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "number" && typeof value !== "string") {
+            console.log("width only support number and string");
+            modifier(this._modifiers, WidthModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, WidthModifier, value);
+        }
+        return this;
     }
 
     height(value: Length): this {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "number" && typeof value !== "string") {
+            console.log("height only support number and string");
+            modifier(this._modifiers, HeightModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, HeightModifier, value);
+        }
+        return this;
     }
 
     expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
@@ -113,7 +317,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     hitTestBehavior(value: HitTestMode): this {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, HitTestBehaviorModifier, value);
+        } else {
+            modifier(this._modifiers, HitTestBehaviorModifier, undefined);
+        }
+        return this;
     }
 
     layoutWeight(value: number | string): this {
@@ -163,7 +372,21 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     opacity(value: number | Resource): this {
-        throw new Error("Method not implemented.");
+        var opacityDefault = 0.0;
+        var checklist = [JSCallbackInfoType.OBJECT, JSCallbackInfoType.NUMBER, JSCallbackInfoType.STRING];
+        if (!CheckJSCallbackInfo(value, checklist)) {
+            modifier(this._modifiers, OpacityModifier, 1.0);
+        }
+        else {
+            if (isNumber(value)) {
+                opacityDefault = value;
+            }
+            else if (isString(value)) {
+                opacityDefault = Number(value);
+            }
+            modifier(this._modifiers, OpacityModifier, opacityDefault);
+        }
+        return this;
     }
 
     border(value: BorderOptions): this {
@@ -171,19 +394,75 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     borderStyle(value: BorderStyle | EdgeStyles): this {
-        throw new Error("Method not implemented.");
+        var arkBorderStyle = new ArkBorderStyle();
+        if (arkBorderStyle.parseBorderStyle(value)) {
+            modifier(this._modifiers, BorderStyleModifier, arkBorderStyle);
+        } else {
+            modifier(this._modifiers, BorderStyleModifier, undefined);
+        }
+        return this;
     }
 
     borderWidth(value: Length | EdgeWidths): this {
-        throw new Error("Method not implemented.");
+        var borderWidth = new ArkBorderWidth()
+        if (typeof value === "number" || typeof value === "string") {
+            borderWidth.left = value
+            borderWidth.right = value
+            borderWidth.top = value
+            borderWidth.bottom = value
+        }
+        else {
+            borderWidth.left = value?.left
+            borderWidth.right = value?.right
+            borderWidth.top = value?.top
+            borderWidth.bottom = value?.bottom
+        }
+        modifier(this._modifiers, BorderWidthModifier, borderWidth);
+        return this;
     }
 
     borderColor(value: ResourceColor | EdgeColors): this {
-        throw new Error("Method not implemented.");
+        var arkColor = new ArkColor();
+        var borderColorGroup = new ArkBorderColor()
+        if (typeof value === "number" || typeof value === "string") {
+            arkColor.parseColorValue(value)
+            borderColorGroup.leftColor = arkColor.color
+            borderColorGroup.rightColor = arkColor.color
+            borderColorGroup.topColor = arkColor.color
+            borderColorGroup.bottomColor = arkColor.color
+
+        }
+        else if (!!value.left || !!value.right || !!value.top || !!value.bottom) {
+            arkColor.parseColorValue(value.left)
+            borderColorGroup.leftColor = left.color
+            arkColor.parseColorValue(value.right)
+            borderColorGroup.rightColor = right.color
+            arkColor.parseColorValue(value.top)
+            borderColorGroup.topColor = top.color
+            arkColor.parseColorValue(value.bottom)
+            borderColorGroup.bottomColor = bottom.color
+        }
+
+        modifier(this._modifiers, BorderColorModifier, borderColorGroup);
+        return this;
     }
 
     borderRadius(value: Length | BorderRadiuses): this {
-        throw new Error("Method not implemented.");
+        var borderRadius = new ArkBorderRadius
+        if (typeof value === "number" || typeof value === "string") {
+            borderRadius.topLeft = value
+            borderRadius.topRight = value
+            borderRadius.bottomLeft = value
+            borderRadius.bottomRight = value
+        }
+        else {
+            borderRadius.topLeft = value?.topRight
+            borderRadius.topRight = value?.topRight
+            borderRadius.bottomLeft = value?.bottomLeft
+            borderRadius.bottomRight = value?.bottomRight
+        }
+        modifier(this._modifiers, BorderRadiusModifier, borderRadius);
+        return this;
     }
 
     borderImage(value: BorderImageOption): this {
@@ -339,7 +618,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     transform(value: object): this {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, TransformModifier, new ArkTransformMatrix(value["matrix4x4"]));
+        return this;
     }
 
     onAppear(event: () => void): this {
@@ -379,7 +659,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     zIndex(value: number): this {
-        throw new Error("Method not implemented.");
+        if (value !== null) {
+            var zIndex = 0;
+            if (typeof (value) === "number") {
+                zIndex = value;
+            }
+            modifier(this._modifiers, ZIndexModifier, zIndex);
+        }
+        return this;
     }
 
     sharedTransition(id: string, options?: sharedTransitionOptions): this {
@@ -395,7 +682,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     position(value: Position): this {
-        throw new Error("Method not implemented.");
+        if (!value || (!!value?.x && typeof value?.x != "number" && typeof value?.x != "string") ||
+            (!!value?.y && typeof value?.y != "number" && typeof value?.x != "string")) {
+            console.log("position x and y should be number or string");
+            modifier(this._modifiers, PositionModifier, undefined);
+        }
+        else {
+            var position = new ArkPosition()
+            position.x = value?.x
+            position.y = value?.y
+            modifier(this._modifiers, PositionModifier, position);
+        }
+        return this;
     }
 
     markAnchor(value: Position): this {
@@ -496,11 +794,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     shadow(value: ShadowOptions | ShadowStyle): this {
-        throw new Error("Method not implemented.");
-    }
-
-    clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
-        throw new Error("Method not implemented.");
+        var arkShadow = new ArkShadow();
+        if (arkShadow.parseShadowValue(value)) {
+            modifier(this._modifiers, ShadowModifier, arkShadow);
+        } else {
+            modifier(this._modifiers, ShadowModifier, undefined);
+        }
+        return this;
     }
 
     mask(value: CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute | ProgressMask): this {

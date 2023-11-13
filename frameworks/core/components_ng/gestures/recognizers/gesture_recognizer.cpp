@@ -21,6 +21,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -144,7 +145,7 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
     std::vector<Matrix4> vTrans {};
     auto host = node.Upgrade();
     while (host) {
-        auto localMat = host->GetRenderContext()->GetLocalTransformMatrix();
+        auto localMat = host->GetLocalMatrix();
         vTrans.emplace_back(localMat);
         host = host->GetAncestorNodeOfFrame();
     }
@@ -161,4 +162,42 @@ void NGGestureRecognizer::SetTransInfo(int transId)
 {
     transId_ = transId;
 }
+
+RefPtr<GestureSnapshot> NGGestureRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = TouchEventTarget::Dump();
+    auto group = gestureGroup_.Upgrade();
+    if (group) {
+        info->parentId = reinterpret_cast<uintptr_t>(AceType::RawPtr(group));
+    }
+    return info;
+}
+
+void NGGestureRecognizer::AddGestureProcedure(const std::string& procedure) const
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+    eventMgr->GetEventTreeRecord().AddGestureProcedure(
+        reinterpret_cast<uintptr_t>(this),
+        procedure,
+        TransRefereeState(this->GetRefereeState()),
+        TransGestureDisposal(this->GetGestureDisposal()));
+}
+
+void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
+    const RefPtr<NGGestureRecognizer>& recognizer) const
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+    eventMgr->GetEventTreeRecord().AddGestureProcedure(
+        reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
+        point,
+        TransRefereeState(recognizer->GetRefereeState()),
+        TransGestureDisposal(recognizer->GetGestureDisposal()));
+}
+
 } // namespace OHOS::Ace::NG

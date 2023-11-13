@@ -43,8 +43,12 @@ private:
     void MeasureDescription(LayoutWrapper* layoutWrapper, const SizeF& parentSize);
     void MeasureTitleChild(LayoutWrapper* layoutWrapper, const SizeF& parentSize);
     bool CheckDescriptionIsImageNode(const RefPtr<LayoutWrapper>& layoutWrapper) const;
+    void MeasureLimitValueTextWidth(LayoutWrapper* layoutWrapper);
 
     RefPtr<ImageLoadingContext> indicatorIconLoadingCtx_;
+    double limitValueTextWidth_ = 0.0;
+    double startAngleOffsetX_ = 0.0;
+    double endAngleOffsetX_ = 0.0;
     ACE_DISALLOW_COPY_AND_MOVE(GaugeLayoutAlgorithm);
 };
 

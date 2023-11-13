@@ -119,6 +119,9 @@ protected:
     float unitWidth_ = 0.0f;
     bool autoWidth_ = false;
 
+private:
+    float GetVisualTextWidth() const;
+
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
