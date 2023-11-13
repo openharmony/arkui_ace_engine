@@ -122,6 +122,8 @@ using OnSelectFunc = std::function<void(bool)>;
 using OnDeleteEvent = std::function<void()>;
 using OnEnterDeleteAreaEvent = std::function<void()>;
 using OnExitDeleteAreaEvent = std::function<void()>;
+using OnOffsetChangeFunc = std::function<void(int32_t)>;
+using OnStateChangedEvent = std::function<void(SwipeActionState)>;
 
 } // namespace OHOS::Ace
 

@@ -89,8 +89,8 @@ void ListItemModelImpl::SetSelectable(bool selectable)
     JSViewSetProperty(&V2::ListItemComponent::SetSelectable, selectable);
 }
 
-void ListItemModelImpl::SetSwiperAction(
-    std::function<void()>&& startAction, std::function<void()>&& endAction, V2::SwipeEdgeEffect edgeEffect)
+void ListItemModelImpl::SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
+    [[maybe_unused]] OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect)
 {
     auto listItem = AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!listItem) {
@@ -119,7 +119,7 @@ void ListItemModelImpl::SetSelectCallback(OnSelectFunc&& selectCallback)
 
 void ListItemModelImpl::SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation,
     OnDeleteEvent&& onDelete, OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
-    const Dimension& length, bool isStartArea) {};
+    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea) {};
 
 void ListItemModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
