@@ -256,7 +256,7 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
         CHECK_NULL_RETURN(rsData, nullptr);
         ImageLoader::CacheImageData(src.GetKey(), AceType::MakeRefPtr<NG::DrawingImageData>(rsData));
     } while (0);
-    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&rsData));
+    return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
 #endif
 }
 
