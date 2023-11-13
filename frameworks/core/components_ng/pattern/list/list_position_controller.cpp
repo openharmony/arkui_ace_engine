@@ -25,4 +25,14 @@ Rect ListPositionController::GetItemRectInGroup(int32_t index, int32_t indexInGr
     CHECK_NULL_RETURN(listPattern, Rect());
     return listPattern->GetItemRectInGroup(index, indexInGroup);
 }
+
+void ListPositionController::CloseAllSwipeActions(OnFinishFunc&& onFinishCallback)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
+    CHECK_NULL_VOID(listPattern);
+    return listPattern->CloseAllSwipeActions(std::move(onFinishCallback));
+}
+
 } // namespace OHOS::Ace::NG

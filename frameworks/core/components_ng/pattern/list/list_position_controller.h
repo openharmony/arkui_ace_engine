@@ -27,6 +27,7 @@ public:
     ~ListPositionController() override = default;
 
     Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const override;
+    void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) override;
 };
 } // namespace OHOS::Ace::NG
 

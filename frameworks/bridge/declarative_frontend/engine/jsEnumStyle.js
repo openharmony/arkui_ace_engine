@@ -1954,6 +1954,19 @@ var SwiperNestedScrollMode;
   SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
 })(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
 
+var CheckBoxStyle;
+(function (CheckBoxStyle) {
+  CheckBoxStyle["CIRCULAR_STYLE"] = 0;
+  CheckBoxStyle["SQUARE_STYLE"] = 1;
+})(CheckBoxStyle || (CheckBoxStyle = {}));
+
+var SwipeActionState;
+(function (SwipeActionState) {
+  SwipeActionState[SwipeActionState["COLLAPSED"] = 0] = "COLLAPSED";
+  SwipeActionState[SwipeActionState["EXPANDED"] = 1] = "EXPANDED";
+  SwipeActionState[SwipeActionState["ACTIONING"] = 2] = "ACTIONING";
+})(SwipeActionState || (SwipeActionState = {}));
+
 var CheckBoxShape;
 (function (CheckBoxShape) {
   CheckBoxShape["CIRCLE"] = 0;
