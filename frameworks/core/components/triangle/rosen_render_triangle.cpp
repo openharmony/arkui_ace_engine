@@ -77,7 +77,7 @@ void RosenRenderTriangle::Paint(RenderContext& context, const Offset& offset)
     path.Close();
 
     RSBrush brush;
-    brush.SetARGB(color_.GetRed(), color_.GetGreen(), color_.GetBlue(), color_.GetAlpha());
+    brush.SetARGB(color_.GetAlpha(), color_.GetRed(), color_.GetGreen(), color_.GetBlue());
     brush.SetAntiAlias(true);
     canvas->AttachBrush(brush);
     canvas->DrawPath(path);
