@@ -150,10 +150,10 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
         } else {
             RSScalar halfDenominator = 2.0f;
             RSScalar radius = 0.0f;
-            RSRRect rect = rrect.GetRect();
+            RSRect rect = rrect.GetRect();
             RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
             RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
-            RSRPoint centerPt(x, y);
+            RSPoint centerPt(x, y);
             if (rect.GetWidth() > rect.GetHeight()) {
                 radius = rect.GetHeight() / halfDenominator;
             } else {
@@ -178,10 +178,10 @@ void CheckBoxModifier::DrawBorder(RSCanvas& canvas, const OffsetF& origin, RSPen
     } else {
         RSScalar halfDenominator = 2.0f;
         RSScalar radius = 0.0f;
-        RSRRect rect = rrect.GetRect();
+        RSRect rect = rrect.GetRect();
         RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
         RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
-        RSRPoint centerPt(x, y);
+        RSPoint centerPt(x, y);
         if (rect.GetWidth() > rect.GetHeight()) {
             radius = rect.GetHeight() / halfDenominator;
         } else {
@@ -206,10 +206,10 @@ void CheckBoxModifier::DrawBackboard(
     } else {
         RSScalar halfDenominator = 2.0f;
         RSScalar radius = 0.0f;
-        RSRRect rect = rrect.GetRect();
+        RSRect rect = rrect.GetRect();
         RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
         RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
-        RSRPoint centerPt(x, y);
+        RSPoint centerPt(x, y);
         if (rect.GetWidth() > rect.GetHeight()) {
             radius = rect.GetHeight() / halfDenominator;
         } else {

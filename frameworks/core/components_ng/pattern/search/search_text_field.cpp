@@ -49,4 +49,14 @@ TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction()
 {
     return TextInputAction::SEARCH;
 }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+void SearchTextFieldPattern::InitDragEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetDraggable(true);
+    TextFieldPattern::InitDragEvent();
+}
+#endif
 } // namespace OHOS::Ace::NG

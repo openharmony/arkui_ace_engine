@@ -145,7 +145,7 @@ public:
     void SetAudioResumeInterval(int32_t resumeInterval) override;
     void SetAudioExclusive(bool audioExclusive) override;
     void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
-    void SetWrapContent(bool isWrapContentEnabled) override;
+    void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
 };

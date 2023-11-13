@@ -50,6 +50,9 @@ constexpr double DEFAULT_INDICATOR_OFFSET = 16.0;
 constexpr int32_t DEFAULT_FRICTION_RATIO = 42;
 constexpr float PERCENT = 0.01; // Percent
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
+constexpr float DEFAULT_SPEED = 10.0f;
+constexpr float DEFAULT_OFFSET = 20.0f;
+constexpr int32_t CALL_TIMES = 2;
 } // namespace
 class RefreshTestNg : public testing::Test, public TestNG {
 public:
@@ -826,5 +829,28 @@ HWTEST_F(RefreshTestNg, VersionElevenAttrRefreshing002, TestSize.Level1)
     paintProperty_->UpdateIsRefreshing(true);
     pattern_->OnModifyDone();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+}
+
+/**
+ * @tc.name: Frame Scene TEST
+ * @tc.desc: Test Frame ratio
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, RefreshDragFrameRatio001, TestSize.Level1)
+{
+    RefreshModelNG refreshModel;
+    refreshModel.Create();
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(!!frameNode);
+    auto refreshPattern = frameNode->GetPattern<RefreshPattern>();
+    EXPECT_TRUE(!!refreshPattern);
+    auto renderContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
+    EXPECT_TRUE(!!renderContext);
+    EXPECT_CALL(*renderContext, AddFRCSceneInfo(_, _)).Times(CALL_TIMES);
+    refreshPattern->HandleDragStart(true, DEFAULT_SPEED);
+    refreshPattern->HandleDragUpdate(DEFAULT_OFFSET, DEFAULT_SPEED);
+    refreshPattern->HandleDragUpdate(DEFAULT_OFFSET, DEFAULT_SPEED);
+    refreshPattern->HandleDragEnd(DEFAULT_SPEED);
 }
 } // namespace OHOS::Ace::NG

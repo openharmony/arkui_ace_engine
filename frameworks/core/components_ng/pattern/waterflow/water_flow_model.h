@@ -54,6 +54,7 @@ public:
     virtual void SetOnReachEnd(OnReachEvent&& onReachEnd) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin) = 0;
     virtual void SetFriction(double friction) = 0;
+    virtual void SetCachedCount(int32_t value) = 0;
 
 private:
     static std::unique_ptr<WaterFlowModel> instance_;

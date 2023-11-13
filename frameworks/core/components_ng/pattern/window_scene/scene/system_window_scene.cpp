@@ -19,6 +19,7 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : session_(session)
@@ -86,14 +87,25 @@ void SystemWindowScene::OnAttachToFrameNode()
     };
     mouseEventHub->SetMouseEvent(std::move(mouseCallback));
 
-    auto lostFocusCallback = [weakThis = WeakClaim(this)]() {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        auto focusHub = host->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->LostFocus();
+    RegisterFocusCallback();
+}
+
+void SystemWindowScene::RegisterFocusCallback()
+{
+    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto focusHub = host->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->LostFocus();
+        },
+            TaskExecutor::TaskType::UI);
     };
     CHECK_NULL_VOID(session_);
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);

@@ -92,6 +92,14 @@ void JSGauge::Create(const JSCallbackInfo& info)
     double gaugeMin = min->IsNumber() ? min->ToNumber<double>() : 0;
     double gaugeMax = max->IsNumber() ? max->ToNumber<double>() : 100;
     double gaugeValue = value->IsNumber() ? value->ToNumber<double>() : 0;
+    if (LessNotEqual(gaugeMax, gaugeMin)) {
+        gaugeMin = NG::DEFAULT_MIN_VALUE;
+        gaugeMax = NG::DEFAULT_MAX_VALUE;
+    }
+
+    if (LessNotEqual(gaugeValue, gaugeMin) || GreatNotEqual(gaugeValue, gaugeMax)) {
+        gaugeValue = gaugeMin;
+    }
     GaugeModel::GetInstance()->Create(gaugeValue, gaugeMin, gaugeMax);
     if (min->IsNumber() || max->IsNumber()) {
         GaugeModel::GetInstance()->SetIsShowLimitValue(true);
@@ -190,7 +198,9 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
             auto tempColors = JSRef<JSArray>::Cast(jsValue);
             // Get weight
             float weight = tempColors->GetValueAt(1)->ToNumber<float>();
-            weight = Negative(weight) ? 0.0f : weight;
+            if (NonPositive(weight)) {
+                continue;
+            }
             weights.push_back(weight);
             // Get color
             JSRef<JSVal> jsColorValue = tempColors->GetValueAt(0);

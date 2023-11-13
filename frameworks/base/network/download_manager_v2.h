@@ -29,13 +29,13 @@
 namespace OHOS::Ace {
 
 struct DownloadCallback {
-    std::function<void(const std::vector<uint8_t>&)> successCallback;
+    std::function<void(const std::string&&)> successCallback;
     std::function<void(std::string)> failCallback;
     std::function<void(std::string)> cancelCallback;
 };
 struct DownloadCondition {
     std::condition_variable cv;
-    std::vector<uint8_t> dataOut;
+    std::string dataOut;
     std::mutex downloadMutex;
     std::string errorMsg;
     bool downloadSuccess = false;

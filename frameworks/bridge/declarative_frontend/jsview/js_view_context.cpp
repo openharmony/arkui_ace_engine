@@ -16,7 +16,10 @@
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 
 #include <functional>
+#include <memory>
+#include <sstream>
 
+#include "base/log/ace_trace.h"
 #include "base/log/jank_frame_report.h"
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -130,6 +133,13 @@ int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext
 {
     CHECK_NULL_RETURN(pipelineContext, 0);
     return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+}
+
+bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option)
+{
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRender() &&
+        option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
 }
 
 } // namespace
@@ -314,13 +324,19 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
+    auto traceStreamPtr = std::make_shared<std::stringstream>();
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentId()]() {
+                            id = Container::CurrentId(), traceStreamPtr]() {
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
+            AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
+        };
+    } else {
+        onFinishEvent = [traceStreamPtr]() {
+            AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     }
 
@@ -331,8 +347,15 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 
     AnimationOption option =
         CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContext->IsFormRender());
-    if (pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRender() &&
-        option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext))) {
+    *traceStreamPtr << "AnimateTo, Options"
+                    << " duration:" << option.GetDuration()
+                    << ",iteration:" << option.GetIteration()
+                    << ",delay:" << option.GetDelay()
+                    << ",tempo:" << option.GetTempo()
+                    << ",direction:" << (uint32_t) option.GetAnimationDirection()
+                    << ",curve:" << (option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
+    AceAsyncTraceBegin(0, traceStreamPtr->str().c_str(), true);
+    if (CheckIfSetFormAnimationDuration(pipelineContext, option)) {
         option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
         TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
             static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext)));

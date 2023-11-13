@@ -57,11 +57,16 @@ private:
     ServicePlatformFinish onFinish_;
 };
 
-int32_t AceServiceAbility::instanceId_ = 100000;
 const std::string AceServiceAbility::START_PARAMS_KEY = "__startParams";
 const std::string AceServiceAbility::URI = "url";
 
 REGISTER_AA(AceServiceAbility)
+
+AceServiceAbility::AceServiceAbility()
+{
+    abilityId_ = Container::GenerateId<PA_SERVICE_CONTAINER>();
+}
+
 void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     Ability::OnStart(want, sessionInfo);

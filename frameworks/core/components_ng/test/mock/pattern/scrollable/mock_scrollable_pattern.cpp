@@ -34,7 +34,7 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode) {}
 
 void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>&) {}
 
-bool ScrollablePattern::HandleEdgeEffect(float, int32_t, const SizeF&)
+bool ScrollablePattern::HandleEdgeEffect(float /* offset */, int32_t /* source */, const SizeF& /* size */)
 {
     return false;
 }
@@ -44,6 +44,13 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
 void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) {}
 
 void ScrollablePattern::ScrollTo(float position) {}
+
+float ScrollablePattern::GetMainContentSize() const
+{
+    return 0.0f;
+}
+
+void ScrollablePattern::ScrollToEdge(ScrollEdgeType /* scrollEdgeType */, bool /* smooth */) {}
 
 void ScrollablePattern::StopAnimate() {}
 

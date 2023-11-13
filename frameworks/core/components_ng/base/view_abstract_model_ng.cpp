@@ -32,7 +32,7 @@ constexpr int32_t LONG_PRESS_DURATION = 800;
 } // namespace
 
 void ViewAbstractModelNG::CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
-    const NG::OffsetF& offset, std::function<void()>& previewBuildFunc, const MenuParam& menuParam)
+    const NG::OffsetF& offset, std::function<void()>& previewBuildFunc, MenuParam menuParam)
 {
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     if (!buildFunc) {
@@ -46,6 +46,10 @@ void ViewAbstractModelNG::CreateCustomMenu(std::function<void()>& buildFunc, con
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
+#ifdef PREVIEW
+    // unable to use the subWindow in the Previewer.
+    menuParam.type = MenuType::MENU;
+#endif
     NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, offset, menuParam, previewCustomNode);
 }
 

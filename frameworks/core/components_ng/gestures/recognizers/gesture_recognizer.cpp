@@ -144,7 +144,7 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
     std::vector<Matrix4> vTrans {};
     auto host = node.Upgrade();
     while (host) {
-        auto localMat = host->GetRenderContext()->GetLocalTransformMatrix();
+        auto localMat = host->GetLocalMatrix();
         vTrans.emplace_back(localMat);
         host = host->GetAncestorNodeOfFrame();
     }

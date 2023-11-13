@@ -46,6 +46,7 @@ public:
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin) override;
     void SetFriction(double friction) override;
+    void SetCachedCount(int32_t value) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

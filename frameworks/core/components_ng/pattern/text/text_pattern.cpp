@@ -97,6 +97,7 @@ void TextPattern::CloseSelectOverlay(bool animation)
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         selectOverlayProxy_->Close(animation);
     }
+    RemoveAreaChangeInner();
 }
 
 void TextPattern::ResetSelection()
@@ -379,8 +380,6 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     SelectOverlayInfo selectInfo;
     selectInfo.firstHandle.paintRect = firstHandle;
     selectInfo.secondHandle.paintRect = secondHandle;
-    CheckHandles(selectInfo.firstHandle);
-    CheckHandles(selectInfo.secondHandle);
     selectInfo.onHandleMove = [weak = WeakClaim(this)](const RectF& handleRect, bool isFirst) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -403,6 +402,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnCopy();
+        pattern->RemoveAreaChangeInner();
     };
     selectInfo.menuCallback.onSelectAll = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -414,6 +414,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         if (closedByGlobalEvent) {
             pattern->ResetSelection();
+            pattern->RemoveAreaChangeInner();
         }
     };
 
@@ -921,9 +922,6 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddOnAreaChangeNode(host->GetId());
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag())) {
         // measure flag changed, reset paragraph.
@@ -1001,19 +999,12 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         SelectHandleInfo firstHandleInfo;
         firstHandleInfo.paintRect = textSelector_.firstHandle;
-        if (firstHandleInfo.paintRect != selectInfo.firstHandle.paintRect) {
-            CheckHandles(firstHandleInfo);
-        } else {
-            firstHandleInfo.isShow = selectInfo.firstHandle.isShow;
-        }
+        CheckHandles(firstHandleInfo);
 
         SelectHandleInfo secondHandleInfo;
         secondHandleInfo.paintRect = textSelector_.secondHandle;
-        if (secondHandleInfo.paintRect != selectInfo.secondHandle.paintRect) {
-            CheckHandles(secondHandleInfo);
-        } else {
-            secondHandleInfo.isShow = selectInfo.secondHandle.isShow;
-        }
+        CheckHandles(secondHandleInfo);
+
         auto start = textSelector_.GetTextStart();
         auto end = textSelector_.GetTextEnd();
         selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
@@ -1022,7 +1013,14 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
     } else {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        pipeline->AddOnAreaChangeNode(host->GetId());
         selectInfo.callerFrameNode = GetHost();
+        if (!selectInfo.isUsingMouse) {
+            CheckHandles(selectInfo.firstHandle);
+            CheckHandles(selectInfo.secondHandle);
+        }
         selectOverlayProxy_ =
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this), animation);
         CHECK_NULL_VOID(selectOverlayProxy_);
@@ -1234,10 +1232,17 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
             spans_.emplace_back(spanNode->GetSpanItem());
         }
     } else if (child->GetTag() == V2::IMAGE_ETS_TAG) {
-        auto imageNode = DynamicCast<ImageSpanNode>(child);
+        auto imageSpanNode = DynamicCast<ImageSpanNode>(child);
+        if (imageSpanNode) {
+            spans_.emplace_back(imageSpanNode->GetSpanItem());
+            spans_.back()->imageNodeId = imageSpanNode->GetId();
+            return;
+        }
+        auto imageNode = DynamicCast<FrameNode>(child);
         if (imageNode) {
-            spans_.emplace_back(imageNode->GetSpanItem());
+            spans_.emplace_back(MakeRefPtr<ImageSpanItem>());
             spans_.back()->imageNodeId = imageNode->GetId();
+            return;
         }
     }
 }
@@ -1452,4 +1457,12 @@ void TextPattern::OnAreaChangedInner()
     }
 }
 
+void TextPattern::RemoveAreaChangeInner()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pipeline->RemoveOnAreaChangeNode(host->GetId());
+}
 } // namespace OHOS::Ace::NG

@@ -1277,15 +1277,6 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign
     isScrollEnd_ = true;
 }
 
-void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
-{
-    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
-        ScrollToIndex(0, smooth_, ScrollAlign::START);
-    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth_, ScrollAlign::END);
-    }
-}
-
 bool ListPattern::ScrollPage(bool reverse)
 {
     StopAnimate();
@@ -1743,6 +1734,7 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
     }
     json->Put("friction", GetFriction());
+    json->Put("edgeEffectAlwaysEnabled", GetAlwaysEnabled());
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)

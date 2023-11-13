@@ -83,7 +83,7 @@ int32_t InteractionImpl::GetUdKey(std::string& udKey)
     return InteractionManager::GetInstance()->GetUdKey(udKey);
 }
 
-int32_t InteractionImpl::GetShadowOffset(ShadowOffsetData shadowOffsetData)
+int32_t InteractionImpl::GetShadowOffset(ShadowOffsetData& shadowOffsetData)
 {
     return InteractionManager::GetInstance()->GetShadowOffset(
         shadowOffsetData.offsetX, shadowOffsetData.offsetY, shadowOffsetData.width, shadowOffsetData.height);

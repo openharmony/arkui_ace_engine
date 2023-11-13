@@ -130,6 +130,7 @@ public:
     }
 
 private:
+    Offset GetHoverOffset(const Size& size) const;
     // Animatable
     RefPtr<AnimatablePropertyUint8> opacity_;
     RefPtr<AnimatablePropertyFloat> barWidth_;

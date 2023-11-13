@@ -218,11 +218,7 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, ArcData arcData
 
 void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) const
 {
-#ifndef USE_ROSEN_DRAWING
-    RSCanvas canvas = context.canvas;
-#else
     RSCanvas& canvas = context.canvas;
-#endif
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
 
@@ -269,11 +265,7 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) con
 
 void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF offset) const
 {
-#ifndef USE_ROSEN_DRAWING
-    auto canvas = context.canvas;
-#else
     auto& canvas = context.canvas;
-#endif
     auto totalWidth = context.width;
     auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
     auto segmentWidthSum = 0.0f;
