@@ -930,6 +930,45 @@ struct ArkUIMenuModifierAPI {
     void (*ResetRadius)(NodeHandle node);
 };
 
+struct ArkUIAlphabetIndexerModifierAPI {
+    void (*SetPopupItemFont)(NodeHandle node, double size, int unit, const char* weight);
+    void (*ResetPopupItemFont)(NodeHandle node);
+    void (*SetSelectedFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*ResetSelectedFont)(NodeHandle node);
+    void (*SetPopupFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*ResetPopupFont)(NodeHandle node);
+    void (*SetAlphabetIndexerFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*ResetAlphabetIndexerFont)(NodeHandle node);
+    void (*SetPopupItemBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetPopupItemBackgroundColor)(NodeHandle node);
+    void (*SetAlphabetIndexerColor)(NodeHandle node, uint32_t color);
+    void (*ResetAlphabetIndexerColor)(NodeHandle node);
+    void (*SetPopupColor)(NodeHandle node, uint32_t color);
+    void (*ResetPopupColor)(NodeHandle node);
+    void (*SetAlphabetIndexerSelectedColor)(NodeHandle node, uint32_t color);
+    void (*ResetAlphabetIndexerSelectedColor)(NodeHandle node);
+    void (*SetPopupBackground)(NodeHandle node, uint32_t color);
+    void (*ResetPopupBackground)(NodeHandle node);
+    void (*SetSelectedBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetSelectedBackgroundColor)(NodeHandle node);
+    void (*SetPopupUnselectedColor)(NodeHandle node, uint32_t color);
+    void (*ResetPopupUnselectedColor)(NodeHandle node);
+    void (*SetAlignStyle)(NodeHandle node, int32_t value);
+    void (*ResetAlignStyle)(NodeHandle node);
+    void (*SetUsingPopup)(NodeHandle node, bool value);
+    void (*ResetUsingPopup)(NodeHandle node);
+    void (*SetAlphabetIndexerSelected)(NodeHandle node, int32_t value);
+    void (*ResetAlphabetIndexerSelected)(NodeHandle node);
+    void (*SetPopupHorizontalSpace)(NodeHandle node, double value, int unit);
+    void (*ResetPopupHorizontalSpace)(NodeHandle node);
+    void (*SetPopupSelectedColor)(NodeHandle node, uint32_t color);
+    void (*ResetPopupSelectedColor)(NodeHandle node);
+    void (*SetItemSize)(NodeHandle node, double value, int unit);
+    void (*ResetItemSize)(NodeHandle node);
+    void (*SetPopupPosition)(NodeHandle node, double xValue, int xUnit, double yValue, int yUnit);
+    void (*ResetPopupPosition)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -973,6 +1012,7 @@ struct ArkUINodeAPI {
     ArkUITextInputModifierAPI (*GetTextInputModifier)();
     ArkUIMenuItemModifierAPI (*GetMenuItemModifier)();
     ArkUIMenuModifierAPI (*GetMenuModifier)();
+    ArkUIAlphabetIndexerModifierAPI (*GetAlphabetIndexerModifier)();
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);

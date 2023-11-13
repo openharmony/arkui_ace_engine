@@ -29,11 +29,11 @@ public:
     void SetPopupBackground(const std::optional<Color>& color) override;
     void SetUsingPopup(bool state) override;
     void SetSelectedFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
-        std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) override;
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<OHOS::Ace::FontStyle>& fontStyle) override;
     void SetPopupFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
-        std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) override;
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<OHOS::Ace::FontStyle>& fontStyle) override;
     void SetFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
-        std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) override;
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<OHOS::Ace::FontStyle>& fontStyle) override;
     void SetItemSize(const Dimension& value) override;
     void SetPopupHorizontalSpace(const Dimension& value) override;
     void SetAlignStyle(int32_t value) override;
@@ -51,6 +51,32 @@ public:
     void SetOnPopupSelected(std::function<void(const int32_t selected)>&& onPopupSelected) override;
     void SetChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) override;
     void SetCreatChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) override;
+
+    static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
+    static void SetFontWeight(FrameNode* frameNode, const FontWeight weight);
+    static void SetSelectedFont(FrameNode* frameNode, std::optional<Dimension>& fontSize,
+        std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
+        std::optional<OHOS::Ace::FontStyle>& fontStyle);
+    static void SetPopupFont(FrameNode* frameNode, std::optional<Dimension>& fontSize,
+        std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
+        std::optional<OHOS::Ace::FontStyle>& fontStyle);
+    static void SetFont(FrameNode* frameNode, std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<OHOS::Ace::FontStyle>& fontStyle);
+    static void SetPopupUnselectedColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetPopupItemBackground(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetPopupColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetPopupBackground(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetPopupSelectedColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetAlignStyle(FrameNode* frameNode, int32_t value);
+    static void SetPopupHorizontalSpace(FrameNode* frameNode, const Dimension& popupHorizontalSpace);
+    static void SetUsingPopup(FrameNode* frameNode, bool state);
+    static void SetSelected(FrameNode* frameNode, int32_t selected);
+    static void SetItemSize(FrameNode* frameNode, const Dimension& value);
+    static void SetPopupPositionX(FrameNode* frameNode, const std::optional<Dimension>& popupPositionXOpt);
+    static void SetPopupPositionY(FrameNode* frameNode, const std::optional<Dimension>& popupPositionYOpt);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H
