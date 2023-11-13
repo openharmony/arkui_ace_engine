@@ -49,6 +49,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+}
+
 namespace OHOS::Ace::NG {
 class PipelineContext;
 class Pattern;
@@ -587,6 +591,17 @@ public:
     {
         return localMat_;
     }
+
+    int32_t GetUiExtensionId();
+    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId);
+    void SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
+        int32_t offset, Accessibility::AccessibilityElementInfo& output);
+    void FocusMoveSearchNG(int32_t elementId, int32_t direction,
+        int32_t offset, Accessibility::AccessibilityElementInfo& output);
 
 private:
     void MarkNeedRender(bool isRenderBoundary);

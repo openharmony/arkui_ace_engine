@@ -29,6 +29,10 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+}
+
 namespace OHOS::Ace::NG {
 struct DirtySwapConfig {
     bool frameSizeChange = false;
@@ -401,6 +405,25 @@ public:
 
     virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
     virtual void FireAndCleanScrollingListener() {}
+
+    virtual int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+    {
+        return -1;
+    }
+    
+    virtual void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
+    virtual void SearchElementInfosByText(int32_t elementId, const std::string& text,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
+    virtual void FindFocusedElementInfo(int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+    virtual void FocusMoveSearch(int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+
+    virtual int32_t GetUiExtensionId()
+    {
+        return -1;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

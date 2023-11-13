@@ -1944,4 +1944,33 @@ sptr<IRemoteObject> UIContentImpl::GetParentToken()
 {
     return parentToken_;
 }
+
+void UIContentImpl::SearchElementInfoByAccessibilityId(
+    int32_t elementId, int32_t mode,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    Platform::AceContainer::SearchElementInfoByAccessibilityIdNG(instanceId_, elementId, mode, baseParent, output);
+}
+
+void UIContentImpl::SearchElementInfosByText(
+    int32_t elementId, const std::string& text, int32_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    Platform::AceContainer::SearchElementInfosByTextNG(instanceId_, elementId, text, baseParent, output);
+}
+
+void UIContentImpl::FindFocusedElementInfo(
+    int32_t elementId, int32_t focusType,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+{
+    Platform::AceContainer::FindFocusedElementInfoNG(instanceId_, elementId, focusType, baseParent, output);
+}
+
+void UIContentImpl::FocusMoveSearch(
+    int32_t elementId, int32_t direction,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+{
+    Platform::AceContainer::FindFocusedElementInfoNG(instanceId_, elementId, direction, baseParent, output);
+}
+
 } // namespace OHOS::Ace
