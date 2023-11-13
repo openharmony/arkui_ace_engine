@@ -116,9 +116,9 @@ void GaugeLayoutAlgorithm::MeasureLimitValueTextWidth(LayoutWrapper* layoutWrapp
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<GaugeTheme>();
     CHECK_NULL_VOID(theme);
-    auto strokeWidthValue = layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ConvertToVp();
+    auto strokeWidthValue = layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ConvertToPx();
     if (Negative(strokeWidthValue)) {
-        strokeWidthValue = theme->GetTrackThickness().ConvertToVp();
+        strokeWidthValue = theme->GetTrackThickness().ConvertToPx();
     }
 
     startAngle -= QUARTER_CIRCLE;
@@ -129,7 +129,7 @@ void GaugeLayoutAlgorithm::MeasureLimitValueTextWidth(LayoutWrapper* layoutWrapp
     endAngleOffsetX_ = center.GetX() + (radius - strokeWidthValue) * std::cos(endDegree);
     auto textSafeDistance =
         LIMIT_VALUE_MIN_SAFE_DISTANCE + LIMIT_VALUE_MAX_SAFE_DISTANCE + LIMIT_VALUE_SPACE_SAFE_DISTANCE;
-    limitValueTextWidth_ = (endAngleOffsetX_ - startAngleOffsetX_ - textSafeDistance.ConvertToVp()) * 0.5f;
+    limitValueTextWidth_ = (endAngleOffsetX_ - startAngleOffsetX_ - textSafeDistance.ConvertToPx()) * 0.5f;
 }
 
 void GaugeLayoutAlgorithm::MeasureLimitValueText(
@@ -253,12 +253,13 @@ void GaugeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 childOffset = circularOffset + OffsetF(DESCRIPTION_X * diameter, DESCRIPTION_Y * diameter);
             }
         } else if (nodeId == gaugePattern->GetMinValueTextId()) {
-            childOffset = circularOffset + OffsetF(startAngleOffsetX_ + LIMIT_VALUE_MIN_SAFE_DISTANCE.ConvertToVp(),
-                LIMIT_VALUE_Y * diameter);
+            childOffset =
+                circularOffset + OffsetF(startAngleOffsetX_ + LIMIT_VALUE_MIN_SAFE_DISTANCE.ConvertToPx() - left,
+                                         LIMIT_VALUE_Y * diameter);
         } else if (nodeId == gaugePattern->GetMaxValueTextId()) {
-            childOffset = circularOffset +
-                          OffsetF(endAngleOffsetX_ - limitValueTextWidth_ - LIMIT_VALUE_MAX_SAFE_DISTANCE.ConvertToVp(),
-                              LIMIT_VALUE_Y * diameter);
+            childOffset =
+                circularOffset + OffsetF(endAngleOffsetX_ - limitValueTextWidth_ -
+                                         LIMIT_VALUE_MAX_SAFE_DISTANCE.ConvertToPx() - left, LIMIT_VALUE_Y * diameter);
         } else if (nodeId == gaugePattern->GetTitleChildId()) {
             childOffset = circularOffset;
         }
