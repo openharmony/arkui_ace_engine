@@ -2550,6 +2550,7 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
         "visibleAreaRatio");
     ratioStrToFloat(visibleAreaRatio);
     std::vector<float> partitionPoints;
+    TAG_LOGD(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
     if ((int)(lowerFrameRateVisibleRatio_ * FLOATRATIO_TO_INT) == 0) {
         partitionPoints = {0};
     } else {
