@@ -607,6 +607,8 @@ void SearchModelNG::SetType(TextInputType value)
         layoutProperty->UpdateTypeChanged(true);
     }
     layoutProperty->UpdateTextInputType(value);
+    textFieldHost->MarkModifyDone();
+    textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::string>& placeholder,
