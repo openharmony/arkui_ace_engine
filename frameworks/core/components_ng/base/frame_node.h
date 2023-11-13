@@ -583,7 +583,7 @@ public:
         isFirstBuilding_ = false;
     }
 
-    Matrix4 GetLocalMatrix()
+    Matrix4 GetLocalMatrix() const
     {
         return localMat_;
     }
@@ -641,6 +641,7 @@ private:
     void UpdatePercentSensitive();
 
     void UpdateParentAbsoluteOffset();
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

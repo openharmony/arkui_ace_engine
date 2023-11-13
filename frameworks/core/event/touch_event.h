@@ -20,6 +20,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/time_util.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
 
@@ -431,6 +432,89 @@ private:
 
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
 
+struct StateRecord {
+    std::string procedure;
+    std::string state;
+    std::string disposal;
+    int64_t timestamp = 0;
+
+    StateRecord(const std::string& procedure, const std::string& state, const std::string& disposal,
+        int64_t timestamp):procedure(procedure), state(state), disposal(disposal), timestamp(timestamp)
+    {}
+
+    void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
+    {
+        std::stringstream oss;
+        oss << "procedure: " << procedure;
+        if (!state.empty()) {
+            oss << ", " << "state: " << state << ", "
+                << "disposal: " << disposal;
+        }
+        oss << ", " << "timestamp: " << ConvertTimestampToStr(timestamp);
+        dumpList.emplace_back(std::make_pair(depth, oss.str()));
+    }
+};
+
+struct GestureSnapshot : public virtual AceType {
+    DECLARE_ACE_TYPE(GestureSnapshot, AceType);
+
+public:
+    void AddProcedure(const std::string& procedure, const std::string& state, const std::string& disposal,
+        int64_t timestamp)
+    {
+        if (timestamp == 0) {
+            timestamp = GetCurrentTimestamp();
+        }
+        stateHistory.emplace_back(StateRecord(procedure, state, disposal, timestamp));
+    }
+
+    bool CheckNeedAddMove(const std::string& state, const std::string& disposal)
+    {
+        return stateHistory.empty() ||
+            stateHistory.back().state != state || stateHistory.back().disposal != disposal;
+    }
+
+    void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
+    {
+        std::stringstream oss;
+        oss << "frameNodeId: " << nodeId << ", "
+            << "type: " << type << ", "
+            << "id: " << id << ", "
+            << "parentId: " << parentId;
+        if (!customInfo.empty()) {
+            oss << ", " << "customInfo: " << customInfo;
+        }
+        dumpList.emplace_back(std::make_pair(depth, oss.str()));
+        dumpList.emplace_back(std::make_pair(depth + 1, "stateHistory:"));
+        for (const auto& state : stateHistory) {
+            state.Dump(dumpList, depth + 1 + 1);
+        }
+    }
+
+    static std::string TransTouchType(TouchType type)
+    {
+        switch (type) {
+            case TouchType::DOWN:
+                return "TouchDown";
+            case TouchType::MOVE:
+                return "TouchMove";
+            case TouchType::UP:
+                return "TouchUp";
+            case TouchType::CANCEL:
+                return "TouchCancel";
+            default:
+                return std::string("Type:").append(std::to_string(static_cast<int32_t>(type)));
+        }
+    }
+
+    int32_t nodeId = -1;
+    std::string type;
+    uint64_t id = 0;
+    uint64_t parentId = 0;
+    std::string customInfo;
+    std::list<StateRecord> stateHistory;
+};
+
 class ACE_EXPORT TouchEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventTarget, AceType);
 
@@ -539,6 +623,14 @@ public:
     WeakPtr<NG::FrameNode> GetAttachedNode() const
     {
         return node_;
+    }
+
+    virtual RefPtr<GestureSnapshot> Dump() const
+    {
+        RefPtr<GestureSnapshot> info = AceType::MakeRefPtr<GestureSnapshot>();
+        info->type = GetTypeName();
+        info->id = reinterpret_cast<uintptr_t>(this);
+        return info;
     }
 
 protected:

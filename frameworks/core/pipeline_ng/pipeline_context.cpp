@@ -1164,7 +1164,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     HandleEtsCardTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
-    if (scalePoint.type != TouchType::MOVE) {
+    if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE) {
+        eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Process in ace_container: "
             "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
             "type=%{public}d", scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
@@ -1206,11 +1207,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         if (container && container->IsScenceBoardWindow() && IsWindowSceneConsumed()) {
             FlushTouchEvents();
             return;
-        } else {
-            hasIdleTasks_ = true;
-            RequestFrame();
-            return;
         }
+        hasIdleTasks_ = true;
+        RequestFrame();
+        return;
     }
 
     if (scalePoint.type == TouchType::UP) {
@@ -1289,16 +1289,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         } else {
             rootNode_->DumpTree(0);
         }
-    } else if (params[0] == "-render") {
     } else if (params[0] == "-focus") {
         if (rootNode_->GetFocusHub()) {
             rootNode_->GetFocusHub()->DumpFocusTree(0);
         }
-    } else if (params[0] == "-layer") {
-    } else if (params[0] == "-frontend") {
-#ifndef WEARABLE_PRODUCT
-    } else if (params[0] == "-multimodal") {
-#endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
         auto accessibilityManager = GetAccessibilityManager();
         if (accessibilityManager) {
@@ -1319,6 +1313,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
         for (const auto& func : dumpListeners_) {
             func(jsParams);
+        }
+    } else if (params[0] == "-event") {
+        if (eventManager_) {
+            eventManager_->DumpEvent();
         }
     }
 

@@ -52,4 +52,9 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>&  /* recogni
 {
     return true;
 }
+
+RefPtr<GestureSnapshot> PanRecognizer::Dump() const
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG
